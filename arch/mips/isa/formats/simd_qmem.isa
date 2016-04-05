@@ -1,0 +1,544 @@
+// -*- mode:c++ -*-
+
+// Copyright (c) 2007 MIPS Technologies, Inc.
+// All rights reserved.
+//
+// Redistribution and use in source and binary forms, with or without
+// modification, are permitted provided that the following conditions are
+// met: redistributions of source code must retain the above copyright
+// notice, this list of conditions and the following disclaimer;
+// redistributions in binary form must reproduce the above copyright
+// notice, this list of conditions and the following disclaimer in the
+// documentation and/or other materials provided with the distribution;
+// neither the name of the copyright holders nor the names of its
+// contributors may be used to endorse or promote products derived from
+// this software without specific prior written permission.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+// Authors: Steve Reinhardt
+//          Korey Sewell
+
+////////////////////////////////////////////////////////////////////
+//
+// Memory-format instructions
+//
+
+output header {{
+    /**
+     * Base class for general Mips memory-format instructions.
+     */
+    class SMemory : public MipsStaticInst
+    {
+      protected:
+        /// Memory request flags.  See mem_req_base.hh.
+        Request::Flags memAccessFlags;
+
+        /// Displacement for EA calculation (signed).
+        int32_t disp;
+
+        /// Constructor
+        SMemory(const char *mnem, MachInst _machInst, OpClass __opClass)
+            : MipsStaticInst(mnem, _machInst, __opClass),
+              disp(sext<16>(OFFSET))
+        {
+        }
+
+        std::string
+        generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+    };
+
+     /**
+     * Base class for a few miscellaneous memory-format insts
+     * that don't interpret the disp field
+     */
+    class SMemoryNoDisp : public SMemory
+    {
+      protected:
+        /// Constructor
+        SMemoryNoDisp(const char *mnem, ExtMachInst _machInst, OpClass __opClass)
+            : SMemory(mnem, _machInst, __opClass)
+        {
+        }
+
+        std::string
+        generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+    };
+}};
+
+
+output decoder {{
+    std::string
+    SMemory::generateDisassembly(Addr pc, const SymbolTable *symtab) const
+    {
+        return csprintf("%-10s %c%d, %d(r%d)", mnemonic,
+                        's' , (_destRegIdx[0] - SIMD_Reg_Base)/4, disp, RS);
+    }
+
+    std::string
+    SMemoryNoDisp::generateDisassembly(Addr pc, const SymbolTable *symtab) const
+    {
+        return csprintf("%-10s %c%d, r%d(r%d)", mnemonic,
+                        's' , (_destRegIdx[0] - SIMD_Reg_Base)/4, disp, RS);
+    }
+
+}};
+
+output header {{
+     qword128_t getSMemData(%(CPU_exec_context)s *xc, Packet *packet);
+
+}};
+
+output exec {{
+    /** return data in cases where there the size of data is only
+        known in the packet
+    */
+    
+     qword128_t getSMemData(CPU_EXEC_CONTEXT *xc, Packet *packet) {
+       //printf("getSize is %d\n",(int)packet->getSize());
+       assert(packet->getSize() == 16);
+       return packet->get<qword128_t>();
+     }
+}};
+
+def template QuadLoadStoreDeclare {{
+    /**
+     * Static instruction class for "%(mnemonic)s".
+     */
+    class %(class_name)s : public %(base_class)s
+    {
+      public:
+
+        /// Constructor.
+        %(class_name)s(ExtMachInst machInst);
+
+        %(BasicExecDeclare)s
+
+        %(QuadEACompDeclare)s
+
+        %(QuadInitiateAccDeclare)s
+
+        %(QuadCompleteAccDeclare)s
+    };
+}};
+
+def template QuadEACompDeclare {{
+    Fault eaComp(%(CPU_exec_context)s *, Trace::InstRecord *) const;
+}};
+
+def template QuadInitiateAccDeclare {{
+    Fault initiateAcc(%(CPU_exec_context)s *, Trace::InstRecord *) const;
+}};
+
+
+def template QuadCompleteAccDeclare {{
+    Fault completeAcc(Packet *, %(CPU_exec_context)s *, Trace::InstRecord *) const;
+}};
+
+def template QuadLoadStoreConstructor {{
+    %(class_name)s::%(class_name)s(ExtMachInst machInst)
+         : %(base_class)s("%(mnemonic)s", machInst, %(op_class)s)
+    {
+        %(constructor)s;
+    }
+}};
+
+
+def template QuadEACompExecute {{
+    Fault
+    %(class_name)s::eaComp(CPU_EXEC_CONTEXT *xc,
+                                   Trace::InstRecord *traceData) const
+    {
+        Addr EA;
+        Fault fault = NoFault;
+
+        if (this->isFloating()) {
+            %(fp_enable_check)s;
+
+            if(fault != NoFault)
+                return fault;
+        }
+
+        %(op_decl)s;
+        %(op_rd)s;
+        %(ea_code)s;
+
+        // NOTE: Trace Data is written using execute or completeAcc templates
+        if (fault == NoFault) {
+            xc->setEA(EA);
+        }
+
+        return fault;
+    }
+}};
+
+def template LoadQuadExecute {{
+    Fault %(class_name)s::execute(CPU_EXEC_CONTEXT *xc,
+                                  Trace::InstRecord *traceData) const
+    {
+        Addr EA;
+        Fault fault = NoFault;
+
+        if (this->isFloating()) {
+            %(fp_enable_check)s;
+
+            if(fault != NoFault)
+                return fault;
+        }
+
+        %(op_decl)s;
+        %(op_rd)s;
+        %(ea_code)s;
+
+        if (fault == NoFault) {
+
+            fault = readMemAtomic(xc, traceData, EA, SMem, memAccessFlags);
+
+            %(memacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            %(op_wb)s;
+        }
+
+        return fault;
+    }
+}};
+
+
+def template LoadQuadInitiateAcc {{
+    Fault %(class_name)s::initiateAcc(CPU_EXEC_CONTEXT *xc,
+                                      Trace::InstRecord *traceData) const
+    {
+        Addr EA;
+        Fault fault = NoFault;
+
+        if (this->isFloating()) {
+            %(fp_enable_check)s;
+
+            if(fault != NoFault)
+                return fault;
+        }
+
+        %(op_src_decl)s;
+        %(op_rd)s;
+        %(ea_code)s;
+
+        if (fault == NoFault) {
+            fault = readSMemTiming(xc, traceData, EA, SMem, memAccessFlags);
+        }
+
+        return fault;
+    }
+}};
+
+def template LoadQuadCompleteAcc {{
+    Fault %(class_name)s::completeAcc(Packet *pkt,
+                                      CPU_EXEC_CONTEXT *xc,
+                                      Trace::InstRecord *traceData) const
+    {
+        Fault fault = NoFault;
+
+        if (this->isFloating()) {
+            %(fp_enable_check)s;
+
+            if(fault != NoFault)
+                return fault;
+        }
+
+        %(op_decl)s;
+        %(op_rd)s;
+
+	csprintf("\nSMem = %d, %d, %d, %d\n\n",SMem.data[0],SMem.data[1],SMem.data[2],SMem.data[3]);
+
+        getMem(pkt, SMem, traceData);
+
+        if (fault == NoFault) {
+            %(memacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            %(op_wb)s;
+        }
+
+        return fault;
+    }
+}};
+
+def template StoreQuadExecute {{
+    Fault %(class_name)s::execute(CPU_EXEC_CONTEXT *xc,
+                                  Trace::InstRecord *traceData) const
+    {
+        Addr EA;
+        Fault fault = NoFault;
+
+        %(fp_enable_check)s;
+        %(op_decl)s;
+        %(op_rd)s;
+        %(ea_code)s;
+
+        if (fault == NoFault) {
+            %(memacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            fault = writeSMemAtomic(xc, traceData, SMem, EA, memAccessFlags,
+                    NULL);
+        }
+
+        if (fault == NoFault) {
+            %(postacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            %(op_wb)s;
+        }
+
+        return fault;
+    }
+}};
+
+
+def template StoreFPQuadExecute {{
+    Fault %(class_name)s::execute(CPU_EXEC_CONTEXT *xc,
+                                  Trace::InstRecord *traceData) const
+    {
+        Addr EA;
+        Fault fault = NoFault;
+
+        %(fp_enable_check)s;
+        if(fault != NoFault)
+          return fault;
+        %(op_decl)s;
+        %(op_rd)s;
+        %(ea_code)s;
+
+        if (fault == NoFault) {
+            %(memacc_code)s;
+        }
+
+        if (fault == NoFault) {
+	  fault = writeSMemAtomic(xc, traceData, SMem, EA, memAccessFlags,)
+                    NULL);
+        }
+
+        if (fault == NoFault) {
+            %(postacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            %(op_wb)s;
+        }
+
+        return fault;
+    }
+}};
+
+def template StoreCondQuadExecute {{
+    Fault %(class_name)s::execute(CPU_EXEC_CONTEXT *xc,
+                                  Trace::InstRecord *traceData) const
+    {
+        Addr EA;
+        Fault fault = NoFault;
+        //qword128_t write_result;
+	//write_resutl.data[0] = 0;
+	//write_resutl.data[1] = 0;
+	//write_resutl.data[2] = 0;
+	//write_resutl.data[3] = 0;
+
+        %(fp_enable_check)s;
+        %(op_decl)s;
+        %(op_rd)s;
+        %(ea_code)s;
+
+        if (fault == NoFault) {
+            %(memacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            fault = writeSMemAtomic(xc, traceData, SMem, EA, memAccessFlags,
+                    NULL);
+        }
+
+        if (fault == NoFault) {
+            %(postacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            %(op_wb)s;
+        }
+
+        return fault;
+    }
+}};
+
+def template StoreQuadInitiateAcc {{
+    Fault %(class_name)s::initiateAcc(CPU_EXEC_CONTEXT *xc,
+                                      Trace::InstRecord *traceData) const
+    {
+        Addr EA;
+        Fault fault = NoFault;
+
+        %(fp_enable_check)s;
+        %(op_decl)s;
+        %(op_rd)s;
+        %(ea_code)s;
+
+        if (fault == NoFault) {
+            %(memacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            fault = writeMemTiming(xc, traceData, SMem, EA, memAccessFlags,
+                    NULL);
+        }
+
+        return fault;
+    }
+}};
+
+
+def template StoreQuadCompleteAcc {{
+    Fault %(class_name)s::completeAcc(Packet *pkt,
+                                      CPU_EXEC_CONTEXT *xc,
+                                      Trace::InstRecord *traceData) const
+    {
+        return NoFault;
+    }
+}};
+
+def template StoreCondQuadCompleteAcc {{
+    Fault %(class_name)s::completeAcc(Packet *pkt,
+                                      CPU_EXEC_CONTEXT *xc,
+                                      Trace::InstRecord *traceData) const
+    {
+        Fault fault = NoFault;
+
+        %(fp_enable_check)s;
+        %(op_dest_decl)s;
+
+        uint64_t write_result = pkt->req->getExtraData();
+
+        if (fault == NoFault) {
+            %(postacc_code)s;
+        }
+
+        if (fault == NoFault) {
+            %(op_wb)s;
+        }
+
+        return fault;
+    }
+}};
+
+def format LoadQuadMemory(memacc_code, ea_code = {{ EA = Rs + disp; }},
+                     mem_flags = [], inst_flags = []) {{
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      decode_template = ImmNopCheckDecode,
+                      exec_template_base = 'Load')
+}};
+
+
+def format StoreQuadMemory(memacc_code, ea_code = {{ EA = Rs + disp; }},
+                     mem_flags = [], inst_flags = []) {{
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      exec_template_base = 'Store')
+}};
+
+def format LoadIndexedQuadMemory(memacc_code, ea_code = {{ EA = Rs + Rt; }},
+                     mem_flags = [], inst_flags = []) {{
+    inst_flags += ['IsIndexed']
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      decode_template = ImmNopCheckDecode,
+                      exec_template_base = 'Load')
+}};
+
+def format StoreIndexedQuadMemory(memacc_code, ea_code = {{ EA = Rs + Rt; }},
+                     mem_flags = [], inst_flags = []) {{
+    inst_flags += ['IsIndexed']
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      exec_template_base = 'Store')
+}};
+
+def format LoadFPIndexedQuadMemory(memacc_code, ea_code = {{ EA = Rs + Rt; }},
+                     mem_flags = [], inst_flags = []) {{
+    inst_flags += ['IsIndexed', 'IsFloating']
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      decode_template = ImmNopCheckDecode,
+                      exec_template_base = 'Load')
+}};
+
+def format StoreFPIndexedQuadMemory(memacc_code, ea_code = {{ EA = Rs + Rt; }},
+                     mem_flags = [], inst_flags = []) {{
+    inst_flags += ['IsIndexed', 'IsFloating']
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      exec_template_base = 'Store')
+}};
+
+
+def format LoadUnalignedQuadMemory(memacc_code, ea_code = {{ EA = (Rs + disp) & ~3; }},
+                     mem_flags = [], inst_flags = []) {{
+    decl_code = '''
+        uint32_t mem_word = Mem_uw;
+        uint32_t unalign_addr = Rs + disp;
+        uint32_t byte_offset = unalign_addr & 3;
+        if (GuestByteOrder == BigEndianByteOrder)
+            byte_offset ^= 3;
+    '''
+
+    memacc_code = decl_code + memacc_code
+
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      decode_template = ImmNopCheckDecode,
+                      exec_template_base = 'Load')
+}};
+
+def format StoreUnalignedQuadMemory(memacc_code, ea_code = {{ EA = (Rs + disp) & ~3; }},
+                     mem_flags = [], inst_flags = []) {{
+    decl_code = '''
+        uint32_t mem_word = 0;
+        uint32_t unaligned_addr = Rs + disp;
+        uint32_t byte_offset = unaligned_addr & 3;
+        if (GuestByteOrder == BigEndianByteOrder)
+            byte_offset ^= 3;
+        fault = readMemAtomic(xc, traceData, EA, mem_word, memAccessFlags);
+    '''
+    memacc_code = decl_code + memacc_code + '\nMem = mem_word;\n'
+
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+		      base_class = 'SMemory',
+                      exec_template_base = 'Store')
+}};
+
+def format StoreCondQuad(memacc_code, postacc_code,
+                     ea_code = {{ EA = Rs + disp; }},
+                     mem_flags = [], inst_flags = []) {{
+    (header_output, decoder_output, decode_block, exec_output) = \
+        LoadStoreBase(name, Name, ea_code, memacc_code, mem_flags, inst_flags,
+                      postacc_code,base_class = 'SMemory',exec_template_base = 'StoreCond')
+}};

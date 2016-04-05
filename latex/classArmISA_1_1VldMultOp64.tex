@@ -1,0 +1,145 @@
+\hypertarget{classArmISA_1_1VldMultOp64}{
+\section{クラス VldMultOp64}
+\label{classArmISA_1_1VldMultOp64}\index{ArmISA::VldMultOp64@{ArmISA::VldMultOp64}}
+}
+
+
+{\ttfamily \#include $<$macromem.hh$>$}VldMultOp64に対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classArmISA_1_1VldMultOp64}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1VldMultOp64_a355647a38deb45ea21e749e81606300b}{VldMultOp64} (const char $\ast$mnem, \hyperlink{classStaticInst_a5605d4fc727eae9e595325c90c0ec108}{ExtMachInst} \hyperlink{classStaticInst_a744598b194ca3d4201d9414ce4cc4af4}{machInst}, OpClass \_\-\_\-opClass, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{namespaceArmISA_adf8c6c579ad8729095a637a4f2181211}{rn}, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} vd, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{namespaceArmISA_ad546c2cf2168cf2d8ac21b2a9f485e82}{rm}, uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_aac129ded07ba57383c5e2540f22c94ef}{eSize}, uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_af13e629a2f79d14821c7b9246ef99e9f}{dataSize}, uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_afb0be420b537599a5b86558127502040}{numStructElems}, uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_a7a5268882c913c394a8ad4d988eb94e6}{numRegs}, bool \hyperlink{classArmISA_1_1VldMultOp64_a93541ed16711b2c9c53cf093b675d90b}{wb})
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_aac129ded07ba57383c5e2540f22c94ef}{eSize}
+\item 
+uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_af13e629a2f79d14821c7b9246ef99e9f}{dataSize}
+\item 
+uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_afb0be420b537599a5b86558127502040}{numStructElems}
+\item 
+uint8\_\-t \hyperlink{classArmISA_1_1VldMultOp64_a7a5268882c913c394a8ad4d988eb94e6}{numRegs}
+\item 
+bool \hyperlink{classArmISA_1_1VldMultOp64_a93541ed16711b2c9c53cf093b675d90b}{wb}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Base classes for microcoded AArch64 NEON memory instructions. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1VldMultOp64_a355647a38deb45ea21e749e81606300b}{
+\index{ArmISA::VldMultOp64@{ArmISA::VldMultOp64}!VldMultOp64@{VldMultOp64}}
+\index{VldMultOp64@{VldMultOp64}!ArmISA::VldMultOp64@{ArmISA::VldMultOp64}}
+\subsubsection[{VldMultOp64}]{\setlength{\rightskip}{0pt plus 5cm}{\bf VldMultOp64} (const char $\ast$ {\em mnem}, \/  {\bf ExtMachInst} {\em machInst}, \/  OpClass {\em \_\-\_\-opClass}, \/  {\bf RegIndex} {\em rn}, \/  {\bf RegIndex} {\em vd}, \/  {\bf RegIndex} {\em rm}, \/  uint8\_\-t {\em eSize}, \/  uint8\_\-t {\em dataSize}, \/  uint8\_\-t {\em numStructElems}, \/  uint8\_\-t {\em numRegs}, \/  bool {\em wb})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VldMultOp64_a355647a38deb45ea21e749e81606300b}
+
+
+
+\begin{DoxyCode}
+1058                                                                            :
+1059     PredMacroOp(mnem, machInst, __opClass)
+1060 {
+1061     RegIndex vx = NumFloatV8ArchRegs / 4;
+1062     RegIndex rnsp = (RegIndex) makeSP((IntRegIndex) rn);
+1063     bool baseIsSP = isSP((IntRegIndex) rnsp);
+1064 
+1065     numMicroops = wb ? 1 : 0;
+1066 
+1067     int totNumBytes = numRegs * dataSize / 8;
+1068     assert(totNumBytes <= 64);
+1069 
+1070     // The guiding principle here is that no more than 16 bytes can be
+1071     // transferred at a time
+1072     int numMemMicroops = totNumBytes / 16;
+1073     int residuum = totNumBytes % 16;
+1074     if (residuum)
+1075         ++numMemMicroops;
+1076     numMicroops += numMemMicroops;
+1077 
+1078     int numMarshalMicroops = numRegs / 2 + (numRegs % 2 ? 1 : 0);
+1079     numMicroops += numMarshalMicroops;
+1080 
+1081     microOps = new StaticInstPtr[numMicroops];
+1082     unsigned uopIdx = 0;
+1083     uint32_t memaccessFlags = TLB::MustBeOne | (TLB::ArmFlags) eSize |
+1084         TLB::AllowUnaligned;
+1085 
+1086     int i = 0;
+1087     for(; i < numMemMicroops - 1; ++i) {
+1088         microOps[uopIdx++] = new MicroNeonLoad64(
+1089             machInst, vx + (RegIndex) i, rnsp, 16 * i, memaccessFlags,
+1090             baseIsSP, 16 /* accSize */, eSize);
+1091     }
+1092     microOps[uopIdx++] =  new MicroNeonLoad64(
+1093         machInst, vx + (RegIndex) i, rnsp, 16 * i, memaccessFlags, baseIsSP,
+1094         residuum ? residuum : 16 /* accSize */, eSize);
+1095 
+1096     // Writeback microop: the post-increment amount is encoded in "Rm": a
+1097     // 64-bit general register OR as '11111' for an immediate value equal to
+1098     // the total number of bytes transferred (i.e. 8, 16, 24, 32, 48 or 64)
+1099     if (wb) {
+1100         if (rm != ((RegIndex) INTREG_X31)) {
+1101             microOps[uopIdx++] = new MicroAddXERegUop(machInst, rnsp, rnsp, rm,
+1102                                                       UXTX, 0);
+1103         } else {
+1104             microOps[uopIdx++] = new MicroAddXiUop(machInst, rnsp, rnsp,
+1105                                                    totNumBytes);
+1106         }
+1107     }
+1108 
+1109     for (int i = 0; i < numMarshalMicroops; ++i) {
+1110         microOps[uopIdx++] = new MicroDeintNeon64(
+1111             machInst, vd + (RegIndex) (2 * i), vx, eSize, dataSize,
+1112             numStructElems, numRegs, i /* step */);
+1113     }
+1114 
+1115     assert(uopIdx == numMicroops);
+1116 
+1117     for (int i = 0; i < numMicroops - 1; ++i) {
+1118         microOps[i]->setDelayedCommit();
+1119     }
+1120     microOps[numMicroops - 1]->setLastMicroop();
+1121 }
+
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classArmISA_1_1VldMultOp64_af13e629a2f79d14821c7b9246ef99e9f}{
+\index{ArmISA::VldMultOp64@{ArmISA::VldMultOp64}!dataSize@{dataSize}}
+\index{dataSize@{dataSize}!ArmISA::VldMultOp64@{ArmISA::VldMultOp64}}
+\subsubsection[{dataSize}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf dataSize}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VldMultOp64_af13e629a2f79d14821c7b9246ef99e9f}
+\hypertarget{classArmISA_1_1VldMultOp64_aac129ded07ba57383c5e2540f22c94ef}{
+\index{ArmISA::VldMultOp64@{ArmISA::VldMultOp64}!eSize@{eSize}}
+\index{eSize@{eSize}!ArmISA::VldMultOp64@{ArmISA::VldMultOp64}}
+\subsubsection[{eSize}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf eSize}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VldMultOp64_aac129ded07ba57383c5e2540f22c94ef}
+\hypertarget{classArmISA_1_1VldMultOp64_a7a5268882c913c394a8ad4d988eb94e6}{
+\index{ArmISA::VldMultOp64@{ArmISA::VldMultOp64}!numRegs@{numRegs}}
+\index{numRegs@{numRegs}!ArmISA::VldMultOp64@{ArmISA::VldMultOp64}}
+\subsubsection[{numRegs}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf numRegs}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VldMultOp64_a7a5268882c913c394a8ad4d988eb94e6}
+\hypertarget{classArmISA_1_1VldMultOp64_afb0be420b537599a5b86558127502040}{
+\index{ArmISA::VldMultOp64@{ArmISA::VldMultOp64}!numStructElems@{numStructElems}}
+\index{numStructElems@{numStructElems}!ArmISA::VldMultOp64@{ArmISA::VldMultOp64}}
+\subsubsection[{numStructElems}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf numStructElems}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VldMultOp64_afb0be420b537599a5b86558127502040}
+\hypertarget{classArmISA_1_1VldMultOp64_a93541ed16711b2c9c53cf093b675d90b}{
+\index{ArmISA::VldMultOp64@{ArmISA::VldMultOp64}!wb@{wb}}
+\index{wb@{wb}!ArmISA::VldMultOp64@{ArmISA::VldMultOp64}}
+\subsubsection[{wb}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf wb}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VldMultOp64_a93541ed16711b2c9c53cf093b675d90b}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/insts/\hyperlink{macromem_8hh}{macromem.hh}\item 
+arch/arm/insts/\hyperlink{macromem_8cc}{macromem.cc}\end{DoxyCompactItemize}

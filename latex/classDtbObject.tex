@@ -1,0 +1,246 @@
+\hypertarget{classDtbObject}{
+\section{クラス DtbObject}
+\label{classDtbObject}\index{DtbObject@{DtbObject}}
+}
+
+
+{\ttfamily \#include $<$dtb\_\-object.hh$>$}DtbObjectに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classDtbObject}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{classDtbObject_a46a1bb2e6ec09d7b37530e94b2529452}{$\sim$DtbObject} ()
+\item 
+bool \hyperlink{classDtbObject_a3d1578c362819bbd3af37cbbfeb6732e}{addBootCmdLine} (const char $\ast$\_\-args, size\_\-t \hyperlink{classObjectFile_a7360b55975153b822efc5217b7734e6a}{len})
+\item 
+bool \hyperlink{classDtbObject_a1de102f86bbb53d20455d9e78be53935}{loadGlobalSymbols} (\hyperlink{classSymbolTable}{SymbolTable} $\ast$symtab, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addrMask=std::numeric\_\-limits$<$ \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} $>$::max())
+\item 
+bool \hyperlink{classDtbObject_aab9393b89c15838ac1b842e642f981bb}{loadLocalSymbols} (\hyperlink{classSymbolTable}{SymbolTable} $\ast$symtab, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addrMask=std::numeric\_\-limits$<$ \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} $>$::max())
+\end{DoxyCompactItemize}
+\subsection*{Static Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classObjectFile}{ObjectFile} $\ast$ \hyperlink{classDtbObject_a3b119de4852833fdf74dbb4b8e1e1eba}{tryFile} (const std::string \&fname, int fd, size\_\-t \hyperlink{classObjectFile_a7360b55975153b822efc5217b7734e6a}{len}, uint8\_\-t $\ast$\hyperlink{classObjectFile_abbae3bd152e2d64768026e03593e64f3}{data})
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDtbObject_ab48ec9e732244daaaa0dee06ea827de6}{DtbObject} (const std::string \&\_\-filename, int \_\-fd, size\_\-t \_\-len, uint8\_\-t $\ast$\_\-data, \hyperlink{classObjectFile_a0ac03ab06a859320a9072002bdf3aa0f}{Arch} \_\-arch, \hyperlink{classObjectFile_aafc438343baf22e5884dde40c41331e8}{OpSys} \_\-opSys)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classDtbObject_a7fb4f2b3db8f5603574f0e9cc114c360}{fileDataMmapped}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classDtbObject_ab48ec9e732244daaaa0dee06ea827de6}{
+\index{DtbObject@{DtbObject}!DtbObject@{DtbObject}}
+\index{DtbObject@{DtbObject}!DtbObject@{DtbObject}}
+\subsubsection[{DtbObject}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DtbObject} (const std::string \& {\em \_\-filename}, \/  int {\em \_\-fd}, \/  size\_\-t {\em \_\-len}, \/  uint8\_\-t $\ast$ {\em \_\-data}, \/  {\bf Arch} {\em \_\-arch}, \/  {\bf OpSys} {\em \_\-opSys})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classDtbObject_ab48ec9e732244daaaa0dee06ea827de6}
+
+
+
+\begin{DoxyCode}
+56     : ObjectFile(_filename, _fd, _len, _data, _arch, _opSys)
+57 {
+58     text.baseAddr = 0;
+59     text.size = len;
+60     text.fileImage = fileData;
+61 
+62     data.baseAddr = 0;
+63     data.size = 0;
+64     data.fileImage = NULL;
+65 
+66     bss.baseAddr = 0;
+67     bss.size = 0;
+68     bss.fileImage = NULL;
+69 
+70     fileDataMmapped = true;
+71 }
+\end{DoxyCode}
+\hypertarget{classDtbObject_a46a1bb2e6ec09d7b37530e94b2529452}{
+\index{DtbObject@{DtbObject}!$\sim$DtbObject@{$\sim$DtbObject}}
+\index{$\sim$DtbObject@{$\sim$DtbObject}!DtbObject@{DtbObject}}
+\subsubsection[{$\sim$DtbObject}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf DtbObject} ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classDtbObject_a46a1bb2e6ec09d7b37530e94b2529452}
+
+
+
+\begin{DoxyCode}
+74 {
+75     if (descriptor >= 0) {
+76         ::close(descriptor);
+77         descriptor = -1;
+78     }
+79 
+80     // Make sure to clean up memory properly depending
+81     // on how buffer was allocated.
+82     if (fileData && !fileDataMmapped) {
+83         delete [] fileData;
+84         fileData = NULL;
+85     } else if (fileData) {
+86         munmap(fileData, len);
+87         fileData = NULL;
+88     }
+89 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classDtbObject_a3d1578c362819bbd3af37cbbfeb6732e}{
+\index{DtbObject@{DtbObject}!addBootCmdLine@{addBootCmdLine}}
+\index{addBootCmdLine@{addBootCmdLine}!DtbObject@{DtbObject}}
+\subsubsection[{addBootCmdLine}]{\setlength{\rightskip}{0pt plus 5cm}bool addBootCmdLine (const char $\ast$ {\em \_\-args}, \/  size\_\-t {\em len})}}
+\label{classDtbObject_a3d1578c362819bbd3af37cbbfeb6732e}
+Adds the passed in Command Line options for the kernel to the proper location in the device tree. 
+\begin{DoxyParams}{引数}
+\item[{\em \_\-args}]command line to append \item[{\em len}]length of the command line string \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+returns true on success, false otherwise 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+93 {
+94     const char* root_path = "/";
+95     const char* node_name = "chosen";
+96     const char* full_path_node_name = "/chosen";
+97     const char* property_name = "bootargs";
+98 
+99     // Make a new buffer that has extra space to add nodes/properties
+100     int newLen = 2*this->len;
+101     uint8_t* fdt_buf_w_space = new uint8_t[newLen];
+102     // Copy and unpack flattened device tree into new buffer
+103     int ret = fdt_open_into((void*)fileData, (void*)fdt_buf_w_space, (newLen));
+104     if (ret < 0) {
+105         warn("Error resizing buffer of flattened device tree, "
+106              "errno: %d\n", ret);
+107         delete [] fdt_buf_w_space;
+108         return false;
+109     }
+110 
+111     // First try finding the /chosen node in the dtb
+112     int offset = fdt_path_offset((void*)fdt_buf_w_space, full_path_node_name);
+113     if (offset < 0) {
+114         // try adding the node by walking dtb tree to proper insertion point
+115         offset = fdt_path_offset((void*)fdt_buf_w_space, root_path);
+116         offset = fdt_add_subnode((void*)fdt_buf_w_space, offset, node_name);
+117         offset = fdt_path_offset((void*)fdt_buf_w_space, full_path_node_name);
+118         if (offset < 0) {
+119             warn("Error finding or adding \"chosen\" subnode to flattened "
+120                  "device tree, errno: %d\n", offset);
+121             delete [] fdt_buf_w_space;
+122             return false;
+123         }
+124     }
+125 
+126     // Set the bootargs property in the /chosen node
+127     ret = fdt_setprop((void*)fdt_buf_w_space, offset, property_name,
+128                       (const void*)_args, len+1);
+129     if (ret < 0) {
+130         warn("Error setting \"bootargs\" property to flattened device tree, "
+131              "errno: %d\n", ret);
+132         delete [] fdt_buf_w_space;
+133         return false;
+134     }
+135 
+136     // Repack the dtb for kernel use
+137     ret = fdt_pack((void*)fdt_buf_w_space);
+138     if (ret < 0) {
+139         warn("Error re-packing flattened device tree structure, "
+140              "errno: %d\n", ret);
+141         delete [] fdt_buf_w_space;
+142         return false;
+143     }
+144 
+145     text.size = newLen;
+146     text.fileImage = fdt_buf_w_space;
+147 
+148     // clean up old buffer and set to new fdt blob
+149     munmap(fileData, this->len);
+150     fileData = fdt_buf_w_space;
+151     fileDataMmapped = false;
+152     this->len = newLen;
+153 
+154     return true;
+155 }
+\end{DoxyCode}
+\hypertarget{classDtbObject_a1de102f86bbb53d20455d9e78be53935}{
+\index{DtbObject@{DtbObject}!loadGlobalSymbols@{loadGlobalSymbols}}
+\index{loadGlobalSymbols@{loadGlobalSymbols}!DtbObject@{DtbObject}}
+\subsubsection[{loadGlobalSymbols}]{\setlength{\rightskip}{0pt plus 5cm}bool loadGlobalSymbols ({\bf SymbolTable} $\ast$ {\em symtab}, \/  {\bf Addr} {\em addrMask} = {\ttfamily std::numeric\_\-limits$<${\bf Addr}$>$::max()})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classDtbObject_a1de102f86bbb53d20455d9e78be53935}
+
+
+\hyperlink{classObjectFile_abd8b86c98494f055ba7e0babbd55f4a0}{ObjectFile}を実装しています。
+
+
+\begin{DoxyCode}
+159 {
+160     // nothing to do here
+161     return false;
+162 }
+\end{DoxyCode}
+\hypertarget{classDtbObject_aab9393b89c15838ac1b842e642f981bb}{
+\index{DtbObject@{DtbObject}!loadLocalSymbols@{loadLocalSymbols}}
+\index{loadLocalSymbols@{loadLocalSymbols}!DtbObject@{DtbObject}}
+\subsubsection[{loadLocalSymbols}]{\setlength{\rightskip}{0pt plus 5cm}bool loadLocalSymbols ({\bf SymbolTable} $\ast$ {\em symtab}, \/  {\bf Addr} {\em addrMask} = {\ttfamily std::numeric\_\-limits$<${\bf Addr}$>$::max()})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classDtbObject_aab9393b89c15838ac1b842e642f981bb}
+
+
+\hyperlink{classObjectFile_a15e7fbacc339ac9a4d50e4aa36591339}{ObjectFile}を実装しています。
+
+
+\begin{DoxyCode}
+166 {
+167     // nothing to do here
+168     return false;
+169 }
+\end{DoxyCode}
+\hypertarget{classDtbObject_a3b119de4852833fdf74dbb4b8e1e1eba}{
+\index{DtbObject@{DtbObject}!tryFile@{tryFile}}
+\index{tryFile@{tryFile}!DtbObject@{DtbObject}}
+\subsubsection[{tryFile}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ObjectFile} $\ast$ tryFile (const std::string \& {\em fname}, \/  int {\em fd}, \/  size\_\-t {\em len}, \/  uint8\_\-t $\ast$ {\em data})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classDtbObject_a3b119de4852833fdf74dbb4b8e1e1eba}
+Static function that tries to load file as a flattened device tree blob. 
+\begin{DoxyParams}{引数}
+\item[{\em fname}]path to file \item[{\em fd}]file descriptor of object file \item[{\em len}]length of file \item[{\em data}]mmap'ed data buffer containing file contents \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+\hyperlink{classObjectFile}{ObjectFile} representing closest match of file type 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+43 {
+44     // Check if this is a FDT file by looking for magic number
+45     if (fdt_magic((void*)data) == FDT_MAGIC) {
+46         return new DtbObject(fname, fd, len, data,
+47                              ObjectFile::UnknownArch, ObjectFile::UnknownOpSys);
+48     } else {
+49         return NULL;
+50     }
+51 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classDtbObject_a7fb4f2b3db8f5603574f0e9cc114c360}{
+\index{DtbObject@{DtbObject}!fileDataMmapped@{fileDataMmapped}}
+\index{fileDataMmapped@{fileDataMmapped}!DtbObject@{DtbObject}}
+\subsubsection[{fileDataMmapped}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf fileDataMmapped}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classDtbObject_a7fb4f2b3db8f5603574f0e9cc114c360}
+Bool marking if this dtb file has replaced the original read in DTB file with a new modified buffer 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/loader/\hyperlink{dtb__object_8hh}{dtb\_\-object.hh}\item 
+base/loader/\hyperlink{dtb__object_8cc}{dtb\_\-object.cc}\end{DoxyCompactItemize}

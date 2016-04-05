@@ -1,0 +1,336 @@
+\hypertarget{classArmISA_1_1RemoteGDB}{
+\section{クラス RemoteGDB}
+\label{classArmISA_1_1RemoteGDB}\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+}
+
+
+{\ttfamily \#include $<$remote\_\-gdb.hh$>$}RemoteGDBに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classArmISA_1_1RemoteGDB}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1RemoteGDB_a378793e7a68420568b51f355b7e8c473}{RemoteGDB} (\hyperlink{classSystem}{System} $\ast$\_\-system, \hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc})
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classArmISA_1_1RemoteGDB_ac4c7be164f087f2f53d137d9768809a7}{acc} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} addr, size\_\-t \hyperlink{namespaceArmISA_a41a9f22a6c7645fac2f8d633371e354d}{len})
+\item 
+bool \hyperlink{classArmISA_1_1RemoteGDB_afbada55bb9d0e9c8c26bb48cb5890111}{write} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} addr, size\_\-t size, const char $\ast$data)
+\item 
+void \hyperlink{classArmISA_1_1RemoteGDB_a62bc8adc5a48f1cbb5eb9bb64301d38d}{getregs} ()
+\item 
+void \hyperlink{classArmISA_1_1RemoteGDB_a2051121b6bc93c8ca3856bbeeca7bdc1}{setregs} ()
+\item 
+void \hyperlink{classArmISA_1_1RemoteGDB_afd89268069d9026378b06b08c97f65f8}{clearSingleStep} ()
+\item 
+void \hyperlink{classArmISA_1_1RemoteGDB_a40d5da340fdb741de8cd3ffbc69708fe}{setSingleStep} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classm5_1_1params_1_1Addr}{Addr} \hyperlink{classArmISA_1_1RemoteGDB_ae1a0a563a724aaffa8ae5b4095957aa4}{notTakenBkpt}
+\item 
+\hyperlink{classm5_1_1params_1_1Addr}{Addr} \hyperlink{classArmISA_1_1RemoteGDB_abfdbe67e311a613bbbe39b730279f3e1}{takenBkpt}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1RemoteGDB_a378793e7a68420568b51f355b7e8c473}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!RemoteGDB@{RemoteGDB}}
+\index{RemoteGDB@{RemoteGDB}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{RemoteGDB}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RemoteGDB} ({\bf System} $\ast$ {\em \_\-system}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{classArmISA_1_1RemoteGDB_a378793e7a68420568b51f355b7e8c473}
+
+
+
+\begin{DoxyCode}
+163     : BaseRemoteGDB(_system, tc, MAX_NUMREGS)
+164 {
+165 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classArmISA_1_1RemoteGDB_ac4c7be164f087f2f53d137d9768809a7}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!acc@{acc}}
+\index{acc@{acc}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{acc}]{\setlength{\rightskip}{0pt plus 5cm}bool acc ({\bf Addr} {\em addr}, \/  size\_\-t {\em len})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_ac4c7be164f087f2f53d137d9768809a7}
+
+
+
+\begin{DoxyCode}
+172 {
+173     if (FullSystem) {
+174         Addr last_va;
+175         va       = truncPage(va);
+176         last_va  = roundPage(va + len);
+177 
+178         do  {
+179             if (virtvalid(context, va)) {
+180                 return true;
+181             }
+182             va += PageBytes;
+183         } while (va < last_va);
+184 
+185         DPRINTF(GDBAcc, "acc:   %#x mapping is valid\n", va);
+186         return true;
+187     } else {
+188         TlbEntry entry;
+189         //Check to make sure the first byte is mapped into the processes address
+190         //space.
+191         if (context->getProcessPtr()->pTable->lookup(va, entry))
+192             return true;
+193         return false;
+194     }
+195 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1RemoteGDB_afd89268069d9026378b06b08c97f65f8}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!clearSingleStep@{clearSingleStep}}
+\index{clearSingleStep@{clearSingleStep}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{clearSingleStep}]{\setlength{\rightskip}{0pt plus 5cm}void clearSingleStep ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_afd89268069d9026378b06b08c97f65f8}
+
+
+\hyperlink{classBaseRemoteGDB_a69f1887d1310ab6f19cf5bbcdf9d7a1e}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+342 {
+343     DPRINTF(GDBMisc, "clearSingleStep bt_addr=%#x nt_addr=%#x\n",
+344             takenBkpt, notTakenBkpt);
+345 
+346     if (takenBkpt != 0)
+347         clearTempBreakpoint(takenBkpt);
+348 
+349     if (notTakenBkpt != 0)
+350         clearTempBreakpoint(notTakenBkpt);
+351 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1RemoteGDB_a62bc8adc5a48f1cbb5eb9bb64301d38d}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!getregs@{getregs}}
+\index{getregs@{getregs}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{getregs}]{\setlength{\rightskip}{0pt plus 5cm}void getregs ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_a62bc8adc5a48f1cbb5eb9bb64301d38d}
+
+
+\hyperlink{classBaseRemoteGDB_aca04756a764f2ef2add9ee91be012659}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+203 {
+204     DPRINTF(GDBAcc, "getregs in remotegdb \n");
+205 
+206     memset(gdbregs.regs, 0, gdbregs.bytes());
+207 
+208     if (inAArch64(context)) {  // AArch64
+209         // x0-x31
+210         for (int i = 0; i < 32; ++i) {
+211             gdbregs.regs[REG_X0 + i] = context->readIntReg(INTREG_X0 + i);
+212         }
+213         // pc
+214         gdbregs.regs[REG_PC_64] = context->pcState().pc();
+215         // cpsr
+216         gdbregs.regs[REG_CPSR_64] = context->readMiscRegNoEffect(MISCREG_CPSR);
+217         // v0-v31
+218         for (int i = 0; i < 32; ++i) {
+219             gdbregs.regs[REG_V0 + 2 * i] = static_cast<uint64_t>(
+220                 context->readFloatRegBits(i * 4 + 3)) << 32 |
+221                     context->readFloatRegBits(i * 4 + 2);
+222             gdbregs.regs[REG_V0 + 2 * i + 1] = static_cast<uint64_t>(
+223                 context->readFloatRegBits(i * 4 + 1)) << 32 |
+224                     context->readFloatRegBits(i * 4 + 0);
+225         }
+226     } else {  // AArch32
+227         // R0-R15 supervisor mode
+228         // arm registers are 32 bits wide, gdb registers are 64 bits wide two
+229         // arm registers are packed into one gdb register (little endian)
+230         gdbregs.regs[REG_R0 + 0] = context->readIntReg(INTREG_R1) << 32 |
+231             context->readIntReg(INTREG_R0);
+232         gdbregs.regs[REG_R0 + 1] = context->readIntReg(INTREG_R3) << 32 |
+233             context->readIntReg(INTREG_R2);
+234         gdbregs.regs[REG_R0 + 2] = context->readIntReg(INTREG_R5) << 32 |
+235             context->readIntReg(INTREG_R4);
+236         gdbregs.regs[REG_R0 + 3] = context->readIntReg(INTREG_R7) << 32 |
+237             context->readIntReg(INTREG_R6);
+238         gdbregs.regs[REG_R0 + 4] = context->readIntReg(INTREG_R9) << 32 |
+239             context->readIntReg(INTREG_R8);
+240         gdbregs.regs[REG_R0 + 5] = context->readIntReg(INTREG_R11) << 32|
+241             context->readIntReg(INTREG_R10);
+242         gdbregs.regs[REG_R0 + 6] = context->readIntReg(INTREG_SP) << 32 |
+243             context->readIntReg(INTREG_R12);
+244         gdbregs.regs[REG_R0 + 7] = context->pcState().pc() << 32        |
+245             context->readIntReg(INTREG_LR);
+246 
+247         // CPSR
+248         gdbregs.regs[REG_CPSR]  = context->readMiscRegNoEffect(MISCREG_CPSR);
+249 
+250         // vfpv3/neon floating point registers (32 double or 64 float)
+251 
+252         gdbregs.regs[REG_F0] =
+253             static_cast<uint64_t>(context->readFloatRegBits(0)) << 32 |
+254             gdbregs.regs[REG_CPSR];
+255 
+256         for (int i = 1; i < (NumFloatV7ArchRegs>>1); ++i) {
+257             gdbregs.regs[i + REG_F0] =
+258                 static_cast<uint64_t>(context->readFloatRegBits(2*i)) << 32 |
+259                 context->readFloatRegBits(2*i-1);
+260         }
+261 
+262         // FPSCR
+263         gdbregs.regs[REG_FPSCR] = static_cast<uint64_t>(
+264             context->readMiscRegNoEffect(MISCREG_FPSCR)) << 32 |
+265                 context->readFloatRegBits(NumFloatV7ArchRegs - 1);
+266     }
+267 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1RemoteGDB_a2051121b6bc93c8ca3856bbeeca7bdc1}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!setregs@{setregs}}
+\index{setregs@{setregs}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{setregs}]{\setlength{\rightskip}{0pt plus 5cm}void setregs ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_a2051121b6bc93c8ca3856bbeeca7bdc1}
+
+
+\hyperlink{classBaseRemoteGDB_a6b0b51dc196f12756cc0ec49a3ae6a6a}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+275 {
+276 
+277     DPRINTF(GDBAcc, "setregs in remotegdb \n");
+278     if (inAArch64(context)) {  // AArch64
+279         // x0-x31
+280         for (int i = 0; i < 32; ++i) {
+281             context->setIntReg(INTREG_X0 + i, gdbregs.regs[REG_X0 + i]);
+282         }
+283         // pc
+284         context->pcState(gdbregs.regs[REG_PC_64]);
+285         // cpsr
+286         context->setMiscRegNoEffect(MISCREG_CPSR, gdbregs.regs[REG_CPSR_64]);
+287         // v0-v31
+288         for (int i = 0; i < 32; ++i) {
+289           context->setFloatRegBits(i * 4 + 3,
+290                                    gdbregs.regs[REG_V0 + 2 * i] >> 32);
+291           context->setFloatRegBits(i * 4 + 2,
+292                                    gdbregs.regs[REG_V0 + 2 * i]);
+293           context->setFloatRegBits(i * 4 + 1,
+294                                    gdbregs.regs[REG_V0 + 2 * i + 1] >> 32);
+295           context->setFloatRegBits(i * 4 + 0,
+296                                    gdbregs.regs[REG_V0 + 2 * i + 1]);
+297         }
+298     } else {  // AArch32
+299         // R0-R15 supervisor mode
+300         // arm registers are 32 bits wide, gdb registers are 64 bits wide
+301         // two arm registers are packed into one gdb register (little endian)
+302         context->setIntReg(INTREG_R0 , bits(gdbregs.regs[REG_R0 + 0], 31, 0));
+303         context->setIntReg(INTREG_R1 , bits(gdbregs.regs[REG_R0 + 0], 63, 32));
+304         context->setIntReg(INTREG_R2 , bits(gdbregs.regs[REG_R0 + 1], 31, 0));
+305         context->setIntReg(INTREG_R3 , bits(gdbregs.regs[REG_R0 + 1], 63, 32));
+306         context->setIntReg(INTREG_R4 , bits(gdbregs.regs[REG_R0 + 2], 31, 0));
+307         context->setIntReg(INTREG_R5 , bits(gdbregs.regs[REG_R0 + 2], 63, 32));
+308         context->setIntReg(INTREG_R6 , bits(gdbregs.regs[REG_R0 + 3], 31, 0));
+309         context->setIntReg(INTREG_R7 , bits(gdbregs.regs[REG_R0 + 3], 63, 32));
+310         context->setIntReg(INTREG_R8 , bits(gdbregs.regs[REG_R0 + 4], 31, 0));
+311         context->setIntReg(INTREG_R9 , bits(gdbregs.regs[REG_R0 + 4], 63, 32));
+312         context->setIntReg(INTREG_R10, bits(gdbregs.regs[REG_R0 + 5], 31, 0));
+313         context->setIntReg(INTREG_R11, bits(gdbregs.regs[REG_R0 + 5], 63, 32));
+314         context->setIntReg(INTREG_R12, bits(gdbregs.regs[REG_R0 + 6], 31, 0));
+315         context->setIntReg(INTREG_SP , bits(gdbregs.regs[REG_R0 + 6], 63, 32));
+316         context->setIntReg(INTREG_LR , bits(gdbregs.regs[REG_R0 + 7], 31, 0));
+317         context->pcState(bits(gdbregs.regs[REG_R0 + 7], 63, 32));
+318 
+319         //CPSR
+320         context->setMiscRegNoEffect(MISCREG_CPSR, gdbregs.regs[REG_CPSR]);
+321 
+322         //vfpv3/neon floating point registers (32 double or 64 float)
+323         context->setFloatRegBits(0, gdbregs.regs[REG_F0]>>32);
+324 
+325         for (int i = 1; i < NumFloatV7ArchRegs; ++i) {
+326             if (i%2) {
+327                 int j = (i+1)/2;
+328                 context->setFloatRegBits(i, bits(gdbregs.regs[j + REG_F0], 31, 0)
+      );
+329             } else {
+330                 int j = i/2;
+331                 context->setFloatRegBits(i, gdbregs.regs[j + REG_F0]>>32);
+332             }
+333         }
+334 
+335         //FPSCR
+336         context->setMiscReg(MISCREG_FPSCR, gdbregs.regs[REG_FPSCR]>>32);
+337     }
+338 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1RemoteGDB_a40d5da340fdb741de8cd3ffbc69708fe}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!setSingleStep@{setSingleStep}}
+\index{setSingleStep@{setSingleStep}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{setSingleStep}]{\setlength{\rightskip}{0pt plus 5cm}void setSingleStep ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_a40d5da340fdb741de8cd3ffbc69708fe}
+
+
+\hyperlink{classBaseRemoteGDB_a253d4b1107e84fe80036d1826067741a}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+355 {
+356     PCState pc = context->pcState();
+357     PCState bpc;
+358     bool set_bt = false;
+359 
+360     // User was stopped at pc, e.g. the instruction at pc was not
+361     // executed.
+362     MachInst inst = read<MachInst>(pc.pc());
+363     StaticInstPtr si = context->getDecoderPtr()->decode(inst, pc.pc());
+364     if (si->hasBranchTarget(pc, context, bpc)) {
+365         // Don't bother setting a breakpoint on the taken branch if it
+366         // is the same as the next pc
+367         if (bpc.pc() != pc.npc())
+368             set_bt = true;
+369     }
+370 
+371     DPRINTF(GDBMisc, "setSingleStep bt_addr=%#x nt_addr=%#x\n",
+372             takenBkpt, notTakenBkpt);
+373 
+374     setTempBreakpoint(notTakenBkpt = pc.npc());
+375 
+376     if (set_bt)
+377         setTempBreakpoint(takenBkpt = bpc.pc());
+378 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1RemoteGDB_afbada55bb9d0e9c8c26bb48cb5890111}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!write@{write}}
+\index{write@{write}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}bool write ({\bf Addr} {\em addr}, \/  size\_\-t {\em size}, \/  const char $\ast$ {\em data})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_afbada55bb9d0e9c8c26bb48cb5890111}
+
+
+
+\begin{DoxyCode}
+383 {
+384     return BaseRemoteGDB::write(vaddr, size, data);
+385 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classArmISA_1_1RemoteGDB_ae1a0a563a724aaffa8ae5b4095957aa4}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!notTakenBkpt@{notTakenBkpt}}
+\index{notTakenBkpt@{notTakenBkpt}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{notTakenBkpt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf notTakenBkpt}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_ae1a0a563a724aaffa8ae5b4095957aa4}
+\hypertarget{classArmISA_1_1RemoteGDB_abfdbe67e311a613bbbe39b730279f3e1}{
+\index{ArmISA::RemoteGDB@{ArmISA::RemoteGDB}!takenBkpt@{takenBkpt}}
+\index{takenBkpt@{takenBkpt}!ArmISA::RemoteGDB@{ArmISA::RemoteGDB}}
+\subsubsection[{takenBkpt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf takenBkpt}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1RemoteGDB_abfdbe67e311a613bbbe39b730279f3e1}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2remote__gdb_8hh}{remote\_\-gdb.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2remote__gdb_8cc}{remote\_\-gdb.cc}\end{DoxyCompactItemize}

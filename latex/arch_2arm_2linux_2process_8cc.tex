@@ -1,0 +1,169 @@
+\hypertarget{arch_2arm_2linux_2process_8cc}{
+\section{arch/arm/linux/process.cc}
+\label{arch_2arm_2linux_2process_8cc}\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/arm/linux/linux.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/arm/linux/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/arm/isa\_\-traits.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/thread\_\-context.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}kern/linux/linux.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/syscall\_\-emul.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/system.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2arm_2linux_2process_8cc_a270ecf0da6ee38054c36b40e8465ffac}{unameFunc32} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target uname() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2arm_2linux_2process_8cc_ad0b3033a6c6b2d4cd97bcbc12b83d22d}{unameFunc64} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target uname() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2arm_2linux_2process_8cc_a7443cdd8a2cf70b17ff18014d88d1425}{setTLSFunc32} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target set\_\-tls() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2arm_2linux_2process_8cc_a3d8267dd88fd8643c1eceb6846b21a67}{setTLSFunc64} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classSyscallDesc}{SyscallDesc} \hyperlink{arch_2arm_2linux_2process_8cc_a3806da4de7bd5082ba4479a94ba79a03}{syscallDescs32} \mbox{[}$\,$\mbox{]}
+\item 
+static \hyperlink{classSyscallDesc}{SyscallDesc} \hyperlink{arch_2arm_2linux_2process_8cc_addb2c480e43a636b8e27a35c1a06df6a}{syscallDescs64} \mbox{[}$\,$\mbox{]}
+\item 
+static \hyperlink{classSyscallDesc}{SyscallDesc} \hyperlink{arch_2arm_2linux_2process_8cc_abdee67c9f5072ff74a56ffff09da9f88}{privSyscallDescs32} \mbox{[}$\,$\mbox{]}
+\item 
+static \hyperlink{classSyscallDesc}{SyscallDesc} \hyperlink{arch_2arm_2linux_2process_8cc_acaf69ae835c4a92eed91ae730adbc077}{privSyscallDescs64} \mbox{[}$\,$\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{arch_2arm_2linux_2process_8cc_a7443cdd8a2cf70b17ff18014d88d1425}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!setTLSFunc32@{setTLSFunc32}}
+\index{setTLSFunc32@{setTLSFunc32}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{setTLSFunc32}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} setTLSFunc32 ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_a7443cdd8a2cf70b17ff18014d88d1425}
+
+
+Target set\_\-tls() handler. 
+
+
+\begin{DoxyCode}
+100 {
+101     int index = 0;
+102     uint32_t tlsPtr = process->getSyscallArg(tc, index);
+103 
+104     tc->getMemProxy().writeBlob(ArmLinuxProcess32::commPage + 0x0ff0,
+105                                  (uint8_t *)&tlsPtr, sizeof(tlsPtr));
+106     tc->setMiscReg(MISCREG_TPIDRURO,tlsPtr);
+107     return 0;
+108 }
+\end{DoxyCode}
+\hypertarget{arch_2arm_2linux_2process_8cc_a3d8267dd88fd8643c1eceb6846b21a67}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!setTLSFunc64@{setTLSFunc64}}
+\index{setTLSFunc64@{setTLSFunc64}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{setTLSFunc64}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} setTLSFunc64 ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_a3d8267dd88fd8643c1eceb6846b21a67}
+
+
+
+\begin{DoxyCode}
+113 {
+114     int index = 0;
+115     uint32_t tlsPtr = process->getSyscallArg(tc, index);
+116 
+117     tc->setMiscReg(MISCREG_TPIDRRO_EL0, tlsPtr);
+118     return 0;
+119 }
+\end{DoxyCode}
+\hypertarget{arch_2arm_2linux_2process_8cc_a270ecf0da6ee38054c36b40e8465ffac}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!unameFunc32@{unameFunc32}}
+\index{unameFunc32@{unameFunc32}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{unameFunc32}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} unameFunc32 ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_a270ecf0da6ee38054c36b40e8465ffac}
+
+
+Target uname() handler. 
+
+
+\begin{DoxyCode}
+64 {
+65     int index = 0;
+66     TypedBufferArg<Linux::utsname> name(process->getSyscallArg(tc, index));
+67 
+68     strcpy(name->sysname, "Linux");
+69     strcpy(name->nodename, "m5.eecs.umich.edu");
+70     strcpy(name->release, "3.0.0");
+71     strcpy(name->version, "#1 Mon Aug 18 11:32:15 EDT 2003");
+72     strcpy(name->machine, "armv7l");
+73 
+74     name.copyOut(tc->getMemProxy());
+75     return 0;
+76 }
+\end{DoxyCode}
+\hypertarget{arch_2arm_2linux_2process_8cc_ad0b3033a6c6b2d4cd97bcbc12b83d22d}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!unameFunc64@{unameFunc64}}
+\index{unameFunc64@{unameFunc64}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{unameFunc64}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} unameFunc64 ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_ad0b3033a6c6b2d4cd97bcbc12b83d22d}
+
+
+Target uname() handler. 
+
+
+\begin{DoxyCode}
+82 {
+83     int index = 0;
+84     TypedBufferArg<Linux::utsname> name(process->getSyscallArg(tc, index));
+85 
+86     strcpy(name->sysname, "Linux");
+87     strcpy(name->nodename, "gem5");
+88     strcpy(name->release, "3.7.0+");
+89     strcpy(name->version, "#1 SMP Sat Dec  1 00:00:00 GMT 2012");
+90     strcpy(name->machine, "armv8l");
+91 
+92     name.copyOut(tc->getMemProxy());
+93     return 0;
+94 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{arch_2arm_2linux_2process_8cc_abdee67c9f5072ff74a56ffff09da9f88}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!privSyscallDescs32@{privSyscallDescs32}}
+\index{privSyscallDescs32@{privSyscallDescs32}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{privSyscallDescs32}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} {\bf privSyscallDescs32}\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_abdee67c9f5072ff74a56ffff09da9f88}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+ {
+     SyscallDesc("breakpoint", unimplementedFunc),
+     SyscallDesc("cacheflush", unimplementedFunc),
+     SyscallDesc("usr26", unimplementedFunc),
+     SyscallDesc("usr32", unimplementedFunc),
+     SyscallDesc("set_tls", setTLSFunc32)
+}
+\end{DoxyCode}
+\hypertarget{arch_2arm_2linux_2process_8cc_acaf69ae835c4a92eed91ae730adbc077}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!privSyscallDescs64@{privSyscallDescs64}}
+\index{privSyscallDescs64@{privSyscallDescs64}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{privSyscallDescs64}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} {\bf privSyscallDescs64}\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_acaf69ae835c4a92eed91ae730adbc077}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+ {
+     SyscallDesc("unallocated", unimplementedFunc),
+     SyscallDesc("cacheflush", unimplementedFunc),
+     SyscallDesc("unallocated", unimplementedFunc),
+     SyscallDesc("unallocated", unimplementedFunc),
+     SyscallDesc("set_tls", setTLSFunc64)
+}
+\end{DoxyCode}
+\hypertarget{arch_2arm_2linux_2process_8cc_a3806da4de7bd5082ba4479a94ba79a03}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!syscallDescs32@{syscallDescs32}}
+\index{syscallDescs32@{syscallDescs32}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{syscallDescs32}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} {\bf syscallDescs32}\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_a3806da4de7bd5082ba4479a94ba79a03}
+\hypertarget{arch_2arm_2linux_2process_8cc_addb2c480e43a636b8e27a35c1a06df6a}{
+\index{arch/arm/linux/process.cc@{arch/arm/linux/process.cc}!syscallDescs64@{syscallDescs64}}
+\index{syscallDescs64@{syscallDescs64}!arch/arm/linux/process.cc@{arch/arm/linux/process.cc}}
+\subsubsection[{syscallDescs64}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} {\bf syscallDescs64}\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2arm_2linux_2process_8cc_addb2c480e43a636b8e27a35c1a06df6a}

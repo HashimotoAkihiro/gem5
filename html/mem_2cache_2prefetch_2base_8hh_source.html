@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/cache/prefetch/base.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/cache/prefetch/base.hh</h1><a href="mem_2cache_2prefetch_2base_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Ron Dreslinski</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00048"></a>00048 <span class="preprocessor">#ifndef __MEM_CACHE_PREFETCH_BASE_PREFETCHER_HH__</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_CACHE_PREFETCH_BASE_PREFETCHER_HH__</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;params/BaseCache.hh&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="clocked__object_8hh.html">sim/clocked_object.hh</a>&quot;</span>
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058 <span class="keyword">class </span><a class="code" href="classBaseCache.html">BaseCache</a>;
+<a name="l00059"></a>00059 
+<a name="l00060"></a><a class="code" href="classBasePrefetcher.html">00060</a> <span class="keyword">class </span><a class="code" href="classBasePrefetcher.html">BasePrefetcher</a> : <span class="keyword">public</span> <a class="code" href="classClockedObject.html">ClockedObject</a>
+<a name="l00061"></a>00061 {
+<a name="l00062"></a>00062   <span class="keyword">protected</span>:
+<a name="l00063"></a>00063 
+<a name="l00065"></a><a class="code" href="classBasePrefetcher_1_1DeferredPacket.html">00065</a>     <span class="keyword">class </span><a class="code" href="classBasePrefetcher_1_1DeferredPacket.html">DeferredPacket</a> {
+<a name="l00066"></a>00066       <span class="keyword">public</span>:
+<a name="l00067"></a><a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#a4daae57fbf09ee5423d123f5ce330e92">00067</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#a4daae57fbf09ee5423d123f5ce330e92" title="The tick when the packet is ready to transmit.">tick</a>;      
+<a name="l00068"></a><a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#a3a891bc2a0fcbe6be5297077d94e2df7">00068</a>         <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#a3a891bc2a0fcbe6be5297077d94e2df7" title="Pointer to the packet to transmit.">pkt</a>;  
+<a name="l00069"></a><a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#ab130ef186edfc2a1928d00d723a11fc0">00069</a>         <a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#ab130ef186edfc2a1928d00d723a11fc0">DeferredPacket</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>, <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>)
+<a name="l00070"></a>00070             : <a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#a4daae57fbf09ee5423d123f5ce330e92" title="The tick when the packet is ready to transmit.">tick</a>(t), <a class="code" href="classBasePrefetcher_1_1DeferredPacket.html#a3a891bc2a0fcbe6be5297077d94e2df7" title="Pointer to the packet to transmit.">pkt</a>(p)
+<a name="l00071"></a>00071         {}
+<a name="l00072"></a>00072     };
+<a name="l00073"></a>00073 
+<a name="l00075"></a><a class="code" href="classBasePrefetcher.html#acdef622ce8eca64ce81e25e37f0bc22e">00075</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DeferredPacket&gt;</a> <a class="code" href="classBasePrefetcher.html#acdef622ce8eca64ce81e25e37f0bc22e">pf</a>;
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077     <span class="comment">// PARAMETERS</span>
+<a name="l00078"></a>00078 
+<a name="l00080"></a><a class="code" href="classBasePrefetcher.html#ad3f1cf0299fe68eb9a68a7c67232c62d">00080</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classBasePrefetcher.html#ad3f1cf0299fe68eb9a68a7c67232c62d">size</a>;
+<a name="l00081"></a>00081 
+<a name="l00083"></a><a class="code" href="classBasePrefetcher.html#a5cc08dee7231c774489c04728dd5f169">00083</a>     <a class="code" href="classBaseCache.html">BaseCache</a>* <a class="code" href="classBasePrefetcher.html#a5cc08dee7231c774489c04728dd5f169">cache</a>;
+<a name="l00084"></a>00084 
+<a name="l00086"></a><a class="code" href="classBasePrefetcher.html#a848be51480be2b992d8a262952268fbc">00086</a>     <span class="keywordtype">int</span> <a class="code" href="classBasePrefetcher.html#a848be51480be2b992d8a262952268fbc">blkSize</a>;
+<a name="l00087"></a>00087 
+<a name="l00089"></a><a class="code" href="classBasePrefetcher.html#a46b9d67ee437c6ecdbedca8ec8d2ed40">00089</a>     <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classBasePrefetcher.html#a46b9d67ee437c6ecdbedca8ec8d2ed40">latency</a>;
+<a name="l00090"></a>00090 
+<a name="l00092"></a><a class="code" href="classBasePrefetcher.html#aa05c9c27f3c02725fb1574fb5218aeba">00092</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classBasePrefetcher.html#aa05c9c27f3c02725fb1574fb5218aeba">degree</a>;
+<a name="l00093"></a>00093 
+<a name="l00095"></a><a class="code" href="classBasePrefetcher.html#ab84f738213bbd5196080f894c0d5aaf2">00095</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#ab84f738213bbd5196080f894c0d5aaf2">useMasterId</a>;
+<a name="l00097"></a><a class="code" href="classBasePrefetcher.html#a8e2ec9b566b10d5b73a5d9fe6a90b058">00097</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a8e2ec9b566b10d5b73a5d9fe6a90b058">pageStop</a>;
+<a name="l00098"></a>00098 
+<a name="l00100"></a><a class="code" href="classBasePrefetcher.html#a198469b16ef2d026a2ffa298eb77e616">00100</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a198469b16ef2d026a2ffa298eb77e616">serialSquash</a>;
+<a name="l00101"></a>00101 
+<a name="l00103"></a><a class="code" href="classBasePrefetcher.html#a8762c4c2c983c8eadd6c7bccfe973f5f">00103</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a8762c4c2c983c8eadd6c7bccfe973f5f">onlyData</a>;
+<a name="l00104"></a>00104 
+<a name="l00106"></a><a class="code" href="classBasePrefetcher.html#ade1681d5d6ad302db05a204fd920a110">00106</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#ade1681d5d6ad302db05a204fd920a110">onMissOnly</a>;
+<a name="l00107"></a>00107 
+<a name="l00109"></a><a class="code" href="classBasePrefetcher.html#a009f56092b97c79cde580c4ae5e12599">00109</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a009f56092b97c79cde580c4ae5e12599">onReadOnly</a>;
+<a name="l00110"></a>00110 
+<a name="l00113"></a><a class="code" href="classBasePrefetcher.html#a632f5ff02feaeadf06e58c82f3fb43c3">00113</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a632f5ff02feaeadf06e58c82f3fb43c3">onPrefetch</a>;
+<a name="l00114"></a>00114 
+<a name="l00116"></a><a class="code" href="classBasePrefetcher.html#af27ccd765f13a4b7bd119dc7579e2746">00116</a>     <a class="code" href="classSystem.html">System</a>* <a class="code" href="classBasePrefetcher.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00117"></a>00117 
+<a name="l00119"></a><a class="code" href="classBasePrefetcher.html#a96ec6a422ac492d05f8b3edc5b58532b">00119</a>     <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> <a class="code" href="classBasePrefetcher.html#a96ec6a422ac492d05f8b3edc5b58532b">masterId</a>;
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121   <span class="keyword">public</span>:
+<a name="l00122"></a>00122 
+<a name="l00123"></a><a class="code" href="classBasePrefetcher.html#aa83003235229fe6e7aae462188f4d63d">00123</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#aa83003235229fe6e7aae462188f4d63d">pfIdentified</a>;
+<a name="l00124"></a><a class="code" href="classBasePrefetcher.html#a16b12f81a92a01a460e62a7785e0726d">00124</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#a16b12f81a92a01a460e62a7785e0726d">pfMSHRHit</a>;
+<a name="l00125"></a><a class="code" href="classBasePrefetcher.html#a61e01d10fc3d03b88341a0663ede2177">00125</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#a61e01d10fc3d03b88341a0663ede2177">pfCacheHit</a>;
+<a name="l00126"></a><a class="code" href="classBasePrefetcher.html#a2df98c96edba641dbec623185d5c801b">00126</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#a2df98c96edba641dbec623185d5c801b">pfBufferHit</a>;
+<a name="l00127"></a><a class="code" href="classBasePrefetcher.html#a33b63796ece1306bb25b4abcbb8e888e">00127</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#a33b63796ece1306bb25b4abcbb8e888e">pfRemovedFull</a>;
+<a name="l00128"></a><a class="code" href="classBasePrefetcher.html#ac2aa69cf510d48d234493085b96d810b">00128</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#ac2aa69cf510d48d234493085b96d810b">pfRemovedMSHR</a>;
+<a name="l00129"></a><a class="code" href="classBasePrefetcher.html#a616b66672824772fbc0ac255630074a8">00129</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#a616b66672824772fbc0ac255630074a8">pfIssued</a>;
+<a name="l00130"></a><a class="code" href="classBasePrefetcher.html#a2e71998cfd3608b558c489b33280d0e6">00130</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#a2e71998cfd3608b558c489b33280d0e6">pfSpanPage</a>;
+<a name="l00131"></a><a class="code" href="classBasePrefetcher.html#ae39544ad55ce96aa1560f3f3fc8f5906">00131</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBasePrefetcher.html#ae39544ad55ce96aa1560f3f3fc8f5906">pfSquashed</a>;
+<a name="l00132"></a>00132 
+<a name="l00133"></a>00133     <span class="keywordtype">void</span> <a class="code" href="classBasePrefetcher.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00134"></a>00134 
+<a name="l00135"></a>00135   <span class="keyword">public</span>:
+<a name="l00136"></a><a class="code" href="classBasePrefetcher.html#a46661f02a5642b04fd4e12f645ad9c5c">00136</a>     <span class="keyword">typedef</span> BasePrefetcherParams <a class="code" href="classBasePrefetcher.html#a46661f02a5642b04fd4e12f645ad9c5c">Params</a>;
+<a name="l00137"></a>00137     <a class="code" href="classBasePrefetcher.html#aff313fac14ed758d8896572ecb0b6bfe">BasePrefetcher</a>(<span class="keyword">const</span> <a class="code" href="classBasePrefetcher.html#a46661f02a5642b04fd4e12f645ad9c5c">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00138"></a>00138 
+<a name="l00139"></a><a class="code" href="classBasePrefetcher.html#a36880a63235082d98e72895db229946f">00139</a>     <span class="keyword">virtual</span> <a class="code" href="classBasePrefetcher.html#a36880a63235082d98e72895db229946f">~BasePrefetcher</a>() {}
+<a name="l00140"></a>00140 
+<a name="l00141"></a>00141     <span class="keywordtype">void</span> <a class="code" href="classBasePrefetcher.html#a6a5d34a51c5ba1c4f87dbcc59e8b13fb">setCache</a>(<a class="code" href="classBaseCache.html">BaseCache</a> *_cache);
+<a name="l00142"></a>00142 
+<a name="l00148"></a>00148     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBasePrefetcher.html#a1d4199bee2a7f9e8f22bf9e84d5ceda4">notify</a>(<a class="code" href="classPacket.html">PacketPtr</a> &amp;pkt, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classClockedObject.html#a4daae57fbf09ee5423d123f5ce330e92">tick</a>);
+<a name="l00149"></a>00149 
+<a name="l00150"></a>00150     <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a1c1743bff8e77d48e43b38e1b8bcb7e6">inCache</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">bool</span> is_secure);
+<a name="l00151"></a>00151 
+<a name="l00152"></a>00152     <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a7101ac3ce053ea800e49a4ff44c84ca0">inMissQueue</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">bool</span> is_secure);
+<a name="l00153"></a>00153 
+<a name="l00154"></a>00154     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classBasePrefetcher.html#a248e1528ea5a374640182955f4793d3f">getPacket</a>();
+<a name="l00155"></a>00155 
+<a name="l00156"></a><a class="code" href="classBasePrefetcher.html#a1ea6e3ce1b4860ce7b2da36b169e6ff5">00156</a>     <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a1ea6e3ce1b4860ce7b2da36b169e6ff5">havePending</a>()
+<a name="l00157"></a>00157     {
+<a name="l00158"></a>00158         <span class="keywordflow">return</span> !<a class="code" href="classBasePrefetcher.html#acdef622ce8eca64ce81e25e37f0bc22e">pf</a>.empty();
+<a name="l00159"></a>00159     }
+<a name="l00160"></a>00160 
+<a name="l00161"></a><a class="code" href="classBasePrefetcher.html#a7b66a659d072bb2b2e105351949f7b2e">00161</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBasePrefetcher.html#a7b66a659d072bb2b2e105351949f7b2e">nextPrefetchReadyTime</a>()
+<a name="l00162"></a>00162     {
+<a name="l00163"></a>00163         <span class="keywordflow">return</span> <a class="code" href="classBasePrefetcher.html#acdef622ce8eca64ce81e25e37f0bc22e">pf</a>.empty() ? <a class="code" href="base_2types_8hh.html#abe940b1b328825e234da719447e15ca5">MaxTick</a> : <a class="code" href="classBasePrefetcher.html#acdef622ce8eca64ce81e25e37f0bc22e">pf</a>.front().tick;
+<a name="l00164"></a>00164     }
+<a name="l00165"></a>00165 
+<a name="l00166"></a>00166     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBasePrefetcher.html#a3db7131bcae7e87e8146195a6e8be817">calculatePrefetch</a>(<a class="code" href="classPacket.html">PacketPtr</a> &amp;pkt,
+<a name="l00167"></a>00167                                    <a class="code" href="classstd_1_1list.html">std::list&lt;Addr&gt;</a> &amp;addresses,
+<a name="l00168"></a>00168                                    <a class="code" href="classstd_1_1list.html">std::list&lt;Cycles&gt;</a> &amp;delays) = 0;
+<a name="l00169"></a>00169 
+<a name="l00170"></a>00170     <a class="code" href="classstd_1_1list.html">std::list&lt;DeferredPacket&gt;::iterator</a> <a class="code" href="classBasePrefetcher.html#a50ff64f84defcdcd4e1ecc3f7df52af1">inPrefetch</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> address, <span class="keywordtype">bool</span> is_secure);
+<a name="l00171"></a>00171 
+<a name="l00175"></a>00175     <span class="keywordtype">bool</span> <a class="code" href="classBasePrefetcher.html#a0092f15516ff429fb7437fd21747fbf5">samePage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#aa4c45773b9b358324d349233bf954418">b</a>);
+<a name="l00176"></a>00176  <span class="keyword">public</span>:
+<a name="l00177"></a>00177     <span class="keyword">const</span> <a class="code" href="classBasePrefetcher.html#a46661f02a5642b04fd4e12f645ad9c5c">Params</a>*
+<a name="l00178"></a><a class="code" href="classBasePrefetcher.html#acd3c3feb78ae7a8f88fe0f110a718dff">00178</a>     <a class="code" href="classBasePrefetcher.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00179"></a>00179 <span class="keyword">    </span>{
+<a name="l00180"></a>00180         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classBasePrefetcher.html#a46661f02a5642b04fd4e12f645ad9c5c">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00181"></a>00181     }
+<a name="l00182"></a>00182 
+<a name="l00183"></a>00183 };
+<a name="l00184"></a>00184 <span class="preprocessor">#endif //__MEM_CACHE_PREFETCH_BASE_PREFETCHER_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

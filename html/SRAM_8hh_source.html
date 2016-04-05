@@ -1,0 +1,153 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/network/orion/Buffer/SRAM.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/network/orion/Buffer/SRAM.hh</h1><a href="SRAM_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2009 Princeton University</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2009 The Regents of the University of California</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00007"></a>00007 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00008"></a>00008 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00009"></a>00009 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00010"></a>00010 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00011"></a>00011 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00012"></a>00012 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00013"></a>00013 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00014"></a>00014 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00015"></a>00015 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00018"></a>00018 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00019"></a>00019 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00020"></a>00020 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00021"></a>00021 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00022"></a>00022 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00023"></a>00023 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00024"></a>00024 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00025"></a>00025 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00026"></a>00026 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00027"></a>00027 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * Authors:  Hangsheng Wang (Orion 1.0, Princeton)</span>
+<a name="l00030"></a>00030 <span class="comment"> *           Xinping Zhu (Orion 1.0, Princeton)</span>
+<a name="l00031"></a>00031 <span class="comment"> *           Xuning Chen (Orion 1.0, Princeton)</span>
+<a name="l00032"></a>00032 <span class="comment"> *           Bin Li (Orion 2.0, Princeton)</span>
+<a name="l00033"></a>00033 <span class="comment"> *           Kambiz Samadi (Orion 2.0, UC San Diego)</span>
+<a name="l00034"></a>00034 <span class="comment"> */</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="preprocessor">#ifndef __SRAM_H__</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define __SRAM_H__</span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="OrionConfig_8hh.html">mem/ruby/network/orion/OrionConfig.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="TechParameter_8hh.html">mem/ruby/network/orion/TechParameter.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="Type_8hh.html">mem/ruby/network/orion/Type.hh</a>&quot;</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="keyword">class </span><a class="code" href="classOutdrvUnit.html">OutdrvUnit</a>;
+<a name="l00044"></a>00044 <span class="keyword">class </span><a class="code" href="classAmpUnit.html">AmpUnit</a>;
+<a name="l00045"></a>00045 <span class="keyword">class </span><a class="code" href="classBitlineUnit.html">BitlineUnit</a>;
+<a name="l00046"></a>00046 <span class="keyword">class </span><a class="code" href="classMemUnit.html">MemUnit</a>;
+<a name="l00047"></a>00047 <span class="keyword">class </span><a class="code" href="classPrechargeUnit.html">PrechargeUnit</a>;
+<a name="l00048"></a>00048 <span class="keyword">class </span><a class="code" href="classWordlineUnit.html">WordlineUnit</a>;
+<a name="l00049"></a>00049 <span class="keyword">class </span><a class="code" href="classDecoderUnit.html">DecoderUnit</a>;
+<a name="l00050"></a>00050 
+<a name="l00051"></a><a class="code" href="classSRAM.html">00051</a> <span class="keyword">class </span><a class="code" href="classSRAM.html">SRAM</a>
+<a name="l00052"></a>00052 {
+<a name="l00053"></a>00053   <span class="keyword">public</span>:
+<a name="l00054"></a>00054     <a class="code" href="classSRAM.html#a44e5766c0ab3b73832cb445b67ef48ed">SRAM</a>(
+<a name="l00055"></a>00055       <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> num_entry_,
+<a name="l00056"></a>00056       <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> line_width_,
+<a name="l00057"></a>00057       <span class="keywordtype">bool</span> is_fifo_,
+<a name="l00058"></a>00058       <span class="keywordtype">bool</span> is_outdrv_,
+<a name="l00059"></a>00059       <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> num_read_port_,
+<a name="l00060"></a>00060       <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> num_write_port_,
+<a name="l00061"></a>00061       <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> num_data_end_,
+<a name="l00062"></a>00062       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; rowdec_model_str_,
+<a name="l00063"></a>00063       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; wl_model_str_,
+<a name="l00064"></a>00064       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; bl_pre_model_str_,
+<a name="l00065"></a>00065       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; mem_model_str_,
+<a name="l00066"></a>00066       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; bl_model_str_,
+<a name="l00067"></a>00067       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; amp_model_str_,
+<a name="l00068"></a>00068       <span class="keyword">const</span> <span class="keywordtype">string</span>&amp; outdrv_model_str_,
+<a name="l00069"></a>00069       <span class="keyword">const</span> <a class="code" href="classTechParameter.html">TechParameter</a>* tech_param_ptr_
+<a name="l00070"></a>00070     );
+<a name="l00071"></a>00071     <a class="code" href="classSRAM.html#a28d511ec0a18d1bf56ad56afad48d349">~SRAM</a>();
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073   <span class="keyword">public</span>:
+<a name="l00074"></a><a class="code" href="classSRAM.html#a3331c2b6445f43552b749da69ea9a252">00074</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a3331c2b6445f43552b749da69ea9a252">get_line_width</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSRAM.html#add4c54b54475120d0e1547d3a9c48f44">m_line_width</a>; }
+<a name="l00075"></a><a class="code" href="classSRAM.html#a761fb745955331551770d0d323372db5">00075</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a761fb745955331551770d0d323372db5">get_num_data_end</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSRAM.html#ad874cacc5e9e8f63d86abf08c6c0519d">m_num_data_end</a>; }
+<a name="l00076"></a><a class="code" href="classSRAM.html#a1f89e3f79d1f83f22d8e03f7a132242f">00076</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a1f89e3f79d1f83f22d8e03f7a132242f">get_num_read_port</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSRAM.html#a0bf03d796dd95afdc5077aa3a1bef997">m_num_read_port</a>; }
+<a name="l00077"></a><a class="code" href="classSRAM.html#ae9eea5ec891e765e6bdb63618ba3181a">00077</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#ae9eea5ec891e765e6bdb63618ba3181a">get_num_write_port</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSRAM.html#a2c7430e3adc3731c7d4d7b23a12bc0e2">m_num_write_port</a>; }
+<a name="l00078"></a><a class="code" href="classSRAM.html#a19419ab4e6838e43d62657758e0821ff">00078</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a19419ab4e6838e43d62657758e0821ff">get_num_port</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<a class="code" href="classSRAM.html#a0bf03d796dd95afdc5077aa3a1bef997">m_num_read_port</a>+<a class="code" href="classSRAM.html#a2c7430e3adc3731c7d4d7b23a12bc0e2">m_num_write_port</a>); }
+<a name="l00079"></a><a class="code" href="classSRAM.html#aeae566aacd01a41f66fda87cb0fd9778">00079</a>     <span class="keywordtype">bool</span> <a class="code" href="classSRAM.html#aeae566aacd01a41f66fda87cb0fd9778">get_is_outdrv</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSRAM.html#abf268b469077bf0460d0043b68443b6a">m_is_outdrv</a>; }
+<a name="l00080"></a><a class="code" href="classSRAM.html#a870b30e2a9145eeda64c820e9f43c74e">00080</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a870b30e2a9145eeda64c820e9f43c74e">get_num_row</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSRAM.html#a291c35e9632031ebe307862c5c760519">m_num_entry</a>; }
+<a name="l00081"></a><a class="code" href="classSRAM.html#aeaeab0740a324ed17fdab95be3a01e27">00081</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#aeaeab0740a324ed17fdab95be3a01e27">get_num_col</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSRAM.html#add4c54b54475120d0e1547d3a9c48f44">m_line_width</a>; }
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083     <span class="keywordtype">double</span> <a class="code" href="classSRAM.html#a3308b493960fdd7d2a292786eaba976c">calc_e_read</a>(<span class="keywordtype">bool</span> is_max_) <span class="keyword">const</span>;
+<a name="l00084"></a>00084     <span class="keywordtype">double</span> <a class="code" href="classSRAM.html#a3ea79b0e93868572161314a61e384360">calc_e_write</a>(<span class="keywordtype">bool</span> is_max_) <span class="keyword">const</span>;
+<a name="l00085"></a>00085     <span class="keywordtype">double</span> <a class="code" href="classSRAM.html#aad1d8e72e5083614a20373b700754f6a">calc_i_static</a>() <span class="keyword">const</span>;
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087   <span class="keyword">private</span>:
+<a name="l00088"></a>00088     <span class="keywordtype">void</span> <a class="code" href="classSRAM.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090   <span class="keyword">private</span>:
+<a name="l00091"></a><a class="code" href="classSRAM.html#a291c35e9632031ebe307862c5c760519">00091</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a291c35e9632031ebe307862c5c760519">m_num_entry</a>;
+<a name="l00092"></a><a class="code" href="classSRAM.html#add4c54b54475120d0e1547d3a9c48f44">00092</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#add4c54b54475120d0e1547d3a9c48f44">m_line_width</a>;
+<a name="l00093"></a><a class="code" href="classSRAM.html#a6278bce84ca8f1587dbb706ad2d20012">00093</a>     <span class="keywordtype">bool</span> <a class="code" href="classSRAM.html#a6278bce84ca8f1587dbb706ad2d20012">m_is_fifo</a>;
+<a name="l00094"></a><a class="code" href="classSRAM.html#abf268b469077bf0460d0043b68443b6a">00094</a>     <span class="keywordtype">bool</span> <a class="code" href="classSRAM.html#abf268b469077bf0460d0043b68443b6a">m_is_outdrv</a>;
+<a name="l00095"></a><a class="code" href="classSRAM.html#a8c06cdb977d003e4002bcfb41e08cf07">00095</a>     <span class="keywordtype">string</span> <a class="code" href="classSRAM.html#a8c06cdb977d003e4002bcfb41e08cf07">m_rowdec_model_str</a>;
+<a name="l00096"></a><a class="code" href="classSRAM.html#ac4e3f087da06ff2021c091e3801d43d1">00096</a>     <span class="keywordtype">string</span> <a class="code" href="classSRAM.html#ac4e3f087da06ff2021c091e3801d43d1">m_wl_model_str</a>;
+<a name="l00097"></a><a class="code" href="classSRAM.html#ad05f5b41e577bbebf3a1cad993940983">00097</a>     <span class="keywordtype">string</span> <a class="code" href="classSRAM.html#ad05f5b41e577bbebf3a1cad993940983">m_bl_pre_model_str</a>;
+<a name="l00098"></a><a class="code" href="classSRAM.html#a95866e527392174ec4db91c75a1792f9">00098</a>     <span class="keywordtype">string</span> <a class="code" href="classSRAM.html#a95866e527392174ec4db91c75a1792f9">m_mem_model_str</a>;
+<a name="l00099"></a><a class="code" href="classSRAM.html#afb4f7a38ccbd67bd5279fb192bb51187">00099</a>     <span class="keywordtype">string</span> <a class="code" href="classSRAM.html#afb4f7a38ccbd67bd5279fb192bb51187">m_bl_model_str</a>;
+<a name="l00100"></a><a class="code" href="classSRAM.html#a8f2d65a26d51d3c2f8b9ba7527e5fb83">00100</a>     <span class="keywordtype">string</span> <a class="code" href="classSRAM.html#a8f2d65a26d51d3c2f8b9ba7527e5fb83">m_amp_model_str</a>;
+<a name="l00101"></a><a class="code" href="classSRAM.html#a795b1240cc7fd86676c293dadd7617f9">00101</a>     <span class="keywordtype">string</span> <a class="code" href="classSRAM.html#a795b1240cc7fd86676c293dadd7617f9">m_outdrv_model_str</a>;
+<a name="l00102"></a><a class="code" href="classSRAM.html#a11d1644aa2bfe0e16783dface6fadf13">00102</a>     <span class="keyword">const</span> <a class="code" href="classTechParameter.html">TechParameter</a>* <a class="code" href="classSRAM.html#a11d1644aa2bfe0e16783dface6fadf13">m_tech_param_ptr</a>;
+<a name="l00103"></a>00103 
+<a name="l00104"></a><a class="code" href="classSRAM.html#ae68c0641bad3a869a51391378bd4e7b9">00104</a>     <a class="code" href="classOutdrvUnit.html">OutdrvUnit</a>* <a class="code" href="classSRAM.html#ae68c0641bad3a869a51391378bd4e7b9">m_outdrv_unit_ptr</a>;
+<a name="l00105"></a><a class="code" href="classSRAM.html#a782cdf3f8bfe374a54a57282e4e9f21d">00105</a>     <a class="code" href="classAmpUnit.html">AmpUnit</a>* <a class="code" href="classSRAM.html#a782cdf3f8bfe374a54a57282e4e9f21d">m_amp_unit_ptr</a>;
+<a name="l00106"></a><a class="code" href="classSRAM.html#a6114e5cc948c4e37dd24fe594a2e9e00">00106</a>     <a class="code" href="classBitlineUnit.html">BitlineUnit</a>* <a class="code" href="classSRAM.html#a6114e5cc948c4e37dd24fe594a2e9e00">m_bl_unit_ptr</a>;
+<a name="l00107"></a><a class="code" href="classSRAM.html#ae82e83ce5d903907de04ffbb9cf0c1c4">00107</a>     <a class="code" href="classMemUnit.html">MemUnit</a>* <a class="code" href="classSRAM.html#ae82e83ce5d903907de04ffbb9cf0c1c4">m_mem_unit_ptr</a>;
+<a name="l00108"></a><a class="code" href="classSRAM.html#a8dee760fb2038ae2ac5d06bec679567b">00108</a>     <a class="code" href="classPrechargeUnit.html">PrechargeUnit</a>* <a class="code" href="classSRAM.html#a8dee760fb2038ae2ac5d06bec679567b">m_bl_pre_unit_ptr</a>;
+<a name="l00109"></a><a class="code" href="classSRAM.html#a88ab323dc1aabb663a49f131fd43a549">00109</a>     <a class="code" href="classWordlineUnit.html">WordlineUnit</a>* <a class="code" href="classSRAM.html#a88ab323dc1aabb663a49f131fd43a549">m_wl_unit_ptr</a>;
+<a name="l00110"></a><a class="code" href="classSRAM.html#af248bbf358f029f6c226068df2f12a76">00110</a>     <a class="code" href="classDecoderUnit.html">DecoderUnit</a>* <a class="code" href="classSRAM.html#af248bbf358f029f6c226068df2f12a76">m_rowdec_unit_ptr</a>;
+<a name="l00111"></a>00111 
+<a name="l00112"></a><a class="code" href="classSRAM.html#a0bf03d796dd95afdc5077aa3a1bef997">00112</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a0bf03d796dd95afdc5077aa3a1bef997">m_num_read_port</a>;
+<a name="l00113"></a><a class="code" href="classSRAM.html#a2c7430e3adc3731c7d4d7b23a12bc0e2">00113</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#a2c7430e3adc3731c7d4d7b23a12bc0e2">m_num_write_port</a>;
+<a name="l00114"></a><a class="code" href="classSRAM.html#ad874cacc5e9e8f63d86abf08c6c0519d">00114</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#ad874cacc5e9e8f63d86abf08c6c0519d">m_num_data_end</a>;
+<a name="l00115"></a>00115 
+<a name="l00116"></a><a class="code" href="classSRAM.html#af0ba7be4a4c39caf7f8108d89cdda070">00116</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSRAM.html#af0ba7be4a4c39caf7f8108d89cdda070">m_rowdec_width</a>;
+<a name="l00117"></a>00117 };
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119 <span class="preprocessor">#endif</span>
+<a name="l00120"></a>00120 <span class="preprocessor"></span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

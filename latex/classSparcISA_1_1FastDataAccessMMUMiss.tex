@@ -1,0 +1,103 @@
+\hypertarget{classSparcISA_1_1FastDataAccessMMUMiss}{
+\section{クラス FastDataAccessMMUMiss}
+\label{classSparcISA_1_1FastDataAccessMMUMiss}\index{SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}}
+}
+
+
+{\ttfamily \#include $<$faults.hh$>$}FastDataAccessMMUMissに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classSparcISA_1_1FastDataAccessMMUMiss}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSparcISA_1_1FastDataAccessMMUMiss_ae1de78aee4b4b1ac010519d262644296}{FastDataAccessMMUMiss} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr)
+\item 
+\hyperlink{classSparcISA_1_1FastDataAccessMMUMiss_ae2db95fae027a44a26e71d3a874f61ae}{FastDataAccessMMUMiss} ()
+\item 
+void \hyperlink{classSparcISA_1_1FastDataAccessMMUMiss_a2bd783b42262278d41157d428e1f8d6f}{invoke} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classRefCountingPtr}{StaticInstPtr} inst=\hyperlink{classStaticInst_aa793d9793af735f09096369fb17567b6}{StaticInst::nullStaticInstPtr})
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classSparcISA_1_1FastDataAccessMMUMiss_a9f933b300ef63eea367ca82f8da31025}{vaddr}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classSparcISA_1_1FastDataAccessMMUMiss_ae1de78aee4b4b1ac010519d262644296}{
+\index{SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}!FastDataAccessMMUMiss@{FastDataAccessMMUMiss}}
+\index{FastDataAccessMMUMiss@{FastDataAccessMMUMiss}!SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}}
+\subsubsection[{FastDataAccessMMUMiss}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FastDataAccessMMUMiss} ({\bf Addr} {\em addr})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSparcISA_1_1FastDataAccessMMUMiss_ae1de78aee4b4b1ac010519d262644296}
+
+
+
+\begin{DoxyCode}
+218                                      : vaddr(addr)
+219     {}
+\end{DoxyCode}
+\hypertarget{classSparcISA_1_1FastDataAccessMMUMiss_ae2db95fae027a44a26e71d3a874f61ae}{
+\index{SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}!FastDataAccessMMUMiss@{FastDataAccessMMUMiss}}
+\index{FastDataAccessMMUMiss@{FastDataAccessMMUMiss}!SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}}
+\subsubsection[{FastDataAccessMMUMiss}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FastDataAccessMMUMiss} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSparcISA_1_1FastDataAccessMMUMiss_ae2db95fae027a44a26e71d3a874f61ae}
+
+
+
+\begin{DoxyCode}
+220                             : vaddr(0)
+221     {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classSparcISA_1_1FastDataAccessMMUMiss_a2bd783b42262278d41157d428e1f8d6f}{
+\index{SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}!invoke@{invoke}}
+\index{invoke@{invoke}!SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}}
+\subsubsection[{invoke}]{\setlength{\rightskip}{0pt plus 5cm}void invoke ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf StaticInstPtr} {\em inst} = {\ttfamily {\bf StaticInst::nullStaticInstPtr}})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSparcISA_1_1FastDataAccessMMUMiss_a2bd783b42262278d41157d428e1f8d6f}
+
+
+\hyperlink{classSparcISA_1_1SparcFaultBase_a2bd783b42262278d41157d428e1f8d6f}{SparcFaultBase}を再定義しています。
+
+
+\begin{DoxyCode}
+638 {
+639     if (FullSystem) {
+640         SparcFaultBase::invoke(tc, inst);
+641         return;
+642     }
+643 
+644     Process *p = tc->getProcessPtr();
+645     TlbEntry entry;
+646     bool success = p->pTable->lookup(vaddr, entry);
+647     if (!success) {
+648         if (p->fixupStackFault(vaddr))
+649             success = p->pTable->lookup(vaddr, entry);
+650     }
+651     if (!success) {
+652         panic("Tried to access unmapped address %#x.\n", vaddr);
+653     } else {
+654         Addr alignedVaddr = p->pTable->pageAlign(vaddr);
+655         tc->getDTBPtr()->insert(alignedVaddr, 0 /*partition id*/,
+656                 p->M5_pid /*context id*/, false, entry.pte);
+657     }
+658 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classSparcISA_1_1FastDataAccessMMUMiss_a9f933b300ef63eea367ca82f8da31025}{
+\index{SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}!vaddr@{vaddr}}
+\index{vaddr@{vaddr}!SparcISA::FastDataAccessMMUMiss@{SparcISA::FastDataAccessMMUMiss}}
+\subsubsection[{vaddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf vaddr}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classSparcISA_1_1FastDataAccessMMUMiss_a9f933b300ef63eea367ca82f8da31025}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/sparc/\hyperlink{arch_2sparc_2faults_8hh}{faults.hh}\item 
+arch/sparc/\hyperlink{arch_2sparc_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

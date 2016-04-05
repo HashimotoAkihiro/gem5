@@ -1,0 +1,142 @@
+\hypertarget{arch_2mips_2linux_2process_8cc}{
+\section{arch/mips/linux/process.cc}
+\label{arch_2mips_2linux_2process_8cc}\index{arch/mips/linux/process.cc@{arch/mips/linux/process.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/mips/linux/linux.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/mips/linux/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/mips/isa\_\-traits.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/thread\_\-context.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/SyscallVerbose.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}kern/linux/linux.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/eventq.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/syscall\_\-emul.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/system.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2mips_2linux_2process_8cc_a9b3287e154144b39ade23cc40ad37808}{unameFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target uname() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2mips_2linux_2process_8cc_a630eaf257899efca58b23c9e94982653}{sys\_\-getsysinfoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2mips_2linux_2process_8cc_a636d327c8e0236653ee0b1a94f1d92f9}{sys\_\-setsysinfoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target sys\_\-setsysinfo() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2mips_2linux_2process_8cc_a99a0685db04311a1e5fe5ac14280f96f}{setThreadAreaFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{arch_2mips_2linux_2process_8cc_a99a0685db04311a1e5fe5ac14280f96f}{
+\index{arch/mips/linux/process.cc@{arch/mips/linux/process.cc}!setThreadAreaFunc@{setThreadAreaFunc}}
+\index{setThreadAreaFunc@{setThreadAreaFunc}!arch/mips/linux/process.cc@{arch/mips/linux/process.cc}}
+\subsubsection[{setThreadAreaFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} setThreadAreaFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2mips_2linux_2process_8cc_a99a0685db04311a1e5fe5ac14280f96f}
+
+
+
+\begin{DoxyCode}
+131 {
+132     int index = 0;
+133     Addr addr = process->getSyscallArg(tc, index);
+134     tc->setMiscRegNoEffect(MISCREG_TP_VALUE, addr);
+135     return 0;
+136 }
+\end{DoxyCode}
+\hypertarget{arch_2mips_2linux_2process_8cc_a630eaf257899efca58b23c9e94982653}{
+\index{arch/mips/linux/process.cc@{arch/mips/linux/process.cc}!sys\_\-getsysinfoFunc@{sys\_\-getsysinfoFunc}}
+\index{sys\_\-getsysinfoFunc@{sys\_\-getsysinfoFunc}!arch/mips/linux/process.cc@{arch/mips/linux/process.cc}}
+\subsubsection[{sys\_\-getsysinfoFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} sys\_\-getsysinfoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2mips_2linux_2process_8cc_a630eaf257899efca58b23c9e94982653}
+Target sys\_\-getsysyinfo() handler. Even though this call is borrowed from \hyperlink{classTru64}{Tru64}, the subcases that get used appear to be different in practice from those used by \hyperlink{classTru64}{Tru64} processes. 
+
+
+\begin{DoxyCode}
+72 {
+73     int index = 0;
+74     unsigned op = process->getSyscallArg(tc, index);
+75     unsigned bufPtr = process->getSyscallArg(tc, index);
+76     // unsigned nbytes = process->getSyscallArg(tc, index);
+77 
+78     switch (op) {
+79       case 45:
+80         { 
+81             // GSI_IEEE_FP_CONTROL
+82             TypedBufferArg<uint64_t> fpcr(bufPtr);
+83             // I don't think this exactly matches the HW FPCR
+84             *fpcr = 0;
+85             fpcr.copyOut(tc->getMemProxy());
+86             return 0;
+87         }
+88       default:
+89         cerr << "sys_getsysinfo: unknown op " << op << endl;
+90         abort();
+91         break;
+92     }
+93 
+94     return 1;
+95 }
+\end{DoxyCode}
+\hypertarget{arch_2mips_2linux_2process_8cc_a636d327c8e0236653ee0b1a94f1d92f9}{
+\index{arch/mips/linux/process.cc@{arch/mips/linux/process.cc}!sys\_\-setsysinfoFunc@{sys\_\-setsysinfoFunc}}
+\index{sys\_\-setsysinfoFunc@{sys\_\-setsysinfoFunc}!arch/mips/linux/process.cc@{arch/mips/linux/process.cc}}
+\subsubsection[{sys\_\-setsysinfoFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} sys\_\-setsysinfoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2mips_2linux_2process_8cc_a636d327c8e0236653ee0b1a94f1d92f9}
+
+
+Target sys\_\-setsysinfo() handler. 
+
+
+\begin{DoxyCode}
+101 {
+102     int index = 0;
+103     unsigned op = process->getSyscallArg(tc, index);
+104     Addr bufPtr = process->getSyscallArg(tc, index);
+105     // unsigned nbytes = process->getSyscallArg(tc, index);
+106 
+107     switch (op) {
+108 
+109       case 14:
+110         {
+111             // SSI_IEEE_FP_CONTROL
+112             TypedBufferArg<uint64_t> fpcr(bufPtr);
+113             // I don't think this exactly matches the HW FPCR
+114             fpcr.copyIn(tc->getMemProxy());
+115             DPRINTFR(SyscallVerbose, "sys_setsysinfo(SSI_IEEE_FP_CONTROL): "
+116                    " setting FPCR to 0x%x\n", gtoh(*(uint64_t*)fpcr));
+117             return 0;
+118         }
+119       default:
+120         cerr << "sys_setsysinfo: unknown op " << op << endl;
+121         abort();
+122         break;
+123     }
+124 
+125     return 1;
+126 }
+\end{DoxyCode}
+\hypertarget{arch_2mips_2linux_2process_8cc_a9b3287e154144b39ade23cc40ad37808}{
+\index{arch/mips/linux/process.cc@{arch/mips/linux/process.cc}!unameFunc@{unameFunc}}
+\index{unameFunc@{unameFunc}!arch/mips/linux/process.cc@{arch/mips/linux/process.cc}}
+\subsubsection[{unameFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} unameFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2mips_2linux_2process_8cc_a9b3287e154144b39ade23cc40ad37808}
+
+
+Target uname() handler. 
+
+
+\begin{DoxyCode}
+52 {
+53     int index = 0;
+54     TypedBufferArg<Linux::utsname> name(process->getSyscallArg(tc, index));
+55 
+56     strcpy(name->sysname, "Linux");
+57     strcpy(name->nodename,"sim.gem5.org");
+58     strcpy(name->release, "3.0.0");
+59     strcpy(name->version, "#1 Mon Aug 18 11:32:15 EDT 2003");
+60     strcpy(name->machine, "mips");
+61 
+62     name.copyOut(tc->getMemProxy());
+63     return 0;
+64 }
+\end{DoxyCode}

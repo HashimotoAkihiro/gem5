@@ -1,0 +1,157 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/page_table.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/page_table.hh</h1><a href="page__table_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2003 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Steve Reinhardt</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00036"></a>00036 <span class="preprocessor">#ifndef __MEM_PAGE_TABLE_HH__</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_PAGE_TABLE_HH__</span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;arch/isa_traits.hh&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;arch/tlb.hh&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="hashmap_8hh.html">base/hashmap.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="request_8hh.html">mem/request.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="serialize_8hh.html">sim/serialize.hh</a>&quot;</span>
+<a name="l00048"></a>00048 
+<a name="l00052"></a><a class="code" href="classPageTable.html">00052</a> <span class="keyword">class </span><a class="code" href="classPageTable.html">PageTable</a>
+<a name="l00053"></a>00053 {
+<a name="l00054"></a>00054   <span class="keyword">protected</span>:
+<a name="l00055"></a><a class="code" href="classPageTable.html#af3d8a3d9e644cad85356d24d9c324628">00055</a>     <span class="keyword">typedef</span> m5::hash_map&lt;Addr, TheISA::TlbEntry&gt; <a class="code" href="classPageTable.html#af3d8a3d9e644cad85356d24d9c324628">PTable</a>;
+<a name="l00056"></a><a class="code" href="classPageTable.html#ae7a302b2a02308ebbb6a164d74a9b2fa">00056</a>     <span class="keyword">typedef</span> PTable::iterator <a class="code" href="classPageTable.html#ae7a302b2a02308ebbb6a164d74a9b2fa">PTableItr</a>;
+<a name="l00057"></a><a class="code" href="classPageTable.html#af6a1d4146effcb66a42a1a50cdedd71c">00057</a>     <a class="code" href="classPageTable.html#af3d8a3d9e644cad85356d24d9c324628">PTable</a> <a class="code" href="classPageTable.html#af6a1d4146effcb66a42a1a50cdedd71c">pTable</a>;
+<a name="l00058"></a>00058 
+<a name="l00059"></a><a class="code" href="structPageTable_1_1cacheElement.html">00059</a>     <span class="keyword">struct </span><a class="code" href="structPageTable_1_1cacheElement.html">cacheElement</a> {
+<a name="l00060"></a><a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">00060</a>         <span class="keywordtype">bool</span> <a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a>;
+<a name="l00061"></a><a class="code" href="structPageTable_1_1cacheElement.html#a9f933b300ef63eea367ca82f8da31025">00061</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPageTable_1_1cacheElement.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>;
+<a name="l00062"></a><a class="code" href="structPageTable_1_1cacheElement.html#ad4a78f29e7f4b676825756c275a61918">00062</a>         TheISA::TlbEntry <a class="code" href="structPageTable_1_1cacheElement.html#ad4a78f29e7f4b676825756c275a61918">entry</a>;
+<a name="l00063"></a>00063     };
+<a name="l00064"></a>00064 
+<a name="l00065"></a><a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">00065</a>     <span class="keyword">struct </span><a class="code" href="structPageTable_1_1cacheElement.html">cacheElement</a> <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[3];
+<a name="l00066"></a>00066 
+<a name="l00067"></a><a class="code" href="classPageTable.html#a9e5e4d8007dd2c921971af2a58f86adc">00067</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classPageTable.html#a9e5e4d8007dd2c921971af2a58f86adc">pageSize</a>;
+<a name="l00068"></a><a class="code" href="classPageTable.html#a646af22c789b99dbdef2d5d867b6257a">00068</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classPageTable.html#a646af22c789b99dbdef2d5d867b6257a">offsetMask</a>;
+<a name="l00069"></a>00069 
+<a name="l00070"></a><a class="code" href="classPageTable.html#ae7231756748632307a03aff2b0d3fd8d">00070</a>     <span class="keyword">const</span> uint64_t <a class="code" href="classPageTable.html#ae7231756748632307a03aff2b0d3fd8d">pid</a>;
+<a name="l00071"></a><a class="code" href="classPageTable.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">00071</a>     <span class="keyword">const</span> std::string <a class="code" href="classPageTable.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>;
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073   <span class="keyword">public</span>:
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075     <a class="code" href="classPageTable.html#a0ba607685599040207fa0f5834252a97">PageTable</a>(<span class="keyword">const</span> std::string &amp;__name, uint64_t _pid,
+<a name="l00076"></a>00076               <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> _pageSize = <a class="code" href="namespaceAlphaISA.html#a06fc87d81c62e9abb8790b6e5713c55babe0c83362ff9a394bc07b0e26f089b83">TheISA::VMPageSize</a>);
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078     <a class="code" href="classPageTable.html#ac8d0a10aebf4985568764273ad64d267">~PageTable</a>();
+<a name="l00079"></a>00079 
+<a name="l00080"></a>00080     <span class="comment">// for DPRINTF compatibility</span>
+<a name="l00081"></a><a class="code" href="classPageTable.html#a6490f765a824ced1cc94979609fe7e07">00081</a>     <span class="keyword">const</span> std::string <a class="code" href="classPageTable.html#a6490f765a824ced1cc94979609fe7e07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classPageTable.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>; }
+<a name="l00082"></a>00082 
+<a name="l00083"></a><a class="code" href="classPageTable.html#a38247c4bd6655c6c275b578bd72e63e4">00083</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classPageTable.html#a38247c4bd6655c6c275b578bd72e63e4">pageAlign</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>)  { <span class="keywordflow">return</span> (a &amp; ~<a class="code" href="classPageTable.html#a646af22c789b99dbdef2d5d867b6257a">offsetMask</a>); }
+<a name="l00084"></a><a class="code" href="classPageTable.html#aea9a0188c4082f2d04b870ee4d03103c">00084</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classPageTable.html#aea9a0188c4082f2d04b870ee4d03103c">pageOffset</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>) { <span class="keywordflow">return</span> (a &amp;  <a class="code" href="classPageTable.html#a646af22c789b99dbdef2d5d867b6257a">offsetMask</a>); }
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086     <span class="keywordtype">void</span> <a class="code" href="classPageTable.html#aff59f07ef2928facc67674a304b1e7e9">map</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> paddr, int64_t size, <span class="keywordtype">bool</span> clobber = <span class="keyword">false</span>);
+<a name="l00087"></a>00087     <span class="keywordtype">void</span> <a class="code" href="classPageTable.html#a42230248f7e6b36d1d039334dfc8c73b">remap</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, int64_t size, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> new_vaddr);
+<a name="l00088"></a>00088     <span class="keywordtype">void</span> <a class="code" href="classPageTable.html#a8655228481877dd15f31d7657b7636f0">unmap</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, int64_t size);
+<a name="l00089"></a>00089 
+<a name="l00096"></a>00096     <span class="keywordtype">bool</span> <a class="code" href="classPageTable.html#ab21bd7c6a258cbbe96db22e978a0ee70">isUnmapped</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, int64_t size);
+<a name="l00097"></a>00097 
+<a name="l00103"></a>00103     <span class="keywordtype">bool</span> <a class="code" href="classPageTable.html#a5a9bd017a274b26bec6d93084a06a786">lookup</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, TheISA::TlbEntry &amp;entry);
+<a name="l00104"></a>00104 
+<a name="l00111"></a>00111     <span class="keywordtype">bool</span> <a class="code" href="classPageTable.html#a1fa58423b982a3454aadc9b5e932e9ed">translate</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;paddr);
+<a name="l00112"></a>00112 
+<a name="l00118"></a><a class="code" href="classPageTable.html#a72077eb2c400826c0a18b845a7be0e6a">00118</a>     <span class="keywordtype">bool</span> <a class="code" href="classPageTable.html#a72077eb2c400826c0a18b845a7be0e6a">translate</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>) { <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> dummy; <span class="keywordflow">return</span> <a class="code" href="classPageTable.html#a72077eb2c400826c0a18b845a7be0e6a">translate</a>(vaddr, dummy); }
+<a name="l00119"></a>00119 
+<a name="l00125"></a>00125     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classPageTable.html#a1fa58423b982a3454aadc9b5e932e9ed">translate</a>(<a class="code" href="classRequest.html">RequestPtr</a> req);
+<a name="l00126"></a>00126 
+<a name="l00132"></a><a class="code" href="classPageTable.html#ad12e4d4887c4e62c2c8236936053dcd5">00132</a>     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classPageTable.html#ad12e4d4887c4e62c2c8236936053dcd5">updateCache</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, TheISA::TlbEntry entry)
+<a name="l00133"></a>00133     {
+<a name="l00134"></a>00134         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[2].<a class="code" href="structPageTable_1_1cacheElement.html#ad4a78f29e7f4b676825756c275a61918">entry</a> = <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].<a class="code" href="structPageTable_1_1cacheElement.html#ad4a78f29e7f4b676825756c275a61918">entry</a>;
+<a name="l00135"></a>00135         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[2].<a class="code" href="structPageTable_1_1cacheElement.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a> = <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].<a class="code" href="structPageTable_1_1cacheElement.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>;
+<a name="l00136"></a>00136         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[2].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a>;
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].<a class="code" href="structPageTable_1_1cacheElement.html#ad4a78f29e7f4b676825756c275a61918">entry</a> = <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].<a class="code" href="structPageTable_1_1cacheElement.html#ad4a78f29e7f4b676825756c275a61918">entry</a>;
+<a name="l00139"></a>00139         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].<a class="code" href="structPageTable_1_1cacheElement.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a> = <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].<a class="code" href="structPageTable_1_1cacheElement.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>;
+<a name="l00140"></a>00140         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a>;
+<a name="l00141"></a>00141 
+<a name="l00142"></a>00142         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].<a class="code" href="structPageTable_1_1cacheElement.html#ad4a78f29e7f4b676825756c275a61918">entry</a> = entry;
+<a name="l00143"></a>00143         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].<a class="code" href="structPageTable_1_1cacheElement.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a> = vaddr;
+<a name="l00144"></a>00144         <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">true</span>;
+<a name="l00145"></a>00145     }
+<a name="l00146"></a>00146 
+<a name="l00151"></a><a class="code" href="classPageTable.html#a7a34214b4d368d09f3dee2ee3670b520">00151</a>     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classPageTable.html#a7a34214b4d368d09f3dee2ee3670b520">eraseCacheEntry</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>)
+<a name="l00152"></a>00152     {
+<a name="l00153"></a>00153         <span class="comment">// Invalidate cached entries if necessary</span>
+<a name="l00154"></a>00154         <span class="keywordflow">if</span> (<a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].valid &amp;&amp; <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].vaddr == vaddr) {
+<a name="l00155"></a>00155             <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[0].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">false</span>;
+<a name="l00156"></a>00156         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].valid &amp;&amp; <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].vaddr == vaddr) {
+<a name="l00157"></a>00157             <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[1].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">false</span>;
+<a name="l00158"></a>00158         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[2].valid &amp;&amp; <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[2].vaddr == vaddr) {
+<a name="l00159"></a>00159             <a class="code" href="classPageTable.html#a6eb3f78e407d321f98bdaacc9d2768a6">pTableCache</a>[2].<a class="code" href="structPageTable_1_1cacheElement.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">false</span>;
+<a name="l00160"></a>00160         }
+<a name="l00161"></a>00161     }
+<a name="l00162"></a>00162 
+<a name="l00163"></a>00163     <span class="keywordtype">void</span> <a class="code" href="classPageTable.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00164"></a>00164 
+<a name="l00165"></a>00165     <span class="keywordtype">void</span> <a class="code" href="classPageTable.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00166"></a>00166 };
+<a name="l00167"></a>00167 
+<a name="l00168"></a>00168 <span class="preprocessor">#endif // __MEM_PAGE_TABLE_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

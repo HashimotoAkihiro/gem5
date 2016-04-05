@@ -1,0 +1,698 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/lsq_impl.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/lsq_impl.hh</h1><a href="lsq__impl_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011-2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2005-2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Korey Sewell</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __CPU_O3_LSQ_IMPL_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_LSQ_IMPL_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;algorithm&gt;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="lsq_8hh.html">cpu/o3/lsq.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;debug/Drain.hh&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;debug/Fetch.hh&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;debug/LSQ.hh&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;debug/Writeback.hh&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;params/DerivO3CPU.hh&quot;</span>
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057 <span class="keyword">using namespace </span>std;
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00060"></a><a class="code" href="classLSQ.html#a268c66c8da0a95e3c0778a5e454ba669">00060</a> <a class="code" href="classLSQ.html#a268c66c8da0a95e3c0778a5e454ba669">LSQ&lt;Impl&gt;::LSQ</a>(O3CPU *cpu_ptr, IEW *iew_ptr, DerivO3CPUParams *params)
+<a name="l00061"></a>00061     : cpu(cpu_ptr), iewStage(iew_ptr),
+<a name="l00062"></a>00062       LQEntries(params-&gt;LQEntries),
+<a name="l00063"></a>00063       SQEntries(params-&gt;SQEntries),
+<a name="l00064"></a>00064       numThreads(params-&gt;numThreads),
+<a name="l00065"></a>00065       retryTid(-1)
+<a name="l00066"></a>00066 {
+<a name="l00067"></a>00067     assert(<a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a> &gt; 0 &amp;&amp; <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a> &lt;= <a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>);
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069     <span class="comment">//**********************************************/</span>
+<a name="l00070"></a>00070     <span class="comment">//************ Handle SMT Parameters ***********/</span>
+<a name="l00071"></a>00071     <span class="comment">//**********************************************/</span>
+<a name="l00072"></a>00072     std::string policy = params-&gt;smtLSQPolicy;
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074     <span class="comment">//Convert string to lowercase</span>
+<a name="l00075"></a>00075     std::transform(policy.begin(), policy.end(), policy.begin(),
+<a name="l00076"></a>00076                    (int(*)(int)) tolower);
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078     <span class="comment">//Figure out fetch policy</span>
+<a name="l00079"></a>00079     <span class="keywordflow">if</span> (policy == <span class="stringliteral">&quot;dynamic&quot;</span>) {
+<a name="l00080"></a>00080         <a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> = <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a96535b1625776102bcc13f7dfb598dcb">Dynamic</a>;
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082         <a class="code" href="classLSQ.html#ad2f4fd027fe71a87d5ee2d798ec19ac3">maxLQEntries</a> = <a class="code" href="classLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a>;
+<a name="l00083"></a>00083         <a class="code" href="classLSQ.html#a0e9eef7cd7598f554f1f89c35cb08128">maxSQEntries</a> = <a class="code" href="classLSQ.html#a38c8af5392da70119dc5cce4e3637cbc">SQEntries</a>;
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classLSQ.html">LSQ</a>, <span class="stringliteral">&quot;LSQ sharing policy set to Dynamic\n&quot;</span>);
+<a name="l00086"></a>00086     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (policy == <span class="stringliteral">&quot;partitioned&quot;</span>) {
+<a name="l00087"></a>00087         <a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> = <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599add8dfa69b567f90d3f13d819109ab74e">Partitioned</a>;
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089         <span class="comment">//@todo:make work if part_amt doesnt divide evenly.</span>
+<a name="l00090"></a>00090         <a class="code" href="classLSQ.html#ad2f4fd027fe71a87d5ee2d798ec19ac3">maxLQEntries</a> = <a class="code" href="classLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a> / <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>;
+<a name="l00091"></a>00091         <a class="code" href="classLSQ.html#a0e9eef7cd7598f554f1f89c35cb08128">maxSQEntries</a> = <a class="code" href="classLSQ.html#a38c8af5392da70119dc5cce4e3637cbc">SQEntries</a> / <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>;
+<a name="l00092"></a>00092 
+<a name="l00093"></a>00093         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(Fetch, <span class="stringliteral">&quot;LSQ sharing policy set to Partitioned: &quot;</span>
+<a name="l00094"></a>00094                 <span class="stringliteral">&quot;%i entries per LQ | %i entries per SQ\n&quot;</span>,
+<a name="l00095"></a>00095                 <a class="code" href="classLSQ.html#ad2f4fd027fe71a87d5ee2d798ec19ac3">maxLQEntries</a>,<a class="code" href="classLSQ.html#a0e9eef7cd7598f554f1f89c35cb08128">maxSQEntries</a>);
+<a name="l00096"></a>00096     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (policy == <span class="stringliteral">&quot;threshold&quot;</span>) {
+<a name="l00097"></a>00097         <a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> = <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a267544c4de8ecc66bd0fed6310af63be">Threshold</a>;
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099         assert(params-&gt;smtLSQThreshold &gt; <a class="code" href="classLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a>);
+<a name="l00100"></a>00100         assert(params-&gt;smtLSQThreshold &gt; <a class="code" href="classLSQ.html#a38c8af5392da70119dc5cce4e3637cbc">SQEntries</a>);
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102         <span class="comment">//Divide up by threshold amount</span>
+<a name="l00103"></a>00103         <span class="comment">//@todo: Should threads check the max and the total</span>
+<a name="l00104"></a>00104         <span class="comment">//amount of the LSQ</span>
+<a name="l00105"></a>00105         <a class="code" href="classLSQ.html#ad2f4fd027fe71a87d5ee2d798ec19ac3">maxLQEntries</a>  = params-&gt;smtLSQThreshold;
+<a name="l00106"></a>00106         <a class="code" href="classLSQ.html#a0e9eef7cd7598f554f1f89c35cb08128">maxSQEntries</a>  = params-&gt;smtLSQThreshold;
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classLSQ.html">LSQ</a>, <span class="stringliteral">&quot;LSQ sharing policy set to Threshold: &quot;</span>
+<a name="l00109"></a>00109                 <span class="stringliteral">&quot;%i entries per LQ | %i entries per SQ\n&quot;</span>,
+<a name="l00110"></a>00110                 <a class="code" href="classLSQ.html#ad2f4fd027fe71a87d5ee2d798ec19ac3">maxLQEntries</a>,<a class="code" href="classLSQ.html#a0e9eef7cd7598f554f1f89c35cb08128">maxSQEntries</a>);
+<a name="l00111"></a>00111     } <span class="keywordflow">else</span> {
+<a name="l00112"></a>00112         assert(0 &amp;&amp; <span class="stringliteral">&quot;Invalid LSQ Sharing Policy.Options Are:{Dynamic,&quot;</span>
+<a name="l00113"></a>00113                     <span class="stringliteral">&quot;Partitioned, Threshold}&quot;</span>);
+<a name="l00114"></a>00114     }
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116     <span class="comment">//Initialize LSQs</span>
+<a name="l00117"></a>00117     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a> = <span class="keyword">new</span> <a class="code" href="classLSQUnit.html">LSQUnit</a>[<a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>];
+<a name="l00118"></a>00118     <span class="keywordflow">for</span> (<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0; tid &lt; <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>; tid++) {
+<a name="l00119"></a>00119         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a45b3b65ba551c17c3b200db265611a4c">init</a>(<a class="code" href="classLSQ.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>, iew_ptr, params, <span class="keyword">this</span>,
+<a name="l00120"></a>00120                          <a class="code" href="classLSQ.html#ad2f4fd027fe71a87d5ee2d798ec19ac3">maxLQEntries</a>, <a class="code" href="classLSQ.html#a0e9eef7cd7598f554f1f89c35cb08128">maxSQEntries</a>, tid);
+<a name="l00121"></a>00121         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a8d77cc755c7a424f4eb80130fb627012">setDcachePort</a>(&amp;cpu_ptr-&gt;getDataPort());
+<a name="l00122"></a>00122     }
+<a name="l00123"></a>00123 }
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125 
+<a name="l00126"></a>00126 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00127"></a>00127 std::string
+<a name="l00128"></a><a class="code" href="classLSQ.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00128</a> <a class="code" href="classLSQ.html#a37627d5d5bba7f4a8690c71c2ab3cb07">LSQ&lt;Impl&gt;::name</a>()<span class="keyword"> const</span>
+<a name="l00129"></a>00129 <span class="keyword"></span>{
+<a name="l00130"></a>00130     <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a4e9ef25d8913b270d432be4bbfe4965c">iewStage</a>-&gt;name() + <span class="stringliteral">&quot;.lsq&quot;</span>;
+<a name="l00131"></a>00131 }
+<a name="l00132"></a>00132 
+<a name="l00133"></a>00133 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00134"></a>00134 <span class="keywordtype">void</span>
+<a name="l00135"></a><a class="code" href="classLSQ.html#a4dc637449366fcdfc4e764cdf12d9b11">00135</a> <a class="code" href="classLSQ.html#a4dc637449366fcdfc4e764cdf12d9b11">LSQ&lt;Impl&gt;::regStats</a>()
+<a name="l00136"></a>00136 {
+<a name="l00137"></a>00137     <span class="comment">//Initialize LSQs</span>
+<a name="l00138"></a>00138     <span class="keywordflow">for</span> (<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0; tid &lt; <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>; tid++) {
+<a name="l00139"></a>00139         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00140"></a>00140     }
+<a name="l00141"></a>00141 }
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00144"></a>00144 <span class="keywordtype">void</span>
+<a name="l00145"></a><a class="code" href="classLSQ.html#aab96bdacf8bd420402cbb543f994e054">00145</a> <a class="code" href="classLSQ.html#aab96bdacf8bd420402cbb543f994e054">LSQ&lt;Impl&gt;::setActiveThreads</a>(<a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;</a> *at_ptr)
+<a name="l00146"></a>00146 {
+<a name="l00147"></a>00147     <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a> = at_ptr;
+<a name="l00148"></a>00148     assert(<a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a> != 0);
+<a name="l00149"></a>00149 }
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00152"></a>00152 <span class="keywordtype">void</span>
+<a name="l00153"></a><a class="code" href="classLSQ.html#a0240eb42fa57fe5d3788093f62b77347">00153</a> <a class="code" href="classLSQ.html#a0240eb42fa57fe5d3788093f62b77347">LSQ&lt;Impl&gt;::drainSanityCheck</a>()<span class="keyword"> const</span>
+<a name="l00154"></a>00154 <span class="keyword"></span>{
+<a name="l00155"></a>00155     assert(<a class="code" href="classLSQ.html#adf5473c18a3d7c1e88c4a2072bce5526">isDrained</a>());
+<a name="l00156"></a>00156 
+<a name="l00157"></a>00157     <span class="keywordflow">for</span> (<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0; tid &lt; <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>; tid++)
+<a name="l00158"></a>00158         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#a0240eb42fa57fe5d3788093f62b77347">drainSanityCheck</a>();
+<a name="l00159"></a>00159 }
+<a name="l00160"></a>00160 
+<a name="l00161"></a>00161 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00162"></a>00162 <span class="keywordtype">bool</span>
+<a name="l00163"></a><a class="code" href="classLSQ.html#adf5473c18a3d7c1e88c4a2072bce5526">00163</a> <a class="code" href="classLSQ.html#adf5473c18a3d7c1e88c4a2072bce5526">LSQ&lt;Impl&gt;::isDrained</a>()<span class="keyword"> const</span>
+<a name="l00164"></a>00164 <span class="keyword"></span>{
+<a name="l00165"></a>00165     <span class="keywordtype">bool</span> drained(<span class="keyword">true</span>);
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167     <span class="keywordflow">if</span> (!<a class="code" href="classLSQ.html#a01d2807c1345befcffd168a2a9dbdbf2">lqEmpty</a>()) {
+<a name="l00168"></a>00168         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(Drain, <span class="stringliteral">&quot;Not drained, LQ not empty.\n&quot;</span>);
+<a name="l00169"></a>00169         drained = <span class="keyword">false</span>;
+<a name="l00170"></a>00170     }
+<a name="l00171"></a>00171 
+<a name="l00172"></a>00172     <span class="keywordflow">if</span> (!<a class="code" href="classLSQ.html#a5761e9640bec8ba8474945cce57b6501">sqEmpty</a>()) {
+<a name="l00173"></a>00173         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(Drain, <span class="stringliteral">&quot;Not drained, SQ not empty.\n&quot;</span>);
+<a name="l00174"></a>00174         drained = <span class="keyword">false</span>;
+<a name="l00175"></a>00175     }
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a865aaad70625f17392c717930860d386">retryTid</a> != <a class="code" href="base_2types_8hh.html#a192b210a26f038691d0f095d85dc0953">InvalidThreadID</a>) {
+<a name="l00178"></a>00178         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(Drain, <span class="stringliteral">&quot;Not drained, the LSQ has blocked the caches.\n&quot;</span>);
+<a name="l00179"></a>00179         drained = <span class="keyword">false</span>;
+<a name="l00180"></a>00180     }
+<a name="l00181"></a>00181 
+<a name="l00182"></a>00182     <span class="keywordflow">return</span> drained;
+<a name="l00183"></a>00183 }
+<a name="l00184"></a>00184 
+<a name="l00185"></a>00185 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00186"></a>00186 <span class="keywordtype">void</span>
+<a name="l00187"></a><a class="code" href="classLSQ.html#a8674059ce345e23aac5086b2c3e24a43">00187</a> <a class="code" href="classLSQ.html#a8674059ce345e23aac5086b2c3e24a43">LSQ&lt;Impl&gt;::takeOverFrom</a>()
+<a name="l00188"></a>00188 {
+<a name="l00189"></a>00189     <span class="keywordflow">for</span> (<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0; tid &lt; <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>; tid++) {
+<a name="l00190"></a>00190         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a8674059ce345e23aac5086b2c3e24a43">takeOverFrom</a>();
+<a name="l00191"></a>00191     }
+<a name="l00192"></a>00192 }
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00195"></a>00195 <span class="keywordtype">int</span>
+<a name="l00196"></a><a class="code" href="classLSQ.html#a5d2b0e4e7d98ea4ebd9fb98ac0d91e2f">00196</a> <a class="code" href="classLSQ.html#a5d2b0e4e7d98ea4ebd9fb98ac0d91e2f">LSQ&lt;Impl&gt;::entryAmount</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> num_threads)
+<a name="l00197"></a>00197 {
+<a name="l00198"></a>00198     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> == <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599add8dfa69b567f90d3f13d819109ab74e">Partitioned</a>) {
+<a name="l00199"></a>00199         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a> / num_threads;
+<a name="l00200"></a>00200     } <span class="keywordflow">else</span> {
+<a name="l00201"></a>00201         <span class="keywordflow">return</span> 0;
+<a name="l00202"></a>00202     }
+<a name="l00203"></a>00203 }
+<a name="l00204"></a>00204 
+<a name="l00205"></a>00205 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00206"></a>00206 <span class="keywordtype">void</span>
+<a name="l00207"></a><a class="code" href="classLSQ.html#aaf9a05771a835f9f8d634cef36e24d40">00207</a> <a class="code" href="classLSQ.html#aaf9a05771a835f9f8d634cef36e24d40">LSQ&lt;Impl&gt;::resetEntries</a>()
+<a name="l00208"></a>00208 {
+<a name="l00209"></a>00209     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> != <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a96535b1625776102bcc13f7dfb598dcb">Dynamic</a> || <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a> &gt; 1) {
+<a name="l00210"></a>00210         <span class="keywordtype">int</span> active_threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;size();
+<a name="l00211"></a>00211 
+<a name="l00212"></a>00212         <span class="keywordtype">int</span> maxEntries;
+<a name="l00213"></a>00213 
+<a name="l00214"></a>00214         <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> == <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599add8dfa69b567f90d3f13d819109ab74e">Partitioned</a>) {
+<a name="l00215"></a>00215             maxEntries = <a class="code" href="classLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a> / active_threads;
+<a name="l00216"></a>00216         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> == <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a267544c4de8ecc66bd0fed6310af63be">Threshold</a> &amp;&amp; active_threads == 1) {
+<a name="l00217"></a>00217             maxEntries = <a class="code" href="classLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a>;
+<a name="l00218"></a>00218         } <span class="keywordflow">else</span> {
+<a name="l00219"></a>00219             maxEntries = <a class="code" href="classLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a>;
+<a name="l00220"></a>00220         }
+<a name="l00221"></a>00221 
+<a name="l00222"></a>00222         <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads  = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00223"></a>00223         <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00224"></a>00224 
+<a name="l00225"></a>00225         <span class="keywordflow">while</span> (threads != end) {
+<a name="l00226"></a>00226             <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00227"></a>00227 
+<a name="l00228"></a>00228             <a class="code" href="classLSQ.html#a3672feee3a3eaad63f2e96d46385a099">resizeEntries</a>(maxEntries, tid);
+<a name="l00229"></a>00229         }
+<a name="l00230"></a>00230     }
+<a name="l00231"></a>00231 }
+<a name="l00232"></a>00232 
+<a name="l00233"></a>00233 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00234"></a>00234 <span class="keywordtype">void</span>
+<a name="l00235"></a><a class="code" href="classLSQ.html#a53a4e3e73adce8cf2b544117971131c5">00235</a> <a class="code" href="classLSQ.html#a53a4e3e73adce8cf2b544117971131c5">LSQ&lt;Impl&gt;::removeEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00236"></a>00236 {
+<a name="l00237"></a>00237     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#ae3af532345dbe6519e8272d9cd677230">clearLQ</a>();
+<a name="l00238"></a>00238     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a171cd7891063f418b1ee217f5c03537b">clearSQ</a>();
+<a name="l00239"></a>00239 }
+<a name="l00240"></a>00240 
+<a name="l00241"></a>00241 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00242"></a>00242 <span class="keywordtype">void</span>
+<a name="l00243"></a><a class="code" href="classLSQ.html#a3672feee3a3eaad63f2e96d46385a099">00243</a> <a class="code" href="classLSQ.html#a3672feee3a3eaad63f2e96d46385a099">LSQ&lt;Impl&gt;::resizeEntries</a>(<span class="keywordtype">unsigned</span> size, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00244"></a>00244 {
+<a name="l00245"></a>00245     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a3bc9500810cb2d5615e29206e2d6499f">resizeLQ</a>(size);
+<a name="l00246"></a>00246     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a341dd6a3bd8d240659fd9d698c3b5c65">resizeSQ</a>(size);
+<a name="l00247"></a>00247 }
+<a name="l00248"></a>00248 
+<a name="l00249"></a>00249 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00250"></a>00250 <span class="keywordtype">void</span>
+<a name="l00251"></a><a class="code" href="classLSQ.html#a873dd91783f9efb4a590aded1f70d6b0">00251</a> <a class="code" href="classLSQ.html#a873dd91783f9efb4a590aded1f70d6b0">LSQ&lt;Impl&gt;::tick</a>()
+<a name="l00252"></a>00252 {
+<a name="l00253"></a>00253     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00254"></a>00254     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00255"></a>00255 
+<a name="l00256"></a>00256     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00257"></a>00257         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00258"></a>00258 
+<a name="l00259"></a>00259         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00260"></a>00260     }
+<a name="l00261"></a>00261 }
+<a name="l00262"></a>00262 
+<a name="l00263"></a>00263 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00264"></a>00264 <span class="keywordtype">void</span>
+<a name="l00265"></a><a class="code" href="classLSQ.html#ad22b3ecafed2bcd9c59fcab049a1cb98">00265</a> <a class="code" href="classLSQ.html#ad22b3ecafed2bcd9c59fcab049a1cb98">LSQ&lt;Impl&gt;::insertLoad</a>(<a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">DynInstPtr</a> &amp;load_inst)
+<a name="l00266"></a>00266 {
+<a name="l00267"></a>00267     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = load_inst-&gt;threadNumber;
+<a name="l00268"></a>00268 
+<a name="l00269"></a>00269     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#ad22b3ecafed2bcd9c59fcab049a1cb98">insertLoad</a>(load_inst);
+<a name="l00270"></a>00270 }
+<a name="l00271"></a>00271 
+<a name="l00272"></a>00272 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00273"></a>00273 <span class="keywordtype">void</span>
+<a name="l00274"></a><a class="code" href="classLSQ.html#a6a4b4e51bfff3639932ebaba45e8a282">00274</a> <a class="code" href="classLSQ.html#a6a4b4e51bfff3639932ebaba45e8a282">LSQ&lt;Impl&gt;::insertStore</a>(<a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">DynInstPtr</a> &amp;store_inst)
+<a name="l00275"></a>00275 {
+<a name="l00276"></a>00276     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = store_inst-&gt;threadNumber;
+<a name="l00277"></a>00277 
+<a name="l00278"></a>00278     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a6a4b4e51bfff3639932ebaba45e8a282">insertStore</a>(store_inst);
+<a name="l00279"></a>00279 }
+<a name="l00280"></a>00280 
+<a name="l00281"></a>00281 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00282"></a>00282 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00283"></a><a class="code" href="classLSQ.html#a30c6332142c2ecca389ed6ee463c692b">00283</a> <a class="code" href="classLSQ.html#a30c6332142c2ecca389ed6ee463c692b">LSQ&lt;Impl&gt;::executeLoad</a>(<a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">DynInstPtr</a> &amp;inst)
+<a name="l00284"></a>00284 {
+<a name="l00285"></a>00285     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = inst-&gt;threadNumber;
+<a name="l00286"></a>00286 
+<a name="l00287"></a>00287     <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a30c6332142c2ecca389ed6ee463c692b">executeLoad</a>(inst);
+<a name="l00288"></a>00288 }
+<a name="l00289"></a>00289 
+<a name="l00290"></a>00290 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00291"></a>00291 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00292"></a><a class="code" href="classLSQ.html#aad78b8a37ee5c61e47df58dd39980340">00292</a> <a class="code" href="classLSQ.html#aad78b8a37ee5c61e47df58dd39980340">LSQ&lt;Impl&gt;::executeStore</a>(<a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">DynInstPtr</a> &amp;inst)
+<a name="l00293"></a>00293 {
+<a name="l00294"></a>00294     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = inst-&gt;threadNumber;
+<a name="l00295"></a>00295 
+<a name="l00296"></a>00296     <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#aad78b8a37ee5c61e47df58dd39980340">executeStore</a>(inst);
+<a name="l00297"></a>00297 }
+<a name="l00298"></a>00298 
+<a name="l00299"></a>00299 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00300"></a>00300 <span class="keywordtype">void</span>
+<a name="l00301"></a><a class="code" href="classLSQ.html#a5f04e29d6f6feb8b86460491f2ba7547">00301</a> <a class="code" href="classLSQ.html#a5f04e29d6f6feb8b86460491f2ba7547">LSQ&lt;Impl&gt;::writebackStores</a>()
+<a name="l00302"></a>00302 {
+<a name="l00303"></a>00303     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00304"></a>00304     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00305"></a>00305 
+<a name="l00306"></a>00306     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00307"></a>00307         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00308"></a>00308 
+<a name="l00309"></a>00309         <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a4115edd209f7e5e51c3a17d40edd9e7a">numStoresToWB</a>(tid) &gt; 0) {
+<a name="l00310"></a>00310             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(Writeback,<span class="stringliteral">&quot;[tid:%i] Writing back stores. %i stores &quot;</span>
+<a name="l00311"></a>00311                 <span class="stringliteral">&quot;available for Writeback.\n&quot;</span>, tid, <a class="code" href="classLSQ.html#a4115edd209f7e5e51c3a17d40edd9e7a">numStoresToWB</a>(tid));
+<a name="l00312"></a>00312         }
+<a name="l00313"></a>00313 
+<a name="l00314"></a>00314         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a5f04e29d6f6feb8b86460491f2ba7547">writebackStores</a>();
+<a name="l00315"></a>00315     }
+<a name="l00316"></a>00316 }
+<a name="l00317"></a>00317 
+<a name="l00318"></a>00318 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00319"></a>00319 <span class="keywordtype">bool</span>
+<a name="l00320"></a><a class="code" href="classLSQ.html#a4f720bbfb5fdefdb23516500eeb0b4de">00320</a> <a class="code" href="classLSQ.html#a4f720bbfb5fdefdb23516500eeb0b4de">LSQ&lt;Impl&gt;::violation</a>()
+<a name="l00321"></a>00321 {
+<a name="l00322"></a>00322     <span class="comment">/* Answers: Does Anybody Have a Violation?*/</span>
+<a name="l00323"></a>00323     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00324"></a>00324     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00325"></a>00325 
+<a name="l00326"></a>00326     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00327"></a>00327         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00328"></a>00328 
+<a name="l00329"></a>00329         <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#a4f720bbfb5fdefdb23516500eeb0b4de">violation</a>())
+<a name="l00330"></a>00330             <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00331"></a>00331     }
+<a name="l00332"></a>00332 
+<a name="l00333"></a>00333     <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00334"></a>00334 }
+<a name="l00335"></a>00335 
+<a name="l00336"></a>00336 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00337"></a>00337 <span class="keywordtype">void</span>
+<a name="l00338"></a><a class="code" href="classLSQ.html#a29cb5a4f98063ce6e9210eacbdb35298">00338</a> <a class="code" href="classLSQ.html#a29cb5a4f98063ce6e9210eacbdb35298">LSQ&lt;Impl&gt;::recvRetry</a>()
+<a name="l00339"></a>00339 {
+<a name="l00340"></a>00340     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a865aaad70625f17392c717930860d386">retryTid</a> == <a class="code" href="base_2types_8hh.html#a192b210a26f038691d0f095d85dc0953">InvalidThreadID</a>)
+<a name="l00341"></a>00341     {
+<a name="l00342"></a>00342         <span class="comment">//Squashed, so drop it</span>
+<a name="l00343"></a>00343         <span class="keywordflow">return</span>;
+<a name="l00344"></a>00344     }
+<a name="l00345"></a>00345     <span class="keywordtype">int</span> curr_retry_tid = <a class="code" href="classLSQ.html#a865aaad70625f17392c717930860d386">retryTid</a>;
+<a name="l00346"></a>00346     <span class="comment">// Speculatively clear the retry Tid.  This will get set again if</span>
+<a name="l00347"></a>00347     <span class="comment">// the LSQUnit was unable to complete its access.</span>
+<a name="l00348"></a>00348     <a class="code" href="classLSQ.html#a865aaad70625f17392c717930860d386">retryTid</a> = -1;
+<a name="l00349"></a>00349     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[curr_retry_tid].<a class="code" href="classLSQUnit.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00350"></a>00350 }
+<a name="l00351"></a>00351 
+<a name="l00352"></a>00352 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00353"></a>00353 <span class="keywordtype">bool</span>
+<a name="l00354"></a><a class="code" href="classLSQ.html#a482dba5588f4bee43e498875a61e5e0b">00354</a> <a class="code" href="classLSQ.html#a482dba5588f4bee43e498875a61e5e0b">LSQ&lt;Impl&gt;::recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00355"></a>00355 {
+<a name="l00356"></a>00356     <span class="keywordflow">if</span> (pkt-&gt;<a class="code" href="classPacket.html#a32759931a1b2d6380407c6a18abd46e3">isError</a>())
+<a name="l00357"></a>00357         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classLSQ.html">LSQ</a>, <span class="stringliteral">&quot;Got error packet back for address: %#X\n&quot;</span>,
+<a name="l00358"></a>00358                 pkt-&gt;<a class="code" href="classPacket.html#afca9af4d83a57836baba87603463a6e0">getAddr</a>());
+<a name="l00359"></a>00359     <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[pkt-&gt;<a class="code" href="classPacket.html#a956cd41d82347558b9c0a5b0474903f2" title="A pointer to the original request.">req</a>-&gt;<a class="code" href="classRequest.html#afc38d04c77e7b5fc3bbb0dd00fc87742">threadId</a>()].<a class="code" href="classLSQUnit.html#a0f7f0d3412bbf494cd3d0c0f48e5fcf2">completeDataAccess</a>(pkt);
+<a name="l00360"></a>00360     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00361"></a>00361 }
+<a name="l00362"></a>00362 
+<a name="l00363"></a>00363 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00364"></a>00364 <span class="keywordtype">void</span>
+<a name="l00365"></a><a class="code" href="classLSQ.html#aff3031c56fc4947a19695c868bb8233e">00365</a> <a class="code" href="classLSQ.html#aff3031c56fc4947a19695c868bb8233e">LSQ&lt;Impl&gt;::recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00366"></a>00366 {
+<a name="l00367"></a>00367     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classLSQ.html">LSQ</a>, <span class="stringliteral">&quot;received pkt for addr:%#x %s\n&quot;</span>, pkt-&gt;<a class="code" href="classPacket.html#afca9af4d83a57836baba87603463a6e0">getAddr</a>(),
+<a name="l00368"></a>00368             pkt-&gt;<a class="code" href="classPacket.html#a863af57e28a01258236ea303155fc7ff">cmdString</a>());
+<a name="l00369"></a>00369 
+<a name="l00370"></a>00370     <span class="comment">// must be a snoop</span>
+<a name="l00371"></a>00371     <span class="keywordflow">if</span> (pkt-&gt;<a class="code" href="classPacket.html#a4a1a39b8ffab2d6266cd9d794ca332e3">isInvalidate</a>()) {
+<a name="l00372"></a>00372         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classLSQ.html">LSQ</a>, <span class="stringliteral">&quot;received invalidation for addr:%#x\n&quot;</span>,
+<a name="l00373"></a>00373                 pkt-&gt;<a class="code" href="classPacket.html#afca9af4d83a57836baba87603463a6e0">getAddr</a>());
+<a name="l00374"></a>00374         <span class="keywordflow">for</span> (<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0; tid &lt; <a class="code" href="classLSQ.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>; tid++) {
+<a name="l00375"></a>00375             <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a35b89a864d3af33a4b045b7fe0aa6b5a">checkSnoop</a>(pkt);
+<a name="l00376"></a>00376         }
+<a name="l00377"></a>00377     }
+<a name="l00378"></a>00378 }
+<a name="l00379"></a>00379 
+<a name="l00380"></a>00380 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00381"></a>00381 <span class="keywordtype">int</span>
+<a name="l00382"></a><a class="code" href="classLSQ.html#ae452b1c7e00c383f2916c4a530fab737">00382</a> <a class="code" href="classLSQ.html#ae452b1c7e00c383f2916c4a530fab737">LSQ&lt;Impl&gt;::getCount</a>()
+<a name="l00383"></a>00383 {
+<a name="l00384"></a>00384     <span class="keywordtype">unsigned</span> <a class="code" href="namespaceStats.html#a4031dfee086a6a4cf1deea1fff2e0d5c">total</a> = 0;
+<a name="l00385"></a>00385 
+<a name="l00386"></a>00386     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00387"></a>00387     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00388"></a>00388 
+<a name="l00389"></a>00389     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00390"></a>00390         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00391"></a>00391 
+<a name="l00392"></a>00392         total += <a class="code" href="classLSQ.html#ae452b1c7e00c383f2916c4a530fab737">getCount</a>(tid);
+<a name="l00393"></a>00393     }
+<a name="l00394"></a>00394 
+<a name="l00395"></a>00395     <span class="keywordflow">return</span> total;
+<a name="l00396"></a>00396 }
+<a name="l00397"></a>00397 
+<a name="l00398"></a>00398 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00399"></a>00399 <span class="keywordtype">int</span>
+<a name="l00400"></a><a class="code" href="classLSQ.html#a54460b759fb06e2b18e26657279a6f49">00400</a> <a class="code" href="classLSQ.html#a54460b759fb06e2b18e26657279a6f49">LSQ&lt;Impl&gt;::numLoads</a>()
+<a name="l00401"></a>00401 {
+<a name="l00402"></a>00402     <span class="keywordtype">unsigned</span> <a class="code" href="namespaceStats.html#a4031dfee086a6a4cf1deea1fff2e0d5c">total</a> = 0;
+<a name="l00403"></a>00403 
+<a name="l00404"></a>00404     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00405"></a>00405     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00406"></a>00406 
+<a name="l00407"></a>00407     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00408"></a>00408         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00409"></a>00409 
+<a name="l00410"></a>00410         total += <a class="code" href="classLSQ.html#a54460b759fb06e2b18e26657279a6f49">numLoads</a>(tid);
+<a name="l00411"></a>00411     }
+<a name="l00412"></a>00412 
+<a name="l00413"></a>00413     <span class="keywordflow">return</span> total;
+<a name="l00414"></a>00414 }
+<a name="l00415"></a>00415 
+<a name="l00416"></a>00416 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00417"></a>00417 <span class="keywordtype">int</span>
+<a name="l00418"></a><a class="code" href="classLSQ.html#aa0fc32a4a9d77696f5907f4d25e7d07f">00418</a> <a class="code" href="classLSQ.html#aa0fc32a4a9d77696f5907f4d25e7d07f">LSQ&lt;Impl&gt;::numStores</a>()
+<a name="l00419"></a>00419 {
+<a name="l00420"></a>00420     <span class="keywordtype">unsigned</span> <a class="code" href="namespaceStats.html#a4031dfee086a6a4cf1deea1fff2e0d5c">total</a> = 0;
+<a name="l00421"></a>00421 
+<a name="l00422"></a>00422     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00423"></a>00423     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00424"></a>00424 
+<a name="l00425"></a>00425     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00426"></a>00426         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00427"></a>00427 
+<a name="l00428"></a>00428         total += <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#aa0fc32a4a9d77696f5907f4d25e7d07f">numStores</a>();
+<a name="l00429"></a>00429     }
+<a name="l00430"></a>00430 
+<a name="l00431"></a>00431     <span class="keywordflow">return</span> total;
+<a name="l00432"></a>00432 }
+<a name="l00433"></a>00433 
+<a name="l00434"></a>00434 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00435"></a>00435 <span class="keywordtype">unsigned</span>
+<a name="l00436"></a><a class="code" href="classLSQ.html#a028971a565aca048c67ea1c36a6a9d51">00436</a> <a class="code" href="classLSQ.html#a028971a565aca048c67ea1c36a6a9d51">LSQ&lt;Impl&gt;::numFreeEntries</a>()
+<a name="l00437"></a>00437 {
+<a name="l00438"></a>00438     <span class="keywordtype">unsigned</span> <a class="code" href="namespaceStats.html#a4031dfee086a6a4cf1deea1fff2e0d5c">total</a> = 0;
+<a name="l00439"></a>00439 
+<a name="l00440"></a>00440     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00441"></a>00441     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00442"></a>00442 
+<a name="l00443"></a>00443     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00444"></a>00444         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00445"></a>00445 
+<a name="l00446"></a>00446         total += <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a028971a565aca048c67ea1c36a6a9d51">numFreeEntries</a>();
+<a name="l00447"></a>00447     }
+<a name="l00448"></a>00448 
+<a name="l00449"></a>00449     <span class="keywordflow">return</span> total;
+<a name="l00450"></a>00450 }
+<a name="l00451"></a>00451 
+<a name="l00452"></a>00452 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00453"></a>00453 <span class="keywordtype">unsigned</span>
+<a name="l00454"></a><a class="code" href="classLSQ.html#acc878f608deead5b5319a6a3f98b50c8">00454</a> <a class="code" href="classLSQ.html#a028971a565aca048c67ea1c36a6a9d51">LSQ&lt;Impl&gt;::numFreeEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00455"></a>00455 {
+<a name="l00456"></a>00456     <span class="comment">//if (lsqPolicy == Dynamic)</span>
+<a name="l00457"></a>00457     <span class="comment">//return numFreeEntries();</span>
+<a name="l00458"></a>00458     <span class="comment">//else</span>
+<a name="l00459"></a>00459         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a028971a565aca048c67ea1c36a6a9d51">numFreeEntries</a>();
+<a name="l00460"></a>00460 }
+<a name="l00461"></a>00461 
+<a name="l00462"></a>00462 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00463"></a>00463 <span class="keywordtype">bool</span>
+<a name="l00464"></a><a class="code" href="classLSQ.html#a3e70330939fdfc4dbc2f60c1a660584d">00464</a> <a class="code" href="classLSQ.html#a3e70330939fdfc4dbc2f60c1a660584d">LSQ&lt;Impl&gt;::isFull</a>()
+<a name="l00465"></a>00465 {
+<a name="l00466"></a>00466     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00467"></a>00467     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00468"></a>00468 
+<a name="l00469"></a>00469     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00470"></a>00470         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00471"></a>00471 
+<a name="l00472"></a>00472         <span class="keywordflow">if</span> (!(<a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#a5893daf623130be826f492bbff58f757">lqFull</a>() || <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#a477981d1f905d2d398a1527f7149e3c4">sqFull</a>()))
+<a name="l00473"></a>00473             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00474"></a>00474     }
+<a name="l00475"></a>00475 
+<a name="l00476"></a>00476     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00477"></a>00477 }
+<a name="l00478"></a>00478 
+<a name="l00479"></a>00479 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00480"></a>00480 <span class="keywordtype">bool</span>
+<a name="l00481"></a><a class="code" href="classLSQ.html#a30fac732df9b3fda011c7329a112cb31">00481</a> <a class="code" href="classLSQ.html#a3e70330939fdfc4dbc2f60c1a660584d">LSQ&lt;Impl&gt;::isFull</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00482"></a>00482 {
+<a name="l00483"></a>00483     <span class="comment">//@todo: Change to Calculate All Entries for</span>
+<a name="l00484"></a>00484     <span class="comment">//Dynamic Policy</span>
+<a name="l00485"></a>00485     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> == <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a96535b1625776102bcc13f7dfb598dcb">Dynamic</a>)
+<a name="l00486"></a>00486         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>();
+<a name="l00487"></a>00487     <span class="keywordflow">else</span>
+<a name="l00488"></a>00488         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a5893daf623130be826f492bbff58f757">lqFull</a>() || <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a477981d1f905d2d398a1527f7149e3c4">sqFull</a>();
+<a name="l00489"></a>00489 }
+<a name="l00490"></a>00490 
+<a name="l00491"></a>00491 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00492"></a>00492 <span class="keywordtype">bool</span>
+<a name="l00493"></a><a class="code" href="classLSQ.html#a479432127ee77145cc19d6a2d1590821">00493</a> <a class="code" href="classLSQ.html#a479432127ee77145cc19d6a2d1590821">LSQ&lt;Impl&gt;::isEmpty</a>()<span class="keyword"> const</span>
+<a name="l00494"></a>00494 <span class="keyword"></span>{
+<a name="l00495"></a>00495     <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a01d2807c1345befcffd168a2a9dbdbf2">lqEmpty</a>() &amp;&amp; <a class="code" href="classLSQ.html#a5761e9640bec8ba8474945cce57b6501">sqEmpty</a>();
+<a name="l00496"></a>00496 }
+<a name="l00497"></a>00497 
+<a name="l00498"></a>00498 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00499"></a>00499 <span class="keywordtype">bool</span>
+<a name="l00500"></a><a class="code" href="classLSQ.html#a01d2807c1345befcffd168a2a9dbdbf2">00500</a> <a class="code" href="classLSQ.html#a01d2807c1345befcffd168a2a9dbdbf2">LSQ&lt;Impl&gt;::lqEmpty</a>()<span class="keyword"> const</span>
+<a name="l00501"></a>00501 <span class="keyword"></span>{
+<a name="l00502"></a>00502     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::const_iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00503"></a>00503     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::const_iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00504"></a>00504 
+<a name="l00505"></a>00505     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00506"></a>00506         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00507"></a>00507 
+<a name="l00508"></a>00508         <span class="keywordflow">if</span> (!<a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#a01d2807c1345befcffd168a2a9dbdbf2">lqEmpty</a>())
+<a name="l00509"></a>00509             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00510"></a>00510     }
+<a name="l00511"></a>00511 
+<a name="l00512"></a>00512     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00513"></a>00513 }
+<a name="l00514"></a>00514 
+<a name="l00515"></a>00515 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00516"></a>00516 <span class="keywordtype">bool</span>
+<a name="l00517"></a><a class="code" href="classLSQ.html#a5761e9640bec8ba8474945cce57b6501">00517</a> <a class="code" href="classLSQ.html#a5761e9640bec8ba8474945cce57b6501">LSQ&lt;Impl&gt;::sqEmpty</a>()<span class="keyword"> const</span>
+<a name="l00518"></a>00518 <span class="keyword"></span>{
+<a name="l00519"></a>00519     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::const_iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00520"></a>00520     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::const_iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00521"></a>00521 
+<a name="l00522"></a>00522     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00523"></a>00523         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00524"></a>00524 
+<a name="l00525"></a>00525         <span class="keywordflow">if</span> (!<a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#a5761e9640bec8ba8474945cce57b6501">sqEmpty</a>())
+<a name="l00526"></a>00526             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00527"></a>00527     }
+<a name="l00528"></a>00528 
+<a name="l00529"></a>00529     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00530"></a>00530 }
+<a name="l00531"></a>00531 
+<a name="l00532"></a>00532 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00533"></a>00533 <span class="keywordtype">bool</span>
+<a name="l00534"></a><a class="code" href="classLSQ.html#a5893daf623130be826f492bbff58f757">00534</a> <a class="code" href="classLSQ.html#a5893daf623130be826f492bbff58f757">LSQ&lt;Impl&gt;::lqFull</a>()
+<a name="l00535"></a>00535 {
+<a name="l00536"></a>00536     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00537"></a>00537     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00538"></a>00538 
+<a name="l00539"></a>00539     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00540"></a>00540         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00541"></a>00541 
+<a name="l00542"></a>00542         <span class="keywordflow">if</span> (!<a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#a5893daf623130be826f492bbff58f757">lqFull</a>())
+<a name="l00543"></a>00543             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00544"></a>00544     }
+<a name="l00545"></a>00545 
+<a name="l00546"></a>00546     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00547"></a>00547 }
+<a name="l00548"></a>00548 
+<a name="l00549"></a>00549 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00550"></a>00550 <span class="keywordtype">bool</span>
+<a name="l00551"></a><a class="code" href="classLSQ.html#afa1d531e5f388b1cdc3af03100f63061">00551</a> <a class="code" href="classLSQ.html#a5893daf623130be826f492bbff58f757">LSQ&lt;Impl&gt;::lqFull</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00552"></a>00552 {
+<a name="l00553"></a>00553     <span class="comment">//@todo: Change to Calculate All Entries for</span>
+<a name="l00554"></a>00554     <span class="comment">//Dynamic Policy</span>
+<a name="l00555"></a>00555     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> == <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a96535b1625776102bcc13f7dfb598dcb">Dynamic</a>)
+<a name="l00556"></a>00556         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5893daf623130be826f492bbff58f757">lqFull</a>();
+<a name="l00557"></a>00557     <span class="keywordflow">else</span>
+<a name="l00558"></a>00558         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a5893daf623130be826f492bbff58f757">lqFull</a>();
+<a name="l00559"></a>00559 }
+<a name="l00560"></a>00560 
+<a name="l00561"></a>00561 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00562"></a>00562 <span class="keywordtype">bool</span>
+<a name="l00563"></a><a class="code" href="classLSQ.html#a477981d1f905d2d398a1527f7149e3c4">00563</a> <a class="code" href="classLSQ.html#a477981d1f905d2d398a1527f7149e3c4">LSQ&lt;Impl&gt;::sqFull</a>()
+<a name="l00564"></a>00564 {
+<a name="l00565"></a>00565     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00566"></a>00566     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00567"></a>00567 
+<a name="l00568"></a>00568     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00569"></a>00569         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00570"></a>00570 
+<a name="l00571"></a>00571         <span class="keywordflow">if</span> (!<a class="code" href="classLSQ.html#a477981d1f905d2d398a1527f7149e3c4">sqFull</a>(tid))
+<a name="l00572"></a>00572             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00573"></a>00573     }
+<a name="l00574"></a>00574 
+<a name="l00575"></a>00575     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00576"></a>00576 }
+<a name="l00577"></a>00577 
+<a name="l00578"></a>00578 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00579"></a>00579 <span class="keywordtype">bool</span>
+<a name="l00580"></a><a class="code" href="classLSQ.html#a6a3501ebb06c38938a3b0ebcea2b6a8b">00580</a> <a class="code" href="classLSQ.html#a477981d1f905d2d398a1527f7149e3c4">LSQ&lt;Impl&gt;::sqFull</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00581"></a>00581 {
+<a name="l00582"></a>00582      <span class="comment">//@todo: Change to Calculate All Entries for</span>
+<a name="l00583"></a>00583     <span class="comment">//Dynamic Policy</span>
+<a name="l00584"></a>00584     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> == <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a96535b1625776102bcc13f7dfb598dcb">Dynamic</a>)
+<a name="l00585"></a>00585         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a477981d1f905d2d398a1527f7149e3c4">sqFull</a>();
+<a name="l00586"></a>00586     <span class="keywordflow">else</span>
+<a name="l00587"></a>00587         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#a477981d1f905d2d398a1527f7149e3c4">sqFull</a>();
+<a name="l00588"></a>00588 }
+<a name="l00589"></a>00589 
+<a name="l00590"></a>00590 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00591"></a>00591 <span class="keywordtype">bool</span>
+<a name="l00592"></a><a class="code" href="classLSQ.html#af8eb8590fbfa6ecd2f796390677a4c00">00592</a> <a class="code" href="classLSQ.html#af8eb8590fbfa6ecd2f796390677a4c00">LSQ&lt;Impl&gt;::isStalled</a>()
+<a name="l00593"></a>00593 {
+<a name="l00594"></a>00594     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00595"></a>00595     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00596"></a>00596 
+<a name="l00597"></a>00597     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00598"></a>00598         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00599"></a>00599 
+<a name="l00600"></a>00600         <span class="keywordflow">if</span> (!<a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQ.html#af8eb8590fbfa6ecd2f796390677a4c00">isStalled</a>())
+<a name="l00601"></a>00601             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00602"></a>00602     }
+<a name="l00603"></a>00603 
+<a name="l00604"></a>00604     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00605"></a>00605 }
+<a name="l00606"></a>00606 
+<a name="l00607"></a>00607 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00608"></a>00608 <span class="keywordtype">bool</span>
+<a name="l00609"></a><a class="code" href="classLSQ.html#a5532c6a5a314b05c9d29a319aa3a76a6">00609</a> <a class="code" href="classLSQ.html#af8eb8590fbfa6ecd2f796390677a4c00">LSQ&lt;Impl&gt;::isStalled</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00610"></a>00610 {
+<a name="l00611"></a>00611     <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a28ca1f0961b84f3386b592d1e3e1b411">lsqPolicy</a> == <a class="code" href="classLSQ.html#a2ecb54b28634ef872a820651cce92599a96535b1625776102bcc13f7dfb598dcb">Dynamic</a>)
+<a name="l00612"></a>00612         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#af8eb8590fbfa6ecd2f796390677a4c00">isStalled</a>();
+<a name="l00613"></a>00613     <span class="keywordflow">else</span>
+<a name="l00614"></a>00614         <span class="keywordflow">return</span> <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#af8eb8590fbfa6ecd2f796390677a4c00">isStalled</a>();
+<a name="l00615"></a>00615 }
+<a name="l00616"></a>00616 
+<a name="l00617"></a>00617 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00618"></a>00618 <span class="keywordtype">bool</span>
+<a name="l00619"></a><a class="code" href="classLSQ.html#ad2e4b46255cfb53e85522adeed4e2089">00619</a> <a class="code" href="classLSQ.html#ad2e4b46255cfb53e85522adeed4e2089">LSQ&lt;Impl&gt;::hasStoresToWB</a>()
+<a name="l00620"></a>00620 {
+<a name="l00621"></a>00621     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00622"></a>00622     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00623"></a>00623 
+<a name="l00624"></a>00624     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00625"></a>00625         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00626"></a>00626 
+<a name="l00627"></a>00627         <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#ad2e4b46255cfb53e85522adeed4e2089">hasStoresToWB</a>(tid))
+<a name="l00628"></a>00628             <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00629"></a>00629     }
+<a name="l00630"></a>00630 
+<a name="l00631"></a>00631     <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00632"></a>00632 }
+<a name="l00633"></a>00633 
+<a name="l00634"></a>00634 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00635"></a>00635 <span class="keywordtype">bool</span>
+<a name="l00636"></a><a class="code" href="classLSQ.html#a338be821734603396bfef8d9fb8f04b0">00636</a> <a class="code" href="classLSQ.html#a338be821734603396bfef8d9fb8f04b0">LSQ&lt;Impl&gt;::willWB</a>()
+<a name="l00637"></a>00637 {
+<a name="l00638"></a>00638     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00639"></a>00639     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00640"></a>00640 
+<a name="l00641"></a>00641     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00642"></a>00642         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00643"></a>00643 
+<a name="l00644"></a>00644         <span class="keywordflow">if</span> (<a class="code" href="classLSQ.html#a338be821734603396bfef8d9fb8f04b0">willWB</a>(tid))
+<a name="l00645"></a>00645             <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00646"></a>00646     }
+<a name="l00647"></a>00647 
+<a name="l00648"></a>00648     <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00649"></a>00649 }
+<a name="l00650"></a>00650 
+<a name="l00651"></a>00651 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00652"></a>00652 <span class="keywordtype">void</span>
+<a name="l00653"></a><a class="code" href="classLSQ.html#ad0dcc54f6823ec37a9ab4eef289e2305">00653</a> <a class="code" href="classLSQ.html#ad0dcc54f6823ec37a9ab4eef289e2305">LSQ&lt;Impl&gt;::dumpInsts</a>()<span class="keyword"> const</span>
+<a name="l00654"></a>00654 <span class="keyword"></span>{
+<a name="l00655"></a>00655     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::const_iterator</a> threads = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;begin();
+<a name="l00656"></a>00656     <a class="code" href="classstd_1_1list.html">list&lt;ThreadID&gt;::const_iterator</a> end = <a class="code" href="classLSQ.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>-&gt;end();
+<a name="l00657"></a>00657 
+<a name="l00658"></a>00658     <span class="keywordflow">while</span> (threads != end) {
+<a name="l00659"></a>00659         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = *threads++;
+<a name="l00660"></a>00660 
+<a name="l00661"></a>00661         <a class="code" href="classLSQ.html#a5709dc03226b4fc5a49a4c6a41ff50ad">thread</a>[tid].<a class="code" href="classLSQUnit.html#ad0dcc54f6823ec37a9ab4eef289e2305">dumpInsts</a>();
+<a name="l00662"></a>00662     }
+<a name="l00663"></a>00663 }
+<a name="l00664"></a>00664 
+<a name="l00665"></a>00665 <span class="preprocessor">#endif//__CPU_O3_LSQ_IMPL_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

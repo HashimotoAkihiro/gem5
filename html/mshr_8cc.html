@@ -1,0 +1,84 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/cache/mshr.cc</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>mem/cache/mshr.cc</h1><code>#include &lt;algorithm&gt;</code><br/>
+<code>#include &lt;cassert&gt;</code><br/>
+<code>#include &lt;string&gt;</code><br/>
+<code>#include &lt;vector&gt;</code><br/>
+<code>#include &quot;<a class="el" href="base_2misc_8hh_source.html">base/misc.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="base_2types_8hh_source.html">base/types.hh</a>&quot;</code><br/>
+<code>#include &quot;debug/Cache.hh&quot;</code><br/>
+<code>#include &quot;<a class="el" href="cache_8hh_source.html">mem/cache/cache.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="mshr_8hh_source.html">mem/cache/mshr.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="core_8hh_source.html">sim/core.hh</a>&quot;</code><br/>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2"><h2>関数</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="mshr_8cc.html#a6955a2cb81cc3df61959850986f4bbad">replaceUpgrade</a> (<a class="el" href="classPacket.html">PacketPtr</a> pkt)</td></tr>
+</table>
+<hr/><a name="_details"></a><h2>説明</h2>
+<p>Miss Status and Handling <a class="el" href="classRegister.html">Register</a> (<a class="el" href="classMSHR.html">MSHR</a>) definitions. </p>
+<hr/><h2>関数</h2>
+<a class="anchor" id="a6955a2cb81cc3df61959850986f4bbad"></a><!-- doxytag: member="mshr.cc::replaceUpgrade" ref="a6955a2cb81cc3df61959850986f4bbad" args="(PacketPtr pkt)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static void replaceUpgrade </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="classPacket.html">PacketPtr</a>&nbsp;</td>
+          <td class="paramname"> <em>pkt</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p><div class="fragment"><pre class="fragment"><a name="l00112"></a>00112 {
+<a name="l00113"></a>00113     <span class="keywordflow">if</span> (pkt-&gt;<a class="code" href="classPacket.html#af88eb56d484b750933cd2ea86594f001" title="The command field of the packet.">cmd</a> == <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a4f223f365c25887900892b6c520ed89e">MemCmd::UpgradeReq</a>) {
+<a name="l00114"></a>00114         pkt-&gt;<a class="code" href="classPacket.html#af88eb56d484b750933cd2ea86594f001" title="The command field of the packet.">cmd</a> = <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a9add93dbfe06a6be0bb0340705785f6c">MemCmd::ReadExReq</a>;
+<a name="l00115"></a>00115         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classCache.html">Cache</a>, <span class="stringliteral">&quot;Replacing UpgradeReq with ReadExReq\n&quot;</span>);
+<a name="l00116"></a>00116     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (pkt-&gt;<a class="code" href="classPacket.html#af88eb56d484b750933cd2ea86594f001" title="The command field of the packet.">cmd</a> == <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a26dd5b7b190f0af191e3d07399cbf1d5">MemCmd::SCUpgradeReq</a>) {
+<a name="l00117"></a>00117         pkt-&gt;<a class="code" href="classPacket.html#af88eb56d484b750933cd2ea86594f001" title="The command field of the packet.">cmd</a> = <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153ac6ef7b72a17dbdd8c061094bf7554753">MemCmd::SCUpgradeFailReq</a>;
+<a name="l00118"></a>00118         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classCache.html">Cache</a>, <span class="stringliteral">&quot;Replacing SCUpgradeReq with SCUpgradeFailReq\n&quot;</span>);
+<a name="l00119"></a>00119     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (pkt-&gt;<a class="code" href="classPacket.html#af88eb56d484b750933cd2ea86594f001" title="The command field of the packet.">cmd</a> == <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a10ce12df51611216e2e8c4cb9b5d4047">MemCmd::StoreCondReq</a>) {
+<a name="l00120"></a>00120         pkt-&gt;<a class="code" href="classPacket.html#af88eb56d484b750933cd2ea86594f001" title="The command field of the packet.">cmd</a> = <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a74dd6ebac6e139815fdc22edbae3cce3">MemCmd::StoreCondFailReq</a>;
+<a name="l00121"></a>00121         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classCache.html">Cache</a>, <span class="stringliteral">&quot;Replacing StoreCondReq with StoreCondFailReq\n&quot;</span>);
+<a name="l00122"></a>00122     }
+<a name="l00123"></a>00123 }
+</pre></div></p>
+
+</div>
+</div>
+</div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

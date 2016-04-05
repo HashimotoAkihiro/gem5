@@ -1,0 +1,137 @@
+\hypertarget{classimporter_1_1CodeImporter}{
+\section{クラス CodeImporter}
+\label{classimporter_1_1CodeImporter}\index{importer::CodeImporter@{importer::CodeImporter}}
+}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classimporter_1_1CodeImporter_ac775ee34451fdfa742b318538164070e}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classimporter_1_1CodeImporter_ad22d65f9dea83524b07e886e4201cec3}{add\_\-module}
+\item 
+def \hyperlink{classimporter_1_1CodeImporter_aa4d132840fb72dbe7fb6a9196a6649bf}{find\_\-module}
+\item 
+def \hyperlink{classimporter_1_1CodeImporter_a89668954a89cab781fc0af952e937dc4}{load\_\-module}
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classimporter_1_1CodeImporter_a7f721a262dd3d84c38ad13e9af027464}{modules}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classimporter_1_1CodeImporter_ac775ee34451fdfa742b318538164070e}{
+\index{importer::CodeImporter@{importer::CodeImporter}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!importer::CodeImporter@{importer::CodeImporter}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-init\_\-\_\- ( {\em self})}}
+\label{classimporter_1_1CodeImporter_ac775ee34451fdfa742b318538164070e}
+
+
+
+\begin{DoxyCode}
+33                       :
+34         self.modules = {}
+35 
+    def add_module(self, filename, abspath, modpath, code):
+\end{DoxyCode}
+\hypertarget{classimporter_1_1CodeImporter_ad22d65f9dea83524b07e886e4201cec3}{
+\index{importer::CodeImporter@{importer::CodeImporter}!add\_\-module@{add\_\-module}}
+\index{add\_\-module@{add\_\-module}!importer::CodeImporter@{importer::CodeImporter}}
+\subsubsection[{add\_\-module}]{\setlength{\rightskip}{0pt plus 5cm}def add\_\-module ( {\em self}, \/   {\em filename}, \/   {\em abspath}, \/   {\em modpath}, \/   {\em code})}}
+\label{classimporter_1_1CodeImporter_ad22d65f9dea83524b07e886e4201cec3}
+
+
+
+\begin{DoxyCode}
+36                                                           :
+37         if modpath in self.modules:
+38             raise AttributeError, "%s already found in importer" % modpath
+39 
+40         self.modules[modpath] = (filename, abspath, code)
+41 
+    def find_module(self, fullname, path):
+\end{DoxyCode}
+\hypertarget{classimporter_1_1CodeImporter_aa4d132840fb72dbe7fb6a9196a6649bf}{
+\index{importer::CodeImporter@{importer::CodeImporter}!find\_\-module@{find\_\-module}}
+\index{find\_\-module@{find\_\-module}!importer::CodeImporter@{importer::CodeImporter}}
+\subsubsection[{find\_\-module}]{\setlength{\rightskip}{0pt plus 5cm}def find\_\-module ( {\em self}, \/   {\em fullname}, \/   {\em path})}}
+\label{classimporter_1_1CodeImporter_aa4d132840fb72dbe7fb6a9196a6649bf}
+
+
+
+\begin{DoxyCode}
+42                                          :
+43         if fullname in self.modules:
+44             return self
+45 
+46         return None
+47 
+    def load_module(self, fullname):
+\end{DoxyCode}
+\hypertarget{classimporter_1_1CodeImporter_a89668954a89cab781fc0af952e937dc4}{
+\index{importer::CodeImporter@{importer::CodeImporter}!load\_\-module@{load\_\-module}}
+\index{load\_\-module@{load\_\-module}!importer::CodeImporter@{importer::CodeImporter}}
+\subsubsection[{load\_\-module}]{\setlength{\rightskip}{0pt plus 5cm}def load\_\-module ( {\em self}, \/   {\em fullname})}}
+\label{classimporter_1_1CodeImporter_a89668954a89cab781fc0af952e937dc4}
+
+
+
+\begin{DoxyCode}
+48                                    :
+49         # Because the importer is created and initialized in its own
+50         # little sandbox (in init.cc), the globals that were available
+51         # when the importer module was loaded and CodeImporter was
+52         # defined are not available when load_module is actually
+53         # called. Soooo, the imports must live here.
+54         import imp
+55         import os
+56         import sys
+57 
+58         try:
+59             mod = sys.modules[fullname]
+60         except KeyError:
+61             mod = imp.new_module(fullname)
+62             sys.modules[fullname] = mod
+63 
+64         try:
+65             mod.__loader__ = self
+66             srcfile,abspath,code = self.modules[fullname]
+67 
+68             override = os.environ.get('M5_OVERRIDE_PY_SOURCE', 'false').lower()
+69             if override in ('true', 'yes') and  os.path.exists(abspath):
+70                 src = file(abspath, 'r').read()
+71                 code = compile(src, abspath, 'exec')
+72 
+73             if os.path.basename(srcfile) == '__init__.py':
+74                 mod.__path__ = fullname.split('.')
+75                 mod.__package__ = fullname
+76             else:
+77                 mod.__package__ = fullname.rpartition('.')[0]
+78             mod.__file__ = srcfile
+79 
+80             exec code in mod.__dict__
+81         except Exception:
+82             del sys.modules[fullname]
+83             raise
+84 
+85         return mod
+86 
+87 # Create an importer and add it to the meta_path so future imports can
+88 # use it.  There's currently nothing in the importer, but calls to
+89 # add_module can be used to add code.
+import sys
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classimporter_1_1CodeImporter_a7f721a262dd3d84c38ad13e9af027464}{
+\index{importer::CodeImporter@{importer::CodeImporter}!modules@{modules}}
+\index{modules@{modules}!importer::CodeImporter@{importer::CodeImporter}}
+\subsubsection[{modules}]{\setlength{\rightskip}{0pt plus 5cm}{\bf modules}}}
+\label{classimporter_1_1CodeImporter_a7f721a262dd3d84c38ad13e9af027464}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+python/\hyperlink{importer_8py}{importer.py}\end{DoxyCompactItemize}

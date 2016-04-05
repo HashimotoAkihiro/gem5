@@ -1,0 +1,174 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/network/fault_model/FaultModel.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/network/fault_model/FaultModel.hh</h1><a href="FaultModel_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011 Massachusetts Institute of Technology</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Konstantinos Aisopos</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="comment">/*</span>
+<a name="l00032"></a>00032 <span class="comment"> * Official Tool Website: www.mit.edu/~kaisopos/FaultModel</span>
+<a name="l00033"></a>00033 <span class="comment"> *</span>
+<a name="l00034"></a>00034 <span class="comment"> * If you use our tool for academic research, we request that you cite: </span>
+<a name="l00035"></a>00035 <span class="comment"> * Konstantinos Aisopos, Chia-Hsin Owen Chen, and Li-Shiuan Peh. Enabling</span>
+<a name="l00036"></a>00036 <span class="comment"> * System-Level Modeling of Variation-Induced Faults in Networks-on-Chip.</span>
+<a name="l00037"></a>00037 <span class="comment"> * Proceedings of the 48th Design Automation Conference (DAC&apos;11)</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __MEM_RUBY_NETWORK_FAULT_MODEL_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_NETWORK_FAULT_MODEL_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="comment">// tool limitations and fixed inputs</span>
+<a name="l00044"></a><a class="code" href="FaultModel_8hh.html#a9a3db37b47be93a561643b04afb37303">00044</a> <span class="preprocessor">#define MAX_VCs 40</span>
+<a name="l00045"></a><a class="code" href="FaultModel_8hh.html#ae962d9d6a16983055ca17865b95be5f1">00045</a> <span class="preprocessor"></span><span class="preprocessor">#define MAX_BUFFERS_per_VC 5</span>
+<a name="l00046"></a><a class="code" href="FaultModel_8hh.html#ac6d4824e8c19e85640d24090644abef8">00046</a> <span class="preprocessor"></span><span class="preprocessor">#define BASELINE_TEMPERATURE_CELCIUS 71</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span>
+<a name="l00048"></a>00048 <span class="comment">// C++ includes</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="comment">// GEM5 includes</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;params/FaultModel.hh&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a><a class="code" href="classFaultModel.html">00055</a> <span class="keyword">class </span><a class="code" href="classFaultModel_1_1FaultModel.html">FaultModel</a> : <span class="keyword">public</span> <a class="code" href="classSimObject.html">SimObject</a>
+<a name="l00056"></a>00056 {
+<a name="l00057"></a>00057   <span class="keyword">public</span>:
+<a name="l00058"></a><a class="code" href="classFaultModel.html#a7375aa39205bda869bcfb089a9163679">00058</a>     <span class="keyword">typedef</span> FaultModelParams <a class="code" href="classFaultModel.html#a7375aa39205bda869bcfb089a9163679">Params</a>;
+<a name="l00059"></a>00059     <a class="code" href="classFaultModel.html#ad0752b1f7980300e4978b8ed20041fdc">FaultModel</a>(<span class="keyword">const</span> <a class="code" href="classFaultModel.html#a7375aa39205bda869bcfb089a9163679">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00060"></a><a class="code" href="classFaultModel.html#acd3c3feb78ae7a8f88fe0f110a718dff">00060</a>     <span class="keyword">const</span> <a class="code" href="classFaultModel.html#a7375aa39205bda869bcfb089a9163679">Params</a> *<a class="code" href="classFaultModel.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<span class="keyword">const</span> <a class="code" href="classFaultModel.html#a7375aa39205bda869bcfb089a9163679">Params</a> *)<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>; }
+<a name="l00061"></a>00061 
+<a name="l00062"></a>00062     <span class="comment">/************************************************************************/</span>
+<a name="l00063"></a>00063     <span class="comment">/**********  THE FAULT TYPES SUPPORTED BY THE FAULT MODEL ***************/</span>
+<a name="l00064"></a>00064     <span class="comment">/************************************************************************/</span>
+<a name="l00065"></a>00065 
+<a name="l00066"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5f">00066</a>     <span class="keyword">enum</span> <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5f">fault_type</a> 
+<a name="l00067"></a>00067     {
+<a name="l00068"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa5e3d5701e1e7ad68ef8ce6e61b343135">00068</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa5e3d5701e1e7ad68ef8ce6e61b343135">data_corruption__few_bits</a>,
+<a name="l00069"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fab3d1223d794fade671b2f63bc14a87e0">00069</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fab3d1223d794fade671b2f63bc14a87e0">data_corruption__all_bits</a>,
+<a name="l00070"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa2c8ad4552f3e7e28c7f43164f0cedea8">00070</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa2c8ad4552f3e7e28c7f43164f0cedea8">flit_conservation__flit_duplication</a>,
+<a name="l00071"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fadb758411e26971d262e497483d6becf7">00071</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fadb758411e26971d262e497483d6becf7">flit_conservation__flit_loss_or_split</a>,
+<a name="l00072"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa78688a71f46ef6d5c915dacbbe65e564">00072</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa78688a71f46ef6d5c915dacbbe65e564">misrouting</a>,
+<a name="l00073"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5faf319483361a14b6983f1e35359bc9afc">00073</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5faf319483361a14b6983f1e35359bc9afc">credit_conservation__credit_generation</a>,
+<a name="l00074"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fae7401498e51398da99c21cb2e0acf056">00074</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fae7401498e51398da99c21cb2e0acf056">credit_conservation__credit_loss</a>,
+<a name="l00075"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa40686ec21bc4f76a8013d2602a0b44c9">00075</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa40686ec21bc4f76a8013d2602a0b44c9">erroneous_allocation__VC</a>,
+<a name="l00076"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa5037400f494a1f7f958dbf08e78bd457">00076</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa5037400f494a1f7f958dbf08e78bd457">erroneous_allocation__switch</a>,
+<a name="l00077"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa6bef1f2c7d102fec7019aa0cb548a275">00077</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa6bef1f2c7d102fec7019aa0cb548a275">unfair_arbitration</a>,
+<a name="l00078"></a><a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa8fd6d2a4b94af175b1e18503d1f2200f">00078</a>         <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa8fd6d2a4b94af175b1e18503d1f2200f">number_of_fault_types</a>
+<a name="l00079"></a>00079     };
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081     <span class="comment">/************************************************************************/</span>
+<a name="l00082"></a>00082     <span class="comment">/********************  INTERFACE OF THE FAULT MODEL *********************/</span>
+<a name="l00083"></a>00083     <span class="comment">/************************************************************************/</span>
+<a name="l00084"></a>00084 
+<a name="l00085"></a><a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21f">00085</a>     <span class="keyword">enum</span> <a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21f">conf_record_format</a>
+<a name="l00086"></a>00086     {
+<a name="l00087"></a><a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fa661e3c1c70f1697835634d6120c27fba">00087</a>         <a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fa661e3c1c70f1697835634d6120c27fba">conf_record_buff_per_vc</a>,
+<a name="l00088"></a><a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21faddfdcf5391cbdeaa8eddaced808b95c1">00088</a>         <a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21faddfdcf5391cbdeaa8eddaced808b95c1">conf_record_vcs</a>,
+<a name="l00089"></a><a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fae775c7c2b6014dd0e7cf2a21110a1439">00089</a>         <a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fae775c7c2b6014dd0e7cf2a21110a1439">conf_record_first_fault_type</a>,
+<a name="l00090"></a><a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fae0a9a36ceaa84ed33759c149e73175db">00090</a>         <a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fae0a9a36ceaa84ed33759c149e73175db">conf_record_last_fault_type</a> = <a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fae775c7c2b6014dd0e7cf2a21110a1439">conf_record_first_fault_type</a> + <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa8fd6d2a4b94af175b1e18503d1f2200f">number_of_fault_types</a> - 1,
+<a name="l00091"></a><a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fa07bd82f54a5768393897ffc8ac9cc552">00091</a>         <a class="code" href="classFaultModel.html#a892d29ada597232548383eb62e8cf21fa07bd82f54a5768393897ffc8ac9cc552">fields_per_conf_record</a>
+<a name="l00092"></a>00092     };
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743">00094</a>     <span class="keyword">enum</span> <a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743">temperature_record_format</a>
+<a name="l00095"></a>00095     {
+<a name="l00096"></a><a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743a403451297f147cd7d99fb6d8551c85bb">00096</a>         <a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743a403451297f147cd7d99fb6d8551c85bb">temperature_record_temp</a>,
+<a name="l00097"></a><a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743a9c15194df607ea0aa56be4487a131c7d">00097</a>         <a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743a9c15194df607ea0aa56be4487a131c7d">temperature_record_weight</a>,
+<a name="l00098"></a><a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743a188f80d79d5384c287be5edd519c6d8a">00098</a>         <a class="code" href="classFaultModel.html#a84543b68245449294e82d04eb844d743a188f80d79d5384c287be5edd519c6d8a">fields_per_temperature_record</a>
+<a name="l00099"></a>00099     };
+<a name="l00100"></a>00100 
+<a name="l00101"></a><a class="code" href="structFaultModel_1_1system__conf.html">00101</a>     <span class="keyword">struct </span><a class="code" href="structFaultModel_1_1system__conf.html">system_conf</a>
+<a name="l00102"></a>00102     {
+<a name="l00103"></a><a class="code" href="structFaultModel_1_1system__conf.html#aff3c11f5a43f1f0e5e0b7d037a202fb1">00103</a>         <span class="keywordtype">int</span> <a class="code" href="structFaultModel_1_1system__conf.html#aff3c11f5a43f1f0e5e0b7d037a202fb1">vcs</a>;
+<a name="l00104"></a><a class="code" href="structFaultModel_1_1system__conf.html#a976f05a8fc5b5b5fd700b180b8d95d68">00104</a>         <span class="keywordtype">int</span> <a class="code" href="structFaultModel_1_1system__conf.html#a976f05a8fc5b5b5fd700b180b8d95d68">buff_per_vc</a>;
+<a name="l00105"></a><a class="code" href="structFaultModel_1_1system__conf.html#aa8f5e04c807b5c28799f6070b26f6787">00105</a>         <span class="keywordtype">float</span> <a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5f">fault_type</a>[<a class="code" href="classFaultModel.html#ad671111bc5a7e95e40340cfe3fb42f5fa8fd6d2a4b94af175b1e18503d1f2200f">number_of_fault_types</a>];
+<a name="l00106"></a>00106     };
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108     <span class="keywordtype">int</span> <a class="code" href="classFaultModel.html#a9b0afb8ab704de6844484a41ecbad75f">declare_router</a>(<span class="keywordtype">int</span> number_of_inputs, 
+<a name="l00109"></a>00109                        <span class="keywordtype">int</span> number_of_outputs, 
+<a name="l00110"></a>00110                        <span class="keywordtype">int</span> number_of_vcs_per_vnet, 
+<a name="l00111"></a>00111                        <span class="keywordtype">int</span> number_of_buff_per_data_vc, 
+<a name="l00112"></a>00112                        <span class="keywordtype">int</span> number_of_buff_per_ctrl_vc);
+<a name="l00113"></a>00113 
+<a name="l00114"></a>00114     std::string <a class="code" href="classFaultModel.html#a0b3a049c6918c05b4fb8a7702d65dd93">fault_type_to_string</a>(<span class="keywordtype">int</span> fault_type_index);
+<a name="l00115"></a>00115  
+<a name="l00116"></a>00116     <span class="comment">// the following 2 functions are called at runtime, to get the probability </span>
+<a name="l00117"></a>00117     <span class="comment">// of each fault type (fault_vector) or the aggregate fault probability </span>
+<a name="l00118"></a>00118     <span class="comment">// (fault_prob). Note: the probability values are provided by reference</span>
+<a name="l00119"></a>00119     <span class="comment">// (in the variables fault_vector[] &amp; aggregate_fault_prob respectively).</span>
+<a name="l00120"></a>00120     <span class="comment">// Both functions also return a success flag (which is always true if </span>
+<a name="l00121"></a>00121     <span class="comment">// temperature ranges from 0C to 125C)</span>
+<a name="l00122"></a>00122 
+<a name="l00123"></a>00123     <span class="keywordtype">bool</span> <a class="code" href="classFaultModel.html#a25ca83d60796d678cc73f46c3553368b">fault_vector</a>(<span class="keywordtype">int</span> routerID, 
+<a name="l00124"></a>00124                       <span class="keywordtype">int</span> temperature, 
+<a name="l00125"></a>00125                       <span class="keywordtype">float</span> <a class="code" href="classFaultModel.html#a25ca83d60796d678cc73f46c3553368b">fault_vector</a>[]);
+<a name="l00126"></a>00126 
+<a name="l00127"></a>00127     <span class="keywordtype">bool</span> <a class="code" href="classFaultModel.html#ac7d54b266bf5b3e7b3054fdd875d89df">fault_prob</a>(<span class="keywordtype">int</span> routerID,
+<a name="l00128"></a>00128                     <span class="keywordtype">int</span> temperature, 
+<a name="l00129"></a>00129                     <span class="keywordtype">float</span> *aggregate_fault_prob);
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131     <span class="comment">// for debugging purposes</span>
+<a name="l00132"></a>00132 
+<a name="l00133"></a>00133     <span class="keywordtype">void</span> <a class="code" href="classFaultModel.html#a7e8442e7139d840c15bdee83789f7ae8">print</a>(<span class="keywordtype">void</span>);
+<a name="l00134"></a>00134 
+<a name="l00135"></a>00135   <span class="keyword">private</span>:
+<a name="l00136"></a><a class="code" href="classFaultModel.html#aa04aa52748b59c0c6e94daec54d0b10e">00136</a>     <a class="code" href="classstd_1_1vector.html">std::vector &lt;system_conf&gt;</a> <a class="code" href="classFaultModel.html#aa04aa52748b59c0c6e94daec54d0b10e">configurations</a>;
+<a name="l00137"></a><a class="code" href="classFaultModel.html#a3f1d61888ea857f30c7c8767847c2483">00137</a>     <a class="code" href="classstd_1_1vector.html">std::vector &lt;system_conf&gt;</a> <a class="code" href="classFaultModel.html#a3f1d61888ea857f30c7c8767847c2483">routers</a>;
+<a name="l00138"></a><a class="code" href="classFaultModel.html#ada85c55ffa43379d698989a8ee5c0391">00138</a>     <a class="code" href="classstd_1_1vector.html">std::vector &lt;int&gt;</a> <a class="code" href="classFaultModel.html#ada85c55ffa43379d698989a8ee5c0391">temperature_weights</a>;
+<a name="l00139"></a>00139 };
+<a name="l00140"></a>00140 
+<a name="l00141"></a>00141 <span class="preprocessor">#endif //  __MEM_RUBY_NETWORK_FAULT_MODEL_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

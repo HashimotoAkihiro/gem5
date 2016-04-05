@@ -1,0 +1,358 @@
+\hypertarget{namespacem5_1_1util_1_1dot__writer}{
+\section{ネームスペース m5::util::dot\_\-writer}
+\label{namespacem5_1_1util_1_1dot__writer}\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}}
+}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classm5_1_1util_1_1dot__writer_1_1NodeType}{NodeType}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_add31984cb8657529c3421202a51a7dc0}{dot\_\-create\_\-nodes}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_a6f29e1e4547e1ba7ec5fe675dfb1a079}{dot\_\-create\_\-edges}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_a1fff52253a51b807eca402644554e628}{dot\_\-add\_\-edge}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_a2444e15cbf160c23ba843c38960063b5}{dot\_\-create\_\-cluster}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_ad6620c2cbb99013162bcbc566c5b0378}{dot\_\-create\_\-node}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_a498b4029e58b118de7ca1b994d70234c}{get\_\-node\_\-type}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_a7bba31405ed25bdf7a33744c7e90b502}{get\_\-type\_\-colour}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_a61d8e0385c2049fd69ddf1bc7b944b7d}{dot\_\-gen\_\-colour}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_a7583ad2189f2e3cdd087d9d5e62ce1af}{dot\_\-rgb\_\-to\_\-html}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1dot__writer_ae1c22e483b943c09e1d17ebc09c4b5f2}{do\_\-dot}
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{namespacem5_1_1util_1_1dot__writer_a31241ceacc46b6932a85d676d5a4ab8a}{pydot} = False
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_ae1c22e483b943c09e1d17ebc09c4b5f2}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!do\_\-dot@{do\_\-dot}}
+\index{do\_\-dot@{do\_\-dot}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{do\_\-dot}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::do\_\-dot ( {\em root}, \/   {\em outdir}, \/   {\em dotFilename})}}
+\label{namespacem5_1_1util_1_1dot__writer_ae1c22e483b943c09e1d17ebc09c4b5f2}
+
+
+
+\begin{DoxyCode}
+259                                      :
+260     if not pydot:
+261         return
+262     # * use ranksep > 1.0 for for vertical separation between nodes
+263     # especially useful if you need to annotate edges using e.g. visio
+264     # which accepts svg format
+265     # * no need for hoizontal separation as nothing moves horizonally
+266     callgraph = pydot.Dot(graph_type='digraph', ranksep='1.3')
+267     dot_create_nodes(root, callgraph)
+268     dot_create_edges(root, callgraph)
+269     dot_filename = os.path.join(outdir, dotFilename)
+270     callgraph.write(dot_filename)
+271     try:
+272         # dot crashes if the figure is extremely wide.
+273         # So avoid terminating simulation unnecessarily
+274         callgraph.write_svg(dot_filename + ".svg")
+275         callgraph.write_pdf(dot_filename + ".pdf")
+276     except:
+277         warn("failed to generate dot output from %s", dot_filename)
+        warn("failed to generate dot output from %s", dot_filename)
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a1fff52253a51b807eca402644554e628}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!dot\_\-add\_\-edge@{dot\_\-add\_\-edge}}
+\index{dot\_\-add\_\-edge@{dot\_\-add\_\-edge}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{dot\_\-add\_\-edge}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::dot\_\-add\_\-edge ( {\em simNode}, \/   {\em callgraph}, \/   {\em full\_\-port\_\-name}, \/   {\em peerPort})}}
+\label{namespacem5_1_1util_1_1dot__writer_a1fff52253a51b807eca402644554e628}
+
+
+
+\begin{DoxyCode}
+126                                                               :
+127     if peerPort.role == "MASTER":
+128         peer_port_name = re.sub('\.', '_', peerPort.peer.simobj.path() \
+129                 + "." + peerPort.peer.name)
+130         callgraph.add_edge(pydot.Edge(full_port_name, peer_port_name))
+131 
+def dot_create_cluster(simNode, full_path, label):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a2444e15cbf160c23ba843c38960063b5}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!dot\_\-create\_\-cluster@{dot\_\-create\_\-cluster}}
+\index{dot\_\-create\_\-cluster@{dot\_\-create\_\-cluster}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{dot\_\-create\_\-cluster}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::dot\_\-create\_\-cluster ( {\em simNode}, \/   {\em full\_\-path}, \/   {\em label})}}
+\label{namespacem5_1_1util_1_1dot__writer_a2444e15cbf160c23ba843c38960063b5}
+
+
+
+\begin{DoxyCode}
+132                                                  :
+133     # get the parameter values of the node and use them as a tooltip
+134     ini_strings = []
+135     for param in sorted(simNode._params.keys()):
+136         value = simNode._values.get(param)
+137         if value != None:
+138             # parameter name = value in HTML friendly format
+139             ini_strings.append(str(param) + "&#61;" +
+140                                simNode._values[param].ini_str())
+141     # join all the parameters with an HTML newline
+142     tooltip = "&#10;".join(ini_strings)
+143 
+144     return pydot.Cluster( \
+145                          full_path, \
+146                          shape = "Mrecord", \
+147                          label = label, \
+148                          tooltip = "\"" + tooltip + "\"", \
+149                          style = "\"rounded, filled\"", \
+150                          color = "#000000", \
+151                          fillcolor = dot_gen_colour(simNode), \
+152                          fontname = "Arial", \
+153                          fontsize = "14", \
+154                          fontcolor = "#000000" \
+155                          )
+156 
+def dot_create_node(simNode, full_path, label):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a6f29e1e4547e1ba7ec5fe675dfb1a079}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!dot\_\-create\_\-edges@{dot\_\-create\_\-edges}}
+\index{dot\_\-create\_\-edges@{dot\_\-create\_\-edges}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{dot\_\-create\_\-edges}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::dot\_\-create\_\-edges ( {\em simNode}, \/   {\em callgraph})}}
+\label{namespacem5_1_1util_1_1dot__writer_a6f29e1e4547e1ba7ec5fe675dfb1a079}
+
+
+
+\begin{DoxyCode}
+102                                         :
+103     for port_name in simNode._ports.keys():
+104         port = simNode._port_refs.get(port_name, None)
+105         if port != None:
+106             full_path = re.sub('\.', '_', simNode.path())
+107             full_port_name = full_path + "_" + port_name
+108             port_node = dot_create_node(simNode, full_port_name, port_name)
+109             # create edges
+110             if isinstance(port, PortRef):
+111                 dot_add_edge(simNode, callgraph, full_port_name, port)
+112             else:
+113                 for p in port.elements:
+114                     dot_add_edge(simNode, callgraph, full_port_name, p)
+115 
+116     # recurse to children
+117     if simNode._children:
+118         for c in simNode._children:
+119             child = simNode._children[c]
+120             if isSimObjectVector(child):
+121                 for obj in child:
+122                     dot_create_edges(obj, callgraph)
+123             else:
+124                 dot_create_edges(child, callgraph)
+125 
+def dot_add_edge(simNode, callgraph, full_port_name, peerPort):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_ad6620c2cbb99013162bcbc566c5b0378}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!dot\_\-create\_\-node@{dot\_\-create\_\-node}}
+\index{dot\_\-create\_\-node@{dot\_\-create\_\-node}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{dot\_\-create\_\-node}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::dot\_\-create\_\-node ( {\em simNode}, \/   {\em full\_\-path}, \/   {\em label})}}
+\label{namespacem5_1_1util_1_1dot__writer_ad6620c2cbb99013162bcbc566c5b0378}
+
+
+
+\begin{DoxyCode}
+157                                               :
+158     return pydot.Node( \
+159                          full_path, \
+160                          shape = "Mrecord", \
+161                          label = label, \
+162                          style = "\"rounded, filled\"", \
+163                          color = "#000000", \
+164                          fillcolor = dot_gen_colour(simNode, True), \
+165                          fontname = "Arial", \
+166                          fontsize = "14", \
+167                          fontcolor = "#000000" \
+168                          )
+169 
+170 # an enumerator for different kinds of node types, at the moment we
+171 # discern the majority of node types, with the caches being the
+172 # notable exception
+class NodeType:
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_add31984cb8657529c3421202a51a7dc0}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!dot\_\-create\_\-nodes@{dot\_\-create\_\-nodes}}
+\index{dot\_\-create\_\-nodes@{dot\_\-create\_\-nodes}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{dot\_\-create\_\-nodes}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::dot\_\-create\_\-nodes ( {\em simNode}, \/   {\em callgraph})}}
+\label{namespacem5_1_1util_1_1dot__writer_add31984cb8657529c3421202a51a7dc0}
+
+
+
+\begin{DoxyCode}
+69                                         :
+70     if isRoot(simNode):
+71         label = "root"
+72     else:
+73         label = simNode._name
+74     full_path = re.sub('\.', '_', simNode.path())
+75     # add class name under the label
+76     label = "\"" + label + " \\n: " + simNode.__class__.__name__ + "\""
+77 
+78     # each component is a sub-graph (cluster)
+79     cluster = dot_create_cluster(simNode, full_path, label)
+80 
+81     # create nodes per port
+82     for port_name in simNode._ports.keys():
+83         port = simNode._port_refs.get(port_name, None)
+84         if port != None:
+85             full_port_name = full_path + "_" + port_name
+86             port_node = dot_create_node(simNode, full_port_name, port_name)
+87             cluster.add_node(port_node)
+88 
+89     # recurse to children
+90     if simNode._children:
+91         for c in simNode._children:
+92             child = simNode._children[c]
+93             if isSimObjectVector(child):
+94                 for obj in child:
+95                     dot_create_nodes(obj, cluster)
+96             else:
+97                 dot_create_nodes(child, cluster)
+98 
+99     callgraph.add_subgraph(cluster)
+100 
+101 # create all edges according to memory hierarchy
+def dot_create_edges(simNode, callgraph):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a61d8e0385c2049fd69ddf1bc7b944b7d}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!dot\_\-gen\_\-colour@{dot\_\-gen\_\-colour}}
+\index{dot\_\-gen\_\-colour@{dot\_\-gen\_\-colour}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{dot\_\-gen\_\-colour}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::dot\_\-gen\_\-colour ( {\em simNode}, \/   {\em isPort} = {\ttfamily False})}}
+\label{namespacem5_1_1util_1_1dot__writer_a61d8e0385c2049fd69ddf1bc7b944b7d}
+
+
+
+\begin{DoxyCode}
+220                                            :
+221     # determine the type of the current node, and also its parent, if
+222     # the node is not the same type as the parent then we use the base
+223     # colour for its type
+224     node_type = get_node_type(simNode)
+225     if simNode._parent:
+226         parent_type = get_node_type(simNode._parent)
+227     else:
+228         parent_type = NodeType.OTHER
+229 
+230     # if this node is the same type as the parent, then scale the
+231     # colour based on the depth such that the deeper levels in the
+232     # hierarchy get darker colours
+233     if node_type == parent_type:
+234         # start out with a depth of zero
+235         depth = 0
+236         parent = simNode._parent
+237         # find the closes parent that is not the same type
+238         while parent and get_node_type(parent) == parent_type:
+239             depth = depth + 1
+240             parent = parent._parent
+241         node_colour = get_type_colour(parent_type)
+242         # slightly arbitrary, but assume that the depth is less than
+243         # five levels
+244         r, g, b = map(lambda x: x * max(1 - depth / 7.0, 0.3), node_colour)
+245     else:
+246         node_colour = get_type_colour(node_type)
+247         r, g, b = node_colour
+248 
+249     # if we are colouring a port, then make it a slightly darker shade
+250     # than the node that encapsulates it, once again use a magic constant
+251     if isPort:
+252         r, g, b = map(lambda x: 0.8 * x, (r, g, b))
+253 
+254     return dot_rgb_to_html(r, g, b)
+255 
+def dot_rgb_to_html(r, g, b):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a7583ad2189f2e3cdd087d9d5e62ce1af}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!dot\_\-rgb\_\-to\_\-html@{dot\_\-rgb\_\-to\_\-html}}
+\index{dot\_\-rgb\_\-to\_\-html@{dot\_\-rgb\_\-to\_\-html}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{dot\_\-rgb\_\-to\_\-html}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::dot\_\-rgb\_\-to\_\-html ( {\em r}, \/   {\em g}, \/   {\em b})}}
+\label{namespacem5_1_1util_1_1dot__writer_a7583ad2189f2e3cdd087d9d5e62ce1af}
+
+
+
+\begin{DoxyCode}
+256                             :
+257     return "#%.2x%.2x%.2x" % (r, g, b)
+258 
+def do_dot(root, outdir, dotFilename):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a498b4029e58b118de7ca1b994d70234c}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!get\_\-node\_\-type@{get\_\-node\_\-type}}
+\index{get\_\-node\_\-type@{get\_\-node\_\-type}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{get\_\-node\_\-type}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::get\_\-node\_\-type ( {\em simNode})}}
+\label{namespacem5_1_1util_1_1dot__writer_a498b4029e58b118de7ca1b994d70234c}
+
+
+
+\begin{DoxyCode}
+182                           :
+183     if isinstance(simNode, m5.objects.System):
+184         return NodeType.SYS
+185     # NULL ISA has no BaseCPU or PioDevice, so check if these names
+186     # exists before using them
+187     elif 'BaseCPU' in dir(m5.objects) and \
+188             isinstance(simNode, m5.objects.BaseCPU):
+189         return NodeType.CPU
+190     elif 'PioDevice' in dir(m5.objects) and \
+191             isinstance(simNode, m5.objects.PioDevice):
+192         return NodeType.DEV
+193     elif isinstance(simNode, m5.objects.BaseBus):
+194         return NodeType.BUS
+195     elif isinstance(simNode, m5.objects.AbstractMemory):
+196         return NodeType.MEM
+197     else:
+198         return NodeType.OTHER
+199 
+200 # based on the node type, determine the colour as an RGB tuple, the
+201 # palette is rather arbitrary at this point (some coherent natural
+202 # tones), and someone that feels artistic should probably have a look
+def get_type_colour(nodeType):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a7bba31405ed25bdf7a33744c7e90b502}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!get\_\-type\_\-colour@{get\_\-type\_\-colour}}
+\index{get\_\-type\_\-colour@{get\_\-type\_\-colour}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{get\_\-type\_\-colour}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::dot\_\-writer::get\_\-type\_\-colour ( {\em nodeType})}}
+\label{namespacem5_1_1util_1_1dot__writer_a7bba31405ed25bdf7a33744c7e90b502}
+
+
+
+\begin{DoxyCode}
+203                              :
+204     if nodeType == NodeType.SYS:
+205         return (228, 231, 235)
+206     elif nodeType == NodeType.CPU:
+207         return (187, 198, 217)
+208     elif nodeType == NodeType.BUS:
+209         return (111, 121, 140)
+210     elif nodeType == NodeType.MEM:
+211         return (94, 89, 88)
+212     elif nodeType == NodeType.DEV:
+213         return (199, 167, 147)
+214     elif nodeType == NodeType.OTHER:
+215         # use a relatively gray shade
+216         return (186, 182, 174)
+217 
+218 # generate colour for a node, either corresponding to a sim object or a
+219 # port
+def dot_gen_colour(simNode, isPort = False):
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{namespacem5_1_1util_1_1dot__writer_a31241ceacc46b6932a85d676d5a4ab8a}{
+\index{m5::util::dot\_\-writer@{m5::util::dot\_\-writer}!pydot@{pydot}}
+\index{pydot@{pydot}!m5::util::dot_writer@{m5::util::dot\_\-writer}}
+\subsubsection[{pydot}]{\setlength{\rightskip}{0pt plus 5cm}{\bf pydot} = False}}
+\label{namespacem5_1_1util_1_1dot__writer_a31241ceacc46b6932a85d676d5a4ab8a}

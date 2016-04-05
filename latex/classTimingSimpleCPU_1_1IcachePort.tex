@@ -1,0 +1,112 @@
+\hypertarget{classTimingSimpleCPU_1_1IcachePort}{
+\section{クラス IcachePort}
+\label{classTimingSimpleCPU_1_1IcachePort}\index{TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}}
+}
+IcachePortに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classTimingSimpleCPU_1_1IcachePort}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structTimingSimpleCPU_1_1IcachePort_1_1ITickEvent}{ITickEvent}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTimingSimpleCPU_1_1IcachePort_aecbabb77fb044c96b054b9e97ab47863}{IcachePort} (\hyperlink{classTimingSimpleCPU_1_1TimingSimpleCPU}{TimingSimpleCPU} $\ast$\_\-cpu)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+virtual bool \hyperlink{classTimingSimpleCPU_1_1IcachePort_a482dba5588f4bee43e498875a61e5e0b}{recvTimingResp} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual void \hyperlink{classTimingSimpleCPU_1_1IcachePort_a29cb5a4f98063ce6e9210eacbdb35298}{recvRetry} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structTimingSimpleCPU_1_1IcachePort_1_1ITickEvent}{ITickEvent} \hyperlink{classTimingSimpleCPU_1_1IcachePort_a799a54dae0252f08692ee951528144dc}{tickEvent}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTimingSimpleCPU_1_1IcachePort_aecbabb77fb044c96b054b9e97ab47863}{
+\index{TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}!IcachePort@{IcachePort}}
+\index{IcachePort@{IcachePort}!TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}}
+\subsubsection[{IcachePort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf IcachePort} ({\bf TimingSimpleCPU} $\ast$ {\em \_\-cpu})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTimingSimpleCPU_1_1IcachePort_aecbabb77fb044c96b054b9e97ab47863}
+
+
+
+\begin{DoxyCode}
+190             : TimingCPUPort(_cpu->name() + ".icache_port", _cpu),
+191               tickEvent(_cpu)
+192         { }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTimingSimpleCPU_1_1IcachePort_a29cb5a4f98063ce6e9210eacbdb35298}{
+\index{TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}!recvRetry@{recvRetry}}
+\index{recvRetry@{recvRetry}!TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}}
+\subsubsection[{recvRetry}]{\setlength{\rightskip}{0pt plus 5cm}void recvRetry ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classTimingSimpleCPU_1_1IcachePort_a29cb5a4f98063ce6e9210eacbdb35298}
+Called by the slave port if sendTimingReq or sendTimingSnoopResp was called on this master port (causing recvTimingReq and recvTimingSnoopResp to be called on the slave port) and was unsuccesful. 
+
+\hyperlink{classMasterPort_ac1ccc3bcf7ebabb20b57fab99b2be5b0}{MasterPort}を実装しています。
+
+
+\begin{DoxyCode}
+746 {
+747     // we shouldn't get a retry unless we have a packet that we're
+748     // waiting to transmit
+749     assert(cpu->ifetch_pkt != NULL);
+750     assert(cpu->_status == IcacheRetry);
+751     PacketPtr tmp = cpu->ifetch_pkt;
+752     if (sendTimingReq(tmp)) {
+753         cpu->_status = IcacheWaitResponse;
+754         cpu->ifetch_pkt = NULL;
+755     }
+756 }
+\end{DoxyCode}
+\hypertarget{classTimingSimpleCPU_1_1IcachePort_a482dba5588f4bee43e498875a61e5e0b}{
+\index{TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}!recvTimingResp@{recvTimingResp}}
+\index{recvTimingResp@{recvTimingResp}!TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}}
+\subsubsection[{recvTimingResp}]{\setlength{\rightskip}{0pt plus 5cm}bool recvTimingResp ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classTimingSimpleCPU_1_1IcachePort_a482dba5588f4bee43e498875a61e5e0b}
+Receive a timing response from the slave port. 
+
+\hyperlink{classMasterPort_abd323548d6c93f8b0543f1fe3a86ca35}{MasterPort}を実装しています。
+
+
+\begin{DoxyCode}
+731 {
+732     DPRINTF(SimpleCPU, "Received timing response %#x\n", pkt->getAddr());
+733     // delay processing of returned data until next CPU clock edge
+734     Tick next_tick = cpu->clockEdge();
+735 
+736     if (next_tick == curTick())
+737         cpu->completeIfetch(pkt);
+738     else
+739         tickEvent.schedule(pkt, next_tick);
+740 
+741     return true;
+742 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classTimingSimpleCPU_1_1IcachePort_a799a54dae0252f08692ee951528144dc}{
+\index{TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}!tickEvent@{tickEvent}}
+\index{tickEvent@{tickEvent}!TimingSimpleCPU::IcachePort@{TimingSimpleCPU::IcachePort}}
+\subsubsection[{tickEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ITickEvent} {\bf tickEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTimingSimpleCPU_1_1IcachePort_a799a54dae0252f08692ee951528144dc}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/simple/\hyperlink{timing_8hh}{timing.hh}\item 
+cpu/simple/\hyperlink{timing_8cc}{timing.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,237 @@
+\hypertarget{classCpuLocalTimer}{
+\section{クラス CpuLocalTimer}
+\label{classCpuLocalTimer}\index{CpuLocalTimer@{CpuLocalTimer}}
+}
+
+
+{\ttfamily \#include $<$timer\_\-cpulocal.hh$>$}CpuLocalTimerに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classCpuLocalTimer}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classCpuLocalTimer_1_1Timer}{Timer}
+\end{DoxyCompactItemize}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef CpuLocalTimerParams \hyperlink{classCpuLocalTimer_a2abacbbb646e91ed1ef591d6ce81f4e3}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classCpuLocalTimer_a2abacbbb646e91ed1ef591d6ce81f4e3}{Params} $\ast$ \hyperlink{classCpuLocalTimer_acd3c3feb78ae7a8f88fe0f110a718dff}{params} () const 
+\item 
+\hyperlink{classCpuLocalTimer_ae7c3cd295b79e672e3294e726eb27f61}{CpuLocalTimer} (\hyperlink{classCpuLocalTimer_a2abacbbb646e91ed1ef591d6ce81f4e3}{Params} $\ast$p)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classCpuLocalTimer_a613ec7d5e1ec64f8d21fec78ae8e568e}{read} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classCpuLocalTimer_a4cefab464e72b5dd42c003a0a4341802}{write} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual void \hyperlink{classCpuLocalTimer_a53e036786d17361be4c7320d39c99b84}{serialize} (std::ostream \&os)
+\item 
+virtual void \hyperlink{classCpuLocalTimer_af22e5d6d660b97db37003ac61ac4ee49}{unserialize} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const std::string \&section)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBaseGic}{BaseGic} $\ast$ \hyperlink{classCpuLocalTimer_a2e2266dca56928f63667e994933169ee}{gic}
+\item 
+\hyperlink{classCpuLocalTimer_1_1Timer}{Timer} \hyperlink{classCpuLocalTimer_ad9495d6ed4425c81f8f33c7df84a0ada}{localTimer} \mbox{[}\hyperlink{classCpuLocalTimer_a4b102c882c8ecd5172c3f918fcde9c6d}{CPU\_\-MAX}\mbox{]}
+\end{DoxyCompactItemize}
+\subsection*{Static Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+static const int \hyperlink{classCpuLocalTimer_a4b102c882c8ecd5172c3f918fcde9c6d}{CPU\_\-MAX} = 8
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classCpuLocalTimer_a2abacbbb646e91ed1ef591d6ce81f4e3}{
+\index{CpuLocalTimer@{CpuLocalTimer}!Params@{Params}}
+\index{Params@{Params}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef CpuLocalTimerParams {\bf Params}}}
+\label{classCpuLocalTimer_a2abacbbb646e91ed1ef591d6ce81f4e3}
+
+
+\hyperlink{classBasicPioDevice_a2845515ac6467f10540747053c8a0449}{BasicPioDevice}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCpuLocalTimer_ae7c3cd295b79e672e3294e726eb27f61}{
+\index{CpuLocalTimer@{CpuLocalTimer}!CpuLocalTimer@{CpuLocalTimer}}
+\index{CpuLocalTimer@{CpuLocalTimer}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{CpuLocalTimer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CpuLocalTimer} ({\bf Params} $\ast$ {\em p})}}
+\label{classCpuLocalTimer_ae7c3cd295b79e672e3294e726eb27f61}
+The constructor for \hyperlink{classRealView}{RealView} just registers itself with the MMU. 
+\begin{DoxyParams}{引数}
+\item[{\em p}]params structure \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+51     : BasicPioDevice(p, 0x38), gic(p->gic)
+52 {
+53    // Initialize the timer registers for each per cpu timer
+54    for (int i = 0; i < CPU_MAX; i++) {
+55         std::stringstream oss;
+56         oss << name() << ".timer" << i;
+57         localTimer[i]._name = oss.str();
+58         localTimer[i].parent = this;
+59         localTimer[i].intNumTimer = p->int_num_timer;
+60         localTimer[i].intNumWatchdog = p->int_num_watchdog;
+61         localTimer[i].cpuNum = i;
+62     }
+63 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classCpuLocalTimer_acd3c3feb78ae7a8f88fe0f110a718dff}{
+\index{CpuLocalTimer@{CpuLocalTimer}!params@{params}}
+\index{params@{params}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Params}$\ast$ params () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCpuLocalTimer_acd3c3feb78ae7a8f88fe0f110a718dff}
+
+
+\hyperlink{classBasicPioDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicPioDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+166     {
+167         return dynamic_cast<const Params *>(_params);
+168     }
+\end{DoxyCode}
+\hypertarget{classCpuLocalTimer_a613ec7d5e1ec64f8d21fec78ae8e568e}{
+\index{CpuLocalTimer@{CpuLocalTimer}!read@{read}}
+\index{read@{read}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} read ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCpuLocalTimer_a613ec7d5e1ec64f8d21fec78ae8e568e}
+Handle a read to the device 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]The memory request. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Returns latency of device read 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_a842312590432036092c422c87a442358}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+74 {
+75     assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+76     assert(pkt->getSize() == 4);
+77     Addr daddr = pkt->getAddr() - pioAddr;
+78     pkt->allocate();
+79     int cpu_id = pkt->req->contextId();
+80     DPRINTF(Timer, "Reading from CpuLocalTimer at offset: %#x\n", daddr);
+81     assert(cpu_id >= 0);
+82     assert(cpu_id < CPU_MAX);
+83 
+84     if (daddr < Timer::Size)
+85         localTimer[cpu_id].read(pkt, daddr);
+86     else
+87         panic("Tried to read CpuLocalTimer at offset %#x that doesn't exist\n", d
+      addr);
+88     pkt->makeAtomicResponse();
+89     return pioDelay;
+90 }
+\end{DoxyCode}
+\hypertarget{classCpuLocalTimer_a53e036786d17361be4c7320d39c99b84}{
+\index{CpuLocalTimer@{CpuLocalTimer}!serialize@{serialize}}
+\index{serialize@{serialize}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize (std::ostream \& {\em os})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCpuLocalTimer_a53e036786d17361be4c7320d39c99b84}
+
+
+\hyperlink{classSerializable_ad6272f80ae37e8331e3969b3f072a801}{Serializable}を再定義しています。
+
+
+\begin{DoxyCode}
+422 {
+423     for (int i = 0; i < CPU_MAX; i++) {
+424         nameOut(os, csprintf("%s.timer%d", name(), i));
+425         localTimer[i].serialize(os);
+426     }
+427 }
+\end{DoxyCode}
+\hypertarget{classCpuLocalTimer_af22e5d6d660b97db37003ac61ac4ee49}{
+\index{CpuLocalTimer@{CpuLocalTimer}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}void unserialize ({\bf Checkpoint} $\ast$ {\em cp}, \/  const std::string \& {\em section})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCpuLocalTimer_af22e5d6d660b97db37003ac61ac4ee49}
+
+
+\hyperlink{classSerializable_af100c4e9feabf3cd918619c88c718387}{Serializable}を再定義しています。
+
+
+\begin{DoxyCode}
+431 {
+432     for (int i = 0; i < CPU_MAX; i++) {
+433         localTimer[i].unserialize(cp, csprintf("%s.timer%d", section, i));
+434     }
+435 }
+\end{DoxyCode}
+\hypertarget{classCpuLocalTimer_a4cefab464e72b5dd42c003a0a4341802}{
+\index{CpuLocalTimer@{CpuLocalTimer}!write@{write}}
+\index{write@{write}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} write ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCpuLocalTimer_a4cefab464e72b5dd42c003a0a4341802}
+Handle a write to the device. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]The memory request. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Returns latency of device write 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_afe8371668d023bb2516b286e5e399b6f}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+153 {
+154     assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+155     assert(pkt->getSize() == 4);
+156     Addr daddr = pkt->getAddr() - pioAddr;
+157     pkt->allocate();
+158     int cpu_id = pkt->req->contextId();
+159     DPRINTF(Timer, "Writing to CpuLocalTimer at offset: %#x\n", daddr);
+160     assert(cpu_id >= 0);
+161     assert(cpu_id < CPU_MAX);
+162 
+163     if (daddr < Timer::Size)
+164         localTimer[cpu_id].write(pkt, daddr);
+165     else
+166         panic("Tried to write CpuLocalTimer at offset %#x that doesn't exist\n", 
+      daddr);
+167     pkt->makeAtomicResponse();
+168     return pioDelay;
+169 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCpuLocalTimer_a4b102c882c8ecd5172c3f918fcde9c6d}{
+\index{CpuLocalTimer@{CpuLocalTimer}!CPU\_\-MAX@{CPU\_\-MAX}}
+\index{CPU\_\-MAX@{CPU\_\-MAX}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{CPU\_\-MAX}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf CPU\_\-MAX} = 8\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classCpuLocalTimer_a4b102c882c8ecd5172c3f918fcde9c6d}
+\hypertarget{classCpuLocalTimer_a2e2266dca56928f63667e994933169ee}{
+\index{CpuLocalTimer@{CpuLocalTimer}!gic@{gic}}
+\index{gic@{gic}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{gic}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BaseGic}$\ast$ {\bf gic}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCpuLocalTimer_a2e2266dca56928f63667e994933169ee}
+Pointer to the GIC for causing an interrupt \hypertarget{classCpuLocalTimer_ad9495d6ed4425c81f8f33c7df84a0ada}{
+\index{CpuLocalTimer@{CpuLocalTimer}!localTimer@{localTimer}}
+\index{localTimer@{localTimer}!CpuLocalTimer@{CpuLocalTimer}}
+\subsubsection[{localTimer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Timer} {\bf localTimer}\mbox{[}{\bf CPU\_\-MAX}\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCpuLocalTimer_ad9495d6ed4425c81f8f33c7df84a0ada}
+Timers that do the actual work 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/arm/\hyperlink{timer__cpulocal_8hh}{timer\_\-cpulocal.hh}\item 
+dev/arm/\hyperlink{timer__cpulocal_8cc}{timer\_\-cpulocal.cc}\end{DoxyCompactItemize}

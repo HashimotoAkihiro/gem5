@@ -1,0 +1,126 @@
+\hypertarget{generic_2memhelpers_8hh}{
+\section{arch/generic/memhelpers.hh}
+\label{generic_2memhelpers_8hh}\index{arch/generic/memhelpers.hh@{arch/generic/memhelpers.hh}}
+}
+{\ttfamily \#include $<$stdio.h$>$}\par
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/request.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/byteswap.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/fault\_\-fwd.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/insttracer.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$class XC , class MemT $>$ }\\\hyperlink{classRefCountingPtr}{Fault} \hyperlink{generic_2memhelpers_8hh_a491fe4bf4be9d7fed3785c1ae563ff5d}{readMemTiming} (XC $\ast$xc, \hyperlink{classTrace_1_1InstRecord}{Trace::InstRecord} $\ast$traceData, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, MemT \&mem, unsigned flags)
+\begin{DoxyCompactList}\small\item\em Read from memory in timing mode. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class MemT $>$ }\\void \hyperlink{generic_2memhelpers_8hh_abed30c0ee19ac7b23d3e6bcf0c86de6f}{getMem} (\hyperlink{classPacket}{PacketPtr} pkt, MemT \&mem, \hyperlink{classTrace_1_1InstRecord}{Trace::InstRecord} $\ast$traceData)
+\begin{DoxyCompactList}\small\item\em Extract the data returned from a timing mode read. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class XC , class MemT $>$ }\\\hyperlink{classRefCountingPtr}{Fault} \hyperlink{generic_2memhelpers_8hh_a6793e28c3f96586257658fd5c41a7074}{readMemAtomic} (XC $\ast$xc, \hyperlink{classTrace_1_1InstRecord}{Trace::InstRecord} $\ast$traceData, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, MemT \&mem, unsigned flags)
+\begin{DoxyCompactList}\small\item\em Read from memory in atomic mode. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class XC , class MemT $>$ }\\\hyperlink{classRefCountingPtr}{Fault} \hyperlink{generic_2memhelpers_8hh_aaef940f518929a90f7b5399c66907fb2}{writeMemTiming} (XC $\ast$xc, \hyperlink{classTrace_1_1InstRecord}{Trace::InstRecord} $\ast$traceData, MemT mem, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, unsigned flags, uint64\_\-t $\ast$res)
+\begin{DoxyCompactList}\small\item\em Write to memory in timing mode. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class XC , class MemT $>$ }\\\hyperlink{classRefCountingPtr}{Fault} \hyperlink{generic_2memhelpers_8hh_a806e635999838018e8f1e2b84e9cb827}{writeMemAtomic} (XC $\ast$xc, \hyperlink{classTrace_1_1InstRecord}{Trace::InstRecord} $\ast$traceData, const MemT \&mem, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, unsigned flags, uint64\_\-t $\ast$res)
+\begin{DoxyCompactList}\small\item\em Write to memory in atomic mode. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{generic_2memhelpers_8hh_abed30c0ee19ac7b23d3e6bcf0c86de6f}{
+\index{generic/memhelpers.hh@{generic/memhelpers.hh}!getMem@{getMem}}
+\index{getMem@{getMem}!generic/memhelpers.hh@{generic/memhelpers.hh}}
+\subsubsection[{getMem}]{\setlength{\rightskip}{0pt plus 5cm}void getMem ({\bf PacketPtr} {\em pkt}, \/  MemT \& {\em mem}, \/  {\bf Trace::InstRecord} $\ast$ {\em traceData})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{generic_2memhelpers_8hh_abed30c0ee19ac7b23d3e6bcf0c86de6f}
+
+
+Extract the data returned from a timing mode read. 
+
+
+\begin{DoxyCode}
+67 {
+68     mem = pkt->get<MemT>();
+69     if (traceData)
+70         traceData->setData(mem);
+71 }
+\end{DoxyCode}
+\hypertarget{generic_2memhelpers_8hh_a6793e28c3f96586257658fd5c41a7074}{
+\index{generic/memhelpers.hh@{generic/memhelpers.hh}!readMemAtomic@{readMemAtomic}}
+\index{readMemAtomic@{readMemAtomic}!generic/memhelpers.hh@{generic/memhelpers.hh}}
+\subsubsection[{readMemAtomic}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} readMemAtomic (XC $\ast$ {\em xc}, \/  {\bf Trace::InstRecord} $\ast$ {\em traceData}, \/  {\bf Addr} {\em addr}, \/  MemT \& {\em mem}, \/  unsigned {\em flags})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{generic_2memhelpers_8hh_a6793e28c3f96586257658fd5c41a7074}
+
+
+Read from memory in atomic mode. 
+
+
+\begin{DoxyCode}
+79 {
+80 
+81     memset(&mem, 0, sizeof(mem));
+82     Fault fault = readMemTiming(xc, traceData, addr, mem, flags);
+83     if (fault == NoFault) {
+84         mem = TheISA::gtoh(mem);
+85         if (traceData)
+86             traceData->setData(mem);
+87     }
+88    
+89     return fault;
+90 }
+\end{DoxyCode}
+\hypertarget{generic_2memhelpers_8hh_a491fe4bf4be9d7fed3785c1ae563ff5d}{
+\index{generic/memhelpers.hh@{generic/memhelpers.hh}!readMemTiming@{readMemTiming}}
+\index{readMemTiming@{readMemTiming}!generic/memhelpers.hh@{generic/memhelpers.hh}}
+\subsubsection[{readMemTiming}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} readMemTiming (XC $\ast$ {\em xc}, \/  {\bf Trace::InstRecord} $\ast$ {\em traceData}, \/  {\bf Addr} {\em addr}, \/  MemT \& {\em mem}, \/  unsigned {\em flags})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{generic_2memhelpers_8hh_a491fe4bf4be9d7fed3785c1ae563ff5d}
+
+
+Read from memory in timing mode. 
+
+
+\begin{DoxyCode}
+59 {
+60     return xc->readMem(addr, (uint8_t *)&mem, sizeof(MemT), flags);
+61 }
+\end{DoxyCode}
+\hypertarget{generic_2memhelpers_8hh_a806e635999838018e8f1e2b84e9cb827}{
+\index{generic/memhelpers.hh@{generic/memhelpers.hh}!writeMemAtomic@{writeMemAtomic}}
+\index{writeMemAtomic@{writeMemAtomic}!generic/memhelpers.hh@{generic/memhelpers.hh}}
+\subsubsection[{writeMemAtomic}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} writeMemAtomic (XC $\ast$ {\em xc}, \/  {\bf Trace::InstRecord} $\ast$ {\em traceData}, \/  const MemT \& {\em mem}, \/  {\bf Addr} {\em addr}, \/  unsigned {\em flags}, \/  uint64\_\-t $\ast$ {\em res})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{generic_2memhelpers_8hh_a806e635999838018e8f1e2b84e9cb827}
+
+
+Write to memory in atomic mode. 
+
+
+\begin{DoxyCode}
+115 {
+116     Fault fault = writeMemTiming(xc, traceData, mem, addr, flags, res);
+117     if (fault == NoFault && res != NULL) {
+118         if (flags & Request::MEM_SWAP || flags & Request::MEM_SWAP_COND)
+119           if(sizeof(MemT) == 16) {return fault;}
+120           else {//*res = TheISA::gtoh((MemT)*res);
+121                 *res = TheISA::gtoh(*res);}
+122         else
+123           if(sizeof(MemT) == 16) {return fault;}
+124           else{  *res = TheISA::gtoh(*res);}
+125     }
+126     return fault;
+127 }
+\end{DoxyCode}
+\hypertarget{generic_2memhelpers_8hh_aaef940f518929a90f7b5399c66907fb2}{
+\index{generic/memhelpers.hh@{generic/memhelpers.hh}!writeMemTiming@{writeMemTiming}}
+\index{writeMemTiming@{writeMemTiming}!generic/memhelpers.hh@{generic/memhelpers.hh}}
+\subsubsection[{writeMemTiming}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} writeMemTiming (XC $\ast$ {\em xc}, \/  {\bf Trace::InstRecord} $\ast$ {\em traceData}, \/  MemT {\em mem}, \/  {\bf Addr} {\em addr}, \/  unsigned {\em flags}, \/  uint64\_\-t $\ast$ {\em res})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{generic_2memhelpers_8hh_aaef940f518929a90f7b5399c66907fb2}
+
+
+Write to memory in timing mode. 
+
+
+\begin{DoxyCode}
+101 {
+102     if (traceData) {
+103         traceData->setData(mem);
+104     }
+105     mem = TheISA::htog(mem);
+106     return xc->writeMem((uint8_t *)&mem, sizeof(MemT), addr, flags, res);
+107 }
+\end{DoxyCode}

@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/network/garnet/fixed-pipeline/NetworkInterface_d.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/network/garnet/fixed-pipeline/NetworkInterface_d.hh</h1><a href="NetworkInterface__d_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2008 Princeton University</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Niket Agarwal</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __MEM_RUBY_NETWORK_GARNET_FIXED_PIPELINE_NETWORK_INTERFACE_D_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_NETWORK_GARNET_FIXED_PIPELINE_NETWORK_INTERFACE_D_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="Consumer_8hh.html">mem/ruby/common/Consumer.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="CreditLink__d_8hh.html">mem/ruby/network/garnet/fixed-pipeline/CreditLink_d.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="GarnetNetwork__d_8hh.html">mem/ruby/network/garnet/fixed-pipeline/GarnetNetwork_d.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="NetworkLink__d_8hh.html">mem/ruby/network/garnet/fixed-pipeline/NetworkLink_d.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="OutVcState__d_8hh.html">mem/ruby/network/garnet/fixed-pipeline/OutVcState_d.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="NetworkHeader_8hh.html">mem/ruby/network/garnet/NetworkHeader.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="Message_8hh.html">mem/ruby/slicc_interface/Message.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;params/GarnetNetworkInterface_d.hh&quot;</span>
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="keyword">class </span><a class="code" href="classNetworkMessage.html">NetworkMessage</a>;
+<a name="l00047"></a>00047 <span class="keyword">class </span><a class="code" href="classMessageBuffer.html">MessageBuffer</a>;
+<a name="l00048"></a>00048 <span class="keyword">class </span><a class="code" href="classflitBuffer__d.html">flitBuffer_d</a>;
+<a name="l00049"></a>00049 
+<a name="l00050"></a><a class="code" href="classNetworkInterface__d.html">00050</a> <span class="keyword">class </span><a class="code" href="classNetworkInterface__d.html">NetworkInterface_d</a> : <span class="keyword">public</span> <a class="code" href="classClockedObject_1_1ClockedObject.html">ClockedObject</a>, <span class="keyword">public</span> <a class="code" href="classConsumer.html">Consumer</a>
+<a name="l00051"></a>00051 {
+<a name="l00052"></a>00052   <span class="keyword">public</span>:
+<a name="l00053"></a><a class="code" href="classNetworkInterface__d.html#ab6c40ec3be0502fd09ea61583eecc26a">00053</a>     <span class="keyword">typedef</span> GarnetNetworkInterface_dParams <a class="code" href="classNetworkInterface__d.html#ab6c40ec3be0502fd09ea61583eecc26a">Params</a>;
+<a name="l00054"></a>00054     <a class="code" href="classNetworkInterface__d.html#a1f5049c73c6c9b05ac58d9ec59df057c">NetworkInterface_d</a>(<span class="keyword">const</span> <a class="code" href="classNetworkInterface__d.html#ab6c40ec3be0502fd09ea61583eecc26a">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00055"></a>00055     <a class="code" href="classNetworkInterface__d.html#aba1b0a4c820667bc51ff0bd8b9e599bd">~NetworkInterface_d</a>();
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#adbdbe0df8be4baa68257ae0a5badfd2e">addInPort</a>(<a class="code" href="classNetworkLink__d.html">NetworkLink_d</a> *in_link, <a class="code" href="classCreditLink__d.html">CreditLink_d</a> *credit_link);
+<a name="l00060"></a>00060     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#a8bb6c70f88a9da2c9adab0d72a2e6e3f">addOutPort</a>(<a class="code" href="classNetworkLink__d.html">NetworkLink_d</a> *out_link, <a class="code" href="classCreditLink__d.html">CreditLink_d</a> *credit_link);
+<a name="l00061"></a>00061 
+<a name="l00062"></a>00062     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>();
+<a name="l00063"></a>00063     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#abb78e667f7f184a1989354ba522d32a9">addNode</a>(<a class="code" href="classstd_1_1vector.html">std::vector&lt;MessageBuffer *&gt;</a> &amp;inNode,
+<a name="l00064"></a>00064                  <a class="code" href="classstd_1_1vector.html">std::vector&lt;MessageBuffer *&gt;</a> &amp;outNode);
+<a name="l00065"></a>00065     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#ac55fe386a101fbae38c716067c9966a0">print</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00066"></a>00066     <span class="keywordtype">int</span> <a class="code" href="classNetworkInterface__d.html#ae73de77352867d272505f41222809e17">get_vnet</a>(<span class="keywordtype">int</span> vc);
+<a name="l00067"></a><a class="code" href="classNetworkInterface__d.html#adb63d5adcd3ba8d6d0c6336d7b716243">00067</a>     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#adb63d5adcd3ba8d6d0c6336d7b716243">init_net_ptr</a>(<a class="code" href="classGarnetNetwork__d.html">GarnetNetwork_d</a> *net_ptr) { <a class="code" href="classNetworkInterface__d.html#a9534b7843922554d9c1b429e50a11e6d">m_net_ptr</a> = net_ptr; }
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classNetworkInterface__d.html#aba9037f662122b5f2e85647d35670e5c">functionalWrite</a>(<a class="code" href="classPacket.html">Packet</a> *);
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071   <span class="keyword">private</span>:
+<a name="l00072"></a><a class="code" href="classNetworkInterface__d.html#a9534b7843922554d9c1b429e50a11e6d">00072</a>     <a class="code" href="classGarnetNetwork__d.html">GarnetNetwork_d</a> *<a class="code" href="classNetworkInterface__d.html#a9534b7843922554d9c1b429e50a11e6d">m_net_ptr</a>;
+<a name="l00073"></a><a class="code" href="classNetworkInterface__d.html#af4cc96182e80059859793d92cb3dd769">00073</a>     <span class="keywordtype">int</span> <a class="code" href="classNetworkInterface__d.html#af4cc96182e80059859793d92cb3dd769">m_virtual_networks</a>, <a class="code" href="classNetworkInterface__d.html#a2e1a9213321dfa0386cdedaf6fc22996">m_num_vcs</a>, <a class="code" href="classNetworkInterface__d.html#a2d66b8cad5144408ed492eeff4d37c2f">m_vc_per_vnet</a>;
+<a name="l00074"></a><a class="code" href="classNetworkInterface__d.html#aaed4e1d0badfbd8b21e43869898ed184">00074</a>     <a class="code" href="TypeDefines_8hh.html#a83c14b4ae37e80071f6b3506a6c46151">NodeID</a> <a class="code" href="classNetworkInterface__d.html#aaed4e1d0badfbd8b21e43869898ed184">m_id</a>;
+<a name="l00075"></a><a class="code" href="classNetworkInterface__d.html#aadaadc7a32b7bf67a8c953eb3e9a13c7">00075</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;OutVcState_d *&gt;</a> <a class="code" href="classNetworkInterface__d.html#aadaadc7a32b7bf67a8c953eb3e9a13c7">m_out_vc_state</a>;
+<a name="l00076"></a><a class="code" href="classNetworkInterface__d.html#a4e31a4f4aad8462157e797cdb1e3e00c">00076</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classNetworkInterface__d.html#a4e31a4f4aad8462157e797cdb1e3e00c">m_vc_allocator</a>;
+<a name="l00077"></a><a class="code" href="classNetworkInterface__d.html#a4e50d04fbae98d5e7eac566ab56f4227">00077</a>     <span class="keywordtype">int</span> <a class="code" href="classNetworkInterface__d.html#a4e50d04fbae98d5e7eac566ab56f4227">m_vc_round_robin</a>; <span class="comment">// For round robin scheduling</span>
+<a name="l00078"></a><a class="code" href="classNetworkInterface__d.html#aaf13976ec6e83029468aab14cef7c812">00078</a>     <a class="code" href="classflitBuffer__d.html">flitBuffer_d</a> *<a class="code" href="classNetworkInterface__d.html#aaf13976ec6e83029468aab14cef7c812">outSrcQueue</a>; <span class="comment">// For modelling link contention</span>
+<a name="l00079"></a><a class="code" href="classNetworkInterface__d.html#ab387c0eedaf4adb3f05beb4433c2e033">00079</a>     <a class="code" href="classflitBuffer__d.html">flitBuffer_d</a> *<a class="code" href="classNetworkInterface__d.html#ab387c0eedaf4adb3f05beb4433c2e033">creditQueue</a>;
+<a name="l00080"></a>00080 
+<a name="l00081"></a><a class="code" href="classNetworkInterface__d.html#a32c70d9a8a19282b4cc9094e6b94c96f">00081</a>     <a class="code" href="classNetworkLink__d.html">NetworkLink_d</a> *<a class="code" href="classNetworkInterface__d.html#a32c70d9a8a19282b4cc9094e6b94c96f">inNetLink</a>;
+<a name="l00082"></a><a class="code" href="classNetworkInterface__d.html#ac6b53ee37454b0be010596ffff96d307">00082</a>     <a class="code" href="classNetworkLink__d.html">NetworkLink_d</a> *<a class="code" href="classNetworkInterface__d.html#ac6b53ee37454b0be010596ffff96d307">outNetLink</a>;
+<a name="l00083"></a><a class="code" href="classNetworkInterface__d.html#a8439db4fc7b7271dfca6bf98b13036a4">00083</a>     <a class="code" href="classCreditLink__d.html">CreditLink_d</a> *<a class="code" href="classNetworkInterface__d.html#a8439db4fc7b7271dfca6bf98b13036a4">m_credit_link</a>;
+<a name="l00084"></a><a class="code" href="classNetworkInterface__d.html#a586e9d61fe6b52622d7589a756560ec6">00084</a>     <a class="code" href="classCreditLink__d.html">CreditLink_d</a> *<a class="code" href="classNetworkInterface__d.html#a586e9d61fe6b52622d7589a756560ec6">m_ni_credit_link</a>;
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086     <span class="comment">// Input Flit Buffers</span>
+<a name="l00087"></a>00087     <span class="comment">// The flit buffers which will serve the Consumer</span>
+<a name="l00088"></a><a class="code" href="classNetworkInterface__d.html#a364f3f4326fe3dc25234b260deecf659">00088</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;flitBuffer_d *&gt;</a>   <a class="code" href="classNetworkInterface__d.html#a364f3f4326fe3dc25234b260deecf659">m_ni_buffers</a>;
+<a name="l00089"></a><a class="code" href="classNetworkInterface__d.html#a6dec698d5050bbeb09ab70f9ea7df75c">00089</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Time&gt;</a> <a class="code" href="classNetworkInterface__d.html#a6dec698d5050bbeb09ab70f9ea7df75c">m_ni_enqueue_time</a>;
+<a name="l00090"></a>00090 
+<a name="l00091"></a>00091     <span class="comment">// The Message buffers that takes messages from the protocol</span>
+<a name="l00092"></a><a class="code" href="classNetworkInterface__d.html#a933eda70266204185e6bc2a65f0add98">00092</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;MessageBuffer *&gt;</a> <a class="code" href="classNetworkInterface__d.html#a933eda70266204185e6bc2a65f0add98">inNode_ptr</a>;
+<a name="l00093"></a>00093     <span class="comment">// The Message buffers that provides messages to the protocol</span>
+<a name="l00094"></a><a class="code" href="classNetworkInterface__d.html#aff22e632df88a83fbcbac281efec0dcc">00094</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;MessageBuffer *&gt;</a> <a class="code" href="classNetworkInterface__d.html#aff22e632df88a83fbcbac281efec0dcc">outNode_ptr</a>;
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096     <span class="keywordtype">bool</span> <a class="code" href="classNetworkInterface__d.html#a12a9945591ab6cd27b4cf0df84786cf8">flitisizeMessage</a>(<a class="code" href="classRefCountingPtr.html">MsgPtr</a> msg_ptr, <span class="keywordtype">int</span> vnet);
+<a name="l00097"></a>00097     <span class="keywordtype">int</span> <a class="code" href="classNetworkInterface__d.html#ab27658cc3136de94d2d08c78ac499aff">calculateVC</a>(<span class="keywordtype">int</span> vnet);
+<a name="l00098"></a>00098     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#a0b5091af4210988da9a7eeb44e5691e4">scheduleOutputLink</a>();
+<a name="l00099"></a>00099     <span class="keywordtype">void</span> <a class="code" href="classNetworkInterface__d.html#af954e8e2150e2ce2e1b87081bbd9c678">checkReschedule</a>();
+<a name="l00100"></a>00100 };
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102 <span class="preprocessor">#endif // __MEM_RUBY_NETWORK_GARNET_FIXED_PIPELINE_NETWORK_INTERFACE_D_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

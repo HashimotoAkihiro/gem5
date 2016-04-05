@@ -1,0 +1,193 @@
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job}{
+\section{クラス Job}
+\label{classm5_1_1util_1_1jobfile_1_1Job}\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+}
+Jobに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classm5_1_1util_1_1jobfile_1_1Job}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classm5_1_1util_1_1jobfile_1_1Job_ac775ee34451fdfa742b318538164070e}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classm5_1_1util_1_1jobfile_1_1Job_a4110248fff184e40b53c1cfa2bc3c649}{clone}
+\item 
+def \hyperlink{classm5_1_1util_1_1jobfile_1_1Job_a40bc1aa85be1c4ba18cd144234c53984}{printinfo}
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Job_ab74e6bf80237ddc4109968cedc58c151}{name}
+\item 
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Job_aafc566bb08a9f46485e7238669581c2b}{desc}
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Job_ae59962abbe8dc3d47a44d7ec1f35af63}{\_\-config}
+\item 
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Job_a9f92d6deaff1a0299428452ea47e01cc}{\_\-groups}
+\item 
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Job_a7f9a85e66fca8983938e3ef12b102552}{\_\-options}
+\item 
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Job_a7e3898763f063c1db75758a64bc6eb6b}{\_\-is\_\-checkpoint}
+\item 
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Job_a3c6a36161a314474d5a6e96f5976ac11}{\_\-checkpoint}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_ac775ee34451fdfa742b318538164070e}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em options})}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_ac775ee34451fdfa742b318538164070e}
+
+
+
+\begin{DoxyCode}
+126                                :
+127         super(Job, self).__init__('', '')
+128 
+129         config = options[0]._config
+130         for opt in options:
+131             if opt._config != config:
+132                 raise AttributeError, \
+133                       "All options are not from the same Configuration"
+134 
+135         self._config = config
+136         self._groups = [ opt._group for opt in options ]
+137         self._options = options
+138 
+139         self.update(self._config)
+140         for group in self._groups:
+141             self.update(group)
+142 
+143         self._is_checkpoint = True
+144 
+145         for option in self._options:
+146             self.update(option)
+147             if not option._group._checkpoint:
+148                 self._is_checkpoint = False
+149 
+150             if option._suboption:
+151                 self.update(option._suboption)
+152                 self._is_checkpoint = False
+153 
+154         names = [ ]
+155         for opt in self._options:
+156             if opt.name:
+157                 names.append(opt.name)
+158         self.name = ':'.join(names)
+159 
+160         descs = [ ]
+161         for opt in self._options:
+162             if opt.desc:
+163                 descs.append(opt.desc)
+164         self.desc = ', '.join(descs)
+165 
+166         self._checkpoint = None
+167         if not self._is_checkpoint:
+168             opts = []
+169             for opt in options:
+170                 cpt = opt._group._checkpoint
+171                 if not cpt:
+172                     continue
+173                 if isinstance(cpt, Option):
+174                     opt = cpt.clone(suboptions=False)
+175                 else:
+176                     opt = opt.clone(suboptions=False)
+177 
+178                 opts.append(opt)
+179 
+180             if opts:
+181                 self._checkpoint = Job(opts)
+182 
+    def clone(self):
+\end{DoxyCode}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_a4110248fff184e40b53c1cfa2bc3c649}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!clone@{clone}}
+\index{clone@{clone}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{clone}]{\setlength{\rightskip}{0pt plus 5cm}def clone ( {\em self})}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_a4110248fff184e40b53c1cfa2bc3c649}
+
+
+
+\begin{DoxyCode}
+183                    :
+184         return Job(self._options)
+185 
+    def printinfo(self):
+\end{DoxyCode}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_a40bc1aa85be1c4ba18cd144234c53984}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!printinfo@{printinfo}}
+\index{printinfo@{printinfo}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{printinfo}]{\setlength{\rightskip}{0pt plus 5cm}def printinfo ( {\em self})}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_a40bc1aa85be1c4ba18cd144234c53984}
+
+
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Data_a40bc1aa85be1c4ba18cd144234c53984}{Data}を再定義しています。
+
+
+\begin{DoxyCode}
+186                        :
+187         super(Job, self).printinfo()
+188         if self._checkpoint:
+189             print 'checkpoint: %s' % self._checkpoint.name
+190         print 'config: %s' % self._config.name
+191         print 'groups: %s' % [ g.name for g in self._groups ]
+192         print 'options: %s' % [ o.name for o in self._options ]
+193         super(Job, self).printverbose()
+194 
+class SubOption(Data):
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_a3c6a36161a314474d5a6e96f5976ac11}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!\_\-checkpoint@{\_\-checkpoint}}
+\index{\_\-checkpoint@{\_\-checkpoint}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{\_\-checkpoint}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \_\-checkpoint}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_a3c6a36161a314474d5a6e96f5976ac11}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_ae59962abbe8dc3d47a44d7ec1f35af63}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!\_\-config@{\_\-config}}
+\index{\_\-config@{\_\-config}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{\_\-config}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \_\-config}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_ae59962abbe8dc3d47a44d7ec1f35af63}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_a9f92d6deaff1a0299428452ea47e01cc}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!\_\-groups@{\_\-groups}}
+\index{\_\-groups@{\_\-groups}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{\_\-groups}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \_\-groups}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_a9f92d6deaff1a0299428452ea47e01cc}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_a7e3898763f063c1db75758a64bc6eb6b}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!\_\-is\_\-checkpoint@{\_\-is\_\-checkpoint}}
+\index{\_\-is\_\-checkpoint@{\_\-is\_\-checkpoint}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{\_\-is\_\-checkpoint}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \_\-is\_\-checkpoint}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_a7e3898763f063c1db75758a64bc6eb6b}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_a7f9a85e66fca8983938e3ef12b102552}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!\_\-options@{\_\-options}}
+\index{\_\-options@{\_\-options}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{\_\-options}]{\setlength{\rightskip}{0pt plus 5cm}{\bf \_\-options}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_a7f9a85e66fca8983938e3ef12b102552}
+\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_aafc566bb08a9f46485e7238669581c2b}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!desc@{desc}}
+\index{desc@{desc}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{desc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf desc}}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_aafc566bb08a9f46485e7238669581c2b}
+
+
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Data_aafc566bb08a9f46485e7238669581c2b}{Data}を再定義しています。\hypertarget{classm5_1_1util_1_1jobfile_1_1Job_ab74e6bf80237ddc4109968cedc58c151}{
+\index{m5::util::jobfile::Job@{m5::util::jobfile::Job}!name@{name}}
+\index{name@{name}!m5::util::jobfile::Job@{m5::util::jobfile::Job}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}{\bf name}}}
+\label{classm5_1_1util_1_1jobfile_1_1Job_ab74e6bf80237ddc4109968cedc58c151}
+
+
+\hyperlink{classm5_1_1util_1_1jobfile_1_1Data_ab74e6bf80237ddc4109968cedc58c151}{Data}を再定義しています。
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+python/m5/util/\hyperlink{jobfile_8py}{jobfile.py}\end{DoxyCompactItemize}

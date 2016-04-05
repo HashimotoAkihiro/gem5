@@ -1,0 +1,502 @@
+\hypertarget{classSparcLiveProcess}{
+\section{クラス SparcLiveProcess}
+\label{classSparcLiveProcess}\index{SparcLiveProcess@{SparcLiveProcess}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}SparcLiveProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6.80556cm]{classSparcLiveProcess}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+virtual void \hyperlink{classSparcLiveProcess_a7737d67ba76be0bd3beb0bd0dc93333a}{handleTrap} (int trapNum, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classSparcLiveProcess_a21c8d5b3f25a0b2b07e7d6339507f484}{readFillStart} ()
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classSparcLiveProcess_ad091f71e79fb429f020a72b02b1b2b5a}{readSpillStart} ()
+\item 
+virtual void \hyperlink{classSparcLiveProcess_ab39e13308fa993d443b20e56572106f5}{flushWindows} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc)=0
+\item 
+void \hyperlink{classSparcLiveProcess_aaefd02663c1eae206b851290d9276a5e}{setSyscallReturn} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classSyscallReturn}{SyscallReturn} return\_\-value)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSparcLiveProcess_a0078d11945ecc8ac374a64be69d72698}{SparcLiveProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile}, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \_\-StackBias)
+\item 
+void \hyperlink{classSparcLiveProcess_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\item 
+{\footnotesize template$<$class IntType $>$ }\\void \hyperlink{classSparcLiveProcess_a2415a441aed245469460cac91152385e}{argsInit} (int pageSize)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classSparcLiveProcess_a0c923d515c84756a72003bff7ed696b0}{StackBias}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classSparcLiveProcess_a8d30128bf1e2f675a5a3cc5ea79ddb96}{fillStart}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classSparcLiveProcess_a4377422380fb1e1eb5626cb9a631cd65}{spillStart}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classSparcLiveProcess_a0078d11945ecc8ac374a64be69d72698}{
+\index{SparcLiveProcess@{SparcLiveProcess}!SparcLiveProcess@{SparcLiveProcess}}
+\index{SparcLiveProcess@{SparcLiveProcess}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{SparcLiveProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SparcLiveProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile}, \/  {\bf Addr} {\em \_\-StackBias})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classSparcLiveProcess_a0078d11945ecc8ac374a64be69d72698}
+
+
+
+\begin{DoxyCode}
+55     : LiveProcess(params, objFile), StackBias(_StackBias)
+56 {
+57 
+58     // XXX all the below need to be updated for SPARC - Ali
+59     brk_point = objFile->dataBase() + objFile->dataSize() + objFile->bssSize();
+60     brk_point = roundUp(brk_point, VMPageSize);
+61 
+62     // Set pointer for next thread stack.  Reserve 8M for main stack.
+63     next_thread_stack_base = stack_base - (8 * 1024 * 1024);
+64 
+65     // Initialize these to 0s
+66     fillStart = 0;
+67     spillStart = 0;
+68 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classSparcLiveProcess_a2415a441aed245469460cac91152385e}{
+\index{SparcLiveProcess@{SparcLiveProcess}!argsInit@{argsInit}}
+\index{argsInit@{argsInit}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{argsInit}]{\setlength{\rightskip}{0pt plus 5cm}void argsInit (int {\em pageSize})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classSparcLiveProcess_a2415a441aed245469460cac91152385e}
+
+
+
+\begin{DoxyCode}
+189 {
+190     int intSize = sizeof(IntType);
+191 
+192     typedef AuxVector<IntType> auxv_t;
+193 
+194     std::vector<auxv_t> auxv;
+195 
+196     string filename;
+197     if (argv.size() < 1)
+198         filename = "";
+199     else
+200         filename = argv[0];
+201 
+202     // Even for a 32 bit process, the ABI says we still need to
+203     // maintain double word alignment of the stack pointer.
+204     uint64_t align = 16;
+205 
+206     // load object file into target memory
+207     objFile->loadSections(initVirtMem);
+208 
+209     enum hardwareCaps
+210     {
+211         M5_HWCAP_SPARC_FLUSH = 1,
+212         M5_HWCAP_SPARC_STBAR = 2,
+213         M5_HWCAP_SPARC_SWAP = 4,
+214         M5_HWCAP_SPARC_MULDIV = 8,
+215         M5_HWCAP_SPARC_V9 = 16,
+216         // This one should technically only be set
+217         // if there is a cheetah or cheetah_plus tlb,
+218         // but we'll use it all the time
+219         M5_HWCAP_SPARC_ULTRA3 = 32
+220     };
+221 
+222     const int64_t hwcap =
+223         M5_HWCAP_SPARC_FLUSH |
+224         M5_HWCAP_SPARC_STBAR |
+225         M5_HWCAP_SPARC_SWAP |
+226         M5_HWCAP_SPARC_MULDIV |
+227         M5_HWCAP_SPARC_V9 |
+228         M5_HWCAP_SPARC_ULTRA3;
+229 
+230     // Setup the auxilliary vectors. These will already have endian conversion.
+231     // Auxilliary vectors are loaded only for elf formatted executables.
+232     ElfObject * elfObject = dynamic_cast<ElfObject *>(objFile);
+233     if (elfObject) {
+234         // Bits which describe the system hardware capabilities
+235         auxv.push_back(auxv_t(M5_AT_HWCAP, hwcap));
+236         // The system page size
+237         auxv.push_back(auxv_t(M5_AT_PAGESZ, SparcISA::VMPageSize));
+238         // Defined to be 100 in the kernel source.
+239         // Frequency at which times() increments
+240         auxv.push_back(auxv_t(M5_AT_CLKTCK, 100));
+241         // For statically linked executables, this is the virtual address of the
+242         // program header tables if they appear in the executable image
+243         auxv.push_back(auxv_t(M5_AT_PHDR, elfObject->programHeaderTable()));
+244         // This is the size of a program header entry from the elf file.
+245         auxv.push_back(auxv_t(M5_AT_PHENT, elfObject->programHeaderSize()));
+246         // This is the number of program headers from the original elf file.
+247         auxv.push_back(auxv_t(M5_AT_PHNUM, elfObject->programHeaderCount()));
+248         // This is the address of the elf "interpreter", It should be set
+249         // to 0 for regular executables. It should be something else
+250         // (not sure what) for dynamic libraries.
+251         auxv.push_back(auxv_t(M5_AT_BASE, 0));
+252         // This is hardwired to 0 in the elf loading code in the kernel
+253         auxv.push_back(auxv_t(M5_AT_FLAGS, 0));
+254         // The entry point to the program
+255         auxv.push_back(auxv_t(M5_AT_ENTRY, objFile->entryPoint()));
+256         // Different user and group IDs
+257         auxv.push_back(auxv_t(M5_AT_UID, uid()));
+258         auxv.push_back(auxv_t(M5_AT_EUID, euid()));
+259         auxv.push_back(auxv_t(M5_AT_GID, gid()));
+260         auxv.push_back(auxv_t(M5_AT_EGID, egid()));
+261         // Whether to enable "secure mode" in the executable
+262         auxv.push_back(auxv_t(M5_AT_SECURE, 0));
+263     }
+264 
+265     // Figure out how big the initial stack needs to be
+266 
+267     // The unaccounted for 8 byte 0 at the top of the stack
+268     int sentry_size = 8;
+269 
+270     // This is the name of the file which is present on the initial stack
+271     // It's purpose is to let the user space linker examine the original file.
+272     int file_name_size = filename.size() + 1;
+273 
+274     int env_data_size = 0;
+275     for (int i = 0; i < envp.size(); ++i) {
+276         env_data_size += envp[i].size() + 1;
+277     }
+278     int arg_data_size = 0;
+279     for (int i = 0; i < argv.size(); ++i) {
+280         arg_data_size += argv[i].size() + 1;
+281     }
+282 
+283     // The info_block.
+284     int base_info_block_size =
+285         sentry_size + file_name_size + env_data_size + arg_data_size;
+286 
+287     int info_block_size = roundUp(base_info_block_size, align);
+288 
+289     int info_block_padding = info_block_size - base_info_block_size;
+290 
+291     // Each auxilliary vector is two words
+292     int aux_array_size = intSize * 2 * (auxv.size() + 1);
+293 
+294     int envp_array_size = intSize * (envp.size() + 1);
+295     int argv_array_size = intSize * (argv.size() + 1);
+296 
+297     int argc_size = intSize;
+298     int window_save_size = intSize * 16;
+299 
+300     // Figure out the size of the contents of the actual initial frame
+301     int frame_size =
+302         aux_array_size +
+303         envp_array_size +
+304         argv_array_size +
+305         argc_size +
+306         window_save_size;
+307 
+308     // There needs to be padding after the auxiliary vector data so that the
+309     // very bottom of the stack is aligned properly.
+310     int aligned_partial_size = roundUp(frame_size, align);
+311     int aux_padding = aligned_partial_size - frame_size;
+312 
+313     int space_needed =
+314         info_block_size +
+315         aux_padding +
+316         frame_size;
+317 
+318     stack_min = stack_base - space_needed;
+319     stack_min = roundDown(stack_min, align);
+320     stack_size = stack_base - stack_min;
+321 
+322     // Allocate space for the stack
+323     allocateMem(roundDown(stack_min, pageSize), roundUp(stack_size, pageSize));
+324 
+325     // map out initial stack contents
+326     IntType sentry_base = stack_base - sentry_size;
+327     IntType file_name_base = sentry_base - file_name_size;
+328     IntType env_data_base = file_name_base - env_data_size;
+329     IntType arg_data_base = env_data_base - arg_data_size;
+330     IntType auxv_array_base = arg_data_base -
+331         info_block_padding - aux_array_size - aux_padding;
+332     IntType envp_array_base = auxv_array_base - envp_array_size;
+333     IntType argv_array_base = envp_array_base - argv_array_size;
+334     IntType argc_base = argv_array_base - argc_size;
+335 #if TRACING_ON
+336     IntType window_save_base = argc_base - window_save_size;
+337 #endif
+338 
+339     DPRINTF(Stack, "The addresses of items on the initial stack:\n");
+340     DPRINTF(Stack, "%#x - sentry NULL\n", sentry_base);
+341     DPRINTF(Stack, "filename = %s\n", filename);
+342     DPRINTF(Stack, "%#x - file name\n", file_name_base);
+343     DPRINTF(Stack, "%#x - env data\n", env_data_base);
+344     DPRINTF(Stack, "%#x - arg data\n", arg_data_base);
+345     DPRINTF(Stack, "%#x - auxv array\n", auxv_array_base);
+346     DPRINTF(Stack, "%#x - envp array\n", envp_array_base);
+347     DPRINTF(Stack, "%#x - argv array\n", argv_array_base);
+348     DPRINTF(Stack, "%#x - argc \n", argc_base);
+349     DPRINTF(Stack, "%#x - window save\n", window_save_base);
+350     DPRINTF(Stack, "%#x - stack min\n", stack_min);
+351 
+352     assert(window_save_base == stack_min);
+353 
+354     // write contents to stack
+355 
+356     // figure out argc
+357     IntType argc = argv.size();
+358     IntType guestArgc = SparcISA::htog(argc);
+359 
+360     // Write out the sentry void *
+361     uint64_t sentry_NULL = 0;
+362     initVirtMem.writeBlob(sentry_base,
+363             (uint8_t*)&sentry_NULL, sentry_size);
+364 
+365     // Write the file name
+366     initVirtMem.writeString(file_name_base, filename.c_str());
+367 
+368     // Copy the aux stuff
+369     for (int x = 0; x < auxv.size(); x++) {
+370         initVirtMem.writeBlob(auxv_array_base + x * 2 * intSize,
+371                 (uint8_t*)&(auxv[x].a_type), intSize);
+372         initVirtMem.writeBlob(auxv_array_base + (x * 2 + 1) * intSize,
+373                 (uint8_t*)&(auxv[x].a_val), intSize);
+374     }
+375 
+376     // Write out the terminating zeroed auxilliary vector
+377     const IntType zero = 0;
+378     initVirtMem.writeBlob(auxv_array_base + intSize * 2 * auxv.size(),
+379             (uint8_t*)&zero, intSize);
+380     initVirtMem.writeBlob(auxv_array_base + intSize * (2 * auxv.size() + 1),
+381             (uint8_t*)&zero, intSize);
+382 
+383     copyStringArray(envp, envp_array_base, env_data_base, initVirtMem);
+384     copyStringArray(argv, argv_array_base, arg_data_base, initVirtMem);
+385 
+386     initVirtMem.writeBlob(argc_base, (uint8_t*)&guestArgc, intSize);
+387 
+388     // Set up space for the trap handlers into the processes address space.
+389     // Since the stack grows down and there is reserved address space abov
+390     // it, we can put stuff above it and stay out of the way.
+391     fillStart = stack_base;
+392     spillStart = fillStart + sizeof(MachInst) * numFillInsts;
+393 
+394     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+395     // Set up the thread context to start running the process
+396     // assert(NumArgumentRegs >= 2);
+397     // tc->setIntReg(ArgumentReg[0], argc);
+398     // tc->setIntReg(ArgumentReg[1], argv_array_base);
+399     tc->setIntReg(StackPointerReg, stack_min - StackBias);
+400 
+401     // %g1 is a pointer to a function that should be run at exit. Since we
+402     // don't have anything like that, it should be set to 0.
+403     tc->setIntReg(1, 0);
+404 
+405     tc->pcState(objFile->entryPoint());
+406 
+407     // Align the "stack_min" to a page boundary.
+408     stack_min = roundDown(stack_min, pageSize);
+409 
+410 //    num_processes++;
+411 }
+\end{DoxyCode}
+\hypertarget{classSparcLiveProcess_ab39e13308fa993d443b20e56572106f5}{
+\index{SparcLiveProcess@{SparcLiveProcess}!flushWindows@{flushWindows}}
+\index{flushWindows@{flushWindows}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{flushWindows}]{\setlength{\rightskip}{0pt plus 5cm}virtual void flushWindows ({\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
+\label{classSparcLiveProcess_ab39e13308fa993d443b20e56572106f5}
+
+
+\hyperlink{classSparc32LiveProcess_ac36137c98f2b65736e0c5745c3c90c85}{Sparc32LiveProcess}, と \hyperlink{classSparc64LiveProcess_ac36137c98f2b65736e0c5745c3c90c85}{Sparc64LiveProcess}で実装されています。\hypertarget{classSparcLiveProcess_a7737d67ba76be0bd3beb0bd0dc93333a}{
+\index{SparcLiveProcess@{SparcLiveProcess}!handleTrap@{handleTrap}}
+\index{handleTrap@{handleTrap}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{handleTrap}]{\setlength{\rightskip}{0pt plus 5cm}void handleTrap (int {\em trapNum}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSparcLiveProcess_a7737d67ba76be0bd3beb0bd0dc93333a}
+
+
+\hyperlink{classSparcISA_1_1Sparc32LinuxProcess_a7737d67ba76be0bd3beb0bd0dc93333a}{Sparc32LinuxProcess}, と \hyperlink{classSparcISA_1_1Sparc64LinuxProcess_a7737d67ba76be0bd3beb0bd0dc93333a}{Sparc64LinuxProcess}で再定義されています。
+
+
+\begin{DoxyCode}
+72 {
+73     PCState pc = tc->pcState();
+74     switch (trapNum) {
+75       case 0x01: // Software breakpoint
+76         warn("Software breakpoint encountered at pc %#x.\n", pc.pc());
+77         break;
+78       case 0x02: // Division by zero
+79         warn("Software signaled a division by zero at pc %#x.\n", pc.pc());
+80         break;
+81       case 0x03: // Flush window trap
+82         flushWindows(tc);
+83         break;
+84       case 0x04: // Clean windows
+85         warn("Ignoring process request for clean register "
+86                 "windows at pc %#x.\n", pc.pc());
+87         break;
+88       case 0x05: // Range check
+89         warn("Software signaled a range check at pc %#x.\n", pc.pc());
+90         break;
+91       case 0x06: // Fix alignment
+92         warn("Ignoring process request for os assisted unaligned accesses "
+93                 "at pc %#x.\n", pc.pc());
+94         break;
+95       case 0x07: // Integer overflow
+96         warn("Software signaled an integer overflow at pc %#x.\n", pc.pc());
+97         break;
+98       case 0x32: // Get integer condition codes
+99         warn("Ignoring process request to get the integer condition codes "
+100                 "at pc %#x.\n", pc.pc());
+101         break;
+102       case 0x33: // Set integer condition codes
+103         warn("Ignoring process request to set the integer condition codes "
+104                 "at pc %#x.\n", pc.pc());
+105         break;
+106       default:
+107         panic("Unimplemented trap to operating system: trap number %#x.\n", trapN
+      um);
+108     }
+109 }
+\end{DoxyCode}
+\hypertarget{classSparcLiveProcess_a3c34ea9b29f410748d4435a667484924}{
+\index{SparcLiveProcess@{SparcLiveProcess}!initState@{initState}}
+\index{initState@{initState}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classSparcLiveProcess_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classSparcLiveProcess_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classProcess_a3c34ea9b29f410748d4435a667484924}{Process}を再定義しています。
+
+\hyperlink{classSparc32LiveProcess_a3c34ea9b29f410748d4435a667484924}{Sparc32LiveProcess}, と \hyperlink{classSparc64LiveProcess_a3c34ea9b29f410748d4435a667484924}{Sparc64LiveProcess}で再定義されています。
+
+
+\begin{DoxyCode}
+113 {
+114     LiveProcess::initState();
+115 
+116     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+117     // From the SPARC ABI
+118 
+119     // Setup default FP state
+120     tc->setMiscRegNoEffect(MISCREG_FSR, 0);
+121 
+122     tc->setMiscRegNoEffect(MISCREG_TICK, 0);
+123 
+124     /*
+125      * Register window management registers
+126      */
+127 
+128     // No windows contain info from other programs
+129     // tc->setMiscRegNoEffect(MISCREG_OTHERWIN, 0);
+130     tc->setIntReg(NumIntArchRegs + 6, 0);
+131     // There are no windows to pop
+132     // tc->setMiscRegNoEffect(MISCREG_CANRESTORE, 0);
+133     tc->setIntReg(NumIntArchRegs + 4, 0);
+134     // All windows are available to save into
+135     // tc->setMiscRegNoEffect(MISCREG_CANSAVE, NWindows - 2);
+136     tc->setIntReg(NumIntArchRegs + 3, NWindows - 2);
+137     // All windows are "clean"
+138     // tc->setMiscRegNoEffect(MISCREG_CLEANWIN, NWindows);
+139     tc->setIntReg(NumIntArchRegs + 5, NWindows);
+140     // Start with register window 0
+141     tc->setMiscReg(MISCREG_CWP, 0);
+142     // Always use spill and fill traps 0
+143     // tc->setMiscRegNoEffect(MISCREG_WSTATE, 0);
+144     tc->setIntReg(NumIntArchRegs + 7, 0);
+145     // Set the trap level to 0
+146     tc->setMiscRegNoEffect(MISCREG_TL, 0);
+147     // Set the ASI register to something fixed
+148     tc->setMiscReg(MISCREG_ASI, ASI_PRIMARY);
+149 
+150     /*
+151      * T1 specific registers
+152      */
+153     // Turn on the icache, dcache, dtb translation, and itb translation.
+154     tc->setMiscRegNoEffect(MISCREG_MMU_LSU_CTRL, 15);
+155 }
+\end{DoxyCode}
+\hypertarget{classSparcLiveProcess_a21c8d5b3f25a0b2b07e7d6339507f484}{
+\index{SparcLiveProcess@{SparcLiveProcess}!readFillStart@{readFillStart}}
+\index{readFillStart@{readFillStart}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{readFillStart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} readFillStart ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSparcLiveProcess_a21c8d5b3f25a0b2b07e7d6339507f484}
+
+
+
+\begin{DoxyCode}
+66 { return fillStart; }
+\end{DoxyCode}
+\hypertarget{classSparcLiveProcess_ad091f71e79fb429f020a72b02b1b2b5a}{
+\index{SparcLiveProcess@{SparcLiveProcess}!readSpillStart@{readSpillStart}}
+\index{readSpillStart@{readSpillStart}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{readSpillStart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} readSpillStart ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSparcLiveProcess_ad091f71e79fb429f020a72b02b1b2b5a}
+
+
+
+\begin{DoxyCode}
+67 { return spillStart; }
+\end{DoxyCode}
+\hypertarget{classSparcLiveProcess_aaefd02663c1eae206b851290d9276a5e}{
+\index{SparcLiveProcess@{SparcLiveProcess}!setSyscallReturn@{setSyscallReturn}}
+\index{setSyscallReturn@{setSyscallReturn}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{setSyscallReturn}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallReturn ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf SyscallReturn} {\em return\_\-value})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSparcLiveProcess_aaefd02663c1eae206b851290d9276a5e}
+
+
+\hyperlink{classLiveProcess_a5955e790542b86589b9fd75df24ec2d3}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+536 {
+537     // check for error condition.  SPARC syscall convention is to
+538     // indicate success/failure in reg the carry bit of the ccr
+539     // and put the return value itself in the standard return value reg ().
+540     PSTATE pstate = tc->readMiscRegNoEffect(MISCREG_PSTATE);
+541     if (sysret.successful()) {
+542         // no error, clear XCC.C
+543         tc->setIntReg(NumIntArchRegs + 2,
+544                       tc->readIntReg(NumIntArchRegs + 2) & 0xEE);
+545         IntReg val = sysret.returnValue();
+546         if (pstate.am)
+547             val = bits(val, 31, 0);
+548         tc->setIntReg(ReturnValueReg, val);
+549     } else {
+550         // got an error, set XCC.C
+551         tc->setIntReg(NumIntArchRegs + 2,
+552                       tc->readIntReg(NumIntArchRegs + 2) | 0x11);
+553         IntReg val = sysret.errnoValue();
+554         if (pstate.am)
+555             val = bits(val, 31, 0);
+556         tc->setIntReg(ReturnValueReg, val);
+557     }
+558 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classSparcLiveProcess_a8d30128bf1e2f675a5a3cc5ea79ddb96}{
+\index{SparcLiveProcess@{SparcLiveProcess}!fillStart@{fillStart}}
+\index{fillStart@{fillStart}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{fillStart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf fillStart}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classSparcLiveProcess_a8d30128bf1e2f675a5a3cc5ea79ddb96}
+\hypertarget{classSparcLiveProcess_a4377422380fb1e1eb5626cb9a631cd65}{
+\index{SparcLiveProcess@{SparcLiveProcess}!spillStart@{spillStart}}
+\index{spillStart@{spillStart}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{spillStart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf spillStart}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classSparcLiveProcess_a4377422380fb1e1eb5626cb9a631cd65}
+\hypertarget{classSparcLiveProcess_a0c923d515c84756a72003bff7ed696b0}{
+\index{SparcLiveProcess@{SparcLiveProcess}!StackBias@{StackBias}}
+\index{StackBias@{StackBias}!SparcLiveProcess@{SparcLiveProcess}}
+\subsubsection[{StackBias}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Addr} {\bf StackBias}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classSparcLiveProcess_a0c923d515c84756a72003bff7ed696b0}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/sparc/\hyperlink{arch_2sparc_2process_8hh}{process.hh}\item 
+arch/sparc/\hyperlink{arch_2sparc_2process_8cc}{process.cc}\end{DoxyCompactItemize}

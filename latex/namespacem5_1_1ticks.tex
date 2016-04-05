@@ -1,0 +1,139 @@
+\hypertarget{namespacem5_1_1ticks}{
+\section{ネームスペース m5::ticks}
+\label{namespacem5_1_1ticks}\index{m5::ticks@{m5::ticks}}
+}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacem5_1_1ticks_a4b96fedcec7b9876e1e3f808c616988c}{fixGlobalFrequency}
+\item 
+def \hyperlink{namespacem5_1_1ticks_a175a2a93d9b8a10666cabe70ddc8fe56}{setGlobalFrequency}
+\item 
+def \hyperlink{namespacem5_1_1ticks_a8beea6a5babd1b8a0975e69ed7bd99b9}{fromSeconds}
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+float \hyperlink{namespacem5_1_1ticks_a3bc8cac19cc66d1cfe3b0aeba6299271}{tps} = 1.0e12
+\item 
+\hyperlink{namespacem5_1_1ticks_af6ce746b7d1156b95ebd9c32b09d693a}{tps\_\-fixed} = False
+\item 
+float \hyperlink{namespacem5_1_1ticks_ab05a03249670abb258a9dd7c2a435443}{frequency\_\-tolerance} = 0.001
+\item 
+list \hyperlink{namespacem5_1_1ticks_aa4a022e6ddacd362b83964da5cc5d044}{\_\-\_\-all\_\-\_\-}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespacem5_1_1ticks_a4b96fedcec7b9876e1e3f808c616988c}{
+\index{m5::ticks@{m5::ticks}!fixGlobalFrequency@{fixGlobalFrequency}}
+\index{fixGlobalFrequency@{fixGlobalFrequency}!m5::ticks@{m5::ticks}}
+\subsubsection[{fixGlobalFrequency}]{\setlength{\rightskip}{0pt plus 5cm}def m5::ticks::fixGlobalFrequency ()}}
+\label{namespacem5_1_1ticks_a4b96fedcec7b9876e1e3f808c616988c}
+
+
+
+\begin{DoxyCode}
+36                         :
+37     import internal
+38     global tps, tps_fixed
+39     if not tps_fixed:
+40         tps_fixed = True
+41         internal.core.setClockFrequency(int(tps))
+42         print "Global frequency set at %d ticks per second" % int(tps)
+43 
+def setGlobalFrequency(ticksPerSecond):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1ticks_a8beea6a5babd1b8a0975e69ed7bd99b9}{
+\index{m5::ticks@{m5::ticks}!fromSeconds@{fromSeconds}}
+\index{fromSeconds@{fromSeconds}!m5::ticks@{m5::ticks}}
+\subsubsection[{fromSeconds}]{\setlength{\rightskip}{0pt plus 5cm}def m5::ticks::fromSeconds ( {\em value})}}
+\label{namespacem5_1_1ticks_a8beea6a5babd1b8a0975e69ed7bd99b9}
+
+
+
+\begin{DoxyCode}
+66                       :
+67     if not isinstance(value, float):
+68         raise TypeError, "can't convert '%s' to type tick" % type(value)
+69 
+70     # once someone needs to convert to seconds, the global frequency
+71     # had better be fixed
+72     if not tps_fixed:
+73         raise AttributeError, \
+74               "In order to do conversions, the global frequency must be fixed"
+75 
+76     if value == 0:
+77         return 0
+78 
+79     # convert the value from time to ticks
+80     value *= tps
+81 
+82     int_value = int(round(value))
+83     err = (value - int_value) / value
+84     if err > frequency_tolerance:
+85         warn("rounding error > tolerance\n    %f rounded to %d", value,
+86             int_value)
+87     return int_value
+88 
+__all__ = [ 'setGlobalFrequency', 'fixGlobalFrequency', 'fromSeconds',
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1ticks_a175a2a93d9b8a10666cabe70ddc8fe56}{
+\index{m5::ticks@{m5::ticks}!setGlobalFrequency@{setGlobalFrequency}}
+\index{setGlobalFrequency@{setGlobalFrequency}!m5::ticks@{m5::ticks}}
+\subsubsection[{setGlobalFrequency}]{\setlength{\rightskip}{0pt plus 5cm}def m5::ticks::setGlobalFrequency ( {\em ticksPerSecond})}}
+\label{namespacem5_1_1ticks_a175a2a93d9b8a10666cabe70ddc8fe56}
+
+
+
+\begin{DoxyCode}
+44                                       :
+45     from m5.util import convert
+46 
+47     global tps, tps_fixed
+48 
+49     if tps_fixed:
+50         raise AttributeError, \
+51               "Global frequency already fixed at %f ticks/s." % tps
+52 
+53     if isinstance(ticksPerSecond, (int, long)):
+54         tps = ticksPerSecond
+55     elif isinstance(ticksPerSecond, float):
+56         tps = ticksPerSecond
+57     elif isinstance(ticksPerSecond, str):
+58         tps = round(convert.anyToFrequency(ticksPerSecond))
+59     else:
+60         raise TypeError, \
+61               "wrong type '%s' for ticksPerSecond" % type(ticksPerSecond)
+62 
+63 # how big does a rounding error need to be before we warn about it?
+frequency_tolerance = 0.001  # 0.1%
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{namespacem5_1_1ticks_aa4a022e6ddacd362b83964da5cc5d044}{
+\index{m5::ticks@{m5::ticks}!\_\-\_\-all\_\-\_\-@{\_\-\_\-all\_\-\_\-}}
+\index{\_\-\_\-all\_\-\_\-@{\_\-\_\-all\_\-\_\-}!m5::ticks@{m5::ticks}}
+\subsubsection[{\_\-\_\-all\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}list {\bf \_\-\_\-all\_\-\_\-}}}
+\label{namespacem5_1_1ticks_aa4a022e6ddacd362b83964da5cc5d044}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+[ 'setGlobalFrequency', 'fixGlobalFrequency', 'fromSeconds',
+            'frequency_tolerance' ]
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1ticks_ab05a03249670abb258a9dd7c2a435443}{
+\index{m5::ticks@{m5::ticks}!frequency\_\-tolerance@{frequency\_\-tolerance}}
+\index{frequency\_\-tolerance@{frequency\_\-tolerance}!m5::ticks@{m5::ticks}}
+\subsubsection[{frequency\_\-tolerance}]{\setlength{\rightskip}{0pt plus 5cm}float {\bf frequency\_\-tolerance} = 0.001}}
+\label{namespacem5_1_1ticks_ab05a03249670abb258a9dd7c2a435443}
+\hypertarget{namespacem5_1_1ticks_a3bc8cac19cc66d1cfe3b0aeba6299271}{
+\index{m5::ticks@{m5::ticks}!tps@{tps}}
+\index{tps@{tps}!m5::ticks@{m5::ticks}}
+\subsubsection[{tps}]{\setlength{\rightskip}{0pt plus 5cm}float {\bf tps} = 1.0e12}}
+\label{namespacem5_1_1ticks_a3bc8cac19cc66d1cfe3b0aeba6299271}
+\hypertarget{namespacem5_1_1ticks_af6ce746b7d1156b95ebd9c32b09d693a}{
+\index{m5::ticks@{m5::ticks}!tps\_\-fixed@{tps\_\-fixed}}
+\index{tps\_\-fixed@{tps\_\-fixed}!m5::ticks@{m5::ticks}}
+\subsubsection[{tps\_\-fixed}]{\setlength{\rightskip}{0pt plus 5cm}{\bf tps\_\-fixed} = False}}
+\label{namespacem5_1_1ticks_af6ce746b7d1156b95ebd9c32b09d693a}

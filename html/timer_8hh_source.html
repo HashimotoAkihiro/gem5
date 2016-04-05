@@ -1,0 +1,162 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/kvm/timer.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/kvm/timer.hh</h1><a href="timer_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Andreas Sandberg</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __CPU_KVM_TIMER_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_KVM_TIMER_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &lt;ctime&gt;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="perfevent_8hh.html">cpu/kvm/perfevent.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="core_8hh.html">sim/core.hh</a>&quot;</span>
+<a name="l00047"></a>00047 
+<a name="l00062"></a><a class="code" href="classBaseKvmTimer.html">00062</a> <span class="keyword">class </span><a class="code" href="classBaseKvmTimer.html">BaseKvmTimer</a>
+<a name="l00063"></a>00063 {
+<a name="l00064"></a>00064   <span class="keyword">public</span>:
+<a name="l00073"></a><a class="code" href="classBaseKvmTimer.html#a0593c66dc86ef9aeff3553a78e114231">00073</a>     <a class="code" href="classBaseKvmTimer.html#a0593c66dc86ef9aeff3553a78e114231">BaseKvmTimer</a>(<span class="keywordtype">int</span> <a class="code" href="classBaseKvmTimer.html#a68acd751895efa9ac5a6461017f1d2d8">signo</a>, <span class="keywordtype">float</span> <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#af880b55be2bf83ac65eb9b0abe62ae49">hostFreq</a>)
+<a name="l00074"></a>00074         : signo(signo), <a class="code" href="classBaseKvmTimer.html#ad8d1a189e5fdd7cf11ab8165cf05a88c">_resolution</a>(0),
+<a name="l00075"></a>00075           hostFactor(hostFactor), hostFreq(hostFreq) {};
+<a name="l00076"></a><a class="code" href="classBaseKvmTimer.html#afbfb3a067be95a63da916f38d0beac51">00076</a>     <span class="keyword">virtual</span> <a class="code" href="classBaseKvmTimer.html#afbfb3a067be95a63da916f38d0beac51">~BaseKvmTimer</a>() {};
+<a name="l00077"></a>00077 
+<a name="l00090"></a>00090     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseKvmTimer.html#af6a92c8cd2abd0bf8699cbefe1257074">arm</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> ticks) = 0;
+<a name="l00097"></a>00097     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseKvmTimer.html#aaef5c4bcad609bff2d6580c368020346">disarm</a>() = 0;
+<a name="l00098"></a>00098 
+<a name="l00106"></a><a class="code" href="classBaseKvmTimer.html#a4450cc644b16fe4cb8b25ed02fb6446f">00106</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#a4450cc644b16fe4cb8b25ed02fb6446f">resolution</a>() {
+<a name="l00107"></a>00107         <span class="keywordflow">if</span> (<a class="code" href="classBaseKvmTimer.html#ad8d1a189e5fdd7cf11ab8165cf05a88c">_resolution</a> == 0)
+<a name="l00108"></a>00108             <a class="code" href="classBaseKvmTimer.html#ad8d1a189e5fdd7cf11ab8165cf05a88c">_resolution</a> = <a class="code" href="classBaseKvmTimer.html#a8bff362cf60f8a6adbdc0aa31cb9be27">calcResolution</a>();
+<a name="l00109"></a>00109         <span class="keywordflow">return</span> <a class="code" href="classBaseKvmTimer.html#ad8d1a189e5fdd7cf11ab8165cf05a88c">_resolution</a>;
+<a name="l00110"></a>00110     }
+<a name="l00111"></a>00111 
+<a name="l00119"></a><a class="code" href="classBaseKvmTimer.html#ace36954bea0efa9977b9d4760437860b">00119</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#ace36954bea0efa9977b9d4760437860b">ticksFromHostCycles</a>(uint64_t cycles) {
+<a name="l00120"></a>00120         <span class="keywordflow">return</span> cycles * <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a> * <a class="code" href="classBaseKvmTimer.html#af880b55be2bf83ac65eb9b0abe62ae49">hostFreq</a>;
+<a name="l00121"></a>00121     }
+<a name="l00122"></a>00122 
+<a name="l00130"></a><a class="code" href="classBaseKvmTimer.html#a4702535d08d1d648d5a5bcd113edc395">00130</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#a4702535d08d1d648d5a5bcd113edc395">ticksFromHostNs</a>(uint64_t <a class="code" href="namespaceArmISA.html#a4036e5d9d61eba835b609e8298312a22">ns</a>) {
+<a name="l00131"></a>00131         <span class="keywordflow">return</span> ns * <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a> * <a class="code" href="namespaceSimClock_1_1Float.html#a476bed566643072ee0ed28f78d0db370" title="nanosecond">SimClock::Float::ns</a>;
+<a name="l00132"></a>00132     }
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134   <span class="keyword">protected</span>:
+<a name="l00141"></a>00141     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#a8bff362cf60f8a6adbdc0aa31cb9be27">calcResolution</a>() = 0;
+<a name="l00142"></a>00142 
+<a name="l00148"></a><a class="code" href="classBaseKvmTimer.html#a1e40d82dba12b48d6298661480977ff9">00148</a>     uint64_t <a class="code" href="classBaseKvmTimer.html#a1e40d82dba12b48d6298661480977ff9">hostNs</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> ticks) {
+<a name="l00149"></a>00149         <span class="keywordflow">return</span> ticks / (<a class="code" href="namespaceSimClock_1_1Float.html#a476bed566643072ee0ed28f78d0db370" title="nanosecond">SimClock::Float::ns</a> * <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a>);
+<a name="l00150"></a>00150     }
+<a name="l00151"></a>00151 
+<a name="l00158"></a><a class="code" href="classBaseKvmTimer.html#ab987095ba5c55b83638d48c3b69693d4">00158</a>     uint64_t <a class="code" href="classBaseKvmTimer.html#ab987095ba5c55b83638d48c3b69693d4">hostCycles</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> ticks) {
+<a name="l00159"></a>00159         <span class="keywordflow">return</span> ticks / (<a class="code" href="classBaseKvmTimer.html#af880b55be2bf83ac65eb9b0abe62ae49">hostFreq</a> * <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a>);
+<a name="l00160"></a>00160     }
+<a name="l00161"></a>00161 
+<a name="l00163"></a><a class="code" href="classBaseKvmTimer.html#a68acd751895efa9ac5a6461017f1d2d8">00163</a>     <span class="keywordtype">int</span> <a class="code" href="classBaseKvmTimer.html#a68acd751895efa9ac5a6461017f1d2d8">signo</a>;
+<a name="l00164"></a>00164 
+<a name="l00165"></a>00165   <span class="keyword">private</span>:
+<a name="l00167"></a><a class="code" href="classBaseKvmTimer.html#ad8d1a189e5fdd7cf11ab8165cf05a88c">00167</a>     <span class="keyword">mutable</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#ad8d1a189e5fdd7cf11ab8165cf05a88c">_resolution</a>;
+<a name="l00168"></a>00168 
+<a name="l00170"></a><a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">00170</a>     <span class="keywordtype">float</span> <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a>;
+<a name="l00172"></a><a class="code" href="classBaseKvmTimer.html#af880b55be2bf83ac65eb9b0abe62ae49">00172</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#af880b55be2bf83ac65eb9b0abe62ae49">hostFreq</a>;
+<a name="l00173"></a>00173 };
+<a name="l00174"></a>00174 
+<a name="l00183"></a><a class="code" href="classPosixKvmTimer.html">00183</a> <span class="keyword">class </span><a class="code" href="classPosixKvmTimer.html">PosixKvmTimer</a> : <span class="keyword">public</span> <a class="code" href="classBaseKvmTimer.html">BaseKvmTimer</a>
+<a name="l00184"></a>00184 {
+<a name="l00185"></a>00185   <span class="keyword">public</span>:
+<a name="l00192"></a>00192     <a class="code" href="classPosixKvmTimer.html#a8de164097b5374e298ea92b3e23c1951">PosixKvmTimer</a>(<span class="keywordtype">int</span> <a class="code" href="classBaseKvmTimer.html#a68acd751895efa9ac5a6461017f1d2d8">signo</a>, clockid_t <a class="code" href="classPosixKvmTimer.html#a3ad1d5e961d76190ddbf7559f642a11e">clockID</a>,
+<a name="l00193"></a>00193                   <span class="keywordtype">float</span> <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#af880b55be2bf83ac65eb9b0abe62ae49">hostFreq</a>);
+<a name="l00194"></a>00194     <a class="code" href="classPosixKvmTimer.html#a83d2c8118d7b82a9bbd040e05626d705">~PosixKvmTimer</a>();
+<a name="l00195"></a>00195 
+<a name="l00196"></a>00196     <span class="keywordtype">void</span> <a class="code" href="classPosixKvmTimer.html#a5041ff590d50fcb1f0f5149b2e7eb4bb">arm</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> ticks);
+<a name="l00197"></a>00197     <span class="keywordtype">void</span> <a class="code" href="classPosixKvmTimer.html#a9882bfa120cede575461197f2a13cd8b">disarm</a>();
+<a name="l00198"></a>00198 
+<a name="l00199"></a>00199   <span class="keyword">protected</span>:
+<a name="l00200"></a>00200     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPosixKvmTimer.html#a02798cc202bebceef3ff0e3ff3d7b5b8">calcResolution</a>();
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202   <span class="keyword">private</span>:
+<a name="l00203"></a><a class="code" href="classPosixKvmTimer.html#a3ad1d5e961d76190ddbf7559f642a11e">00203</a>     clockid_t clockID;
+<a name="l00204"></a><a class="code" href="classPosixKvmTimer.html#a1a1e2de3a80567484c9b4d4f20d5a3d0">00204</a>     timer_t <a class="code" href="classPosixKvmTimer.html#a1a1e2de3a80567484c9b4d4f20d5a3d0">timer</a>;
+<a name="l00205"></a>00205 };
+<a name="l00206"></a>00206 
+<a name="l00215"></a><a class="code" href="classPerfKvmTimer.html">00215</a> <span class="keyword">class </span><a class="code" href="classPerfKvmTimer.html">PerfKvmTimer</a> : <span class="keyword">public</span> <a class="code" href="classBaseKvmTimer.html">BaseKvmTimer</a>
+<a name="l00216"></a>00216 {
+<a name="l00217"></a>00217   <span class="keyword">public</span>:
+<a name="l00232"></a>00232     <a class="code" href="classPerfKvmTimer.html#a9435bd1cf661fdb4e35b2a733d94f92d">PerfKvmTimer</a>(<a class="code" href="classPerfKvmCounter.html">PerfKvmCounter</a> &amp;ctr,
+<a name="l00233"></a>00233                  <span class="keywordtype">int</span> <a class="code" href="classBaseKvmTimer.html#a68acd751895efa9ac5a6461017f1d2d8">signo</a>,
+<a name="l00234"></a>00234                  <span class="keywordtype">float</span> <a class="code" href="classBaseKvmTimer.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmTimer.html#af880b55be2bf83ac65eb9b0abe62ae49">hostFreq</a>);
+<a name="l00235"></a>00235     <a class="code" href="classPerfKvmTimer.html#a0095b8dff4f2db7d8d44674689127373">~PerfKvmTimer</a>();
+<a name="l00236"></a>00236 
+<a name="l00237"></a>00237     <span class="keywordtype">void</span> <a class="code" href="classPerfKvmTimer.html#a5041ff590d50fcb1f0f5149b2e7eb4bb">arm</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> ticks);
+<a name="l00238"></a>00238     <span class="keywordtype">void</span> <a class="code" href="classPerfKvmTimer.html#a9882bfa120cede575461197f2a13cd8b">disarm</a>();
+<a name="l00239"></a>00239 
+<a name="l00240"></a>00240   <span class="keyword">protected</span>:
+<a name="l00241"></a>00241     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPerfKvmTimer.html#a02798cc202bebceef3ff0e3ff3d7b5b8">calcResolution</a>();
+<a name="l00242"></a>00242 
+<a name="l00243"></a>00243   <span class="keyword">private</span>:
+<a name="l00244"></a><a class="code" href="classPerfKvmTimer.html#af183dc3e77e7fc3603a0d4ff4a8fb65d">00244</a>     <a class="code" href="classPerfKvmCounter.html">PerfKvmCounter</a> &amp;<a class="code" href="classPerfKvmTimer.html#af183dc3e77e7fc3603a0d4ff4a8fb65d">hwOverflow</a>;
+<a name="l00245"></a>00245 };
+<a name="l00246"></a>00246 
+<a name="l00247"></a>00247 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

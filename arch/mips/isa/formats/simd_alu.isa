@@ -1,0 +1,307 @@
+// -*- mode:c++ -*-
+
+// Copyright (c) 2007 MIPS Technologies, Inc.
+// All rights reserved.
+// 
+//add SIMD execution 
+//load, store quadword
+//Parallel Arithmetic and Logical
+//
+////////////////////////////////////////////////////////////////////////////
+// SIMD operate instruction
+//
+//
+
+output header {{
+#include <iostream>
+    using namespace std;
+       /*Base class for SIMD operations*/
+        class SIMDOp : public MipsStaticInst
+        {
+                protected:
+
+                /// Constructor
+                SIMDOp(const char *mnem, MachInst _machInst, OpClass __opClass) :
+                                MipsStaticInst(mnem, _machInst, __opClass)
+                {
+                }
+
+                std::string generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        };
+
+        class SIMDHiLoOp: public SIMDOp
+        {
+                protected:
+
+                /// Constructor
+                SIMDHiLoOp(const char *mnem, MachInst _machInst, OpClass __opClass) :
+                                SIMDOp(mnem, _machInst, __opClass)
+                {
+                }
+
+                std::string generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        };
+        
+	class SIMDHiLoRsSelOp: public SIMDHiLoOp
+        {
+                protected:
+
+                /// Constructor
+                SIMDHiLoRsSelOp(const char *mnem, MachInst _machInst, OpClass __opClass) :
+                                SIMDHiLoOp(mnem, _machInst, __opClass)
+                {
+                }
+
+                std::string generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        };
+
+        class SIMDHiLoRdSelOp: public SIMDHiLoOp
+        {
+                protected:
+
+                /// Constructor
+                SIMDHiLoRdSelOp(const char *mnem, MachInst _machInst, OpClass __opClass) :
+                                SIMDHiLoOp(mnem, _machInst, __opClass)
+                {
+                }
+
+                std::string generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        };
+
+        class SIMDHiLoRdSelValOp: public SIMDHiLoOp
+        {
+                protected:
+
+                /// Constructor
+                SIMDHiLoRdSelValOp(const char *mnem, MachInst _machInst, OpClass __opClass) :
+                                SIMDHiLoOp(mnem, _machInst, __opClass)
+                {
+                }
+
+                std::string generateDisassembly(Addr pc, const SymbolTable *symtab) const;
+        };
+
+}};
+// SIMD HiLo instruction class execute method template.
+def template SIMDHiLoExecute {{
+        Fault %(class_name)s::execute(CPU_EXEC_CONTEXT *xc, Trace::InstRecord *traceData) const
+        {
+                Fault fault = NoFault;
+
+                %(fp_enable_check)s;
+                %(op_decl)s;
+                %(op_rd)s;
+                %(code)s;
+
+                if(fault == NoFault)
+                {
+                    %(op_wb)s;
+                }
+                return fault;
+        }
+}};
+
+// SIMD HiLoRsSel instruction class execute method template.
+def template SIMDHiLoRsSelExecute {{
+        Fault %(class_name)s::execute(CPU_EXEC_CONTEXT *xc, Trace::InstRecord *traceData) const
+        {
+                Fault fault = NoFault;
+
+                %(op_decl)s;
+
+                if( ACSRC > 0 && !isDspEnabled(xc) )
+                {
+                    fault = new DspStateDisabledFault();
+                }
+                else
+                {
+                    %(op_rd)s;
+                    %(code)s;
+                }
+
+                if(fault == NoFault)
+                {
+                    %(op_wb)s;
+                }
+                return fault;
+        }
+ }};
+
+// SIMDHiLoRdSel instruction class execute method template.
+def template SIMDHiLoRdSelExecute {{
+        Fault %(class_name)s::execute(CPU_EXEC_CONTEXT *xc, Trace::InstRecord *traceData) const
+        {
+                Fault fault = NoFault;
+
+                %(op_decl)s;
+
+                if( ACDST > 0 && !isDspEnabled(xc) )
+                {
+                    fault = new DspStateDisabledFault();
+                }
+                else
+                {
+                    %(op_rd)s;
+                    %(code)s;
+                }
+
+                if(fault == NoFault)
+                {
+                    %(op_wb)s;
+                }
+                return fault;
+        }
+}};
+
+//Outputs to decoder.cc
+output decoder {{
+        std::string SIMDOp::generateDisassembly(Addr pc, const SymbolTable *symtab) const
+        {
+            std::stringstream ss;
+
+            ccprintf(ss, "%-10s ", mnemonic);
+
+            // just print the first dest... if there's a second one,
+            // it's generally implicit
+	    //SIMD Register is 4-word registers.but SIMD impliment hh, hl, lh, ll. so loop or 1-4 display ?
+            if (_numDestRegs > 0) {
+	        printReg(ss, _destRegIdx[0]);
+                ss << ", ";
+            }
+
+            // just print the first two source regs... if there's
+            // a third one, it's a read-modify-write dest (Rc),
+            // e.g. for CMOVxx
+            if (_numSrcRegs > 0) {
+	        printReg(ss, _srcRegIdx[0]);
+            }
+
+            if (_numSrcRegs > 4) {
+                ss << ", ";
+                printReg(ss, _srcRegIdx[4]);
+            }
+
+	    if (strcmp(mnemonic, "pinsw") == 0 || strcmp(mnemonic,"pextw")==0)
+	      {
+		ccprintf(ss,", %x",Id_SHAMT );
+	      }
+		
+
+            return ss.str();
+        }
+
+        std::string SIMDHiLoOp::generateDisassembly(Addr pc, const SymbolTable *symtab) const
+        {
+            std::stringstream ss;
+
+            ccprintf(ss, "%-10s ", mnemonic);
+
+            //Destination Registers are implicit for HI/LO ops
+            // it's generally implicit
+	    //SIMD Register is 4 registers. so loop or 1-4 display ?
+            if (_numSrcRegs > 0) {
+                printReg(ss, _srcRegIdx[0]);
+            }
+
+            if (_numSrcRegs > 1) {
+                ss << ", ";
+                printReg(ss, _srcRegIdx[4]);
+            }
+
+            return ss.str();
+        }
+
+        std::string SIMDHiLoRsSelOp::generateDisassembly(Addr pc, const SymbolTable *symtab) const
+        {
+            std::stringstream ss;
+
+            ccprintf(ss, "%-10s ", mnemonic);
+
+            if (_numDestRegs > 0 && _destRegIdx[0] < 32+9+128) {
+	        printReg(ss, _destRegIdx[0]);
+            } else if (_numSrcRegs > 0 && _srcRegIdx[0] < 32+9+128) {
+	        printReg(ss, _srcRegIdx[0]);
+            }
+
+            return ss.str();
+        }
+
+        std::string SIMDHiLoRdSelOp::generateDisassembly(Addr pc, const SymbolTable *symtab) const
+        {
+            std::stringstream ss;
+
+            ccprintf(ss, "%-10s ", mnemonic);
+
+            if (_numDestRegs > 0 && _destRegIdx[0] < 32+9+128) {
+	        printReg(ss, _destRegIdx[0]);
+            } else if (_numSrcRegs > 0 && _srcRegIdx[0] < 32+9+128) {
+	        printReg(ss, _srcRegIdx[0]);
+            }
+
+            return ss.str();
+        }
+
+        std::string SIMDHiLoRdSelValOp::generateDisassembly(Addr pc, const SymbolTable *symtab) const
+        {
+            std::stringstream ss;
+
+            ccprintf(ss, "%-10s ", mnemonic);
+
+            if (_numDestRegs > 0 && _destRegIdx[0] < 32+9+128) {
+                printReg(ss, _destRegIdx[0]);
+            } else if (_numSrcRegs > 0 && _srcRegIdx[0] < 32+9+128) {
+                printReg(ss, _srcRegIdx[0]);
+            }
+
+            return ss.str();
+        }
+}};
+
+def format SIMDOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'SIMDOp',  {"code":code,"op_class":"SimdAluOp"}, opt_flags)
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = RegNopCheckDecode.subst(iop)
+    exec_output = BasicExecute.subst(iop)
+}};
+
+def format SIMDHiLoRsSelOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'SIMDHiLoRsSelOp', code, opt_flags)
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = SIMDHiLoRsSelExecute.subst(iop)
+}};
+
+def format SIMDHiLoRdSelOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'SIMDHiLoRdSelOp', code, opt_flags)
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = SIMDHiLoRdSelExecute.subst(iop)
+}};
+
+def format SIMDHiLoRdSelValOp(code, *opt_flags) {{
+    code += 'LOLL = val_ll<31:0>;\n'
+    code += 'HILL = val_ll<63:32>;\n'
+    code += 'LOLH = val_lh<31:0>;\n'
+    code += 'HILH = val_lh<63:32>;\n'
+    code += 'LOHL = val_hl<31:0>;\n'
+    code += 'HIHL = val_hl<63:32>;\n'
+    code += 'LOHH = val_hh<31:0>;\n'
+    code += 'HIHH = val_hh<63:32>;\n'
+
+    iop = InstObjParams(name, Name, 'SIMDHiLoRdSelOp', {"code": code,"op_class":"SimdMultOp"}, opt_flags)
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = SIMDHiLoRdSelExecute.subst(iop)
+}};
+
+def format SIMDHiLoOp(code, *opt_flags) {{
+    iop = InstObjParams(name, Name, 'SIMDHiLoOp', {"code": code,"op_class":"SimdMultAccOp"}, opt_flags)
+    header_output = BasicDeclare.subst(iop)
+    decoder_output = BasicConstructor.subst(iop)
+    decode_block = BasicDecode.subst(iop)
+    exec_output = SIMDHiLoExecute.subst(iop)
+}};

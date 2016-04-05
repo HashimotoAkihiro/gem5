@@ -1,0 +1,146 @@
+\hypertarget{classCpuEvent}{
+\section{クラス CpuEvent}
+\label{classCpuEvent}\index{CpuEvent@{CpuEvent}}
+}
+
+
+{\ttfamily \#include $<$cpuevent.hh$>$}CpuEventに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classCpuEvent}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCpuEvent_ac2509f47e48618aceb1bbd19cddb51a7}{CpuEvent} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\_\-tc, \hyperlink{classEventBase_a6d92f7ee8144a5911ed46d85a89a4934}{Priority} p=\hyperlink{classEventBase_a6bd0fef0ad63ee49ad5ece92a9dd5f8f}{Default\_\-Pri})
+\item 
+\hyperlink{classCpuEvent_a258f48595df111cbfc722fb3aadcf3cf}{$\sim$CpuEvent} ()
+\item 
+\hyperlink{classThreadContext}{ThreadContext} $\ast$ \hyperlink{classCpuEvent_a81894d15db5190d5364449a4915b76f5}{getTC} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classCpuEvent_abc7c937eda3f3c20297a24ba96396447}{replaceThreadContext} (\hyperlink{classThreadContext}{ThreadContext} $\ast$oldTc, \hyperlink{classThreadContext}{ThreadContext} $\ast$newTc)
+\end{DoxyCompactItemize}
+\subsection*{Protected 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classCpuEvent}{CpuEvent} $\ast$ $>$ \hyperlink{classCpuEvent_a87e3068498bf2fb68a7723d38bd194f3}{CpuEventList}
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classThreadContext}{ThreadContext} $\ast$ \hyperlink{classCpuEvent_a4455a4759e69e5ebe68ae7298cbcc37d}{tc}
+\end{DoxyCompactItemize}
+\subsection*{Static Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classstd_1_1vector}{CpuEventList} \hyperlink{classCpuEvent_a8117445cf117d748705531a5145dc9f7}{cpuEventList}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+This class creates a global list of events that need a pointer to a thread context. When a switchover takes place the events can be migrated to the new thread context, otherwise you could have a wake timer interrupt go off on a switched out cpu or other unfortunate events. This object MUST be dynamically allocated to avoid it being deleted after a cpu switch happens. 
+
+\subsection{型定義}
+\hypertarget{classCpuEvent_a87e3068498bf2fb68a7723d38bd194f3}{
+\index{CpuEvent@{CpuEvent}!CpuEventList@{CpuEventList}}
+\index{CpuEventList@{CpuEventList}!CpuEvent@{CpuEvent}}
+\subsubsection[{CpuEventList}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf std::vector}$<${\bf CpuEvent} $\ast$$>$ {\bf CpuEventList}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCpuEvent_a87e3068498bf2fb68a7723d38bd194f3}
+type of global list of cpu events. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCpuEvent_ac2509f47e48618aceb1bbd19cddb51a7}{
+\index{CpuEvent@{CpuEvent}!CpuEvent@{CpuEvent}}
+\index{CpuEvent@{CpuEvent}!CpuEvent@{CpuEvent}}
+\subsubsection[{CpuEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CpuEvent} ({\bf ThreadContext} $\ast$ {\em \_\-tc}, \/  {\bf Priority} {\em p} = {\ttfamily {\bf Default\_\-Pri}})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCpuEvent_ac2509f47e48618aceb1bbd19cddb51a7}
+
+
+
+\begin{DoxyCode}
+63         : Event(p), tc(_tc)
+64     { cpuEventList.push_back(this); }
+\end{DoxyCode}
+\hypertarget{classCpuEvent_a258f48595df111cbfc722fb3aadcf3cf}{
+\index{CpuEvent@{CpuEvent}!$\sim$CpuEvent@{$\sim$CpuEvent}}
+\index{$\sim$CpuEvent@{$\sim$CpuEvent}!CpuEvent@{CpuEvent}}
+\subsubsection[{$\sim$CpuEvent}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf CpuEvent} ()}}
+\label{classCpuEvent_a258f48595df111cbfc722fb3aadcf3cf}
+delete the cpu event from the global list. 
+
+
+\begin{DoxyCode}
+38 {
+39     CpuEventList::iterator i;
+40 
+41     // delete the event from the global list
+42     for (i = cpuEventList.begin(); i != cpuEventList.end(); ) {
+43         if (*i == this)
+44             i = cpuEventList.erase(i);
+45         else
+46             i++;
+47     }
+48 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classCpuEvent_a81894d15db5190d5364449a4915b76f5}{
+\index{CpuEvent@{CpuEvent}!getTC@{getTC}}
+\index{getTC@{getTC}!CpuEvent@{CpuEvent}}
+\subsubsection[{getTC}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadContext}$\ast$ getTC ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCpuEvent_a81894d15db5190d5364449a4915b76f5}
+
+
+
+\begin{DoxyCode}
+75 { return tc; }
+\end{DoxyCode}
+\hypertarget{classCpuEvent_abc7c937eda3f3c20297a24ba96396447}{
+\index{CpuEvent@{CpuEvent}!replaceThreadContext@{replaceThreadContext}}
+\index{replaceThreadContext@{replaceThreadContext}!CpuEvent@{CpuEvent}}
+\subsubsection[{replaceThreadContext}]{\setlength{\rightskip}{0pt plus 5cm}void replaceThreadContext ({\bf ThreadContext} $\ast$ {\em oldTc}, \/  {\bf ThreadContext} $\ast$ {\em newTc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classCpuEvent_abc7c937eda3f3c20297a24ba96396447}
+Update all events switching old tc to new tc. 
+\begin{DoxyParams}{引数}
+\item[{\em oldTc}]the old thread context we are switching from \item[{\em newTc}]the new thread context we are switching to. \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+52 {
+53     CpuEventList::iterator i;
+54 
+55     // Update any events that have the old thread context with the new thread
+56     // context
+57     for (i = cpuEventList.begin(); i != cpuEventList.end(); i++) {
+58         if ((*i)->tc == oldTc)
+59             (*i)->tc = newTc;
+60     }
+61 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCpuEvent_a8117445cf117d748705531a5145dc9f7}{
+\index{CpuEvent@{CpuEvent}!cpuEventList@{cpuEventList}}
+\index{cpuEventList@{cpuEventList}!CpuEvent@{CpuEvent}}
+\subsubsection[{cpuEventList}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CpuEvent::CpuEventList} {\bf cpuEventList}\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classCpuEvent_a8117445cf117d748705531a5145dc9f7}
+Static list of cpu events that is searched every time a cpu switch happens.
+
+Static list of all \hyperlink{classCpuEvent}{CpuEvent} objects so we can modify their thread contexts as needed. \hypertarget{classCpuEvent_a4455a4759e69e5ebe68ae7298cbcc37d}{
+\index{CpuEvent@{CpuEvent}!tc@{tc}}
+\index{tc@{tc}!CpuEvent@{CpuEvent}}
+\subsubsection[{tc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadContext}$\ast$ {\bf tc}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCpuEvent_a4455a4759e69e5ebe68ae7298cbcc37d}
+The thread context that is switched to the new cpus. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/\hyperlink{cpuevent_8hh}{cpuevent.hh}\item 
+cpu/\hyperlink{cpuevent_8cc}{cpuevent.cc}\end{DoxyCompactItemize}

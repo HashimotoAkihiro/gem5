@@ -1,0 +1,500 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/arm/insts/macromem.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/arm/insts/macromem.hh</h1><a href="macromem_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2007-2008 The Florida State University</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Stephen Hines</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#ifndef __ARCH_ARM_MACROMEM_HH__</span>
+<a name="l00043"></a>00043 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ARM_MACROMEM_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="pred__inst_8hh.html">arch/arm/insts/pred_inst.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="arch_2arm_2tlb_8hh.html">arch/arm/tlb.hh</a>&quot;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="keyword">namespace </span><a class="code" href="classArmISA_1_1ArmISA.html">ArmISA</a>
+<a name="l00049"></a>00049 {
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="keyword">static</span> <span class="keyword">inline</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>
+<a name="l00052"></a><a class="code" href="namespaceArmISA.html#a294787b82a4a15394e65702f8e8cde80">00052</a> <a class="code" href="namespaceArmISA.html#a294787b82a4a15394e65702f8e8cde80">number_of_ones</a>(int32_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00053"></a>00053 {
+<a name="l00054"></a>00054     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> ones = 0;
+<a name="l00055"></a>00055     <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; 32; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>++ )
+<a name="l00056"></a>00056     {
+<a name="l00057"></a>00057         <span class="keywordflow">if</span> ( val &amp; (1&lt;&lt;<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) )
+<a name="l00058"></a>00058             ones++;
+<a name="l00059"></a>00059     }
+<a name="l00060"></a>00060     <span class="keywordflow">return</span> ones;
+<a name="l00061"></a>00061 }
+<a name="l00062"></a>00062 
+<a name="l00066"></a><a class="code" href="classArmISA_1_1MicroOp.html">00066</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredOp.html">PredOp</a>
+<a name="l00067"></a>00067 {
+<a name="l00068"></a>00068   <span class="keyword">protected</span>:
+<a name="l00069"></a><a class="code" href="classArmISA_1_1MicroOp.html#a4fce46491b629156291132a467e8693e">00069</a>     <a class="code" href="classArmISA_1_1MicroOp.html#a4fce46491b629156291132a467e8693e">MicroOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass)
+<a name="l00070"></a>00070             : <a class="code" href="classArmISA_1_1PredOp.html">PredOp</a>(mnem, machInst, __opClass)
+<a name="l00071"></a>00071     {
+<a name="l00072"></a>00072     }
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074   <span class="keyword">public</span>:
+<a name="l00075"></a>00075     <span class="keywordtype">void</span>
+<a name="l00076"></a><a class="code" href="classArmISA_1_1MicroOp.html#af04cd01429462d48e635f3e01ced6257">00076</a>     <a class="code" href="classArmISA_1_1MicroOp.html#af04cd01429462d48e635f3e01ced6257">advancePC</a>(<a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">PCState</a> &amp;pcState)<span class="keyword"> const</span>
+<a name="l00077"></a>00077 <span class="keyword">    </span>{
+<a name="l00078"></a>00078         <span class="keywordflow">if</span> (<a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsLastMicroop]) {
+<a name="l00079"></a>00079             pcState.uEnd();
+<a name="l00080"></a>00080         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsMicroop]) {
+<a name="l00081"></a>00081             pcState.uAdvance();
+<a name="l00082"></a>00082         } <span class="keywordflow">else</span> {
+<a name="l00083"></a>00083             pcState.advance();
+<a name="l00084"></a>00084         }
+<a name="l00085"></a>00085     }
+<a name="l00086"></a>00086 };
+<a name="l00087"></a>00087 
+<a name="l00088"></a><a class="code" href="classArmISA_1_1MicroOpX.html">00088</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroOpX.html">MicroOpX</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>
+<a name="l00089"></a>00089 {
+<a name="l00090"></a>00090   <span class="keyword">protected</span>:
+<a name="l00091"></a><a class="code" href="classArmISA_1_1MicroOpX.html#af06653f85c4862ab6db35679371186b6">00091</a>     <a class="code" href="classArmISA_1_1MicroOpX.html#af06653f85c4862ab6db35679371186b6">MicroOpX</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass)
+<a name="l00092"></a>00092             : <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>(mnem, machInst, __opClass)
+<a name="l00093"></a>00093     {}
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095   <span class="keyword">public</span>:
+<a name="l00096"></a>00096     <span class="keywordtype">void</span>
+<a name="l00097"></a><a class="code" href="classArmISA_1_1MicroOpX.html#af04cd01429462d48e635f3e01ced6257">00097</a>     <a class="code" href="classArmISA_1_1MicroOpX.html#af04cd01429462d48e635f3e01ced6257">advancePC</a>(<a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">PCState</a> &amp;pcState)<span class="keyword"> const</span>
+<a name="l00098"></a>00098 <span class="keyword">    </span>{
+<a name="l00099"></a>00099         <span class="keywordflow">if</span> (<a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsLastMicroop]) {
+<a name="l00100"></a>00100             pcState.uEnd();
+<a name="l00101"></a>00101         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsMicroop]) {
+<a name="l00102"></a>00102             pcState.uAdvance();
+<a name="l00103"></a>00103         } <span class="keywordflow">else</span> {
+<a name="l00104"></a>00104             pcState.advance();
+<a name="l00105"></a>00105         }
+<a name="l00106"></a>00106     }
+<a name="l00107"></a>00107 };
+<a name="l00108"></a>00108 
+<a name="l00112"></a><a class="code" href="classArmISA_1_1MicroNeonMemOp.html">00112</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroNeonMemOp.html">MicroNeonMemOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00113"></a>00113 {
+<a name="l00114"></a>00114   <span class="keyword">protected</span>:
+<a name="l00115"></a><a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">00115</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a6563276134c2f303bab0c30e83e02220">dest</a>, <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>;
+<a name="l00116"></a><a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a3aa9e175bd81b38df0e566643d5d4f8d">00116</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a3aa9e175bd81b38df0e566643d5d4f8d">imm</a>;
+<a name="l00117"></a><a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a827c936c9e2b1f1cf21a01f204a8d821">00117</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a827c936c9e2b1f1cf21a01f204a8d821">memAccessFlags</a>;
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a9ec783f147082cdedf23edaec11108bc">00119</a>     <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a9ec783f147082cdedf23edaec11108bc">MicroNeonMemOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00120"></a>00120                    <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _dest, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _imm)
+<a name="l00121"></a>00121             : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00122"></a>00122               <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a6563276134c2f303bab0c30e83e02220">dest</a>(_dest), <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a3aa9e175bd81b38df0e566643d5d4f8d">imm</a>(_imm),
+<a name="l00123"></a>00123               <a class="code" href="classArmISA_1_1MicroNeonMemOp.html#a827c936c9e2b1f1cf21a01f204a8d821">memAccessFlags</a>(<a class="code" href="classArmISA_1_1TLB.html">TLB</a>::MustBeOne)
+<a name="l00124"></a>00124     {
+<a name="l00125"></a>00125     }
+<a name="l00126"></a>00126 };
+<a name="l00127"></a>00127 
+<a name="l00131"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp.html">00131</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroNeonMixOp.html">MicroNeonMixOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00132"></a>00132 {
+<a name="l00133"></a>00133   <span class="keyword">protected</span>:
+<a name="l00134"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp.html#ae55982e6b9309683aef1b44249ab406f">00134</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroNeonMixOp.html#a6563276134c2f303bab0c30e83e02220">dest</a>, <a class="code" href="classArmISA_1_1MicroNeonMixOp.html#ae55982e6b9309683aef1b44249ab406f">op1</a>;
+<a name="l00135"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp.html#a739c65d9c925e3793560160ef5a96d6f">00135</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1MicroNeonMixOp.html#a739c65d9c925e3793560160ef5a96d6f">step</a>;
+<a name="l00136"></a>00136 
+<a name="l00137"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp.html#a36be9fd8ff3c4724827aa6d7be82356c">00137</a>     <a class="code" href="classArmISA_1_1MicroNeonMixOp.html#a36be9fd8ff3c4724827aa6d7be82356c">MicroNeonMixOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00138"></a>00138                    <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _dest, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _step)
+<a name="l00139"></a>00139             : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00140"></a>00140               <a class="code" href="classArmISA_1_1MicroNeonMixOp.html#a6563276134c2f303bab0c30e83e02220">dest</a>(_dest), <a class="code" href="classArmISA_1_1MicroNeonMixOp.html#ae55982e6b9309683aef1b44249ab406f">op1</a>(_op1), <a class="code" href="classArmISA_1_1MicroNeonMixOp.html#a739c65d9c925e3793560160ef5a96d6f">step</a>(_step)
+<a name="l00141"></a>00141     {
+<a name="l00142"></a>00142     }
+<a name="l00143"></a>00143 };
+<a name="l00144"></a>00144 
+<a name="l00145"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp.html">00145</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp.html">MicroNeonMixLaneOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroNeonMixOp.html">MicroNeonMixOp</a>
+<a name="l00146"></a>00146 {
+<a name="l00147"></a>00147   <span class="keyword">protected</span>:
+<a name="l00148"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp.html#a11dafb05e242b40250edce6bc9cfd29f">00148</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp.html#a11dafb05e242b40250edce6bc9cfd29f">lane</a>;
+<a name="l00149"></a>00149 
+<a name="l00150"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp.html#af3cc50e0446af48efb448a4cf391165c">00150</a>     <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp.html#af3cc50e0446af48efb448a4cf391165c">MicroNeonMixLaneOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>,
+<a name="l00151"></a>00151                        OpClass __opClass, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _dest, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _op1,
+<a name="l00152"></a>00152                        <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _step, <span class="keywordtype">unsigned</span> _lane)
+<a name="l00153"></a>00153             : <a class="code" href="classArmISA_1_1MicroNeonMixOp.html">MicroNeonMixOp</a>(mnem, machInst, __opClass, _dest, _op1, _step),
+<a name="l00154"></a>00154               <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp.html#a11dafb05e242b40250edce6bc9cfd29f">lane</a>(_lane)
+<a name="l00155"></a>00155     {
+<a name="l00156"></a>00156     }
+<a name="l00157"></a>00157 };
+<a name="l00158"></a>00158 
+<a name="l00162"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp64.html">00162</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroNeonMixOp64.html">MicroNeonMixOp64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00163"></a>00163 {
+<a name="l00164"></a>00164   <span class="keyword">protected</span>:
+<a name="l00165"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#ae55982e6b9309683aef1b44249ab406f">00165</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a6563276134c2f303bab0c30e83e02220">dest</a>, <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#ae55982e6b9309683aef1b44249ab406f">op1</a>;
+<a name="l00166"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a4a2eb71e89c989655301c2f2070e29b3">00166</a>     uint8_t <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>, <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a7a5268882c913c394a8ad4d988eb94e6">numRegs</a>, <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a4a2eb71e89c989655301c2f2070e29b3">step</a>;
+<a name="l00167"></a>00167 
+<a name="l00168"></a><a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a7e806f9d0c1e32b27ec5d124d88f99be">00168</a>     <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a7e806f9d0c1e32b27ec5d124d88f99be">MicroNeonMixOp64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00169"></a>00169                      <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _dest, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _op1, uint8_t _eSize,
+<a name="l00170"></a>00170                      uint8_t _dataSize, uint8_t _numStructElems,
+<a name="l00171"></a>00171                      uint8_t _numRegs, uint8_t _step)
+<a name="l00172"></a>00172         : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass), <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a6563276134c2f303bab0c30e83e02220">dest</a>(_dest), <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#ae55982e6b9309683aef1b44249ab406f">op1</a>(_op1),
+<a name="l00173"></a>00173           <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>(_eSize), <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>(_dataSize), <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>(_numStructElems),
+<a name="l00174"></a>00174           <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a7a5268882c913c394a8ad4d988eb94e6">numRegs</a>(_numRegs), <a class="code" href="classArmISA_1_1MicroNeonMixOp64.html#a4a2eb71e89c989655301c2f2070e29b3">step</a>(_step)
+<a name="l00175"></a>00175     {
+<a name="l00176"></a>00176     }
+<a name="l00177"></a>00177 };
+<a name="l00178"></a>00178 
+<a name="l00179"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html">00179</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html">MicroNeonMixLaneOp64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00180"></a>00180 {
+<a name="l00181"></a>00181   <span class="keyword">protected</span>:
+<a name="l00182"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#ae55982e6b9309683aef1b44249ab406f">00182</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a6563276134c2f303bab0c30e83e02220">dest</a>, <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#ae55982e6b9309683aef1b44249ab406f">op1</a>;
+<a name="l00183"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a4a2eb71e89c989655301c2f2070e29b3">00183</a>     uint8_t <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>, <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#af193aa092c273ecfcd953f986cd68f9d">lane</a>, <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a4a2eb71e89c989655301c2f2070e29b3">step</a>;
+<a name="l00184"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a8f2b56ecc4db4f48e2c08aef78591efc">00184</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a8f2b56ecc4db4f48e2c08aef78591efc">replicate</a>;
+<a name="l00185"></a>00185 
+<a name="l00186"></a><a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a9d9e8837f3b4b5a5c931fb6133f35b36">00186</a>     <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a9d9e8837f3b4b5a5c931fb6133f35b36">MicroNeonMixLaneOp64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>,
+<a name="l00187"></a>00187                          OpClass __opClass, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _dest, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _op1,
+<a name="l00188"></a>00188                          uint8_t _eSize, uint8_t _dataSize,
+<a name="l00189"></a>00189                          uint8_t _numStructElems, uint8_t _lane, uint8_t _step,
+<a name="l00190"></a>00190                          <span class="keywordtype">bool</span> _replicate = <span class="keyword">false</span>)
+<a name="l00191"></a>00191         : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass), <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a6563276134c2f303bab0c30e83e02220">dest</a>(_dest), <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#ae55982e6b9309683aef1b44249ab406f">op1</a>(_op1),
+<a name="l00192"></a>00192           <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>(_eSize), <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>(_dataSize), <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>(_numStructElems),
+<a name="l00193"></a>00193           <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#af193aa092c273ecfcd953f986cd68f9d">lane</a>(_lane), <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a4a2eb71e89c989655301c2f2070e29b3">step</a>(_step), <a class="code" href="classArmISA_1_1MicroNeonMixLaneOp64.html#a8f2b56ecc4db4f48e2c08aef78591efc">replicate</a>(_replicate)
+<a name="l00194"></a>00194     {
+<a name="l00195"></a>00195     }
+<a name="l00196"></a>00196 };
+<a name="l00197"></a>00197 
+<a name="l00201"></a><a class="code" href="classArmISA_1_1VldMultOp64.html">00201</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VldMultOp64.html">VldMultOp64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00202"></a>00202 {
+<a name="l00203"></a>00203   <span class="keyword">protected</span>:
+<a name="l00204"></a><a class="code" href="classArmISA_1_1VldMultOp64.html#afb0be420b537599a5b86558127502040">00204</a>     uint8_t <a class="code" href="classArmISA_1_1VldMultOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>, <a class="code" href="classArmISA_1_1VldMultOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, <a class="code" href="classArmISA_1_1VldMultOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, <a class="code" href="classArmISA_1_1VldMultOp64.html#a7a5268882c913c394a8ad4d988eb94e6">numRegs</a>;
+<a name="l00205"></a><a class="code" href="classArmISA_1_1VldMultOp64.html#a93541ed16711b2c9c53cf093b675d90b">00205</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VldMultOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>;
+<a name="l00206"></a>00206 
+<a name="l00207"></a>00207     <a class="code" href="classArmISA_1_1VldMultOp64.html#a355647a38deb45ea21e749e81606300b">VldMultOp64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00208"></a>00208                 <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>, uint8_t <a class="code" href="classArmISA_1_1VldMultOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>,
+<a name="l00209"></a>00209                 uint8_t <a class="code" href="classArmISA_1_1VldMultOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, uint8_t <a class="code" href="classArmISA_1_1VldMultOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, uint8_t <a class="code" href="classArmISA_1_1VldMultOp64.html#a7a5268882c913c394a8ad4d988eb94e6">numRegs</a>,
+<a name="l00210"></a>00210                 <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VldMultOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>);
+<a name="l00211"></a>00211 };
+<a name="l00212"></a>00212 
+<a name="l00213"></a><a class="code" href="classArmISA_1_1VstMultOp64.html">00213</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VstMultOp64.html">VstMultOp64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00214"></a>00214 {
+<a name="l00215"></a>00215   <span class="keyword">protected</span>:
+<a name="l00216"></a><a class="code" href="classArmISA_1_1VstMultOp64.html#afb0be420b537599a5b86558127502040">00216</a>     uint8_t <a class="code" href="classArmISA_1_1VstMultOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>, <a class="code" href="classArmISA_1_1VstMultOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, <a class="code" href="classArmISA_1_1VstMultOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, <a class="code" href="classArmISA_1_1VstMultOp64.html#a7a5268882c913c394a8ad4d988eb94e6">numRegs</a>;
+<a name="l00217"></a><a class="code" href="classArmISA_1_1VstMultOp64.html#a93541ed16711b2c9c53cf093b675d90b">00217</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VstMultOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>;
+<a name="l00218"></a>00218 
+<a name="l00219"></a>00219     <a class="code" href="classArmISA_1_1VstMultOp64.html#a276ccadb6451c16bf40551c3ae4b5cb5">VstMultOp64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00220"></a>00220                 <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>, uint8_t <a class="code" href="classArmISA_1_1VstMultOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>,
+<a name="l00221"></a>00221                 uint8_t <a class="code" href="classArmISA_1_1VstMultOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, uint8_t <a class="code" href="classArmISA_1_1VstMultOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, uint8_t <a class="code" href="classArmISA_1_1VstMultOp64.html#a7a5268882c913c394a8ad4d988eb94e6">numRegs</a>,
+<a name="l00222"></a>00222                 <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VstMultOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>);
+<a name="l00223"></a>00223 };
+<a name="l00224"></a>00224 
+<a name="l00225"></a><a class="code" href="classArmISA_1_1VldSingleOp64.html">00225</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VldSingleOp64.html">VldSingleOp64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00226"></a>00226 {
+<a name="l00227"></a>00227   <span class="keyword">protected</span>:
+<a name="l00228"></a><a class="code" href="classArmISA_1_1VldSingleOp64.html#afb0be420b537599a5b86558127502040">00228</a>     uint8_t <a class="code" href="classArmISA_1_1VldSingleOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>, <a class="code" href="classArmISA_1_1VldSingleOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, <a class="code" href="classArmISA_1_1VldSingleOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, <a class="code" href="classArmISA_1_1VldSingleOp64.html#aae5a12e607d0f782506d9e6ec6179c64">index</a>;
+<a name="l00229"></a><a class="code" href="classArmISA_1_1VldSingleOp64.html#a93541ed16711b2c9c53cf093b675d90b">00229</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VldSingleOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>, <a class="code" href="classArmISA_1_1VldSingleOp64.html#a8f2b56ecc4db4f48e2c08aef78591efc">replicate</a>;
+<a name="l00230"></a>00230 
+<a name="l00231"></a>00231     <a class="code" href="classArmISA_1_1VldSingleOp64.html#a61720536a7dbaa8cf1551561689ec645">VldSingleOp64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00232"></a>00232                   <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>, uint8_t <a class="code" href="classArmISA_1_1VldSingleOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>,
+<a name="l00233"></a>00233                   uint8_t <a class="code" href="classArmISA_1_1VldSingleOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, uint8_t <a class="code" href="classArmISA_1_1VldSingleOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, uint8_t <a class="code" href="classArmISA_1_1VldSingleOp64.html#aae5a12e607d0f782506d9e6ec6179c64">index</a>,
+<a name="l00234"></a>00234                   <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VldSingleOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>, <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VldSingleOp64.html#a8f2b56ecc4db4f48e2c08aef78591efc">replicate</a> = <span class="keyword">false</span>);
+<a name="l00235"></a>00235 };
+<a name="l00236"></a>00236 
+<a name="l00237"></a><a class="code" href="classArmISA_1_1VstSingleOp64.html">00237</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VstSingleOp64.html">VstSingleOp64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00238"></a>00238 {
+<a name="l00239"></a>00239   <span class="keyword">protected</span>:
+<a name="l00240"></a><a class="code" href="classArmISA_1_1VstSingleOp64.html#afb0be420b537599a5b86558127502040">00240</a>     uint8_t <a class="code" href="classArmISA_1_1VstSingleOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>, <a class="code" href="classArmISA_1_1VstSingleOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, <a class="code" href="classArmISA_1_1VstSingleOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, <a class="code" href="classArmISA_1_1VstSingleOp64.html#aae5a12e607d0f782506d9e6ec6179c64">index</a>;
+<a name="l00241"></a><a class="code" href="classArmISA_1_1VstSingleOp64.html#a93541ed16711b2c9c53cf093b675d90b">00241</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VstSingleOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>, <a class="code" href="classArmISA_1_1VstSingleOp64.html#a8f2b56ecc4db4f48e2c08aef78591efc">replicate</a>;
+<a name="l00242"></a>00242 
+<a name="l00243"></a>00243     <a class="code" href="classArmISA_1_1VstSingleOp64.html#a009a820bb99cfc9faf08044c53c9c928">VstSingleOp64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00244"></a>00244                   <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>, uint8_t <a class="code" href="classArmISA_1_1VstSingleOp64.html#aac129ded07ba57383c5e2540f22c94ef">eSize</a>,
+<a name="l00245"></a>00245                   uint8_t <a class="code" href="classArmISA_1_1VstSingleOp64.html#af13e629a2f79d14821c7b9246ef99e9f">dataSize</a>, uint8_t <a class="code" href="classArmISA_1_1VstSingleOp64.html#afb0be420b537599a5b86558127502040">numStructElems</a>, uint8_t <a class="code" href="classArmISA_1_1VstSingleOp64.html#aae5a12e607d0f782506d9e6ec6179c64">index</a>,
+<a name="l00246"></a>00246                   <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VstSingleOp64.html#a93541ed16711b2c9c53cf093b675d90b">wb</a>, <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1VstSingleOp64.html#a8f2b56ecc4db4f48e2c08aef78591efc">replicate</a> = <span class="keyword">false</span>);
+<a name="l00247"></a>00247 };
+<a name="l00248"></a>00248 
+<a name="l00254"></a><a class="code" href="classArmISA_1_1MicroSetPCCPSR.html">00254</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroSetPCCPSR.html">MicroSetPCCPSR</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00255"></a>00255 {
+<a name="l00256"></a>00256     <span class="keyword">protected</span>:
+<a name="l00257"></a><a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a86973ec62735a43f3925953a6b8afc99">00257</a>     <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a605d05e28dce4515bfd33f74e709f29d">ura</a>, <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#aa5ea75563934f5379a9abef2877e781c">urb</a>, <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a86973ec62735a43f3925953a6b8afc99">urc</a>;
+<a name="l00258"></a>00258 
+<a name="l00259"></a><a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a79e8561be37a7d8c1c93a1f3cea51dfb">00259</a>     <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a79e8561be37a7d8c1c93a1f3cea51dfb">MicroSetPCCPSR</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00260"></a>00260                    <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> _ura, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> _urb, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> _urc)
+<a name="l00261"></a>00261         : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00262"></a>00262           <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a605d05e28dce4515bfd33f74e709f29d">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#aa5ea75563934f5379a9abef2877e781c">urb</a>(_urb), <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a86973ec62735a43f3925953a6b8afc99">urc</a>(_urc)
+<a name="l00263"></a>00263     {
+<a name="l00264"></a>00264     }
+<a name="l00265"></a>00265 
+<a name="l00266"></a>00266     std::string <a class="code" href="classArmISA_1_1MicroSetPCCPSR.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00267"></a>00267 };
+<a name="l00268"></a>00268 
+<a name="l00272"></a><a class="code" href="classArmISA_1_1MicroIntMov.html">00272</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroIntMov.html">MicroIntMov</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00273"></a>00273 {
+<a name="l00274"></a>00274   <span class="keyword">protected</span>:
+<a name="l00275"></a><a class="code" href="classArmISA_1_1MicroIntMov.html#a3771d4e6da84a09dbf436d6b1af2be46">00275</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroIntMov.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>, <a class="code" href="classArmISA_1_1MicroIntMov.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>;
+<a name="l00276"></a>00276 
+<a name="l00277"></a><a class="code" href="classArmISA_1_1MicroIntMov.html#a21c0c6bc858b449669b48135356ccb7b">00277</a>     <a class="code" href="classArmISA_1_1MicroIntMov.html#a21c0c6bc858b449669b48135356ccb7b">MicroIntMov</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00278"></a>00278                <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urb)
+<a name="l00279"></a>00279             : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00280"></a>00280               <a class="code" href="classArmISA_1_1MicroIntMov.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroIntMov.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>(_urb)
+<a name="l00281"></a>00281     {
+<a name="l00282"></a>00282     }
+<a name="l00283"></a>00283 
+<a name="l00284"></a>00284     std::string <a class="code" href="classArmISA_1_1MicroIntMov.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00285"></a>00285 };
+<a name="l00286"></a>00286 
+<a name="l00290"></a><a class="code" href="classArmISA_1_1MicroIntImmOp.html">00290</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroIntImmOp.html">MicroIntImmOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00291"></a>00291 {
+<a name="l00292"></a>00292   <span class="keyword">protected</span>:
+<a name="l00293"></a><a class="code" href="classArmISA_1_1MicroIntImmOp.html#a3771d4e6da84a09dbf436d6b1af2be46">00293</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroIntImmOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>, <a class="code" href="classArmISA_1_1MicroIntImmOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>;
+<a name="l00294"></a><a class="code" href="classArmISA_1_1MicroIntImmOp.html#a71f011dbd3228d41f9e08aaf8c133f77">00294</a>     int32_t <a class="code" href="classArmISA_1_1MicroIntImmOp.html#a71f011dbd3228d41f9e08aaf8c133f77">imm</a>;
+<a name="l00295"></a>00295 
+<a name="l00296"></a><a class="code" href="classArmISA_1_1MicroIntImmOp.html#ac48b8ef4688144851e7cef3b098d573b">00296</a>     <a class="code" href="classArmISA_1_1MicroIntImmOp.html#ac48b8ef4688144851e7cef3b098d573b">MicroIntImmOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00297"></a>00297                   <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urb, int32_t _imm)
+<a name="l00298"></a>00298             : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00299"></a>00299               <a class="code" href="classArmISA_1_1MicroIntImmOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroIntImmOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>(_urb), <a class="code" href="classArmISA_1_1MicroIntImmOp.html#a71f011dbd3228d41f9e08aaf8c133f77">imm</a>(_imm)
+<a name="l00300"></a>00300     {
+<a name="l00301"></a>00301     }
+<a name="l00302"></a>00302 
+<a name="l00303"></a>00303     std::string <a class="code" href="classArmISA_1_1MicroIntImmOp.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00304"></a>00304 };
+<a name="l00305"></a>00305 
+<a name="l00306"></a><a class="code" href="classArmISA_1_1MicroIntImmXOp.html">00306</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroIntImmXOp.html">MicroIntImmXOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOpX.html">MicroOpX</a>
+<a name="l00307"></a>00307 {
+<a name="l00308"></a>00308   <span class="keyword">protected</span>:
+<a name="l00309"></a><a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a3771d4e6da84a09dbf436d6b1af2be46">00309</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>, <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>;
+<a name="l00310"></a><a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a11b34c3ceec32cc1f14d0ca9c099c470">00310</a>     int64_t <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a11b34c3ceec32cc1f14d0ca9c099c470">imm</a>;
+<a name="l00311"></a>00311 
+<a name="l00312"></a><a class="code" href="classArmISA_1_1MicroIntImmXOp.html#aaf906f3827f63cd0b3ffdbcee54e9dfd">00312</a>     <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#aaf906f3827f63cd0b3ffdbcee54e9dfd">MicroIntImmXOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00313"></a>00313                    <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urb, int64_t _imm)
+<a name="l00314"></a>00314             : <a class="code" href="classArmISA_1_1MicroOpX.html">MicroOpX</a>(mnem, machInst, __opClass),
+<a name="l00315"></a>00315               <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>(_urb), <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a11b34c3ceec32cc1f14d0ca9c099c470">imm</a>(_imm)
+<a name="l00316"></a>00316     {
+<a name="l00317"></a>00317     }
+<a name="l00318"></a>00318 
+<a name="l00319"></a>00319     std::string <a class="code" href="classArmISA_1_1MicroIntImmXOp.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00320"></a>00320 };
+<a name="l00321"></a>00321 
+<a name="l00325"></a><a class="code" href="classArmISA_1_1MicroIntOp.html">00325</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroIntOp.html">MicroIntOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00326"></a>00326 {
+<a name="l00327"></a>00327   <span class="keyword">protected</span>:
+<a name="l00328"></a><a class="code" href="classArmISA_1_1MicroIntOp.html#a7b2bf3346575e8b24bdd921acf571967">00328</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroIntOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>, <a class="code" href="classArmISA_1_1MicroIntOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>, <a class="code" href="classArmISA_1_1MicroIntOp.html#a7b2bf3346575e8b24bdd921acf571967">urc</a>;
+<a name="l00329"></a>00329 
+<a name="l00330"></a><a class="code" href="classArmISA_1_1MicroIntOp.html#a5da9f4c4044633746772068d6b292e51">00330</a>     <a class="code" href="classArmISA_1_1MicroIntOp.html#a5da9f4c4044633746772068d6b292e51">MicroIntOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00331"></a>00331                <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urb, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urc)
+<a name="l00332"></a>00332             : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00333"></a>00333               <a class="code" href="classArmISA_1_1MicroIntOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroIntOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>(_urb), <a class="code" href="classArmISA_1_1MicroIntOp.html#a7b2bf3346575e8b24bdd921acf571967">urc</a>(_urc)
+<a name="l00334"></a>00334     {
+<a name="l00335"></a>00335     }
+<a name="l00336"></a>00336 
+<a name="l00337"></a>00337     std::string <a class="code" href="classArmISA_1_1MicroIntOp.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00338"></a>00338 };
+<a name="l00339"></a>00339 
+<a name="l00340"></a><a class="code" href="classArmISA_1_1MicroIntRegXOp.html">00340</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroIntRegXOp.html">MicroIntRegXOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00341"></a>00341 {
+<a name="l00342"></a>00342   <span class="keyword">protected</span>:
+<a name="l00343"></a><a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a7b2bf3346575e8b24bdd921acf571967">00343</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>, <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>, <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a7b2bf3346575e8b24bdd921acf571967">urc</a>;
+<a name="l00344"></a><a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a0822cc4af9f88047e13ca95f7d8c0830">00344</a>     <a class="code" href="namespaceArmISA.html#a4420842b5673543552a3aba317c69dbb">ArmExtendType</a> <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a0822cc4af9f88047e13ca95f7d8c0830">type</a>;
+<a name="l00345"></a><a class="code" href="classArmISA_1_1MicroIntRegXOp.html#ae7055048ef987608275e966a35eeba5d">00345</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#ae7055048ef987608275e966a35eeba5d">shiftAmt</a>;
+<a name="l00346"></a>00346 
+<a name="l00347"></a><a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a889cae91e98bf874676003ee46d88edb">00347</a>     <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a889cae91e98bf874676003ee46d88edb">MicroIntRegXOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00348"></a>00348                    <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urb, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urc,
+<a name="l00349"></a>00349                    <a class="code" href="namespaceArmISA.html#a4420842b5673543552a3aba317c69dbb">ArmExtendType</a> _type, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _shiftAmt)
+<a name="l00350"></a>00350             : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00351"></a>00351               <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>(_urb), <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a7b2bf3346575e8b24bdd921acf571967">urc</a>(_urc),
+<a name="l00352"></a>00352               <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a0822cc4af9f88047e13ca95f7d8c0830">type</a>(_type), <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#ae7055048ef987608275e966a35eeba5d">shiftAmt</a>(_shiftAmt)
+<a name="l00353"></a>00353     {
+<a name="l00354"></a>00354     }
+<a name="l00355"></a>00355 
+<a name="l00356"></a>00356     std::string <a class="code" href="classArmISA_1_1MicroIntRegXOp.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00357"></a>00357 };
+<a name="l00358"></a>00358 
+<a name="l00362"></a><a class="code" href="classArmISA_1_1MicroIntRegOp.html">00362</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroIntRegOp.html">MicroIntRegOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>
+<a name="l00363"></a>00363 {
+<a name="l00364"></a>00364   <span class="keyword">protected</span>:
+<a name="l00365"></a><a class="code" href="classArmISA_1_1MicroIntRegOp.html#a7b2bf3346575e8b24bdd921acf571967">00365</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>, <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>, <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a7b2bf3346575e8b24bdd921acf571967">urc</a>;
+<a name="l00366"></a><a class="code" href="classArmISA_1_1MicroIntRegOp.html#a378dfadeb317c390962c147be928d92d">00366</a>     int32_t <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a378dfadeb317c390962c147be928d92d">shiftAmt</a>;
+<a name="l00367"></a><a class="code" href="classArmISA_1_1MicroIntRegOp.html#ae5b7df4bd366c5419743bf5f679485b9">00367</a>     <a class="code" href="namespaceArmISA.html#a209d79feaaef0aa2f54ae62e53ee90de">ArmShiftType</a> <a class="code" href="classArmISA_1_1MicroIntRegOp.html#ae5b7df4bd366c5419743bf5f679485b9">shiftType</a>;
+<a name="l00368"></a>00368 
+<a name="l00369"></a><a class="code" href="classArmISA_1_1MicroIntRegOp.html#afdd1f2b049ef59e4297a31709dc79a88">00369</a>     <a class="code" href="classArmISA_1_1MicroIntRegOp.html#afdd1f2b049ef59e4297a31709dc79a88">MicroIntRegOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00370"></a>00370                <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urb, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urc,
+<a name="l00371"></a>00371                int32_t _shiftAmt, <a class="code" href="namespaceArmISA.html#a209d79feaaef0aa2f54ae62e53ee90de">ArmShiftType</a> _shiftType)
+<a name="l00372"></a>00372             : <a class="code" href="classArmISA_1_1MicroOp.html">MicroOp</a>(mnem, machInst, __opClass),
+<a name="l00373"></a>00373               <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a8e6cd3e234a4950e7a1a05f1b24cfee0">ura</a>(_ura), <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a3771d4e6da84a09dbf436d6b1af2be46">urb</a>(_urb), <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a7b2bf3346575e8b24bdd921acf571967">urc</a>(_urc),
+<a name="l00374"></a>00374               <a class="code" href="classArmISA_1_1MicroIntRegOp.html#a378dfadeb317c390962c147be928d92d">shiftAmt</a>(_shiftAmt), <a class="code" href="classArmISA_1_1MicroIntRegOp.html#ae5b7df4bd366c5419743bf5f679485b9">shiftType</a>(_shiftType)
+<a name="l00375"></a>00375     {
+<a name="l00376"></a>00376     }
+<a name="l00377"></a>00377 };
+<a name="l00378"></a>00378 
+<a name="l00382"></a><a class="code" href="classArmISA_1_1MicroMemOp.html">00382</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MicroMemOp.html">MicroMemOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1MicroIntImmOp.html">MicroIntImmOp</a>
+<a name="l00383"></a>00383 {
+<a name="l00384"></a>00384   <span class="keyword">protected</span>:
+<a name="l00385"></a><a class="code" href="classArmISA_1_1MicroMemOp.html#a7155f867ab504d48e40f4b43a4d9daf6">00385</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1MicroMemOp.html#a7155f867ab504d48e40f4b43a4d9daf6">up</a>;
+<a name="l00386"></a><a class="code" href="classArmISA_1_1MicroMemOp.html#a827c936c9e2b1f1cf21a01f204a8d821">00386</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classArmISA_1_1MicroMemOp.html#a827c936c9e2b1f1cf21a01f204a8d821">memAccessFlags</a>;
+<a name="l00387"></a>00387 
+<a name="l00388"></a><a class="code" href="classArmISA_1_1MicroMemOp.html#aa3d3e0b762997684acc50593592bb84b">00388</a>     <a class="code" href="classArmISA_1_1MicroMemOp.html#aa3d3e0b762997684acc50593592bb84b">MicroMemOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00389"></a>00389                <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _ura, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> _urb, <span class="keywordtype">bool</span> _up, uint8_t _imm)
+<a name="l00390"></a>00390             : <a class="code" href="classArmISA_1_1MicroIntImmOp.html">MicroIntImmOp</a>(mnem, machInst, __opClass, _ura, _urb, _imm),
+<a name="l00391"></a>00391               <a class="code" href="classArmISA_1_1MicroMemOp.html#a7155f867ab504d48e40f4b43a4d9daf6">up</a>(_up), <a class="code" href="classArmISA_1_1MicroMemOp.html#a827c936c9e2b1f1cf21a01f204a8d821">memAccessFlags</a>(<a class="code" href="classArmISA_1_1TLB.html">TLB</a>::MustBeOne | <a class="code" href="classArmISA_1_1TLB.html">TLB</a>::AlignWord)
+<a name="l00392"></a>00392     {
+<a name="l00393"></a>00393     }
+<a name="l00394"></a>00394 
+<a name="l00395"></a>00395     std::string <a class="code" href="classArmISA_1_1MicroMemOp.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00396"></a>00396 };
+<a name="l00397"></a>00397 
+<a name="l00401"></a><a class="code" href="classArmISA_1_1MacroMemOp.html">00401</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MacroMemOp.html">MacroMemOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00402"></a>00402 {
+<a name="l00403"></a>00403   <span class="keyword">protected</span>:
+<a name="l00404"></a>00404     <a class="code" href="classArmISA_1_1MacroMemOp.html#a008eeb85abf61c91301851bc54b7a726">MacroMemOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00405"></a>00405                <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <span class="keywordtype">bool</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a3a82fdc0669ddcc0c196b1ac0220c55a">up</a>, <span class="keywordtype">bool</span> <a class="code" href="namespaceAlphaISA_1_1Kernel.html#aa1fc3805dac6f71f457fbbc263105bf6a04981b8c09a50ccfb1d92fc11b81c36a">user</a>,
+<a name="l00406"></a>00406                <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a8143fa40e9030da2e8b93ba9990a7bb1">writeback</a>, <span class="keywordtype">bool</span> load, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> reglist);
+<a name="l00407"></a>00407 };
+<a name="l00408"></a>00408 
+<a name="l00412"></a><a class="code" href="classArmISA_1_1PairMemOp.html">00412</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1PairMemOp.html">PairMemOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00413"></a>00413 {
+<a name="l00414"></a>00414   <span class="keyword">public</span>:
+<a name="l00415"></a><a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68">00415</a>     <span class="keyword">enum</span> <a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68">AddrMode</a> {
+<a name="l00416"></a><a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68a65551ba1b10e5734f879f0333cdcb7da">00416</a>         <a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68a65551ba1b10e5734f879f0333cdcb7da">AddrMd_Offset</a>,
+<a name="l00417"></a><a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68ae21d09df49cf2636f746abd6749e9a47">00417</a>         <a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68ae21d09df49cf2636f746abd6749e9a47">AddrMd_PreIndex</a>,
+<a name="l00418"></a><a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68af7adc379284699304b17af32b41e8ea1">00418</a>         <a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68af7adc379284699304b17af32b41e8ea1">AddrMd_PostIndex</a>
+<a name="l00419"></a>00419     };
+<a name="l00420"></a>00420 
+<a name="l00421"></a>00421   <span class="keyword">protected</span>:
+<a name="l00422"></a>00422     <a class="code" href="classArmISA_1_1PairMemOp.html#a5bba341210b26c5e58c4672b264c3e1a">PairMemOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00423"></a>00423               <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> size, <span class="keywordtype">bool</span> <a class="code" href="namespaceMipsISA.html#a3233167b16e632eb21dbd7f259511ddd">fp</a>, <span class="keywordtype">bool</span> load, <span class="keywordtype">bool</span> noAlloc, <span class="keywordtype">bool</span> signExt,
+<a name="l00424"></a>00424               <span class="keywordtype">bool</span> exclusive, <span class="keywordtype">bool</span> acrel, int64_t <a class="code" href="namespaceArmISA.html#a2308526fcc9af84548a72f9ba3102ec1">imm</a>, <a class="code" href="classArmISA_1_1PairMemOp.html#abf132b4ad93f3557cd3956577592ba68">AddrMode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00425"></a>00425               <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceArmISA.html#a445689c4b952c722ae5b0cec0311cd10">rt</a>, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> rt2);
+<a name="l00426"></a>00426 };
+<a name="l00427"></a>00427 
+<a name="l00428"></a><a class="code" href="classArmISA_1_1BigFpMemImmOp.html">00428</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BigFpMemImmOp.html">BigFpMemImmOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00429"></a>00429 {
+<a name="l00430"></a>00430   <span class="keyword">protected</span>:
+<a name="l00431"></a>00431     <a class="code" href="classArmISA_1_1BigFpMemImmOp.html#a6599205315e3ab3d08dcc63f0d41897a">BigFpMemImmOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00432"></a>00432                   <span class="keywordtype">bool</span> load, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> dest, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, int64_t <a class="code" href="namespaceArmISA.html#a2308526fcc9af84548a72f9ba3102ec1">imm</a>);
+<a name="l00433"></a>00433 };
+<a name="l00434"></a>00434 
+<a name="l00435"></a><a class="code" href="classArmISA_1_1BigFpMemPostOp.html">00435</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BigFpMemPostOp.html">BigFpMemPostOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00436"></a>00436 {
+<a name="l00437"></a>00437   <span class="keyword">protected</span>:
+<a name="l00438"></a>00438     <a class="code" href="classArmISA_1_1BigFpMemPostOp.html#a9e2ec00bc8cb99dc7aeee6ec6f5e8148">BigFpMemPostOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00439"></a>00439                    <span class="keywordtype">bool</span> load, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> dest, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, int64_t <a class="code" href="namespaceArmISA.html#a2308526fcc9af84548a72f9ba3102ec1">imm</a>);
+<a name="l00440"></a>00440 };
+<a name="l00441"></a>00441 
+<a name="l00442"></a><a class="code" href="classArmISA_1_1BigFpMemPreOp.html">00442</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BigFpMemPreOp.html">BigFpMemPreOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00443"></a>00443 {
+<a name="l00444"></a>00444   <span class="keyword">protected</span>:
+<a name="l00445"></a>00445     <a class="code" href="classArmISA_1_1BigFpMemPreOp.html#af22fb1c31af1287c19c29bb9e5b5628d">BigFpMemPreOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00446"></a>00446                   <span class="keywordtype">bool</span> load, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> dest, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, int64_t <a class="code" href="namespaceArmISA.html#a2308526fcc9af84548a72f9ba3102ec1">imm</a>);
+<a name="l00447"></a>00447 };
+<a name="l00448"></a>00448 
+<a name="l00449"></a><a class="code" href="classArmISA_1_1BigFpMemRegOp.html">00449</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BigFpMemRegOp.html">BigFpMemRegOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00450"></a>00450 {
+<a name="l00451"></a>00451   <span class="keyword">protected</span>:
+<a name="l00452"></a>00452     <a class="code" href="classArmISA_1_1BigFpMemRegOp.html#ad1eb7e0d1cbb6a2e6213f92ba6babe90">BigFpMemRegOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00453"></a>00453                   <span class="keywordtype">bool</span> load, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> dest, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>,
+<a name="l00454"></a>00454                   <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>, <a class="code" href="namespaceArmISA.html#a4420842b5673543552a3aba317c69dbb">ArmExtendType</a> <a class="code" href="namespaceX86ISA.html#ad805db903f6899f960fd9a982272096a">type</a>, int64_t <a class="code" href="namespaceArmISA.html#a2308526fcc9af84548a72f9ba3102ec1">imm</a>);
+<a name="l00455"></a>00455 };
+<a name="l00456"></a>00456 
+<a name="l00457"></a><a class="code" href="classArmISA_1_1BigFpMemLitOp.html">00457</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BigFpMemLitOp.html">BigFpMemLitOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00458"></a>00458 {
+<a name="l00459"></a>00459   <span class="keyword">protected</span>:
+<a name="l00460"></a>00460     <a class="code" href="classArmISA_1_1BigFpMemLitOp.html#ae9b7f29814341fd8f960c9f031bf14bc">BigFpMemLitOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00461"></a>00461                   <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> dest, int64_t <a class="code" href="namespaceArmISA.html#a2308526fcc9af84548a72f9ba3102ec1">imm</a>);
+<a name="l00462"></a>00462 };
+<a name="l00463"></a>00463 
+<a name="l00467"></a><a class="code" href="classArmISA_1_1VldMultOp.html">00467</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VldMultOp.html">VldMultOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00468"></a>00468 {
+<a name="l00469"></a>00469   <span class="keyword">protected</span>:
+<a name="l00470"></a>00470     <a class="code" href="classArmISA_1_1VldMultOp.html#a754883decfb95a4817c7650fc301a435">VldMultOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00471"></a>00471               <span class="keywordtype">unsigned</span> elems, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd, <span class="keywordtype">unsigned</span> regs,
+<a name="l00472"></a>00472               <span class="keywordtype">unsigned</span> inc, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> size, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> align, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>);
+<a name="l00473"></a>00473 };
+<a name="l00474"></a>00474 
+<a name="l00475"></a><a class="code" href="classArmISA_1_1VldSingleOp.html">00475</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VldSingleOp.html">VldSingleOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00476"></a>00476 {
+<a name="l00477"></a>00477   <span class="keyword">protected</span>:
+<a name="l00478"></a>00478     <a class="code" href="classArmISA_1_1VldSingleOp.html#a2047790d9f83b99ba811392cb8b947b4">VldSingleOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00479"></a>00479                 <span class="keywordtype">bool</span> all, <span class="keywordtype">unsigned</span> elems, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd,
+<a name="l00480"></a>00480                 <span class="keywordtype">unsigned</span> regs, <span class="keywordtype">unsigned</span> inc, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> size,
+<a name="l00481"></a>00481                 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> align, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>, <span class="keywordtype">unsigned</span> lane);
+<a name="l00482"></a>00482 };
+<a name="l00483"></a>00483 
+<a name="l00487"></a><a class="code" href="classArmISA_1_1VstMultOp.html">00487</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VstMultOp.html">VstMultOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00488"></a>00488 {
+<a name="l00489"></a>00489   <span class="keyword">protected</span>:
+<a name="l00490"></a>00490     <a class="code" href="classArmISA_1_1VstMultOp.html#a701693769a1feaeea70657430ea392b3">VstMultOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00491"></a>00491               <span class="keywordtype">unsigned</span> <a class="code" href="namespaceArmISA.html#a0da89c280130b84ae26405a901396428">width</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd, <span class="keywordtype">unsigned</span> regs,
+<a name="l00492"></a>00492               <span class="keywordtype">unsigned</span> inc, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> size, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> align, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>);
+<a name="l00493"></a>00493 };
+<a name="l00494"></a>00494 
+<a name="l00495"></a><a class="code" href="classArmISA_1_1VstSingleOp.html">00495</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VstSingleOp.html">VstSingleOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00496"></a>00496 {
+<a name="l00497"></a>00497   <span class="keyword">protected</span>:
+<a name="l00498"></a>00498     <a class="code" href="classArmISA_1_1VstSingleOp.html#af0f9e5c15c10a709383bd04133330235">VstSingleOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00499"></a>00499                 <span class="keywordtype">bool</span> all, <span class="keywordtype">unsigned</span> elems, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd,
+<a name="l00500"></a>00500                 <span class="keywordtype">unsigned</span> regs, <span class="keywordtype">unsigned</span> inc, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> size,
+<a name="l00501"></a>00501                 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> align, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="namespaceArmISA.html#ad546c2cf2168cf2d8ac21b2a9f485e82">rm</a>, <span class="keywordtype">unsigned</span> lane);
+<a name="l00502"></a>00502 };
+<a name="l00503"></a>00503 
+<a name="l00507"></a><a class="code" href="classArmISA_1_1MacroVFPMemOp.html">00507</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1MacroVFPMemOp.html">MacroVFPMemOp</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1PredMacroOp.html">PredMacroOp</a>
+<a name="l00508"></a>00508 {
+<a name="l00509"></a>00509   <span class="keyword">protected</span>:
+<a name="l00510"></a>00510     <a class="code" href="classArmISA_1_1MacroVFPMemOp.html#ac86efcec990c72ecd0ea1044552863f9">MacroVFPMemOp</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>, OpClass __opClass,
+<a name="l00511"></a>00511                   <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="namespaceArmISA.html#adf8c6c579ad8729095a637a4f2181211">rn</a>, <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> vd, <span class="keywordtype">bool</span> single, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a3a82fdc0669ddcc0c196b1ac0220c55a">up</a>,
+<a name="l00512"></a>00512                   <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a8143fa40e9030da2e8b93ba9990a7bb1">writeback</a>, <span class="keywordtype">bool</span> load, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>);
+<a name="l00513"></a>00513 };
+<a name="l00514"></a>00514 
+<a name="l00515"></a>00515 }
+<a name="l00516"></a>00516 
+<a name="l00517"></a>00517 <span class="preprocessor">#endif //__ARCH_ARM_INSTS_MACROMEM_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

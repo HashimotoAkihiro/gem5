@@ -1,0 +1,148 @@
+\hypertarget{pyobject_8cc}{
+\section{python/swig/pyobject.cc}
+\label{pyobject_8cc}\index{python/swig/pyobject.cc@{python/swig/pyobject.cc}}
+}
+{\ttfamily \#include $<$Python.h$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include \char`\"{}base/inifile.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/output.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}config/the\_\-isa.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/mem\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}python/swig/pyobject.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/full\_\-system.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-object.hh\char`\"{}}\par
+\subsection*{マクロ定義}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{pyobject_8cc_a7f39c59205bc447b57403e3b2c78e50a}{PCC}(s)~const\_\-cast$<$char $\ast$$>$(s)
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{pyobject_8cc_a07ed93a9ca4128b7d2b30ee7a82bb77e}{connectPorts} (\hyperlink{classSimObject}{SimObject} $\ast$o1, const std::string \&name1, int i1, \hyperlink{classSimObject}{SimObject} $\ast$o2, const std::string \&name2, int i2)
+\item 
+\hyperlink{classIniFile}{IniFile} \& \hyperlink{pyobject_8cc_ac390ef5a36b7dee6bd6913a9f7734b4f}{inifile} ()
+\item 
+\hyperlink{classSimObject}{SimObject} $\ast$ \hyperlink{pyobject_8cc_a35bd8f1c38b15825afd59cae5bb0169e}{convertSwigSimObjectPtr} (\hyperlink{init_8hh_ae19630c1f4ca6d5236b30719d9140013}{PyObject} $\ast$)
+\item 
+\hyperlink{classSimObject}{SimObject} $\ast$ \hyperlink{pyobject_8cc_a768f957834fc9bdd7b98a109dd58adab}{resolveSimObject} (const string \&name)
+\end{DoxyCompactItemize}
+
+
+\subsection{マクロ定義}
+\hypertarget{pyobject_8cc_a7f39c59205bc447b57403e3b2c78e50a}{
+\index{pyobject.cc@{pyobject.cc}!PCC@{PCC}}
+\index{PCC@{PCC}!pyobject.cc@{pyobject.cc}}
+\subsubsection[{PCC}]{\setlength{\rightskip}{0pt plus 5cm}\#define PCC(s)~const\_\-cast$<$char $\ast$$>$(s)}}
+\label{pyobject_8cc_a7f39c59205bc447b57403e3b2c78e50a}
+
+
+\subsection{関数}
+\hypertarget{pyobject_8cc_a07ed93a9ca4128b7d2b30ee7a82bb77e}{
+\index{pyobject.cc@{pyobject.cc}!connectPorts@{connectPorts}}
+\index{connectPorts@{connectPorts}!pyobject.cc@{pyobject.cc}}
+\subsubsection[{connectPorts}]{\setlength{\rightskip}{0pt plus 5cm}int connectPorts ({\bf SimObject} $\ast$ {\em o1}, \/  const std::string \& {\em name1}, \/  int {\em i1}, \/  {\bf SimObject} $\ast$ {\em o2}, \/  const std::string \& {\em name2}, \/  int {\em i2})}}
+\label{pyobject_8cc_a07ed93a9ca4128b7d2b30ee7a82bb77e}
+Connect the described \hyperlink{classMemObject}{MemObject} ports. Called from Python via SWIG. The indices i1 \& i2 will be -\/1 for regular ports, $>$= 0 for vector ports. SimObject1 is the master, and SimObject2 is the slave 
+
+
+\begin{DoxyCode}
+77 {
+78 #if THE_ISA != NULL_ISA
+79     if (FullSystem) {
+80         EtherObject *eo1, *eo2;
+81         EtherDevice *ed1, *ed2;
+82         eo1 = dynamic_cast<EtherObject*>(o1);
+83         ed1 = dynamic_cast<EtherDevice*>(o1);
+84         eo2 = dynamic_cast<EtherObject*>(o2);
+85         ed2 = dynamic_cast<EtherDevice*>(o2);
+86 
+87         if ((eo1 || ed1) && (eo2 || ed2)) {
+88             EtherInt *p1 = lookupEthPort(o1, name1, i1);
+89             EtherInt *p2 = lookupEthPort(o2, name2, i2);
+90 
+91             if (p1 != NULL &&  p2 != NULL) {
+92 
+93                 p1->setPeer(p2);
+94                 p2->setPeer(p1);
+95 
+96                 return 1;
+97             }
+98         }
+99     }
+100 #endif
+101     MemObject *mo1, *mo2;
+102     mo1 = dynamic_cast<MemObject*>(o1);
+103     mo2 = dynamic_cast<MemObject*>(o2);
+104 
+105     if(mo1 == NULL || mo2 == NULL) {
+106         panic ("Error casting SimObjects %s and %s to MemObject", o1->name(),
+107                o2->name());
+108     }
+109 
+110     // generic master/slave port connection
+111     BaseMasterPort& masterPort = mo1->getMasterPort(name1, i1);
+112     BaseSlavePort& slavePort   = mo2->getSlavePort(name2, i2);
+113 
+114     masterPort.bind(slavePort);
+115 
+116     return 1;
+117 }
+\end{DoxyCode}
+\hypertarget{pyobject_8cc_a35bd8f1c38b15825afd59cae5bb0169e}{
+\index{pyobject.cc@{pyobject.cc}!convertSwigSimObjectPtr@{convertSwigSimObjectPtr}}
+\index{convertSwigSimObjectPtr@{convertSwigSimObjectPtr}!pyobject.cc@{pyobject.cc}}
+\subsubsection[{convertSwigSimObjectPtr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject}$\ast$ convertSwigSimObjectPtr ({\bf PyObject} $\ast$)}}
+\label{pyobject_8cc_a35bd8f1c38b15825afd59cae5bb0169e}
+Convert a pointer to the Python object that SWIG wraps around a C++ \hyperlink{classSimObject}{SimObject} pointer back to the actual C++ pointer. See main.i. \hypertarget{pyobject_8cc_ac390ef5a36b7dee6bd6913a9f7734b4f}{
+\index{pyobject.cc@{pyobject.cc}!inifile@{inifile}}
+\index{inifile@{inifile}!pyobject.cc@{pyobject.cc}}
+\subsubsection[{inifile}]{\setlength{\rightskip}{0pt plus 5cm}{\bf IniFile}\& inifile ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{pyobject_8cc_ac390ef5a36b7dee6bd6913a9f7734b4f}
+
+
+
+\begin{DoxyCode}
+121 {
+122     static IniFile inifile;
+123     return inifile;
+124 }
+\end{DoxyCode}
+\hypertarget{pyobject_8cc_a768f957834fc9bdd7b98a109dd58adab}{
+\index{pyobject.cc@{pyobject.cc}!resolveSimObject@{resolveSimObject}}
+\index{resolveSimObject@{resolveSimObject}!pyobject.cc@{pyobject.cc}}
+\subsubsection[{resolveSimObject}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject}$\ast$ resolveSimObject (const string \& {\em name})}}
+\label{pyobject_8cc_a768f957834fc9bdd7b98a109dd58adab}
+
+
+
+\begin{DoxyCode}
+141 {
+142     PyObject *module = PyImport_ImportModule(PCC("m5.SimObject"));
+143     if (module == NULL)
+144         panic("Could not import m5.SimObject");
+145 
+146     PyObject *resolver =
+147         PyObject_GetAttrString(module, PCC("resolveSimObject"));
+148     if (resolver == NULL) {
+149         PyErr_Print();
+150         panic("resolveSimObject: failed to find resolveSimObject");
+151     }
+152 
+153     PyObject *ptr = PyObject_CallFunction(resolver, PCC("(s)"), name.c_str());
+154     if (ptr == NULL) {
+155         PyErr_Print();
+156         panic("resolveSimObject: failure on call to Python for %s", name);
+157     }
+158 
+159     SimObject *obj = convertSwigSimObjectPtr(ptr);
+160     if (obj == NULL)
+161         panic("resolveSimObject: failure on pointer conversion for %s", name);
+162 
+163     Py_DECREF(module);
+164     Py_DECREF(resolver);
+165     Py_DECREF(ptr);
+166 
+167     return obj;
+168 }
+\end{DoxyCode}

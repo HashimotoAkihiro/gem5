@@ -1,0 +1,254 @@
+\hypertarget{x86_2linux_2syscalls_8cc}{
+\section{arch/x86/linux/syscalls.cc}
+\label{x86_2linux_2syscalls_8cc}\index{arch/x86/linux/syscalls.cc@{arch/x86/linux/syscalls.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/x86/linux/linux.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/linux/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/regs/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}kern/linux/linux.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/syscall\_\-emul.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structUserDesc64}{UserDesc64}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{x86_2linux_2syscalls_8cc_a9b3287e154144b39ade23cc40ad37808}{unameFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target uname() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{x86_2linux_2syscalls_8cc_a1e167bbd4e7e38dfc0c294b3815befbb}{archPrctlFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{x86_2linux_2syscalls_8cc_a60d12d95db3ed15dbe9b7f7f740248f2}{BitUnion32} (UserDescFlags) Bitfield$<$ 0 $>$ seg\_\-32bit
+\item 
+\hyperlink{x86_2linux_2syscalls_8cc_a6ae4e9248f1974e498edc404fc7f69d8}{EndBitUnion} (UserDescFlags) struct UserDesc32
+\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{x86_2linux_2syscalls_8cc_a0fb1aaa52bfc0b22143130e7e225c0a3}{setThreadArea32Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+Bitfield$<$ 2, 1 $>$ \hyperlink{x86_2linux_2syscalls_8cc_a8ef5c6d6f5c464eb06802bd7aecff6f9}{contents}
+\item 
+Bitfield$<$ 3 $>$ \hyperlink{x86_2linux_2syscalls_8cc_a5d7cde930bfe1b46f45bac5199166c36}{read\_\-exec\_\-only}
+\item 
+Bitfield$<$ 4 $>$ \hyperlink{x86_2linux_2syscalls_8cc_ac246911acb4c5a34e8a2b414a4d7da6d}{limit\_\-in\_\-pages}
+\item 
+Bitfield$<$ 5 $>$ \hyperlink{x86_2linux_2syscalls_8cc_a8a63c8ee782955a28fea1c8aa61dc10c}{seg\_\-not\_\-present}
+\item 
+Bitfield$<$ 6 $>$ \hyperlink{x86_2linux_2syscalls_8cc_ad7d11737a016e190b46f25c8a9d61ced}{useable}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{x86_2linux_2syscalls_8cc_a1e167bbd4e7e38dfc0c294b3815befbb}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!archPrctlFunc@{archPrctlFunc}}
+\index{archPrctlFunc@{archPrctlFunc}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{archPrctlFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} archPrctlFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86_2linux_2syscalls_8cc_a1e167bbd4e7e38dfc0c294b3815befbb}
+
+
+
+\begin{DoxyCode}
+70 {
+71     enum ArchPrctlCodes
+72     {
+73         SetFS = 0x1002,
+74         GetFS = 0x1003,
+75         SetGS = 0x1001,
+76         GetGS = 0x1004
+77     };
+78 
+79     //First argument is the code, second is the address
+80     int index = 0;
+81     int code = process->getSyscallArg(tc, index);
+82     uint64_t addr = process->getSyscallArg(tc, index);
+83     uint64_t fsBase, gsBase;
+84     SETranslatingPortProxy &p = tc->getMemProxy();
+85     switch(code)
+86     {
+87       //Each of these valid options should actually check addr.
+88       case SetFS:
+89         tc->setMiscRegNoEffect(MISCREG_FS_BASE, addr);
+90         tc->setMiscRegNoEffect(MISCREG_FS_EFF_BASE, addr);
+91         return 0;
+92       case GetFS:
+93         fsBase = tc->readMiscRegNoEffect(MISCREG_FS_BASE);
+94         p.write(addr, fsBase);
+95         return 0;
+96       case SetGS:
+97         tc->setMiscRegNoEffect(MISCREG_GS_BASE, addr);
+98         tc->setMiscRegNoEffect(MISCREG_GS_EFF_BASE, addr);
+99         return 0;
+100       case GetGS:
+101         gsBase = tc->readMiscRegNoEffect(MISCREG_GS_BASE);
+102         p.write(addr, gsBase);
+103         return 0;
+104       default:
+105         return -EINVAL;
+106     }
+107 }
+\end{DoxyCode}
+\hypertarget{x86_2linux_2syscalls_8cc_a60d12d95db3ed15dbe9b7f7f740248f2}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!BitUnion32@{BitUnion32}}
+\index{BitUnion32@{BitUnion32}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{BitUnion32}]{\setlength{\rightskip}{0pt plus 5cm}BitUnion32 (UserDescFlags)}}
+\label{x86_2linux_2syscalls_8cc_a60d12d95db3ed15dbe9b7f7f740248f2}
+\hypertarget{x86_2linux_2syscalls_8cc_a6ae4e9248f1974e498edc404fc7f69d8}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!EndBitUnion@{EndBitUnion}}
+\index{EndBitUnion@{EndBitUnion}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{EndBitUnion}]{\setlength{\rightskip}{0pt plus 5cm}EndBitUnion (UserDescFlags)}}
+\label{x86_2linux_2syscalls_8cc_a6ae4e9248f1974e498edc404fc7f69d8}
+
+
+
+\begin{DoxyCode}
+118                   {
+119     uint32_t entry_number;
+120     uint32_t base_addr;
+121     uint32_t limit;
+122     uint32_t flags;
+123 };
+\end{DoxyCode}
+\hypertarget{x86_2linux_2syscalls_8cc_a0fb1aaa52bfc0b22143130e7e225c0a3}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!setThreadArea32Func@{setThreadArea32Func}}
+\index{setThreadArea32Func@{setThreadArea32Func}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{setThreadArea32Func}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} setThreadArea32Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86_2linux_2syscalls_8cc_a0fb1aaa52bfc0b22143130e7e225c0a3}
+
+
+
+\begin{DoxyCode}
+136 {
+137     const int minTLSEntry = 6;
+138     const int numTLSEntries = 3;
+139     const int maxTLSEntry = minTLSEntry + numTLSEntries - 1;
+140 
+141     X86LiveProcess *x86lp = dynamic_cast<X86LiveProcess *>(process);
+142     assert(x86lp);
+143 
+144     assert((maxTLSEntry + 1) * sizeof(uint64_t) <= x86lp->gdtSize());
+145 
+146     int argIndex = 0;
+147     TypedBufferArg<UserDesc32> userDesc(process->getSyscallArg(tc, argIndex));
+148     TypedBufferArg<uint64_t>
+149         gdt(x86lp->gdtStart() + minTLSEntry * sizeof(uint64_t),
+150                 numTLSEntries * sizeof(uint64_t));
+151 
+152     if (!userDesc.copyIn(tc->getMemProxy()))
+153         return -EFAULT;
+154 
+155     if (!gdt.copyIn(tc->getMemProxy()))
+156         panic("Failed to copy in GDT for %s.\n", desc->name);
+157 
+158     if (userDesc->entry_number == (uint32_t)(-1)) {
+159         // Find a free TLS entry.
+160         for (int i = 0; i < numTLSEntries; i++) {
+161             if (gdt[i] == 0) {
+162                 userDesc->entry_number = i + minTLSEntry;
+163                 break;
+164             }
+165         }
+166         // We failed to find one.
+167         if (userDesc->entry_number == (uint32_t)(-1))
+168             return -ESRCH;
+169     }
+170 
+171     int index = userDesc->entry_number;
+172 
+173     if (index < minTLSEntry || index > maxTLSEntry)
+174         return -EINVAL;
+175 
+176     index -= minTLSEntry;
+177 
+178     // Build the entry we're going to add.
+179     SegDescriptor segDesc = 0;
+180     UserDescFlags flags = userDesc->flags;
+181 
+182     segDesc.limitLow = bits(userDesc->limit, 15, 0);
+183     segDesc.baseLow = bits(userDesc->base_addr, 23, 0);
+184     segDesc.type.a = 1;
+185     if (!flags.read_exec_only)
+186         segDesc.type.w = 1;
+187     if (bits((uint8_t)flags.contents, 0))
+188         segDesc.type.e = 1;
+189     if (bits((uint8_t)flags.contents, 1))
+190         segDesc.type.codeOrData = 1;
+191     segDesc.s = 1;
+192     segDesc.dpl = 3;
+193     if (!flags.seg_not_present)
+194         segDesc.p = 1;
+195     segDesc.limitHigh = bits(userDesc->limit, 19, 16);
+196     if (flags.useable)
+197         segDesc.avl = 1;
+198     segDesc.l = 0;
+199     if (flags.seg_32bit)
+200         segDesc.d = 1;
+201     if (flags.limit_in_pages)
+202         segDesc.g = 1;
+203     segDesc.baseHigh = bits(userDesc->base_addr, 31, 24);
+204 
+205     gdt[index] = (uint64_t)segDesc;
+206 
+207     if (!userDesc.copyOut(tc->getMemProxy()))
+208         return -EFAULT;
+209     if (!gdt.copyOut(tc->getMemProxy()))
+210         panic("Failed to copy out GDT for %s.\n", desc->name);
+211 
+212     return 0;
+213 }
+\end{DoxyCode}
+\hypertarget{x86_2linux_2syscalls_8cc_a9b3287e154144b39ade23cc40ad37808}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!unameFunc@{unameFunc}}
+\index{unameFunc@{unameFunc}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{unameFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} unameFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86_2linux_2syscalls_8cc_a9b3287e154144b39ade23cc40ad37808}
+
+
+Target uname() handler. 
+
+
+\begin{DoxyCode}
+52 {
+53     int index = 0;
+54     TypedBufferArg<Linux::utsname> name(process->getSyscallArg(tc, index));
+55 
+56     strcpy(name->sysname, "Linux");
+57     strcpy(name->nodename, "sim.gem5.org");
+58     strcpy(name->release, "3.0.0");
+59     strcpy(name->version, "#1 Mon Aug 18 11:32:15 EDT 2003");
+60     strcpy(name->machine, "x86_64");
+61 
+62     name.copyOut(tc->getMemProxy());
+63 
+64     return 0;
+65 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{x86_2linux_2syscalls_8cc_a8ef5c6d6f5c464eb06802bd7aecff6f9}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!contents@{contents}}
+\index{contents@{contents}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{contents}]{\setlength{\rightskip}{0pt plus 5cm}Bitfield$<$2, 1$>$ {\bf contents}}}
+\label{x86_2linux_2syscalls_8cc_a8ef5c6d6f5c464eb06802bd7aecff6f9}
+\hypertarget{x86_2linux_2syscalls_8cc_ac246911acb4c5a34e8a2b414a4d7da6d}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!limit\_\-in\_\-pages@{limit\_\-in\_\-pages}}
+\index{limit\_\-in\_\-pages@{limit\_\-in\_\-pages}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{limit\_\-in\_\-pages}]{\setlength{\rightskip}{0pt plus 5cm}Bitfield$<$4$>$ {\bf limit\_\-in\_\-pages}}}
+\label{x86_2linux_2syscalls_8cc_ac246911acb4c5a34e8a2b414a4d7da6d}
+\hypertarget{x86_2linux_2syscalls_8cc_a5d7cde930bfe1b46f45bac5199166c36}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!read\_\-exec\_\-only@{read\_\-exec\_\-only}}
+\index{read\_\-exec\_\-only@{read\_\-exec\_\-only}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{read\_\-exec\_\-only}]{\setlength{\rightskip}{0pt plus 5cm}Bitfield$<$3$>$ {\bf read\_\-exec\_\-only}}}
+\label{x86_2linux_2syscalls_8cc_a5d7cde930bfe1b46f45bac5199166c36}
+\hypertarget{x86_2linux_2syscalls_8cc_a8a63c8ee782955a28fea1c8aa61dc10c}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!seg\_\-not\_\-present@{seg\_\-not\_\-present}}
+\index{seg\_\-not\_\-present@{seg\_\-not\_\-present}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{seg\_\-not\_\-present}]{\setlength{\rightskip}{0pt plus 5cm}Bitfield$<$5$>$ {\bf seg\_\-not\_\-present}}}
+\label{x86_2linux_2syscalls_8cc_a8a63c8ee782955a28fea1c8aa61dc10c}
+\hypertarget{x86_2linux_2syscalls_8cc_ad7d11737a016e190b46f25c8a9d61ced}{
+\index{x86/linux/syscalls.cc@{x86/linux/syscalls.cc}!useable@{useable}}
+\index{useable@{useable}!x86/linux/syscalls.cc@{x86/linux/syscalls.cc}}
+\subsubsection[{useable}]{\setlength{\rightskip}{0pt plus 5cm}Bitfield$<$6$>$ {\bf useable}}}
+\label{x86_2linux_2syscalls_8cc_ad7d11737a016e190b46f25c8a9d61ced}

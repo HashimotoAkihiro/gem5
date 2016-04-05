@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/slicc_interface/AbstractController.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/slicc_interface/AbstractController.hh</h1><a href="AbstractController_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2009 Mark D. Hill and David A. Wood</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> */</span>
+<a name="l00028"></a>00028 
+<a name="l00029"></a>00029 <span class="preprocessor">#ifndef __MEM_RUBY_SLICC_INTERFACE_ABSTRACTCONTROLLER_HH__</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_SLICC_INTERFACE_ABSTRACTCONTROLLER_HH__</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span>
+<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;<a class="code" href="callback_8hh.html">base/callback.hh</a>&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;mem/protocol/AccessPermission.hh&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="MessageBuffer_8hh.html">mem/ruby/buffers/MessageBuffer.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="Address_8hh.html">mem/ruby/common/Address.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="Consumer_8hh.html">mem/ruby/common/Consumer.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="DataBlock_8hh.html">mem/ruby/common/DataBlock.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="Histogram_8hh.html">mem/ruby/common/Histogram.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="Network_8hh.html">mem/ruby/network/Network.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="CacheRecorder_8hh.html">mem/ruby/recorder/CacheRecorder.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="MachineID_8hh.html">mem/ruby/system/MachineID.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;params/RubyController.hh&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="clocked__object_8hh.html">sim/clocked_object.hh</a>&quot;</span>
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049 <span class="keyword">class </span><a class="code" href="classNetwork.html">Network</a>;
+<a name="l00050"></a>00050 
+<a name="l00051"></a><a class="code" href="classAbstractController.html">00051</a> <span class="keyword">class </span><a class="code" href="classAbstractController.html">AbstractController</a> : <span class="keyword">public</span> <a class="code" href="classClockedObject_1_1ClockedObject.html">ClockedObject</a>, <span class="keyword">public</span> <a class="code" href="classConsumer.html">Consumer</a>
+<a name="l00052"></a>00052 {
+<a name="l00053"></a>00053   <span class="keyword">public</span>:
+<a name="l00054"></a><a class="code" href="classAbstractController.html#a8dd24df4fce13403813bb4f7243a3b13">00054</a>     <span class="keyword">typedef</span> RubyControllerParams <a class="code" href="classAbstractController.html#a8dd24df4fce13403813bb4f7243a3b13">Params</a>;
+<a name="l00055"></a>00055     <a class="code" href="classAbstractController.html#a59d22e188a5f6fde018cb048098296d5">AbstractController</a>(<span class="keyword">const</span> <a class="code" href="classAbstractController.html#a8dd24df4fce13403813bb4f7243a3b13">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00056"></a>00056     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00057"></a><a class="code" href="classAbstractController.html#acd3c3feb78ae7a8f88fe0f110a718dff">00057</a>     <span class="keyword">const</span> <a class="code" href="classAbstractController.html#a8dd24df4fce13403813bb4f7243a3b13">Params</a> *<a class="code" href="classAbstractController.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<span class="keyword">const</span> <a class="code" href="classAbstractController.html#a8dd24df4fce13403813bb4f7243a3b13">Params</a> *)<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>; }
+<a name="l00058"></a>00058 
+<a name="l00059"></a><a class="code" href="classAbstractController.html#a35b384df19605d0186339f088df677d5">00059</a>     <span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a83c14b4ae37e80071f6b3506a6c46151">NodeID</a> <a class="code" href="classAbstractController.html#a35b384df19605d0186339f088df677d5">getVersion</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractController.html#a4d3bc5bdeb83c6982ed2341fa055ae19">m_machineID</a>.<a class="code" href="structMachineID.html#a2677f023318d0c72e14ba5dd0c29cb85">getNum</a>(); }
+<a name="l00060"></a><a class="code" href="classAbstractController.html#a7a63a33844df1ce5a3b16096dfbbe0f9">00060</a>     <span class="keyword">const</span> MachineType <a class="code" href="classAbstractController.html#a7a63a33844df1ce5a3b16096dfbbe0f9">getType</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractController.html#a4d3bc5bdeb83c6982ed2341fa055ae19">m_machineID</a>.<a class="code" href="structMachineID.html#a3979ddfd39fd9b22e4bb58bb0ff50726">getType</a>(); }
+<a name="l00061"></a>00061 
+<a name="l00062"></a><a class="code" href="classAbstractController.html#a319f9c65d0c91a62be0c99b53a702e8d">00062</a>     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a319f9c65d0c91a62be0c99b53a702e8d">initNetworkPtr</a>(<a class="code" href="classNetwork.html">Network</a>* net_ptr) { <a class="code" href="classAbstractController.html#a6ffbec7c57469120487119d74fb1fae7">m_net_ptr</a> = net_ptr; }
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064     <span class="comment">// return instance name</span>
+<a name="l00065"></a>00065     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#af682f6c6bb8d16137c284112954156fb">blockOnQueue</a>(<a class="code" href="classAddress.html">Address</a>, <a class="code" href="classMessageBuffer.html">MessageBuffer</a>*);
+<a name="l00066"></a>00066     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a6da828f9409955e467e80f6d5290fcfd">unblock</a>(<a class="code" href="classAddress.html">Address</a>);
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068     <span class="keyword">virtual</span> <a class="code" href="classMessageBuffer.html">MessageBuffer</a>* <a class="code" href="classAbstractController.html#a80b4b6fca935f6914fd15ea5715e2170">getMandatoryQueue</a>() <span class="keyword">const</span> = 0;
+<a name="l00069"></a>00069     <span class="keyword">virtual</span> <span class="keyword">const</span> std::string <a class="code" href="classAbstractController.html#adb24cab1ca6d817bdcdef245731b8b77">toString</a>() <span class="keyword">const</span> = 0;  <span class="comment">// returns text version of</span>
+<a name="l00070"></a>00070                                                      <span class="comment">// controller type</span>
+<a name="l00071"></a>00071     <span class="keyword">virtual</span> AccessPermission <a class="code" href="classAbstractController.html#ab14bc832dc06fbcb264f043d44a8915c">getAccessPermission</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) = 0;
+<a name="l00072"></a>00072     <span class="keyword">virtual</span> <a class="code" href="classDataBlock.html">DataBlock</a>&amp; <a class="code" href="classAbstractController.html#ae014657139e530ad9d75dfd8f52302a4">getDataBlock</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) = 0;
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a3ea5f7af5db62cc24f4e40df9ea5c971">print</a>(std::ostream &amp; out) <span class="keyword">const</span> = 0;
+<a name="l00075"></a>00075     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a623e3e7d1b1c725d70009f7b01a421b9">wakeup</a>() = 0;
+<a name="l00076"></a>00076     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a9820f96c5343e42ad3fcbc97b83f59d5">resetStats</a>() = 0;
+<a name="l00077"></a>00077     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a4ca8c1956ef762ec2219ff377a68c7ba">recordCacheTrace</a>(<span class="keywordtype">int</span> cntrl, <a class="code" href="classCacheRecorder.html">CacheRecorder</a>* tr) = 0;
+<a name="l00080"></a>00080     <span class="keyword">virtual</span> <a class="code" href="classSequencer.html">Sequencer</a>* <a class="code" href="classAbstractController.html#ada806654b26aababb417afe9bfbf66e5">getSequencer</a>() <span class="keyword">const</span> = 0;
+<a name="l00081"></a>00081 
+<a name="l00086"></a>00086     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classAbstractController.html#ab4c57c1f46545be8cb011b32d4949330">functionalReadBuffers</a>(<a class="code" href="classPacket.html">PacketPtr</a>&amp;) = 0;
+<a name="l00089"></a>00089     <span class="keyword">virtual</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classAbstractController.html#a87a5fc3e2b5c5e1813ed7ed3ef1689ae">functionalWriteBuffers</a>(<a class="code" href="classPacket.html">PacketPtr</a>&amp;) = 0;
+<a name="l00090"></a>00090 
+<a name="l00092"></a><a class="code" href="classAbstractController.html#a4498badc3fa7137b6d66736d302623ae">00092</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a4498badc3fa7137b6d66736d302623ae" title="Function for enqueuing a prefetch request.">enqueuePrefetch</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp;, <span class="keyword">const</span> RubyRequestType&amp;)
+<a name="l00093"></a>00093     { <a class="code" href="base_2misc_8hh.html#acad519418dbfdd70c1208711e609c80e">fatal</a>(<span class="stringliteral">&quot;Prefetches not implemented!&quot;</span>);}
+<a name="l00094"></a>00094 
+<a name="l00098"></a><a class="code" href="classAbstractController.html#ae3089fd60541650eefd9605c2c1abc68">00098</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#ae3089fd60541650eefd9605c2c1abc68">collateStats</a>()
+<a name="l00099"></a>00099     {<a class="code" href="base_2misc_8hh.html#acad519418dbfdd70c1208711e609c80e">fatal</a>(<span class="stringliteral">&quot;collateStats() should be overridden!&quot;</span>);}
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101   <span class="keyword">public</span>:
+<a name="l00102"></a><a class="code" href="classAbstractController.html#abaec6aa0c0c0f1d34472f0b3702d86c4">00102</a>     <a class="code" href="structMachineID.html">MachineID</a> <a class="code" href="classAbstractController.html#abaec6aa0c0c0f1d34472f0b3702d86c4">getMachineID</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractController.html#a4d3bc5bdeb83c6982ed2341fa055ae19">m_machineID</a>; }
+<a name="l00103"></a>00103 
+<a name="l00104"></a><a class="code" href="classAbstractController.html#a8c0950c725a8898f340f7b267ff208be">00104</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classAbstractController.html#a8c0950c725a8898f340f7b267ff208be">getDelayHist</a>() { <span class="keywordflow">return</span> <a class="code" href="classAbstractController.html#a32315b21a536469475414901e05bfe36">m_delayHistogram</a>; }
+<a name="l00105"></a><a class="code" href="classAbstractController.html#a2fc801bc03037a99f6689b7d1bb4eda9">00105</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classAbstractController.html#a2fc801bc03037a99f6689b7d1bb4eda9">getDelayVCHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>)
+<a name="l00106"></a>00106     { <span class="keywordflow">return</span> *(<a class="code" href="classAbstractController.html#aba317e33c2fc730b07d01be02e743bd7">m_delayVCHistogram</a>[index]); }
+<a name="l00107"></a>00107 
+<a name="l00108"></a><a class="code" href="classAbstractController.html#a3a55ba724e099baf8906b6ba1a943b52">00108</a>     <a class="code" href="classMessageBuffer.html">MessageBuffer</a> *<a class="code" href="classAbstractController.html#a3a55ba724e099baf8906b6ba1a943b52">getPeerQueue</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> pid)
+<a name="l00109"></a>00109     {
+<a name="l00110"></a>00110         std::map&lt;uint32_t, MessageBuffer *&gt;::iterator it =
+<a name="l00111"></a>00111                                         <a class="code" href="classAbstractController.html#ab2e155eabfce9e3d4b821328ecb302f9" title="Map from physical network number to the Message Buffer.">peerQueueMap</a>.find(pid);
+<a name="l00112"></a>00112         assert(it != <a class="code" href="classAbstractController.html#ab2e155eabfce9e3d4b821328ecb302f9" title="Map from physical network number to the Message Buffer.">peerQueueMap</a>.end());
+<a name="l00113"></a>00113         <span class="keywordflow">return</span> (*it).second;
+<a name="l00114"></a>00114     }
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116   <span class="keyword">protected</span>:
+<a name="l00118"></a>00118     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a8bb6029436f36f339582bda79270fa10" title="Profiles original cache requests including PUTs.">profileRequest</a>(<span class="keyword">const</span> std::string &amp;request);
+<a name="l00120"></a>00120     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a6bc3835966ece2b6fb72a056f447a68e" title="Profiles the delay associated with messages.">profileMsgDelay</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> virtualNetwork, <a class="code" href="classCycles.html">Cycles</a> delay);
+<a name="l00121"></a>00121 
+<a name="l00123"></a>00123     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a8d382287e22ac84bc108ad9ea6621603" title="Function for connecting peer controllers.">connectWithPeer</a>(<a class="code" href="classAbstractController.html">AbstractController</a> *);
+<a name="l00124"></a><a class="code" href="classAbstractController.html#a9a66179697aa43bfa97cee9cf8dbad19">00124</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a9a66179697aa43bfa97cee9cf8dbad19">getQueuesFromPeer</a>(<a class="code" href="classAbstractController.html">AbstractController</a> *)
+<a name="l00125"></a>00125     { <a class="code" href="base_2misc_8hh.html#acad519418dbfdd70c1208711e609c80e">fatal</a>(<span class="stringliteral">&quot;getQueuesFromPeer() should be called only if implemented!&quot;</span>); }
+<a name="l00126"></a>00126 
+<a name="l00127"></a>00127     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#a4f512122c5d5042bb9da1a0d1fb4c920">stallBuffer</a>(<a class="code" href="classMessageBuffer.html">MessageBuffer</a>* buf, <a class="code" href="classAddress.html">Address</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00128"></a>00128     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#aa205de64042612c18d6104532fc72024">wakeUpBuffers</a>(<a class="code" href="classAddress.html">Address</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00129"></a>00129     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#aa595bebc4acf9a8dfec0b5a99f0b86e2">wakeUpAllBuffers</a>(<a class="code" href="classAddress.html">Address</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00130"></a>00130     <span class="keywordtype">void</span> <a class="code" href="classAbstractController.html#aa595bebc4acf9a8dfec0b5a99f0b86e2">wakeUpAllBuffers</a>();
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132   <span class="keyword">protected</span>:
+<a name="l00133"></a><a class="code" href="classAbstractController.html#aa54fd03777fe9911cb24303071f918c7">00133</a>     <a class="code" href="TypeDefines_8hh.html#a83c14b4ae37e80071f6b3506a6c46151">NodeID</a> <a class="code" href="classAbstractController.html#aa54fd03777fe9911cb24303071f918c7">m_version</a>;
+<a name="l00134"></a><a class="code" href="classAbstractController.html#a4d3bc5bdeb83c6982ed2341fa055ae19">00134</a>     <a class="code" href="structMachineID.html">MachineID</a> <a class="code" href="classAbstractController.html#a4d3bc5bdeb83c6982ed2341fa055ae19">m_machineID</a>;
+<a name="l00135"></a><a class="code" href="classAbstractController.html#a5fddc9f932bac7163c96fc4ccf27790c">00135</a>     <a class="code" href="TypeDefines_8hh.html#a83c14b4ae37e80071f6b3506a6c46151">NodeID</a> <a class="code" href="classAbstractController.html#a5fddc9f932bac7163c96fc4ccf27790c">m_clusterID</a>;
+<a name="l00136"></a>00136 
+<a name="l00137"></a><a class="code" href="classAbstractController.html#a6ffbec7c57469120487119d74fb1fae7">00137</a>     <a class="code" href="classNetwork.html">Network</a>* <a class="code" href="classAbstractController.html#a6ffbec7c57469120487119d74fb1fae7">m_net_ptr</a>;
+<a name="l00138"></a><a class="code" href="classAbstractController.html#a0ea33ffe10dd66af8bdd7928b4d953b5">00138</a>     <span class="keywordtype">bool</span> <a class="code" href="classAbstractController.html#a0ea33ffe10dd66af8bdd7928b4d953b5">m_is_blocking</a>;
+<a name="l00139"></a><a class="code" href="classAbstractController.html#ad9f87101fff45853a32f5fe42f9d43b0">00139</a>     std::map&lt;Address, MessageBuffer*&gt; <a class="code" href="classAbstractController.html#ad9f87101fff45853a32f5fe42f9d43b0">m_block_map</a>;
+<a name="l00140"></a>00140 
+<a name="l00141"></a><a class="code" href="classAbstractController.html#a7c9a43de9f27c3319add6df9c0d2e948">00141</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;MessageBuffer*&gt;</a> <a class="code" href="classstd_1_1vector.html">MsgVecType</a>;
+<a name="l00142"></a><a class="code" href="classAbstractController.html#afcfa4bb0b120bb22dce11fc367b702af">00142</a>     <span class="keyword">typedef</span> std::map&lt; Address, MsgVecType* &gt; <a class="code" href="classAbstractController.html#afcfa4bb0b120bb22dce11fc367b702af">WaitingBufType</a>;
+<a name="l00143"></a><a class="code" href="classAbstractController.html#a90f25dd5a7f1085002cab4e1e98f9232">00143</a>     <a class="code" href="classAbstractController.html#afcfa4bb0b120bb22dce11fc367b702af">WaitingBufType</a> <a class="code" href="classAbstractController.html#a90f25dd5a7f1085002cab4e1e98f9232">m_waiting_buffers</a>;
+<a name="l00144"></a>00144 
+<a name="l00145"></a><a class="code" href="classAbstractController.html#af686856d627ada54f36461fd10bc0371">00145</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classAbstractController.html#af686856d627ada54f36461fd10bc0371">m_in_ports</a>;
+<a name="l00146"></a><a class="code" href="classAbstractController.html#aef85e61fde66cb7b942c755043b43520">00146</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classAbstractController.html#aef85e61fde66cb7b942c755043b43520">m_cur_in_port</a>;
+<a name="l00147"></a><a class="code" href="classAbstractController.html#a9fe046cc3878d0da925915f0f90ab8c2">00147</a>     <span class="keywordtype">int</span> <a class="code" href="classAbstractController.html#a9fe046cc3878d0da925915f0f90ab8c2">m_number_of_TBEs</a>;
+<a name="l00148"></a><a class="code" href="classAbstractController.html#a3fa70d035aed57776ef789fbdafa7276">00148</a>     <span class="keywordtype">int</span> <a class="code" href="classAbstractController.html#a3fa70d035aed57776ef789fbdafa7276">m_transitions_per_cycle</a>;
+<a name="l00149"></a><a class="code" href="classAbstractController.html#a71fd0f20cbb3b3edc07df4aeb43b6b98">00149</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classAbstractController.html#a71fd0f20cbb3b3edc07df4aeb43b6b98">m_buffer_size</a>;
+<a name="l00150"></a><a class="code" href="classAbstractController.html#a896a9ceedfb77c22a82b490f05ae4624">00150</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classAbstractController.html#a896a9ceedfb77c22a82b490f05ae4624">m_recycle_latency</a>;
+<a name="l00151"></a>00151 
+<a name="l00153"></a><a class="code" href="classAbstractController.html#ab2e155eabfce9e3d4b821328ecb302f9">00153</a>     std::map&lt;uint32_t, MessageBuffer*&gt; <a class="code" href="classAbstractController.html#ab2e155eabfce9e3d4b821328ecb302f9" title="Map from physical network number to the Message Buffer.">peerQueueMap</a>;
+<a name="l00154"></a>00154 
+<a name="l00157"></a><a class="code" href="classAbstractController.html#a0de33847c40bca29af78bf6c48a40e0c">00157</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classAbstractController.html#a0de33847c40bca29af78bf6c48a40e0c">m_fully_busy_cycles</a>;
+<a name="l00158"></a>00158 
+<a name="l00161"></a><a class="code" href="classAbstractController.html#a32315b21a536469475414901e05bfe36">00161</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classAbstractController.html#a32315b21a536469475414901e05bfe36">m_delayHistogram</a>;
+<a name="l00162"></a><a class="code" href="classAbstractController.html#aba317e33c2fc730b07d01be02e743bd7">00162</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classAbstractController.html#aba317e33c2fc730b07d01be02e743bd7">m_delayVCHistogram</a>;
+<a name="l00163"></a>00163 
+<a name="l00166"></a><a class="code" href="classAbstractController_1_1StatsCallback.html">00166</a>     <span class="keyword">class </span><a class="code" href="classAbstractController_1_1StatsCallback.html">StatsCallback</a> : <span class="keyword">public</span> <a class="code" href="classCallback.html">Callback</a>
+<a name="l00167"></a>00167     {
+<a name="l00168"></a>00168       <span class="keyword">private</span>:
+<a name="l00169"></a><a class="code" href="classAbstractController_1_1StatsCallback.html#a888182eae55b1785e132b97c932bc5d4">00169</a>         <a class="code" href="classAbstractController.html">AbstractController</a> *<a class="code" href="classAbstractController_1_1StatsCallback.html#a888182eae55b1785e132b97c932bc5d4">ctr</a>;
+<a name="l00170"></a>00170 
+<a name="l00171"></a>00171       <span class="keyword">public</span>:
+<a name="l00172"></a><a class="code" href="classAbstractController_1_1StatsCallback.html#af912e043410ed023ceb7b6eacf42a794">00172</a>         <span class="keyword">virtual</span> <a class="code" href="classAbstractController_1_1StatsCallback.html#af912e043410ed023ceb7b6eacf42a794">~StatsCallback</a>() {}
+<a name="l00173"></a><a class="code" href="classAbstractController_1_1StatsCallback.html#a21a0491ed8c247edae7783371356ec5d">00173</a>         <a class="code" href="classAbstractController_1_1StatsCallback.html#a21a0491ed8c247edae7783371356ec5d">StatsCallback</a>(<a class="code" href="classAbstractController.html">AbstractController</a> *_ctr) : <a class="code" href="classAbstractController_1_1StatsCallback.html#a888182eae55b1785e132b97c932bc5d4">ctr</a>(_ctr) {}
+<a name="l00174"></a><a class="code" href="classAbstractController_1_1StatsCallback.html#a2e9c5136d19b1a95fc427e0852deab5c">00174</a>         <span class="keywordtype">void</span> <a class="code" href="classAbstractController_1_1StatsCallback.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>() {<a class="code" href="classAbstractController_1_1StatsCallback.html#a888182eae55b1785e132b97c932bc5d4">ctr</a>-&gt;<a class="code" href="classAbstractController.html#ae3089fd60541650eefd9605c2c1abc68">collateStats</a>();}
+<a name="l00175"></a>00175     };
+<a name="l00176"></a>00176 };
+<a name="l00177"></a>00177 
+<a name="l00178"></a>00178 <span class="preprocessor">#endif // __MEM_RUBY_SLICC_INTERFACE_ABSTRACTCONTROLLER_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

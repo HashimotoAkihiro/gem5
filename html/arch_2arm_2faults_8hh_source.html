@@ -1,0 +1,574 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/arm/faults.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/arm/faults.hh</h1><a href="arch_2arm_2faults_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010, 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2003-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * Copyright (c) 2007-2008 The Florida State University</span>
+<a name="l00016"></a>00016 <span class="comment"> * All rights reserved.</span>
+<a name="l00017"></a>00017 <span class="comment"> *</span>
+<a name="l00018"></a>00018 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00019"></a>00019 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00020"></a>00020 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00021"></a>00021 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00022"></a>00022 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00023"></a>00023 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00024"></a>00024 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00025"></a>00025 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00026"></a>00026 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00027"></a>00027 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00030"></a>00030 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00032"></a>00032 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00033"></a>00033 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00034"></a>00034 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00035"></a>00035 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00036"></a>00036 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00037"></a>00037 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00038"></a>00038 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00039"></a>00039 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00040"></a>00040 <span class="comment"> *</span>
+<a name="l00041"></a>00041 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00042"></a>00042 <span class="comment"> *          Gabe Black</span>
+<a name="l00043"></a>00043 <span class="comment"> *          Giacomo Gabrielli</span>
+<a name="l00044"></a>00044 <span class="comment"> *          Thomas Grocutt</span>
+<a name="l00045"></a>00045 <span class="comment"> */</span>
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="preprocessor">#ifndef __ARM_FAULTS_HH__</span>
+<a name="l00048"></a>00048 <span class="preprocessor"></span><span class="preprocessor">#define __ARM_FAULTS_HH__</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="arm_2miscregs_8hh.html">arch/arm/miscregs.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="arm_2pagetable_8hh.html">arch/arm/pagetable.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="arch_2arm_2types_8hh.html">arch/arm/types.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="base_2misc_8hh.html">base/misc.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="full__system_8hh.html">sim/full_system.hh</a>&quot;</span>
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057 <span class="comment">// The design of the &quot;name&quot; and &quot;vect&quot; functions is in sim/faults.hh</span>
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059 <span class="keyword">namespace </span><a class="code" href="classArmISA_1_1ArmISA.html">ArmISA</a>
+<a name="l00060"></a>00060 {
+<a name="l00061"></a><a class="code" href="namespaceArmISA.html#a263b69e0840c906ca5589c8376659c07">00061</a> <span class="keyword">typedef</span> <span class="keyword">const</span> <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultOffset</a>;
+<a name="l00062"></a>00062 
+<a name="l00063"></a><a class="code" href="classArmISA_1_1ArmFault.html">00063</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1ArmFault.html">ArmFault</a> : <span class="keyword">public</span> <a class="code" href="classFaultBase.html">FaultBase</a>
+<a name="l00064"></a>00064 {
+<a name="l00065"></a>00065   <span class="keyword">protected</span>:
+<a name="l00066"></a><a class="code" href="classArmISA_1_1ArmFault.html#a4a11fa8755d51be93a88861302a9378d">00066</a>     <a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> <a class="code" href="classArmISA_1_1ArmFault.html#a4a11fa8755d51be93a88861302a9378d">machInst</a>;
+<a name="l00067"></a><a class="code" href="classArmISA_1_1ArmFault.html#a0fb00c9c002f515a36a15727a2687638">00067</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1ArmFault.html#a0fb00c9c002f515a36a15727a2687638">issRaw</a>;
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069     <span class="comment">// Helper variables for ARMv8 exception handling</span>
+<a name="l00070"></a><a class="code" href="classArmISA_1_1ArmFault.html#a51103adca623d16f7da6931f9d183a56">00070</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFault.html#a51103adca623d16f7da6931f9d183a56">from64</a>;  <span class="comment">// True if the exception is generated from the AArch64 state</span>
+<a name="l00071"></a><a class="code" href="classArmISA_1_1ArmFault.html#ab1a8b3123513ec016e7c11c08df5fe80">00071</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFault.html#ab1a8b3123513ec016e7c11c08df5fe80">to64</a>;  <span class="comment">// True if the exception is taken in AArch64 state</span>
+<a name="l00072"></a><a class="code" href="classArmISA_1_1ArmFault.html#a00c8974825a99478bde412e8fe507330">00072</a>     <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5">ExceptionLevel</a> <a class="code" href="classArmISA_1_1ArmFault.html#a00c8974825a99478bde412e8fe507330">fromEL</a>;  <span class="comment">// Source exception level</span>
+<a name="l00073"></a><a class="code" href="classArmISA_1_1ArmFault.html#aa9dc1b3121ecbc002306990c12748cf3">00073</a>     <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5">ExceptionLevel</a> <a class="code" href="classArmISA_1_1ArmFault.html#aa9dc1b3121ecbc002306990c12748cf3">toEL</a>;  <span class="comment">// Target exception level</span>
+<a name="l00074"></a><a class="code" href="classArmISA_1_1ArmFault.html#ac6653d6bb19baf0040626de12091e8f5">00074</a>     <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaa">OperatingMode</a> <a class="code" href="classArmISA_1_1ArmFault.html#ac6653d6bb19baf0040626de12091e8f5">fromMode</a>;  <span class="comment">// Source operating mode</span>
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classArmISA_1_1ArmFault.html#a27f212dcc968f825450c87cfbc39eb37">getVector</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00077"></a>00077     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classArmISA_1_1ArmFault.html#add9243269fc0ab1dca2ea804c7fa2600">getVector64</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079   <span class="keyword">public</span>:
+<a name="l00084"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202">00084</a>     <span class="keyword">enum</span> <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202">FaultSource</a>
+<a name="l00085"></a>00085     {
+<a name="l00086"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a25751bcd8ec8d06a081be3218e856cc6">00086</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a25751bcd8ec8d06a081be3218e856cc6">AlignmentFault</a> = 0,
+<a name="l00087"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ad88fb6665c995c4aff3aac33695f436a">00087</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ad88fb6665c995c4aff3aac33695f436a">InstructionCacheMaintenance</a>,  <span class="comment">// Short-desc. format only</span>
+<a name="l00088"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a2c9696f3e45f34637be8769e3f076f0c">00088</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a2c9696f3e45f34637be8769e3f076f0c">SynchExtAbtOnTranslTableWalkLL</a>,
+<a name="l00089"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a73f8efcb2cc36f81d5c33df5f1c9bd53">00089</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a73f8efcb2cc36f81d5c33df5f1c9bd53">SynchPtyErrOnTranslTableWalkLL</a> = <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a2c9696f3e45f34637be8769e3f076f0c">SynchExtAbtOnTranslTableWalkLL</a> + 4,
+<a name="l00090"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a36a8d822dd25492d60c859de5400455b">00090</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a36a8d822dd25492d60c859de5400455b">TranslationLL</a> = <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a73f8efcb2cc36f81d5c33df5f1c9bd53">SynchPtyErrOnTranslTableWalkLL</a> + 4,
+<a name="l00091"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a86a18fce3ed059dd524ccc7f8f337137">00091</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a86a18fce3ed059dd524ccc7f8f337137">AccessFlagLL</a> = <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a36a8d822dd25492d60c859de5400455b">TranslationLL</a> + 4,
+<a name="l00092"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a1b3eba46a3fdb576e660783538300d71">00092</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a1b3eba46a3fdb576e660783538300d71">DomainLL</a> = <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a86a18fce3ed059dd524ccc7f8f337137">AccessFlagLL</a> + 4,
+<a name="l00093"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ac0886edcd2e7ae9ce6ce4161ca336205">00093</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ac0886edcd2e7ae9ce6ce4161ca336205">PermissionLL</a> = <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a1b3eba46a3fdb576e660783538300d71">DomainLL</a> + 4,
+<a name="l00094"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aadff4677cc8ab6ed2e52256c271e955b">00094</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aadff4677cc8ab6ed2e52256c271e955b">DebugEvent</a> = <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ac0886edcd2e7ae9ce6ce4161ca336205">PermissionLL</a> + 4,
+<a name="l00095"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a9ea09f3eaeef5031d42156ce4cacdde3">00095</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a9ea09f3eaeef5031d42156ce4cacdde3">SynchronousExternalAbort</a>,
+<a name="l00096"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a644cdad9d0e40d88fd4760d5b9f122df">00096</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a644cdad9d0e40d88fd4760d5b9f122df">TLBConflictAbort</a>,  <span class="comment">// Requires LPAE</span>
+<a name="l00097"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a03582e93d4e784024e9dc0194f0ec975">00097</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a03582e93d4e784024e9dc0194f0ec975">SynchPtyErrOnMemoryAccess</a>,
+<a name="l00098"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ae9b68ca2d47d74817b5024c649c0c18c">00098</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ae9b68ca2d47d74817b5024c649c0c18c">AsynchronousExternalAbort</a>,
+<a name="l00099"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aa632f13a72a303d4b5e2fc5ff134c4a5">00099</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aa632f13a72a303d4b5e2fc5ff134c4a5">AsynchPtyErrOnMemoryAccess</a>,
+<a name="l00100"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ad3e0e83e6ccbaae6110e0312eb6a5280">00100</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ad3e0e83e6ccbaae6110e0312eb6a5280">AddressSizeLL</a>,  <span class="comment">// AArch64 only</span>
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102         <span class="comment">// Not real faults. These are faults to allow the translation function</span>
+<a name="l00103"></a>00103         <span class="comment">// to inform the memory access function not to proceed for a prefetch</span>
+<a name="l00104"></a>00104         <span class="comment">// that misses in the TLB or that targets an uncacheable address</span>
+<a name="l00105"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a8fb140b2bbd4a06aff962a234cab140a">00105</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a8fb140b2bbd4a06aff962a234cab140a">PrefetchTLBMiss</a> = <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202ad3e0e83e6ccbaae6110e0312eb6a5280">AddressSizeLL</a> + 4,
+<a name="l00106"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a85b18a63875108da23e40b72d28ebcdb">00106</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a85b18a63875108da23e40b72d28ebcdb">PrefetchUncacheable</a>,
+<a name="l00107"></a>00107 
+<a name="l00108"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aa18f7941ba185ca82851870dd047183f">00108</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aa18f7941ba185ca82851870dd047183f">NumFaultSources</a>,
+<a name="l00109"></a><a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a43b7840df03cb93f888c5fd0eec6dbc0">00109</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202a43b7840df03cb93f888c5fd0eec6dbc0">FaultSourceInvalid</a> = 0xff
+<a name="l00110"></a>00110     };
+<a name="l00111"></a>00111 
+<a name="l00114"></a><a class="code" href="classArmISA_1_1ArmFault.html#a9d1adbbd4c90a71fbe8e091316ddad20">00114</a>     <span class="keyword">static</span> uint8_t <a class="code" href="classArmISA_1_1ArmFault.html#a9d1adbbd4c90a71fbe8e091316ddad20">shortDescFaultSources</a>[<a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aa18f7941ba185ca82851870dd047183f">NumFaultSources</a>];
+<a name="l00117"></a><a class="code" href="classArmISA_1_1ArmFault.html#af8144bca69405c504518999a068fe715">00117</a>     <span class="keyword">static</span> uint8_t <a class="code" href="classArmISA_1_1ArmFault.html#af8144bca69405c504518999a068fe715">longDescFaultSources</a>[<a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aa18f7941ba185ca82851870dd047183f">NumFaultSources</a>];
+<a name="l00119"></a><a class="code" href="classArmISA_1_1ArmFault.html#a9717d5a209bf4c9a1c0641374bba08d6">00119</a>     <span class="keyword">static</span> uint8_t <a class="code" href="classArmISA_1_1ArmFault.html#a9717d5a209bf4c9a1c0641374bba08d6" title="Encodings of the fault sources in AArch64 state.">aarch64FaultSources</a>[<a class="code" href="classArmISA_1_1ArmFault.html#a8771a605c5b916759188c3a191bb6202aa18f7941ba185ca82851870dd047183f">NumFaultSources</a>];
+<a name="l00120"></a>00120 
+<a name="l00121"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fb">00121</a>     <span class="keyword">enum</span> <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fb">AnnotationIDs</a>
+<a name="l00122"></a>00122     {
+<a name="l00123"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbacb00f3857a36a02714ddb93ed59761cc">00123</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbacb00f3857a36a02714ddb93ed59761cc">S1PTW</a>, <span class="comment">// DataAbort, PrefetchAbort: Stage 1 Page Table Walk,</span>
+<a name="l00124"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fba5968d80312a62d0fbd34222451882770">00124</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fba5968d80312a62d0fbd34222451882770">OVA</a>,   <span class="comment">// DataAbort, PrefetchAbort: stage 1 Virtual Address for stage 2 faults</span>
+<a name="l00125"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbabcf7b189035aefa211bcbcb6ab85512f">00125</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbabcf7b189035aefa211bcbcb6ab85512f">SAS</a>,   <span class="comment">// DataAbort: Syndrome Access Size</span>
+<a name="l00126"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fba403b03371fd04961f31f99b254cf8e57">00126</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fba403b03371fd04961f31f99b254cf8e57">SSE</a>,   <span class="comment">// DataAbort: Syndrome Sign Extend</span>
+<a name="l00127"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbabc58ebf93594dd8d4888dbb8f40277d7">00127</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbabc58ebf93594dd8d4888dbb8f40277d7">SRT</a>,   <span class="comment">// DataAbort: Syndrome Register Transfer</span>
+<a name="l00128"></a>00128 
+<a name="l00129"></a>00129         <span class="comment">// AArch64 only</span>
+<a name="l00130"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fba96bc3519848ec2ba618228bca917088d">00130</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fba96bc3519848ec2ba618228bca917088d">SF</a>,    <span class="comment">// DataAbort: width of the accessed register is SixtyFour</span>
+<a name="l00131"></a><a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbaaa54e8220a1a7dbfd4cf3843b1b04422">00131</a>         <a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fbaaa54e8220a1a7dbfd4cf3843b1b04422">AR</a>     <span class="comment">// DataAbort: Acquire/Release semantics</span>
+<a name="l00132"></a>00132     };
+<a name="l00133"></a>00133 
+<a name="l00134"></a><a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56ae">00134</a>     <span class="keyword">enum</span> <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56ae">TranMethod</a>
+<a name="l00135"></a>00135     {
+<a name="l00136"></a><a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aea307d48bbc198c224e04bf57415c05dcd">00136</a>         <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aea307d48bbc198c224e04bf57415c05dcd">LpaeTran</a>,
+<a name="l00137"></a><a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aeabfef4fbb52d72e0c89f660f2d501a488">00137</a>         <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aeabfef4fbb52d72e0c89f660f2d501a488">VmsaTran</a>,
+<a name="l00138"></a><a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aeae6c1c0c9ccfea433b47dcf88c8cea24e">00138</a>         <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aeae6c1c0c9ccfea433b47dcf88c8cea24e">UnknownTran</a>
+<a name="l00139"></a>00139     };
+<a name="l00140"></a>00140 
+<a name="l00141"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html">00141</a>     <span class="keyword">struct </span><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html">FaultVals</a>
+<a name="l00142"></a>00142     {
+<a name="l00143"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a4d488474632193509a5a7521b4cf58f4">00143</a>         <span class="keyword">const</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a4d488474632193509a5a7521b4cf58f4">name</a>;
+<a name="l00144"></a>00144 
+<a name="l00145"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a778d3e813933a076bcd9c3773adaef95">00145</a>         <span class="keyword">const</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultOffset</a> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a778d3e813933a076bcd9c3773adaef95">offset</a>;
+<a name="l00146"></a>00146 
+<a name="l00147"></a>00147         <span class="comment">// Offsets used for exceptions taken in AArch64 state</span>
+<a name="l00148"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a201c56b49cd63876dacfbe37eede7d95">00148</a>         <span class="keyword">const</span> uint16_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a201c56b49cd63876dacfbe37eede7d95">currELTOffset</a>;
+<a name="l00149"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a0d0fdf0ed32354c5bfd96838287a4e8b">00149</a>         <span class="keyword">const</span> uint16_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a0d0fdf0ed32354c5bfd96838287a4e8b">currELHOffset</a>;
+<a name="l00150"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a63f9ce93412f04583c03ea1481359a69">00150</a>         <span class="keyword">const</span> uint16_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a63f9ce93412f04583c03ea1481359a69">lowerEL64Offset</a>;
+<a name="l00151"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a6b2d7282702ab76c1e7ba88c5f36276c">00151</a>         <span class="keyword">const</span> uint16_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a6b2d7282702ab76c1e7ba88c5f36276c">lowerEL32Offset</a>;
+<a name="l00152"></a>00152 
+<a name="l00153"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a2c7f4a024af107179bac9ac9100058b9">00153</a>         <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaa">OperatingMode</a> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a2c7f4a024af107179bac9ac9100058b9">nextMode</a>;
+<a name="l00154"></a>00154 
+<a name="l00155"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a355dadd1b099bfae6d6290258826775d">00155</a>         <span class="keyword">const</span> uint8_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a355dadd1b099bfae6d6290258826775d">armPcOffset</a>;
+<a name="l00156"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a549b30d126a28b4535bf031131fd30c2">00156</a>         <span class="keyword">const</span> uint8_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a549b30d126a28b4535bf031131fd30c2">thumbPcOffset</a>;
+<a name="l00157"></a>00157         <span class="comment">// The following two values are used in place of armPcOffset and</span>
+<a name="l00158"></a>00158         <span class="comment">// thumbPcOffset when the exception return address is saved into ELR</span>
+<a name="l00159"></a>00159         <span class="comment">// registers (exceptions taken in HYP mode or in AArch64 state)</span>
+<a name="l00160"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a0f842dcb4caa04a34edfd154a6b4cf80">00160</a>         <span class="keyword">const</span> uint8_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a0f842dcb4caa04a34edfd154a6b4cf80">armPcElrOffset</a>;
+<a name="l00161"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#ad765db0a66a03c467f5e537b0131c98a">00161</a>         <span class="keyword">const</span> uint8_t <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#ad765db0a66a03c467f5e537b0131c98a">thumbPcElrOffset</a>;
+<a name="l00162"></a>00162 
+<a name="l00163"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a55dc4be44e9cf9a0a1f3a6117bcdc654">00163</a>         <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a55dc4be44e9cf9a0a1f3a6117bcdc654">hypTrappable</a>;
+<a name="l00164"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#abfcc26cdd699d3e4ce3461895cb86d12">00164</a>         <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#abfcc26cdd699d3e4ce3461895cb86d12">abortDisable</a>;
+<a name="l00165"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a8ece5e9baacb84a7e5419b017467b89e">00165</a>         <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a8ece5e9baacb84a7e5419b017467b89e">fiqDisable</a>;
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167         <span class="comment">// Exception class used to appropriately set the syndrome register</span>
+<a name="l00168"></a>00168         <span class="comment">// (exceptions taken in HYP mode or in AArch64 state)</span>
+<a name="l00169"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a3f13e5a80511a00d0b198e8204d343c7">00169</a>         <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a3f13e5a80511a00d0b198e8204d343c7">ec</a>;
+<a name="l00170"></a>00170 
+<a name="l00171"></a><a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a1b98f9d520cb54d9b9322e9c45fed459">00171</a>         <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a1b98f9d520cb54d9b9322e9c45fed459">count</a>;
+<a name="l00172"></a>00172     };
+<a name="l00173"></a>00173 
+<a name="l00174"></a><a class="code" href="classArmISA_1_1ArmFault.html#a0b41a5f87b01c7e5df6f1b05d86d506e">00174</a>     <a class="code" href="classArmISA_1_1ArmFault.html#a0b41a5f87b01c7e5df6f1b05d86d506e">ArmFault</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst = 0, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _iss = 0) :
+<a name="l00175"></a>00175         <a class="code" href="classArmISA_1_1ArmFault.html#a4a11fa8755d51be93a88861302a9378d">machInst</a>(_machInst), <a class="code" href="classArmISA_1_1ArmFault.html#a0fb00c9c002f515a36a15727a2687638">issRaw</a>(_iss), <a class="code" href="classArmISA_1_1ArmFault.html#a51103adca623d16f7da6931f9d183a56">from64</a>(false), <a class="code" href="classArmISA_1_1ArmFault.html#ab1a8b3123513ec016e7c11c08df5fe80">to64</a>(false) {}
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177     <span class="comment">// Returns the actual syndrome register to use based on the target</span>
+<a name="l00178"></a>00178     <span class="comment">// exception level</span>
+<a name="l00179"></a>00179     <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1ArmFault.html#afe3b3e62aed4e08eb41a2b458fa78b5f">getSyndromeReg64</a>() <span class="keyword">const</span>;
+<a name="l00180"></a>00180     <span class="comment">// Returns the actual fault address register to use based on the target</span>
+<a name="l00181"></a>00181     <span class="comment">// exception level</span>
+<a name="l00182"></a>00182     <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1ArmFault.html#a2d53b5dbdfef7129f082792e84b2a732">getFaultAddrReg64</a>() <span class="keyword">const</span>;
+<a name="l00183"></a>00183 
+<a name="l00184"></a>00184     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1ArmFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00185"></a>00185             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00186"></a>00186     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1ArmFault.html#aaf4d069b2d2cce997ddb00514554ac02">invoke64</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00187"></a>00187             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00188"></a><a class="code" href="classArmISA_1_1ArmFault.html#a1711e0fd9d5fa3eaa8e62cc821ef850d">00188</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1ArmFault.html#a1711e0fd9d5fa3eaa8e62cc821ef850d">annotate</a>(<a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fb">AnnotationIDs</a> <span class="keywordtype">id</span>, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) {}
+<a name="l00189"></a>00189     <span class="keyword">virtual</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a>&amp; <a class="code" href="classArmISA_1_1ArmFault.html#a5d92ccd11b5cd6b04f02bd0a088b776c">countStat</a>() = 0;
+<a name="l00190"></a>00190     <span class="keyword">virtual</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultOffset</a> <a class="code" href="classArmISA_1_1ArmFault.html#abd70b2c2ab6d989305cd72d37594cf70">offset</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) = 0;
+<a name="l00191"></a>00191     <span class="keyword">virtual</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultOffset</a> <a class="code" href="classArmISA_1_1ArmFault.html#aa7f9ab8b5a2e4da88efdfcb60c8d2574">offset64</a>() = 0;
+<a name="l00192"></a>00192     <span class="keyword">virtual</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaa">OperatingMode</a> <a class="code" href="classArmISA_1_1ArmFault.html#a245c0940c93d0130b3efaf4e1d8ad542">nextMode</a>() = 0;
+<a name="l00193"></a>00193     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFault.html#af62e0649938431df8cfab96f0e3fb0a1">routeToMonitor</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span> = 0;
+<a name="l00194"></a><a class="code" href="classArmISA_1_1ArmFault.html#a6fa7b734487c2a8da04a28ace414a355">00194</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFault.html#a6fa7b734487c2a8da04a28ace414a355">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00195"></a>00195     <span class="keyword">virtual</span> uint8_t <a class="code" href="classArmISA_1_1ArmFault.html#a62f88e7446d881692b70a4c53a66709e">armPcOffset</a>(<span class="keywordtype">bool</span> isHyp) = 0;
+<a name="l00196"></a>00196     <span class="keyword">virtual</span> uint8_t <a class="code" href="classArmISA_1_1ArmFault.html#a5622623cc4ac5dfcc5b2c78c41997ce4">thumbPcOffset</a>(<span class="keywordtype">bool</span> isHyp) = 0;
+<a name="l00197"></a>00197     <span class="keyword">virtual</span> uint8_t <a class="code" href="classArmISA_1_1ArmFault.html#ac6225f20625dd9cd1d2ff5a5813ccb56">armPcElrOffset</a>() = 0;
+<a name="l00198"></a>00198     <span class="keyword">virtual</span> uint8_t <a class="code" href="classArmISA_1_1ArmFault.html#a846a83fa30036c124fe623647dd70c5d">thumbPcElrOffset</a>() = 0;
+<a name="l00199"></a>00199     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFault.html#a159a2321e7b2cdb89571d6bb04064c4a">abortDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) = 0;
+<a name="l00200"></a>00200     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFault.html#a90898a2c4e92e85e6cdecddc2d82a621">fiqDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) = 0;
+<a name="l00201"></a>00201     <span class="keyword">virtual</span> <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1ArmFault.html#ab1ac230a4768ca0e080718a7382ecc18">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span> = 0;
+<a name="l00202"></a>00202     <span class="keyword">virtual</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1ArmFault.html#a12a2298da9af24c62275dac1cf76a888">iss</a>() <span class="keyword">const</span> = 0;
+<a name="l00203"></a><a class="code" href="classArmISA_1_1ArmFault.html#a61bc59380024a05bdcbb39fb27e0293d">00203</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFault.html#a61bc59380024a05bdcbb39fb27e0293d">isStage2</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00204"></a><a class="code" href="classArmISA_1_1ArmFault.html#a48f7b7354d7dcf9850a65f9f433c4871">00204</a>     <span class="keyword">virtual</span> FSR <a class="code" href="classArmISA_1_1ArmFault.html#a48f7b7354d7dcf9850a65f9f433c4871">getFsr</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) { <span class="keywordflow">return</span> 0; }
+<a name="l00205"></a>00205     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1ArmFault.html#a618b248f8f365d00661d7663152848d6">setSyndrome</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> syndrome_reg);
+<a name="l00206"></a>00206 };
+<a name="l00207"></a>00207 
+<a name="l00208"></a>00208 <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;
+<a name="l00209"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html">00209</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFault.html">ArmFault</a>
+<a name="l00210"></a>00210 {
+<a name="l00211"></a>00211   <span class="keyword">protected</span>:
+<a name="l00212"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a8b3c2006cfd550d551232a82b397bbca">00212</a>     <span class="keyword">static</span> <a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html">FaultVals</a> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>;
+<a name="l00213"></a>00213 
+<a name="l00214"></a>00214   <span class="keyword">public</span>:
+<a name="l00215"></a>00215     <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals&lt;T&gt;</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst = 0, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _iss = 0) :
+<a name="l00216"></a>00216         <a class="code" href="classArmISA_1_1ArmFault.html#a0b41a5f87b01c7e5df6f1b05d86d506e">ArmFault</a>(_machInst, _iss) {}
+<a name="l00217"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a73adb23259baf912a81683a9790a303f">00217</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a4d488474632193509a5a7521b4cf58f4">name</a>; }
+<a name="l00218"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a6c79663c761ff57265459f7e3aefaf4c">00218</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classArmISA_1_1ArmFaultVals.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() { <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a1b98f9d520cb54d9b9322e9c45fed459">count</a>; }
+<a name="l00219"></a>00219     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultOffset</a> <a class="code" href="classArmISA_1_1ArmFaultVals.html#abc6884c0ca3ffb06e3507e320c0d5089">offset</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00220"></a>00220 
+<a name="l00221"></a>00221     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultOffset</a>
+<a name="l00222"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a81e30246c00f10182deda977ba385832">00222</a>     <a class="code" href="classArmISA_1_1ArmFaultVals.html#a81e30246c00f10182deda977ba385832">offset64</a>()
+<a name="l00223"></a>00223     {
+<a name="l00224"></a>00224         <span class="keywordflow">if</span> (<a class="code" href="classArmISA_1_1ArmFault.html#aa9dc1b3121ecbc002306990c12748cf3">toEL</a> == <a class="code" href="classArmISA_1_1ArmFault.html#a00c8974825a99478bde412e8fe507330">fromEL</a>) {
+<a name="l00225"></a>00225             <span class="keywordflow">if</span> (<a class="code" href="namespaceArmISA.html#ac235340b5f554a5f3b60ae1360b6a71f">opModeIsT</a>(<a class="code" href="classArmISA_1_1ArmFault.html#ac6653d6bb19baf0040626de12091e8f5">fromMode</a>))
+<a name="l00226"></a>00226                 <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a201c56b49cd63876dacfbe37eede7d95">currELTOffset</a>;
+<a name="l00227"></a>00227             <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a0d0fdf0ed32354c5bfd96838287a4e8b">currELHOffset</a>;
+<a name="l00228"></a>00228         } <span class="keywordflow">else</span> {
+<a name="l00229"></a>00229             <span class="keywordflow">if</span> (<a class="code" href="classArmISA_1_1ArmFault.html#a51103adca623d16f7da6931f9d183a56">from64</a>)
+<a name="l00230"></a>00230                 <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a63f9ce93412f04583c03ea1481359a69">lowerEL64Offset</a>;
+<a name="l00231"></a>00231             <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a6b2d7282702ab76c1e7ba88c5f36276c">lowerEL32Offset</a>;
+<a name="l00232"></a>00232         }
+<a name="l00233"></a>00233     }
+<a name="l00234"></a>00234 
+<a name="l00235"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a5bddc2d174b417a7f918e873cd12ba2a">00235</a>     <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaa">OperatingMode</a> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a5bddc2d174b417a7f918e873cd12ba2a">nextMode</a>() { <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a2c7f4a024af107179bac9ac9100058b9">nextMode</a>; }
+<a name="l00236"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a9a0a467b98f43890c1d89d1d59a5923c">00236</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a9a0a467b98f43890c1d89d1d59a5923c">routeToMonitor</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00237"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a3a08a20ac78186f405db46f8b3373e2f">00237</a>     uint8_t <a class="code" href="classArmISA_1_1ArmFaultVals.html#a3a08a20ac78186f405db46f8b3373e2f">armPcOffset</a>(<span class="keywordtype">bool</span> isHyp)   { <span class="keywordflow">return</span> isHyp ? <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a0f842dcb4caa04a34edfd154a6b4cf80">armPcElrOffset</a>
+<a name="l00238"></a>00238                                                      : <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a355dadd1b099bfae6d6290258826775d">armPcOffset</a>; }
+<a name="l00239"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#ad8a859e85912fae683d889d24bedfe08">00239</a>     uint8_t <a class="code" href="classArmISA_1_1ArmFaultVals.html#ad8a859e85912fae683d889d24bedfe08">thumbPcOffset</a>(<span class="keywordtype">bool</span> isHyp) { <span class="keywordflow">return</span> isHyp ? <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#ad765db0a66a03c467f5e537b0131c98a">thumbPcElrOffset</a>
+<a name="l00240"></a>00240                                                      : <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a549b30d126a28b4535bf031131fd30c2">thumbPcOffset</a>; }
+<a name="l00241"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a951709b498aaf37b7361af330f767def">00241</a>     uint8_t <a class="code" href="classArmISA_1_1ArmFaultVals.html#a951709b498aaf37b7361af330f767def">armPcElrOffset</a>() { <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a0f842dcb4caa04a34edfd154a6b4cf80">armPcElrOffset</a>; }
+<a name="l00242"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a75dbff4cd777bfd8db18b862970689e2">00242</a>     uint8_t <a class="code" href="classArmISA_1_1ArmFaultVals.html#a75dbff4cd777bfd8db18b862970689e2">thumbPcElrOffset</a>() { <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#ad765db0a66a03c467f5e537b0131c98a">thumbPcElrOffset</a>; }
+<a name="l00243"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a1f1a5b662b9a505415dd5ef1f52892f3">00243</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a1f1a5b662b9a505415dd5ef1f52892f3">abortDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a>* <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) { <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#abfcc26cdd699d3e4ce3461895cb86d12">abortDisable</a>; }
+<a name="l00244"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a554b3d306d50e92e5d8102124be41fe7">00244</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a554b3d306d50e92e5d8102124be41fe7">fiqDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a>* <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) { <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a8ece5e9baacb84a7e5419b017467b89e">fiqDisable</a>; }
+<a name="l00245"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#aa4dd5fb47a1253dbe17e692e905a8c7c">00245</a>     <span class="keyword">virtual</span> <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1ArmFaultVals.html#aa4dd5fb47a1253dbe17e692e905a8c7c">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a7b40df863f325ba499b5fa5a34ad8f9d">vals</a>.<a class="code" href="structArmISA_1_1ArmFault_1_1FaultVals.html#a3f13e5a80511a00d0b198e8204d343c7">ec</a>; }
+<a name="l00246"></a><a class="code" href="classArmISA_1_1ArmFaultVals.html#a1049bf31f8df10c66994603055cf531d">00246</a>     <span class="keyword">virtual</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1ArmFaultVals.html#a1049bf31f8df10c66994603055cf531d">iss</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1ArmFault.html#a0fb00c9c002f515a36a15727a2687638">issRaw</a>; }
+<a name="l00247"></a>00247 };
+<a name="l00248"></a>00248 
+<a name="l00249"></a><a class="code" href="classArmISA_1_1Reset.html">00249</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1Reset.html">Reset</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;Reset&gt;
+<a name="l00250"></a>00250 {
+<a name="l00251"></a>00251   <span class="keyword">public</span>:
+<a name="l00252"></a>00252     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1Reset.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00253"></a>00253             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00254"></a>00254 };
+<a name="l00255"></a>00255 
+<a name="l00256"></a><a class="code" href="classArmISA_1_1UndefinedInstruction.html">00256</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1UndefinedInstruction.html">UndefinedInstruction</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;UndefinedInstruction&gt;
+<a name="l00257"></a>00257 {
+<a name="l00258"></a>00258   <span class="keyword">protected</span>:
+<a name="l00259"></a><a class="code" href="classArmISA_1_1UndefinedInstruction.html#ac160cc61da581bdcf075273493b9f156">00259</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1UndefinedInstruction.html#ac160cc61da581bdcf075273493b9f156">unknown</a>;
+<a name="l00260"></a><a class="code" href="classArmISA_1_1UndefinedInstruction.html#a4295e1a543aa3694e2987c6731c226ad">00260</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a4295e1a543aa3694e2987c6731c226ad">disabled</a>;
+<a name="l00261"></a><a class="code" href="classArmISA_1_1UndefinedInstruction.html#af5e67d95019a0b5aba4c42205567eda7">00261</a>     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1UndefinedInstruction.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>;
+<a name="l00262"></a><a class="code" href="classArmISA_1_1UndefinedInstruction.html#adfacb526b8ab378bf36f1324303635d0">00262</a>     <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classArmISA_1_1UndefinedInstruction.html#adfacb526b8ab378bf36f1324303635d0">mnemonic</a>;
+<a name="l00263"></a>00263 
+<a name="l00264"></a>00264   <span class="keyword">public</span>:
+<a name="l00265"></a><a class="code" href="classArmISA_1_1UndefinedInstruction.html#a4896cdc6731c9fc601e3d5ce8ca26c6e">00265</a>     <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a4896cdc6731c9fc601e3d5ce8ca26c6e">UndefinedInstruction</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst,
+<a name="l00266"></a>00266                          <span class="keywordtype">bool</span> _unknown,
+<a name="l00267"></a>00267                          <span class="keyword">const</span> <span class="keywordtype">char</span> *_mnemonic = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>,
+<a name="l00268"></a>00268                          <span class="keywordtype">bool</span> _disabled = <span class="keyword">false</span>) :
+<a name="l00269"></a>00269         <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;<a class="code" href="classArmISA_1_1UndefinedInstruction.html">UndefinedInstruction</a>&gt;(_machInst),
+<a name="l00270"></a>00270         <a class="code" href="classArmISA_1_1UndefinedInstruction.html#ac160cc61da581bdcf075273493b9f156">unknown</a>(_unknown), <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a4295e1a543aa3694e2987c6731c226ad">disabled</a>(_disabled),
+<a name="l00271"></a>00271         <a class="code" href="classArmISA_1_1UndefinedInstruction.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>(<a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2aa3995628917a586c043ca2d5933b0149">EC_INVALID</a>), <a class="code" href="classArmISA_1_1UndefinedInstruction.html#adfacb526b8ab378bf36f1324303635d0">mnemonic</a>(_mnemonic)
+<a name="l00272"></a>00272     {}
+<a name="l00273"></a><a class="code" href="classArmISA_1_1UndefinedInstruction.html#a5eb139880bd865099005b05ea572a0a8">00273</a>     <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a4896cdc6731c9fc601e3d5ce8ca26c6e">UndefinedInstruction</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _iss,
+<a name="l00274"></a>00274             <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> _overrideEc, <span class="keyword">const</span> <span class="keywordtype">char</span> *_mnemonic = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) :
+<a name="l00275"></a>00275         <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;<a class="code" href="classArmISA_1_1UndefinedInstruction.html">UndefinedInstruction</a>&gt;(_machInst, _iss),
+<a name="l00276"></a>00276         <a class="code" href="classArmISA_1_1UndefinedInstruction.html#ac160cc61da581bdcf075273493b9f156">unknown</a>(false), <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a4295e1a543aa3694e2987c6731c226ad">disabled</a>(true), <a class="code" href="classArmISA_1_1UndefinedInstruction.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>(_overrideEc),
+<a name="l00277"></a>00277         <a class="code" href="classArmISA_1_1UndefinedInstruction.html#adfacb526b8ab378bf36f1324303635d0">mnemonic</a>(_mnemonic)
+<a name="l00278"></a>00278     {}
+<a name="l00279"></a>00279 
+<a name="l00280"></a>00280     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00281"></a>00281             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00282"></a>00282     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a16facd13ba8e6d15d2b865882c379d5f">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00283"></a>00283     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1UndefinedInstruction.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00284"></a>00284     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1UndefinedInstruction.html#a54f4d33ac162a95fd5b3830cf7fab8ff">iss</a>() <span class="keyword">const</span>;
+<a name="l00285"></a>00285 };
+<a name="l00286"></a>00286 
+<a name="l00287"></a><a class="code" href="classArmISA_1_1SupervisorCall.html">00287</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1SupervisorCall.html">SupervisorCall</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;SupervisorCall&gt;
+<a name="l00288"></a>00288 {
+<a name="l00289"></a>00289   <span class="keyword">protected</span>:
+<a name="l00290"></a><a class="code" href="classArmISA_1_1SupervisorCall.html#af5e67d95019a0b5aba4c42205567eda7">00290</a>     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1SupervisorCall.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>;
+<a name="l00291"></a>00291   <span class="keyword">public</span>:
+<a name="l00292"></a><a class="code" href="classArmISA_1_1SupervisorCall.html#a138ed4243912a600cdc9e392d4522e57">00292</a>     <a class="code" href="classArmISA_1_1SupervisorCall.html#a138ed4243912a600cdc9e392d4522e57">SupervisorCall</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _iss,
+<a name="l00293"></a>00293                    <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> _overrideEc = <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2aa3995628917a586c043ca2d5933b0149">EC_INVALID</a>) :
+<a name="l00294"></a>00294         <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;<a class="code" href="classArmISA_1_1SupervisorCall.html">SupervisorCall</a>&gt;(_machInst, _iss),
+<a name="l00295"></a>00295         <a class="code" href="classArmISA_1_1SupervisorCall.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>(_overrideEc)
+<a name="l00296"></a>00296     {}
+<a name="l00297"></a>00297 
+<a name="l00298"></a>00298     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1SupervisorCall.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00299"></a>00299             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00300"></a>00300     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1SupervisorCall.html#a16facd13ba8e6d15d2b865882c379d5f">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00301"></a>00301     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1SupervisorCall.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00302"></a>00302     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1SupervisorCall.html#a54f4d33ac162a95fd5b3830cf7fab8ff">iss</a>() <span class="keyword">const</span>;
+<a name="l00303"></a>00303 };
+<a name="l00304"></a>00304 
+<a name="l00305"></a><a class="code" href="classArmISA_1_1SecureMonitorCall.html">00305</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1SecureMonitorCall.html">SecureMonitorCall</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;SecureMonitorCall&gt;
+<a name="l00306"></a>00306 {
+<a name="l00307"></a>00307   <span class="keyword">public</span>:
+<a name="l00308"></a><a class="code" href="classArmISA_1_1SecureMonitorCall.html#aab4fff0747965a2d46f019a6acb71460">00308</a>     <a class="code" href="classArmISA_1_1SecureMonitorCall.html#aab4fff0747965a2d46f019a6acb71460">SecureMonitorCall</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst) :
+<a name="l00309"></a>00309         <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;<a class="code" href="classArmISA_1_1SecureMonitorCall.html">SecureMonitorCall</a>&gt;(_machInst)
+<a name="l00310"></a>00310     {}
+<a name="l00311"></a>00311 
+<a name="l00312"></a>00312     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1SecureMonitorCall.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00313"></a>00313             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00314"></a>00314     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1SecureMonitorCall.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00315"></a>00315     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1SecureMonitorCall.html#a54f4d33ac162a95fd5b3830cf7fab8ff">iss</a>() <span class="keyword">const</span>;
+<a name="l00316"></a>00316 };
+<a name="l00317"></a>00317 
+<a name="l00318"></a><a class="code" href="classArmISA_1_1SupervisorTrap.html">00318</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1SupervisorTrap.html">SupervisorTrap</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;SupervisorTrap&gt;
+<a name="l00319"></a>00319 {
+<a name="l00320"></a>00320   <span class="keyword">protected</span>:
+<a name="l00321"></a><a class="code" href="classArmISA_1_1SupervisorTrap.html#a4a11fa8755d51be93a88861302a9378d">00321</a>     <a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> <a class="code" href="classArmISA_1_1SupervisorTrap.html#a4a11fa8755d51be93a88861302a9378d">machInst</a>;
+<a name="l00322"></a><a class="code" href="classArmISA_1_1SupervisorTrap.html#af5e67d95019a0b5aba4c42205567eda7">00322</a>     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1SupervisorTrap.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>;
+<a name="l00323"></a>00323 
+<a name="l00324"></a>00324   <span class="keyword">public</span>:
+<a name="l00325"></a><a class="code" href="classArmISA_1_1SupervisorTrap.html#a4495049d8fb76e06d9669611708775df">00325</a>     <a class="code" href="classArmISA_1_1SupervisorTrap.html#a4495049d8fb76e06d9669611708775df">SupervisorTrap</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _iss,
+<a name="l00326"></a>00326                    <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> _overrideEc = <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2aa3995628917a586c043ca2d5933b0149">EC_INVALID</a>) :
+<a name="l00327"></a>00327         <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;<a class="code" href="classArmISA_1_1SupervisorTrap.html">SupervisorTrap</a>&gt;(_machInst, _iss),
+<a name="l00328"></a>00328         <a class="code" href="classArmISA_1_1SupervisorTrap.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>(_overrideEc)
+<a name="l00329"></a>00329     {}
+<a name="l00330"></a>00330 
+<a name="l00331"></a>00331     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1SupervisorTrap.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00332"></a>00332 };
+<a name="l00333"></a>00333 
+<a name="l00334"></a><a class="code" href="classArmISA_1_1SecureMonitorTrap.html">00334</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1SecureMonitorTrap.html">SecureMonitorTrap</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;SecureMonitorTrap&gt;
+<a name="l00335"></a>00335 {
+<a name="l00336"></a>00336  <span class="keyword">protected</span>:
+<a name="l00337"></a><a class="code" href="classArmISA_1_1SecureMonitorTrap.html#a4a11fa8755d51be93a88861302a9378d">00337</a>     <a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> <a class="code" href="classArmISA_1_1SecureMonitorTrap.html#a4a11fa8755d51be93a88861302a9378d">machInst</a>;
+<a name="l00338"></a><a class="code" href="classArmISA_1_1SecureMonitorTrap.html#af5e67d95019a0b5aba4c42205567eda7">00338</a>     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1SecureMonitorTrap.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>;
+<a name="l00339"></a>00339 
+<a name="l00340"></a>00340   <span class="keyword">public</span>:
+<a name="l00341"></a><a class="code" href="classArmISA_1_1SecureMonitorTrap.html#a9d7a16449817dcdbbd07d2c3e59c1309">00341</a>     <a class="code" href="classArmISA_1_1SecureMonitorTrap.html#a9d7a16449817dcdbbd07d2c3e59c1309">SecureMonitorTrap</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _iss,
+<a name="l00342"></a>00342                       <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> _overrideEc = <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2aa3995628917a586c043ca2d5933b0149">EC_INVALID</a>) :
+<a name="l00343"></a>00343         <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;<a class="code" href="classArmISA_1_1SecureMonitorTrap.html">SecureMonitorTrap</a>&gt;(_machInst, _iss),
+<a name="l00344"></a>00344         <a class="code" href="classArmISA_1_1SecureMonitorTrap.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>(_overrideEc)
+<a name="l00345"></a>00345     {}
+<a name="l00346"></a>00346 
+<a name="l00347"></a>00347     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1SecureMonitorTrap.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00348"></a>00348 };
+<a name="l00349"></a>00349 
+<a name="l00350"></a><a class="code" href="classArmISA_1_1HypervisorCall.html">00350</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1HypervisorCall.html">HypervisorCall</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;HypervisorCall&gt;
+<a name="l00351"></a>00351 {
+<a name="l00352"></a>00352   <span class="keyword">public</span>:
+<a name="l00353"></a>00353     <a class="code" href="classArmISA_1_1HypervisorCall.html#a019fffca678c1aaa71fb594aa71a2447">HypervisorCall</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _imm);
+<a name="l00354"></a>00354 };
+<a name="l00355"></a>00355 
+<a name="l00356"></a><a class="code" href="classArmISA_1_1HypervisorTrap.html">00356</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1HypervisorTrap.html">HypervisorTrap</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;HypervisorTrap&gt;
+<a name="l00357"></a>00357 {
+<a name="l00358"></a>00358   <span class="keyword">protected</span>:
+<a name="l00359"></a><a class="code" href="classArmISA_1_1HypervisorTrap.html#a4a11fa8755d51be93a88861302a9378d">00359</a>     <a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> <a class="code" href="classArmISA_1_1HypervisorTrap.html#a4a11fa8755d51be93a88861302a9378d">machInst</a>;
+<a name="l00360"></a><a class="code" href="classArmISA_1_1HypervisorTrap.html#af5e67d95019a0b5aba4c42205567eda7">00360</a>     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1HypervisorTrap.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>;
+<a name="l00361"></a>00361 
+<a name="l00362"></a>00362   <span class="keyword">public</span>:
+<a name="l00363"></a><a class="code" href="classArmISA_1_1HypervisorTrap.html#aed3e8c939479b9f3acffeafc9de7f777">00363</a>     <a class="code" href="classArmISA_1_1HypervisorTrap.html#aed3e8c939479b9f3acffeafc9de7f777">HypervisorTrap</a>(<a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">ExtMachInst</a> _machInst, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> _iss,
+<a name="l00364"></a>00364                    <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> _overrideEc = <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2aa3995628917a586c043ca2d5933b0149">EC_INVALID</a>) :
+<a name="l00365"></a>00365       <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;<a class="code" href="classArmISA_1_1HypervisorTrap.html">HypervisorTrap</a>&gt;(_machInst, _iss),
+<a name="l00366"></a>00366       <a class="code" href="classArmISA_1_1HypervisorTrap.html#af5e67d95019a0b5aba4c42205567eda7">overrideEc</a>(_overrideEc)
+<a name="l00367"></a>00367     {}
+<a name="l00368"></a>00368 
+<a name="l00369"></a>00369     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1HypervisorTrap.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00370"></a>00370 };
+<a name="l00371"></a>00371 
+<a name="l00372"></a>00372 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00373"></a><a class="code" href="classArmISA_1_1AbortFault.html">00373</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1AbortFault.html">AbortFault</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;T&gt;
+<a name="l00374"></a>00374 {
+<a name="l00375"></a>00375   <span class="keyword">protected</span>:
+<a name="l00382"></a><a class="code" href="classArmISA_1_1AbortFault.html#a39e9eff111c8c7d4acfecc9d3bbd29d4">00382</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classArmISA_1_1AbortFault.html#a39e9eff111c8c7d4acfecc9d3bbd29d4">faultAddr</a>;
+<a name="l00388"></a><a class="code" href="classArmISA_1_1AbortFault.html#a6d8ab6ddd3da67e07350b2c3ff6c0d80">00388</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classArmISA_1_1AbortFault.html#a6d8ab6ddd3da67e07350b2c3ff6c0d80">OVAddr</a>;
+<a name="l00389"></a><a class="code" href="classArmISA_1_1AbortFault.html#ab4d8d1259f524270d625ab8933700d27">00389</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1AbortFault.html#ab4d8d1259f524270d625ab8933700d27">write</a>;
+<a name="l00390"></a><a class="code" href="classArmISA_1_1AbortFault.html#a8f425ac9ed99f5604dcca4b072c88718">00390</a>     <a class="code" href="structArmISA_1_1TlbEntry.html#a0595b41cfb7d03f18438f9c355a3469d">TlbEntry::DomainType</a> <a class="code" href="classArmISA_1_1AbortFault.html#a8f425ac9ed99f5604dcca4b072c88718">domain</a>;
+<a name="l00391"></a><a class="code" href="classArmISA_1_1AbortFault.html#a36a99c772ae64e186f5264a662834eef">00391</a>     uint8_t <a class="code" href="classArmISA_1_1AbortFault.html#a36a99c772ae64e186f5264a662834eef">source</a>;
+<a name="l00392"></a><a class="code" href="classArmISA_1_1AbortFault.html#ada7b52f73921c795a241ffd6e381fc69">00392</a>     uint8_t <a class="code" href="classArmISA_1_1AbortFault.html#ada7b52f73921c795a241ffd6e381fc69">srcEncoded</a>;
+<a name="l00393"></a><a class="code" href="classArmISA_1_1AbortFault.html#a29056d47d3f3a94a388d6f9ba707ef0e">00393</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1AbortFault.html#a29056d47d3f3a94a388d6f9ba707ef0e">stage2</a>;
+<a name="l00394"></a><a class="code" href="classArmISA_1_1AbortFault.html#ad135724e922a94add62100a64854ae84">00394</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1AbortFault.html#ad135724e922a94add62100a64854ae84">s1ptw</a>;
+<a name="l00395"></a><a class="code" href="classArmISA_1_1AbortFault.html#a8f7a9c6fc85261a8c7ffb21d5afeed24">00395</a>     <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56ae">ArmFault::TranMethod</a> <a class="code" href="classArmISA_1_1AbortFault.html#a8f7a9c6fc85261a8c7ffb21d5afeed24">tranMethod</a>;
+<a name="l00396"></a>00396 
+<a name="l00397"></a>00397   <span class="keyword">public</span>:
+<a name="l00398"></a><a class="code" href="classArmISA_1_1AbortFault.html#a68effcc3ba0f9938e7571ad7dc83ffcf">00398</a>     <a class="code" href="classArmISA_1_1AbortFault.html#a68effcc3ba0f9938e7571ad7dc83ffcf">AbortFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _faultAddr, <span class="keywordtype">bool</span> _write, <a class="code" href="structArmISA_1_1TlbEntry.html#a0595b41cfb7d03f18438f9c355a3469d">TlbEntry::DomainType</a> _domain, uint8_t _source,
+<a name="l00399"></a>00399                <span class="keywordtype">bool</span> _stage2, <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56ae">ArmFault::TranMethod</a> _tranMethod = <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aeae6c1c0c9ccfea433b47dcf88c8cea24e">ArmFault::UnknownTran</a>) :
+<a name="l00400"></a>00400         <a class="code" href="classArmISA_1_1AbortFault.html#a39e9eff111c8c7d4acfecc9d3bbd29d4">faultAddr</a>(_faultAddr), <a class="code" href="classArmISA_1_1AbortFault.html#ab4d8d1259f524270d625ab8933700d27">write</a>(_write), <a class="code" href="classArmISA_1_1AbortFault.html#a8f425ac9ed99f5604dcca4b072c88718">domain</a>(_domain), <a class="code" href="classArmISA_1_1AbortFault.html#a36a99c772ae64e186f5264a662834eef">source</a>(_source),
+<a name="l00401"></a>00401         <a class="code" href="classArmISA_1_1AbortFault.html#a29056d47d3f3a94a388d6f9ba707ef0e">stage2</a>(_stage2), <a class="code" href="classArmISA_1_1AbortFault.html#ad135724e922a94add62100a64854ae84">s1ptw</a>(false), <a class="code" href="classArmISA_1_1AbortFault.html#a8f7a9c6fc85261a8c7ffb21d5afeed24">tranMethod</a>(_tranMethod)
+<a name="l00402"></a>00402     {}
+<a name="l00403"></a>00403 
+<a name="l00404"></a>00404     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1AbortFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00405"></a>00405             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00406"></a>00406 
+<a name="l00407"></a>00407     FSR <a class="code" href="classArmISA_1_1AbortFault.html#abae0f5c90ba0a6f56bc8df45dbd5861b">getFsr</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00408"></a>00408     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1AbortFault.html#a92a741baab278ed029d84b0fe979e1b8">abortDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00409"></a>00409     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1AbortFault.html#a54f4d33ac162a95fd5b3830cf7fab8ff">iss</a>() <span class="keyword">const</span>;
+<a name="l00410"></a><a class="code" href="classArmISA_1_1AbortFault.html#abb0e34fd2d22460e7779f419601dc6dc">00410</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1AbortFault.html#abb0e34fd2d22460e7779f419601dc6dc">isStage2</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1AbortFault.html#a29056d47d3f3a94a388d6f9ba707ef0e">stage2</a>; }
+<a name="l00411"></a>00411     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1AbortFault.html#a1534ab135f3f8a49ad6274389bf77b51">annotate</a>(<a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fb">ArmFault::AnnotationIDs</a> <span class="keywordtype">id</span>, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00412"></a>00412     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1AbortFault.html#a3839d4e20c8314337d02889689f3c57e">isMMUFault</a>() <span class="keyword">const</span>;
+<a name="l00413"></a>00413 };
+<a name="l00414"></a>00414 
+<a name="l00415"></a><a class="code" href="classArmISA_1_1PrefetchAbort.html">00415</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1PrefetchAbort.html">PrefetchAbort</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1AbortFault.html">AbortFault</a>&lt;PrefetchAbort&gt;
+<a name="l00416"></a>00416 {
+<a name="l00417"></a>00417   <span class="keyword">public</span>:
+<a name="l00418"></a><a class="code" href="classArmISA_1_1PrefetchAbort.html#a0fc945049ae4ebc86b2c2765b65ab5c8">00418</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1PrefetchAbort.html#a0fc945049ae4ebc86b2c2765b65ab5c8">FsrIndex</a>  = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a0cb1fb74731b18fc53003292782a6dc2">MISCREG_IFSR</a>;
+<a name="l00419"></a><a class="code" href="classArmISA_1_1PrefetchAbort.html#a3c751f200a61047c7edace6f38db43aa">00419</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1PrefetchAbort.html#a3c751f200a61047c7edace6f38db43aa">FarIndex</a>  = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67abf90698e2082c52e49da71f35b07787d">MISCREG_IFAR</a>;
+<a name="l00420"></a><a class="code" href="classArmISA_1_1PrefetchAbort.html#adf1eccd205afd5770084542cc2295d6c">00420</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1PrefetchAbort.html#adf1eccd205afd5770084542cc2295d6c">HFarIndex</a> = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aee42f058c39a2845dd61766e62a72cdd">MISCREG_HIFAR</a>;
+<a name="l00421"></a>00421 
+<a name="l00422"></a><a class="code" href="classArmISA_1_1PrefetchAbort.html#adbe1805a5aad9380631cc0402ae0667e">00422</a>     <a class="code" href="classArmISA_1_1PrefetchAbort.html#adbe1805a5aad9380631cc0402ae0667e">PrefetchAbort</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _addr, uint8_t _source, <span class="keywordtype">bool</span> _stage2 = <span class="keyword">false</span>,
+<a name="l00423"></a>00423                   <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56ae">ArmFault::TranMethod</a> _tranMethod = <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aeae6c1c0c9ccfea433b47dcf88c8cea24e">ArmFault::UnknownTran</a>) :
+<a name="l00424"></a>00424         <a class="code" href="classArmISA_1_1AbortFault.html">AbortFault</a>&lt;<a class="code" href="classArmISA_1_1PrefetchAbort.html">PrefetchAbort</a>&gt;(_addr, false, <a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a>::DomainType::NoAccess,
+<a name="l00425"></a>00425                 _source, _stage2, _tranMethod)
+<a name="l00426"></a>00426     {}
+<a name="l00427"></a>00427 
+<a name="l00428"></a>00428     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1PrefetchAbort.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00429"></a>00429     <span class="comment">// @todo: external aborts should be routed if SCR.EA == 1</span>
+<a name="l00430"></a>00430     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1PrefetchAbort.html#afd7a21fdb010230ad53094254739dde8">routeToMonitor</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00431"></a>00431     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1PrefetchAbort.html#a16facd13ba8e6d15d2b865882c379d5f">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00432"></a>00432 };
+<a name="l00433"></a>00433 
+<a name="l00434"></a><a class="code" href="classArmISA_1_1DataAbort.html">00434</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1DataAbort.html">DataAbort</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1AbortFault.html">AbortFault</a>&lt;DataAbort&gt;
+<a name="l00435"></a>00435 {
+<a name="l00436"></a>00436   <span class="keyword">public</span>:
+<a name="l00437"></a><a class="code" href="classArmISA_1_1DataAbort.html#a0fc945049ae4ebc86b2c2765b65ab5c8">00437</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1DataAbort.html#a0fc945049ae4ebc86b2c2765b65ab5c8">FsrIndex</a>  = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67af20b92a7da7147b7c719d9296b9b9302">MISCREG_DFSR</a>;
+<a name="l00438"></a><a class="code" href="classArmISA_1_1DataAbort.html#a3c751f200a61047c7edace6f38db43aa">00438</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1DataAbort.html#a3c751f200a61047c7edace6f38db43aa">FarIndex</a>  = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a725af3f50bd0eb1f0dd63dd8431bce79">MISCREG_DFAR</a>;
+<a name="l00439"></a><a class="code" href="classArmISA_1_1DataAbort.html#adf1eccd205afd5770084542cc2295d6c">00439</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1DataAbort.html#adf1eccd205afd5770084542cc2295d6c">HFarIndex</a> = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67adf49ef8d2b41c6bea3b3d82f126b7951">MISCREG_HDFAR</a>;
+<a name="l00440"></a><a class="code" href="classArmISA_1_1DataAbort.html#ab98211392ddb1f356f10c5688f55ec06">00440</a>     <span class="keywordtype">bool</span>    <a class="code" href="classArmISA_1_1DataAbort.html#ab98211392ddb1f356f10c5688f55ec06">isv</a>;
+<a name="l00441"></a><a class="code" href="classArmISA_1_1DataAbort.html#a1186084bdb2d7947ab58dac309bb3557">00441</a>     uint8_t <a class="code" href="classArmISA_1_1DataAbort.html#a1186084bdb2d7947ab58dac309bb3557">sas</a>;
+<a name="l00442"></a><a class="code" href="classArmISA_1_1DataAbort.html#abba3874a6247f0df00a9dcc659cc2d67">00442</a>     uint8_t <a class="code" href="classArmISA_1_1DataAbort.html#abba3874a6247f0df00a9dcc659cc2d67">sse</a>;
+<a name="l00443"></a><a class="code" href="classArmISA_1_1DataAbort.html#a46e1e6d22b710c280f39d97cb7ea8de9">00443</a>     uint8_t <a class="code" href="classArmISA_1_1DataAbort.html#a46e1e6d22b710c280f39d97cb7ea8de9">srt</a>;
+<a name="l00444"></a>00444 
+<a name="l00445"></a>00445     <span class="comment">// AArch64 only</span>
+<a name="l00446"></a><a class="code" href="classArmISA_1_1DataAbort.html#a9da2d5806018a5e01c9898d9c751ebb6">00446</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1DataAbort.html#a9da2d5806018a5e01c9898d9c751ebb6">sf</a>;
+<a name="l00447"></a><a class="code" href="classArmISA_1_1DataAbort.html#a3fd520eea10c5d7eb8490a0f8a53dc0b">00447</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1DataAbort.html#a3fd520eea10c5d7eb8490a0f8a53dc0b">ar</a>;
+<a name="l00448"></a>00448 
+<a name="l00449"></a><a class="code" href="classArmISA_1_1DataAbort.html#aca4861c0042d8fa8b6d71b89d1ebe0e6">00449</a>     <a class="code" href="classArmISA_1_1DataAbort.html#aca4861c0042d8fa8b6d71b89d1ebe0e6">DataAbort</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _addr, <a class="code" href="structArmISA_1_1TlbEntry.html#a0595b41cfb7d03f18438f9c355a3469d">TlbEntry::DomainType</a> _domain, <span class="keywordtype">bool</span> _write, uint8_t _source,
+<a name="l00450"></a>00450               <span class="keywordtype">bool</span> _stage2 = <span class="keyword">false</span>, <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56ae">ArmFault::TranMethod</a> _tranMethod = <a class="code" href="classArmISA_1_1ArmFault.html#ad78237d6390becbe8bdf9e73979c56aeae6c1c0c9ccfea433b47dcf88c8cea24e">ArmFault::UnknownTran</a>) :
+<a name="l00451"></a>00451         <a class="code" href="classArmISA_1_1AbortFault.html">AbortFault</a>&lt;<a class="code" href="classArmISA_1_1DataAbort.html">DataAbort</a>&gt;(_addr, _write, _domain, _source, _stage2,
+<a name="l00452"></a>00452                               _tranMethod),
+<a name="l00453"></a>00453         <a class="code" href="classArmISA_1_1DataAbort.html#ab98211392ddb1f356f10c5688f55ec06">isv</a>(false), <a class="code" href="classArmISA_1_1DataAbort.html#a1186084bdb2d7947ab58dac309bb3557">sas</a> (0), <a class="code" href="classArmISA_1_1DataAbort.html#abba3874a6247f0df00a9dcc659cc2d67">sse</a>(0), <a class="code" href="classArmISA_1_1DataAbort.html#a46e1e6d22b710c280f39d97cb7ea8de9">srt</a>(0), <a class="code" href="classArmISA_1_1DataAbort.html#a9da2d5806018a5e01c9898d9c751ebb6">sf</a>(false), <a class="code" href="classArmISA_1_1DataAbort.html#a3fd520eea10c5d7eb8490a0f8a53dc0b">ar</a>(false)
+<a name="l00454"></a>00454     {}
+<a name="l00455"></a>00455 
+<a name="l00456"></a>00456     <a class="code" href="namespaceArmISA.html#a04034d12009cf36227f4d2abff3331a2">ExceptionClass</a> <a class="code" href="classArmISA_1_1DataAbort.html#aefab73b22a74d7c48b8a23230906d7cd">ec</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00457"></a>00457     <span class="comment">// @todo: external aborts should be routed if SCR.EA == 1</span>
+<a name="l00458"></a>00458     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1DataAbort.html#afd7a21fdb010230ad53094254739dde8">routeToMonitor</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00459"></a>00459     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1DataAbort.html#a16facd13ba8e6d15d2b865882c379d5f">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00460"></a>00460     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1DataAbort.html#a54f4d33ac162a95fd5b3830cf7fab8ff">iss</a>() <span class="keyword">const</span>;
+<a name="l00461"></a>00461     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1DataAbort.html#a284956f8d8ec0f18434d857ae44c6a6c">annotate</a>(<a class="code" href="classArmISA_1_1ArmFault.html#a955305710181a260a9ee0b419a6027fb">AnnotationIDs</a> <span class="keywordtype">id</span>, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00462"></a>00462 };
+<a name="l00463"></a>00463 
+<a name="l00464"></a><a class="code" href="classArmISA_1_1VirtualDataAbort.html">00464</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VirtualDataAbort.html">VirtualDataAbort</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1AbortFault.html">AbortFault</a>&lt;VirtualDataAbort&gt;
+<a name="l00465"></a>00465 {
+<a name="l00466"></a>00466   <span class="keyword">public</span>:
+<a name="l00467"></a><a class="code" href="classArmISA_1_1VirtualDataAbort.html#a0fc945049ae4ebc86b2c2765b65ab5c8">00467</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1VirtualDataAbort.html#a0fc945049ae4ebc86b2c2765b65ab5c8">FsrIndex</a>  = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67af20b92a7da7147b7c719d9296b9b9302">MISCREG_DFSR</a>;
+<a name="l00468"></a><a class="code" href="classArmISA_1_1VirtualDataAbort.html#a3c751f200a61047c7edace6f38db43aa">00468</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1VirtualDataAbort.html#a3c751f200a61047c7edace6f38db43aa">FarIndex</a>  = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a725af3f50bd0eb1f0dd63dd8431bce79">MISCREG_DFAR</a>;
+<a name="l00469"></a><a class="code" href="classArmISA_1_1VirtualDataAbort.html#adf1eccd205afd5770084542cc2295d6c">00469</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67">MiscRegIndex</a> <a class="code" href="classArmISA_1_1VirtualDataAbort.html#adf1eccd205afd5770084542cc2295d6c">HFarIndex</a> = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67adf49ef8d2b41c6bea3b3d82f126b7951">MISCREG_HDFAR</a>;
+<a name="l00470"></a>00470 
+<a name="l00471"></a><a class="code" href="classArmISA_1_1VirtualDataAbort.html#a144ebf1c82b0b283c23af51e73cf00bd">00471</a>     <a class="code" href="classArmISA_1_1VirtualDataAbort.html#a144ebf1c82b0b283c23af51e73cf00bd">VirtualDataAbort</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _addr, <a class="code" href="structArmISA_1_1TlbEntry.html#a0595b41cfb7d03f18438f9c355a3469d">TlbEntry::DomainType</a> _domain, <span class="keywordtype">bool</span> _write,
+<a name="l00472"></a>00472                      uint8_t _source) :
+<a name="l00473"></a>00473         <a class="code" href="classArmISA_1_1AbortFault.html">AbortFault</a>&lt;<a class="code" href="classArmISA_1_1VirtualDataAbort.html">VirtualDataAbort</a>&gt;(_addr, _write, _domain, _source, false)
+<a name="l00474"></a>00474     {}
+<a name="l00475"></a>00475 
+<a name="l00476"></a>00476     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1VirtualDataAbort.html#a38260dc6f5fb9598eaf95d8696e3efe8">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst);
+<a name="l00477"></a>00477 };
+<a name="l00478"></a>00478 
+<a name="l00479"></a><a class="code" href="classArmISA_1_1Interrupt.html">00479</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1Interrupt.html">Interrupt</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;Interrupt&gt;
+<a name="l00480"></a>00480 {
+<a name="l00481"></a>00481   <span class="keyword">public</span>:
+<a name="l00482"></a>00482     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1Interrupt.html#afd7a21fdb010230ad53094254739dde8">routeToMonitor</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00483"></a>00483     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1Interrupt.html#a16facd13ba8e6d15d2b865882c379d5f">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc) <span class="keyword">const</span>;
+<a name="l00484"></a>00484     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1Interrupt.html#a92a741baab278ed029d84b0fe979e1b8">abortDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc);
+<a name="l00485"></a>00485 };
+<a name="l00486"></a>00486 
+<a name="l00487"></a><a class="code" href="classArmISA_1_1VirtualInterrupt.html">00487</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VirtualInterrupt.html">VirtualInterrupt</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;VirtualInterrupt&gt;
+<a name="l00488"></a>00488 {
+<a name="l00489"></a>00489   <span class="keyword">public</span>:
+<a name="l00490"></a>00490     <a class="code" href="classArmISA_1_1VirtualInterrupt.html#ad1659bb054ed9b76cdb1d897198af0ca">VirtualInterrupt</a>();
+<a name="l00491"></a>00491 };
+<a name="l00492"></a>00492 
+<a name="l00493"></a><a class="code" href="classArmISA_1_1FastInterrupt.html">00493</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1FastInterrupt.html">FastInterrupt</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;FastInterrupt&gt;
+<a name="l00494"></a>00494 {
+<a name="l00495"></a>00495   <span class="keyword">public</span>:
+<a name="l00496"></a>00496     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1FastInterrupt.html#afd7a21fdb010230ad53094254739dde8">routeToMonitor</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00497"></a>00497     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1FastInterrupt.html#a16facd13ba8e6d15d2b865882c379d5f">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc) <span class="keyword">const</span>;
+<a name="l00498"></a>00498     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1FastInterrupt.html#a92a741baab278ed029d84b0fe979e1b8">abortDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc);
+<a name="l00499"></a>00499     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1FastInterrupt.html#a5f03475ae417a13eb48c2593f9f5b5a6">fiqDisable</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc);
+<a name="l00500"></a>00500 };
+<a name="l00501"></a>00501 
+<a name="l00502"></a><a class="code" href="classArmISA_1_1VirtualFastInterrupt.html">00502</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1VirtualFastInterrupt.html">VirtualFastInterrupt</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;VirtualFastInterrupt&gt;
+<a name="l00503"></a>00503 {
+<a name="l00504"></a>00504   <span class="keyword">public</span>:
+<a name="l00505"></a>00505     <a class="code" href="classArmISA_1_1VirtualFastInterrupt.html#adbc393b4cc90fcc9689f8767b3e7ffda">VirtualFastInterrupt</a>();
+<a name="l00506"></a>00506 };
+<a name="l00507"></a>00507 
+<a name="l00509"></a><a class="code" href="classArmISA_1_1PCAlignmentFault.html">00509</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1PCAlignmentFault.html" title="PC alignment fault (AArch64 only).">PCAlignmentFault</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;PCAlignmentFault&gt;
+<a name="l00510"></a>00510 {
+<a name="l00511"></a>00511   <span class="keyword">protected</span>:
+<a name="l00513"></a><a class="code" href="classArmISA_1_1PCAlignmentFault.html#af8e1c40a0f10f0875e5ce4a62fdc3d7f">00513</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classArmISA_1_1PCAlignmentFault.html#af8e1c40a0f10f0875e5ce4a62fdc3d7f" title="The unaligned value of the PC.">faultPC</a>;
+<a name="l00514"></a>00514   <span class="keyword">public</span>:
+<a name="l00515"></a><a class="code" href="classArmISA_1_1PCAlignmentFault.html#a16a334acc3968c1fc6cbeed896fae45c">00515</a>     <a class="code" href="classArmISA_1_1PCAlignmentFault.html#a16a334acc3968c1fc6cbeed896fae45c">PCAlignmentFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _faultPC) : <a class="code" href="classArmISA_1_1PCAlignmentFault.html#af8e1c40a0f10f0875e5ce4a62fdc3d7f" title="The unaligned value of the PC.">faultPC</a>(_faultPC)
+<a name="l00516"></a>00516     {}
+<a name="l00517"></a>00517     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1PCAlignmentFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00518"></a>00518             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00519"></a>00519 };
+<a name="l00520"></a>00520 
+<a name="l00522"></a><a class="code" href="classArmISA_1_1SPAlignmentFault.html">00522</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1SPAlignmentFault.html" title="Stack pointer alignment fault (AArch64 only).">SPAlignmentFault</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;SPAlignmentFault&gt;
+<a name="l00523"></a>00523 {
+<a name="l00524"></a>00524   <span class="keyword">public</span>:
+<a name="l00525"></a>00525     <a class="code" href="classArmISA_1_1SPAlignmentFault.html#adbc2f2be4c75b0addbc237176d2daed6">SPAlignmentFault</a>();
+<a name="l00526"></a>00526 };
+<a name="l00527"></a>00527 
+<a name="l00529"></a><a class="code" href="classArmISA_1_1SystemError.html">00529</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1SystemError.html" title="System error (AArch64 only).">SystemError</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;SystemError&gt;
+<a name="l00530"></a>00530 {
+<a name="l00531"></a>00531   <span class="keyword">public</span>:
+<a name="l00532"></a>00532     <a class="code" href="classArmISA_1_1SystemError.html#a952c3a95357c9c6e8602a0853d8f982c">SystemError</a>();
+<a name="l00533"></a>00533     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1SystemError.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00534"></a>00534             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00535"></a>00535     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1SystemError.html#afd7a21fdb010230ad53094254739dde8">routeToMonitor</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc) <span class="keyword">const</span>;
+<a name="l00536"></a>00536     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1SystemError.html#a16facd13ba8e6d15d2b865882c379d5f">routeToHyp</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc) <span class="keyword">const</span>;
+<a name="l00537"></a>00537 };
+<a name="l00538"></a>00538 
+<a name="l00539"></a>00539 <span class="comment">// A fault that flushes the pipe, excluding the faulting instructions</span>
+<a name="l00540"></a><a class="code" href="classArmISA_1_1FlushPipe.html">00540</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1FlushPipe.html">FlushPipe</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;FlushPipe&gt;
+<a name="l00541"></a>00541 {
+<a name="l00542"></a>00542   <span class="keyword">public</span>:
+<a name="l00543"></a><a class="code" href="classArmISA_1_1FlushPipe.html#a4de297117c6f3daf568b1b84528ce788">00543</a>     <a class="code" href="classArmISA_1_1FlushPipe.html#a4de297117c6f3daf568b1b84528ce788">FlushPipe</a>() {}
+<a name="l00544"></a>00544     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1FlushPipe.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00545"></a>00545             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00546"></a>00546 };
+<a name="l00547"></a>00547 
+<a name="l00548"></a>00548 <span class="comment">// A fault that flushes the pipe, excluding the faulting instructions</span>
+<a name="l00549"></a><a class="code" href="classArmISA_1_1ArmSev.html">00549</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1ArmSev.html">ArmSev</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;ArmSev&gt;
+<a name="l00550"></a>00550 {
+<a name="l00551"></a>00551   <span class="keyword">public</span>:
+<a name="l00552"></a><a class="code" href="classArmISA_1_1ArmSev.html#a66acfa8195a707c7d4bb7c9d91e099d8">00552</a>     <a class="code" href="classArmISA_1_1ArmSev.html#a66acfa8195a707c7d4bb7c9d91e099d8">ArmSev</a> () {}
+<a name="l00553"></a>00553     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1ArmSev.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00554"></a>00554             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00555"></a>00555 };
+<a name="l00556"></a>00556 
+<a name="l00558"></a><a class="code" href="classArmISA_1_1IllegalInstSetStateFault.html">00558</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1IllegalInstSetStateFault.html" title="Illegal Instruction Set State fault (AArch64 only).">IllegalInstSetStateFault</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmFaultVals.html">ArmFaultVals</a>&lt;IllegalInstSetStateFault&gt;
+<a name="l00559"></a>00559 {
+<a name="l00560"></a>00560   <span class="keyword">public</span>:
+<a name="l00561"></a>00561     <a class="code" href="classArmISA_1_1IllegalInstSetStateFault.html#ac09355fa32af8cd00c384c1aa9aff497">IllegalInstSetStateFault</a>();
+<a name="l00562"></a>00562 };
+<a name="l00563"></a>00563 
+<a name="l00564"></a>00564 } <span class="comment">// namespace ArmISA</span>
+<a name="l00565"></a>00565 
+<a name="l00566"></a>00566 <span class="preprocessor">#endif // __ARM_FAULTS_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

@@ -1,0 +1,132 @@
+\hypertarget{group__KvmInterrupts}{
+\section{KVM Interrupt handling.}
+\label{group__KvmInterrupts}\index{KVM Interrupt handling.@{KVM Interrupt handling.}}
+}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{group__KvmInterrupts_gabc700469cba2d4bba666902e552e7c2e}{kvmNonMaskableInterrupt} ()
+\item 
+void \hyperlink{group__KvmInterrupts_ga16b8f95e3f70098952604e6b8a121679}{kvmInterrupt} (const struct kvm\_\-interrupt \&interrupt)
+\item 
+void \hyperlink{group__KvmInterrupts_ga75f1140369bf3942bb93a75d1b3de2c9}{createIRQChip} ()
+\item 
+void \hyperlink{group__KvmInterrupts_ga5037b917c47fff611ecdd5b547655284}{setIRQLine} (\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} irq, bool high)
+\item 
+bool \hyperlink{group__KvmInterrupts_ga4e9371a3b5e598c4cde8ebef65be940f}{hasKernelIRQChip} () const 
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+These methods control interrupt delivery to the guest system. 
+
+\subsection{関数}
+\hypertarget{group__KvmInterrupts_ga75f1140369bf3942bb93a75d1b3de2c9}{
+\index{KvmInterrupts@{KvmInterrupts}!createIRQChip@{createIRQChip}}
+\index{createIRQChip@{createIRQChip}!KvmInterrupts@{KvmInterrupts}}
+\subsubsection[{createIRQChip}]{\setlength{\rightskip}{0pt plus 5cm}void createIRQChip ()\hspace{0.3cm}{\ttfamily  \mbox{[}inherited\mbox{]}}}}
+\label{group__KvmInterrupts_ga75f1140369bf3942bb93a75d1b3de2c9}
+Create an in-\/kernel interrupt controller
+
+\begin{DoxyNote}{覚え書き}
+This functionality depends on \hyperlink{classKvm_ab3e6d2bb7ea83c6cdc20369bf3a274a6}{Kvm::capIRQChip()}. 
+\end{DoxyNote}
+
+
+
+\begin{DoxyCode}
+403 {
+404     if (_hasKernelIRQChip)
+405         panic("KvmVM::createIRQChip called twice.\n");
+406 
+407     if (ioctl(KVM_CREATE_IRQCHIP) != -1) {
+408         _hasKernelIRQChip = true;
+409     } else {
+410         warn("KVM: Failed to create in-kernel IRQ chip (errno: %i)\n",
+411              errno);
+412         _hasKernelIRQChip = false;
+413     }
+414 }
+\end{DoxyCode}
+\hypertarget{group__KvmInterrupts_ga4e9371a3b5e598c4cde8ebef65be940f}{
+\index{KvmInterrupts@{KvmInterrupts}!hasKernelIRQChip@{hasKernelIRQChip}}
+\index{hasKernelIRQChip@{hasKernelIRQChip}!KvmInterrupts@{KvmInterrupts}}
+\subsubsection[{hasKernelIRQChip}]{\setlength{\rightskip}{0pt plus 5cm}bool hasKernelIRQChip () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, inherited\mbox{]}}}}
+\label{group__KvmInterrupts_ga4e9371a3b5e598c4cde8ebef65be940f}
+Is in-\/kernel IRQ chip emulation enabled? 
+
+
+\begin{DoxyCode}
+331 { return _hasKernelIRQChip; }
+\end{DoxyCode}
+\hypertarget{group__KvmInterrupts_ga16b8f95e3f70098952604e6b8a121679}{
+\index{KvmInterrupts@{KvmInterrupts}!kvmInterrupt@{kvmInterrupt}}
+\index{kvmInterrupt@{kvmInterrupt}!KvmInterrupts@{KvmInterrupts}}
+\subsubsection[{kvmInterrupt}]{\setlength{\rightskip}{0pt plus 5cm}void kvmInterrupt (const struct kvm\_\-interrupt \& {\em interrupt})\hspace{0.3cm}{\ttfamily  \mbox{[}protected, inherited\mbox{]}}}}
+\label{group__KvmInterrupts_ga16b8f95e3f70098952604e6b8a121679}
+Send a normal interrupt to the guest
+
+\begin{DoxyNote}{覚え書き}
+Make sure that ready\_\-for\_\-interrupt\_\-injection in kvm\_\-run is set prior to calling this function. If not, an interrupt window must be requested by setting request\_\-interrupt\_\-window in kvm\_\-run to 1 and restarting the guest.
+\end{DoxyNote}
+
+\begin{DoxyParams}{引数}
+\item[{\em interrupt}]Structure describing the interrupt to send \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+717 {
+718     ++numInterrupts;
+719     if (ioctl(KVM_INTERRUPT, (void *)&interrupt) == -1)
+720         panic("KVM: Failed to deliver interrupt to virtual CPU\n");
+721 }
+\end{DoxyCode}
+\hypertarget{group__KvmInterrupts_gabc700469cba2d4bba666902e552e7c2e}{
+\index{KvmInterrupts@{KvmInterrupts}!kvmNonMaskableInterrupt@{kvmNonMaskableInterrupt}}
+\index{kvmNonMaskableInterrupt@{kvmNonMaskableInterrupt}!KvmInterrupts@{KvmInterrupts}}
+\subsubsection[{kvmNonMaskableInterrupt}]{\setlength{\rightskip}{0pt plus 5cm}void kvmNonMaskableInterrupt ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, inherited\mbox{]}}}}
+\label{group__KvmInterrupts_gabc700469cba2d4bba666902e552e7c2e}
+Send a non-\/maskable interrupt to the guest
+
+\begin{DoxyNote}{覚え書き}
+The presence of this call depends on \hyperlink{classKvm_acf36e247bf7857c1c7b1e260eff7f7db}{Kvm::capUserNMI()}. 
+\end{DoxyNote}
+
+
+
+\begin{DoxyCode}
+709 {
+710     ++numInterrupts;
+711     if (ioctl(KVM_NMI) == -1)
+712         panic("KVM: Failed to deliver NMI to virtual CPU\n");
+713 }
+\end{DoxyCode}
+\hypertarget{group__KvmInterrupts_ga5037b917c47fff611ecdd5b547655284}{
+\index{KvmInterrupts@{KvmInterrupts}!setIRQLine@{setIRQLine}}
+\index{setIRQLine@{setIRQLine}!KvmInterrupts@{KvmInterrupts}}
+\subsubsection[{setIRQLine}]{\setlength{\rightskip}{0pt plus 5cm}void setIRQLine ({\bf uint32\_\-t} {\em irq}, \/  bool {\em high})\hspace{0.3cm}{\ttfamily  \mbox{[}inherited\mbox{]}}}}
+\label{group__KvmInterrupts_ga5037b917c47fff611ecdd5b547655284}
+\hyperlink{classSet}{Set} the status of an IRQ line using KVM\_\-IRQ\_\-LINE.
+
+\begin{DoxyNote}{覚え書き}
+This ioctl is usually only used if the interrupt controller is emulated by the kernel (i.e., after calling \hyperlink{group__KvmInterrupts_ga75f1140369bf3942bb93a75d1b3de2c9}{createIRQChip()}). Some architectures (e.g., ARM) use it instead of \hyperlink{group__KvmInterrupts_ga16b8f95e3f70098952604e6b8a121679}{BaseKvmCPU::kvmInterrupt()}.
+\end{DoxyNote}
+
+\begin{DoxyParams}{引数}
+\item[{\em irq}]Interrupt number \item[{\em high}]Line level (true for high, false for low) \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+418 {
+419     struct kvm_irq_level kvm_level;
+420 
+421     kvm_level.irq = irq;
+422     kvm_level.level = high ? 1 : 0;
+423 
+424     if (ioctl(KVM_IRQ_LINE, &kvm_level) == -1)
+425         panic("KVM: Failed to set IRQ line level (errno: %i)\n",
+426               errno);
+427 }
+\end{DoxyCode}

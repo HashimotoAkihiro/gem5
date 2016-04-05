@@ -1,0 +1,202 @@
+\hypertarget{classIniFile_1_1Section}{
+\section{クラス Section}
+\label{classIniFile_1_1Section}\index{IniFile::Section@{IniFile::Section}}
+}
+
+
+{\ttfamily \#include $<$inifile.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classIniFile_1_1Section_a431219dba705401fd07b93d3232656c6}{Section} ()
+\begin{DoxyCompactList}\small\item\em Constructor. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classIniFile_1_1Section_a9bb33643f50132c7eb254763f4509d23}{isReferenced} ()
+\begin{DoxyCompactList}\small\item\em Has this section been used? \item\end{DoxyCompactList}\item 
+void \hyperlink{classIniFile_1_1Section_a413d316c230aa09f6a7ec81c0f6a0a3c}{addEntry} (const std::string \&entryName, const std::string \&value, bool append)
+\item 
+bool \hyperlink{classIniFile_1_1Section_a17a35c61f796d02d1071b18fcc5a8d5f}{add} (const std::string \&assignment)
+\item 
+\hyperlink{classIniFile_1_1Entry}{Entry} $\ast$ \hyperlink{classIniFile_1_1Section_afe23112a92c3a94832ec63c369cd7b95}{findEntry} (const std::string \&entryName) const 
+\item 
+bool \hyperlink{classIniFile_1_1Section_a0be8fad0417aca3b37c8b95877552a39}{printUnreferenced} (const std::string \&sectionName)
+\item 
+void \hyperlink{classIniFile_1_1Section_a249475ee201869af7bf1723fed47acd2}{dump} (const std::string \&sectionName)
+\begin{DoxyCompactList}\small\item\em Print the contents of this section to cout (for debugging). \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef m5::hash\_\-map$<$ std::string, \hyperlink{classIniFile_1_1Entry}{Entry} $\ast$ $>$ \hyperlink{classIniFile_1_1Section_ad995a87b3c533e5d50b43cac19dbb9e1}{EntryTable}
+\begin{DoxyCompactList}\small\item\em EntryTable type. Map of strings to \hyperlink{classIniFile_1_1Entry}{Entry} object pointers. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classIniFile_1_1Section_ad995a87b3c533e5d50b43cac19dbb9e1}{EntryTable} \hyperlink{classIniFile_1_1Section_a064a83514d9112677d600fdf61cb9ad0}{table}
+\begin{DoxyCompactList}\small\item\em Table of entries. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classIniFile_1_1Section_a591be5ec02bb1171f1edde9acdbcfc50}{referenced}
+\begin{DoxyCompactList}\small\item\em Has this section been used? \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+A section. 
+
+\subsection{型定義}
+\hypertarget{classIniFile_1_1Section_ad995a87b3c533e5d50b43cac19dbb9e1}{
+\index{IniFile::Section@{IniFile::Section}!EntryTable@{EntryTable}}
+\index{EntryTable@{EntryTable}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{EntryTable}]{\setlength{\rightskip}{0pt plus 5cm}typedef m5::hash\_\-map$<$std::string, {\bf Entry} $\ast$$>$ {\bf EntryTable}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classIniFile_1_1Section_ad995a87b3c533e5d50b43cac19dbb9e1}
+
+
+EntryTable type. Map of strings to \hyperlink{classIniFile_1_1Entry}{Entry} object pointers. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classIniFile_1_1Section_a431219dba705401fd07b93d3232656c6}{
+\index{IniFile::Section@{IniFile::Section}!Section@{Section}}
+\index{Section@{Section}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{Section}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Section} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classIniFile_1_1Section_a431219dba705401fd07b93d3232656c6}
+
+
+Constructor. 
+
+
+\begin{DoxyCode}
+105             : table(), referenced(false)
+106         {
+107         }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classIniFile_1_1Section_a17a35c61f796d02d1071b18fcc5a8d5f}{
+\index{IniFile::Section@{IniFile::Section}!add@{add}}
+\index{add@{add}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{add}]{\setlength{\rightskip}{0pt plus 5cm}bool add (const std::string \& {\em assignment})}}
+\label{classIniFile_1_1Section_a17a35c61f796d02d1071b18fcc5a8d5f}
+Add an entry to the table given a string assigment. Assignment should be of the form \char`\"{}param=value\char`\"{} or \char`\"{}param+=value\char`\"{} (for append). This funciton parses the assignment statment and calls \hyperlink{classIniFile_1_1Section_a413d316c230aa09f6a7ec81c0f6a0a3c}{addEntry()}. 
+\begin{DoxyRetVals}{戻り値}
+\item[{\em True}]for success, false if parse error. \end{DoxyRetVals}
+
+
+
+\begin{DoxyCode}
+101 {
+102     string::size_type offset = assignment.find('=');
+103     if (offset == string::npos) {
+104         // no '=' found
+105         cerr << "Can't parse .ini line " << assignment << endl;
+106         return false;
+107     }
+108 
+109     // if "+=" rather than just "=" then append value
+110     bool append = (assignment[offset-1] == '+');
+111 
+112     string entryName = assignment.substr(0, append ? offset-1 : offset);
+113     string value = assignment.substr(offset + 1);
+114 
+115     eat_white(entryName);
+116     eat_white(value);
+117 
+118     addEntry(entryName, value, append);
+119     return true;
+120 }
+\end{DoxyCode}
+\hypertarget{classIniFile_1_1Section_a413d316c230aa09f6a7ec81c0f6a0a3c}{
+\index{IniFile::Section@{IniFile::Section}!addEntry@{addEntry}}
+\index{addEntry@{addEntry}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{addEntry}]{\setlength{\rightskip}{0pt plus 5cm}void addEntry (const std::string \& {\em entryName}, \/  const std::string \& {\em value}, \/  bool {\em append})}}
+\label{classIniFile_1_1Section_a413d316c230aa09f6a7ec81c0f6a0a3c}
+Add an entry to the table. If an entry with the same name already exists, the 'append' parameter is checked If true, the new value will be appended to the existing entry. If false, the new value will replace the existing entry. 
+
+
+\begin{DoxyCode}
+81 {
+82     EntryTable::iterator ei = table.find(entryName);
+83 
+84     if (ei == table.end()) {
+85         // new entry
+86         table[entryName] = new Entry(value);
+87     }
+88     else if (append) {
+89         // append new reult to old entry
+90         ei->second->appendValue(value);
+91     }
+92     else {
+93         // override old entry
+94         ei->second->setValue(value);
+95     }
+96 }
+\end{DoxyCode}
+\hypertarget{classIniFile_1_1Section_a249475ee201869af7bf1723fed47acd2}{
+\index{IniFile::Section@{IniFile::Section}!dump@{dump}}
+\index{dump@{dump}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}void dump (const std::string \& {\em sectionName})}}
+\label{classIniFile_1_1Section_a249475ee201869af7bf1723fed47acd2}
+
+
+Print the contents of this section to cout (for debugging). \hypertarget{classIniFile_1_1Section_afe23112a92c3a94832ec63c369cd7b95}{
+\index{IniFile::Section@{IniFile::Section}!findEntry@{findEntry}}
+\index{findEntry@{findEntry}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{findEntry}]{\setlength{\rightskip}{0pt plus 5cm}{\bf IniFile::Entry} $\ast$ findEntry (const std::string \& {\em entryName}) const}}
+\label{classIniFile_1_1Section_afe23112a92c3a94832ec63c369cd7b95}
+Find the entry with the given name. 
+\begin{DoxyRetVals}{戻り値}
+\item[{\em Pointer}]to the entry object, or NULL if none. \end{DoxyRetVals}
+
+
+
+\begin{DoxyCode}
+125 {
+126     referenced = true;
+127 
+128     EntryTable::const_iterator ei = table.find(entryName);
+129 
+130     return (ei == table.end()) ? NULL : ei->second;
+131 }
+\end{DoxyCode}
+\hypertarget{classIniFile_1_1Section_a9bb33643f50132c7eb254763f4509d23}{
+\index{IniFile::Section@{IniFile::Section}!isReferenced@{isReferenced}}
+\index{isReferenced@{isReferenced}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{isReferenced}]{\setlength{\rightskip}{0pt plus 5cm}bool isReferenced ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classIniFile_1_1Section_a9bb33643f50132c7eb254763f4509d23}
+
+
+Has this section been used? 
+
+
+\begin{DoxyCode}
+110 { return referenced; }
+\end{DoxyCode}
+\hypertarget{classIniFile_1_1Section_a0be8fad0417aca3b37c8b95877552a39}{
+\index{IniFile::Section@{IniFile::Section}!printUnreferenced@{printUnreferenced}}
+\index{printUnreferenced@{printUnreferenced}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{printUnreferenced}]{\setlength{\rightskip}{0pt plus 5cm}bool printUnreferenced (const std::string \& {\em sectionName})}}
+\label{classIniFile_1_1Section_a0be8fad0417aca3b37c8b95877552a39}
+Print the unreferenced entries in this section to cerr. Messages can be suppressed using \char`\"{}unref\_\-section\_\-ok\char`\"{} and \char`\"{}unref\_\-entries\_\-ok\char`\"{}. 
+\begin{DoxyParams}{引数}
+\item[{\em sectionName}]Name of this section, for use in output message. \end{DoxyParams}
+
+\begin{DoxyRetVals}{戻り値}
+\item[{\em True}]if any entries were printed. \end{DoxyRetVals}
+
+
+\subsection{変数}
+\hypertarget{classIniFile_1_1Section_a591be5ec02bb1171f1edde9acdbcfc50}{
+\index{IniFile::Section@{IniFile::Section}!referenced@{referenced}}
+\index{referenced@{referenced}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{referenced}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf referenced}\hspace{0.3cm}{\ttfamily  \mbox{[}mutable, private\mbox{]}}}}
+\label{classIniFile_1_1Section_a591be5ec02bb1171f1edde9acdbcfc50}
+
+
+Has this section been used? \hypertarget{classIniFile_1_1Section_a064a83514d9112677d600fdf61cb9ad0}{
+\index{IniFile::Section@{IniFile::Section}!table@{table}}
+\index{table@{table}!IniFile::Section@{IniFile::Section}}
+\subsubsection[{table}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EntryTable} {\bf table}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classIniFile_1_1Section_a064a83514d9112677d600fdf61cb9ad0}
+
+
+Table of entries. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{inifile_8hh}{inifile.hh}\item 
+base/\hyperlink{inifile_8cc}{inifile.cc}\end{DoxyCompactItemize}

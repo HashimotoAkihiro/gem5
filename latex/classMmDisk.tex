@@ -1,0 +1,289 @@
+\hypertarget{classMmDisk}{
+\section{クラス MmDisk}
+\label{classMmDisk}\index{MmDisk@{MmDisk}}
+}
+
+
+{\ttfamily \#include $<$mm\_\-disk.hh$>$}MmDiskに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classMmDisk}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef MmDiskParams \hyperlink{classMmDisk_a9e8be66baf207ea5dcd34d3f71d3734b}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMmDisk_aee281487cb9cc386c7da1b3df89eee9b}{MmDisk} (const \hyperlink{classMmDisk_a9e8be66baf207ea5dcd34d3f71d3734b}{Params} $\ast$p)
+\item 
+const \hyperlink{classMmDisk_a9e8be66baf207ea5dcd34d3f71d3734b}{Params} $\ast$ \hyperlink{classMmDisk_acd3c3feb78ae7a8f88fe0f110a718dff}{params} () const 
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classMmDisk_a613ec7d5e1ec64f8d21fec78ae8e568e}{read} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classMmDisk_a4cefab464e72b5dd42c003a0a4341802}{write} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual void \hyperlink{classMmDisk_a53e036786d17361be4c7320d39c99b84}{serialize} (std::ostream \&os)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDiskImage}{DiskImage} $\ast$ \hyperlink{classMmDisk_a86d47120637a95e3a6876c774d768030}{image}
+\item 
+off\_\-t \hyperlink{classMmDisk_ac818f733a8c55e0be72dbdadc453c769}{curSector}
+\item 
+bool \hyperlink{classMmDisk_ad25edacba00e4d0666a9959053b7cc10}{dirty}
+\item 
+uint8\_\-t \hyperlink{classMmDisk_a981f17e4c4f4909188222a7be11afaf8}{diskData} \mbox{[}SectorSize\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classMmDisk_a9e8be66baf207ea5dcd34d3f71d3734b}{
+\index{MmDisk@{MmDisk}!Params@{Params}}
+\index{Params@{Params}!MmDisk@{MmDisk}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef MmDiskParams {\bf Params}}}
+\label{classMmDisk_a9e8be66baf207ea5dcd34d3f71d3734b}
+
+
+\hyperlink{classBasicPioDevice_a2845515ac6467f10540747053c8a0449}{BasicPioDevice}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classMmDisk_aee281487cb9cc386c7da1b3df89eee9b}{
+\index{MmDisk@{MmDisk}!MmDisk@{MmDisk}}
+\index{MmDisk@{MmDisk}!MmDisk@{MmDisk}}
+\subsubsection[{MmDisk}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MmDisk} (const {\bf Params} $\ast$ {\em p})}}
+\label{classMmDisk_aee281487cb9cc386c7da1b3df89eee9b}
+
+
+
+\begin{DoxyCode}
+48     : BasicPioDevice(p, p->image->size() * SectorSize),
+49       image(p->image), curSector((off_t)-1), dirty(false)
+50 {
+51     std::memset(&diskData, 0, SectorSize);
+52 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classMmDisk_acd3c3feb78ae7a8f88fe0f110a718dff}{
+\index{MmDisk@{MmDisk}!params@{params}}
+\index{params@{params}!MmDisk@{MmDisk}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Params}$\ast$ params () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classMmDisk_acd3c3feb78ae7a8f88fe0f110a718dff}
+
+
+\hyperlink{classBasicPioDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicPioDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+57     {
+58         return dynamic_cast<const Params *>(_params);
+59     }
+\end{DoxyCode}
+\hypertarget{classMmDisk_a613ec7d5e1ec64f8d21fec78ae8e568e}{
+\index{MmDisk@{MmDisk}!read@{read}}
+\index{read@{read}!MmDisk@{MmDisk}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} read ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classMmDisk_a613ec7d5e1ec64f8d21fec78ae8e568e}
+Pure virtual function that the device must implement. Called when a read command is recieved by the port. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]\hyperlink{classPacket}{Packet} describing this request \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+number of ticks it took to complete 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_a842312590432036092c422c87a442358}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+56 {
+57     Addr accessAddr;
+58     off_t sector;
+59     uint16_t d16;
+60     uint32_t d32;
+61     uint64_t d64;
+62 
+63     assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+64     accessAddr = pkt->getAddr() - pioAddr;
+65 
+66     sector = accessAddr / SectorSize;
+67 
+68     if (sector != curSector) {
+69         if (dirty) {
+70 #ifndef NDEBUG
+71             off_t bytes_written =
+72 #endif
+73                 image->write(diskData, curSector);
+74             assert(bytes_written == SectorSize);
+75         }
+76 #ifndef NDEBUG
+77         off_t bytes_read =
+78 #endif
+79             image->read(diskData, sector);
+80         assert(bytes_read == SectorSize);
+81         curSector = sector;
+82     }
+83     switch (pkt->getSize()) {
+84       case sizeof(uint8_t):
+85         pkt->set(diskData[accessAddr % SectorSize]);
+86         DPRINTF(IdeDisk, "reading byte %#x value= %#x\n", accessAddr, diskData[ac
+      cessAddr %
+87                 SectorSize]);
+88         break;
+89       case sizeof(uint16_t):
+90         memcpy(&d16, diskData + (accessAddr % SectorSize), 2);
+91         pkt->set(htobe(d16));
+92         DPRINTF(IdeDisk, "reading word %#x value= %#x\n", accessAddr, d16);
+93         break;
+94       case sizeof(uint32_t):
+95         memcpy(&d32, diskData + (accessAddr % SectorSize), 4);
+96         pkt->set(htobe(d32));
+97         DPRINTF(IdeDisk, "reading dword %#x value= %#x\n", accessAddr, d32);
+98         break;
+99       case sizeof(uint64_t):
+100         memcpy(&d64, diskData + (accessAddr % SectorSize), 8);
+101         pkt->set(htobe(d64));
+102         DPRINTF(IdeDisk, "reading qword %#x value= %#x\n", accessAddr, d64);
+103         break;
+104       default:
+105         panic("Invalid access size\n");
+106     }
+107 
+108     pkt->makeAtomicResponse();
+109     return pioDelay;
+110 }
+\end{DoxyCode}
+\hypertarget{classMmDisk_a53e036786d17361be4c7320d39c99b84}{
+\index{MmDisk@{MmDisk}!serialize@{serialize}}
+\index{serialize@{serialize}!MmDisk@{MmDisk}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize (std::ostream \& {\em os})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classMmDisk_a53e036786d17361be4c7320d39c99b84}
+
+
+\hyperlink{classSerializable_ad6272f80ae37e8331e3969b3f072a801}{Serializable}を再定義しています。
+
+
+\begin{DoxyCode}
+174 {
+175     // just write any dirty changes to the cow layer it will take care of
+176     // serialization
+177     if (dirty) {
+178 #ifndef NDEBUG
+179         int bytes_read =
+180 #endif
+181             image->write(diskData, curSector);
+182         assert(bytes_read == SectorSize);
+183     }
+184 }
+\end{DoxyCode}
+\hypertarget{classMmDisk_a4cefab464e72b5dd42c003a0a4341802}{
+\index{MmDisk@{MmDisk}!write@{write}}
+\index{write@{write}!MmDisk@{MmDisk}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} write ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classMmDisk_a4cefab464e72b5dd42c003a0a4341802}
+Pure virtual function that the device must implement. Called when a write command is recieved by the port. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]\hyperlink{classPacket}{Packet} describing this request \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+number of ticks it took to complete 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_afe8371668d023bb2516b286e5e399b6f}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+114 {
+115     Addr accessAddr;
+116     off_t sector;
+117     uint16_t d16;
+118     uint32_t d32;
+119     uint64_t d64;
+120 
+121     assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+122     accessAddr = pkt->getAddr() - pioAddr;
+123 
+124     sector = accessAddr / SectorSize;
+125 
+126     if (sector != curSector) {
+127         if (dirty) {
+128 #ifndef NDEBUG
+129             off_t bytes_written =
+130 #endif
+131                 image->write(diskData, curSector);
+132             assert(bytes_written == SectorSize);
+133         }
+134 #ifndef NDEBUG
+135         off_t bytes_read =
+136 #endif
+137             image->read(diskData,  sector);
+138         assert(bytes_read == SectorSize);
+139         curSector = sector;
+140     }
+141     dirty = true;
+142 
+143     switch (pkt->getSize()) {
+144       case sizeof(uint8_t):
+145         diskData[accessAddr % SectorSize] = htobe(pkt->get<uint8_t>());
+146         DPRINTF(IdeDisk, "writing byte %#x value= %#x\n", accessAddr, diskData[ac
+      cessAddr %
+147                 SectorSize]);
+148         break;
+149       case sizeof(uint16_t):
+150         d16 = htobe(pkt->get<uint16_t>());
+151         memcpy(diskData + (accessAddr % SectorSize), &d16, 2);
+152         DPRINTF(IdeDisk, "writing word %#x value= %#x\n", accessAddr, d16);
+153         break;
+154       case sizeof(uint32_t):
+155         d32 = htobe(pkt->get<uint32_t>());
+156         memcpy(diskData + (accessAddr % SectorSize), &d32, 4);
+157         DPRINTF(IdeDisk, "writing dword %#x value= %#x\n", accessAddr, d32);
+158         break;
+159       case sizeof(uint64_t):
+160         d64 = htobe(pkt->get<uint64_t>());
+161         memcpy(diskData + (accessAddr % SectorSize), &d64, 8);
+162         DPRINTF(IdeDisk, "writing qword %#x value= %#x\n", accessAddr, d64);
+163         break;
+164       default:
+165         panic("Invalid access size\n");
+166     }
+167 
+168     pkt->makeAtomicResponse();
+169     return pioDelay;
+170 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classMmDisk_ac818f733a8c55e0be72dbdadc453c769}{
+\index{MmDisk@{MmDisk}!curSector@{curSector}}
+\index{curSector@{curSector}!MmDisk@{MmDisk}}
+\subsubsection[{curSector}]{\setlength{\rightskip}{0pt plus 5cm}off\_\-t {\bf curSector}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classMmDisk_ac818f733a8c55e0be72dbdadc453c769}
+\hypertarget{classMmDisk_ad25edacba00e4d0666a9959053b7cc10}{
+\index{MmDisk@{MmDisk}!dirty@{dirty}}
+\index{dirty@{dirty}!MmDisk@{MmDisk}}
+\subsubsection[{dirty}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf dirty}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classMmDisk_ad25edacba00e4d0666a9959053b7cc10}
+\hypertarget{classMmDisk_a981f17e4c4f4909188222a7be11afaf8}{
+\index{MmDisk@{MmDisk}!diskData@{diskData}}
+\index{diskData@{diskData}!MmDisk@{MmDisk}}
+\subsubsection[{diskData}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf diskData}\mbox{[}SectorSize\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classMmDisk_a981f17e4c4f4909188222a7be11afaf8}
+\hypertarget{classMmDisk_a86d47120637a95e3a6876c774d768030}{
+\index{MmDisk@{MmDisk}!image@{image}}
+\index{image@{image}!MmDisk@{MmDisk}}
+\subsubsection[{image}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DiskImage}$\ast$ {\bf image}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classMmDisk_a86d47120637a95e3a6876c774d768030}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/sparc/\hyperlink{mm__disk_8hh}{mm\_\-disk.hh}\item 
+dev/sparc/\hyperlink{mm__disk_8cc}{mm\_\-disk.cc}\end{DoxyCompactItemize}

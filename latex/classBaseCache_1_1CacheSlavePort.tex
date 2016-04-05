@@ -1,0 +1,135 @@
+\hypertarget{classBaseCache_1_1CacheSlavePort}{
+\section{クラス CacheSlavePort}
+\label{classBaseCache_1_1CacheSlavePort}\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+}
+
+
+{\ttfamily \#include $<$base.hh$>$}CacheSlavePortに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classBaseCache_1_1CacheSlavePort}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classBaseCache_1_1CacheSlavePort_a357d28c375cfa16d73f0cc0dd9a6dd65}{setBlocked} ()
+\item 
+void \hyperlink{classBaseCache_1_1CacheSlavePort_a67086ab888a89c3dbb6feaf48d83861b}{clearBlocked} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBaseCache_1_1CacheSlavePort_abfe2d39a27aaadaf48dec012af6e65e8}{CacheSlavePort} (const std::string \&\_\-name, \hyperlink{classBaseCache_1_1BaseCache}{BaseCache} $\ast$\_\-cache, const std::string \&\_\-label)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSlavePacketQueue}{SlavePacketQueue} \hyperlink{classBaseCache_1_1CacheSlavePort_a3055168363a9ed42f38173363b6c1975}{queue}
+\item 
+bool \hyperlink{classBaseCache_1_1CacheSlavePort_adf1dca7698b030895e9d81fc14cd9fd8}{blocked}
+\item 
+bool \hyperlink{classBaseCache_1_1CacheSlavePort_a63c00ff638681c3fdbaff0e3002674cd}{mustSendRetry}
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classEventWrapper}{EventWrapper}$<$ \hyperlink{classSlavePort}{SlavePort},\&SlavePort::sendRetry $>$ \hyperlink{classBaseCache_1_1CacheSlavePort_a797d0b8335772c15e0e45e2db624eb6c}{sendRetryEvent}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+A cache slave port is used for the CPU-\/side port of the cache, and it is basically a simple timing port that uses a transmit list for responses to the CPU (or connected master). In addition, it has the functionality to block the port for incoming requests. If blocked, the port will issue a retry once unblocked. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classBaseCache_1_1CacheSlavePort_abfe2d39a27aaadaf48dec012af6e65e8}{
+\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}!CacheSlavePort@{CacheSlavePort}}
+\index{CacheSlavePort@{CacheSlavePort}!BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+\subsubsection[{CacheSlavePort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CacheSlavePort} (const std::string \& {\em \_\-name}, \/  {\bf BaseCache} $\ast$ {\em \_\-cache}, \/  const std::string \& {\em \_\-label})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classBaseCache_1_1CacheSlavePort_abfe2d39a27aaadaf48dec012af6e65e8}
+
+
+
+\begin{DoxyCode}
+62     : QueuedSlavePort(_name, _cache, queue), queue(*_cache, *this, _label),
+63       blocked(false), mustSendRetry(false), sendRetryEvent(this)
+64 {
+65 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classBaseCache_1_1CacheSlavePort_a67086ab888a89c3dbb6feaf48d83861b}{
+\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}!clearBlocked@{clearBlocked}}
+\index{clearBlocked@{clearBlocked}!BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+\subsubsection[{clearBlocked}]{\setlength{\rightskip}{0pt plus 5cm}void clearBlocked ()}}
+\label{classBaseCache_1_1CacheSlavePort_a67086ab888a89c3dbb6feaf48d83861b}
+Return to normal operation and accept new requests. 
+
+
+\begin{DoxyCode}
+103 {
+104     assert(blocked);
+105     DPRINTF(CachePort, "Cache port %s accepting new requests\n", name());
+106     blocked = false;
+107     if (mustSendRetry) {
+108         DPRINTF(CachePort, "Cache port %s sending retry\n", name());
+109         mustSendRetry = false;
+110         // @TODO: need to find a better time (next bus cycle?)
+111         owner.schedule(sendRetryEvent, curTick() + 1);
+112     }
+113 }
+\end{DoxyCode}
+\hypertarget{classBaseCache_1_1CacheSlavePort_a357d28c375cfa16d73f0cc0dd9a6dd65}{
+\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}!setBlocked@{setBlocked}}
+\index{setBlocked@{setBlocked}!BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+\subsubsection[{setBlocked}]{\setlength{\rightskip}{0pt plus 5cm}void setBlocked ()}}
+\label{classBaseCache_1_1CacheSlavePort_a357d28c375cfa16d73f0cc0dd9a6dd65}
+Do not accept any new requests. 
+
+
+\begin{DoxyCode}
+88 {
+89     assert(!blocked);
+90     DPRINTF(CachePort, "Cache port %s blocking new requests\n", name());
+91     blocked = true;
+92     // if we already scheduled a retry in this cycle, but it has not yet
+93     // happened, cancel it
+94     if (sendRetryEvent.scheduled()) {
+95        owner.deschedule(sendRetryEvent);
+96        DPRINTF(CachePort, "Cache port %s deschedule retry\n", name());
+97        mustSendRetry = true;
+98     }
+99 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classBaseCache_1_1CacheSlavePort_adf1dca7698b030895e9d81fc14cd9fd8}{
+\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}!blocked@{blocked}}
+\index{blocked@{blocked}!BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+\subsubsection[{blocked}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf blocked}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classBaseCache_1_1CacheSlavePort_adf1dca7698b030895e9d81fc14cd9fd8}
+\hypertarget{classBaseCache_1_1CacheSlavePort_a63c00ff638681c3fdbaff0e3002674cd}{
+\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}!mustSendRetry@{mustSendRetry}}
+\index{mustSendRetry@{mustSendRetry}!BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+\subsubsection[{mustSendRetry}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf mustSendRetry}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classBaseCache_1_1CacheSlavePort_a63c00ff638681c3fdbaff0e3002674cd}
+\hypertarget{classBaseCache_1_1CacheSlavePort_a3055168363a9ed42f38173363b6c1975}{
+\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}!queue@{queue}}
+\index{queue@{queue}!BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+\subsubsection[{queue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SlavePacketQueue} {\bf queue}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classBaseCache_1_1CacheSlavePort_a3055168363a9ed42f38173363b6c1975}
+A normal packet queue used to store responses. 
+
+\hyperlink{classQueuedSlavePort_a89fcdbe2ab63d24f2112bc7e05bf2413}{QueuedSlavePort}を再定義しています。\hypertarget{classBaseCache_1_1CacheSlavePort_a797d0b8335772c15e0e45e2db624eb6c}{
+\index{BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}!sendRetryEvent@{sendRetryEvent}}
+\index{sendRetryEvent@{sendRetryEvent}!BaseCache::CacheSlavePort@{BaseCache::CacheSlavePort}}
+\subsubsection[{sendRetryEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EventWrapper}$<${\bf SlavePort}, \&SlavePort::sendRetry$>$ {\bf sendRetryEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBaseCache_1_1CacheSlavePort_a797d0b8335772c15e0e45e2db624eb6c}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/cache/\hyperlink{mem_2cache_2base_8hh}{base.hh}\item 
+mem/cache/\hyperlink{mem_2cache_2base_8cc}{base.cc}\end{DoxyCompactItemize}

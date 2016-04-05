@@ -1,0 +1,151 @@
+\hypertarget{classPowerLinuxProcess}{
+\section{クラス PowerLinuxProcess}
+\label{classPowerLinuxProcess}\index{PowerLinuxProcess@{PowerLinuxProcess}}
+}
+
+
+A process with emulated PPC/Linux syscalls.  
+
+
+{\ttfamily \#include $<$process.hh$>$}PowerLinuxProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classPowerLinuxProcess}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPowerLinuxProcess_ac5aac042846f3ca8ede0428ef2267eed}{PowerLinuxProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile})
+\item 
+virtual \hyperlink{classSyscallDesc}{SyscallDesc} $\ast$ \hyperlink{classPowerLinuxProcess_aebbff609a7235342925445690acf5ee8}{getDesc} (int callnum)
+\item 
+void \hyperlink{classPowerLinuxProcess_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\item 
+\hyperlink{namespacePowerISA_a0e080577527fb3e9685399f75b5caf15}{PowerISA::IntReg} \hyperlink{classPowerLinuxProcess_a4a1521e60b3fd8333fc98a5565c484ec}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i)
+\item 
+void \hyperlink{classPowerLinuxProcess_a1e515b39cc799824d1dd93d40ba28416}{setSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int i, \hyperlink{namespacePowerISA_a0e080577527fb3e9685399f75b5caf15}{PowerISA::IntReg} val)
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+const int \hyperlink{classPowerLinuxProcess_a9534988905c6f5c8c57c4b6a7b179fea}{Num\_\-Syscall\_\-Descs}
+\end{DoxyCompactItemize}
+\subsection*{Static Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classSyscallDesc}{SyscallDesc} \hyperlink{classPowerLinuxProcess_a08d67a94820b75842e07f030e548372e}{syscallDescs} \mbox{[}$\,$\mbox{]}
+\begin{DoxyCompactList}\small\item\em Array of syscall descriptors, indexed by call number. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+A process with emulated PPC/Linux syscalls. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPowerLinuxProcess_ac5aac042846f3ca8ede0428ef2267eed}{
+\index{PowerLinuxProcess@{PowerLinuxProcess}!PowerLinuxProcess@{PowerLinuxProcess}}
+\index{PowerLinuxProcess@{PowerLinuxProcess}!PowerLinuxProcess@{PowerLinuxProcess}}
+\subsubsection[{PowerLinuxProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PowerLinuxProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile})}}
+\label{classPowerLinuxProcess_ac5aac042846f3ca8ede0428ef2267eed}
+
+
+
+\begin{DoxyCode}
+418     : PowerLiveProcess(params, objFile),
+419      Num_Syscall_Descs(sizeof(syscallDescs) / sizeof(SyscallDesc))
+420 {
+421 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPowerLinuxProcess_aebbff609a7235342925445690acf5ee8}{
+\index{PowerLinuxProcess@{PowerLinuxProcess}!getDesc@{getDesc}}
+\index{getDesc@{getDesc}!PowerLinuxProcess@{PowerLinuxProcess}}
+\subsubsection[{getDesc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} $\ast$ getDesc (int {\em callnum})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPowerLinuxProcess_aebbff609a7235342925445690acf5ee8}
+
+
+\hyperlink{classLiveProcess_a478f396f8895ef7728d26866a00121d7}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+425 {
+426     if (callnum < 0 || callnum > Num_Syscall_Descs)
+427         return NULL;
+428 
+429     return &syscallDescs[callnum];
+430 }
+\end{DoxyCode}
+\hypertarget{classPowerLinuxProcess_a4a1521e60b3fd8333fc98a5565c484ec}{
+\index{PowerLinuxProcess@{PowerLinuxProcess}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!PowerLinuxProcess@{PowerLinuxProcess}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PowerISA::IntReg} getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPowerLinuxProcess_a4a1521e60b3fd8333fc98a5565c484ec}
+
+
+\hyperlink{classPowerLiveProcess_a4a1521e60b3fd8333fc98a5565c484ec}{PowerLiveProcess}を再定義しています。
+
+
+\begin{DoxyCode}
+440 {
+441     // Linux apparently allows more parameter than the ABI says it should.
+442     // This limit may need to be increased even further.
+443     assert(i < 6);
+444     return tc->readIntReg(ArgumentReg0 + i++);
+445 }
+\end{DoxyCode}
+\hypertarget{classPowerLinuxProcess_a3c34ea9b29f410748d4435a667484924}{
+\index{PowerLinuxProcess@{PowerLinuxProcess}!initState@{initState}}
+\index{initState@{initState}!PowerLinuxProcess@{PowerLinuxProcess}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPowerLinuxProcess_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classPowerLinuxProcess_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classPowerLiveProcess_a3c34ea9b29f410748d4435a667484924}{PowerLiveProcess}を再定義しています。
+
+
+\begin{DoxyCode}
+434 {
+435     PowerLiveProcess::initState();
+436 }
+\end{DoxyCode}
+\hypertarget{classPowerLinuxProcess_a1e515b39cc799824d1dd93d40ba28416}{
+\index{PowerLinuxProcess@{PowerLinuxProcess}!setSyscallArg@{setSyscallArg}}
+\index{setSyscallArg@{setSyscallArg}!PowerLinuxProcess@{PowerLinuxProcess}}
+\subsubsection[{setSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em i}, \/  {\bf PowerISA::IntReg} {\em val})}}
+\label{classPowerLinuxProcess_a1e515b39cc799824d1dd93d40ba28416}
+
+
+\hyperlink{classPowerLiveProcess_a1e515b39cc799824d1dd93d40ba28416}{PowerLiveProcess}を再定義しています。
+
+
+\begin{DoxyCode}
+449 {
+450     // Linux apparently allows more parameter than the ABI says it should.
+451     // This limit may need to be increased even further.
+452     assert(i < 6);
+453     tc->setIntReg(ArgumentReg0 + i, val);
+454 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPowerLinuxProcess_a9534988905c6f5c8c57c4b6a7b179fea}{
+\index{PowerLinuxProcess@{PowerLinuxProcess}!Num\_\-Syscall\_\-Descs@{Num\_\-Syscall\_\-Descs}}
+\index{Num\_\-Syscall\_\-Descs@{Num\_\-Syscall\_\-Descs}!PowerLinuxProcess@{PowerLinuxProcess}}
+\subsubsection[{Num\_\-Syscall\_\-Descs}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf Num\_\-Syscall\_\-Descs}}}
+\label{classPowerLinuxProcess_a9534988905c6f5c8c57c4b6a7b179fea}
+\hypertarget{classPowerLinuxProcess_a08d67a94820b75842e07f030e548372e}{
+\index{PowerLinuxProcess@{PowerLinuxProcess}!syscallDescs@{syscallDescs}}
+\index{syscallDescs@{syscallDescs}!PowerLinuxProcess@{PowerLinuxProcess}}
+\subsubsection[{syscallDescs}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} {\bf syscallDescs}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classPowerLinuxProcess_a08d67a94820b75842e07f030e548372e}
+
+
+Array of syscall descriptors, indexed by call number. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/power/linux/\hyperlink{arch_2power_2linux_2process_8hh}{process.hh}\item 
+arch/power/linux/\hyperlink{arch_2power_2linux_2process_8cc}{process.cc}\end{DoxyCompactItemize}

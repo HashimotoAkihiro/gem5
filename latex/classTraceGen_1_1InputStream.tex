@@ -1,0 +1,132 @@
+\hypertarget{classTraceGen_1_1InputStream}{
+\section{クラス InputStream}
+\label{classTraceGen_1_1InputStream}\index{TraceGen::InputStream@{TraceGen::InputStream}}
+}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTraceGen_1_1InputStream_a579e53605c9d23917107c48e4c68d02d}{InputStream} (const std::string \&filename)
+\item 
+void \hyperlink{classTraceGen_1_1InputStream_ad20897c5c8bd47f5d4005989bead0e55}{reset} ()
+\item 
+void \hyperlink{classTraceGen_1_1InputStream_a02fd73d861ef2e4aabb38c0c9ff82947}{init} ()
+\item 
+bool \hyperlink{classTraceGen_1_1InputStream_ad46fc07f6483a6b8cd3b07223de00477}{read} (\hyperlink{structTraceGen_1_1TraceElement}{TraceElement} \&element)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classProtoInputStream}{ProtoInputStream} \hyperlink{classTraceGen_1_1InputStream_aeea802262475e8c5d837e45e63ed5fa9}{trace}
+\begin{DoxyCompactList}\small\item\em Input file stream for the protobuf trace. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+The \hyperlink{classTraceGen_1_1InputStream}{InputStream} encapsulates a trace file and the internal buffers and populates TraceElements based on the input. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTraceGen_1_1InputStream_a579e53605c9d23917107c48e4c68d02d}{
+\index{TraceGen::InputStream@{TraceGen::InputStream}!InputStream@{InputStream}}
+\index{InputStream@{InputStream}!TraceGen::InputStream@{TraceGen::InputStream}}
+\subsubsection[{InputStream}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InputStream} (const std::string \& {\em filename})}}
+\label{classTraceGen_1_1InputStream_a579e53605c9d23917107c48e4c68d02d}
+Create a trace input stream for a given file name.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em filename}]Path to the file to read from \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+295     : trace(filename)
+296 {
+297     init();
+298 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTraceGen_1_1InputStream_a02fd73d861ef2e4aabb38c0c9ff82947}{
+\index{TraceGen::InputStream@{TraceGen::InputStream}!init@{init}}
+\index{init@{init}!TraceGen::InputStream@{TraceGen::InputStream}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void init ()}}
+\label{classTraceGen_1_1InputStream_a02fd73d861ef2e4aabb38c0c9ff82947}
+\hyperlink{classCheck}{Check} the trace header to make sure that it is of the right format. 
+
+
+\begin{DoxyCode}
+302 {
+303     // Create a protobuf message for the header and read it from the stream
+304     Message::PacketHeader header_msg;
+305     if (!trace.read(header_msg)) {
+306         panic("Failed to read packet header from trace\n");
+307 
+308         if (header_msg.tick_freq() != SimClock::Frequency) {
+309             panic("Trace was recorded with a different tick frequency %d\n",
+310                   header_msg.tick_freq());
+311         }
+312     }
+313 }
+\end{DoxyCode}
+\hypertarget{classTraceGen_1_1InputStream_ad46fc07f6483a6b8cd3b07223de00477}{
+\index{TraceGen::InputStream@{TraceGen::InputStream}!read@{read}}
+\index{read@{read}!TraceGen::InputStream@{TraceGen::InputStream}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}bool read ({\bf TraceElement} \& {\em element})}}
+\label{classTraceGen_1_1InputStream_ad46fc07f6483a6b8cd3b07223de00477}
+Attempt to read a trace element from the stream, and also notify the caller if the end of the file was reached.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em element}]\hyperlink{namespaceTrace}{Trace} element to populate \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+True if an element could be read successfully 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+324 {
+325     Message::Packet pkt_msg;
+326     if (trace.read(pkt_msg)) {
+327         element.cmd = pkt_msg.cmd();
+328         element.addr = pkt_msg.addr();
+329         element.blocksize = pkt_msg.size();
+330         element.tick = pkt_msg.tick();
+331         element.flags = pkt_msg.has_flags() ? pkt_msg.flags() : 0;
+332         return true;
+333     }
+334 
+335     // We have reached the end of the file
+336     return false;
+337 }
+\end{DoxyCode}
+\hypertarget{classTraceGen_1_1InputStream_ad20897c5c8bd47f5d4005989bead0e55}{
+\index{TraceGen::InputStream@{TraceGen::InputStream}!reset@{reset}}
+\index{reset@{reset}!TraceGen::InputStream@{TraceGen::InputStream}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}void reset ()}}
+\label{classTraceGen_1_1InputStream_ad20897c5c8bd47f5d4005989bead0e55}
+Reset the stream such that it can be played once again. 
+
+
+\begin{DoxyCode}
+317 {
+318     trace.reset();
+319     init();
+320 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classTraceGen_1_1InputStream_aeea802262475e8c5d837e45e63ed5fa9}{
+\index{TraceGen::InputStream@{TraceGen::InputStream}!trace@{trace}}
+\index{trace@{trace}!TraceGen::InputStream@{TraceGen::InputStream}}
+\subsubsection[{trace}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ProtoInputStream} {\bf trace}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTraceGen_1_1InputStream_aeea802262475e8c5d837e45e63ed5fa9}
+
+
+Input file stream for the protobuf trace. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/testers/traffic\_\-gen/\hyperlink{generators_8hh}{generators.hh}\item 
+cpu/testers/traffic\_\-gen/\hyperlink{generators_8cc}{generators.cc}\end{DoxyCompactItemize}

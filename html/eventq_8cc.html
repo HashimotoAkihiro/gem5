@@ -1,0 +1,189 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: sim/eventq.cc</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>sim/eventq.cc</h1><code>#include &lt;cassert&gt;</code><br/>
+<code>#include &lt;iostream&gt;</code><br/>
+<code>#include &lt;string&gt;</code><br/>
+<code>#include &lt;vector&gt;</code><br/>
+<code>#include &quot;<a class="el" href="hashmap_8hh_source.html">base/hashmap.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="base_2misc_8hh_source.html">base/misc.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="trace_8hh_source.html">base/trace.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="smt_8hh_source.html">cpu/smt.hh</a>&quot;</code><br/>
+<code>#include &quot;debug/Config.hh&quot;</code><br/>
+<code>#include &quot;<a class="el" href="core_8hh_source.html">sim/core.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="eventq__impl_8hh_source.html">sim/eventq_impl.hh</a>&quot;</code><br/>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2"><h2>関数</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classEventQueue.html">EventQueue</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="eventq_8cc.html#a5b4fbd623a1babda7d35802241f5f6cf">getEventQueue</a> (<a class="el" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> index)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="eventq_8cc.html#afa9cf950f7afca6dc9b1fc2328df2d43">dumpMainQueue</a> ()</td></tr>
+<tr><td colspan="2"><h2>変数</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="eventq_8cc.html#a1184f025d31220089a3af9dfc6eeb4d4">simQuantum</a> = 0</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="eventq_8cc.html#a0cb37c490e14c37cdcc040c2392feda1">numMainEventQueues</a> = 0</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Current number of allocated main event queues.  <a href="#a0cb37c490e14c37cdcc040c2392feda1"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classstd_1_1vector.html">vector</a>&lt; <a class="el" href="classEventQueue.html">EventQueue</a> * &gt;&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="eventq_8cc.html#a304cfaba7d9f7d70b0f766f8a28267db">mainEventQueue</a></td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Array for main event queues.  <a href="#a304cfaba7d9f7d70b0f766f8a28267db"></a><br/></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">__thread <a class="el" href="classEventQueue.html">EventQueue</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="eventq_8cc.html#a2a77d1fcaf54c702b80ae9c02d588333">_curEventQueue</a> = NULL</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="eventq_8cc.html#a1a48f421470ff3e6db2b119ab1286b96">inParallelMode</a> = false</td></tr>
+<tr><td class="mdescLeft">&nbsp;</td><td class="mdescRight">Current mode of execution: parallel / serial.  <a href="#a1a48f421470ff3e6db2b119ab1286b96"></a><br/></td></tr>
+</table>
+<hr/><h2>関数</h2>
+<a class="anchor" id="afa9cf950f7afca6dc9b1fc2328df2d43"></a><!-- doxytag: member="eventq.cc::dumpMainQueue" ref="afa9cf950f7afca6dc9b1fc2328df2d43" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void dumpMainQueue </td>
+          <td>(</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p><div class="fragment"><pre class="fragment"><a name="l00416"></a>00416 {
+<a name="l00417"></a>00417     <span class="keywordflow">for</span> (<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; <a class="code" href="eventq_8cc.html#a0cb37c490e14c37cdcc040c2392feda1" title="Current number of allocated main event queues.">numMainEventQueues</a>; ++<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) {
+<a name="l00418"></a>00418         <a class="code" href="eventq_8cc.html#a304cfaba7d9f7d70b0f766f8a28267db" title="Array for main event queues.">mainEventQueue</a>[<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>]-&gt;dump();
+<a name="l00419"></a>00419     }
+<a name="l00420"></a>00420 }
+</pre></div></p>
+
+</div>
+</div>
+<a class="anchor" id="a5b4fbd623a1babda7d35802241f5f6cf"></a><!-- doxytag: member="eventq.cc::getEventQueue" ref="a5b4fbd623a1babda7d35802241f5f6cf" args="(uint32_t index)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classEventQueue.html">EventQueue</a>* getEventQueue </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&nbsp;</td>
+          <td class="paramname"> <em>index</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Function for returning eventq queue for the provided index. The function allocates a new queue in case one does not exist for the index, provided that the index is with in bounds. </p>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00065"></a>00065 {
+<a name="l00066"></a>00066     <span class="keywordflow">while</span> (<a class="code" href="eventq_8cc.html#a0cb37c490e14c37cdcc040c2392feda1" title="Current number of allocated main event queues.">numMainEventQueues</a> &lt;= <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>) {
+<a name="l00067"></a>00067         <a class="code" href="eventq_8cc.html#a0cb37c490e14c37cdcc040c2392feda1" title="Current number of allocated main event queues.">numMainEventQueues</a>++;
+<a name="l00068"></a>00068         <a class="code" href="eventq_8cc.html#a304cfaba7d9f7d70b0f766f8a28267db" title="Array for main event queues.">mainEventQueue</a>.push_back(
+<a name="l00069"></a>00069             <span class="keyword">new</span> <a class="code" href="classEventQueue.html">EventQueue</a>(<a class="code" href="cprintf_8hh.html#ace22d1c39f2df58e593bc49d1613eca2">csprintf</a>(<span class="stringliteral">&quot;MainEventQueue-%d&quot;</span>, <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>)));
+<a name="l00070"></a>00070     }
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072     <span class="keywordflow">return</span> <a class="code" href="eventq_8cc.html#a304cfaba7d9f7d70b0f766f8a28267db" title="Array for main event queues.">mainEventQueue</a>[<a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>];
+<a name="l00073"></a>00073 }
+</pre></div></p>
+
+</div>
+</div>
+<hr/><h2>変数</h2>
+<a class="anchor" id="a2a77d1fcaf54c702b80ae9c02d588333"></a><!-- doxytag: member="eventq.cc::_curEventQueue" ref="a2a77d1fcaf54c702b80ae9c02d588333" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">__thread <a class="el" href="classEventQueue.html">EventQueue</a>* <a class="el" href="eventq_8hh.html#a2a77d1fcaf54c702b80ae9c02d588333">_curEventQueue</a> = NULL</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>The current event queue for the running thread. Access to this queue does not require any locking from the thread. </p>
+
+</div>
+</div>
+<a class="anchor" id="a1a48f421470ff3e6db2b119ab1286b96"></a><!-- doxytag: member="eventq.cc::inParallelMode" ref="a1a48f421470ff3e6db2b119ab1286b96" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool <a class="el" href="eventq_8hh.html#a1a48f421470ff3e6db2b119ab1286b96">inParallelMode</a> = false</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Current mode of execution: parallel / serial. </p>
+
+</div>
+</div>
+<a class="anchor" id="a304cfaba7d9f7d70b0f766f8a28267db"></a><!-- doxytag: member="eventq.cc::mainEventQueue" ref="a304cfaba7d9f7d70b0f766f8a28267db" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classstd_1_1vector.html">vector</a>&lt;<a class="el" href="classEventQueue.html">EventQueue</a> *&gt; <a class="el" href="eventq_8hh.html#a75c22a9e4871574133dae986c0a4527e">mainEventQueue</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Array for main event queues. </p>
+
+</div>
+</div>
+<a class="anchor" id="a0cb37c490e14c37cdcc040c2392feda1"></a><!-- doxytag: member="eventq.cc::numMainEventQueues" ref="a0cb37c490e14c37cdcc040c2392feda1" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="el" href="eventq_8hh.html#a0cb37c490e14c37cdcc040c2392feda1">numMainEventQueues</a> = 0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p>Current number of allocated main event queues. </p>
+
+</div>
+</div>
+<a class="anchor" id="a1184f025d31220089a3af9dfc6eeb4d4"></a><!-- doxytag: member="eventq.cc::simQuantum" ref="a1184f025d31220089a3af9dfc6eeb4d4" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="el" href="eventq_8hh.html#a1184f025d31220089a3af9dfc6eeb4d4">simQuantum</a> = 0</td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Simulation Quantum for multiple eventq simulation. The quantum value is the period length after which the queues synchronize themselves with each other. This means that any event to scheduled on Queue A which is generated by an event on Queue B should be at least simQuantum ticks away in future. </p>
+
+</div>
+</div>
+</div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

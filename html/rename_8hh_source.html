@@ -1,0 +1,356 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/rename.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/rename.hh</h1><a href="rename_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __CPU_O3_RENAME_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_RENAME_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="timebuf_8hh.html">cpu/timebuf.hh</a>&quot;</span>
+<a name="l00051"></a>00051 
+<a name="l00052"></a>00052 <span class="keyword">struct </span>DerivO3CPUParams;
+<a name="l00053"></a>00053 
+<a name="l00066"></a>00066 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00067"></a><a class="code" href="classDefaultRename.html">00067</a> <span class="keyword">class </span><a class="code" href="classDefaultRename.html">DefaultRename</a>
+<a name="l00068"></a>00068 {
+<a name="l00069"></a>00069   <span class="keyword">public</span>:
+<a name="l00070"></a>00070     <span class="comment">// Typedefs from the Impl.</span>
+<a name="l00071"></a><a class="code" href="classDefaultRename.html#a87d662eaeb9eab249d671b63cb4ba11a">00071</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUPol <a class="code" href="classDefaultRename.html#a87d662eaeb9eab249d671b63cb4ba11a">CPUPol</a>;
+<a name="l00072"></a><a class="code" href="classDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">00072</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00073"></a><a class="code" href="classDefaultRename.html#a44622cf06940413482836cb62931ac3f">00073</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::O3CPU <a class="code" href="classDefaultRename.html#a44622cf06940413482836cb62931ac3f">O3CPU</a>;
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075     <span class="comment">// Typedefs from the CPUPol</span>
+<a name="l00076"></a><a class="code" href="classDefaultRename.html#a38077cd156cf219016abf92d8c5b523b">00076</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::DecodeStruct <a class="code" href="classDefaultRename.html#a38077cd156cf219016abf92d8c5b523b">DecodeStruct</a>;
+<a name="l00077"></a><a class="code" href="classDefaultRename.html#a0c2a89ad2edad9ad605d0461f9b132a5">00077</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::RenameStruct <a class="code" href="classDefaultRename.html#a0c2a89ad2edad9ad605d0461f9b132a5">RenameStruct</a>;
+<a name="l00078"></a><a class="code" href="classDefaultRename.html#ab7dd3632ef639702a5c6e7c2c3a2f82a">00078</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::TimeStruct <a class="code" href="structTimeStruct.html">TimeStruct</a>;
+<a name="l00079"></a><a class="code" href="classDefaultRename.html#ab784c356bacd490590fba42443e0f786">00079</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::FreeList <a class="code" href="classDefaultRename.html#ab784c356bacd490590fba42443e0f786">FreeList</a>;
+<a name="l00080"></a><a class="code" href="classDefaultRename.html#a341963bcea1928476182a17e357f98e3">00080</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::RenameMap <a class="code" href="classDefaultRename.html#a341963bcea1928476182a17e357f98e3">RenameMap</a>;
+<a name="l00081"></a>00081     <span class="comment">// These are used only for initialization.</span>
+<a name="l00082"></a><a class="code" href="classDefaultRename.html#a2e298f790f528754f0e0ffa0cb8088f6">00082</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::IEW <a class="code" href="classDefaultRename.html#a2e298f790f528754f0e0ffa0cb8088f6">IEW</a>;
+<a name="l00083"></a><a class="code" href="classDefaultRename.html#a05a26def5ee77f19d25b86079d161ebd">00083</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::Commit <a class="code" href="classDefaultRename.html#a05a26def5ee77f19d25b86079d161ebd">Commit</a>;
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085     <span class="comment">// Typedefs from the ISA.</span>
+<a name="l00086"></a><a class="code" href="classDefaultRename.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">00086</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> <a class="code" href="classDefaultRename.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a>;
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088     <span class="comment">// A list is used to queue the instructions.  Barrier insts must</span>
+<a name="l00089"></a>00089     <span class="comment">// be added to the front of the list, which is the only reason for</span>
+<a name="l00090"></a>00090     <span class="comment">// using a list instead of a queue. (Most other stages use a</span>
+<a name="l00091"></a>00091     <span class="comment">// queue)</span>
+<a name="l00092"></a><a class="code" href="classDefaultRename.html#adba1ac227fff8c6f9b17ded2fb270e77">00092</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classstd_1_1list.html">InstQueue</a>;
+<a name="l00093"></a><a class="code" href="classDefaultRename.html#a184cb829e22cc656acb41864f68f51ea">00093</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classDefaultRename.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a>;
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095   <span class="keyword">public</span>:
+<a name="l00099"></a><a class="code" href="classDefaultRename.html#ac9f77d94a52c9029448b6d7b61d32718">00099</a>     <span class="keyword">enum</span> <a class="code" href="classDefaultRename.html#ac9f77d94a52c9029448b6d7b61d32718">RenameStatus</a> {
+<a name="l00100"></a><a class="code" href="classDefaultRename.html#ac9f77d94a52c9029448b6d7b61d32718a26bd8444261cc58df7a86753c79d2520">00100</a>         <a class="code" href="classDefaultRename.html#ac9f77d94a52c9029448b6d7b61d32718a26bd8444261cc58df7a86753c79d2520">Active</a>,
+<a name="l00101"></a><a class="code" href="classDefaultRename.html#ac9f77d94a52c9029448b6d7b61d32718a969c924a722daf6334fca64346092ae6">00101</a>         <a class="code" href="classDefaultRename.html#ac9f77d94a52c9029448b6d7b61d32718a969c924a722daf6334fca64346092ae6">Inactive</a>
+<a name="l00102"></a>00102     };
+<a name="l00103"></a>00103 
+<a name="l00105"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173c">00105</a>     <span class="keyword">enum</span> <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173c">ThreadStatus</a> {
+<a name="l00106"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca2f5f2c4a8c4f4f0519d503dcdfbf55cb">00106</a>         <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca2f5f2c4a8c4f4f0519d503dcdfbf55cb">Running</a>,
+<a name="l00107"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173cad3fa9ae9431d6cb1772f9d9df48cab19">00107</a>         <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173cad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00108"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca19a48e232b72697e4bb7ea1b6075ed49">00108</a>         <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca19a48e232b72697e4bb7ea1b6075ed49">StartSquash</a>,
+<a name="l00109"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca22a648855197e326dc88f548634c0ec7">00109</a>         <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca22a648855197e326dc88f548634c0ec7">Squashing</a>,
+<a name="l00110"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca9463ee9b8700258a1019b4b9d2d77a30">00110</a>         <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173ca9463ee9b8700258a1019b4b9d2d77a30">Blocked</a>,
+<a name="l00111"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173caf2a3acf850890cb1651bc41dcbacb7e0">00111</a>         <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173caf2a3acf850890cb1651bc41dcbacb7e0">Unblocking</a>,
+<a name="l00112"></a><a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173caca0d28c09e2dcdb3aec968eda81d65f3">00112</a>         <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173caca0d28c09e2dcdb3aec968eda81d65f3">SerializeStall</a>
+<a name="l00113"></a>00113     };
+<a name="l00114"></a>00114 
+<a name="l00115"></a>00115   <span class="keyword">private</span>:
+<a name="l00117"></a><a class="code" href="classDefaultRename.html#a1564313ed7a74659481a1b5ea2bacf88">00117</a>     <a class="code" href="classDefaultRename.html#ac9f77d94a52c9029448b6d7b61d32718">RenameStatus</a> <a class="code" href="classDefaultRename.html#a1564313ed7a74659481a1b5ea2bacf88">_status</a>;
+<a name="l00118"></a>00118 
+<a name="l00120"></a><a class="code" href="classDefaultRename.html#a8c157bf422205d3cdd7e7c75c2592b6f">00120</a>     <a class="code" href="classDefaultRename.html#ae2739961013a00cede621d4d72f2173c">ThreadStatus</a> <a class="code" href="classDefaultRename.html#a8c157bf422205d3cdd7e7c75c2592b6f">renameStatus</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00121"></a>00121 
+<a name="l00122"></a>00122   <span class="keyword">public</span>:
+<a name="l00124"></a>00124     <a class="code" href="classDefaultRename.html#a6035d792bb85b9f4c301d53c20885dfc">DefaultRename</a>(<a class="code" href="classDefaultRename.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *_cpu, DerivO3CPUParams *params);
+<a name="l00125"></a>00125 
+<a name="l00127"></a>00127     std::string <a class="code" href="classDefaultRename.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>() <span class="keyword">const</span>;
+<a name="l00128"></a>00128 
+<a name="l00130"></a>00130     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00131"></a>00131 
+<a name="l00133"></a>00133     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a2b521ea5f191fff72265f60d4ed5187b">setTimeBuffer</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *tb_ptr);
+<a name="l00134"></a>00134 
+<a name="l00136"></a>00136     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a701624f92a819fe4205faede6e614d9f">setRenameQueue</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;RenameStruct&gt;</a> *rq_ptr);
+<a name="l00137"></a>00137 
+<a name="l00139"></a>00139     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a21f95db13a2fc05d7a5fcc43fec1f1e7">setDecodeQueue</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;DecodeStruct&gt;</a> *dq_ptr);
+<a name="l00140"></a>00140 
+<a name="l00142"></a><a class="code" href="classDefaultRename.html#a4b6d8e4b2cf6249763ed2fc73eb1af47">00142</a>     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a4b6d8e4b2cf6249763ed2fc73eb1af47">setIEWStage</a>(<a class="code" href="classDefaultRename.html#a2e298f790f528754f0e0ffa0cb8088f6">IEW</a> *iew_stage)
+<a name="l00143"></a>00143     { <a class="code" href="classDefaultRename.html#abf7286da8e826739b29fa67855f4216b">iew_ptr</a> = iew_stage; }
+<a name="l00144"></a>00144 
+<a name="l00146"></a><a class="code" href="classDefaultRename.html#a1e488bc36055daaf1f86a9b4e58118c2">00146</a>     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a1e488bc36055daaf1f86a9b4e58118c2">setCommitStage</a>(<a class="code" href="classDefaultRename.html#a05a26def5ee77f19d25b86079d161ebd">Commit</a> *commit_stage)
+<a name="l00147"></a>00147     { <a class="code" href="classDefaultRename.html#a51b23beeb9e078c0c11831d0f2e56bfd">commit_ptr</a> = commit_stage; }
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149   <span class="keyword">private</span>:
+<a name="l00151"></a><a class="code" href="classDefaultRename.html#abf7286da8e826739b29fa67855f4216b">00151</a>     <a class="code" href="classDefaultRename.html#a2e298f790f528754f0e0ffa0cb8088f6">IEW</a> *<a class="code" href="classDefaultRename.html#abf7286da8e826739b29fa67855f4216b">iew_ptr</a>;
+<a name="l00152"></a>00152 
+<a name="l00154"></a><a class="code" href="classDefaultRename.html#a51b23beeb9e078c0c11831d0f2e56bfd">00154</a>     <a class="code" href="classDefaultRename.html#a05a26def5ee77f19d25b86079d161ebd">Commit</a> *<a class="code" href="classDefaultRename.html#a51b23beeb9e078c0c11831d0f2e56bfd">commit_ptr</a>;
+<a name="l00155"></a>00155 
+<a name="l00156"></a>00156   <span class="keyword">public</span>:
+<a name="l00158"></a>00158     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a31d4cbdab16d4ff8d6bc7f84ece727da">startupStage</a>();
+<a name="l00159"></a>00159 
+<a name="l00161"></a>00161     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#aab96bdacf8bd420402cbb543f994e054">setActiveThreads</a>(<a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> *at_ptr);
+<a name="l00162"></a>00162 
+<a name="l00164"></a>00164     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a6f0aaedb2c39d674ef86c25d0aeb4211">setRenameMap</a>(<a class="code" href="classDefaultRename.html#a341963bcea1928476182a17e357f98e3">RenameMap</a> rm_ptr[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>]);
+<a name="l00165"></a>00165 
+<a name="l00167"></a>00167     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a2d3550e87cb180105600dfaefcf83358">setFreeList</a>(<a class="code" href="classDefaultRename.html#ab784c356bacd490590fba42443e0f786">FreeList</a> *fl_ptr);
+<a name="l00168"></a>00168 
+<a name="l00170"></a>00170     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a0b50ac63f22501d5c688294031615b6e">setScoreboard</a>(<a class="code" href="classScoreboard.html">Scoreboard</a> *_scoreboard);
+<a name="l00171"></a>00171 
+<a name="l00173"></a>00173     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a0240eb42fa57fe5d3788093f62b77347">drainSanityCheck</a>() <span class="keyword">const</span>;
+<a name="l00174"></a>00174 
+<a name="l00176"></a>00176     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#adf5473c18a3d7c1e88c4a2072bce5526">isDrained</a>() <span class="keyword">const</span>;
+<a name="l00177"></a>00177 
+<a name="l00179"></a>00179     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a8674059ce345e23aac5086b2c3e24a43">takeOverFrom</a>();
+<a name="l00180"></a>00180 
+<a name="l00182"></a>00182     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#aa896d7ff2c9da1e6e96d46ab4580ec9d">squash</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;squash_seq_num, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00183"></a>00183 
+<a name="l00187"></a>00187     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00188"></a>00188 
+<a name="l00190"></a>00190     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a697961c6f132b511d2921ed9feed80fa">dumpHistory</a>();
+<a name="l00191"></a>00191 
+<a name="l00192"></a>00192   <span class="keyword">private</span>:
+<a name="l00194"></a>00194     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#ada2a699094bc420f977abf2a17ed14c8">resetStage</a>();
+<a name="l00195"></a>00195 
+<a name="l00201"></a>00201     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#ae79f7fcdd0255495d6df18c063988432">rename</a>(<span class="keywordtype">bool</span> &amp;status_change, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00202"></a>00202 
+<a name="l00206"></a>00206     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a8ff86a7781da8390490774c08b1819f2">renameInsts</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00207"></a>00207 
+<a name="l00211"></a>00211     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#ac24515147270ef9b85991bbe13bd47af">skidInsert</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00212"></a>00212 
+<a name="l00216"></a>00216     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a9ff2aa32ab0f40674cb3518108d62f8e">sortInsts</a>();
+<a name="l00217"></a>00217 
+<a name="l00219"></a>00219     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#afe3e2673d17dd5c568862ef5ae68b4d8">skidsEmpty</a>();
+<a name="l00220"></a>00220 
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a4bb9486757ce225941aaaf759b357a57">updateStatus</a>();
+<a name="l00223"></a>00223 
+<a name="l00228"></a>00228     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#ad1993925abd15d3fb59fde2ccfa3d678">block</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00229"></a>00229 
+<a name="l00234"></a>00234     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#a9cc3b95f6969935f78c0158aa5145021">unblock</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00235"></a>00235 
+<a name="l00237"></a>00237     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a32818ae72457917ca9551faa708ba584">doSquash</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;squash_seq_num, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00238"></a>00238 
+<a name="l00240"></a>00240     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a4e15b4f66caef87aacbd195e4a02804d">removeFromHistory</a>(<a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> inst_seq_num, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00241"></a>00241 
+<a name="l00243"></a>00243     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a8c18390fbeba66214f3854d7325a1d0e">renameSrcRegs</a>(<a class="code" href="classDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00244"></a>00244 
+<a name="l00246"></a>00246     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a21ced1baf75f43ecfa99d8c90ae210d6">renameDestRegs</a>(<a class="code" href="classDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00247"></a>00247 
+<a name="l00249"></a>00249     <span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code" href="classDefaultRename.html#a6367314e59f9295e1bf57419938874c5">calcFreeROBEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00250"></a>00250 
+<a name="l00252"></a>00252     <span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code" href="classDefaultRename.html#a27fa95f1f1dd353635a73f0b56a64e24">calcFreeIQEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00253"></a>00253 
+<a name="l00255"></a>00255     <span class="keyword">inline</span> <span class="keywordtype">int</span> <a class="code" href="classDefaultRename.html#a31f50b46622924ea0e53e641b635887c">calcFreeLSQEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00256"></a>00256 
+<a name="l00258"></a>00258     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultRename.html#ad533c56329b83d5b1aef92d0a6594b2c">validInsts</a>();
+<a name="l00259"></a>00259 
+<a name="l00261"></a>00261     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#ad65c9f053a6038ac8c34c34bfe9a88c3">readStallSignals</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00262"></a>00262 
+<a name="l00264"></a>00264     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#a2dd2400250619a315cb46f95f777db01">checkStall</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00265"></a>00265 
+<a name="l00267"></a>00267     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a7dc4c8fb34921e56b869bac55a7f3806">readFreeEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00268"></a>00268 
+<a name="l00270"></a>00270     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#af77f2bf38a75182c65e633b9fdf295d2">checkSignalsAndUpdate</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00271"></a>00271 
+<a name="l00279"></a>00279     <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a4010b268c107b9aa7289a98f67171e08">serializeAfter</a>(<a class="code" href="classstd_1_1list.html">InstQueue</a> &amp;inst_list, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00280"></a>00280 
+<a name="l00285"></a><a class="code" href="structDefaultRename_1_1RenameHistory.html">00285</a>     <span class="keyword">struct </span><a class="code" href="structDefaultRename_1_1RenameHistory.html">RenameHistory</a> {
+<a name="l00286"></a><a class="code" href="structDefaultRename_1_1RenameHistory.html#a5fc311f775dc87c62fc03af784ab25d0">00286</a>         <a class="code" href="structDefaultRename_1_1RenameHistory.html#a5fc311f775dc87c62fc03af784ab25d0">RenameHistory</a>(<a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> _instSeqNum, <a class="code" href="classDefaultRename.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> _archReg,
+<a name="l00287"></a>00287                       <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> _newPhysReg, <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> _prevPhysReg)
+<a name="l00288"></a>00288             : <a class="code" href="structDefaultRename_1_1RenameHistory.html#a901e3e07a1012b00cd5009167182714b">instSeqNum</a>(_instSeqNum), <a class="code" href="structDefaultRename_1_1RenameHistory.html#af2dcd1f086448036cd37ed6b07aef4a9">archReg</a>(_archReg),
+<a name="l00289"></a>00289               <a class="code" href="structDefaultRename_1_1RenameHistory.html#affb5690b8bee99a204256e0b772f51ac">newPhysReg</a>(_newPhysReg), <a class="code" href="structDefaultRename_1_1RenameHistory.html#a8c356dbfbd6eb1576b5dcd8ac690497c">prevPhysReg</a>(_prevPhysReg)
+<a name="l00290"></a>00290         {
+<a name="l00291"></a>00291         }
+<a name="l00292"></a>00292 
+<a name="l00294"></a><a class="code" href="structDefaultRename_1_1RenameHistory.html#a901e3e07a1012b00cd5009167182714b">00294</a>         <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="structDefaultRename_1_1RenameHistory.html#a901e3e07a1012b00cd5009167182714b">instSeqNum</a>;
+<a name="l00296"></a><a class="code" href="structDefaultRename_1_1RenameHistory.html#af2dcd1f086448036cd37ed6b07aef4a9">00296</a>         <a class="code" href="classDefaultRename.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> <a class="code" href="structDefaultRename_1_1RenameHistory.html#af2dcd1f086448036cd37ed6b07aef4a9">archReg</a>;
+<a name="l00298"></a><a class="code" href="structDefaultRename_1_1RenameHistory.html#affb5690b8bee99a204256e0b772f51ac">00298</a>         <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="structDefaultRename_1_1RenameHistory.html#affb5690b8bee99a204256e0b772f51ac">newPhysReg</a>;
+<a name="l00300"></a><a class="code" href="structDefaultRename_1_1RenameHistory.html#a8c356dbfbd6eb1576b5dcd8ac690497c">00300</a>         <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="structDefaultRename_1_1RenameHistory.html#a8c356dbfbd6eb1576b5dcd8ac690497c">prevPhysReg</a>;
+<a name="l00301"></a>00301     };
+<a name="l00302"></a>00302 
+<a name="l00306"></a><a class="code" href="classDefaultRename.html#adc01dc05e6459841df629cb3353ddde9">00306</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;RenameHistory&gt;</a> <a class="code" href="classDefaultRename.html#adc01dc05e6459841df629cb3353ddde9">historyBuffer</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00307"></a>00307 
+<a name="l00309"></a><a class="code" href="classDefaultRename.html#a1379cf882a12ac6fc9eba5da7c84b18b">00309</a>     <a class="code" href="classDefaultRename.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *<a class="code" href="classDefaultRename.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>;
+<a name="l00310"></a>00310 
+<a name="l00312"></a><a class="code" href="classDefaultRename.html#a83f9ee976e732665aeb08dbc19acfd45">00312</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *<a class="code" href="classDefaultRename.html#a83f9ee976e732665aeb08dbc19acfd45">timeBuffer</a>;
+<a name="l00313"></a>00313 
+<a name="l00315"></a><a class="code" href="classDefaultRename.html#a6c9093e88770a58dc8853f49a09bbac8">00315</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;::wire</a> <a class="code" href="classDefaultRename.html#a6c9093e88770a58dc8853f49a09bbac8">fromIEW</a>;
+<a name="l00316"></a>00316 
+<a name="l00318"></a><a class="code" href="classDefaultRename.html#a0055a92bd94eda21c2641d46ff013dac">00318</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;::wire</a> <a class="code" href="classDefaultRename.html#a0055a92bd94eda21c2641d46ff013dac">fromCommit</a>;
+<a name="l00319"></a>00319 
+<a name="l00321"></a><a class="code" href="classDefaultRename.html#aeb2f0e9b4602def9a8a57f7e3e12cf27">00321</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;::wire</a> <a class="code" href="classDefaultRename.html#aeb2f0e9b4602def9a8a57f7e3e12cf27">toDecode</a>;
+<a name="l00322"></a>00322 
+<a name="l00324"></a><a class="code" href="classDefaultRename.html#ae9b536282159ba75153a223be77515ba">00324</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;RenameStruct&gt;</a> *<a class="code" href="classDefaultRename.html#ae9b536282159ba75153a223be77515ba">renameQueue</a>;
+<a name="l00325"></a>00325 
+<a name="l00327"></a><a class="code" href="classDefaultRename.html#a20add800a4fdb85a3d370265f248a006">00327</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;RenameStruct&gt;::wire</a> <a class="code" href="classDefaultRename.html#a20add800a4fdb85a3d370265f248a006">toIEW</a>;
+<a name="l00328"></a>00328 
+<a name="l00330"></a><a class="code" href="classDefaultRename.html#a7860fc5736574343c9e294cb2bef9d93">00330</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;DecodeStruct&gt;</a> *<a class="code" href="classDefaultRename.html#a7860fc5736574343c9e294cb2bef9d93">decodeQueue</a>;
+<a name="l00331"></a>00331 
+<a name="l00333"></a><a class="code" href="classDefaultRename.html#a8bf861a7b2c3731d3a69bf370564e975">00333</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;DecodeStruct&gt;::wire</a> <a class="code" href="classDefaultRename.html#a8bf861a7b2c3731d3a69bf370564e975">fromDecode</a>;
+<a name="l00334"></a>00334 
+<a name="l00336"></a><a class="code" href="classDefaultRename.html#a4b6cd9f78efe8b5101b48dbf35a43c11">00336</a>     <a class="code" href="classstd_1_1list.html">InstQueue</a> <a class="code" href="classDefaultRename.html#a4b6cd9f78efe8b5101b48dbf35a43c11">insts</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00337"></a>00337 
+<a name="l00339"></a><a class="code" href="classDefaultRename.html#a64b861e400ea5adcf7a2f2dbe605e221">00339</a>     <a class="code" href="classstd_1_1list.html">InstQueue</a> <a class="code" href="classDefaultRename.html#a64b861e400ea5adcf7a2f2dbe605e221">skidBuffer</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00340"></a>00340 
+<a name="l00342"></a><a class="code" href="classDefaultRename.html#ac305c101c17d28451cc1f023b187b08b">00342</a>     <a class="code" href="classDefaultRename.html#a341963bcea1928476182a17e357f98e3">RenameMap</a> *<a class="code" href="classDefaultRename.html#ac305c101c17d28451cc1f023b187b08b">renameMap</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00343"></a>00343 
+<a name="l00345"></a><a class="code" href="classDefaultRename.html#a2e829c52dbc56e7ac6d2fc6a0524ff9c">00345</a>     <a class="code" href="classDefaultRename.html#ab784c356bacd490590fba42443e0f786">FreeList</a> *<a class="code" href="classDefaultRename.html#a2e829c52dbc56e7ac6d2fc6a0524ff9c">freeList</a>;
+<a name="l00346"></a>00346 
+<a name="l00348"></a><a class="code" href="classDefaultRename.html#af6eaea53db532812052f71bf0380dab5">00348</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> *<a class="code" href="classDefaultRename.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>;
+<a name="l00349"></a>00349 
+<a name="l00351"></a><a class="code" href="classDefaultRename.html#a265ad15229da2a6a05f908da093b3ed5">00351</a>     <a class="code" href="classScoreboard.html">Scoreboard</a> *<a class="code" href="classDefaultRename.html#a265ad15229da2a6a05f908da093b3ed5">scoreboard</a>;
+<a name="l00352"></a>00352 
+<a name="l00356"></a><a class="code" href="classDefaultRename.html#af301c62fee41266f36b1318688c8aa55">00356</a>     <span class="keywordtype">int</span> <a class="code" href="classDefaultRename.html#af301c62fee41266f36b1318688c8aa55">instsInProgress</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00357"></a>00357 
+<a name="l00361"></a><a class="code" href="classDefaultRename.html#a2c7e870d4babdac0dc91fc7ffabd0f3d">00361</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#a2c7e870d4babdac0dc91fc7ffabd0f3d">wroteToTimeBuffer</a>;
+<a name="l00362"></a>00362 
+<a name="l00366"></a><a class="code" href="structDefaultRename_1_1FreeEntries.html">00366</a>     <span class="keyword">struct </span><a class="code" href="structDefaultRename_1_1FreeEntries.html">FreeEntries</a> {
+<a name="l00367"></a><a class="code" href="structDefaultRename_1_1FreeEntries.html#ad0ea8223895ed6e0525ab5d0ecbc1baf">00367</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structDefaultRename_1_1FreeEntries.html#ad0ea8223895ed6e0525ab5d0ecbc1baf">iqEntries</a>;
+<a name="l00368"></a><a class="code" href="structDefaultRename_1_1FreeEntries.html#a0251753eeeeffa9ebc3c69909dc95dc2">00368</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structDefaultRename_1_1FreeEntries.html#a0251753eeeeffa9ebc3c69909dc95dc2">lsqEntries</a>;
+<a name="l00369"></a><a class="code" href="structDefaultRename_1_1FreeEntries.html#a4abcd7f900b12d143638dc56a18dd81b">00369</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structDefaultRename_1_1FreeEntries.html#a4abcd7f900b12d143638dc56a18dd81b">robEntries</a>;
+<a name="l00370"></a>00370     };
+<a name="l00371"></a>00371 
+<a name="l00375"></a><a class="code" href="classDefaultRename.html#a20d0243bc02977001bfbd4834a7d8b5d">00375</a>     <a class="code" href="structDefaultRename_1_1FreeEntries.html">FreeEntries</a> <a class="code" href="classDefaultRename.html#a20d0243bc02977001bfbd4834a7d8b5d">freeEntries</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00376"></a>00376 
+<a name="l00381"></a><a class="code" href="classDefaultRename.html#a5a3345554ca63a6e859943d7174d714f">00381</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#a5a3345554ca63a6e859943d7174d714f">emptyROB</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00382"></a>00382 
+<a name="l00384"></a><a class="code" href="structDefaultRename_1_1Stalls.html">00384</a>     <span class="keyword">struct </span><a class="code" href="structDefaultRename_1_1Stalls.html">Stalls</a> {
+<a name="l00385"></a><a class="code" href="structDefaultRename_1_1Stalls.html#a69f40ab12e9825ce316dfa72651a7404">00385</a>         <span class="keywordtype">bool</span> <a class="code" href="structDefaultRename_1_1Stalls.html#a69f40ab12e9825ce316dfa72651a7404">iew</a>;
+<a name="l00386"></a><a class="code" href="structDefaultRename_1_1Stalls.html#ad7d6b839c43385b5fffdf2beaff214ec">00386</a>         <span class="keywordtype">bool</span> <a class="code" href="structDefaultRename_1_1Stalls.html#ad7d6b839c43385b5fffdf2beaff214ec">commit</a>;
+<a name="l00387"></a>00387     };
+<a name="l00388"></a>00388 
+<a name="l00390"></a><a class="code" href="classDefaultRename.html#ade48cf321f5741ea8e54e071680cacdc">00390</a>     <a class="code" href="structDefaultRename_1_1Stalls.html">Stalls</a> <a class="code" href="classDefaultRename.html#ade48cf321f5741ea8e54e071680cacdc">stalls</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00391"></a>00391 
+<a name="l00393"></a><a class="code" href="classDefaultRename.html#a12ab5fca837718e12cc837d0f3c1da82">00393</a>     <a class="code" href="classDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classDefaultRename.html#a12ab5fca837718e12cc837d0f3c1da82">serializeInst</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00394"></a>00394 
+<a name="l00398"></a><a class="code" href="classDefaultRename.html#a4d99bc7f86d1a17d44e59c316c273262">00398</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#a4d99bc7f86d1a17d44e59c316c273262">serializeOnNextInst</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00399"></a>00399 
+<a name="l00401"></a><a class="code" href="classDefaultRename.html#a3069f8fd673d0e9ea2b1a8ce0ad3fe06">00401</a>     <span class="keywordtype">int</span> <a class="code" href="classDefaultRename.html#a3069f8fd673d0e9ea2b1a8ce0ad3fe06">iewToRenameDelay</a>;
+<a name="l00402"></a>00402 
+<a name="l00404"></a><a class="code" href="classDefaultRename.html#a4ff2f51d1e391f739d6d1c73a6bcd0c1">00404</a>     <span class="keywordtype">int</span> <a class="code" href="classDefaultRename.html#a4ff2f51d1e391f739d6d1c73a6bcd0c1">decodeToRenameDelay</a>;
+<a name="l00405"></a>00405 
+<a name="l00407"></a><a class="code" href="classDefaultRename.html#a03ebbedbf40ac0005574e50b3577a651">00407</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultRename.html#a03ebbedbf40ac0005574e50b3577a651">commitToRenameDelay</a>;
+<a name="l00408"></a>00408 
+<a name="l00410"></a><a class="code" href="classDefaultRename.html#a4b41704382bddb6ee06b5ce97b47dd7b">00410</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultRename.html#a4b41704382bddb6ee06b5ce97b47dd7b">renameWidth</a>;
+<a name="l00411"></a>00411 
+<a name="l00415"></a><a class="code" href="classDefaultRename.html#aeab15260a0ccc0ea470bb74344b63d17">00415</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultRename.html#aeab15260a0ccc0ea470bb74344b63d17">commitWidth</a>;
+<a name="l00416"></a>00416 
+<a name="l00420"></a><a class="code" href="classDefaultRename.html#abb033b9572d00b4ffa5aca6c7fb51427">00420</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultRename.html#abb033b9572d00b4ffa5aca6c7fb51427">toIEWIndex</a>;
+<a name="l00421"></a>00421 
+<a name="l00423"></a><a class="code" href="classDefaultRename.html#a5a5235d747599dbd49a887663f3739e8">00423</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#a5a5235d747599dbd49a887663f3739e8">blockThisCycle</a>;
+<a name="l00424"></a>00424 
+<a name="l00427"></a><a class="code" href="classDefaultRename.html#afa9ffeefc4b3ff8ae1ea9919bedbd1e4">00427</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#afa9ffeefc4b3ff8ae1ea9919bedbd1e4">resumeSerialize</a>;
+<a name="l00428"></a>00428 
+<a name="l00431"></a><a class="code" href="classDefaultRename.html#aacc2e9a4766def499954195037465d42">00431</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultRename.html#aacc2e9a4766def499954195037465d42">resumeUnblocking</a>;
+<a name="l00432"></a>00432 
+<a name="l00434"></a><a class="code" href="classDefaultRename.html#a88377f855dbf5adeeecb06b5bb821d35">00434</a>     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classDefaultRename.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>;
+<a name="l00435"></a>00435 
+<a name="l00437"></a><a class="code" href="classDefaultRename.html#a268414a6444b620140f263013a739a17">00437</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultRename.html#a268414a6444b620140f263013a739a17">skidBufferMax</a>;
+<a name="l00438"></a>00438 
+<a name="l00439"></a><a class="code" href="classDefaultRename.html#acc18d044ab2bf32e6515938485638d28">00439</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classDefaultRename.html#acc18d044ab2bf32e6515938485638d28">maxPhysicalRegs</a>;
+<a name="l00440"></a>00440 
+<a name="l00444"></a><a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96">00444</a>     <span class="keyword">enum</span> <a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96">FullSource</a> {
+<a name="l00445"></a><a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96a5040344e9d10f27af23c05c21c5e284f">00445</a>         <a class="code" href="classROB.html">ROB</a>,
+<a name="l00446"></a><a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96a7608065caa4249ff47a58c32d6f3c531">00446</a>         <a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96a7608065caa4249ff47a58c32d6f3c531">IQ</a>,
+<a name="l00447"></a><a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96a4cc572b5087c4e67104941ee638a8512">00447</a>         <a class="code" href="classLSQ.html">LSQ</a>,
+<a name="l00448"></a><a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96ac157bdf0b85a40d2619cbc8bc1ae5fe2">00448</a>         <a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96ac157bdf0b85a40d2619cbc8bc1ae5fe2">NONE</a>
+<a name="l00449"></a>00449     };
+<a name="l00450"></a>00450 
+<a name="l00454"></a>00454     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classDefaultRename.html#a11c6015950a669c6a37e5d9bee62bbbf">incrFullStat</a>(<span class="keyword">const</span> <a class="code" href="classDefaultRename.html#ae3b7ca6b65ac494b86816b5f1dd24e96">FullSource</a> &amp;source);
+<a name="l00455"></a>00455 
+<a name="l00457"></a><a class="code" href="classDefaultRename.html#a8931e7bb259c1fe875fd5a88017b29e2">00457</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a8931e7bb259c1fe875fd5a88017b29e2">renameSquashCycles</a>;
+<a name="l00459"></a><a class="code" href="classDefaultRename.html#a53baed8fe49369b373c3dd986c683596">00459</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a53baed8fe49369b373c3dd986c683596">renameIdleCycles</a>;
+<a name="l00461"></a><a class="code" href="classDefaultRename.html#a45732215f002b5052d042ef5798735f0">00461</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a45732215f002b5052d042ef5798735f0">renameBlockCycles</a>;
+<a name="l00463"></a><a class="code" href="classDefaultRename.html#a712d72379bc583c374e2f6179e8ee58f">00463</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a712d72379bc583c374e2f6179e8ee58f">renameSerializeStallCycles</a>;
+<a name="l00465"></a><a class="code" href="classDefaultRename.html#a7dd03c8b7a88da84ff7e1bdd6b938d47">00465</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a7dd03c8b7a88da84ff7e1bdd6b938d47">renameRunCycles</a>;
+<a name="l00467"></a><a class="code" href="classDefaultRename.html#a2f14c493f619ee24a84fbe959ed72a97">00467</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a2f14c493f619ee24a84fbe959ed72a97">renameUnblockCycles</a>;
+<a name="l00469"></a><a class="code" href="classDefaultRename.html#aee6bb4587ea6f254fc29dda4d565afc9">00469</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#aee6bb4587ea6f254fc29dda4d565afc9">renameRenamedInsts</a>;
+<a name="l00471"></a><a class="code" href="classDefaultRename.html#ae988aa97bbfa339fc6e6bf0cbad90832">00471</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#ae988aa97bbfa339fc6e6bf0cbad90832">renameSquashedInsts</a>;
+<a name="l00473"></a><a class="code" href="classDefaultRename.html#a41408b25638b2531bc9e3b6ee622d148">00473</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a41408b25638b2531bc9e3b6ee622d148">renameROBFullEvents</a>;
+<a name="l00475"></a><a class="code" href="classDefaultRename.html#a9a4bab1aece13e48ae2d2a3f247b3354">00475</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a9a4bab1aece13e48ae2d2a3f247b3354">renameIQFullEvents</a>;
+<a name="l00477"></a><a class="code" href="classDefaultRename.html#aba431e021496d1070a1d8f9ad7ec71f2">00477</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#aba431e021496d1070a1d8f9ad7ec71f2">renameLSQFullEvents</a>;
+<a name="l00480"></a><a class="code" href="classDefaultRename.html#ac012d0908acb20c3f68593787f626711">00480</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#ac012d0908acb20c3f68593787f626711">renameFullRegistersEvents</a>;
+<a name="l00482"></a><a class="code" href="classDefaultRename.html#a3e2c435288350f7d805557b4d1a2b7a5">00482</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a3e2c435288350f7d805557b4d1a2b7a5">renameRenamedOperands</a>;
+<a name="l00484"></a><a class="code" href="classDefaultRename.html#ab0b7632e67fcf2fe1e6bb1cef111eda4">00484</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#ab0b7632e67fcf2fe1e6bb1cef111eda4">renameRenameLookups</a>;
+<a name="l00485"></a><a class="code" href="classDefaultRename.html#ae2548cb038c1868f0dcf4c5df1154b12">00485</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#ae2548cb038c1868f0dcf4c5df1154b12">intRenameLookups</a>;
+<a name="l00486"></a><a class="code" href="classDefaultRename.html#ad27b51042b9dc458c5dd63b8c5f8d467">00486</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#ad27b51042b9dc458c5dd63b8c5f8d467">fpRenameLookups</a>;
+<a name="l00488"></a><a class="code" href="classDefaultRename.html#a5d4c3559dbd988f18cc6d1c0e0470fcb">00488</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a5d4c3559dbd988f18cc6d1c0e0470fcb">renameCommittedMaps</a>;
+<a name="l00490"></a><a class="code" href="classDefaultRename.html#ae0c8395975c577671916d55df6e05b16">00490</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#ae0c8395975c577671916d55df6e05b16">renameUndoneMaps</a>;
+<a name="l00492"></a><a class="code" href="classDefaultRename.html#a6e383a41c8a2b8902dd659805c40621e">00492</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a6e383a41c8a2b8902dd659805c40621e">renamedSerializing</a>;
+<a name="l00494"></a><a class="code" href="classDefaultRename.html#a94f16020be7d9c91aa978ce88f0adb1b">00494</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a94f16020be7d9c91aa978ce88f0adb1b">renamedTempSerializing</a>;
+<a name="l00496"></a><a class="code" href="classDefaultRename.html#a50c910ed2a23d1bbb3e7861c2d1f33f4">00496</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultRename.html#a50c910ed2a23d1bbb3e7861c2d1f33f4">renameSkidInsts</a>;
+<a name="l00497"></a>00497 };
+<a name="l00498"></a>00498 
+<a name="l00499"></a>00499 <span class="preprocessor">#endif // __CPU_O3_RENAME_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

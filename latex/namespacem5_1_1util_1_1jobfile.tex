@@ -1,0 +1,119 @@
+\hypertarget{namespacem5_1_1util_1_1jobfile}{
+\section{ネームスペース m5::util::jobfile}
+\label{namespacem5_1_1util_1_1jobfile}\index{m5::util::jobfile@{m5::util::jobfile}}
+}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classm5_1_1util_1_1jobfile_1_1Data}{Data}
+\item 
+class \hyperlink{classm5_1_1util_1_1jobfile_1_1Job}{Job}
+\item 
+class \hyperlink{classm5_1_1util_1_1jobfile_1_1SubOption}{SubOption}
+\item 
+class \hyperlink{classm5_1_1util_1_1jobfile_1_1Option}{Option}
+\item 
+class \hyperlink{classm5_1_1util_1_1jobfile_1_1Group}{Group}
+\item 
+class \hyperlink{classm5_1_1util_1_1jobfile_1_1Configuration}{Configuration}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1jobfile_ae8f2a0dc1fd012076a0ee988ca30b66b}{JobFile}
+\item 
+def \hyperlink{namespacem5_1_1util_1_1jobfile_a7d9eae5b1acb133336d9466913bc9b2f}{main}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespacem5_1_1util_1_1jobfile_ae8f2a0dc1fd012076a0ee988ca30b66b}{
+\index{m5::util::jobfile@{m5::util::jobfile}!JobFile@{JobFile}}
+\index{JobFile@{JobFile}!m5::util::jobfile@{m5::util::jobfile}}
+\subsubsection[{JobFile}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::jobfile::JobFile ( {\em jobfile})}}
+\label{namespacem5_1_1util_1_1jobfile_ae8f2a0dc1fd012076a0ee988ca30b66b}
+
+
+
+\begin{DoxyCode}
+403                     :
+404     from os.path import expanduser, isfile, join as joinpath
+405     filename = expanduser(jobfile)
+406 
+407     # Can't find filename in the current path, search sys.path
+408     if not isfile(filename):
+409         for path in sys.path:
+410             testname = joinpath(path, filename)
+411             if isfile(testname):
+412                 filename = testname
+413                 break
+414         else:
+415             raise AttributeError, \
+416                   "Could not find file '%s'" % jobfile
+417 
+418     data = {}
+419     execfile(filename, data)
+420     if 'conf' not in data:
+421         raise ImportError, 'cannot import name conf from %s' % jobfile
+422     return data['conf']
+423 
+def main(conf=None):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1util_1_1jobfile_a7d9eae5b1acb133336d9466913bc9b2f}{
+\index{m5::util::jobfile@{m5::util::jobfile}!main@{main}}
+\index{main@{main}!m5::util::jobfile@{m5::util::jobfile}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}def m5::util::jobfile::main ( {\em conf} = {\ttfamily None})}}
+\label{namespacem5_1_1util_1_1jobfile_a7d9eae5b1acb133336d9466913bc9b2f}
+
+
+
+\begin{DoxyCode}
+424                    :
+425     usage = 'Usage: %s [-b] [-c] [-v]' % sys.argv[0]
+426     if conf is None:
+427         usage += ' <jobfile>'
+428 
+429     try:
+430         import getopt
+431         opts, args = getopt.getopt(sys.argv[1:], '-bcv')
+432     except getopt.GetoptError:
+433         sys.exit(usage)
+434 
+435     both = False
+436     checkpoint = False
+437     verbose = False
+438     for opt,arg in opts:
+439         if opt == '-b':
+440             both = True
+441             checkpoint = True
+442         if opt == '-c':
+443             checkpoint = True
+444         if opt == '-v':
+445             verbose = True
+446 
+447     if conf is None:
+448         if len(args) != 1:
+449             raise AttributeError, usage
+450         conf = JobFile(args[0])
+451     else:
+452         if len(args) != 0:
+453             raise AttributeError, usage
+454 
+455     if both:
+456         jobs = conf.alljobs()
+457     elif checkpoint:
+458         jobs = conf.checkpoints()
+459     else:
+460         jobs = conf.jobs()
+461 
+462     for job in jobs:
+463         if verbose:
+464             job.printinfo()
+465         else:
+466             cpt = ''
+467             if job._checkpoint:
+468                 cpt = job._checkpoint.name
+469             print job.name, cpt
+470 
+if __name__ == '__main__':
+\end{DoxyCode}

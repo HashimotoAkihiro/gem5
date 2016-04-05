@@ -1,0 +1,78 @@
+\hypertarget{arch_2x86_2system_8cc}{
+\section{arch/x86/system.cc}
+\label{arch_2x86_2system_8cc}\index{arch/x86/system.cc@{arch/x86/system.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/x86/bios/intelmp.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/bios/smbios.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/regs/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/isa\_\-traits.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/system.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/vtophys.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/object\_\-file.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/symtab.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/intmath.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/thread\_\-context.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/port\_\-proxy.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86System.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/byteswap.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{arch_2x86_2system_8cc_aec099bd6f3e3fbde886cc7122b44deda}{installSegDesc} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{namespaceX86ISA_acea32b07c2303d31296b1c07a16c4795}{SegmentRegIndex} seg, SegDescriptor desc, bool longmode)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{arch_2x86_2system_8cc_aec099bd6f3e3fbde886cc7122b44deda}{
+\index{arch/x86/system.cc@{arch/x86/system.cc}!installSegDesc@{installSegDesc}}
+\index{installSegDesc@{installSegDesc}!arch/x86/system.cc@{arch/x86/system.cc}}
+\subsubsection[{installSegDesc}]{\setlength{\rightskip}{0pt plus 5cm}static void installSegDesc ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf SegmentRegIndex} {\em seg}, \/  SegDescriptor {\em desc}, \/  bool {\em longmode})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2x86_2system_8cc_aec099bd6f3e3fbde886cc7122b44deda}
+
+
+
+\begin{DoxyCode}
+69 {
+70     uint64_t base = desc.baseLow + (desc.baseHigh << 24);
+71     bool honorBase = !longmode || seg == SEGMENT_REG_FS ||
+72                                   seg == SEGMENT_REG_GS ||
+73                                   seg == SEGMENT_REG_TSL ||
+74                                   seg == SYS_SEGMENT_REG_TR;
+75     uint64_t limit = desc.limitLow | (desc.limitHigh << 16);
+76 
+77     SegAttr attr = 0;
+78 
+79     attr.dpl = desc.dpl;
+80     attr.unusable = 0;
+81     attr.defaultSize = desc.d;
+82     attr.longMode = desc.l;
+83     attr.avl = desc.avl;
+84     attr.granularity = desc.g;
+85     attr.present = desc.p;
+86     attr.system = desc.s;
+87     attr.type = desc.type;
+88     if (desc.s) {
+89         if (desc.type.codeOrData) {
+90             // Code segment
+91             attr.expandDown = 0;
+92             attr.readable = desc.type.r;
+93             attr.writable = 0;
+94         } else {
+95             // Data segment
+96             attr.expandDown = desc.type.e;
+97             attr.readable = 1;
+98             attr.writable = desc.type.w;
+99         }
+100     } else {
+101         attr.readable = 1;
+102         attr.writable = 1;
+103         attr.expandDown = 0;
+104     }
+105 
+106     tc->setMiscReg(MISCREG_SEG_BASE(seg), base);
+107     tc->setMiscReg(MISCREG_SEG_EFF_BASE(seg), honorBase ? base : 0);
+108     tc->setMiscReg(MISCREG_SEG_LIMIT(seg), limit);
+109     tc->setMiscReg(MISCREG_SEG_ATTR(seg), (MiscReg)attr);
+110 }
+\end{DoxyCode}

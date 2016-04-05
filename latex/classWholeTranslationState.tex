@@ -1,0 +1,282 @@
+\hypertarget{classWholeTranslationState}{
+\section{クラス WholeTranslationState}
+\label{classWholeTranslationState}\index{WholeTranslationState@{WholeTranslationState}}
+}
+
+
+{\ttfamily \#include $<$translation.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classWholeTranslationState_aa9330770cac55c20fba11842fb48ceb9}{WholeTranslationState} (\hyperlink{classRequest}{RequestPtr} \_\-req, uint8\_\-t $\ast$\_\-data, uint64\_\-t $\ast$\_\-res, \hyperlink{classBaseTLB_a46c8a310cf4c094f8c80e1cb8dc1f911}{BaseTLB::Mode} \_\-mode)
+\item 
+\hyperlink{classWholeTranslationState_a6e6163dd6e49b443f56c30800ac95b75}{WholeTranslationState} (\hyperlink{classRequest}{RequestPtr} \_\-req, \hyperlink{classRequest}{RequestPtr} \_\-sreqLow, \hyperlink{classRequest}{RequestPtr} \_\-sreqHigh, uint8\_\-t $\ast$\_\-data, uint64\_\-t $\ast$\_\-res, \hyperlink{classBaseTLB_a46c8a310cf4c094f8c80e1cb8dc1f911}{BaseTLB::Mode} \_\-mode)
+\item 
+bool \hyperlink{classWholeTranslationState_a4d0ff87d4723870a1348d1f62d15d785}{finish} (\hyperlink{classRefCountingPtr}{Fault} fault, int index)
+\item 
+\hyperlink{classRefCountingPtr}{Fault} \hyperlink{classWholeTranslationState_a1ac977937b0a3cf64e58ba7141e4cc11}{getFault} () const 
+\item 
+void \hyperlink{classWholeTranslationState_a29ac402ee48ba100554ef01f2c8790c9}{setNoFault} ()
+\item 
+bool \hyperlink{classWholeTranslationState_a70c74b2809417ea8701dd6ba9e34312d}{isUncacheable} () const 
+\item 
+bool \hyperlink{classWholeTranslationState_a1eef1bb814a1f77346aba1648fb6d1c9}{isPrefetch} () const 
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classWholeTranslationState_ad988a42a876d1cbc56556e1317e0f107}{getPaddr} () const 
+\item 
+unsigned \hyperlink{classWholeTranslationState_a009220068577b6979aeae8fe951bd63d}{getFlags} ()
+\item 
+void \hyperlink{classWholeTranslationState_a6dc2cbc61a85f942f081c1a136dd3585}{deleteReqs} ()
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classWholeTranslationState_acde7c910d793a8d8913d949834c8c621}{delay}
+\item 
+bool \hyperlink{classWholeTranslationState_afd8e5886f3bd5827ade12fcaf8ea2a47}{isSplit}
+\item 
+\hyperlink{classRequest}{RequestPtr} \hyperlink{classWholeTranslationState_ae9cdcf9160e22de981af332c3f02a209}{mainReq}
+\item 
+\hyperlink{classRequest}{RequestPtr} \hyperlink{classWholeTranslationState_a8c06ecd03202f5de1fc60cf6194ff285}{sreqLow}
+\item 
+\hyperlink{classRequest}{RequestPtr} \hyperlink{classWholeTranslationState_a1464e1dd7de6d5752d05938f0b3bc171}{sreqHigh}
+\item 
+uint8\_\-t $\ast$ \hyperlink{classWholeTranslationState_abe222f6d3581e7920dcad5306cc906a8}{data}
+\item 
+uint64\_\-t $\ast$ \hyperlink{classWholeTranslationState_afd8a8bcfa588184183684cc5a1deeb5a}{res}
+\item 
+\hyperlink{classBaseTLB_a46c8a310cf4c094f8c80e1cb8dc1f911}{BaseTLB::Mode} \hyperlink{classWholeTranslationState_ae9b5adf8be89a72128708c7e621e7211}{mode}
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{classWholeTranslationState_a3fc62072fe6e979a41b2e68bda15893a}{outstanding}
+\item 
+\hyperlink{classRefCountingPtr}{Fault} \hyperlink{classWholeTranslationState_a85850d6bc18d242fa1e8d4859e8d7d05}{faults} \mbox{[}2\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+This class captures the state of an address translation. A translation can be split in two if the ISA supports it and the memory access crosses a page boundary. In this case, this class is shared by two data translations (below). Otherwise it is used by a single data translation class. When each part of the translation is finished, the finish function is called which will indicate whether the whole translation is completed or not. There are also functions for accessing parts of the translation state which deal with the possible split correctly. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classWholeTranslationState_aa9330770cac55c20fba11842fb48ceb9}{
+\index{WholeTranslationState@{WholeTranslationState}!WholeTranslationState@{WholeTranslationState}}
+\index{WholeTranslationState@{WholeTranslationState}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{WholeTranslationState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf WholeTranslationState} ({\bf RequestPtr} {\em \_\-req}, \/  uint8\_\-t $\ast$ {\em \_\-data}, \/  uint64\_\-t $\ast$ {\em \_\-res}, \/  {\bf BaseTLB::Mode} {\em \_\-mode})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_aa9330770cac55c20fba11842fb48ceb9}
+Single translation state. We set the number of outstanding translations to one and indicate that it is not split. 
+
+
+\begin{DoxyCode}
+83         : outstanding(1), delay(false), isSplit(false), mainReq(_req),
+84           sreqLow(NULL), sreqHigh(NULL), data(_data), res(_res), mode(_mode)
+85     {
+86         faults[0] = faults[1] = NoFault;
+87         assert(mode == BaseTLB::Read || mode == BaseTLB::Write);
+88     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_a6e6163dd6e49b443f56c30800ac95b75}{
+\index{WholeTranslationState@{WholeTranslationState}!WholeTranslationState@{WholeTranslationState}}
+\index{WholeTranslationState@{WholeTranslationState}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{WholeTranslationState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf WholeTranslationState} ({\bf RequestPtr} {\em \_\-req}, \/  {\bf RequestPtr} {\em \_\-sreqLow}, \/  {\bf RequestPtr} {\em \_\-sreqHigh}, \/  uint8\_\-t $\ast$ {\em \_\-data}, \/  uint64\_\-t $\ast$ {\em \_\-res}, \/  {\bf BaseTLB::Mode} {\em \_\-mode})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a6e6163dd6e49b443f56c30800ac95b75}
+Split translation state. We copy all state into this class, set the number of outstanding translations to two and then mark this as a split translation. 
+
+
+\begin{DoxyCode}
+98         : outstanding(2), delay(false), isSplit(true), mainReq(_req),
+99           sreqLow(_sreqLow), sreqHigh(_sreqHigh), data(_data), res(_res),
+100           mode(_mode)
+101     {
+102         faults[0] = faults[1] = NoFault;
+103         assert(mode == BaseTLB::Read || mode == BaseTLB::Write);
+104     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classWholeTranslationState_a6dc2cbc61a85f942f081c1a136dd3585}{
+\index{WholeTranslationState@{WholeTranslationState}!deleteReqs@{deleteReqs}}
+\index{deleteReqs@{deleteReqs}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{deleteReqs}]{\setlength{\rightskip}{0pt plus 5cm}void deleteReqs ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a6dc2cbc61a85f942f081c1a136dd3585}
+Delete all requests that make up this translation. 
+
+
+\begin{DoxyCode}
+198     {
+199         delete mainReq;
+200         if (isSplit) {
+201             delete sreqLow;
+202             delete sreqHigh;
+203         }
+204     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_a4d0ff87d4723870a1348d1f62d15d785}{
+\index{WholeTranslationState@{WholeTranslationState}!finish@{finish}}
+\index{finish@{finish}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{finish}]{\setlength{\rightskip}{0pt plus 5cm}bool finish ({\bf Fault} {\em fault}, \/  int {\em index})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a4d0ff87d4723870a1348d1f62d15d785}
+Finish part of a translation. If there is only one request then this translation is completed. If the request has been split in two then the outstanding count determines whether the translation is complete. In this case, flags from the split request are copied to the main request to make it easier to access them later on. 
+
+
+\begin{DoxyCode}
+115     {
+116         assert(outstanding);
+117         faults[index] = fault;
+118         outstanding--;
+119         if (isSplit && outstanding == 0) {
+120 
+121             // For ease later, we copy some state to the main request.
+122             if (faults[0] == NoFault) {
+123                 mainReq->setPaddr(sreqLow->getPaddr());
+124             }
+125             mainReq->setFlags(sreqLow->getFlags());
+126             mainReq->setFlags(sreqHigh->getFlags());
+127         }
+128         return outstanding == 0;
+129     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_a1ac977937b0a3cf64e58ba7141e4cc11}{
+\index{WholeTranslationState@{WholeTranslationState}!getFault@{getFault}}
+\index{getFault@{getFault}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{getFault}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} getFault () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a1ac977937b0a3cf64e58ba7141e4cc11}
+Determine whether this translation produced a fault. Both parts of the translation must be checked if this is a split translation. 
+
+
+\begin{DoxyCode}
+137     {
+138         if (!isSplit)
+139             return faults[0];
+140         else if (faults[0] != NoFault)
+141             return faults[0];
+142         else if (faults[1] != NoFault)
+143             return faults[1];
+144         else
+145             return NoFault;
+146     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_a009220068577b6979aeae8fe951bd63d}{
+\index{WholeTranslationState@{WholeTranslationState}!getFlags@{getFlags}}
+\index{getFlags@{getFlags}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{getFlags}]{\setlength{\rightskip}{0pt plus 5cm}unsigned getFlags ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a009220068577b6979aeae8fe951bd63d}
+Get the flags associated with this request. We only need to access the main request because the flags will have been copied here on a split translation. 
+
+
+\begin{DoxyCode}
+191     {
+192         return mainReq->getFlags();
+193     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_ad988a42a876d1cbc56556e1317e0f107}{
+\index{WholeTranslationState@{WholeTranslationState}!getPaddr@{getPaddr}}
+\index{getPaddr@{getPaddr}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{getPaddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} getPaddr () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_ad988a42a876d1cbc56556e1317e0f107}
+Get the physical address of this request. 
+
+
+\begin{DoxyCode}
+180     {
+181         return mainReq->getPaddr();
+182     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_a1eef1bb814a1f77346aba1648fb6d1c9}{
+\index{WholeTranslationState@{WholeTranslationState}!isPrefetch@{isPrefetch}}
+\index{isPrefetch@{isPrefetch}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{isPrefetch}]{\setlength{\rightskip}{0pt plus 5cm}bool isPrefetch () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a1eef1bb814a1f77346aba1648fb6d1c9}
+\hyperlink{classCheck}{Check} if this request is a prefetch. We only need to check the main request because the flags will have been copied here on a split translation. 
+
+
+\begin{DoxyCode}
+173     {
+174         return mainReq->isPrefetch();
+175     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_a70c74b2809417ea8701dd6ba9e34312d}{
+\index{WholeTranslationState@{WholeTranslationState}!isUncacheable@{isUncacheable}}
+\index{isUncacheable@{isUncacheable}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{isUncacheable}]{\setlength{\rightskip}{0pt plus 5cm}bool isUncacheable () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a70c74b2809417ea8701dd6ba9e34312d}
+\hyperlink{classCheck}{Check} if this request is uncacheable. We only need to check the main request because the flags will have been copied here on a split translation. 
+
+
+\begin{DoxyCode}
+162     {
+163         return mainReq->isUncacheable();
+164     }
+\end{DoxyCode}
+\hypertarget{classWholeTranslationState_a29ac402ee48ba100554ef01f2c8790c9}{
+\index{WholeTranslationState@{WholeTranslationState}!setNoFault@{setNoFault}}
+\index{setNoFault@{setNoFault}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{setNoFault}]{\setlength{\rightskip}{0pt plus 5cm}void setNoFault ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classWholeTranslationState_a29ac402ee48ba100554ef01f2c8790c9}
+Remove all faults from the translation. 
+
+
+\begin{DoxyCode}
+151     {
+152         faults[0] = faults[1] = NoFault;
+153     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classWholeTranslationState_abe222f6d3581e7920dcad5306cc906a8}{
+\index{WholeTranslationState@{WholeTranslationState}!data@{data}}
+\index{data@{data}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{data}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t$\ast$ {\bf data}}}
+\label{classWholeTranslationState_abe222f6d3581e7920dcad5306cc906a8}
+\hypertarget{classWholeTranslationState_acde7c910d793a8d8913d949834c8c621}{
+\index{WholeTranslationState@{WholeTranslationState}!delay@{delay}}
+\index{delay@{delay}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{delay}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf delay}}}
+\label{classWholeTranslationState_acde7c910d793a8d8913d949834c8c621}
+\hypertarget{classWholeTranslationState_a85850d6bc18d242fa1e8d4859e8d7d05}{
+\index{WholeTranslationState@{WholeTranslationState}!faults@{faults}}
+\index{faults@{faults}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{faults}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} {\bf faults}\mbox{[}2\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classWholeTranslationState_a85850d6bc18d242fa1e8d4859e8d7d05}
+\hypertarget{classWholeTranslationState_afd8e5886f3bd5827ade12fcaf8ea2a47}{
+\index{WholeTranslationState@{WholeTranslationState}!isSplit@{isSplit}}
+\index{isSplit@{isSplit}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{isSplit}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf isSplit}}}
+\label{classWholeTranslationState_afd8e5886f3bd5827ade12fcaf8ea2a47}
+\hypertarget{classWholeTranslationState_ae9cdcf9160e22de981af332c3f02a209}{
+\index{WholeTranslationState@{WholeTranslationState}!mainReq@{mainReq}}
+\index{mainReq@{mainReq}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{mainReq}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RequestPtr} {\bf mainReq}}}
+\label{classWholeTranslationState_ae9cdcf9160e22de981af332c3f02a209}
+\hypertarget{classWholeTranslationState_ae9b5adf8be89a72128708c7e621e7211}{
+\index{WholeTranslationState@{WholeTranslationState}!mode@{mode}}
+\index{mode@{mode}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{mode}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BaseTLB::Mode} {\bf mode}}}
+\label{classWholeTranslationState_ae9b5adf8be89a72128708c7e621e7211}
+\hypertarget{classWholeTranslationState_a3fc62072fe6e979a41b2e68bda15893a}{
+\index{WholeTranslationState@{WholeTranslationState}!outstanding@{outstanding}}
+\index{outstanding@{outstanding}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{outstanding}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf outstanding}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classWholeTranslationState_a3fc62072fe6e979a41b2e68bda15893a}
+\hypertarget{classWholeTranslationState_afd8a8bcfa588184183684cc5a1deeb5a}{
+\index{WholeTranslationState@{WholeTranslationState}!res@{res}}
+\index{res@{res}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{res}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t$\ast$ {\bf res}}}
+\label{classWholeTranslationState_afd8a8bcfa588184183684cc5a1deeb5a}
+\hypertarget{classWholeTranslationState_a1464e1dd7de6d5752d05938f0b3bc171}{
+\index{WholeTranslationState@{WholeTranslationState}!sreqHigh@{sreqHigh}}
+\index{sreqHigh@{sreqHigh}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{sreqHigh}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RequestPtr} {\bf sreqHigh}}}
+\label{classWholeTranslationState_a1464e1dd7de6d5752d05938f0b3bc171}
+\hypertarget{classWholeTranslationState_a8c06ecd03202f5de1fc60cf6194ff285}{
+\index{WholeTranslationState@{WholeTranslationState}!sreqLow@{sreqLow}}
+\index{sreqLow@{sreqLow}!WholeTranslationState@{WholeTranslationState}}
+\subsubsection[{sreqLow}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RequestPtr} {\bf sreqLow}}}
+\label{classWholeTranslationState_a8c06ecd03202f5de1fc60cf6194ff285}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/\hyperlink{translation_8hh}{translation.hh}\end{DoxyCompactItemize}

@@ -1,0 +1,544 @@
+\hypertarget{classSparseMemory}{
+\section{クラス SparseMemory}
+\label{classSparseMemory}\index{SparseMemory@{SparseMemory}}
+}
+
+
+{\ttfamily \#include $<$SparseMemory.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSparseMemory_a8e670627f220953e5f45aa5308bdeb4f}{SparseMemory} (int number\_\-of\_\-levels)
+\item 
+\hyperlink{classSparseMemory_a5c1f4b825e7960e579acfd4ac79675c6}{$\sim$SparseMemory} ()
+\item 
+bool \hyperlink{classSparseMemory_a0035c3b58922453aa4b25cc73e4ef27a}{exist} (const \hyperlink{classAddress}{Address} \&address) const 
+\item 
+void \hyperlink{classSparseMemory_aceb8ef4c1228ddad10036f5e59d61ea9}{add} (const \hyperlink{classAddress}{Address} \&address, \hyperlink{classAbstractEntry}{AbstractEntry} $\ast$)
+\item 
+void \hyperlink{classSparseMemory_a8cae1419257c78d90715dd87697f9f74}{remove} (const \hyperlink{classAddress}{Address} \&address)
+\item 
+void \hyperlink{classSparseMemory_a1ab3ef5742c0c4238f90e41d8959603c}{recordBlocks} (int cntrl\_\-id, \hyperlink{classCacheRecorder}{CacheRecorder} $\ast$) const 
+\item 
+\hyperlink{classAbstractEntry}{AbstractEntry} $\ast$ \hyperlink{classSparseMemory_a4cc0abbaa49ab392d18c2f34d87afeb2}{lookup} (const \hyperlink{classAddress}{Address} \&address)
+\item 
+void \hyperlink{classSparseMemory_a3dd3443357312bcb75580eaa508c48a4}{regStats} (const std::string \&name)
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSparseMemory_a4185cf6bae110327c9ce0225a731a7a8}{SparseMemory} (const \hyperlink{classSparseMemory}{SparseMemory} \&obj)
+\item 
+\hyperlink{classSparseMemory}{SparseMemory} \& \hyperlink{classSparseMemory_a4e634becbab6915935553a70f5714742}{operator=} (const \hyperlink{classSparseMemory}{SparseMemory} \&obj)
+\item 
+void \hyperlink{classSparseMemory_a9a883632739ed6248cebecc6e3fedc00}{recursivelyRemoveTables} (\hyperlink{SparseMemory_8hh_a93e9b04c329a9452d20206c8e31a4172}{SparseMapType} $\ast$currentTable, int level)
+\item 
+int \hyperlink{classSparseMemory_aa9e999fef6a14d51d503586d9723de5b}{recursivelyRemoveLevels} (const \hyperlink{classAddress}{Address} \&address, \hyperlink{structCurNextInfo}{CurNextInfo} \&curInfo)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{SparseMemory_8hh_a93e9b04c329a9452d20206c8e31a4172}{SparseMapType} $\ast$ \hyperlink{classSparseMemory_ac362ddde239afefba05ba5bfc62708c3}{m\_\-map\_\-head}
+\item 
+int \hyperlink{classSparseMemory_afa143dbd3f54d7d1568d199a762a2a6c}{m\_\-total\_\-number\_\-of\_\-bits}
+\item 
+int \hyperlink{classSparseMemory_a29e40197e4f3ec21061a02ee9a3dd5eb}{m\_\-number\_\-of\_\-levels}
+\item 
+int $\ast$ \hyperlink{classSparseMemory_a01825402432aab0b3129f1cf4e84c670}{m\_\-number\_\-of\_\-bits\_\-per\_\-level}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classSparseMemory_af76a2ea16aef8c95f5f840cd1cd0990c}{m\_\-total\_\-adds}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classSparseMemory_a3a3ab3ffc66149c4195aaa11285f544b}{m\_\-adds\_\-per\_\-level}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classSparseMemory_a0adb1789aac47c7bc6fffcdd2f8e9df3}{m\_\-total\_\-removes}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classSparseMemory_a26fd7b44dcff75112173b9672dfc21b6}{m\_\-removes\_\-per\_\-level}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classSparseMemory_a8e670627f220953e5f45aa5308bdeb4f}{
+\index{SparseMemory@{SparseMemory}!SparseMemory@{SparseMemory}}
+\index{SparseMemory@{SparseMemory}!SparseMemory@{SparseMemory}}
+\subsubsection[{SparseMemory}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SparseMemory} (int {\em number\_\-of\_\-levels})}}
+\label{classSparseMemory_a8e670627f220953e5f45aa5308bdeb4f}
+
+
+
+\begin{DoxyCode}
+39 {
+40     int even_level_bits;
+41     int extra;
+42     m_total_number_of_bits = RubySystem::getMemorySizeBits() 
+43         - RubySystem::getBlockSizeBits();;
+44 
+45     m_number_of_levels = number_of_levels;
+46 
+47     //
+48     // Create the array that describes the bits per level
+49     //
+50     m_number_of_bits_per_level = new int[m_number_of_levels];
+51     even_level_bits = m_total_number_of_bits / m_number_of_levels;
+52     extra = m_total_number_of_bits % m_number_of_levels;
+53     for (int level = 0; level < m_number_of_levels; level++) {
+54         if (level < extra)
+55             m_number_of_bits_per_level[level] = even_level_bits + 1;
+56         else
+57             m_number_of_bits_per_level[level] = even_level_bits;
+58     }
+59     m_map_head = new SparseMapType;
+60 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_a5c1f4b825e7960e579acfd4ac79675c6}{
+\index{SparseMemory@{SparseMemory}!$\sim$SparseMemory@{$\sim$SparseMemory}}
+\index{$\sim$SparseMemory@{$\sim$SparseMemory}!SparseMemory@{SparseMemory}}
+\subsubsection[{$\sim$SparseMemory}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf SparseMemory} ()}}
+\label{classSparseMemory_a5c1f4b825e7960e579acfd4ac79675c6}
+
+
+
+\begin{DoxyCode}
+63 {
+64     recursivelyRemoveTables(m_map_head, 0);
+65     delete m_map_head;
+66     delete [] m_number_of_bits_per_level;
+67 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_a4185cf6bae110327c9ce0225a731a7a8}{
+\index{SparseMemory@{SparseMemory}!SparseMemory@{SparseMemory}}
+\index{SparseMemory@{SparseMemory}!SparseMemory@{SparseMemory}}
+\subsubsection[{SparseMemory}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SparseMemory} (const {\bf SparseMemory} \& {\em obj})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a4185cf6bae110327c9ce0225a731a7a8}
+
+
+\subsection{関数}
+\hypertarget{classSparseMemory_aceb8ef4c1228ddad10036f5e59d61ea9}{
+\index{SparseMemory@{SparseMemory}!add@{add}}
+\index{add@{add}!SparseMemory@{SparseMemory}}
+\subsubsection[{add}]{\setlength{\rightskip}{0pt plus 5cm}void add (const {\bf Address} \& {\em address}, \/  {\bf AbstractEntry} $\ast$ {\em entry})}}
+\label{classSparseMemory_aceb8ef4c1228ddad10036f5e59d61ea9}
+
+
+
+\begin{DoxyCode}
+143 {
+144     assert(address == line_address(address));
+145     assert(!exist(address));
+146 
+147     m_total_adds++;
+148 
+149     Address curAddress;
+150     SparseMapType* curTable = m_map_head;
+151 
+152     // Initiallize the high bit to be the total number of bits plus
+153     // the block offset.  However the highest bit index is one less
+154     // than this value.
+155     int highBit = m_total_number_of_bits + RubySystem::getBlockSizeBits();
+156     int lowBit;
+157     void* newEntry = NULL;
+158 
+159     for (int level = 0; level < m_number_of_levels; level++) {
+160         // create the appropriate address for this level
+161         // Note: that set Address is inclusive of the specified range,
+162         // thus the high bit is one less than the total number of bits
+163         // used to create the address.
+164         lowBit = highBit - m_number_of_bits_per_level[level];
+165         curAddress.setAddress(address.bitSelect(lowBit, highBit - 1));
+166 
+167         // Adjust the highBit value for the next level
+168         highBit -= m_number_of_bits_per_level[level];
+169 
+170         // if the address exists in the cur table, move on.  Otherwise
+171         // create a new table.
+172         if (curTable->count(curAddress) != 0) {
+173             curTable = (SparseMapType*)((*curTable)[curAddress]);
+174         } else {
+175             m_adds_per_level[level]++;
+176 
+177             // if the last level, add a directory entry.  Otherwise add a map.
+178             if (level == (m_number_of_levels - 1)) {
+179                 entry->getDataBlk().clear();
+180                 newEntry = (void*)entry;
+181             } else {
+182                 SparseMapType* tempMap = new SparseMapType;
+183                 newEntry = (void*)(tempMap);
+184             }
+185 
+186             // Create the pointer container SparseMemEntry and add it
+187             // to the table.
+188             (*curTable)[curAddress] = newEntry;
+189 
+190             // Move to the next level of the heirarchy
+191             curTable = (SparseMapType*)newEntry;
+192         }
+193     }
+194 
+195     assert(exist(address));
+196     return;
+197 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_a0035c3b58922453aa4b25cc73e4ef27a}{
+\index{SparseMemory@{SparseMemory}!exist@{exist}}
+\index{exist@{exist}!SparseMemory@{SparseMemory}}
+\subsubsection[{exist}]{\setlength{\rightskip}{0pt plus 5cm}bool exist (const {\bf Address} \& {\em address}) const}}
+\label{classSparseMemory_a0035c3b58922453aa4b25cc73e4ef27a}
+
+
+
+\begin{DoxyCode}
+99 {
+100     SparseMapType* curTable = m_map_head;
+101     Address curAddress;
+102 
+103     // Initiallize the high bit to be the total number of bits plus
+104     // the block offset.  However the highest bit index is one less
+105     // than this value.
+106     int highBit = m_total_number_of_bits + RubySystem::getBlockSizeBits();
+107     int lowBit;
+108     assert(address == line_address(address));
+109     DPRINTF(RubyCache, "address: %s\n", address);
+110 
+111     for (int level = 0; level < m_number_of_levels; level++) {
+112         // Create the appropriate sub address for this level
+113         // Note: that set Address is inclusive of the specified range,
+114         // thus the high bit is one less than the total number of bits
+115         // used to create the address.
+116         lowBit = highBit - m_number_of_bits_per_level[level];
+117         curAddress.setAddress(address.bitSelect(lowBit, highBit - 1));
+118 
+119         DPRINTF(RubyCache, "level: %d, lowBit: %d, highBit - 1: %d, "
+120                 "curAddress: %s\n",
+121                 level, lowBit, highBit - 1, curAddress);
+122 
+123         // Adjust the highBit value for the next level
+124         highBit -= m_number_of_bits_per_level[level];
+125 
+126         // If the address is found, move on to the next level.
+127         // Otherwise, return not found
+128         if (curTable->count(curAddress) != 0) {
+129             curTable = (SparseMapType*)((*curTable)[curAddress]);
+130         } else {
+131             DPRINTF(RubyCache, "Not found\n");
+132             return false;
+133         }
+134     }
+135 
+136     DPRINTF(RubyCache, "Entry found\n");
+137     return true;
+138 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_a4cc0abbaa49ab392d18c2f34d87afeb2}{
+\index{SparseMemory@{SparseMemory}!lookup@{lookup}}
+\index{lookup@{lookup}!SparseMemory@{SparseMemory}}
+\subsubsection[{lookup}]{\setlength{\rightskip}{0pt plus 5cm}{\bf AbstractEntry} $\ast$ lookup (const {\bf Address} \& {\em address})}}
+\label{classSparseMemory_a4cc0abbaa49ab392d18c2f34d87afeb2}
+
+
+
+\begin{DoxyCode}
+292 {
+293     assert(address == line_address(address));
+294 
+295     Address curAddress;
+296     SparseMapType* curTable = m_map_head;
+297     AbstractEntry* entry = NULL;
+298 
+299     // Initiallize the high bit to be the total number of bits plus
+300     // the block offset.  However the highest bit index is one less
+301     // than this value.
+302     int highBit = m_total_number_of_bits + RubySystem::getBlockSizeBits();
+303     int lowBit;
+304 
+305     for (int level = 0; level < m_number_of_levels; level++) {
+306         // create the appropriate address for this level
+307         // Note: that set Address is inclusive of the specified range,
+308         // thus the high bit is one less than the total number of bits
+309         // used to create the address.
+310         lowBit = highBit - m_number_of_bits_per_level[level];
+311         curAddress.setAddress(address.bitSelect(lowBit, highBit - 1));
+312 
+313         DPRINTF(RubyCache, "level: %d, lowBit: %d, highBit - 1: %d, "
+314                 "curAddress: %s\n",
+315                 level, lowBit, highBit - 1, curAddress);
+316 
+317         // Adjust the highBit value for the next level
+318         highBit -= m_number_of_bits_per_level[level];
+319 
+320         // If the address is found, move on to the next level.
+321         // Otherwise, return not found
+322         if (curTable->count(curAddress) != 0) {
+323             curTable = (SparseMapType*)((*curTable)[curAddress]);
+324         } else {
+325             DPRINTF(RubyCache, "Not found\n");
+326             return NULL;
+327         }
+328     }
+329 
+330     // The last entry actually points to the Directory entry not a table
+331     entry = (AbstractEntry*)curTable;
+332 
+333     return entry;
+334 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_a4e634becbab6915935553a70f5714742}{
+\index{SparseMemory@{SparseMemory}!operator=@{operator=}}
+\index{operator=@{operator=}!SparseMemory@{SparseMemory}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SparseMemory}\& operator= (const {\bf SparseMemory} \& {\em obj})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a4e634becbab6915935553a70f5714742}
+\hypertarget{classSparseMemory_a1ab3ef5742c0c4238f90e41d8959603c}{
+\index{SparseMemory@{SparseMemory}!recordBlocks@{recordBlocks}}
+\index{recordBlocks@{recordBlocks}!SparseMemory@{SparseMemory}}
+\subsubsection[{recordBlocks}]{\setlength{\rightskip}{0pt plus 5cm}void recordBlocks (int {\em cntrl\_\-id}, \/  {\bf CacheRecorder} $\ast$ {\em tr}) const}}
+\label{classSparseMemory_a1ab3ef5742c0c4238f90e41d8959603c}
+Function for recording the contents of memory. This function walks through all the levels of the sparse memory in a breadth first fashion. This might need more memory than a depth first approach. But breadth first seems easier to me than a depth first approach. 
+
+
+\begin{DoxyCode}
+338 {
+339     queue<SparseMapType*> unexplored_nodes[2];
+340     queue<physical_address_t> address_of_nodes[2];
+341 
+342     unexplored_nodes[0].push(m_map_head);
+343     address_of_nodes[0].push(0);
+344 
+345     int parity_of_level = 0;
+346     physical_address_t address, temp_address;
+347     Address curAddress;
+348 
+349     // Initiallize the high bit to be the total number of bits plus
+350     // the block offset.  However the highest bit index is one less
+351     // than this value.
+352     int highBit = m_total_number_of_bits + RubySystem::getBlockSizeBits();
+353     int lowBit;
+354 
+355     for (int cur_level = 0; cur_level < m_number_of_levels; cur_level++) {
+356 
+357         // create the appropriate address for this level
+358         // Note: that set Address is inclusive of the specified range,
+359         // thus the high bit is one less than the total number of bits
+360         // used to create the address.
+361         lowBit = highBit - m_number_of_bits_per_level[cur_level];
+362 
+363         while (!unexplored_nodes[parity_of_level].empty()) {
+364 
+365             SparseMapType* node = unexplored_nodes[parity_of_level].front();
+366             unexplored_nodes[parity_of_level].pop();
+367 
+368             address = address_of_nodes[parity_of_level].front();
+369             address_of_nodes[parity_of_level].pop();
+370 
+371             SparseMapType::iterator iter;
+372 
+373             for (iter = node->begin(); iter != node->end(); iter++) {
+374                 SparseMemEntry entry = (*iter).second;
+375                 curAddress = (*iter).first;
+376 
+377                 if (cur_level != (m_number_of_levels - 1)) {
+378                     // If not at the last level, put this node in the queue
+379                     unexplored_nodes[1 - parity_of_level].push(
+380                                                      (SparseMapType*)(entry));
+381                     address_of_nodes[1 - parity_of_level].push(address |
+382                                          (curAddress.getAddress() << lowBit));
+383                 } else {
+384                     // If at the last level, add a trace record
+385                     temp_address = address | (curAddress.getAddress()
+386                                                                    << lowBit);
+387                     DataBlock block = ((AbstractEntry*)entry)->getDataBlk();
+388                     tr->addRecord(cntrl_id, temp_address, 0, RubyRequestType_ST, 
+      0,
+389                                   block);
+390                 }
+391             }
+392         }
+393 
+394         // Adjust the highBit value for the next level
+395         highBit -= m_number_of_bits_per_level[cur_level];
+396         parity_of_level = 1 - parity_of_level;
+397     }
+398 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_aa9e999fef6a14d51d503586d9723de5b}{
+\index{SparseMemory@{SparseMemory}!recursivelyRemoveLevels@{recursivelyRemoveLevels}}
+\index{recursivelyRemoveLevels@{recursivelyRemoveLevels}!SparseMemory@{SparseMemory}}
+\subsubsection[{recursivelyRemoveLevels}]{\setlength{\rightskip}{0pt plus 5cm}int recursivelyRemoveLevels (const {\bf Address} \& {\em address}, \/  {\bf CurNextInfo} \& {\em curInfo})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_aa9e999fef6a14d51d503586d9723de5b}
+
+
+
+\begin{DoxyCode}
+204 {
+205     Address curAddress;
+206     CurNextInfo nextInfo;
+207     SparseMemEntry entry;
+208 
+209     // create the appropriate address for this level
+210     // Note: that set Address is inclusive of the specified range,
+211     // thus the high bit is one less than the total number of bits
+212     // used to create the address.
+213     curAddress.setAddress(address.bitSelect(curInfo.lowBit,
+214                                             curInfo.highBit - 1));
+215 
+216     DPRINTF(RubyCache, "address: %s, curInfo.level: %d, curInfo.lowBit: %d, "
+217             "curInfo.highBit - 1: %d, curAddress: %s\n",
+218             address, curInfo.level, curInfo.lowBit,
+219             curInfo.highBit - 1, curAddress);
+220 
+221     assert(curInfo.curTable->count(curAddress) != 0);
+222 
+223     entry = (*(curInfo.curTable))[curAddress];
+224 
+225     if (curInfo.level < (m_number_of_levels - 1)) {
+226         // set up next level's info
+227         nextInfo.curTable = (SparseMapType*)(entry);
+228         nextInfo.level = curInfo.level + 1;
+229 
+230         nextInfo.highBit = curInfo.highBit -
+231             m_number_of_bits_per_level[curInfo.level];
+232 
+233         nextInfo.lowBit = curInfo.lowBit -
+234             m_number_of_bits_per_level[curInfo.level + 1];
+235 
+236         // recursively search the table hierarchy
+237         int tableSize = recursivelyRemoveLevels(address, nextInfo);
+238 
+239         // If this table below is now empty, we must delete it and
+240         // erase it from our table.
+241         if (tableSize == 0) {
+242             m_removes_per_level[curInfo.level]++;
+243             delete nextInfo.curTable;
+244             entry = NULL;
+245             curInfo.curTable->erase(curAddress);
+246         }
+247     } else {
+248         // if this is the last level, we have reached the Directory
+249         // Entry and thus we should delete it including the
+250         // SparseMemEntry container struct.
+251         delete (AbstractEntry*)(entry);
+252         entry = NULL;
+253         curInfo.curTable->erase(curAddress);
+254         m_removes_per_level[curInfo.level]++;
+255     }
+256     return curInfo.curTable->size();
+257 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_a9a883632739ed6248cebecc6e3fedc00}{
+\index{SparseMemory@{SparseMemory}!recursivelyRemoveTables@{recursivelyRemoveTables}}
+\index{recursivelyRemoveTables@{recursivelyRemoveTables}!SparseMemory@{SparseMemory}}
+\subsubsection[{recursivelyRemoveTables}]{\setlength{\rightskip}{0pt plus 5cm}void recursivelyRemoveTables ({\bf SparseMapType} $\ast$ {\em currentTable}, \/  int {\em level})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a9a883632739ed6248cebecc6e3fedc00}
+
+
+
+\begin{DoxyCode}
+73 {
+74     SparseMapType::iterator iter;
+75 
+76     for (iter = curTable->begin(); iter != curTable->end(); iter++) {
+77         SparseMemEntry entry = (*iter).second;
+78 
+79         if (curLevel != (m_number_of_levels - 1)) {
+80             // If the not at the last level, analyze those lower level
+81             // tables first, then delete those next tables
+82             SparseMapType* nextTable = (SparseMapType*)(entry);
+83             recursivelyRemoveTables(nextTable, (curLevel + 1));
+84             delete nextTable;
+85         } else {
+86             // If at the last level, delete the directory entry
+87             delete (AbstractEntry*)(entry);
+88         }
+89         entry = NULL;
+90     }
+91 
+92     // Once all entries have been deleted, erase the entries
+93     curTable->erase(curTable->begin(), curTable->end());
+94 }
+\end{DoxyCode}
+\hypertarget{classSparseMemory_a3dd3443357312bcb75580eaa508c48a4}{
+\index{SparseMemory@{SparseMemory}!regStats@{regStats}}
+\index{regStats@{regStats}!SparseMemory@{SparseMemory}}
+\subsubsection[{regStats}]{\setlength{\rightskip}{0pt plus 5cm}void regStats (const std::string \& {\em name})}}
+\label{classSparseMemory_a3dd3443357312bcb75580eaa508c48a4}
+\hypertarget{classSparseMemory_a8cae1419257c78d90715dd87697f9f74}{
+\index{SparseMemory@{SparseMemory}!remove@{remove}}
+\index{remove@{remove}!SparseMemory@{SparseMemory}}
+\subsubsection[{remove}]{\setlength{\rightskip}{0pt plus 5cm}void remove (const {\bf Address} \& {\em address})}}
+\label{classSparseMemory_a8cae1419257c78d90715dd87697f9f74}
+
+
+
+\begin{DoxyCode}
+262 {
+263     assert(address == line_address(address));
+264     assert(exist(address));
+265 
+266     m_total_removes++;
+267 
+268     CurNextInfo nextInfo;
+269 
+270     // Initialize table pointer and level value
+271     nextInfo.curTable = m_map_head;
+272     nextInfo.level = 0;
+273 
+274     // Initiallize the high bit to be the total number of bits plus
+275     // the block offset.  However the highest bit index is one less
+276     // than this value.
+277     nextInfo.highBit = m_total_number_of_bits + RubySystem::getBlockSizeBits();
+278     nextInfo.lowBit = nextInfo.highBit - m_number_of_bits_per_level[0];;
+279 
+280     // recursively search the table hierarchy for empty tables
+281     // starting from the level 0.  Note we do not check the return
+282     // value because the head table is never deleted;
+283     recursivelyRemoveLevels(address, nextInfo);
+284 
+285     assert(!exist(address));
+286     return;
+287 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classSparseMemory_a3a3ab3ffc66149c4195aaa11285f544b}{
+\index{SparseMemory@{SparseMemory}!m\_\-adds\_\-per\_\-level@{m\_\-adds\_\-per\_\-level}}
+\index{m\_\-adds\_\-per\_\-level@{m\_\-adds\_\-per\_\-level}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-adds\_\-per\_\-level}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf m\_\-adds\_\-per\_\-level}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a3a3ab3ffc66149c4195aaa11285f544b}
+\hypertarget{classSparseMemory_ac362ddde239afefba05ba5bfc62708c3}{
+\index{SparseMemory@{SparseMemory}!m\_\-map\_\-head@{m\_\-map\_\-head}}
+\index{m\_\-map\_\-head@{m\_\-map\_\-head}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-map\_\-head}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SparseMapType}$\ast$ {\bf m\_\-map\_\-head}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_ac362ddde239afefba05ba5bfc62708c3}
+\hypertarget{classSparseMemory_a01825402432aab0b3129f1cf4e84c670}{
+\index{SparseMemory@{SparseMemory}!m\_\-number\_\-of\_\-bits\_\-per\_\-level@{m\_\-number\_\-of\_\-bits\_\-per\_\-level}}
+\index{m\_\-number\_\-of\_\-bits\_\-per\_\-level@{m\_\-number\_\-of\_\-bits\_\-per\_\-level}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-number\_\-of\_\-bits\_\-per\_\-level}]{\setlength{\rightskip}{0pt plus 5cm}int$\ast$ {\bf m\_\-number\_\-of\_\-bits\_\-per\_\-level}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a01825402432aab0b3129f1cf4e84c670}
+\hypertarget{classSparseMemory_a29e40197e4f3ec21061a02ee9a3dd5eb}{
+\index{SparseMemory@{SparseMemory}!m\_\-number\_\-of\_\-levels@{m\_\-number\_\-of\_\-levels}}
+\index{m\_\-number\_\-of\_\-levels@{m\_\-number\_\-of\_\-levels}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-number\_\-of\_\-levels}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-number\_\-of\_\-levels}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a29e40197e4f3ec21061a02ee9a3dd5eb}
+\hypertarget{classSparseMemory_a26fd7b44dcff75112173b9672dfc21b6}{
+\index{SparseMemory@{SparseMemory}!m\_\-removes\_\-per\_\-level@{m\_\-removes\_\-per\_\-level}}
+\index{m\_\-removes\_\-per\_\-level@{m\_\-removes\_\-per\_\-level}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-removes\_\-per\_\-level}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf m\_\-removes\_\-per\_\-level}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a26fd7b44dcff75112173b9672dfc21b6}
+\hypertarget{classSparseMemory_af76a2ea16aef8c95f5f840cd1cd0990c}{
+\index{SparseMemory@{SparseMemory}!m\_\-total\_\-adds@{m\_\-total\_\-adds}}
+\index{m\_\-total\_\-adds@{m\_\-total\_\-adds}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-total\_\-adds}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf m\_\-total\_\-adds}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_af76a2ea16aef8c95f5f840cd1cd0990c}
+\hypertarget{classSparseMemory_afa143dbd3f54d7d1568d199a762a2a6c}{
+\index{SparseMemory@{SparseMemory}!m\_\-total\_\-number\_\-of\_\-bits@{m\_\-total\_\-number\_\-of\_\-bits}}
+\index{m\_\-total\_\-number\_\-of\_\-bits@{m\_\-total\_\-number\_\-of\_\-bits}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-total\_\-number\_\-of\_\-bits}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-total\_\-number\_\-of\_\-bits}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_afa143dbd3f54d7d1568d199a762a2a6c}
+\hypertarget{classSparseMemory_a0adb1789aac47c7bc6fffcdd2f8e9df3}{
+\index{SparseMemory@{SparseMemory}!m\_\-total\_\-removes@{m\_\-total\_\-removes}}
+\index{m\_\-total\_\-removes@{m\_\-total\_\-removes}!SparseMemory@{SparseMemory}}
+\subsubsection[{m\_\-total\_\-removes}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf m\_\-total\_\-removes}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSparseMemory_a0adb1789aac47c7bc6fffcdd2f8e9df3}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/system/\hyperlink{SparseMemory_8hh}{SparseMemory.hh}\item 
+mem/ruby/system/\hyperlink{SparseMemory_8cc}{SparseMemory.cc}\end{DoxyCompactItemize}

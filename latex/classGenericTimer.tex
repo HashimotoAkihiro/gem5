@@ -1,0 +1,212 @@
+\hypertarget{classGenericTimer}{
+\section{クラス GenericTimer}
+\label{classGenericTimer}\index{GenericTimer@{GenericTimer}}
+}
+
+
+{\ttfamily \#include $<$generic\_\-timer.hh$>$}GenericTimerに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classGenericTimer}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classGenericTimer_1_1ArchTimer}{ArchTimer}
+\begin{DoxyCompactList}\small\item\em Per-\/CPU architected timer. \item\end{DoxyCompactList}\item 
+class \hyperlink{classGenericTimer_1_1SystemCounter}{SystemCounter}
+\end{DoxyCompactItemize}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef GenericTimerParams \hyperlink{classGenericTimer_a22b88e736eb537a678104e1f9d03b967}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classGenericTimer_a22b88e736eb537a678104e1f9d03b967}{Params} $\ast$ \hyperlink{classGenericTimer_acd3c3feb78ae7a8f88fe0f110a718dff}{params} () const 
+\item 
+\hyperlink{classGenericTimer_ab181001a27fc011ac7f4cf037355fe52}{GenericTimer} (\hyperlink{classGenericTimer_a22b88e736eb537a678104e1f9d03b967}{Params} $\ast$p)
+\begin{DoxyCompactList}\small\item\em Ctor. \item\end{DoxyCompactList}\item 
+\hyperlink{classGenericTimer_1_1SystemCounter}{SystemCounter} $\ast$ \hyperlink{classGenericTimer_aa2f9dd95a2e3e767b4f84eb8f3fe1b3c}{getSystemCounter} ()
+\begin{DoxyCompactList}\small\item\em Returns a pointer to the system counter. \item\end{DoxyCompactList}\item 
+\hyperlink{classGenericTimer_1_1ArchTimer}{ArchTimer} $\ast$ \hyperlink{classGenericTimer_a29c0ab5dcf6b80bda0bcab1529bbdb12}{getArchTimer} (int cpu\_\-id)
+\begin{DoxyCompactList}\small\item\em Returns a pointer to the architected timer for cpu\_\-id. \item\end{DoxyCompactList}\item 
+virtual void \hyperlink{classGenericTimer_a53e036786d17361be4c7320d39c99b84}{serialize} (std::ostream \&os)
+\item 
+virtual void \hyperlink{classGenericTimer_af22e5d6d660b97db37003ac61ac4ee49}{unserialize} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const std::string \&section)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBaseGic}{BaseGic} $\ast$ \hyperlink{classGenericTimer_a3e5f959a7b42b68c04c24579d7694403}{\_\-gic}
+\begin{DoxyCompactList}\small\item\em Pointer to the GIC, needed to trigger timer interrupts. \item\end{DoxyCompactList}\item 
+\hyperlink{classGenericTimer_1_1SystemCounter}{SystemCounter} \hyperlink{classGenericTimer_afd7c96638f55784d1c67600fe458440b}{\_\-systemCounter}
+\begin{DoxyCompactList}\small\item\em \hyperlink{classSystem}{System} counter. \item\end{DoxyCompactList}\item 
+\hyperlink{classGenericTimer_1_1ArchTimer}{ArchTimer} \hyperlink{classGenericTimer_af68f66e102b05b60384be22f871c89ec}{\_\-archTimers} \mbox{[}\hyperlink{classGenericTimer_a4b102c882c8ecd5172c3f918fcde9c6d}{CPU\_\-MAX}\mbox{]}
+\begin{DoxyCompactList}\small\item\em Per-\/CPU architected timers. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+static const int \hyperlink{classGenericTimer_a4b102c882c8ecd5172c3f918fcde9c6d}{CPU\_\-MAX} = 8
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Wrapper around the actual counters and timers of the Generic Timer extension. 
+
+\subsection{型定義}
+\hypertarget{classGenericTimer_a22b88e736eb537a678104e1f9d03b967}{
+\index{GenericTimer@{GenericTimer}!Params@{Params}}
+\index{Params@{Params}!GenericTimer@{GenericTimer}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef GenericTimerParams {\bf Params}}}
+\label{classGenericTimer_a22b88e736eb537a678104e1f9d03b967}
+
+
+\hyperlink{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}{SimObject}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classGenericTimer_ab181001a27fc011ac7f4cf037355fe52}{
+\index{GenericTimer@{GenericTimer}!GenericTimer@{GenericTimer}}
+\index{GenericTimer@{GenericTimer}!GenericTimer@{GenericTimer}}
+\subsubsection[{GenericTimer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GenericTimer} ({\bf Params} $\ast$ {\em p})}}
+\label{classGenericTimer_ab181001a27fc011ac7f4cf037355fe52}
+
+
+Ctor. 
+
+
+\begin{DoxyCode}
+165     : SimObject(p), _gic(p->gic)
+166 {
+167    for (int i = 0; i < CPU_MAX; ++i) {
+168         std::stringstream oss;
+169         oss << name() << ".arch_timer" << i;
+170         _archTimers[i]._name = oss.str();
+171         _archTimers[i]._parent = this;
+172         _archTimers[i]._counter = &_systemCounter;
+173         _archTimers[i]._cpuNum = i;
+174         _archTimers[i]._intNum = p->int_num;
+175    }
+176 
+177    ((ArmSystem *) p->system)->setGenericTimer(this);
+178 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classGenericTimer_a29c0ab5dcf6b80bda0bcab1529bbdb12}{
+\index{GenericTimer@{GenericTimer}!getArchTimer@{getArchTimer}}
+\index{getArchTimer@{getArchTimer}!GenericTimer@{GenericTimer}}
+\subsubsection[{getArchTimer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ArchTimer}$\ast$ getArchTimer (int {\em cpu\_\-id})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classGenericTimer_a29c0ab5dcf6b80bda0bcab1529bbdb12}
+
+
+Returns a pointer to the architected timer for cpu\_\-id. 
+
+
+\begin{DoxyCode}
+193 { return &_archTimers[cpu_id]; }
+\end{DoxyCode}
+\hypertarget{classGenericTimer_aa2f9dd95a2e3e767b4f84eb8f3fe1b3c}{
+\index{GenericTimer@{GenericTimer}!getSystemCounter@{getSystemCounter}}
+\index{getSystemCounter@{getSystemCounter}!GenericTimer@{GenericTimer}}
+\subsubsection[{getSystemCounter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SystemCounter}$\ast$ getSystemCounter ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classGenericTimer_aa2f9dd95a2e3e767b4f84eb8f3fe1b3c}
+
+
+Returns a pointer to the system counter. 
+
+
+\begin{DoxyCode}
+190 { return &_systemCounter; }
+\end{DoxyCode}
+\hypertarget{classGenericTimer_acd3c3feb78ae7a8f88fe0f110a718dff}{
+\index{GenericTimer@{GenericTimer}!params@{params}}
+\index{params@{params}!GenericTimer@{GenericTimer}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Params}$\ast$ params () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classGenericTimer_acd3c3feb78ae7a8f88fe0f110a718dff}
+
+
+\hyperlink{classSimObject_acd3c3feb78ae7a8f88fe0f110a718dff}{SimObject}を再定義しています。
+
+
+\begin{DoxyCode}
+182     {
+183         return dynamic_cast<const Params *>(_params);
+184     }
+\end{DoxyCode}
+\hypertarget{classGenericTimer_a53e036786d17361be4c7320d39c99b84}{
+\index{GenericTimer@{GenericTimer}!serialize@{serialize}}
+\index{serialize@{serialize}!GenericTimer@{GenericTimer}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize (std::ostream \& {\em os})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classGenericTimer_a53e036786d17361be4c7320d39c99b84}
+
+
+\hyperlink{classSerializable_ad6272f80ae37e8331e3969b3f072a801}{Serializable}を再定義しています。
+
+
+\begin{DoxyCode}
+182 {
+183     nameOut(os, csprintf("%s.sys_counter", name()));
+184     _systemCounter.serialize(os);
+185     for (int i = 0; i < CPU_MAX; ++i) {
+186         nameOut(os, csprintf("%s.arch_timer%d", name(), i));
+187         _archTimers[i].serialize(os);
+188     }
+189 }
+\end{DoxyCode}
+\hypertarget{classGenericTimer_af22e5d6d660b97db37003ac61ac4ee49}{
+\index{GenericTimer@{GenericTimer}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!GenericTimer@{GenericTimer}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}void unserialize ({\bf Checkpoint} $\ast$ {\em cp}, \/  const std::string \& {\em section})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classGenericTimer_af22e5d6d660b97db37003ac61ac4ee49}
+
+
+\hyperlink{classSerializable_af100c4e9feabf3cd918619c88c718387}{Serializable}を再定義しています。
+
+
+\begin{DoxyCode}
+193 {
+194     _systemCounter.unserialize(cp, csprintf("%s.sys_counter", section));
+195     for (int i = 0; i < CPU_MAX; ++i) {
+196         _archTimers[i].unserialize(cp, csprintf("%s.arch_timer%d", section, i));
+197     }
+198 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classGenericTimer_af68f66e102b05b60384be22f871c89ec}{
+\index{GenericTimer@{GenericTimer}!\_\-archTimers@{\_\-archTimers}}
+\index{\_\-archTimers@{\_\-archTimers}!GenericTimer@{GenericTimer}}
+\subsubsection[{\_\-archTimers}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ArchTimer} {\bf \_\-archTimers}\mbox{[}{\bf CPU\_\-MAX}\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classGenericTimer_af68f66e102b05b60384be22f871c89ec}
+
+
+Per-\/CPU architected timers. \hypertarget{classGenericTimer_a3e5f959a7b42b68c04c24579d7694403}{
+\index{GenericTimer@{GenericTimer}!\_\-gic@{\_\-gic}}
+\index{\_\-gic@{\_\-gic}!GenericTimer@{GenericTimer}}
+\subsubsection[{\_\-gic}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BaseGic}$\ast$ {\bf \_\-gic}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classGenericTimer_a3e5f959a7b42b68c04c24579d7694403}
+
+
+Pointer to the GIC, needed to trigger timer interrupts. \hypertarget{classGenericTimer_afd7c96638f55784d1c67600fe458440b}{
+\index{GenericTimer@{GenericTimer}!\_\-systemCounter@{\_\-systemCounter}}
+\index{\_\-systemCounter@{\_\-systemCounter}!GenericTimer@{GenericTimer}}
+\subsubsection[{\_\-systemCounter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SystemCounter} {\bf \_\-systemCounter}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classGenericTimer_afd7c96638f55784d1c67600fe458440b}
+
+
+\hyperlink{classSystem}{System} counter. \hypertarget{classGenericTimer_a4b102c882c8ecd5172c3f918fcde9c6d}{
+\index{GenericTimer@{GenericTimer}!CPU\_\-MAX@{CPU\_\-MAX}}
+\index{CPU\_\-MAX@{CPU\_\-MAX}!GenericTimer@{GenericTimer}}
+\subsubsection[{CPU\_\-MAX}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf CPU\_\-MAX} = 8\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classGenericTimer_a4b102c882c8ecd5172c3f918fcde9c6d}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/arm/\hyperlink{generic__timer_8hh}{generic\_\-timer.hh}\item 
+dev/arm/\hyperlink{generic__timer_8cc}{generic\_\-timer.cc}\end{DoxyCompactItemize}

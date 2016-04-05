@@ -1,0 +1,166 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/alpha/isa.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/alpha/isa.hh</h1><a href="alpha_2isa_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2009 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __ARCH_ALPHA_ISA_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ALPHA_ISA_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;cstring&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="alpha_2registers_8hh.html">arch/alpha/registers.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="arch_2alpha_2types_8hh.html">arch/alpha/types.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="sim_2system_8hh.html">sim/system.hh</a>&quot;</span>
+<a name="l00043"></a>00043 
+<a name="l00044"></a>00044 <span class="keyword">struct </span>AlphaISAParams;
+<a name="l00045"></a>00045 <span class="keyword">class </span><a class="code" href="classBaseCPU.html">BaseCPU</a>;
+<a name="l00046"></a>00046 <span class="keyword">class </span><a class="code" href="classCheckpoint.html">Checkpoint</a>;
+<a name="l00047"></a>00047 <span class="keyword">class </span><a class="code" href="classEventManager.html">EventManager</a>;
+<a name="l00048"></a>00048 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="keyword">namespace </span>AlphaISA
+<a name="l00051"></a>00051 {
+<a name="l00052"></a><a class="code" href="classAlphaISA_1_1ISA.html">00052</a>     <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1ISA.html">ISA</a> : <span class="keyword">public</span> <a class="code" href="classm5_1_1SimObject_1_1SimObject.html">SimObject</a>
+<a name="l00053"></a>00053     {
+<a name="l00054"></a>00054       <span class="keyword">public</span>:
+<a name="l00055"></a><a class="code" href="classAlphaISA_1_1ISA.html#a3be59bc6c39d87f5d4bd0e05abe0b416">00055</a>         <span class="keyword">typedef</span> uint64_t <a class="code" href="classAlphaISA_1_1ISA.html#a3be59bc6c39d87f5d4bd0e05abe0b416">InternalProcReg</a>;
+<a name="l00056"></a><a class="code" href="classAlphaISA_1_1ISA.html#a492961bc1e489616b642e85a4e2ddf03">00056</a>         <span class="keyword">typedef</span> AlphaISAParams <a class="code" href="classAlphaISA_1_1ISA.html#a492961bc1e489616b642e85a4e2ddf03">Params</a>;
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058       <span class="keyword">protected</span>:
+<a name="l00059"></a>00059         <span class="comment">// Parent system</span>
+<a name="l00060"></a><a class="code" href="classAlphaISA_1_1ISA.html#af27ccd765f13a4b7bd119dc7579e2746">00060</a>         <a class="code" href="classSystem.html">System</a> *<a class="code" href="classAlphaISA_1_1ISA.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00061"></a>00061 
+<a name="l00062"></a><a class="code" href="classAlphaISA_1_1ISA.html#afe6e18a3c766bdbd3a13c449eff10c85">00062</a>         uint64_t <a class="code" href="classAlphaISA_1_1ISA.html#afe6e18a3c766bdbd3a13c449eff10c85">fpcr</a>;       <span class="comment">// floating point condition codes</span>
+<a name="l00063"></a><a class="code" href="classAlphaISA_1_1ISA.html#a4bf79f35bed3cb9ecd35cc65ec6400c7">00063</a>         uint64_t <a class="code" href="classAlphaISA_1_1ISA.html#a4bf79f35bed3cb9ecd35cc65ec6400c7">uniq</a>;       <span class="comment">// process-unique register</span>
+<a name="l00064"></a><a class="code" href="classAlphaISA_1_1ISA.html#a5379df879a195cd227c4b3e04fc324d4">00064</a>         <span class="keywordtype">bool</span> <a class="code" href="classAlphaISA_1_1ISA.html#a5379df879a195cd227c4b3e04fc324d4">lock_flag</a>;      <span class="comment">// lock flag for LL/SC</span>
+<a name="l00065"></a><a class="code" href="classAlphaISA_1_1ISA.html#a06174a765f779599487143e17e764d72">00065</a>         <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classAlphaISA_1_1ISA.html#a06174a765f779599487143e17e764d72">lock_addr</a>;      <span class="comment">// lock address for LL/SC</span>
+<a name="l00066"></a><a class="code" href="classAlphaISA_1_1ISA.html#a132031b6f829162c4bd2effdb8105dcb">00066</a>         <span class="keywordtype">int</span> <a class="code" href="classAlphaISA_1_1ISA.html#a132031b6f829162c4bd2effdb8105dcb">intr_flag</a>;
+<a name="l00067"></a>00067 
+<a name="l00068"></a><a class="code" href="classAlphaISA_1_1ISA.html#a73c7625b3b5159b8981319eeb1337c75">00068</a>         <a class="code" href="classAlphaISA_1_1ISA.html#a3be59bc6c39d87f5d4bd0e05abe0b416">InternalProcReg</a> <a class="code" href="classAlphaISA_1_1ISA.html#a73c7625b3b5159b8981319eeb1337c75">ipr</a>[<a class="code" href="namespaceAlphaISA.html#ac76a902b2e65598399068bb755d21c61a70427ff525cb627f3e57c9041bf01dfc">NumInternalProcRegs</a>]; <span class="comment">// Internal processor regs</span>
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070       <span class="keyword">protected</span>:
+<a name="l00071"></a>00071         <a class="code" href="classAlphaISA_1_1ISA.html#a3be59bc6c39d87f5d4bd0e05abe0b416">InternalProcReg</a> <a class="code" href="classAlphaISA_1_1ISA.html#adc7402a9cc2aaeb6bbb7bf5c3f7c4d18">readIpr</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00072"></a>00072         <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ISA.html#a5ad670d8483b30ac29ecc133e3e501d5">setIpr</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classAlphaISA_1_1ISA.html#a3be59bc6c39d87f5d4bd0e05abe0b416">InternalProcReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074       <span class="keyword">public</span>:
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076         <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="classAlphaISA_1_1ISA.html#af2ec8925148a53b9bddefb7fb65a7223">readMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0);
+<a name="l00077"></a>00077         <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="classAlphaISA_1_1ISA.html#a81ac5a0c0d9b625997d7737f911743b1">readMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0);
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079         <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ISA.html#ab8dd4afdd4e652ca191b235505691f68">setMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>,
+<a name="l00080"></a>00080                                 <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0);
+<a name="l00081"></a>00081         <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ISA.html#ab85b054f14d72781b7f540270867e2df">setMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00082"></a>00082                         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0);
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084         <span class="keywordtype">void</span>
+<a name="l00085"></a><a class="code" href="classAlphaISA_1_1ISA.html#ac8bb3912a3ce86b15842e79d0b421204">00085</a>         <a class="code" href="classAlphaISA_1_1ISA.html#ac8bb3912a3ce86b15842e79d0b421204">clear</a>()
+<a name="l00086"></a>00086         {
+<a name="l00087"></a>00087             <a class="code" href="classAlphaISA_1_1ISA.html#afe6e18a3c766bdbd3a13c449eff10c85">fpcr</a> = 0;
+<a name="l00088"></a>00088             <a class="code" href="classAlphaISA_1_1ISA.html#a4bf79f35bed3cb9ecd35cc65ec6400c7">uniq</a> = 0;
+<a name="l00089"></a>00089             <a class="code" href="classAlphaISA_1_1ISA.html#a5379df879a195cd227c4b3e04fc324d4">lock_flag</a> = 0;
+<a name="l00090"></a>00090             <a class="code" href="classAlphaISA_1_1ISA.html#a06174a765f779599487143e17e764d72">lock_addr</a> = 0;
+<a name="l00091"></a>00091             <a class="code" href="classAlphaISA_1_1ISA.html#a132031b6f829162c4bd2effdb8105dcb">intr_flag</a> = 0;
+<a name="l00092"></a>00092             memset(<a class="code" href="classAlphaISA_1_1ISA.html#a73c7625b3b5159b8981319eeb1337c75">ipr</a>, 0, <span class="keyword">sizeof</span>(<a class="code" href="classAlphaISA_1_1ISA.html#a73c7625b3b5159b8981319eeb1337c75">ipr</a>));
+<a name="l00093"></a>00093         }
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095         <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ISA.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00096"></a>00096         <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ISA.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098         <span class="keywordtype">int</span>
+<a name="l00099"></a><a class="code" href="classAlphaISA_1_1ISA.html#aece4b88ffcab608652e8e9f0fbe643d4">00099</a>         <a class="code" href="classAlphaISA_1_1ISA.html#aece4b88ffcab608652e8e9f0fbe643d4">flattenIntIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00100"></a>00100 <span class="keyword">        </span>{
+<a name="l00101"></a>00101             <span class="keywordflow">return</span> reg;
+<a name="l00102"></a>00102         }
+<a name="l00103"></a>00103 
+<a name="l00104"></a>00104         <span class="keywordtype">int</span>
+<a name="l00105"></a><a class="code" href="classAlphaISA_1_1ISA.html#a85addcd4f57c5a0ffa81805dcad1eeb7">00105</a>         <a class="code" href="classAlphaISA_1_1ISA.html#a85addcd4f57c5a0ffa81805dcad1eeb7">flattenFloatIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00106"></a>00106 <span class="keyword">        </span>{
+<a name="l00107"></a>00107             <span class="keywordflow">return</span> reg;
+<a name="l00108"></a>00108         }
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110         <span class="comment">// dummy</span>
+<a name="l00111"></a>00111         <span class="keywordtype">int</span>
+<a name="l00112"></a><a class="code" href="classAlphaISA_1_1ISA.html#a7a5d7476bd10e5af09e6e753d1fca087">00112</a>         <a class="code" href="classAlphaISA_1_1ISA.html#a7a5d7476bd10e5af09e6e753d1fca087">flattenCCIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00113"></a>00113 <span class="keyword">        </span>{
+<a name="l00114"></a>00114             <span class="keywordflow">return</span> reg;
+<a name="l00115"></a>00115         }
+<a name="l00116"></a>00116 
+<a name="l00117"></a>00117         <span class="keywordtype">int</span>
+<a name="l00118"></a><a class="code" href="classAlphaISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">00118</a>         <a class="code" href="classAlphaISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00119"></a>00119 <span class="keyword">        </span>{
+<a name="l00120"></a>00120             <span class="keywordflow">return</span> reg;
+<a name="l00121"></a>00121         }
+<a name="l00122"></a>00122 
+<a name="l00123"></a>00123         <span class="keyword">const</span> <a class="code" href="classAlphaISA_1_1ISA.html#a492961bc1e489616b642e85a4e2ddf03">Params</a> *<a class="code" href="classAlphaISA_1_1ISA.html#a0968f22111d8484ab76cc2d65d1ad57d">params</a>() <span class="keyword">const</span>;
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125         <a class="code" href="classAlphaISA_1_1ISA.html#ae9132e021b3f3b20c917fc328a056bbd">ISA</a>(<a class="code" href="classAlphaISA_1_1ISA.html#a492961bc1e489616b642e85a4e2ddf03">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00126"></a>00126 
+<a name="l00127"></a><a class="code" href="classAlphaISA_1_1ISA.html#a769e733729615c529fdb54f538f11dba">00127</a>         <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ISA.html#a769e733729615c529fdb54f538f11dba">startup</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) {}
+<a name="l00128"></a>00128 
+<a name="l00130"></a>00130         <span class="keyword">using</span> <a class="code" href="classSimObject.html#aecc7d8debf54990ffeaaed5bac7d7d81">SimObject::startup</a>;
+<a name="l00131"></a>00131     };
+<a name="l00132"></a>00132 }
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

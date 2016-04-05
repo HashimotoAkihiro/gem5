@@ -1,0 +1,172 @@
+\hypertarget{classX86ISA_1_1InitInterrupt}{
+\section{クラス InitInterrupt}
+\label{classX86ISA_1_1InitInterrupt}\index{X86ISA::InitInterrupt@{X86ISA::InitInterrupt}}
+}
+
+
+{\ttfamily \#include $<$faults.hh$>$}InitInterruptに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classX86ISA_1_1InitInterrupt}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1InitInterrupt_ae97d554dd37e49f62d2483933d5fd437}{InitInterrupt} (uint8\_\-t \_\-vector)
+\item 
+void \hyperlink{classX86ISA_1_1InitInterrupt_a2bd783b42262278d41157d428e1f8d6f}{invoke} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classRefCountingPtr}{StaticInstPtr} inst=\hyperlink{classStaticInst_aa793d9793af735f09096369fb17567b6}{StaticInst::nullStaticInstPtr})
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classX86ISA_1_1InitInterrupt_ae97d554dd37e49f62d2483933d5fd437}{
+\index{X86ISA::InitInterrupt@{X86ISA::InitInterrupt}!InitInterrupt@{InitInterrupt}}
+\index{InitInterrupt@{InitInterrupt}!X86ISA::InitInterrupt@{X86ISA::InitInterrupt}}
+\subsubsection[{InitInterrupt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InitInterrupt} (uint8\_\-t {\em \_\-vector})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classX86ISA_1_1InitInterrupt_ae97d554dd37e49f62d2483933d5fd437}
+
+
+
+\begin{DoxyCode}
+399                                        :
+400             X86Interrupt("INIT Interrupt", "#INIT", _vector)
+401         {}
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classX86ISA_1_1InitInterrupt_a2bd783b42262278d41157d428e1f8d6f}{
+\index{X86ISA::InitInterrupt@{X86ISA::InitInterrupt}!invoke@{invoke}}
+\index{invoke@{invoke}!X86ISA::InitInterrupt@{X86ISA::InitInterrupt}}
+\subsubsection[{invoke}]{\setlength{\rightskip}{0pt plus 5cm}void invoke ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf StaticInstPtr} {\em inst} = {\ttfamily {\bf StaticInst::nullStaticInstPtr}})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1InitInterrupt_a2bd783b42262278d41157d428e1f8d6f}
+
+
+\hyperlink{classX86ISA_1_1X86FaultBase_a2bd783b42262278d41157d428e1f8d6f}{X86FaultBase}を再定義しています。
+
+
+\begin{DoxyCode}
+174     {
+175         DPRINTF(Faults, "Init interrupt.\n");
+176         // The otherwise unmodified integer registers should be set to 0.
+177         for (int index = 0; index < NUM_INTREGS; index++) {
+178             tc->setIntReg(index, 0);
+179         }
+180 
+181         CR0 cr0 = tc->readMiscReg(MISCREG_CR0);
+182         CR0 newCR0 = 1 << 4;
+183         newCR0.cd = cr0.cd;
+184         newCR0.nw = cr0.nw;
+185         tc->setMiscReg(MISCREG_CR0, newCR0);
+186         tc->setMiscReg(MISCREG_CR2, 0);
+187         tc->setMiscReg(MISCREG_CR3, 0);
+188         tc->setMiscReg(MISCREG_CR4, 0);
+189 
+190         tc->setMiscReg(MISCREG_RFLAGS, 0x0000000000000002ULL);
+191 
+192         tc->setMiscReg(MISCREG_EFER, 0);
+193 
+194         SegAttr dataAttr = 0;
+195         dataAttr.dpl = 0;
+196         dataAttr.unusable = 0;
+197         dataAttr.defaultSize = 0;
+198         dataAttr.longMode = 0;
+199         dataAttr.avl = 0;
+200         dataAttr.granularity = 0;
+201         dataAttr.present = 1;
+202         dataAttr.type = 3;
+203         dataAttr.writable = 1;
+204         dataAttr.readable = 1;
+205         dataAttr.expandDown = 0;
+206         dataAttr.system = 1;
+207 
+208         for (int seg = 0; seg != NUM_SEGMENTREGS; seg++) {
+209             tc->setMiscReg(MISCREG_SEG_SEL(seg), 0);
+210             tc->setMiscReg(MISCREG_SEG_BASE(seg), 0);
+211             tc->setMiscReg(MISCREG_SEG_EFF_BASE(seg), 0);
+212             tc->setMiscReg(MISCREG_SEG_LIMIT(seg), 0xffff);
+213             tc->setMiscReg(MISCREG_SEG_ATTR(seg), dataAttr);
+214         }
+215 
+216         SegAttr codeAttr = 0;
+217         codeAttr.dpl = 0;
+218         codeAttr.unusable = 0;
+219         codeAttr.defaultSize = 0;
+220         codeAttr.longMode = 0;
+221         codeAttr.avl = 0;
+222         codeAttr.granularity = 0;
+223         codeAttr.present = 1;
+224         codeAttr.type = 10;
+225         codeAttr.writable = 0;
+226         codeAttr.readable = 1;
+227         codeAttr.expandDown = 0;
+228         codeAttr.system = 1;
+229 
+230         tc->setMiscReg(MISCREG_CS, 0xf000);
+231         tc->setMiscReg(MISCREG_CS_BASE,
+232                 0x00000000ffff0000ULL);
+233         tc->setMiscReg(MISCREG_CS_EFF_BASE,
+234                 0x00000000ffff0000ULL);
+235         // This has the base value pre-added.
+236         tc->setMiscReg(MISCREG_CS_LIMIT, 0xffffffff);
+237         tc->setMiscReg(MISCREG_CS_ATTR, codeAttr);
+238 
+239         PCState pc(0x000000000000fff0ULL + tc->readMiscReg(MISCREG_CS_BASE));
+240         tc->pcState(pc);
+241 
+242         tc->setMiscReg(MISCREG_TSG_BASE, 0);
+243         tc->setMiscReg(MISCREG_TSG_LIMIT, 0xffff);
+244 
+245         tc->setMiscReg(MISCREG_IDTR_BASE, 0);
+246         tc->setMiscReg(MISCREG_IDTR_LIMIT, 0xffff);
+247 
+248         SegAttr tslAttr = 0;
+249         tslAttr.present = 1;
+250         tslAttr.type = 2; // LDT
+251         tc->setMiscReg(MISCREG_TSL, 0);
+252         tc->setMiscReg(MISCREG_TSL_BASE, 0);
+253         tc->setMiscReg(MISCREG_TSL_LIMIT, 0xffff);
+254         tc->setMiscReg(MISCREG_TSL_ATTR, tslAttr);
+255 
+256         SegAttr trAttr = 0;
+257         trAttr.present = 1;
+258         trAttr.type = 3; // Busy 16-bit TSS
+259         tc->setMiscReg(MISCREG_TR, 0);
+260         tc->setMiscReg(MISCREG_TR_BASE, 0);
+261         tc->setMiscReg(MISCREG_TR_LIMIT, 0xffff);
+262         tc->setMiscReg(MISCREG_TR_ATTR, trAttr);
+263 
+264         // This value should be the family/model/stepping of the processor.
+265         // (page 418). It should be consistent with the value from CPUID, but
+266         // the actual value probably doesn't matter much.
+267         tc->setIntReg(INTREG_RDX, 0);
+268 
+269         tc->setMiscReg(MISCREG_DR0, 0);
+270         tc->setMiscReg(MISCREG_DR1, 0);
+271         tc->setMiscReg(MISCREG_DR2, 0);
+272         tc->setMiscReg(MISCREG_DR3, 0);
+273 
+274         tc->setMiscReg(MISCREG_DR6, 0x00000000ffff0ff0ULL);
+275         tc->setMiscReg(MISCREG_DR7, 0x0000000000000400ULL);
+276 
+277         tc->setMiscReg(MISCREG_MXCSR, 0x1f80);
+278 
+279         // Flag all elements on the x87 stack as empty.
+280         tc->setMiscReg(MISCREG_FTW, 0xFFFF);
+281 
+282         // Update the handy M5 Reg.
+283         tc->setMiscReg(MISCREG_M5_REG, 0);
+284         MicroPC entry = X86ISAInst::RomLabels::extern_label_initIntHalt;
+285         pc.upc(romMicroPC(entry));
+286         pc.nupc(romMicroPC(entry) + 1);
+287         tc->pcState(pc);
+288     }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/\hyperlink{arch_2x86_2faults_8hh}{faults.hh}\item 
+arch/x86/\hyperlink{arch_2x86_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

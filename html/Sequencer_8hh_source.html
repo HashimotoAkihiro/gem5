@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/system/Sequencer.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/system/Sequencer.hh</h1><a href="Sequencer_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 1999-2008 Mark D. Hill and David A. Wood</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> */</span>
+<a name="l00028"></a>00028 
+<a name="l00029"></a>00029 <span class="preprocessor">#ifndef __MEM_RUBY_SYSTEM_SEQUENCER_HH__</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_SYSTEM_SEQUENCER_HH__</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span>
+<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00033"></a>00033 
+<a name="l00034"></a>00034 <span class="preprocessor">#include &quot;<a class="code" href="hashmap_8hh.html">base/hashmap.hh</a>&quot;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;mem/protocol/MachineType.hh&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;mem/protocol/RubyRequestType.hh&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;mem/protocol/SequencerRequestType.hh&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="Address_8hh.html">mem/ruby/common/Address.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="CacheMemory_8hh.html">mem/ruby/system/CacheMemory.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="RubyPort_8hh.html">mem/ruby/system/RubyPort.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;params/RubySequencer.hh&quot;</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a><a class="code" href="structSequencerRequest.html">00043</a> <span class="keyword">struct </span><a class="code" href="structSequencerRequest.html">SequencerRequest</a>
+<a name="l00044"></a>00044 {
+<a name="l00045"></a><a class="code" href="structSequencerRequest.html#a3a891bc2a0fcbe6be5297077d94e2df7">00045</a>     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="structSequencerRequest.html#a3a891bc2a0fcbe6be5297077d94e2df7">pkt</a>;
+<a name="l00046"></a><a class="code" href="structSequencerRequest.html#a7d010f0854d320898448eae2da5997f8">00046</a>     RubyRequestType <a class="code" href="structSequencerRequest.html#a7d010f0854d320898448eae2da5997f8">m_type</a>;
+<a name="l00047"></a><a class="code" href="structSequencerRequest.html#aa9c7c90a6f11931d8a6f2f9736929679">00047</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="structSequencerRequest.html#aa9c7c90a6f11931d8a6f2f9736929679">issue_time</a>;
+<a name="l00048"></a>00048 
+<a name="l00049"></a><a class="code" href="structSequencerRequest.html#afdb00f90acab3e58a56b74ee3da13b2f">00049</a>     <a class="code" href="structSequencerRequest.html#afdb00f90acab3e58a56b74ee3da13b2f">SequencerRequest</a>(<a class="code" href="classPacket.html">PacketPtr</a> _pkt, RubyRequestType _m_type,
+<a name="l00050"></a>00050                      <a class="code" href="classCycles.html">Cycles</a> _issue_time)
+<a name="l00051"></a>00051         : <a class="code" href="structSequencerRequest.html#a3a891bc2a0fcbe6be5297077d94e2df7">pkt</a>(_pkt), <a class="code" href="structSequencerRequest.html#a7d010f0854d320898448eae2da5997f8">m_type</a>(_m_type), <a class="code" href="structSequencerRequest.html#aa9c7c90a6f11931d8a6f2f9736929679">issue_time</a>(_issue_time)
+<a name="l00052"></a>00052     {}
+<a name="l00053"></a>00053 };
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055 std::ostream&amp; <a class="code" href="namespaceGenericISA.html#a960fce0270870fc775ac34cc401036ba">operator&lt;&lt;</a>(std::ostream&amp; out, <span class="keyword">const</span> <a class="code" href="structSequencerRequest.html">SequencerRequest</a>&amp; obj);
+<a name="l00056"></a>00056 
+<a name="l00057"></a><a class="code" href="classSequencer.html">00057</a> <span class="keyword">class </span><a class="code" href="classSequencer.html">Sequencer</a> : <span class="keyword">public</span> <a class="code" href="classSequencer_1_1RubyPort.html">RubyPort</a>
+<a name="l00058"></a>00058 {
+<a name="l00059"></a>00059   <span class="keyword">public</span>:
+<a name="l00060"></a><a class="code" href="classSequencer.html#a55b8bba242820df379c5d9139a854e5b">00060</a>     <span class="keyword">typedef</span> RubySequencerParams <a class="code" href="classSequencer.html#a55b8bba242820df379c5d9139a854e5b">Params</a>;
+<a name="l00061"></a>00061     <a class="code" href="classSequencer.html#a5f15f2d0a36488220062dc04ca597b6e">Sequencer</a>(<span class="keyword">const</span> <a class="code" href="classSequencer.html#a55b8bba242820df379c5d9139a854e5b">Params</a> *);
+<a name="l00062"></a>00062     <a class="code" href="classSequencer.html#a33e9de4a3e9618f014e48385c51abe67">~Sequencer</a>();
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064     <span class="comment">// Public Methods</span>
+<a name="l00065"></a>00065     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>(); <span class="comment">// Used only for deadlock detection</span>
+<a name="l00066"></a>00066     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a5108f0f12fa601b4c6713ee79510ef83">printProgress</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00067"></a>00067     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a65880e61108132689a1bd769b9187fb7">resetStats</a>();
+<a name="l00068"></a>00068     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a208669cbc0bb1d52565956ca8c690c55">collateStats</a>();
+<a name="l00069"></a>00069     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a97f81494e28695a87ea2fdc0346ceb30">writeCallback</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address,
+<a name="l00072"></a>00072                        <a class="code" href="classDataBlock.html">DataBlock</a>&amp; data,
+<a name="l00073"></a>00073                        <span class="keyword">const</span> <span class="keywordtype">bool</span> externalHit = <span class="keyword">false</span>,
+<a name="l00074"></a>00074                        <span class="keyword">const</span> MachineType mach = MachineType_NUM,
+<a name="l00075"></a>00075                        <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> initialRequestTime = <a class="code" href="classCycles.html">Cycles</a>(0),
+<a name="l00076"></a>00076                        <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> forwardRequestTime = <a class="code" href="classCycles.html">Cycles</a>(0),
+<a name="l00077"></a>00077                        <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> firstResponseTime = <a class="code" href="classCycles.html">Cycles</a>(0));
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a6b6826ba925b0aa2cad4601dcb8dd5ee">readCallback</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address,
+<a name="l00080"></a>00080                       <a class="code" href="classDataBlock.html">DataBlock</a>&amp; data,
+<a name="l00081"></a>00081                       <span class="keyword">const</span> <span class="keywordtype">bool</span> externalHit = <span class="keyword">false</span>,
+<a name="l00082"></a>00082                       <span class="keyword">const</span> MachineType mach = MachineType_NUM,
+<a name="l00083"></a>00083                       <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> initialRequestTime = <a class="code" href="classCycles.html">Cycles</a>(0),
+<a name="l00084"></a>00084                       <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> forwardRequestTime = <a class="code" href="classCycles.html">Cycles</a>(0),
+<a name="l00085"></a>00085                       <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> firstResponseTime = <a class="code" href="classCycles.html">Cycles</a>(0));
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087     RequestStatus <a class="code" href="classSequencer.html#a23de6e3fbb2362f4410d435e3600d0f7">makeRequest</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00088"></a>00088     <span class="keywordtype">bool</span> <a class="code" href="classSequencer.html#ac6e61de369e994009e36f344f99c15ad">empty</a>() <span class="keyword">const</span>;
+<a name="l00089"></a><a class="code" href="classSequencer.html#ae47593dc86baa86bf047ad1fbcdcceed">00089</a>     <span class="keywordtype">int</span> <a class="code" href="classSequencer.html#ae47593dc86baa86bf047ad1fbcdcceed">outstandingCount</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSequencer.html#a5d645b1dc48106eac07688fc8c65edd2">m_outstanding_count</a>; }
+<a name="l00090"></a>00090 
+<a name="l00091"></a><a class="code" href="classSequencer.html#a11ce018fbd3aa89624b06dbdafbd4ef9">00091</a>     <span class="keywordtype">bool</span> <a class="code" href="classSequencer.html#a11ce018fbd3aa89624b06dbdafbd4ef9">isDeadlockEventScheduled</a>()<span class="keyword"> const</span>
+<a name="l00092"></a>00092 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classSequencer.html#a1898c82aec1a510eaa5aa55cb23a5bc3">deadlockCheckEvent</a>.<a class="code" href="classEvent.html#a9cd69a6b10cb037550943f177a0da688" title="Determine if the current event is scheduled.">scheduled</a>(); }
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classSequencer.html#a7c9a8861621a62055761f47310814762">00094</a>     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a7c9a8861621a62055761f47310814762">descheduleDeadlockEvent</a>()
+<a name="l00095"></a>00095     { <a class="code" href="classEventManager.html#a720e34da4db679fb3f30b20e55c23605">deschedule</a>(<a class="code" href="classSequencer.html#a1898c82aec1a510eaa5aa55cb23a5bc3">deadlockCheckEvent</a>); }
+<a name="l00096"></a>00096 
+<a name="l00097"></a>00097     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#ac55fe386a101fbae38c716067c9966a0">print</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00098"></a>00098     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a381b1e1191b76356f0a37f22b3d19c52">checkCoherence</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00099"></a>00099 
+<a name="l00100"></a>00100     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a2e67c7ecd7fa83154e841e80a502130d">markRemoved</a>();
+<a name="l00101"></a>00101     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a525e0db39943b198c53fc6e8356f6050">removeRequest</a>(<a class="code" href="structSequencerRequest.html">SequencerRequest</a>* request);
+<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a3af79aeefd596a230ebc3a579fcc3fb1">evictionCallback</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00103"></a>00103     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#ab328ca1fdc98e525561d4fc99de4757c">invalidateSC</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a2fa76b7c47843db1ca8a852a1b4fdb49">recordRequestType</a>(SequencerRequestType requestType);
+<a name="l00106"></a><a class="code" href="classSequencer.html#aad0db21fdf9ff4bdf60a45e0eea9ef12">00106</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#aad0db21fdf9ff4bdf60a45e0eea9ef12">getOutstandReqHist</a>() { <span class="keywordflow">return</span> <a class="code" href="classSequencer.html#a24e9160c0860bc93a5f57de63544fe65" title="Histogram for number of outstanding requests per cycle.">m_outstandReqHist</a>; }
+<a name="l00107"></a>00107 
+<a name="l00108"></a><a class="code" href="classSequencer.html#ac46dd25fc33d37a54c700053c1f79314">00108</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#ac46dd25fc33d37a54c700053c1f79314">getLatencyHist</a>() { <span class="keywordflow">return</span> <a class="code" href="classSequencer.html#aeb3fc96d5f4638c5599ed141c6c6bda7" title="Histogram for holding latency profile of all requests.">m_latencyHist</a>; }
+<a name="l00109"></a><a class="code" href="classSequencer.html#ad93cd72a0644b8593762e57de8dcaef3">00109</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#ad93cd72a0644b8593762e57de8dcaef3">getTypeLatencyHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00110"></a>00110     { <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#a21453ca0672126e1c0e204b7c60b3340">m_typeLatencyHist</a>[t]; }
+<a name="l00111"></a>00111 
+<a name="l00112"></a><a class="code" href="classSequencer.html#a60d594e19c05f710687dabeccab69cb4">00112</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#a60d594e19c05f710687dabeccab69cb4">getHitLatencyHist</a>() { <span class="keywordflow">return</span> <a class="code" href="classSequencer.html#aa7b4f1cb2f6f69fac85f5fa0be12f95a">m_hitLatencyHist</a>; }
+<a name="l00113"></a><a class="code" href="classSequencer.html#a4996199be67d053287bec8a2fa742ee0">00113</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#a4996199be67d053287bec8a2fa742ee0">getHitTypeLatencyHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00114"></a>00114     { <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#aeecaf5411cd3b34435f621db03387b67">m_hitTypeLatencyHist</a>[t]; }
+<a name="l00115"></a>00115 
+<a name="l00116"></a><a class="code" href="classSequencer.html#a1923ce01b6ae7bce28ca59c6df159058">00116</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#a1923ce01b6ae7bce28ca59c6df159058">getHitMachLatencyHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00117"></a>00117     { <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#add8e2c73ddfe42f1b177e641a0e626d5">m_hitMachLatencyHist</a>[t]; }
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classSequencer.html#a7d6dd3224cae81bef46bd66b8923f3ca">00119</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#a7d6dd3224cae81bef46bd66b8923f3ca">getHitTypeMachLatencyHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00120"></a>00120     { <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#aaf855f02483dc21743651007a759ea77">m_hitTypeMachLatencyHist</a>[r][t]; }
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="classSequencer.html#ac9bb113b7a017a3530b476b4a6a86995">00122</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#ac9bb113b7a017a3530b476b4a6a86995">getMissLatencyHist</a>()
+<a name="l00123"></a>00123     { <span class="keywordflow">return</span> <a class="code" href="classSequencer.html#aff6841cbe8b6a9be485b4c45a8208f93">m_missLatencyHist</a>; }
+<a name="l00124"></a><a class="code" href="classSequencer.html#acca7e48b22f04eb014984ab493afe1e0">00124</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#acca7e48b22f04eb014984ab493afe1e0">getMissTypeLatencyHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00125"></a>00125     { <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#ac5a934c0abe9f0185357eb76de27dee3">m_missTypeLatencyHist</a>[t]; }
+<a name="l00126"></a>00126 
+<a name="l00127"></a><a class="code" href="classSequencer.html#a3ebf605b76407a53e0c62c2578cc7248">00127</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#a3ebf605b76407a53e0c62c2578cc7248">getMissMachLatencyHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)<span class="keyword"> const</span>
+<a name="l00128"></a>00128 <span class="keyword">    </span>{ <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#a55e994bce4da18f7600be6cbf7a4a3b5">m_missMachLatencyHist</a>[t]; }
+<a name="l00129"></a>00129 
+<a name="l00130"></a>00130     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp;
+<a name="l00131"></a><a class="code" href="classSequencer.html#a72d6c50e8af0a27e656f731aa0196daa">00131</a>     <a class="code" href="classSequencer.html#a72d6c50e8af0a27e656f731aa0196daa">getMissTypeMachLatencyHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)<span class="keyword"> const</span>
+<a name="l00132"></a>00132 <span class="keyword">    </span>{ <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#a8e022aebc37a4b83df56956874befd75">m_missTypeMachLatencyHist</a>[r][t]; }
+<a name="l00133"></a>00133 
+<a name="l00134"></a><a class="code" href="classSequencer.html#a27018ff7465a95b74e4271af0669d480">00134</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp; <a class="code" href="classSequencer.html#a27018ff7465a95b74e4271af0669d480">getIssueToInitialDelayHist</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)<span class="keyword"> const</span>
+<a name="l00135"></a>00135 <span class="keyword">    </span>{ <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#a503562ca3d885333c87da80d05ee612a" title="Histograms for recording the breakdown of miss latency.">m_IssueToInitialDelayHist</a>[t]; }
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp;
+<a name="l00138"></a><a class="code" href="classSequencer.html#a56ef3b1fa82226933191e723ad52cf12">00138</a>     <a class="code" href="classSequencer.html#a56ef3b1fa82226933191e723ad52cf12">getInitialToForwardDelayHist</a>(<span class="keyword">const</span> MachineType <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)<span class="keyword"> const</span>
+<a name="l00139"></a>00139 <span class="keyword">    </span>{ <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#a0dbfb83f6edf61cad3d0aebdc89ed370">m_InitialToForwardDelayHist</a>[t]; }
+<a name="l00140"></a>00140 
+<a name="l00141"></a>00141     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp;
+<a name="l00142"></a><a class="code" href="classSequencer.html#a39c21f2486b1d7dc3ca2a11ddf5378ce">00142</a>     <a class="code" href="classSequencer.html#a39c21f2486b1d7dc3ca2a11ddf5378ce">getForwardRequestToFirstResponseHist</a>(<span class="keyword">const</span> MachineType <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)<span class="keyword"> const</span>
+<a name="l00143"></a>00143 <span class="keyword">    </span>{ <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#ae9bea11c9b001a155e7f7a0f39ac7bf9">m_ForwardToFirstResponseDelayHist</a>[t]; }
+<a name="l00144"></a>00144 
+<a name="l00145"></a>00145     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a>&amp;
+<a name="l00146"></a><a class="code" href="classSequencer.html#a9f0e5366d9f6881645645f94fa07f5df">00146</a>     <a class="code" href="classSequencer.html#a9f0e5366d9f6881645645f94fa07f5df">getFirstResponseToCompletionDelayHist</a>(<span class="keyword">const</span> MachineType <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)<span class="keyword"> const</span>
+<a name="l00147"></a>00147 <span class="keyword">    </span>{ <span class="keywordflow">return</span> *<a class="code" href="classSequencer.html#a6236c49462f2162310ca62569ec869ac">m_FirstResponseToCompletionDelayHist</a>[t]; }
+<a name="l00148"></a>00148 
+<a name="l00149"></a><a class="code" href="classSequencer.html#a24bd4dceacbe5dac96e549c7b1b42717">00149</a>     <a class="code" href="namespaceStats.html#ac35128c026c72bb36af9cea00774e8a6">Stats::Counter</a> <a class="code" href="classSequencer.html#a24bd4dceacbe5dac96e549c7b1b42717">getIncompleteTimes</a>(<span class="keyword">const</span> MachineType <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)<span class="keyword"> const</span>
+<a name="l00150"></a>00150 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classSequencer.html#a42ce5f1f915ac19c7e7575172f28e412">m_IncompleteTimes</a>[t]; }
+<a name="l00151"></a>00151 
+<a name="l00152"></a>00152   <span class="keyword">private</span>:
+<a name="l00153"></a>00153     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#adf180308d81a9eade08f190a0b220c6d">issueRequest</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, RubyRequestType <a class="code" href="classSequencer_1_1RubyPort.html#acce15679d830831b0bbe8ebc2a60b2ca">type</a>);
+<a name="l00154"></a>00154 
+<a name="l00155"></a>00155     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#ae5b978643179033488a1153899c085e5">hitCallback</a>(<a class="code" href="structSequencerRequest.html">SequencerRequest</a>* request, <a class="code" href="classDataBlock.html">DataBlock</a>&amp; data,
+<a name="l00156"></a>00156                      <span class="keywordtype">bool</span> llscSuccess,
+<a name="l00157"></a>00157                      <span class="keyword">const</span> MachineType mach, <span class="keyword">const</span> <span class="keywordtype">bool</span> externalHit,
+<a name="l00158"></a>00158                      <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> initialRequestTime,
+<a name="l00159"></a>00159                      <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> forwardRequestTime,
+<a name="l00160"></a>00160                      <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> firstResponseTime);
+<a name="l00161"></a>00161 
+<a name="l00162"></a>00162     <span class="keywordtype">void</span> <a class="code" href="classSequencer.html#a37b774f897c19e6a2a84d89aeb3f5b45">recordMissLatency</a>(<span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>, <span class="keyword">const</span> RubyRequestType <a class="code" href="classSequencer_1_1RubyPort.html#acce15679d830831b0bbe8ebc2a60b2ca">type</a>,
+<a name="l00163"></a>00163                            <span class="keyword">const</span> MachineType respondingMach,
+<a name="l00164"></a>00164                            <span class="keywordtype">bool</span> isExternalHit, <a class="code" href="classCycles.html">Cycles</a> issuedTime,
+<a name="l00165"></a>00165                            <a class="code" href="classCycles.html">Cycles</a> initialRequestTime,
+<a name="l00166"></a>00166                            <a class="code" href="classCycles.html">Cycles</a> forwardRequestTime, <a class="code" href="classCycles.html">Cycles</a> firstResponseTime,
+<a name="l00167"></a>00167                            <a class="code" href="classCycles.html">Cycles</a> completionTime);
+<a name="l00168"></a>00168 
+<a name="l00169"></a>00169     RequestStatus <a class="code" href="classSequencer.html#ad7e26bff5c0772136a69fc46fb6b6b21">insertRequest</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, RubyRequestType request_type);
+<a name="l00170"></a>00170     <span class="keywordtype">bool</span> <a class="code" href="classSequencer.html#add40b4adaa2c154a2c81fcebc9ff4aaf">handleLlsc</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, <a class="code" href="structSequencerRequest.html">SequencerRequest</a>* request);
+<a name="l00171"></a>00171 
+<a name="l00172"></a>00172     <span class="comment">// Private copy constructor and assignment operator</span>
+<a name="l00173"></a>00173     <a class="code" href="classSequencer.html#a5f15f2d0a36488220062dc04ca597b6e">Sequencer</a>(<span class="keyword">const</span> <a class="code" href="classSequencer.html">Sequencer</a>&amp; obj);
+<a name="l00174"></a>00174     <a class="code" href="classSequencer.html">Sequencer</a>&amp; <a class="code" href="classSequencer.html#ad3a4eee2c15f83ff25ee60d438602e6b">operator=</a>(<span class="keyword">const</span> <a class="code" href="classSequencer.html">Sequencer</a>&amp; obj);
+<a name="l00175"></a>00175 
+<a name="l00176"></a>00176   <span class="keyword">private</span>:
+<a name="l00177"></a><a class="code" href="classSequencer.html#aa4e402fb0283ff3547ee82785e7a66c3">00177</a>     <span class="keywordtype">int</span> <a class="code" href="classSequencer.html#aa4e402fb0283ff3547ee82785e7a66c3">m_max_outstanding_requests</a>;
+<a name="l00178"></a><a class="code" href="classSequencer.html#a4760ee57ee761ad53400a617eb12e95a">00178</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classSequencer.html#a4760ee57ee761ad53400a617eb12e95a">m_deadlock_threshold</a>;
+<a name="l00179"></a>00179 
+<a name="l00180"></a><a class="code" href="classSequencer.html#a7a3b3fe88942aab5003a24c6f1da4428">00180</a>     <a class="code" href="classCacheMemory.html">CacheMemory</a>* <a class="code" href="classSequencer.html#a7a3b3fe88942aab5003a24c6f1da4428">m_dataCache_ptr</a>;
+<a name="l00181"></a><a class="code" href="classSequencer.html#ad75cc69f67160a8550641442ffdb6a47">00181</a>     <a class="code" href="classCacheMemory.html">CacheMemory</a>* <a class="code" href="classSequencer.html#ad75cc69f67160a8550641442ffdb6a47">m_instCache_ptr</a>;
+<a name="l00182"></a>00182 
+<a name="l00183"></a><a class="code" href="classSequencer.html#ab8b07c7968ec41f243eeb0c53e459bb8">00183</a>     <span class="keyword">typedef</span> m5::hash_map&lt;Address, SequencerRequest*&gt; <a class="code" href="classSequencer.html#ab8b07c7968ec41f243eeb0c53e459bb8">RequestTable</a>;
+<a name="l00184"></a><a class="code" href="classSequencer.html#ad419eb325e663790853ec757ca3b02aa">00184</a>     <a class="code" href="classSequencer.html#ab8b07c7968ec41f243eeb0c53e459bb8">RequestTable</a> <a class="code" href="classSequencer.html#ad419eb325e663790853ec757ca3b02aa">m_writeRequestTable</a>;
+<a name="l00185"></a><a class="code" href="classSequencer.html#a50b1d01ac64e8f892be4a49998965cda">00185</a>     <a class="code" href="classSequencer.html#ab8b07c7968ec41f243eeb0c53e459bb8">RequestTable</a> <a class="code" href="classSequencer.html#a50b1d01ac64e8f892be4a49998965cda">m_readRequestTable</a>;
+<a name="l00186"></a>00186     <span class="comment">// Global outstanding request count, across all request tables</span>
+<a name="l00187"></a><a class="code" href="classSequencer.html#a5d645b1dc48106eac07688fc8c65edd2">00187</a>     <span class="keywordtype">int</span> <a class="code" href="classSequencer.html#a5d645b1dc48106eac07688fc8c65edd2">m_outstanding_count</a>;
+<a name="l00188"></a><a class="code" href="classSequencer.html#a2e50c90663719c912c32881d58f1bd01">00188</a>     <span class="keywordtype">bool</span> <a class="code" href="classSequencer.html#a2e50c90663719c912c32881d58f1bd01">m_deadlock_check_scheduled</a>;
+<a name="l00189"></a>00189 
+<a name="l00191"></a><a class="code" href="classSequencer.html#a6d186a780be6aa79db648192dd730779">00191</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classSequencer.html#a6d186a780be6aa79db648192dd730779" title="Counters for recording aliasing information.">m_store_waiting_on_load</a>;
+<a name="l00192"></a><a class="code" href="classSequencer.html#a79cb8a27dd783e3c7298d8d874795b3d">00192</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classSequencer.html#a79cb8a27dd783e3c7298d8d874795b3d">m_store_waiting_on_store</a>;
+<a name="l00193"></a><a class="code" href="classSequencer.html#a8e5427a5d38caa118425b87f68c8b8c0">00193</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classSequencer.html#a8e5427a5d38caa118425b87f68c8b8c0">m_load_waiting_on_store</a>;
+<a name="l00194"></a><a class="code" href="classSequencer.html#a19936e24600f4fafad29833ae73051fa">00194</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classSequencer.html#a19936e24600f4fafad29833ae73051fa">m_load_waiting_on_load</a>;
+<a name="l00195"></a>00195 
+<a name="l00196"></a><a class="code" href="classSequencer.html#a6e3aaea8b048e1811c53f89dfb99260e">00196</a>     <span class="keywordtype">bool</span> <a class="code" href="classSequencer.html#a6e3aaea8b048e1811c53f89dfb99260e">m_usingNetworkTester</a>;
+<a name="l00197"></a>00197 
+<a name="l00199"></a><a class="code" href="classSequencer.html#a24e9160c0860bc93a5f57de63544fe65">00199</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classSequencer.html#a24e9160c0860bc93a5f57de63544fe65" title="Histogram for number of outstanding requests per cycle.">m_outstandReqHist</a>;
+<a name="l00200"></a>00200 
+<a name="l00202"></a><a class="code" href="classSequencer.html#aeb3fc96d5f4638c5599ed141c6c6bda7">00202</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classSequencer.html#aeb3fc96d5f4638c5599ed141c6c6bda7" title="Histogram for holding latency profile of all requests.">m_latencyHist</a>;
+<a name="l00203"></a><a class="code" href="classSequencer.html#a21453ca0672126e1c0e204b7c60b3340">00203</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#a21453ca0672126e1c0e204b7c60b3340">m_typeLatencyHist</a>;
+<a name="l00204"></a>00204 
+<a name="l00207"></a><a class="code" href="classSequencer.html#aa7b4f1cb2f6f69fac85f5fa0be12f95a">00207</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classSequencer.html#aa7b4f1cb2f6f69fac85f5fa0be12f95a">m_hitLatencyHist</a>;
+<a name="l00208"></a><a class="code" href="classSequencer.html#aeecaf5411cd3b34435f621db03387b67">00208</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#aeecaf5411cd3b34435f621db03387b67">m_hitTypeLatencyHist</a>;
+<a name="l00209"></a>00209 
+<a name="l00212"></a><a class="code" href="classSequencer.html#add8e2c73ddfe42f1b177e641a0e626d5">00212</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#add8e2c73ddfe42f1b177e641a0e626d5">m_hitMachLatencyHist</a>;
+<a name="l00213"></a><a class="code" href="classSequencer.html#aaf855f02483dc21743651007a759ea77">00213</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt; std::vector&lt;Stats::Histogram *&gt;</a> &gt; <a class="code" href="classSequencer.html#aaf855f02483dc21743651007a759ea77">m_hitTypeMachLatencyHist</a>;
+<a name="l00214"></a>00214 
+<a name="l00217"></a><a class="code" href="classSequencer.html#aff6841cbe8b6a9be485b4c45a8208f93">00217</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classSequencer.html#aff6841cbe8b6a9be485b4c45a8208f93">m_missLatencyHist</a>;
+<a name="l00218"></a><a class="code" href="classSequencer.html#ac5a934c0abe9f0185357eb76de27dee3">00218</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#ac5a934c0abe9f0185357eb76de27dee3">m_missTypeLatencyHist</a>;
+<a name="l00219"></a>00219 
+<a name="l00222"></a><a class="code" href="classSequencer.html#a55e994bce4da18f7600be6cbf7a4a3b5">00222</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#a55e994bce4da18f7600be6cbf7a4a3b5">m_missMachLatencyHist</a>;
+<a name="l00223"></a><a class="code" href="classSequencer.html#a8e022aebc37a4b83df56956874befd75">00223</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt; std::vector&lt;Stats::Histogram *&gt;</a> &gt; <a class="code" href="classSequencer.html#a8e022aebc37a4b83df56956874befd75">m_missTypeMachLatencyHist</a>;
+<a name="l00224"></a>00224 
+<a name="l00226"></a><a class="code" href="classSequencer.html#a503562ca3d885333c87da80d05ee612a">00226</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#a503562ca3d885333c87da80d05ee612a" title="Histograms for recording the breakdown of miss latency.">m_IssueToInitialDelayHist</a>;
+<a name="l00227"></a><a class="code" href="classSequencer.html#a0dbfb83f6edf61cad3d0aebdc89ed370">00227</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#a0dbfb83f6edf61cad3d0aebdc89ed370">m_InitialToForwardDelayHist</a>;
+<a name="l00228"></a><a class="code" href="classSequencer.html#ae9bea11c9b001a155e7f7a0f39ac7bf9">00228</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#ae9bea11c9b001a155e7f7a0f39ac7bf9">m_ForwardToFirstResponseDelayHist</a>;
+<a name="l00229"></a><a class="code" href="classSequencer.html#a6236c49462f2162310ca62569ec869ac">00229</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Histogram *&gt;</a> <a class="code" href="classSequencer.html#a6236c49462f2162310ca62569ec869ac">m_FirstResponseToCompletionDelayHist</a>;
+<a name="l00230"></a><a class="code" href="classSequencer.html#a42ce5f1f915ac19c7e7575172f28e412">00230</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Stats::Counter&gt;</a> <a class="code" href="classSequencer.html#a42ce5f1f915ac19c7e7575172f28e412">m_IncompleteTimes</a>;
+<a name="l00231"></a>00231 
+<a name="l00232"></a>00232 
+<a name="l00233"></a><a class="code" href="classSequencer_1_1SequencerWakeupEvent.html">00233</a>     <span class="keyword">class </span><a class="code" href="classSequencer_1_1SequencerWakeupEvent.html">SequencerWakeupEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00234"></a>00234     {
+<a name="l00235"></a>00235       <span class="keyword">private</span>:
+<a name="l00236"></a><a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a67a78e02404a00d58ba9d94bdc85e0e4">00236</a>         <a class="code" href="classSequencer.html">Sequencer</a> *<a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a67a78e02404a00d58ba9d94bdc85e0e4">m_sequencer_ptr</a>;
+<a name="l00237"></a>00237 
+<a name="l00238"></a>00238       <span class="keyword">public</span>:
+<a name="l00239"></a><a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#afea1c2d8450af8d50f29d6c1158157ba">00239</a>         <a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#afea1c2d8450af8d50f29d6c1158157ba">SequencerWakeupEvent</a>(<a class="code" href="classSequencer.html">Sequencer</a> *_seq) : <a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a67a78e02404a00d58ba9d94bdc85e0e4">m_sequencer_ptr</a>(_seq) {}
+<a name="l00240"></a><a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">00240</a>         <span class="keywordtype">void</span> <a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>() { <a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a67a78e02404a00d58ba9d94bdc85e0e4">m_sequencer_ptr</a>-&gt;<a class="code" href="classSequencer.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>(); }
+<a name="l00241"></a><a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a2bd90422eece9190794479e08092a252">00241</a>         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classSequencer_1_1SequencerWakeupEvent.html#a2bd90422eece9190794479e08092a252">description</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="stringliteral">&quot;Sequencer deadlock check&quot;</span>; }
+<a name="l00242"></a>00242     };
+<a name="l00243"></a>00243 
+<a name="l00244"></a><a class="code" href="classSequencer.html#a1898c82aec1a510eaa5aa55cb23a5bc3">00244</a>     <a class="code" href="classSequencer_1_1SequencerWakeupEvent.html">SequencerWakeupEvent</a> <a class="code" href="classSequencer.html#a1898c82aec1a510eaa5aa55cb23a5bc3">deadlockCheckEvent</a>;
+<a name="l00245"></a>00245 };
+<a name="l00246"></a>00246 
+<a name="l00247"></a>00247 <span class="keyword">inline</span> std::ostream&amp;
+<a name="l00248"></a><a class="code" href="Sequencer_8hh.html#ac52709b647b4bac80da596daa1f8f442">00248</a> <a class="code" href="namespaceGenericISA.html#a960fce0270870fc775ac34cc401036ba">operator&lt;&lt;</a>(std::ostream&amp; out, <span class="keyword">const</span> <a class="code" href="classSequencer.html">Sequencer</a>&amp; obj)
+<a name="l00249"></a>00249 {
+<a name="l00250"></a>00250     obj.<a class="code" href="classSequencer.html#ac55fe386a101fbae38c716067c9966a0">print</a>(out);
+<a name="l00251"></a>00251     out &lt;&lt; std::flush;
+<a name="l00252"></a>00252     <span class="keywordflow">return</span> out;
+<a name="l00253"></a>00253 }
+<a name="l00254"></a>00254 
+<a name="l00255"></a>00255 <span class="preprocessor">#endif // __MEM_RUBY_SYSTEM_SEQUENCER_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

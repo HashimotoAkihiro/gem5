@@ -1,0 +1,118 @@
+\hypertarget{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST}{
+\section{クラス TypeFieldStateAST}
+\label{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST}\index{slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}}
+}
+TypeFieldStateASTに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_ac775ee34451fdfa742b318538164070e}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_ad8b9328939df072e4740cd9a63189744}{\_\-\_\-repr\_\-\_\-}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a4555d1cee0dccf3942ea35fe86de2e8e}{generate}
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a34ced61a2f2477f2d7a1279dac84ae9b}{field\_\-id}
+\item 
+\hyperlink{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_aa5daf118d47a5a5e2baeebdf6833d549}{perm\_\-ast}
+\item 
+\hyperlink{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a03baf6f181cc885912d671c3fcbfd7e3}{pairs\_\-ast}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_ac775ee34451fdfa742b318538164070e}{
+\index{slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em slicc}, \/   {\em field\_\-id}, \/   {\em perm\_\-ast}, \/   {\em pairs\_\-ast})}}
+\label{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_ac775ee34451fdfa742b318538164070e}
+
+
+
+\begin{DoxyCode}
+31                                                             :
+32         super(TypeFieldStateAST, self).__init__(slicc, pairs_ast)
+33 
+34         self.field_id = field_id
+35         self.perm_ast = perm_ast
+36         if not (perm_ast.type_ast.ident == "AccessPermission"):
+37             self.error("AccessPermission enum value must be specified")
+38         self.pairs_ast = pairs_ast
+39 
+    def __repr__(self):
+\end{DoxyCode}
+\hypertarget{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_ad8b9328939df072e4740cd9a63189744}{
+\index{slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}!\_\-\_\-repr\_\-\_\-@{\_\-\_\-repr\_\-\_\-}}
+\index{\_\-\_\-repr\_\-\_\-@{\_\-\_\-repr\_\-\_\-}!slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}}
+\subsubsection[{\_\-\_\-repr\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-repr\_\-\_\- ( {\em self})}}
+\label{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_ad8b9328939df072e4740cd9a63189744}
+
+
+
+\begin{DoxyCode}
+40                       :
+41         return "[TypeFieldState: %r]" % self.field_id
+42 
+    def generate(self, type):
+\end{DoxyCode}
+\hypertarget{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a4555d1cee0dccf3942ea35fe86de2e8e}{
+\index{slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}!generate@{generate}}
+\index{generate@{generate}!slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}}
+\subsubsection[{generate}]{\setlength{\rightskip}{0pt plus 5cm}def generate ( {\em self}, \/   {\em type})}}
+\label{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a4555d1cee0dccf3942ea35fe86de2e8e}
+
+
+
+\begin{DoxyCode}
+43                             :
+44         if not str(type) == "State":
+45             self.error("State Declaration must be of type State.")
+46         
+47         # Add enumeration
+48         if not type.addEnum(self.field_id, self.pairs_ast.pairs):
+49             self.error("Duplicate enumeration: %s:%s" % (type, self.field_id))
+50 
+51         # Fill machine info
+52         machine = self.symtab.state_machine
+53 
+54         if not machine:
+55             self.error("State declaration not part of a machine.")
+56         s = State(self.symtab, self.field_id, self.location, self.pairs)
+57         machine.addState(s)
+58 
+59         type.statePermPairAdd(s, self.perm_ast.value)
+60 
+61 
+
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a34ced61a2f2477f2d7a1279dac84ae9b}{
+\index{slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}!field\_\-id@{field\_\-id}}
+\index{field\_\-id@{field\_\-id}!slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}}
+\subsubsection[{field\_\-id}]{\setlength{\rightskip}{0pt plus 5cm}{\bf field\_\-id}}}
+\label{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a34ced61a2f2477f2d7a1279dac84ae9b}
+\hypertarget{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a03baf6f181cc885912d671c3fcbfd7e3}{
+\index{slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}!pairs\_\-ast@{pairs\_\-ast}}
+\index{pairs\_\-ast@{pairs\_\-ast}!slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}}
+\subsubsection[{pairs\_\-ast}]{\setlength{\rightskip}{0pt plus 5cm}{\bf pairs\_\-ast}}}
+\label{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_a03baf6f181cc885912d671c3fcbfd7e3}
+\hypertarget{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_aa5daf118d47a5a5e2baeebdf6833d549}{
+\index{slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}!perm\_\-ast@{perm\_\-ast}}
+\index{perm\_\-ast@{perm\_\-ast}!slicc::ast::TypeFieldStateAST::TypeFieldStateAST@{slicc::ast::TypeFieldStateAST::TypeFieldStateAST}}
+\subsubsection[{perm\_\-ast}]{\setlength{\rightskip}{0pt plus 5cm}{\bf perm\_\-ast}}}
+\label{classslicc_1_1ast_1_1TypeFieldStateAST_1_1TypeFieldStateAST_aa5daf118d47a5a5e2baeebdf6833d549}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/slicc/ast/\hyperlink{TypeFieldStateAST_8py}{TypeFieldStateAST.py}\end{DoxyCompactItemize}

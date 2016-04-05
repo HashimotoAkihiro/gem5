@@ -1,0 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/arm/insts/branch64.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/arm/insts/branch64.hh</h1><a href="branch64_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#ifndef __ARCH_ARM_INSTS_BRANCH64_HH__</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ARM_INSTS_BRANCH64_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="arch_2arm_2insts_2static__inst_8hh.html">arch/arm/insts/static_inst.hh</a>&quot;</span>
+<a name="l00043"></a>00043 
+<a name="l00044"></a>00044 <span class="keyword">namespace </span><a class="code" href="classArmISA_1_1ArmISA.html">ArmISA</a>
+<a name="l00045"></a>00045 {
+<a name="l00046"></a>00046 <span class="comment">// Branch to a target computed with an immediate</span>
+<a name="l00047"></a><a class="code" href="classArmISA_1_1BranchImm64.html">00047</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BranchImm64.html">BranchImm64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>
+<a name="l00048"></a>00048 {
+<a name="l00049"></a>00049   <span class="keyword">protected</span>:
+<a name="l00050"></a><a class="code" href="classArmISA_1_1BranchImm64.html#a11b34c3ceec32cc1f14d0ca9c099c470">00050</a>     int64_t <a class="code" href="classArmISA_1_1BranchImm64.html#a11b34c3ceec32cc1f14d0ca9c099c470">imm</a>;
+<a name="l00051"></a>00051 
+<a name="l00052"></a>00052   <span class="keyword">public</span>:
+<a name="l00053"></a><a class="code" href="classArmISA_1_1BranchImm64.html#a5c757855b245901a85aa1fe1fa370d3f">00053</a>     <a class="code" href="classArmISA_1_1BranchImm64.html#a5c757855b245901a85aa1fe1fa370d3f">BranchImm64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst, OpClass __opClass,
+<a name="l00054"></a>00054                 int64_t _imm) :
+<a name="l00055"></a>00055         <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>(mnem, _machInst, __opClass), <a class="code" href="classArmISA_1_1BranchImm64.html#a11b34c3ceec32cc1f14d0ca9c099c470">imm</a>(_imm)
+<a name="l00056"></a>00056     {}
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">ArmISA::PCState</a> <a class="code" href="classArmISA_1_1BranchImm64.html#aef1dd7539a8d8c49730120f2c0b8088e">branchTarget</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">ArmISA::PCState</a> &amp;branchPC) <span class="keyword">const</span>;
+<a name="l00059"></a>00059 
+<a name="l00061"></a>00061     <span class="keyword">using</span> <a class="code" href="classStaticInst.html#af76ec8f94f2e86f19e751e75cc39acaa">StaticInst::branchTarget</a>;
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063     std::string <a class="code" href="classArmISA_1_1BranchImm64.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00064"></a>00064 };
+<a name="l00065"></a>00065 
+<a name="l00066"></a>00066 <span class="comment">// Conditionally Branch to a target computed with an immediate</span>
+<a name="l00067"></a><a class="code" href="classArmISA_1_1BranchImmCond64.html">00067</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BranchImmCond64.html">BranchImmCond64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1BranchImm64.html">BranchImm64</a>
+<a name="l00068"></a>00068 {
+<a name="l00069"></a>00069   <span class="keyword">protected</span>:
+<a name="l00070"></a><a class="code" href="classArmISA_1_1BranchImmCond64.html#a273dc0fe84de8f4a9cf52aaf8dc27885">00070</a>     <a class="code" href="namespaceArmISA.html#ab8f08e777c4753720cff841f81da8e06">ConditionCode</a> <a class="code" href="classArmISA_1_1BranchImmCond64.html#a273dc0fe84de8f4a9cf52aaf8dc27885">condCode</a>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072   <span class="keyword">public</span>:
+<a name="l00073"></a><a class="code" href="classArmISA_1_1BranchImmCond64.html#a536716b0bdc08118996466975aadb573">00073</a>     <a class="code" href="classArmISA_1_1BranchImmCond64.html#a536716b0bdc08118996466975aadb573">BranchImmCond64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst, OpClass __opClass,
+<a name="l00074"></a>00074                     int64_t _imm, <a class="code" href="namespaceArmISA.html#ab8f08e777c4753720cff841f81da8e06">ConditionCode</a> _condCode) :
+<a name="l00075"></a>00075         <a class="code" href="classArmISA_1_1BranchImm64.html">BranchImm64</a>(mnem, _machInst, __opClass, _imm), <a class="code" href="classArmISA_1_1BranchImmCond64.html#a273dc0fe84de8f4a9cf52aaf8dc27885">condCode</a>(_condCode)
+<a name="l00076"></a>00076     {}
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078     std::string <a class="code" href="classArmISA_1_1BranchImmCond64.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00079"></a>00079 };
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081 <span class="comment">// Branch to a target computed with a register</span>
+<a name="l00082"></a><a class="code" href="classArmISA_1_1BranchReg64.html">00082</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BranchReg64.html">BranchReg64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>
+<a name="l00083"></a>00083 {
+<a name="l00084"></a>00084   <span class="keyword">protected</span>:
+<a name="l00085"></a><a class="code" href="classArmISA_1_1BranchReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">00085</a>     <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="classArmISA_1_1BranchReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">op1</a>;
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087   <span class="keyword">public</span>:
+<a name="l00088"></a><a class="code" href="classArmISA_1_1BranchReg64.html#a82752dfaa681072da7204137444208b8">00088</a>     <a class="code" href="classArmISA_1_1BranchReg64.html#a82752dfaa681072da7204137444208b8">BranchReg64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst, OpClass __opClass,
+<a name="l00089"></a>00089                 <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> _op1) :
+<a name="l00090"></a>00090         <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>(mnem, _machInst, __opClass), <a class="code" href="classArmISA_1_1BranchReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">op1</a>(_op1)
+<a name="l00091"></a>00091     {}
+<a name="l00092"></a>00092 
+<a name="l00093"></a>00093     std::string <a class="code" href="classArmISA_1_1BranchReg64.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00094"></a>00094 };
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096 <span class="comment">// Ret instruction</span>
+<a name="l00097"></a><a class="code" href="classArmISA_1_1BranchRet64.html">00097</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BranchRet64.html">BranchRet64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1BranchReg64.html">BranchReg64</a>
+<a name="l00098"></a>00098 {
+<a name="l00099"></a>00099   <span class="keyword">public</span>:
+<a name="l00100"></a><a class="code" href="classArmISA_1_1BranchRet64.html#a7cc6823b15b5589b231b0f2defb8e163">00100</a>     <a class="code" href="classArmISA_1_1BranchRet64.html#a7cc6823b15b5589b231b0f2defb8e163">BranchRet64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst, OpClass __opClass,
+<a name="l00101"></a>00101                 <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> _op1) :
+<a name="l00102"></a>00102         <a class="code" href="classArmISA_1_1BranchReg64.html">BranchReg64</a>(mnem, _machInst, __opClass, _op1)
+<a name="l00103"></a>00103     {}
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105     std::string <a class="code" href="classArmISA_1_1BranchRet64.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00106"></a>00106 };
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108 <span class="comment">// Eret instruction</span>
+<a name="l00109"></a><a class="code" href="classArmISA_1_1BranchEret64.html">00109</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BranchEret64.html">BranchEret64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>
+<a name="l00110"></a>00110 {
+<a name="l00111"></a>00111   <span class="keyword">public</span>:
+<a name="l00112"></a><a class="code" href="classArmISA_1_1BranchEret64.html#a79636504bf9a3839887097c36a261bb1">00112</a>     <a class="code" href="classArmISA_1_1BranchEret64.html#a79636504bf9a3839887097c36a261bb1">BranchEret64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst, OpClass __opClass) :
+<a name="l00113"></a>00113         <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>(mnem, _machInst, __opClass)
+<a name="l00114"></a>00114     {}
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116     std::string <a class="code" href="classArmISA_1_1BranchEret64.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00117"></a>00117 };
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119 <span class="comment">// Branch to a target computed with an immediate and a register</span>
+<a name="l00120"></a><a class="code" href="classArmISA_1_1BranchImmReg64.html">00120</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BranchImmReg64.html">BranchImmReg64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>
+<a name="l00121"></a>00121 {
+<a name="l00122"></a>00122   <span class="keyword">protected</span>:
+<a name="l00123"></a><a class="code" href="classArmISA_1_1BranchImmReg64.html#a11b34c3ceec32cc1f14d0ca9c099c470">00123</a>     int64_t <a class="code" href="classArmISA_1_1BranchImmReg64.html#a11b34c3ceec32cc1f14d0ca9c099c470">imm</a>;
+<a name="l00124"></a><a class="code" href="classArmISA_1_1BranchImmReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">00124</a>     <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="classArmISA_1_1BranchImmReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">op1</a>;
+<a name="l00125"></a>00125 
+<a name="l00126"></a>00126   <span class="keyword">public</span>:
+<a name="l00127"></a><a class="code" href="classArmISA_1_1BranchImmReg64.html#ae8be9e127f0ed118d74a515f5d04d475">00127</a>     <a class="code" href="classArmISA_1_1BranchImmReg64.html#ae8be9e127f0ed118d74a515f5d04d475">BranchImmReg64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst, OpClass __opClass,
+<a name="l00128"></a>00128                    int64_t _imm, <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> _op1) :
+<a name="l00129"></a>00129         <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>(mnem, _machInst, __opClass), <a class="code" href="classArmISA_1_1BranchImmReg64.html#a11b34c3ceec32cc1f14d0ca9c099c470">imm</a>(_imm), <a class="code" href="classArmISA_1_1BranchImmReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">op1</a>(_op1)
+<a name="l00130"></a>00130     {}
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">ArmISA::PCState</a> <a class="code" href="classArmISA_1_1BranchImmReg64.html#aef1dd7539a8d8c49730120f2c0b8088e">branchTarget</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">ArmISA::PCState</a> &amp;branchPC) <span class="keyword">const</span>;
+<a name="l00133"></a>00133 
+<a name="l00135"></a>00135     <span class="keyword">using</span> <a class="code" href="classStaticInst.html#af76ec8f94f2e86f19e751e75cc39acaa">StaticInst::branchTarget</a>;
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137     std::string <a class="code" href="classArmISA_1_1BranchImmReg64.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00138"></a>00138 };
+<a name="l00139"></a>00139 
+<a name="l00140"></a>00140 <span class="comment">// Branch to a target computed with two immediates</span>
+<a name="l00141"></a><a class="code" href="classArmISA_1_1BranchImmImmReg64.html">00141</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1BranchImmImmReg64.html">BranchImmImmReg64</a> : <span class="keyword">public</span> <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>
+<a name="l00142"></a>00142 {
+<a name="l00143"></a>00143   <span class="keyword">protected</span>:
+<a name="l00144"></a><a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a6ccc7c2674222b503fff1477061ccdfa">00144</a>     int64_t <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a6ccc7c2674222b503fff1477061ccdfa">imm1</a>;
+<a name="l00145"></a><a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a0c27335409ea85af7c62f6d73dfab8c8">00145</a>     int64_t <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a0c27335409ea85af7c62f6d73dfab8c8">imm2</a>;
+<a name="l00146"></a><a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">00146</a>     <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">op1</a>;
+<a name="l00147"></a>00147 
+<a name="l00148"></a>00148   <span class="keyword">public</span>:
+<a name="l00149"></a><a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a86edd27123a15e844baec14f26bb7252">00149</a>     <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a86edd27123a15e844baec14f26bb7252">BranchImmImmReg64</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst,
+<a name="l00150"></a>00150                       OpClass __opClass, int64_t _imm1, int64_t _imm2,
+<a name="l00151"></a>00151                       <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> _op1) :
+<a name="l00152"></a>00152         <a class="code" href="classArmISA_1_1ArmStaticInst.html">ArmStaticInst</a>(mnem, _machInst, __opClass),
+<a name="l00153"></a>00153         <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a6ccc7c2674222b503fff1477061ccdfa">imm1</a>(_imm1), <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a0c27335409ea85af7c62f6d73dfab8c8">imm2</a>(_imm2), <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a4c465c43ad568f8bcf8ae71480e9cfea">op1</a>(_op1)
+<a name="l00154"></a>00154     {}
+<a name="l00155"></a>00155 
+<a name="l00156"></a>00156     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">ArmISA::PCState</a> <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#aef1dd7539a8d8c49730120f2c0b8088e">branchTarget</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">ArmISA::PCState</a> &amp;branchPC) <span class="keyword">const</span>;
+<a name="l00157"></a>00157 
+<a name="l00159"></a>00159     <span class="keyword">using</span> <a class="code" href="classStaticInst.html#af76ec8f94f2e86f19e751e75cc39acaa">StaticInst::branchTarget</a>;
+<a name="l00160"></a>00160 
+<a name="l00161"></a>00161     std::string <a class="code" href="classArmISA_1_1BranchImmImmReg64.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> SymbolTable *symtab) <span class="keyword">const</span>;
+<a name="l00162"></a>00162 };
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164 }
+<a name="l00165"></a>00165 
+<a name="l00166"></a>00166 <span class="preprocessor">#endif //__ARCH_ARM_INSTS_BRANCH_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

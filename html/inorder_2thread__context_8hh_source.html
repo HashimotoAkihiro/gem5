@@ -1,0 +1,293 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/inorder/thread_context.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/inorder/thread_context.hh</h1><a href="inorder_2thread__context_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00007"></a>00007 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00008"></a>00008 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00009"></a>00009 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00010"></a>00010 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00011"></a>00011 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00012"></a>00012 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00013"></a>00013 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00014"></a>00014 <span class="comment"> *</span>
+<a name="l00015"></a>00015 <span class="comment"> * Copyright (c) 2007 MIPS Technologies, Inc.</span>
+<a name="l00016"></a>00016 <span class="comment"> * All rights reserved.</span>
+<a name="l00017"></a>00017 <span class="comment"> *</span>
+<a name="l00018"></a>00018 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00019"></a>00019 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00020"></a>00020 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00021"></a>00021 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00022"></a>00022 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00023"></a>00023 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00024"></a>00024 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00025"></a>00025 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00026"></a>00026 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00027"></a>00027 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00030"></a>00030 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00032"></a>00032 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00033"></a>00033 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00034"></a>00034 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00035"></a>00035 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00036"></a>00036 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00037"></a>00037 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00038"></a>00038 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00039"></a>00039 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00040"></a>00040 <span class="comment"> *</span>
+<a name="l00041"></a>00041 <span class="comment"> * Authors: Korey Sewell</span>
+<a name="l00042"></a>00042 <span class="comment"> *</span>
+<a name="l00043"></a>00043 <span class="comment"> */</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="preprocessor">#ifndef __CPU_INORDER_THREAD_CONTEXT_HH__</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_INORDER_THREAD_CONTEXT_HH__</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="inorder_2cpu_8hh.html">cpu/inorder/cpu.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="inorder_2thread__state_8hh.html">cpu/inorder/thread_state.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="exetrace_8hh.html">cpu/exetrace.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="thread__context_8hh.html">cpu/thread_context.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;arch/kernel_stats.hh&quot;</span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055 <span class="keyword">class </span><a class="code" href="classEndQuiesceEvent.html">EndQuiesceEvent</a>;
+<a name="l00056"></a>00056 <span class="keyword">class </span><a class="code" href="classCheckerCPU.html">CheckerCPU</a>;
+<a name="l00057"></a><a class="code" href="namespaceKernel.html">00057</a> <span class="keyword">namespace </span>Kernel {
+<a name="l00058"></a>00058     <span class="keyword">class </span><a class="code" href="classKernel_1_1Statistics.html">Statistics</a>;
+<a name="l00059"></a>00059 };
+<a name="l00060"></a>00060 
+<a name="l00074"></a><a class="code" href="classInOrderThreadContext.html">00074</a> <span class="keyword">class </span><a class="code" href="classInOrderThreadContext.html">InOrderThreadContext</a> : <span class="keyword">public</span> <a class="code" href="classThreadContext.html">ThreadContext</a>
+<a name="l00075"></a>00075 {
+<a name="l00076"></a>00076   <span class="keyword">public</span>:
+<a name="l00077"></a><a class="code" href="classInOrderThreadContext.html#af0f21865a9c4fc558cf601f02846f8da">00077</a>     <a class="code" href="classInOrderThreadContext.html#af0f21865a9c4fc558cf601f02846f8da">InOrderThreadContext</a>() { }
+<a name="l00078"></a>00078 
+<a name="l00080"></a><a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">00080</a>     <a class="code" href="classInOrderCPU.html">InOrderCPU</a> *<a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>;
+<a name="l00081"></a>00081 
+<a name="l00083"></a><a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">00083</a>     <a class="code" href="classInOrderThreadState.html">InOrderThreadState</a> *<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>;
+<a name="l00084"></a>00084 
+<a name="l00087"></a><a class="code" href="classInOrderThreadContext.html#a95b7e95d0558cd03d69613142fff9137">00087</a>     TheISA::TLB *<a class="code" href="classInOrderThreadContext.html#a95b7e95d0558cd03d69613142fff9137">getITBPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#aec8d740c4f6e13264bb6bcb0a2f95a5a">getITBPtr</a>(); }
+<a name="l00088"></a>00088 
+<a name="l00091"></a><a class="code" href="classInOrderThreadContext.html#a2fe6a07c44bc2a4d83b86bea605ba971">00091</a>     TheISA::TLB *<a class="code" href="classInOrderThreadContext.html#a2fe6a07c44bc2a4d83b86bea605ba971">getDTBPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#a295c8ef68d34e6e430da35d8b4b5bd81">getDTBPtr</a>(); }
+<a name="l00092"></a>00092 
+<a name="l00097"></a><a class="code" href="classInOrderThreadContext.html#a0807ebbe39e158fdf6007ca00e3f7252">00097</a>     <a class="code" href="classCheckerCPU.html">CheckerCPU</a> *<a class="code" href="classInOrderThreadContext.html#a0807ebbe39e158fdf6007ca00e3f7252">getCheckerCpuPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>; }
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099     TheISA::Decoder *
+<a name="l00100"></a><a class="code" href="classInOrderThreadContext.html#a6ae33963bc5f8b515f0a50c483f21c7f">00100</a>     <a class="code" href="classInOrderThreadContext.html#a6ae33963bc5f8b515f0a50c483f21c7f">getDecoderPtr</a>()
+<a name="l00101"></a>00101     {
+<a name="l00102"></a>00102         <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#a3c58d1da1d6e12bae2927d14cd7289ad">getDecoderPtr</a>(<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">contextId</a>());
+<a name="l00103"></a>00103     }
+<a name="l00104"></a>00104 
+<a name="l00105"></a><a class="code" href="classInOrderThreadContext.html#af7bdb56e0088b380302741ad9008f321">00105</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classInOrderThreadContext.html#af7bdb56e0088b380302741ad9008f321">getSystemPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>; }
+<a name="l00106"></a>00106 
+<a name="l00108"></a><a class="code" href="classInOrderThreadContext.html#a4f35ce7d5cb2ec57504bc2c2bc03c879">00108</a>     <a class="code" href="classBaseCPU.html">BaseCPU</a> *<a class="code" href="classInOrderThreadContext.html#a4f35ce7d5cb2ec57504bc2c2bc03c879">getCpuPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>; }
+<a name="l00109"></a>00109 
+<a name="l00111"></a><a class="code" href="classInOrderThreadContext.html#a096dc0eb4fc10d75220e3a101256340b">00111</a>     std::string <a class="code" href="classInOrderThreadContext.html#a096dc0eb4fc10d75220e3a101256340b">getCpuName</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;name(); }
+<a name="l00112"></a>00112 
+<a name="l00114"></a><a class="code" href="classInOrderThreadContext.html#a1e2d18ebf4e21f2416c21a8b072e2c7b">00114</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#a1e2d18ebf4e21f2416c21a8b072e2c7b">cpuId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;cpuId(); }
+<a name="l00115"></a>00115 
+<a name="l00117"></a><a class="code" href="classInOrderThreadContext.html#a1ff97b43199001357718671a4d922d12">00117</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classInOrderThreadContext.html#a1ff97b43199001357718671a4d922d12">socketId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;socketId(); }
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classInOrderThreadContext.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">00119</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">contextId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">contextId</a>(); }
+<a name="l00120"></a>00120 
+<a name="l00121"></a><a class="code" href="classInOrderThreadContext.html#a0dd10037a5b0eadaddfe7c67d52d3ac6">00121</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a0dd10037a5b0eadaddfe7c67d52d3ac6">setContextId</a>(<span class="keywordtype">int</span> <span class="keywordtype">id</span>) { <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a0dd10037a5b0eadaddfe7c67d52d3ac6">setContextId</a>(<span class="keywordtype">id</span>); }
+<a name="l00122"></a>00122 
+<a name="l00124"></a><a class="code" href="classInOrderThreadContext.html#afc38d04c77e7b5fc3bbb0dd00fc87742">00124</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#afc38d04c77e7b5fc3bbb0dd00fc87742">threadId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>(); }
+<a name="l00125"></a><a class="code" href="classInOrderThreadContext.html#a9186b553811fbde99263b3fd831f1b0c">00125</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a9186b553811fbde99263b3fd831f1b0c">setThreadId</a>(<span class="keywordtype">int</span> <span class="keywordtype">id</span>) { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#ac0b004fcd497945d2cdd1a056f25a182">setThreadId</a>(<span class="keywordtype">id</span>); }
+<a name="l00126"></a>00126 
+<a name="l00127"></a><a class="code" href="classInOrderThreadContext.html#ae2413b39c462b20a91b585723e44e7f1">00127</a>     uint64_t <a class="code" href="classInOrderThreadContext.html#ae2413b39c462b20a91b585723e44e7f1">readMicroPC</a>()
+<a name="l00128"></a>00128     { <span class="keywordflow">return</span> 0; }
+<a name="l00129"></a>00129 
+<a name="l00130"></a><a class="code" href="classInOrderThreadContext.html#a12ffdd4e1d5fbd2b5ed83f9ae70af0bb">00130</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a12ffdd4e1d5fbd2b5ed83f9ae70af0bb">setMicroPC</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) { };
+<a name="l00131"></a>00131 
+<a name="l00132"></a><a class="code" href="classInOrderThreadContext.html#aa2e28fd8a172666817bb94bf10fb2802">00132</a>     uint64_t <a class="code" href="classInOrderThreadContext.html#aa2e28fd8a172666817bb94bf10fb2802">readNextMicroPC</a>()
+<a name="l00133"></a>00133     { <span class="keywordflow">return</span> 0; }
+<a name="l00134"></a>00134 
+<a name="l00135"></a><a class="code" href="classInOrderThreadContext.html#a6999c039aaa68770e67923328abde58c">00135</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a6999c039aaa68770e67923328abde58c">setNextMicroPC</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) { };
+<a name="l00136"></a>00136 
+<a name="l00138"></a><a class="code" href="classInOrderThreadContext.html#a3faa5e314c06241296ab582bb891a06a">00138</a>     TheISA::Kernel::Statistics *<a class="code" href="classInOrderThreadContext.html#a3faa5e314c06241296ab582bb891a06a">getKernelStats</a>()
+<a name="l00139"></a>00139     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#af94097bd19d2f3145ab6aececf25815c">kernelStats</a>; }
+<a name="l00140"></a>00140 
+<a name="l00141"></a><a class="code" href="classInOrderThreadContext.html#a01ed2104c846a24a0e18594d3a2f7de9">00141</a>     <a class="code" href="classPortProxy.html">PortProxy</a> &amp;<a class="code" href="classInOrderThreadContext.html#a01ed2104c846a24a0e18594d3a2f7de9">getPhysProxy</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a2506d37aed5696e386e4d39270b53556">getPhysProxy</a>(); }
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143     <a class="code" href="classFSTranslatingPortProxy.html">FSTranslatingPortProxy</a> &amp;<a class="code" href="classInOrderThreadContext.html#a03a07ebd804051b18b69156c2fff36a3">getVirtProxy</a>();
+<a name="l00144"></a>00144 
+<a name="l00145"></a><a class="code" href="classInOrderThreadContext.html#ab24719c7923d7d57030fa05bb166c62c">00145</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#ab24719c7923d7d57030fa05bb166c62c">initMemProxies</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00146"></a>00146     { <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#ab24719c7923d7d57030fa05bb166c62c">initMemProxies</a>(tc); }
+<a name="l00147"></a>00147 
+<a name="l00151"></a>00151     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a13fa12d1779a94a1e0b968946a1367c7">dumpFuncProfile</a>();
+<a name="l00152"></a>00152 
+<a name="l00154"></a>00154     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classInOrderThreadContext.html#afaa8f9eb8d809cccd31829ba793a433a">readLastActivate</a>();
+<a name="l00156"></a>00156     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classInOrderThreadContext.html#a7d0b0631c7087d361f6ae11379c06b15">readLastSuspend</a>();
+<a name="l00157"></a>00157 
+<a name="l00159"></a>00159     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#acf9c88860776d7bd752317e8b550a5d5">profileClear</a>();
+<a name="l00160"></a>00160 
+<a name="l00162"></a>00162     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#aba547b904bdcf83196f983f79d285caf">profileSample</a>();
+<a name="l00163"></a>00163 
+<a name="l00165"></a><a class="code" href="classInOrderThreadContext.html#a0546f73d19db75274e9d0bc63c5f5908">00165</a>     <a class="code" href="classEndQuiesceEvent.html">EndQuiesceEvent</a> *<a class="code" href="classInOrderThreadContext.html#a0546f73d19db75274e9d0bc63c5f5908">getQuiesceEvent</a>()
+<a name="l00166"></a>00166     {
+<a name="l00167"></a>00167         <span class="keywordflow">return</span> this-&gt;<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a5845e4af797decd004812fc4e154b3e2">quiesceEvent</a>;
+<a name="l00168"></a>00168     }
+<a name="l00169"></a>00169 
+<a name="l00170"></a><a class="code" href="classInOrderThreadContext.html#ab07f5af63c9d22e504dfe620c0a07228">00170</a>     <a class="code" href="classSETranslatingPortProxy.html">SETranslatingPortProxy</a> &amp;<a class="code" href="classInOrderThreadContext.html#ab07f5af63c9d22e504dfe620c0a07228">getMemProxy</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a5022ffa44e87701f51893d78c0def3a5">getMemProxy</a>(); }
+<a name="l00171"></a>00171 
+<a name="l00173"></a><a class="code" href="classInOrderThreadContext.html#a4b26cb784639047bab9de2b306955c4b">00173</a>     <a class="code" href="classProcess.html">Process</a> *<a class="code" href="classInOrderThreadContext.html#a4b26cb784639047bab9de2b306955c4b">getProcessPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a4b26cb784639047bab9de2b306955c4b">getProcessPtr</a>(); }
+<a name="l00174"></a>00174 
+<a name="l00176"></a><a class="code" href="classInOrderThreadContext.html#a2ad9e92a82d6f783b3061584729c2f4a">00176</a>     <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classInOrderThreadContext.html#a2ad9e92a82d6f783b3061584729c2f4a">status</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a2ad9e92a82d6f783b3061584729c2f4a">status</a>(); }
+<a name="l00177"></a>00177 
+<a name="l00179"></a><a class="code" href="classInOrderThreadContext.html#acdf331c877974ed8697216475a21998d">00179</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#acdf331c877974ed8697216475a21998d">setStatus</a>(<a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> new_status)
+<a name="l00180"></a>00180     { <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#acdf331c877974ed8697216475a21998d">setStatus</a>(new_status); }
+<a name="l00181"></a>00181 
+<a name="l00184"></a>00184     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#ab542a5cf9ce4b41042d61e42dfe3aeab">activate</a>(<a class="code" href="classCycles.html">Cycles</a> delay = <a class="code" href="classCycles.html">Cycles</a>(1));
+<a name="l00185"></a>00185 
+<a name="l00187"></a>00187     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a32072550286c5735b4b95349efa8e4f6">suspend</a>(<a class="code" href="classCycles.html">Cycles</a> delay = <a class="code" href="classCycles.html">Cycles</a>(0));
+<a name="l00188"></a>00188 
+<a name="l00190"></a>00190     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#ade40686c5cdae8911d4062b9bf3d5340">halt</a>(<a class="code" href="classCycles.html">Cycles</a> delay = <a class="code" href="classCycles.html">Cycles</a>(0));
+<a name="l00191"></a>00191 
+<a name="l00193"></a>00193     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#af121f4812cba8e37d675cddada8e47ed">takeOverFrom</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *old_context);
+<a name="l00194"></a>00194 
+<a name="l00196"></a>00196     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a3dd3443357312bcb75580eaa508c48a4">regStats</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="trace_8hh.html#a166fa10b86d8faa127fb7c78191e3e60">name</a>);
+<a name="l00197"></a>00197 
+<a name="l00199"></a><a class="code" href="classInOrderThreadContext.html#a97f81432e1b0b5bcfcf87a7fb6b03e17">00199</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#a97f81432e1b0b5bcfcf87a7fb6b03e17">getThreadNum</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>(); }
+<a name="l00200"></a>00200 
+<a name="l00202"></a>00202     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a60ea17de8baed42e666abb02b172c111">copyArchRegs</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *src_tc);
+<a name="l00203"></a>00203 
+<a name="l00205"></a>00205     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#ad5c88ea41846742bd8c70d9c50f31945">clearArchRegs</a>();
+<a name="l00206"></a>00206 
+<a name="l00208"></a>00208     uint64_t <a class="code" href="classInOrderThreadContext.html#a21c850cd41ab977a2cf3450fe66ec25a">readIntReg</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00209"></a>00209 
+<a name="l00210"></a>00210     <a class="code" href="classThreadContext.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="classInOrderThreadContext.html#a2f97d83baef4fbda00b7f7f62779752f">readFloatReg</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00211"></a>00211 
+<a name="l00212"></a>00212     <a class="code" href="classThreadContext.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="classInOrderThreadContext.html#a4998e6615f835676762af364eff198e3">readFloatRegBits</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00213"></a>00213 
+<a name="l00214"></a>00214     <a class="code" href="classThreadContext.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="classInOrderThreadContext.html#ac3d147c535052bfb1f8e8fe0697168d7">readCCReg</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00215"></a>00215 
+<a name="l00216"></a>00216     uint64_t <a class="code" href="classInOrderThreadContext.html#a207d863e4bad4245020ea32adbaf625a">readRegOtherThread</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00217"></a>00217 
+<a name="l00219"></a>00219     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#abc264e8ee37c6bd7d7b5759b97c34356">setIntReg</a>(<span class="keywordtype">int</span> reg_idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00220"></a>00220 
+<a name="l00221"></a>00221     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#ab6fd8e55b81c173f448ec0c42bc28b99">setFloatReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="classThreadContext.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00222"></a>00222 
+<a name="l00223"></a>00223     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a618651078f08ecd328dfe3312f0f2ea7">setFloatRegBits</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="classThreadContext.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00224"></a>00224 
+<a name="l00225"></a>00225     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#afd6c42b1888ad21a4382078ca7a86d09">setCCReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="classThreadContext.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00226"></a>00226 
+<a name="l00227"></a>00227     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#ae9e72cf93b574d00d7f1652fcafe7449">setRegOtherThread</a>(<span class="keywordtype">int</span> misc_reg,
+<a name="l00228"></a>00228                                    <span class="keyword">const</span> <a class="code" href="classThreadContext.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>,
+<a name="l00229"></a>00229                                    <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00230"></a>00230 
+<a name="l00232"></a><a class="code" href="classInOrderThreadContext.html#a827fb3454585cf4c620f4fd341966317">00232</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classInOrderThreadContext.html#a827fb3454585cf4c620f4fd341966317">pcState</a>()
+<a name="l00233"></a>00233     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#af486ac7476906f63fc6696b3e76a411b">pcState</a>(<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00234"></a>00234 
+<a name="l00236"></a><a class="code" href="classInOrderThreadContext.html#a5e9cfc754c9ef9b7db875ce89871944e">00236</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a827fb3454585cf4c620f4fd341966317">pcState</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00237"></a>00237     { <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#af486ac7476906f63fc6696b3e76a411b">pcState</a>(val, <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00238"></a>00238 
+<a name="l00242"></a><a class="code" href="classInOrderThreadContext.html#a6005386aeeaecb35499c3199fb47ba2f">00242</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a6005386aeeaecb35499c3199fb47ba2f">pcStateNoRecord</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00243"></a>00243     {}
+<a name="l00244"></a>00244 
+<a name="l00245"></a><a class="code" href="classInOrderThreadContext.html#a53c92716db281ae16ffb693c6d7803c7">00245</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classInOrderThreadContext.html#a53c92716db281ae16ffb693c6d7803c7">instAddr</a>()
+<a name="l00246"></a>00246     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#afae6152cf4b3a51162d6e64247c1ac09">instAddr</a>(<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00247"></a>00247 
+<a name="l00248"></a><a class="code" href="classInOrderThreadContext.html#aceec6e28772f91b3cc921c0e3927b0c2">00248</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classInOrderThreadContext.html#aceec6e28772f91b3cc921c0e3927b0c2">nextInstAddr</a>()
+<a name="l00249"></a>00249     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#af1caba1f04cf2802d742d1a16b961e79">nextInstAddr</a>(<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00250"></a>00250 
+<a name="l00251"></a><a class="code" href="classInOrderThreadContext.html#a1a21696f33a7d38f251687ae0b5e9718">00251</a>     <a class="code" href="base_2types_8hh.html#adfb4d8b20c5abc8be73dd367b16f2d57">MicroPC</a> <a class="code" href="classInOrderThreadContext.html#a1a21696f33a7d38f251687ae0b5e9718">microPC</a>()
+<a name="l00252"></a>00252     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#aa295441afc0fa8f449dc1a0cb7c7b994">microPC</a>(<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00253"></a>00253 
+<a name="l00255"></a><a class="code" href="classInOrderThreadContext.html#a7b5ac6af9c2c19d7c1b442b8a3aebbc6">00255</a>     <a class="code" href="classThreadContext.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> <a class="code" href="classInOrderThreadContext.html#a7b5ac6af9c2c19d7c1b442b8a3aebbc6">readMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg)
+<a name="l00256"></a>00256     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#af2ec8925148a53b9bddefb7fb65a7223">readMiscRegNoEffect</a>(misc_reg, <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00257"></a>00257 
+<a name="l00260"></a><a class="code" href="classInOrderThreadContext.html#a5a8c6c487e8da143d26188258b04f1cc">00260</a>     <a class="code" href="classThreadContext.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> <a class="code" href="classInOrderThreadContext.html#a5a8c6c487e8da143d26188258b04f1cc">readMiscReg</a>(<span class="keywordtype">int</span> misc_reg)
+<a name="l00261"></a>00261     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#a71d44ee14eeab530a09bc7d68d97ece2">readMiscReg</a>(misc_reg, <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00262"></a>00262 
+<a name="l00264"></a>00264     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a763517aaea2f3decbc1ef9d064216b6f">setMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="classThreadContext.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00265"></a>00265 
+<a name="l00268"></a>00268     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a1877dde4f3eb17a8b7d33ea40176c148">setMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="classThreadContext.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00269"></a>00269 
+<a name="l00270"></a><a class="code" href="classInOrderThreadContext.html#aa529f2d70520c578e3e29b3bf1a66312">00270</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#aa529f2d70520c578e3e29b3bf1a66312">flattenIntIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00271"></a>00271     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#aa0d8dc5e214b94342d1f730e4e34ae82">isa</a>[<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()]-&gt;flattenIntIndex(reg); }
+<a name="l00272"></a>00272 
+<a name="l00273"></a><a class="code" href="classInOrderThreadContext.html#ab9ea3f8f1a21df875c7273c7377dfac1">00273</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#ab9ea3f8f1a21df875c7273c7377dfac1">flattenFloatIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00274"></a>00274     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#aa0d8dc5e214b94342d1f730e4e34ae82">isa</a>[<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()]-&gt;flattenFloatIndex(reg); }
+<a name="l00275"></a>00275 
+<a name="l00276"></a><a class="code" href="classInOrderThreadContext.html#ac33d74353e36a595ec48962cd0446320">00276</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#ac33d74353e36a595ec48962cd0446320">flattenCCIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00277"></a>00277     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#aa0d8dc5e214b94342d1f730e4e34ae82">isa</a>[<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()]-&gt;flattenCCIndex(reg); }
+<a name="l00278"></a>00278 
+<a name="l00279"></a><a class="code" href="classInOrderThreadContext.html#a5adc7d32f3a8bd75c5dc0a62d95564fd">00279</a>     <span class="keywordtype">int</span> <a class="code" href="classInOrderThreadContext.html#a5adc7d32f3a8bd75c5dc0a62d95564fd">flattenMiscIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00280"></a>00280     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#aa0d8dc5e214b94342d1f730e4e34ae82">isa</a>[<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()]-&gt;flattenMiscIndex(reg); }
+<a name="l00281"></a>00281 
+<a name="l00282"></a><a class="code" href="classInOrderThreadContext.html#a4f6e340045c7344d26acbb6fbece544e">00282</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a4f6e340045c7344d26acbb6fbece544e">activateContext</a>(<a class="code" href="classCycles.html">Cycles</a> delay)
+<a name="l00283"></a>00283     { <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#ad1c701dd98d725950e539f84f9faa8ec">activateContext</a>(<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>(), delay); }
+<a name="l00284"></a>00284 
+<a name="l00285"></a><a class="code" href="classInOrderThreadContext.html#a84a8d5596f32e480e2d6d8199800bc91">00285</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a84a8d5596f32e480e2d6d8199800bc91">deallocateContext</a>()
+<a name="l00286"></a>00286     { <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;deallocateContext(<a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00287"></a>00287 
+<a name="l00289"></a>00289     <span class="comment">// @todo: Figure out where these store cond failures should go.</span>
+<a name="l00290"></a><a class="code" href="classInOrderThreadContext.html#a25b995a791e41965e088d8bf3f2bf859">00290</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInOrderThreadContext.html#a25b995a791e41965e088d8bf3f2bf859">readStCondFailures</a>()
+<a name="l00291"></a>00291     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#af112e3f6e9a9305596d19209d67354fb">storeCondFailures</a>; }
+<a name="l00292"></a>00292 
+<a name="l00294"></a><a class="code" href="classInOrderThreadContext.html#abbe779fa43c72cd485ddb736ab17ff61">00294</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#abbe779fa43c72cd485ddb736ab17ff61">setStCondFailures</a>(<span class="keywordtype">unsigned</span> sc_failures)
+<a name="l00295"></a>00295     { <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#af112e3f6e9a9305596d19209d67354fb">storeCondFailures</a> = sc_failures; }
+<a name="l00296"></a>00296 
+<a name="l00297"></a>00297     <span class="comment">// Only really makes sense for old CPU model.  Lots of code</span>
+<a name="l00298"></a>00298     <span class="comment">// outside the CPU still checks this function, so it will</span>
+<a name="l00299"></a>00299     <span class="comment">// always return false to keep everything working.</span>
+<a name="l00303"></a><a class="code" href="classInOrderThreadContext.html#a99768639c728ee835cce54b8b42b3d8f">00303</a> <span class="comment"></span>    <span class="keywordtype">bool</span> <a class="code" href="classInOrderThreadContext.html#a99768639c728ee835cce54b8b42b3d8f">misspeculating</a>() { <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00304"></a>00304 
+<a name="l00306"></a><a class="code" href="classInOrderThreadContext.html#a36e0b96120fcbbc2ee8699158f7be5c2">00306</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a36e0b96120fcbbc2ee8699158f7be5c2">syscall</a>(int64_t callnum)
+<a name="l00307"></a>00307     { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#a41d682c28d0f49e04393c52815808782">cpu</a>-&gt;<a class="code" href="classInOrderCPU.html#a2d6a2bbae85e604392f43b3418cdec97">syscall</a>(callnum, <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a1df6a20d1f58735daa08de45c9ea6a7a">threadId</a>()); }
+<a name="l00308"></a>00308 
+<a name="l00310"></a><a class="code" href="classInOrderThreadContext.html#a2b0bef6e1b1ac24e9322fbd09a511d11">00310</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classInOrderThreadContext.html#a2b0bef6e1b1ac24e9322fbd09a511d11">readFuncExeInst</a>() { <span class="keywordflow">return</span> <a class="code" href="classInOrderThreadContext.html#ac297691c06a1cd4769d8eba7822395b9">thread</a>-&gt;<a class="code" href="structThreadState.html#a344acde4f72898017365be79fd18a323">funcExeInst</a>; }
+<a name="l00311"></a>00311 
+<a name="l00312"></a><a class="code" href="classInOrderThreadContext.html#a3f71438128bca2ddd412462483bf0f70">00312</a>     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a3f71438128bca2ddd412462483bf0f70">changeRegFileContext</a>(<span class="keywordtype">unsigned</span> param,
+<a name="l00313"></a>00313                                       <span class="keywordtype">unsigned</span> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00314"></a>00314     { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Not supported!&quot;</span>); }
+<a name="l00315"></a>00315 
+<a name="l00316"></a>00316     uint64_t <a class="code" href="classInOrderThreadContext.html#aed7abd4afcb954f8612e4ef1fe73317a">readIntRegFlat</a>(<span class="keywordtype">int</span> idx);
+<a name="l00317"></a>00317     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#ae3b8c9c2c1ae95767f0703357957a3f8">setIntRegFlat</a>(<span class="keywordtype">int</span> idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00318"></a>00318 
+<a name="l00319"></a>00319     <a class="code" href="classThreadContext.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="classInOrderThreadContext.html#aaa32dc9f4a8719a465c267fed47cbdc6">readFloatRegFlat</a>(<span class="keywordtype">int</span> idx);
+<a name="l00320"></a>00320     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a71ec23ca2c029120932e5af4babc0da1">setFloatRegFlat</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classThreadContext.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00321"></a>00321 
+<a name="l00322"></a>00322     <a class="code" href="classThreadContext.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="classInOrderThreadContext.html#a2fa29585c9694c9bffcce2a63f871759">readFloatRegBitsFlat</a>(<span class="keywordtype">int</span> idx);
+<a name="l00323"></a>00323     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#acd974292ff0461c2e94c0b5a1126b503">setFloatRegBitsFlat</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classThreadContext.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00324"></a>00324 
+<a name="l00325"></a>00325     <a class="code" href="classThreadContext.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="classInOrderThreadContext.html#a78f8bb511732f8abab3bd11a18d32072">readCCRegFlat</a>(<span class="keywordtype">int</span> idx);
+<a name="l00326"></a>00326     <span class="keywordtype">void</span> <a class="code" href="classInOrderThreadContext.html#a6dec2284dd5904f992642f24bb289f14">setCCRegFlat</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classThreadContext.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00327"></a>00327 };
+<a name="l00328"></a>00328 
+<a name="l00329"></a>00329 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

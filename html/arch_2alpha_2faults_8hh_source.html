@@ -1,0 +1,365 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/alpha/faults.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/alpha/faults.hh</h1><a href="arch_2alpha_2faults_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2003-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00029"></a>00029 <span class="comment"> *          Kevin Lim</span>
+<a name="l00030"></a>00030 <span class="comment"> */</span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifndef __ARCH_ALPHA_FAULTS_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ALPHA_FAULTS_HH__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;<a class="code" href="alpha_2pagetable_8hh.html">arch/alpha/pagetable.hh</a>&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="request_8hh.html">mem/request.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00038"></a>00038 
+<a name="l00039"></a>00039 <span class="comment">// The design of the &quot;name&quot; and &quot;vect&quot; functions is in sim/faults.hh</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a>00041 <span class="keyword">namespace </span>AlphaISA {
+<a name="l00042"></a>00042 
+<a name="l00043"></a><a class="code" href="namespaceAlphaISA.html#a5c26c9764cc05486454998efadf79833">00043</a> <span class="keyword">typedef</span> <span class="keyword">const</span> <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a>;
+<a name="l00044"></a>00044 
+<a name="l00045"></a><a class="code" href="classAlphaISA_1_1AlphaFault.html">00045</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a> : <span class="keyword">public</span> <a class="code" href="classFaultBase.html">FaultBase</a>
+<a name="l00046"></a>00046 {
+<a name="l00047"></a>00047   <span class="keyword">protected</span>:
+<a name="l00048"></a><a class="code" href="classAlphaISA_1_1AlphaFault.html#a5d44c6b9ce6041b3e9235e8d978156cb">00048</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html#a5d44c6b9ce6041b3e9235e8d978156cb">skipFaultingInstruction</a>() {<span class="keywordflow">return</span> <span class="keyword">false</span>;}
+<a name="l00049"></a><a class="code" href="classAlphaISA_1_1AlphaFault.html#a5187b0d322a9546c3eb0ce51f3268f4e">00049</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html#a5187b0d322a9546c3eb0ce51f3268f4e">setRestartAddress</a>() {<span class="keywordflow">return</span> <span class="keyword">true</span>;}
+<a name="l00050"></a>00050   <span class="keyword">public</span>:
+<a name="l00051"></a>00051     <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00052"></a>00052             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00053"></a>00053     <span class="keyword">virtual</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1AlphaFault.html#ac141ef2ab527bd4d5c079ddff2e8b4aa">vect</a>() = 0;
+<a name="l00054"></a>00054     <span class="keyword">virtual</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1AlphaFault.html#a5d92ccd11b5cd6b04f02bd0a088b776c">countStat</a>() = 0;
+<a name="l00055"></a>00055 };
+<a name="l00056"></a>00056 
+<a name="l00057"></a><a class="code" href="classAlphaISA_1_1MachineCheckFault.html">00057</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1MachineCheckFault.html">MachineCheckFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00058"></a>00058 {
+<a name="l00059"></a>00059   <span class="keyword">private</span>:
+<a name="l00060"></a><a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00060</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00061"></a><a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00061</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00062"></a><a class="code" href="classAlphaISA_1_1MachineCheckFault.html#a4bff925c412f331c5aaf6a39b79619ff">00062</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064   <span class="keyword">public</span>:
+<a name="l00065"></a><a class="code" href="classAlphaISA_1_1MachineCheckFault.html#a73adb23259baf912a81683a9790a303f">00065</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00066"></a><a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ae15c5d7ab0162821b93d668d0b225198">00066</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00067"></a><a class="code" href="classAlphaISA_1_1MachineCheckFault.html#a6c79663c761ff57265459f7e3aefaf4c">00067</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1MachineCheckFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00068"></a>00068 };
+<a name="l00069"></a>00069 
+<a name="l00070"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html">00070</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1AlignmentFault.html">AlignmentFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00071"></a>00071 {
+<a name="l00072"></a>00072   <span class="keyword">private</span>:
+<a name="l00073"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00073</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00074"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00074</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00075"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html#a4bff925c412f331c5aaf6a39b79619ff">00075</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077   <span class="keyword">public</span>:
+<a name="l00078"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html#a73adb23259baf912a81683a9790a303f">00078</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00079"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html#ae15c5d7ab0162821b93d668d0b225198">00079</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00080"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html#a6c79663c761ff57265459f7e3aefaf4c">00080</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1AlignmentFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00081"></a><a class="code" href="classAlphaISA_1_1AlignmentFault.html#ad4aae8bc2dcbe9403effd900aca07d80">00081</a>     <span class="keywordtype">bool</span> <a class="code" href="classAlphaISA_1_1AlignmentFault.html#ad4aae8bc2dcbe9403effd900aca07d80">isAlignmentFault</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <span class="keyword">true</span>;}
+<a name="l00082"></a>00082 };
+<a name="l00083"></a>00083 
+<a name="l00084"></a><a class="code" href="classAlphaISA_1_1ResetFault.html">00084</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1ResetFault.html">ResetFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00085"></a>00085 {
+<a name="l00086"></a>00086   <span class="keyword">private</span>:
+<a name="l00087"></a><a class="code" href="classAlphaISA_1_1ResetFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00087</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ResetFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00088"></a><a class="code" href="classAlphaISA_1_1ResetFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00088</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ResetFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00089"></a><a class="code" href="classAlphaISA_1_1ResetFault.html#a4bff925c412f331c5aaf6a39b79619ff">00089</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1ResetFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00090"></a>00090 
+<a name="l00091"></a>00091   <span class="keyword">public</span>:
+<a name="l00092"></a><a class="code" href="classAlphaISA_1_1ResetFault.html#a73adb23259baf912a81683a9790a303f">00092</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ResetFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ResetFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00093"></a><a class="code" href="classAlphaISA_1_1ResetFault.html#ae15c5d7ab0162821b93d668d0b225198">00093</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ResetFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ResetFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00094"></a><a class="code" href="classAlphaISA_1_1ResetFault.html#a6c79663c761ff57265459f7e3aefaf4c">00094</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1ResetFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ResetFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00095"></a>00095 };
+<a name="l00096"></a>00096 
+<a name="l00097"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html">00097</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1ArithmeticFault.html">ArithmeticFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00098"></a>00098 {
+<a name="l00099"></a>00099   <span class="keyword">private</span>:
+<a name="l00100"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00100</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00101"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00101</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00102"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a4bff925c412f331c5aaf6a39b79619ff">00102</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00103"></a>00103 
+<a name="l00104"></a>00104   <span class="keyword">protected</span>:
+<a name="l00105"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a4dca22d2e3f19609672fe85bb5e28b56">00105</a>     <span class="keywordtype">bool</span> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a4dca22d2e3f19609672fe85bb5e28b56">skipFaultingInstruction</a>() {<span class="keywordflow">return</span> <span class="keyword">true</span>;}
+<a name="l00106"></a>00106 
+<a name="l00107"></a>00107   <span class="keyword">public</span>:
+<a name="l00108"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a73adb23259baf912a81683a9790a303f">00108</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00109"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ae15c5d7ab0162821b93d668d0b225198">00109</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00110"></a><a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a6c79663c761ff57265459f7e3aefaf4c">00110</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00111"></a>00111     <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ArithmeticFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00112"></a>00112             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00113"></a>00113 };
+<a name="l00114"></a>00114 
+<a name="l00115"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html">00115</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1InterruptFault.html">InterruptFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00116"></a>00116 {
+<a name="l00117"></a>00117   <span class="keyword">private</span>:
+<a name="l00118"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00118</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1InterruptFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00119"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00119</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1InterruptFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00120"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html#a4bff925c412f331c5aaf6a39b79619ff">00120</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1InterruptFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00121"></a>00121 
+<a name="l00122"></a>00122   <span class="keyword">protected</span>:
+<a name="l00123"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html#a92cd7f56a5213322fd8b3d1dbe9a7136">00123</a>     <span class="keywordtype">bool</span> <a class="code" href="classAlphaISA_1_1InterruptFault.html#a92cd7f56a5213322fd8b3d1dbe9a7136">setRestartAddress</a>() {<span class="keywordflow">return</span> <span class="keyword">false</span>;}
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125   <span class="keyword">public</span>:
+<a name="l00126"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html#a73adb23259baf912a81683a9790a303f">00126</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1InterruptFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1InterruptFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00127"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html#ae15c5d7ab0162821b93d668d0b225198">00127</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1InterruptFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1InterruptFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00128"></a><a class="code" href="classAlphaISA_1_1InterruptFault.html#a6c79663c761ff57265459f7e3aefaf4c">00128</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1InterruptFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1InterruptFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00129"></a>00129 };
+<a name="l00130"></a>00130 
+<a name="l00131"></a><a class="code" href="classAlphaISA_1_1DtbFault.html">00131</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00132"></a>00132 {
+<a name="l00133"></a>00133   <span class="keyword">protected</span>:
+<a name="l00134"></a><a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">00134</a>     <a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">vaddr</a>;
+<a name="l00135"></a><a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">00135</a>     <a class="code" href="classFlags.html">Request::Flags</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">reqFlags</a>;
+<a name="l00136"></a><a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">00136</a>     uint64_t <a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">flags</a>;
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138   <span class="keyword">public</span>:
+<a name="l00139"></a><a class="code" href="classAlphaISA_1_1DtbFault.html#a74e89dcaff8c62058a1ecabdf3b0e641">00139</a>     <a class="code" href="classAlphaISA_1_1DtbFault.html#a74e89dcaff8c62058a1ecabdf3b0e641">DtbFault</a>(<a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> _vaddr, <a class="code" href="classFlags.html">Request::Flags</a> _reqFlags, uint64_t _flags)
+<a name="l00140"></a>00140         : <a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">vaddr</a>(_vaddr), <a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">reqFlags</a>(_reqFlags), <a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">flags</a>(_flags)
+<a name="l00141"></a>00141     { }
+<a name="l00142"></a>00142     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a09ac100f5ad40cf1726c4e60925c2522">name</a>() <span class="keyword">const</span> = 0;
+<a name="l00143"></a>00143     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#ae7a41506fab06a3c1e392f5286f14c66">vect</a>() = 0;
+<a name="l00144"></a>00144     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1DtbFault.html#a4b643982263b390349238a6711216763">countStat</a>() = 0;
+<a name="l00145"></a>00145     <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1DtbFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00146"></a>00146             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00147"></a>00147 };
+<a name="l00148"></a>00148 
+<a name="l00149"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html">00149</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1NDtbMissFault.html">NDtbMissFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>
+<a name="l00150"></a>00150 {
+<a name="l00151"></a>00151   <span class="keyword">private</span>:
+<a name="l00152"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00152</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00153"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00153</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00154"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a4bff925c412f331c5aaf6a39b79619ff">00154</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00155"></a>00155 
+<a name="l00156"></a>00156   <span class="keyword">public</span>:
+<a name="l00157"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a47ceca6a0cb3454cf788705e9abc1510">00157</a>     <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a47ceca6a0cb3454cf788705e9abc1510">NDtbMissFault</a>(<a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">vaddr</a>, <a class="code" href="classFlags.html">Request::Flags</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">reqFlags</a>, uint64_t <a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">flags</a>)
+<a name="l00158"></a>00158         : <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>(vaddr, reqFlags, flags)
+<a name="l00159"></a>00159     { }
+<a name="l00160"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a73adb23259baf912a81683a9790a303f">00160</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00161"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ae15c5d7ab0162821b93d668d0b225198">00161</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00162"></a><a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a6c79663c761ff57265459f7e3aefaf4c">00162</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00163"></a>00163     <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1NDtbMissFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00164"></a>00164             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00165"></a>00165 };
+<a name="l00166"></a>00166 
+<a name="l00167"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html">00167</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1PDtbMissFault.html">PDtbMissFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>
+<a name="l00168"></a>00168 {
+<a name="l00169"></a>00169   <span class="keyword">private</span>:
+<a name="l00170"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00170</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00171"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00171</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00172"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html#a4bff925c412f331c5aaf6a39b79619ff">00172</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00173"></a>00173 
+<a name="l00174"></a>00174   <span class="keyword">public</span>:
+<a name="l00175"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html#add01ee5fb640342c0f65f9b3b79199ba">00175</a>     <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#add01ee5fb640342c0f65f9b3b79199ba">PDtbMissFault</a>(<a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">vaddr</a>, <a class="code" href="classFlags.html">Request::Flags</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">reqFlags</a>, uint64_t <a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">flags</a>)
+<a name="l00176"></a>00176         : <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>(vaddr, reqFlags, flags)
+<a name="l00177"></a>00177     { }
+<a name="l00178"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html#a73adb23259baf912a81683a9790a303f">00178</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00179"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ae15c5d7ab0162821b93d668d0b225198">00179</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00180"></a><a class="code" href="classAlphaISA_1_1PDtbMissFault.html#a6c79663c761ff57265459f7e3aefaf4c">00180</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1PDtbMissFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00181"></a>00181 };
+<a name="l00182"></a>00182 
+<a name="l00183"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html">00183</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1DtbPageFault.html">DtbPageFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>
+<a name="l00184"></a>00184 {
+<a name="l00185"></a>00185   <span class="keyword">private</span>:
+<a name="l00186"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00186</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00187"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00187</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00188"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html#a4bff925c412f331c5aaf6a39b79619ff">00188</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190   <span class="keyword">public</span>:
+<a name="l00191"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html#ae4f2171aefd458e8a5efafda07781ef6">00191</a>     <a class="code" href="classAlphaISA_1_1DtbPageFault.html#ae4f2171aefd458e8a5efafda07781ef6">DtbPageFault</a>(<a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">vaddr</a>, <a class="code" href="classFlags.html">Request::Flags</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">reqFlags</a>, uint64_t <a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">flags</a>)
+<a name="l00192"></a>00192         : <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>(vaddr, reqFlags, flags)
+<a name="l00193"></a>00193     { }
+<a name="l00194"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html#a73adb23259baf912a81683a9790a303f">00194</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00195"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html#ae15c5d7ab0162821b93d668d0b225198">00195</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00196"></a><a class="code" href="classAlphaISA_1_1DtbPageFault.html#a6c79663c761ff57265459f7e3aefaf4c">00196</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1DtbPageFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbPageFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00197"></a>00197 };
+<a name="l00198"></a>00198 
+<a name="l00199"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html">00199</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1DtbAcvFault.html">DtbAcvFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>
+<a name="l00200"></a>00200 {
+<a name="l00201"></a>00201   <span class="keyword">private</span>:
+<a name="l00202"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00202</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00203"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00203</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00204"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html#a4bff925c412f331c5aaf6a39b79619ff">00204</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00205"></a>00205 
+<a name="l00206"></a>00206   <span class="keyword">public</span>:
+<a name="l00207"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html#afa7cdcdb1879c2258aa8ffd15b82c5a0">00207</a>     <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#afa7cdcdb1879c2258aa8ffd15b82c5a0">DtbAcvFault</a>(<a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">vaddr</a>, <a class="code" href="classFlags.html">Request::Flags</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">reqFlags</a>, uint64_t <a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">flags</a>)
+<a name="l00208"></a>00208         : <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>(vaddr, reqFlags, flags)
+<a name="l00209"></a>00209     { }
+<a name="l00210"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html#a73adb23259baf912a81683a9790a303f">00210</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00211"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ae15c5d7ab0162821b93d668d0b225198">00211</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00212"></a><a class="code" href="classAlphaISA_1_1DtbAcvFault.html#a6c79663c761ff57265459f7e3aefaf4c">00212</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbAcvFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00213"></a>00213 };
+<a name="l00214"></a>00214 
+<a name="l00215"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html">00215</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html">DtbAlignmentFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>
+<a name="l00216"></a>00216 {
+<a name="l00217"></a>00217   <span class="keyword">private</span>:
+<a name="l00218"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00218</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00219"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00219</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00220"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#a4bff925c412f331c5aaf6a39b79619ff">00220</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00221"></a>00221 
+<a name="l00222"></a>00222   <span class="keyword">public</span>:
+<a name="l00223"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ad19c673ddedc51c81895670922fff3ce">00223</a>     <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ad19c673ddedc51c81895670922fff3ce">DtbAlignmentFault</a>(<a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a48d5190e0fd672e7fe9d248a670b8ea3">vaddr</a>, <a class="code" href="classFlags.html">Request::Flags</a> <a class="code" href="classAlphaISA_1_1DtbFault.html#a4342a385c094b40ed46b0674fbb0b223">reqFlags</a>, uint64_t <a class="code" href="classAlphaISA_1_1DtbFault.html#a899a76dc5f03f0d4ea3793c339e07ee9">flags</a>)
+<a name="l00224"></a>00224         : <a class="code" href="classAlphaISA_1_1DtbFault.html">DtbFault</a>(vaddr, reqFlags, flags)
+<a name="l00225"></a>00225     { }
+<a name="l00226"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#a73adb23259baf912a81683a9790a303f">00226</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00227"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ae15c5d7ab0162821b93d668d0b225198">00227</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00228"></a><a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#a6c79663c761ff57265459f7e3aefaf4c">00228</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1DtbAlignmentFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00229"></a>00229 };
+<a name="l00230"></a>00230 
+<a name="l00231"></a><a class="code" href="classAlphaISA_1_1ItbFault.html">00231</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1ItbFault.html">ItbFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00232"></a>00232 {
+<a name="l00233"></a>00233   <span class="keyword">protected</span>:
+<a name="l00234"></a><a class="code" href="classAlphaISA_1_1ItbFault.html#afed6bf9f08aaa7445161a391a719b7e4">00234</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classAlphaISA_1_1ItbFault.html#afed6bf9f08aaa7445161a391a719b7e4">pc</a>;
+<a name="l00235"></a>00235 
+<a name="l00236"></a>00236   <span class="keyword">public</span>:
+<a name="l00237"></a><a class="code" href="classAlphaISA_1_1ItbFault.html#a03effcae3578d6a5662047858f7c2c86">00237</a>     <a class="code" href="classAlphaISA_1_1ItbFault.html#a03effcae3578d6a5662047858f7c2c86">ItbFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _pc) : <a class="code" href="classAlphaISA_1_1ItbFault.html#afed6bf9f08aaa7445161a391a719b7e4">pc</a>(_pc) { }
+<a name="l00238"></a>00238     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ItbFault.html#a09ac100f5ad40cf1726c4e60925c2522">name</a>() <span class="keyword">const</span> = 0;
+<a name="l00239"></a>00239     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ItbFault.html#ae7a41506fab06a3c1e392f5286f14c66">vect</a>() = 0;
+<a name="l00240"></a>00240     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1ItbFault.html#a4b643982263b390349238a6711216763">countStat</a>() = 0;
+<a name="l00241"></a>00241     <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ItbFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00242"></a>00242             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00243"></a>00243 };
+<a name="l00244"></a>00244 
+<a name="l00245"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html">00245</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1ItbPageFault.html">ItbPageFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1ItbFault.html">ItbFault</a>
+<a name="l00246"></a>00246 {
+<a name="l00247"></a>00247   <span class="keyword">private</span>:
+<a name="l00248"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00248</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00249"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00249</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00250"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html#a4bff925c412f331c5aaf6a39b79619ff">00250</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00251"></a>00251 
+<a name="l00252"></a>00252   <span class="keyword">public</span>:
+<a name="l00253"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html#a47740fcdb72d57c57dcb39b14a4e47db">00253</a>     <a class="code" href="classAlphaISA_1_1ItbPageFault.html#a47740fcdb72d57c57dcb39b14a4e47db">ItbPageFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classAlphaISA_1_1ItbFault.html#afed6bf9f08aaa7445161a391a719b7e4">pc</a>) : <a class="code" href="classAlphaISA_1_1ItbFault.html">ItbFault</a>(pc) { }
+<a name="l00254"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html#a73adb23259baf912a81683a9790a303f">00254</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00255"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html#ae15c5d7ab0162821b93d668d0b225198">00255</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00256"></a><a class="code" href="classAlphaISA_1_1ItbPageFault.html#a6c79663c761ff57265459f7e3aefaf4c">00256</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1ItbPageFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00257"></a>00257     <span class="keywordtype">void</span> <a class="code" href="classAlphaISA_1_1ItbPageFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00258"></a>00258             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00259"></a>00259 };
+<a name="l00260"></a>00260 
+<a name="l00261"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html">00261</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1ItbAcvFault.html">ItbAcvFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1ItbFault.html">ItbFault</a>
+<a name="l00262"></a>00262 {
+<a name="l00263"></a>00263   <span class="keyword">private</span>:
+<a name="l00264"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00264</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00265"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00265</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00266"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html#a4bff925c412f331c5aaf6a39b79619ff">00266</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00267"></a>00267 
+<a name="l00268"></a>00268   <span class="keyword">public</span>:
+<a name="l00269"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html#aca2f01a9f9bd3bc50411a4f3e2be0840">00269</a>     <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#aca2f01a9f9bd3bc50411a4f3e2be0840">ItbAcvFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classAlphaISA_1_1ItbFault.html#afed6bf9f08aaa7445161a391a719b7e4">pc</a>) : <a class="code" href="classAlphaISA_1_1ItbFault.html">ItbFault</a>(pc) { }
+<a name="l00270"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html#a73adb23259baf912a81683a9790a303f">00270</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00271"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ae15c5d7ab0162821b93d668d0b225198">00271</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00272"></a><a class="code" href="classAlphaISA_1_1ItbAcvFault.html#a6c79663c761ff57265459f7e3aefaf4c">00272</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1ItbAcvFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00273"></a>00273 };
+<a name="l00274"></a>00274 
+<a name="l00275"></a><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html">00275</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html">UnimplementedOpcodeFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00276"></a>00276 {
+<a name="l00277"></a>00277   <span class="keyword">private</span>:
+<a name="l00278"></a><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00278</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00279"></a><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00279</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00280"></a><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#a4bff925c412f331c5aaf6a39b79619ff">00280</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00281"></a>00281 
+<a name="l00282"></a>00282   <span class="keyword">public</span>:
+<a name="l00283"></a><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#a73adb23259baf912a81683a9790a303f">00283</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00284"></a><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ae15c5d7ab0162821b93d668d0b225198">00284</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00285"></a><a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#a6c79663c761ff57265459f7e3aefaf4c">00285</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1UnimplementedOpcodeFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00286"></a>00286 };
+<a name="l00287"></a>00287 
+<a name="l00288"></a><a class="code" href="classAlphaISA_1_1FloatEnableFault.html">00288</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1FloatEnableFault.html">FloatEnableFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00289"></a>00289 {
+<a name="l00290"></a>00290   <span class="keyword">private</span>:
+<a name="l00291"></a><a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00291</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00292"></a><a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00292</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00293"></a><a class="code" href="classAlphaISA_1_1FloatEnableFault.html#a4bff925c412f331c5aaf6a39b79619ff">00293</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00294"></a>00294 
+<a name="l00295"></a>00295   <span class="keyword">public</span>:
+<a name="l00296"></a><a class="code" href="classAlphaISA_1_1FloatEnableFault.html#a73adb23259baf912a81683a9790a303f">00296</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00297"></a><a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ae15c5d7ab0162821b93d668d0b225198">00297</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00298"></a><a class="code" href="classAlphaISA_1_1FloatEnableFault.html#a6c79663c761ff57265459f7e3aefaf4c">00298</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1FloatEnableFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00299"></a>00299 };
+<a name="l00300"></a>00300 
+<a name="l00301"></a><a class="code" href="classAlphaISA_1_1PalFault.html">00301</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1PalFault.html">PalFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00302"></a>00302 {
+<a name="l00303"></a>00303   <span class="keyword">private</span>:
+<a name="l00304"></a><a class="code" href="classAlphaISA_1_1PalFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00304</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1PalFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00305"></a><a class="code" href="classAlphaISA_1_1PalFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00305</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1PalFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00306"></a><a class="code" href="classAlphaISA_1_1PalFault.html#a4bff925c412f331c5aaf6a39b79619ff">00306</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1PalFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00307"></a>00307 
+<a name="l00308"></a>00308   <span class="keyword">protected</span>:
+<a name="l00309"></a><a class="code" href="classAlphaISA_1_1PalFault.html#a4dca22d2e3f19609672fe85bb5e28b56">00309</a>     <span class="keywordtype">bool</span> <a class="code" href="classAlphaISA_1_1PalFault.html#a4dca22d2e3f19609672fe85bb5e28b56">skipFaultingInstruction</a>() {<span class="keywordflow">return</span> <span class="keyword">true</span>;}
+<a name="l00310"></a>00310 
+<a name="l00311"></a>00311   <span class="keyword">public</span>:
+<a name="l00312"></a><a class="code" href="classAlphaISA_1_1PalFault.html#a73adb23259baf912a81683a9790a303f">00312</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1PalFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1PalFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00313"></a><a class="code" href="classAlphaISA_1_1PalFault.html#ae15c5d7ab0162821b93d668d0b225198">00313</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1PalFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1PalFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00314"></a><a class="code" href="classAlphaISA_1_1PalFault.html#a6c79663c761ff57265459f7e3aefaf4c">00314</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1PalFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1PalFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00315"></a>00315 };
+<a name="l00316"></a>00316 
+<a name="l00317"></a><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html">00317</a> <span class="keyword">class </span><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html">IntegerOverflowFault</a> : <span class="keyword">public</span> <a class="code" href="classAlphaISA_1_1AlphaFault.html">AlphaFault</a>
+<a name="l00318"></a>00318 {
+<a name="l00319"></a>00319   <span class="keyword">private</span>:
+<a name="l00320"></a><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">00320</a>     <span class="keyword">static</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;
+<a name="l00321"></a><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ad9e5855b9db0b2824cf6c507be4a872e">00321</a>     <span class="keyword">static</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;
+<a name="l00322"></a><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#a4bff925c412f331c5aaf6a39b79619ff">00322</a>     <span class="keyword">static</span> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;
+<a name="l00323"></a>00323 
+<a name="l00324"></a>00324   <span class="keyword">public</span>:
+<a name="l00325"></a><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#a73adb23259baf912a81683a9790a303f">00325</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ac79073ffcd2c66a09bcd3bd3ad206019">_name</a>;}
+<a name="l00326"></a><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ae15c5d7ab0162821b93d668d0b225198">00326</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ae15c5d7ab0162821b93d668d0b225198">vect</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#ad9e5855b9db0b2824cf6c507be4a872e">_vect</a>;}
+<a name="l00327"></a><a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#a6c79663c761ff57265459f7e3aefaf4c">00327</a>     <a class="code" href="classStats_1_1Scalar.html">FaultStat</a> &amp; <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#a6c79663c761ff57265459f7e3aefaf4c">countStat</a>() {<span class="keywordflow">return</span> <a class="code" href="classAlphaISA_1_1IntegerOverflowFault.html#a4bff925c412f331c5aaf6a39b79619ff">_count</a>;}
+<a name="l00328"></a>00328 };
+<a name="l00329"></a>00329 
+<a name="l00330"></a>00330 } <span class="comment">// namespace AlphaISA</span>
+<a name="l00331"></a>00331 
+<a name="l00332"></a>00332 <span class="preprocessor">#endif // __ARCH_ALPHA_FAULTS_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

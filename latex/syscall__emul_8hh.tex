@@ -1,0 +1,2639 @@
+\hypertarget{syscall__emul_8hh}{
+\section{sim/syscall\_\-emul.hh}
+\label{syscall__emul_8hh}\index{sim/syscall\_\-emul.hh@{sim/syscall\_\-emul.hh}}
+}
+{\ttfamily \#include $<$sys/stat.h$>$}\par
+{\ttfamily \#include $<$sys/time.h$>$}\par
+{\ttfamily \#include $<$sys/uio.h$>$}\par
+{\ttfamily \#include $<$fcntl.h$>$}\par
+{\ttfamily \#include $<$cerrno$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include \char`\"{}base/chunk\_\-generator.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/intmath.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}config/the\_\-isa.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/base.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/thread\_\-context.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/SyscallVerbose.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/page\_\-table.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/se\_\-translating\_\-port\_\-proxy.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/byteswap.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/syscallreturn.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/system.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classSyscallDesc}{SyscallDesc}
+\item 
+class \hyperlink{classBaseBufferArg}{BaseBufferArg}
+\item 
+class \hyperlink{classBufferArg}{BufferArg}
+\item 
+class \hyperlink{classTypedBufferArg}{TypedBufferArg$<$ T $>$}
+\end{DoxyCompactItemize}
+\subsection*{マクロ定義}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{syscall__emul_8hh_a1b37791ed9ed61caf1eafd4c2853c883}{NO\_\-STAT64}
+\end{DoxyCompactItemize}
+\subsection*{型定義}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct stat \hyperlink{syscall__emul_8hh_a4385fa83cd626df796c087776dd3eaa7}{hst\_\-stat}
+\item 
+typedef struct stat64 \hyperlink{syscall__emul_8hh_aa03f86fa4319b8ebc18a00641cf30543}{hst\_\-stat64}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ac8f61c104c0b3ab72cee8268d0c5467e}{unimplementedFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Handler for unimplemented syscalls that we haven't thought about. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a8f35ef9e245d5ed14d8080adec47f75e}{ignoreFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a9e15ddc8451a50fcb56cb48592a56fe3}{ignoreWarnOnceFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ae00a67f85c25cd1a9c5c0abcc037de4a}{exitFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target \hyperlink{namespaceX86ISA_aab9b5a2e1cd2f24d08a9872895ded9c9}{exit()} handler: terminate current context. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a6a0c80d27fdd5aeef1f76a1156c004e6}{exitGroupFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target exit\_\-group() handler: terminate simulation. (exit all threads). \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a5961ea78f5b078d3c0881362b6992b3a}{getpagesizeFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getpagesize() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aacb64b1e0489626a0c931f076d2f4f31}{brkFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target brk() handler: set brk address. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a1cd0dfa0a5c6e64cc402c1a17fe6a86d}{closeFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target close() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a5cb187a0afcfb802a06396f382fe5ada}{readFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target read() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a0d5b24a5c07baeac543de44989b73d43}{writeFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target write() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aa37fa875550097f17e97de14c6964464}{lseekFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target lseek() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ab86e19440d57fb509cde4f13d38fffda}{\_\-llseekFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target \_\-llseek() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a627dd30ab77faa503107792836ea2158}{munmapFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target munmap() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a82c247bc55c192c038a032fb9bcb884a}{gethostnameFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target gethostname() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ae2dad23a33eba280d86c2592fcd93fe9}{getcwdFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getcwd() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a713e8bc427660dda08453f913ee48c21}{readlinkFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int index=0)
+\begin{DoxyCompactList}\small\item\em Target readlink() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ad3f837adc09d39f3de515a223236040e}{readlinkFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target open() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a332ee720b2d3c8f128b10627f87a9a67}{unlinkFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target unlink() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aeada7d30dbed17e022348fdce3bdebc6}{mkdirFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target mkdir() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a7a4679edd20bcb6c6095d9641bf60a41}{renameFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target rename() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a6e21e57c806344e2ecbb7d2c952af5f9}{truncateFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target truncate() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a895fc73a0e8bb8bbb33b4683a8c5cdf9}{ftruncateFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target ftruncate() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ae8fe2ae6e9a7f93b2fec78dd445ee0bd}{truncate64Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target truncate64() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ab6f7a64ebc9b0e6b072fe33b42b5015b}{ftruncate64Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target ftruncate64() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a90bdffbc29a5b2b7953ae380819fc903}{umaskFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target umask() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a30e4f3dddc7a190609b40155566eb23f}{chownFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target chown() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ac6c9a2c70e0ab95d055e01fb41987854}{fchownFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fchown() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a56b6a187c0e6aa20f278735a8d555dbd}{dupFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target dup() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a78ca4a2b9dba73eeb4fb283cc95a25e9}{fcntlFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fnctl() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a6e50686b7758443953966999dcd80f40}{fcntl64Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fcntl64() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a5dc53a9bd2d0fac6fedb24a8e50c375d}{setuidFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target setuid() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_afd43d1edeba9c138731579129c0e9a47}{getpidFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getpid() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a383f24dfb168d66c98717246b91e01f5}{getuidFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getuid() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aada0d031ba405f7dd4846a72102aa413}{getgidFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getgid() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a7bfc2fd0fff906f4fcf3798992aa385c}{getppidFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getppid() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aff2ca2b37136cae14bf6677989f38a52}{geteuidFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target geteuid() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ae1874a907c0abc563157b5e6cca909f4}{getegidFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getegid() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ab1bb56414754dce4db93e9df10b8c2f7}{cloneFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target clone() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a3a57f406428b5272824549aecc218cff}{accessFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target access() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ad87b62dfcfe55b889d00d3054659a060}{accessFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int index)
+\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a0076008fee4a9a049d0ee73b42bd0802}{futexFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a58d1892bcde783939ea74a6685ebc68b}{pipePseudoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aefdd5bd75cc1a431a02db4b4ba62adf4}{getpidPseudoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getpidPseudo() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a4a4bc3599400554b3e122765ffaa17db}{getuidPseudoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getuidPseudo() handler. \item\end{DoxyCompactList}\item 
+\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aaa6dbbc64e20f7cc39483464fbdace9d}{getgidPseudoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getgidPseudo() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class T1 , class T2 $>$ }\\void \hyperlink{syscall__emul_8hh_ae0808df4f0ff1b8912037c856ee8d5f5}{getElapsedTime} (T1 \&sec, T2 \&usec)
+\item 
+{\footnotesize template$<$typename target\_\-stat , typename host\_\-stat $>$ }\\static void \hyperlink{syscall__emul_8hh_a89261d6022ca29a6b473edc80acb77ad}{convertStatBuf} (target\_\-stat \&tgt, host\_\-stat $\ast$host, bool fakeTTY=false)
+\item 
+{\footnotesize template$<$typename target\_\-stat , typename host\_\-stat64 $>$ }\\static void \hyperlink{syscall__emul_8hh_a0bf9da6738473d5c324756b3259c57f4}{convertStat64Buf} (target\_\-stat \&tgt, host\_\-stat64 $\ast$host, bool fakeTTY=false)
+\item 
+{\footnotesize template$<$class OS $>$ }\\static void \hyperlink{syscall__emul_8hh_aad05317c6d15ac782ba87a36452232d6}{copyOutStatBuf} (\hyperlink{classSETranslatingPortProxy}{SETranslatingPortProxy} \&mem, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, \hyperlink{syscall__emul_8hh_a4385fa83cd626df796c087776dd3eaa7}{hst\_\-stat} $\ast$host, bool fakeTTY=false)
+\item 
+{\footnotesize template$<$class OS $>$ }\\static void \hyperlink{syscall__emul_8hh_a19c436e0b01699972a23c7d7abba0f05}{copyOutStat64Buf} (\hyperlink{classSETranslatingPortProxy}{SETranslatingPortProxy} \&mem, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, \hyperlink{syscall__emul_8hh_aa03f86fa4319b8ebc18a00641cf30543}{hst\_\-stat64} $\ast$host, bool fakeTTY=false)
+\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_af6b366bfb30ebd76fe4647b2c29c94cf}{ioctlFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+{\footnotesize template$<$class OS $>$ }\\static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ae8b330340cfb5e878941b80c190e1bcb}{openFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int index)
+\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aee9c33e8ab3dbe5b14af21d403675465}{openFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target open() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a796691a0efbcbad98107fe763c22083b}{openatFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target openat() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_acc50ca24090796bbabb2797298ebfdef}{faccessatFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target facessat() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aa7c9ee715f608210172fa284884d6ae7}{readlinkatFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target readlinkat() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a6a54d59c2aacf12179e4ab68440f29b4}{sysinfoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target sysinfo() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a8efc7888235c588ed8456c16d4c6f1ab}{chmodFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target chmod() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a2a90cedb240b916a2546d84789f65edb}{fchmodFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fchmod() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aece41171f976116d684969b11ff688fb}{mremapFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target mremap() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a90a4079ec4c293ae75368d283892a19a}{statFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target stat() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a03ce27f716fe9fc0eb250d09c1ff1683}{stat64Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target stat64() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_acc27dba349a051153a090505227b4b9c}{fstatat64Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fstatat64() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ac9c78c04e130987fc30d9e84fc2a8be3}{fstat64Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fstat64() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a720a371d0fcbe5f6ef57bee91d7fe238}{lstatFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target lstat() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a6a65e067e9f7873eb4153258df5b34e0}{lstat64Func} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target lstat64() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a56cd0d550ccc314d5ad3f735436c9d92}{fstatFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fstat() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aeeffeafdf73963270562a90525eeef65}{statfsFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target statfs() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a4cc46834712d2de5f76e696ab5d7a275}{fstatfsFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target fstatfs() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a5ddafb78a103551d95e66674ad49a104}{writevFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target writev() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ab55f07f32ed5eff0cbfb28d3da9d05c4}{mmapFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int num, \hyperlink{classLiveProcess}{LiveProcess} $\ast$p, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_abda22e6d45080ba7498136f15e046d61}{getrlimitFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getrlimit() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aa8d95336bb3f10b1d9416b32fea82c9d}{gettimeofdayFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target gettimeofday() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_a14cb480609d141a40fb4b6ad36c7dbed}{utimesFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target utimes() handler. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_aa7d05f11e84b91416b82898ca0233e20}{getrusageFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getrusage() function. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_af669a50393a3e59f5d77210b44b8c645}{timesFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target times() function. \item\end{DoxyCompactList}\item 
+{\footnotesize template$<$class OS $>$ }\\\hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{syscall__emul_8hh_ac73c74c47ae346b8e74a8d60682c3211}{timeFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target time() function. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+const int \hyperlink{syscall__emul_8hh_a669e0ac171376b8be956f4ac131e78a7}{one\_\-million} = 1000000
+\begin{DoxyCompactList}\small\item\em A readable name for 1,000,000, for converting microseconds to seconds. \item\end{DoxyCompactList}\item 
+const unsigned \hyperlink{syscall__emul_8hh_a39e588dacd751ca716fd5352f319e401}{seconds\_\-since\_\-epoch} = 1000000000
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+This file defines objects used to emulate syscalls from the target application on the host machine. 
+
+\subsection{マクロ定義}
+\hypertarget{syscall__emul_8hh_a1b37791ed9ed61caf1eafd4c2853c883}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!NO\_\-STAT64@{NO\_\-STAT64}}
+\index{NO\_\-STAT64@{NO\_\-STAT64}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{NO\_\-STAT64}]{\setlength{\rightskip}{0pt plus 5cm}\#define NO\_\-STAT64}}
+\label{syscall__emul_8hh_a1b37791ed9ed61caf1eafd4c2853c883}
+{\bfseries 値:}
+\begin{DoxyCode}
+(defined(__APPLE__) || defined(__OpenBSD__) || \
+  defined(__FreeBSD__) || defined(__CYGWIN__) || \
+  defined(__NetBSD__))
+\end{DoxyCode}
+
+
+\subsection{型定義}
+\hypertarget{syscall__emul_8hh_a4385fa83cd626df796c087776dd3eaa7}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!hst\_\-stat@{hst\_\-stat}}
+\index{hst\_\-stat@{hst\_\-stat}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{hst\_\-stat}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct stat {\bf hst\_\-stat}}}
+\label{syscall__emul_8hh_a4385fa83cd626df796c087776dd3eaa7}
+\hypertarget{syscall__emul_8hh_aa03f86fa4319b8ebc18a00641cf30543}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!hst\_\-stat64@{hst\_\-stat64}}
+\index{hst\_\-stat64@{hst\_\-stat64}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{hst\_\-stat64}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct stat64 {\bf hst\_\-stat64}}}
+\label{syscall__emul_8hh_aa03f86fa4319b8ebc18a00641cf30543}
+
+
+\subsection{関数}
+\hypertarget{syscall__emul_8hh_ab86e19440d57fb509cde4f13d38fffda}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!\_\-llseekFunc@{\_\-llseekFunc}}
+\index{\_\-llseekFunc@{\_\-llseekFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{\_\-llseekFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} \_\-llseekFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ab86e19440d57fb509cde4f13d38fffda}
+
+
+Target \_\-llseek() handler. 
+
+
+\begin{DoxyCode}
+264 {
+265     int index = 0;
+266     int fd = p->sim_fd(p->getSyscallArg(tc, index));
+267     uint64_t offset_high = p->getSyscallArg(tc, index);
+268     uint32_t offset_low = p->getSyscallArg(tc, index);
+269     Addr result_ptr = p->getSyscallArg(tc, index);
+270     int whence = p->getSyscallArg(tc, index);
+271 
+272     uint64_t offset = (offset_high << 32) | offset_low;
+273 
+274     uint64_t result = lseek(fd, offset, whence);
+275     result = TheISA::htog(result);
+276 
+277     if (result == (off_t)-1) {
+278         //The seek failed.
+279         return -errno;
+280     } else {
+281         // The seek succeeded.
+282         // Copy "result" to "result_ptr"
+283         // XXX We'll assume that the size of loff_t is 64 bits on the
+284         // target platform
+285         BufferArg result_buf(result_ptr, sizeof(result));
+286         memcpy(result_buf.bufferPtr(), &result, sizeof(result));
+287         result_buf.copyOut(tc->getMemProxy());
+288         return 0;
+289     }
+290 
+291 
+292     return (result == (off_t)-1) ? -errno : result;
+293 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ad87b62dfcfe55b889d00d3054659a060}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!accessFunc@{accessFunc}}
+\index{accessFunc@{accessFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{accessFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} accessFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em index})}}
+\label{syscall__emul_8hh_ad87b62dfcfe55b889d00d3054659a060}
+
+
+
+\begin{DoxyCode}
+864 {
+865     string path;
+866     if (!tc->getMemProxy().tryReadString(path, p->getSyscallArg(tc, index)))
+867         return -EFAULT;
+868 
+869     // Adjust path for current working directory
+870     path = p->fullPath(path);
+871 
+872     mode_t mode = p->getSyscallArg(tc, index);
+873 
+874     int result = access(path.c_str(), mode);
+875     return (result == -1) ? -errno : result;
+876 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a3a57f406428b5272824549aecc218cff}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!accessFunc@{accessFunc}}
+\index{accessFunc@{accessFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{accessFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} accessFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a3a57f406428b5272824549aecc218cff}
+
+
+Target access() handler. 
+
+
+\begin{DoxyCode}
+880 {
+881     return accessFunc(desc, callnum, p, tc, 0);
+882 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aacb64b1e0489626a0c931f076d2f4f31}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!brkFunc@{brkFunc}}
+\index{brkFunc@{brkFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{brkFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} brkFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_aacb64b1e0489626a0c931f076d2f4f31}
+
+
+Target brk() handler: set brk address. 
+
+
+\begin{DoxyCode}
+154 {
+155     // change brk addr to first arg
+156     int index = 0;
+157     Addr new_brk = p->getSyscallArg(tc, index);
+158 
+159     // in Linux at least, brk(0) returns the current break value
+160     // (note that the syscall and the glibc function have different behavior)
+161     if (new_brk == 0)
+162         return p->brk_point;
+163 
+164     if (new_brk > p->brk_point) {
+165         // might need to allocate some new pages
+166         for (ChunkGenerator gen(p->brk_point, new_brk - p->brk_point,
+167                                 VMPageSize); !gen.done(); gen.next()) {
+168             if (!p->pTable->translate(gen.addr()))
+169                 p->allocateMem(roundDown(gen.addr(), VMPageSize), VMPageSize);
+170 
+171             // if the address is already there, zero it out
+172             else {
+173                 uint8_t zero  = 0;
+174                 SETranslatingPortProxy &tp = tc->getMemProxy();
+175 
+176                 // split non-page aligned accesses
+177                 Addr next_page = roundUp(gen.addr(), VMPageSize);
+178                 uint32_t size_needed = next_page - gen.addr();
+179                 tp.memsetBlob(gen.addr(), zero, size_needed);
+180                 if (gen.addr() + VMPageSize > next_page &&
+181                     next_page < new_brk &&
+182                     p->pTable->translate(next_page))
+183                 {
+184                     size_needed = VMPageSize - size_needed;
+185                     tp.memsetBlob(next_page, zero, size_needed);
+186                 }
+187             }
+188         }
+189     }
+190 
+191     p->brk_point = new_brk;
+192     DPRINTF(SyscallVerbose, "Break Point changed to: %#X\n", p->brk_point);
+193     return p->brk_point;
+194 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a8efc7888235c588ed8456c16d4c6f1ab}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!chmodFunc@{chmodFunc}}
+\index{chmodFunc@{chmodFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{chmodFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} chmodFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a8efc7888235c588ed8456c16d4c6f1ab}
+
+
+Target chmod() handler. 
+
+
+\begin{DoxyCode}
+755 {
+756     std::string path;
+757 
+758     int index = 0;
+759     if (!tc->getMemProxy().tryReadString(path,
+760                 process->getSyscallArg(tc, index))) {
+761         return -EFAULT;
+762     }
+763 
+764     uint32_t mode = process->getSyscallArg(tc, index);
+765     mode_t hostMode = 0;
+766 
+767     // XXX translate mode flags via OS::something???
+768     hostMode = mode;
+769 
+770     // Adjust path for current working directory
+771     path = process->fullPath(path);
+772 
+773     // do the chmod
+774     int result = chmod(path.c_str(), hostMode);
+775     if (result < 0)
+776         return -errno;
+777 
+778     return 0;
+779 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a30e4f3dddc7a190609b40155566eb23f}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!chownFunc@{chownFunc}}
+\index{chownFunc@{chownFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{chownFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} chownFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a30e4f3dddc7a190609b40155566eb23f}
+
+
+Target chown() handler. 
+
+
+\begin{DoxyCode}
+533 {
+534     string path;
+535 
+536     int index = 0;
+537     if (!tc->getMemProxy().tryReadString(path, p->getSyscallArg(tc, index)))
+538         return -EFAULT;
+539 
+540     /* XXX endianess */
+541     uint32_t owner = p->getSyscallArg(tc, index);
+542     uid_t hostOwner = owner;
+543     uint32_t group = p->getSyscallArg(tc, index);
+544     gid_t hostGroup = group;
+545 
+546     // Adjust path for current working directory
+547     path = p->fullPath(path);
+548 
+549     int result = chown(path.c_str(), hostOwner, hostGroup);
+550     return (result == -1) ? -errno : result;
+551 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ab1bb56414754dce4db93e9df10b8c2f7}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!cloneFunc@{cloneFunc}}
+\index{cloneFunc@{cloneFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{cloneFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} cloneFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ab1bb56414754dce4db93e9df10b8c2f7}
+
+
+Target clone() handler. 
+
+
+\begin{DoxyCode}
+782 {
+783     int index = 0;
+784     IntReg flags = process->getSyscallArg(tc, index);
+785     IntReg newStack = process->getSyscallArg(tc, index);
+786 
+787     DPRINTF(SyscallVerbose, "In sys_clone:\n");
+788     DPRINTF(SyscallVerbose, " Flags=%llx\n", flags);
+789     DPRINTF(SyscallVerbose, " Child stack=%llx\n", newStack);
+790 
+791 
+792     if (flags != 0x10f00) {
+793         warn("This sys_clone implementation assumes flags "
+794              "CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD "
+795              "(0x10f00), and may not work correctly with given flags "
+796              "0x%llx\n", flags);
+797     }
+798 
+799     ThreadContext* ctc; // child thread context
+800     if ( ( ctc = process->findFreeContext() ) != NULL ) {
+801         DPRINTF(SyscallVerbose, " Found unallocated thread context\n");
+802 
+803         ctc->clearArchRegs();
+804 
+805         // Arch-specific cloning code
+806         #if THE_ISA == ALPHA_ISA or THE_ISA == X86_ISA
+807             // Cloning the misc. regs for these archs is enough
+808             TheISA::copyMiscRegs(tc, ctc);
+809         #elif THE_ISA == SPARC_ISA
+810             TheISA::copyRegs(tc, ctc);
+811 
+812             // TODO: Explain what this code actually does :-)
+813             ctc->setIntReg(NumIntArchRegs + 6, 0);
+814             ctc->setIntReg(NumIntArchRegs + 4, 0);
+815             ctc->setIntReg(NumIntArchRegs + 3, NWindows - 2);
+816             ctc->setIntReg(NumIntArchRegs + 5, NWindows);
+817             ctc->setMiscReg(MISCREG_CWP, 0);
+818             ctc->setIntReg(NumIntArchRegs + 7, 0);
+819             ctc->setMiscRegNoEffect(MISCREG_TL, 0);
+820             ctc->setMiscReg(MISCREG_ASI, ASI_PRIMARY);
+821 
+822             for (int y = 8; y < 32; y++)
+823                 ctc->setIntReg(y, tc->readIntReg(y));
+824         #elif THE_ISA == ARM_ISA
+825             TheISA::copyRegs(tc, ctc);
+826         #else
+827             fatal("sys_clone is not implemented for this ISA\n");
+828         #endif
+829 
+830         // Set up stack register
+831         ctc->setIntReg(TheISA::StackPointerReg, newStack);
+832 
+833         // Set up syscall return values in parent and child
+834         ctc->setIntReg(ReturnValueReg, 0); // return value, child
+835 
+836         // Alpha needs SyscallSuccessReg=0 in child
+837         #if THE_ISA == ALPHA_ISA
+838             ctc->setIntReg(TheISA::SyscallSuccessReg, 0);
+839         #endif
+840 
+841         // In SPARC/Linux, clone returns 0 on pseudo-return register if
+842         // parent, non-zero if child
+843         #if THE_ISA == SPARC_ISA
+844             tc->setIntReg(TheISA::SyscallPseudoReturnReg, 0);
+845             ctc->setIntReg(TheISA::SyscallPseudoReturnReg, 1);
+846         #endif
+847 
+848         ctc->pcState(tc->nextInstAddr());
+849 
+850         ctc->activate();
+851 
+852         // Should return nonzero child TID in parent's syscall return register,
+853         // but for our pthread library any non-zero value will work
+854         return 1;
+855     } else {
+856         fatal("Called sys_clone, but no unallocated thread contexts found!\n");
+857         return 0;
+858     }
+859 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a1cd0dfa0a5c6e64cc402c1a17fe6a86d}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!closeFunc@{closeFunc}}
+\index{closeFunc@{closeFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{closeFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} closeFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a1cd0dfa0a5c6e64cc402c1a17fe6a86d}
+
+
+Target close() handler. 
+
+
+\begin{DoxyCode}
+199 {
+200     int index = 0;
+201     int target_fd = p->getSyscallArg(tc, index);
+202     int sim_fd = p->sim_fd(target_fd);
+203     int status = 0;
+204     if (sim_fd > 2)
+205         status = close(sim_fd);
+206     if (status >= 0)
+207         p->free_fd(target_fd);
+208     return status;
+209 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a0bf9da6738473d5c324756b3259c57f4}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!convertStat64Buf@{convertStat64Buf}}
+\index{convertStat64Buf@{convertStat64Buf}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{convertStat64Buf}]{\setlength{\rightskip}{0pt plus 5cm}static void convertStat64Buf (target\_\-stat \& {\em tgt}, \/  host\_\-stat64 $\ast$ {\em host}, \/  bool {\em fakeTTY} = {\ttfamily false})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{syscall__emul_8hh_a0bf9da6738473d5c324756b3259c57f4}
+
+
+
+\begin{DoxyCode}
+551 {
+552     using namespace TheISA;
+553 
+554     convertStatBuf<target_stat, host_stat64>(tgt, host, fakeTTY);
+555 #if defined(STAT_HAVE_NSEC)
+556     tgt->st_atime_nsec = host->st_atime_nsec;
+557     tgt->st_atime_nsec = TheISA::htog(tgt->st_atime_nsec);
+558     tgt->st_mtime_nsec = host->st_mtime_nsec;
+559     tgt->st_mtime_nsec = TheISA::htog(tgt->st_mtime_nsec);
+560     tgt->st_ctime_nsec = host->st_ctime_nsec;
+561     tgt->st_ctime_nsec = TheISA::htog(tgt->st_ctime_nsec);
+562 #else
+563     tgt->st_atime_nsec = 0;
+564     tgt->st_mtime_nsec = 0;
+565     tgt->st_ctime_nsec = 0;
+566 #endif
+567 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a89261d6022ca29a6b473edc80acb77ad}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!convertStatBuf@{convertStatBuf}}
+\index{convertStatBuf@{convertStatBuf}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{convertStatBuf}]{\setlength{\rightskip}{0pt plus 5cm}static void convertStatBuf (target\_\-stat \& {\em tgt}, \/  host\_\-stat $\ast$ {\em host}, \/  bool {\em fakeTTY} = {\ttfamily false})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{syscall__emul_8hh_a89261d6022ca29a6b473edc80acb77ad}
+
+
+
+\begin{DoxyCode}
+502 {
+503     using namespace TheISA;
+504 
+505     if (fakeTTY)
+506         tgt->st_dev = 0xA;
+507     else
+508         tgt->st_dev = host->st_dev;
+509     tgt->st_dev = TheISA::htog(tgt->st_dev);
+510     tgt->st_ino = host->st_ino;
+511     tgt->st_ino = TheISA::htog(tgt->st_ino);
+512     tgt->st_mode = host->st_mode;
+513     if (fakeTTY) {
+514         // Claim to be a character device
+515         tgt->st_mode &= ~S_IFMT;    // Clear S_IFMT
+516         tgt->st_mode |= S_IFCHR;    // Set S_IFCHR
+517     }
+518     tgt->st_mode = TheISA::htog(tgt->st_mode);
+519     tgt->st_nlink = host->st_nlink;
+520     tgt->st_nlink = TheISA::htog(tgt->st_nlink);
+521     tgt->st_uid = host->st_uid;
+522     tgt->st_uid = TheISA::htog(tgt->st_uid);
+523     tgt->st_gid = host->st_gid;
+524     tgt->st_gid = TheISA::htog(tgt->st_gid);
+525     if (fakeTTY)
+526         tgt->st_rdev = 0x880d;
+527     else
+528         tgt->st_rdev = host->st_rdev;
+529     tgt->st_rdev = TheISA::htog(tgt->st_rdev);
+530     tgt->st_size = host->st_size;
+531     tgt->st_size = TheISA::htog(tgt->st_size);
+532     tgt->st_atimeX = host->st_atime;
+533     tgt->st_atimeX = TheISA::htog(tgt->st_atimeX);
+534     tgt->st_mtimeX = host->st_mtime;
+535     tgt->st_mtimeX = TheISA::htog(tgt->st_mtimeX);
+536     tgt->st_ctimeX = host->st_ctime;
+537     tgt->st_ctimeX = TheISA::htog(tgt->st_ctimeX);
+538     // Force the block size to be 8k. This helps to ensure buffered io works
+539     // consistently across different hosts.
+540     tgt->st_blksize = 0x2000;
+541     tgt->st_blksize = TheISA::htog(tgt->st_blksize);
+542     tgt->st_blocks = host->st_blocks;
+543     tgt->st_blocks = TheISA::htog(tgt->st_blocks);
+544 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a19c436e0b01699972a23c7d7abba0f05}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!copyOutStat64Buf@{copyOutStat64Buf}}
+\index{copyOutStat64Buf@{copyOutStat64Buf}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{copyOutStat64Buf}]{\setlength{\rightskip}{0pt plus 5cm}static void copyOutStat64Buf ({\bf SETranslatingPortProxy} \& {\em mem}, \/  {\bf Addr} {\em addr}, \/  {\bf hst\_\-stat64} $\ast$ {\em host}, \/  bool {\em fakeTTY} = {\ttfamily false})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{syscall__emul_8hh_a19c436e0b01699972a23c7d7abba0f05}
+
+
+
+\begin{DoxyCode}
+585 {
+586     typedef TypedBufferArg<typename OS::tgt_stat64> tgt_stat_buf;
+587     tgt_stat_buf tgt(addr);
+588     convertStat64Buf<tgt_stat_buf, hst_stat64>(tgt, host, fakeTTY);
+589     tgt.copyOut(mem);
+590 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aad05317c6d15ac782ba87a36452232d6}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!copyOutStatBuf@{copyOutStatBuf}}
+\index{copyOutStatBuf@{copyOutStatBuf}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{copyOutStatBuf}]{\setlength{\rightskip}{0pt plus 5cm}static void copyOutStatBuf ({\bf SETranslatingPortProxy} \& {\em mem}, \/  {\bf Addr} {\em addr}, \/  {\bf hst\_\-stat} $\ast$ {\em host}, \/  bool {\em fakeTTY} = {\ttfamily false})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{syscall__emul_8hh_aad05317c6d15ac782ba87a36452232d6}
+
+
+
+\begin{DoxyCode}
+574 {
+575     typedef TypedBufferArg<typename OS::tgt_stat> tgt_stat_buf;
+576     tgt_stat_buf tgt(addr);
+577     convertStatBuf<tgt_stat_buf, hst_stat>(tgt, host, fakeTTY);
+578     tgt.copyOut(mem);
+579 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a56b6a187c0e6aa20f278735a8d555dbd}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!dupFunc@{dupFunc}}
+\index{dupFunc@{dupFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{dupFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} dupFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a56b6a187c0e6aa20f278735a8d555dbd}
+
+
+Target dup() handler. 
+
+
+\begin{DoxyCode}
+575 {
+576     int index = 0;
+577     int fd = process->sim_fd(process->getSyscallArg(tc, index));
+578     if (fd < 0)
+579         return -EBADF;
+580 
+581     Process::FdMap *fdo = process->sim_fd_obj(fd);
+582 
+583     int result = dup(fd);
+584     return (result == -1) ? -errno :
+585         process->alloc_fd(result, fdo->filename, fdo->flags, fdo->mode, false);
+586 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ae00a67f85c25cd1a9c5c0abcc037de4a}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!exitFunc@{exitFunc}}
+\index{exitFunc@{exitFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{exitFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} exitFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ae00a67f85c25cd1a9c5c0abcc037de4a}
+
+
+Target \hyperlink{namespaceX86ISA_aab9b5a2e1cd2f24d08a9872895ded9c9}{exit()} handler: terminate current context. 
+
+
+\begin{DoxyCode}
+116 {
+117     if (process->system->numRunningContexts() == 1) {
+118         // Last running context... exit simulator
+119         int index = 0;
+120         exitSimLoop("target called exit()",
+121                     process->getSyscallArg(tc, index) & 0xff);
+122     } else {
+123         // other running threads... just halt this one
+124         tc->halt();
+125     }
+126 
+127     return 1;
+128 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a6a0c80d27fdd5aeef1f76a1156c004e6}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!exitGroupFunc@{exitGroupFunc}}
+\index{exitGroupFunc@{exitGroupFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{exitGroupFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} exitGroupFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a6a0c80d27fdd5aeef1f76a1156c004e6}
+
+
+Target exit\_\-group() handler: terminate simulation. (exit all threads). 
+
+
+\begin{DoxyCode}
+134 {
+135     // really should just halt all thread contexts belonging to this
+136     // process in case there's another process running...
+137     int index = 0;
+138     exitSimLoop("target called exit()",
+139                 process->getSyscallArg(tc, index) & 0xff);
+140 
+141     return 1;
+142 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_acc50ca24090796bbabb2797298ebfdef}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!faccessatFunc@{faccessatFunc}}
+\index{faccessatFunc@{faccessatFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{faccessatFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} faccessatFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_acc50ca24090796bbabb2797298ebfdef}
+
+
+Target facessat() handler. 
+
+
+\begin{DoxyCode}
+710 {
+711     int index = 0;
+712     int dirfd = process->getSyscallArg(tc, index);
+713     if (dirfd != OS::TGT_AT_FDCWD)
+714         warn("faccessat: first argument not AT_FDCWD; unlikely to work");
+715     return accessFunc(desc, callnum, process, tc, 1);
+716 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a2a90cedb240b916a2546d84789f65edb}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fchmodFunc@{fchmodFunc}}
+\index{fchmodFunc@{fchmodFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fchmodFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fchmodFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a2a90cedb240b916a2546d84789f65edb}
+
+
+Target fchmod() handler. 
+
+
+\begin{DoxyCode}
+787 {
+788     int index = 0;
+789     int fd = process->getSyscallArg(tc, index);
+790     if (fd < 0 || process->sim_fd(fd) < 0) {
+791         // doesn't map to any simulator fd: not a valid target fd
+792         return -EBADF;
+793     }
+794 
+795     uint32_t mode = process->getSyscallArg(tc, index);
+796     mode_t hostMode = 0;
+797 
+798     // XXX translate mode flags via OS::someting???
+799     hostMode = mode;
+800 
+801     // do the fchmod
+802     int result = fchmod(process->sim_fd(fd), hostMode);
+803     if (result < 0)
+804         return -errno;
+805 
+806     return 0;
+807 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ac6c9a2c70e0ab95d055e01fb41987854}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fchownFunc@{fchownFunc}}
+\index{fchownFunc@{fchownFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fchownFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fchownFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ac6c9a2c70e0ab95d055e01fb41987854}
+
+
+Target fchown() handler. 
+
+
+\begin{DoxyCode}
+555 {
+556     int index = 0;
+557     int fd = process->sim_fd(process->getSyscallArg(tc, index));
+558 
+559     if (fd < 0)
+560         return -EBADF;
+561 
+562     /* XXX endianess */
+563     uint32_t owner = process->getSyscallArg(tc, index);
+564     uid_t hostOwner = owner;
+565     uint32_t group = process->getSyscallArg(tc, index);
+566     gid_t hostGroup = group;
+567 
+568     int result = fchown(fd, hostOwner, hostGroup);
+569     return (result == -1) ? -errno : result;
+570 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a6e50686b7758443953966999dcd80f40}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fcntl64Func@{fcntl64Func}}
+\index{fcntl64Func@{fcntl64Func}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fcntl64Func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fcntl64Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a6e50686b7758443953966999dcd80f40}
+
+
+Target fcntl64() handler. 
+
+
+\begin{DoxyCode}
+635 {
+636     int index = 0;
+637     int fd = process->getSyscallArg(tc, index);
+638 
+639     if (fd < 0 || process->sim_fd(fd) < 0)
+640         return -EBADF;
+641 
+642     int cmd = process->getSyscallArg(tc, index);
+643     switch (cmd) {
+644       case 33: //F_GETLK64
+645         warn("fcntl64(%d, F_GETLK64) not supported, error returned\n", fd);
+646         return -EMFILE;
+647 
+648       case 34: // F_SETLK64
+649       case 35: // F_SETLKW64
+650         warn("fcntl64(%d, F_SETLK(W)64) not supported, error returned\n", fd);
+651         return -EMFILE;
+652 
+653       default:
+654         // not sure if this is totally valid, but we'll pass it through
+655         // to the underlying OS
+656         warn("fcntl64(%d, %d) passed through to host\n", fd, cmd);
+657         return fcntl(process->sim_fd(fd), cmd);
+658         // return 0;
+659     }
+660 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a78ca4a2b9dba73eeb4fb283cc95a25e9}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fcntlFunc@{fcntlFunc}}
+\index{fcntlFunc@{fcntlFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fcntlFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fcntlFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a78ca4a2b9dba73eeb4fb283cc95a25e9}
+
+
+Target fnctl() handler. 
+
+
+\begin{DoxyCode}
+592 {
+593     int index = 0;
+594     int fd = process->getSyscallArg(tc, index);
+595 
+596     if (fd < 0 || process->sim_fd(fd) < 0)
+597         return -EBADF;
+598 
+599     int cmd = process->getSyscallArg(tc, index);
+600     switch (cmd) {
+601       case 0: // F_DUPFD
+602         // if we really wanted to support this, we'd need to do it
+603         // in the target fd space.
+604         warn("fcntl(%d, F_DUPFD) not supported, error returned\n", fd);
+605         return -EMFILE;
+606 
+607       case 1: // F_GETFD (get close-on-exec flag)
+608       case 2: // F_SETFD (set close-on-exec flag)
+609         return 0;
+610 
+611       case 3: // F_GETFL (get file flags)
+612       case 4: // F_SETFL (set file flags)
+613         // not sure if this is totally valid, but we'll pass it through
+614         // to the underlying OS
+615         warn("fcntl(%d, %d) passed through to host\n", fd, cmd);
+616         return fcntl(process->sim_fd(fd), cmd);
+617         // return 0;
+618 
+619       case 7: // F_GETLK  (get lock)
+620       case 8: // F_SETLK  (set lock)
+621       case 9: // F_SETLKW (set lock and wait)
+622         // don't mess with file locking... just act like it's OK
+623         warn("File lock call (fcntl(%d, %d)) ignored.\n", fd, cmd);
+624         return 0;
+625 
+626       default:
+627         warn("Unknown fcntl command %d\n", cmd);
+628         return 0;
+629     }
+630 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ac9c78c04e130987fc30d9e84fc2a8be3}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fstat64Func@{fstat64Func}}
+\index{fstat64Func@{fstat64Func}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fstat64Func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fstat64Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_ac9c78c04e130987fc30d9e84fc2a8be3}
+
+
+Target fstat64() handler. 
+
+
+\begin{DoxyCode}
+980 {
+981     int index = 0;
+982     int fd = process->getSyscallArg(tc, index);
+983     Addr bufPtr = process->getSyscallArg(tc, index);
+984     if (fd < 0 || process->sim_fd(fd) < 0) {
+985         // doesn't map to any simulator fd: not a valid target fd
+986         return -EBADF;
+987     }
+988 
+989 #if NO_STAT64
+990     struct stat  hostBuf;
+991     int result = fstat(process->sim_fd(fd), &hostBuf);
+992 #else
+993     struct stat64  hostBuf;
+994     int result = fstat64(process->sim_fd(fd), &hostBuf);
+995 #endif
+996 
+997     if (result < 0)
+998         return -errno;
+999 
+1000     copyOutStat64Buf<OS>(tc->getMemProxy(), bufPtr, &hostBuf, (fd == 1));
+1001 
+1002     return 0;
+1003 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_acc27dba349a051153a090505227b4b9c}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fstatat64Func@{fstatat64Func}}
+\index{fstatat64Func@{fstatat64Func}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fstatat64Func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fstatat64Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_acc27dba349a051153a090505227b4b9c}
+
+
+Target fstatat64() handler. 
+
+
+\begin{DoxyCode}
+943 {
+944     int index = 0;
+945     int dirfd = process->getSyscallArg(tc, index);
+946     if (dirfd != OS::TGT_AT_FDCWD)
+947         warn("openat: first argument not AT_FDCWD; unlikely to work");
+948 
+949     std::string path;
+950     if (!tc->getMemProxy().tryReadString(path,
+951                 process->getSyscallArg(tc, index)))
+952         return -EFAULT;
+953     Addr bufPtr = process->getSyscallArg(tc, index);
+954 
+955     // Adjust path for current working directory
+956     path = process->fullPath(path);
+957 
+958 #if NO_STAT64
+959     struct stat  hostBuf;
+960     int result = stat(path.c_str(), &hostBuf);
+961 #else
+962     struct stat64 hostBuf;
+963     int result = stat64(path.c_str(), &hostBuf);
+964 #endif
+965 
+966     if (result < 0)
+967         return -errno;
+968 
+969     copyOutStat64Buf<OS>(tc->getMemProxy(), bufPtr, &hostBuf);
+970 
+971     return 0;
+972 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a4cc46834712d2de5f76e696ab5d7a275}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fstatfsFunc@{fstatfsFunc}}
+\index{fstatfsFunc@{fstatfsFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fstatfsFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fstatfsFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a4cc46834712d2de5f76e696ab5d7a275}
+
+
+Target fstatfs() handler. 
+
+
+\begin{DoxyCode}
+1131 {
+1132     int index = 0;
+1133     int fd = process->sim_fd(process->getSyscallArg(tc, index));
+1134     Addr bufPtr = process->getSyscallArg(tc, index);
+1135 
+1136     if (fd < 0)
+1137         return -EBADF;
+1138 
+1139     struct statfs hostBuf;
+1140     int result = fstatfs(fd, &hostBuf);
+1141 
+1142     if (result < 0)
+1143         return -errno;
+1144 
+1145     OS::copyOutStatfsBuf(tc->getMemProxy(), bufPtr, &hostBuf);
+1146 
+1147     return 0;
+1148 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a56cd0d550ccc314d5ad3f735436c9d92}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!fstatFunc@{fstatFunc}}
+\index{fstatFunc@{fstatFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{fstatFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} fstatFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a56cd0d550ccc314d5ad3f735436c9d92}
+
+
+Target fstat() handler. 
+
+
+\begin{DoxyCode}
+1074 {
+1075     int index = 0;
+1076     int fd = process->sim_fd(process->getSyscallArg(tc, index));
+1077     Addr bufPtr = process->getSyscallArg(tc, index);
+1078 
+1079     DPRINTF(SyscallVerbose, "fstat(%d, ...)\n", fd);
+1080 
+1081     if (fd < 0)
+1082         return -EBADF;
+1083 
+1084     struct stat hostBuf;
+1085     int result = fstat(fd, &hostBuf);
+1086 
+1087     if (result < 0)
+1088         return -errno;
+1089 
+1090     copyOutStatBuf<OS>(tc->getMemProxy(), bufPtr, &hostBuf, (fd == 1));
+1091 
+1092     return 0;
+1093 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ab6f7a64ebc9b0e6b072fe33b42b5015b}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!ftruncate64Func@{ftruncate64Func}}
+\index{ftruncate64Func@{ftruncate64Func}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{ftruncate64Func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} ftruncate64Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ab6f7a64ebc9b0e6b072fe33b42b5015b}
+
+
+Target ftruncate64() handler. 
+
+
+\begin{DoxyCode}
+503 {
+504     int index = 0;
+505     int fd = process->sim_fd(process->getSyscallArg(tc, index));
+506 
+507     if (fd < 0)
+508         return -EBADF;
+509 
+510     int64_t length = process->getSyscallArg(tc, index, 64);
+511 
+512 #if NO_STAT64
+513     int result = ftruncate(fd, length);
+514 #else
+515     int result = ftruncate64(fd, length);
+516 #endif
+517     return (result == -1) ? -errno : result;
+518 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a895fc73a0e8bb8bbb33b4683a8c5cdf9}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!ftruncateFunc@{ftruncateFunc}}
+\index{ftruncateFunc@{ftruncateFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{ftruncateFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} ftruncateFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a895fc73a0e8bb8bbb33b4683a8c5cdf9}
+
+
+Target ftruncate() handler. 
+
+
+\begin{DoxyCode}
+464 {
+465     int index = 0;
+466     int fd = process->sim_fd(process->getSyscallArg(tc, index));
+467 
+468     if (fd < 0)
+469         return -EBADF;
+470 
+471     off_t length = process->getSyscallArg(tc, index);
+472 
+473     int result = ftruncate(fd, length);
+474     return (result == -1) ? -errno : result;
+475 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a0076008fee4a9a049d0ee73b42bd0802}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!futexFunc@{futexFunc}}
+\index{futexFunc@{futexFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{futexFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} futexFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a0076008fee4a9a049d0ee73b42bd0802}
+Futex system call Implemented by Daniel Sanchez Used by printf's in multi-\/threaded apps 
+
+
+\begin{DoxyCode}
+367 {
+368     int index_uaddr = 0;
+369     int index_op = 1;
+370     int index_val = 2;
+371     int index_timeout = 3;
+372 
+373     uint64_t uaddr = process->getSyscallArg(tc, index_uaddr);
+374     int op = process->getSyscallArg(tc, index_op);
+375     int val = process->getSyscallArg(tc, index_val);
+376     uint64_t timeout = process->getSyscallArg(tc, index_timeout);
+377 
+378     std::map<uint64_t, std::list<ThreadContext *> * >
+379         &futex_map = tc->getSystemPtr()->futexMap;
+380 
+381     DPRINTF(SyscallVerbose, "In sys_futex: Address=%llx, op=%d, val=%d\n",
+382             uaddr, op, val);
+383 
+384     op &= ~OS::TGT_FUTEX_PRIVATE_FLAG;
+385 
+386     if (op == OS::TGT_FUTEX_WAIT) {
+387         if (timeout != 0) {
+388             warn("sys_futex: FUTEX_WAIT with non-null timeout unimplemented;"
+389                  "we'll wait indefinitely");
+390         }
+391 
+392         uint8_t *buf = new uint8_t[sizeof(int)];
+393         tc->getMemProxy().readBlob((Addr)uaddr, buf, (int)sizeof(int));
+394         int mem_val = *((int *)buf);
+395         delete buf;
+396 
+397         if(val != mem_val) {
+398             DPRINTF(SyscallVerbose, "sys_futex: FUTEX_WAKE, read: %d, "
+399                                     "expected: %d\n", mem_val, val);
+400             return -OS::TGT_EWOULDBLOCK;
+401         }
+402 
+403         // Queue the thread context
+404         std::list<ThreadContext *> * tcWaitList;
+405         if (futex_map.count(uaddr)) {
+406             tcWaitList = futex_map.find(uaddr)->second;
+407         } else {
+408             tcWaitList = new std::list<ThreadContext *>();
+409             futex_map.insert(std::pair< uint64_t,
+410                             std::list<ThreadContext *> * >(uaddr, tcWaitList));
+411         }
+412         tcWaitList->push_back(tc);
+413         DPRINTF(SyscallVerbose, "sys_futex: FUTEX_WAIT, suspending calling "
+414                                 "thread context\n");
+415         tc->suspend();
+416         return 0;
+417     } else if (op == OS::TGT_FUTEX_WAKE){
+418         int wokenUp = 0;
+419         std::list<ThreadContext *> * tcWaitList;
+420         if (futex_map.count(uaddr)) {
+421             tcWaitList = futex_map.find(uaddr)->second;
+422             while (tcWaitList->size() > 0 && wokenUp < val) {
+423                 tcWaitList->front()->activate();
+424                 tcWaitList->pop_front();
+425                 wokenUp++;
+426             }
+427             if(tcWaitList->empty()) {
+428                 futex_map.erase(uaddr);
+429                 delete tcWaitList;
+430             }
+431         }
+432         DPRINTF(SyscallVerbose, "sys_futex: FUTEX_WAKE, activated %d waiting "
+433                                 "thread contexts\n", wokenUp);
+434         return wokenUp;
+435     } else {
+436         warn("sys_futex: op %d is not implemented, just returning...", op);
+437         return 0;
+438     }
+439 
+440 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ae2dad23a33eba280d86c2592fcd93fe9}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getcwdFunc@{getcwdFunc}}
+\index{getcwdFunc@{getcwdFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getcwdFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getcwdFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ae2dad23a33eba280d86c2592fcd93fe9}
+
+
+Target getcwd() handler. 
+
+
+\begin{DoxyCode}
+323 {
+324     int result = 0;
+325     int index = 0;
+326     Addr bufPtr = p->getSyscallArg(tc, index);
+327     unsigned long size = p->getSyscallArg(tc, index);
+328     BufferArg buf(bufPtr, size);
+329 
+330     // Is current working directory defined?
+331     string cwd = p->getcwd();
+332     if (!cwd.empty()) {
+333         if (cwd.length() >= size) {
+334             // Buffer too small
+335             return -ERANGE;
+336         }
+337         strncpy((char *)buf.bufferPtr(), cwd.c_str(), size);
+338         result = cwd.length();
+339     }
+340     else {
+341         if (getcwd((char *)buf.bufferPtr(), size) != NULL) {
+342             result = strlen((char *)buf.bufferPtr());
+343         }
+344         else {
+345             result = -1;
+346         }
+347     }
+348 
+349     buf.copyOut(tc->getMemProxy());
+350 
+351     return (result == -1) ? -errno : result;
+352 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ae1874a907c0abc563157b5e6cca909f4}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getegidFunc@{getegidFunc}}
+\index{getegidFunc@{getegidFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getegidFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getegidFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ae1874a907c0abc563157b5e6cca909f4}
+
+
+Target getegid() handler. 
+
+
+\begin{DoxyCode}
+774 {
+775     return process->egid();
+776 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ae0808df4f0ff1b8912037c856ee8d5f5}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getElapsedTime@{getElapsedTime}}
+\index{getElapsedTime@{getElapsedTime}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getElapsedTime}]{\setlength{\rightskip}{0pt plus 5cm}void getElapsedTime (T1 \& {\em sec}, \/  T2 \& {\em usec})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_ae0808df4f0ff1b8912037c856ee8d5f5}
+Helper function to convert current elapsed time to seconds and microseconds. 
+
+
+\begin{DoxyCode}
+474 {
+475     int elapsed_usecs = curTick() / SimClock::Int::us;
+476     sec = elapsed_usecs / one_million;
+477     usec = elapsed_usecs % one_million;
+478 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aff2ca2b37136cae14bf6677989f38a52}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!geteuidFunc@{geteuidFunc}}
+\index{geteuidFunc@{geteuidFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{geteuidFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} geteuidFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_aff2ca2b37136cae14bf6677989f38a52}
+
+
+Target geteuid() handler. 
+
+
+\begin{DoxyCode}
+760 {
+761     return process->euid();             // UID
+762 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aada0d031ba405f7dd4846a72102aa413}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getgidFunc@{getgidFunc}}
+\index{getgidFunc@{getgidFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getgidFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getgidFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_aada0d031ba405f7dd4846a72102aa413}
+
+
+Target getgid() handler. 
+
+
+\begin{DoxyCode}
+767 {
+768     return process->gid();
+769 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aaa6dbbc64e20f7cc39483464fbdace9d}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getgidPseudoFunc@{getgidPseudoFunc}}
+\index{getgidPseudoFunc@{getgidPseudoFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getgidPseudoFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getgidPseudoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_aaa6dbbc64e20f7cc39483464fbdace9d}
+
+
+Target getgidPseudo() handler. 
+
+
+\begin{DoxyCode}
+714 {
+715     // Get current group ID.  EGID goes in r20.
+716     tc->setIntReg(SyscallPseudoReturnReg, process->egid()); //EGID
+717     return process->gid();
+718 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a82c247bc55c192c038a032fb9bcb884a}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!gethostnameFunc@{gethostnameFunc}}
+\index{gethostnameFunc@{gethostnameFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{gethostnameFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} gethostnameFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a82c247bc55c192c038a032fb9bcb884a}
+
+
+Target gethostname() handler. 
+
+
+\begin{DoxyCode}
+308 {
+309     int index = 0;
+310     Addr bufPtr = p->getSyscallArg(tc, index);
+311     int name_len = p->getSyscallArg(tc, index);
+312     BufferArg name(bufPtr, name_len);
+313 
+314     strncpy((char *)name.bufferPtr(), hostname, name_len);
+315 
+316     name.copyOut(tc->getMemProxy());
+317 
+318     return 0;
+319 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a5961ea78f5b078d3c0881362b6992b3a}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getpagesizeFunc@{getpagesizeFunc}}
+\index{getpagesizeFunc@{getpagesizeFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getpagesizeFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getpagesizeFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a5961ea78f5b078d3c0881362b6992b3a}
+
+
+Target getpagesize() handler. 
+
+
+\begin{DoxyCode}
+147 {
+148     return (int)VMPageSize;
+149 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_afd43d1edeba9c138731579129c0e9a47}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getpidFunc@{getpidFunc}}
+\index{getpidFunc@{getpidFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getpidFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getpidFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_afd43d1edeba9c138731579129c0e9a47}
+
+
+Target getpid() handler. 
+
+
+\begin{DoxyCode}
+734 {
+735     // Make up a PID.  There's no interprocess communication in
+736     // fake_syscall mode, so there's no way for a process to know it's
+737     // not getting a unique value.
+738 
+739     tc->setIntReg(SyscallPseudoReturnReg, process->ppid()); //PID
+740     return process->pid();
+741 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aefdd5bd75cc1a431a02db4b4ba62adf4}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getpidPseudoFunc@{getpidPseudoFunc}}
+\index{getpidPseudoFunc@{getpidPseudoFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getpidPseudoFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getpidPseudoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_aefdd5bd75cc1a431a02db4b4ba62adf4}
+
+
+Target getpidPseudo() handler. 
+
+
+\begin{DoxyCode}
+688 {
+689     // Make up a PID.  There's no interprocess communication in
+690     // fake_syscall mode, so there's no way for a process to know it's
+691     // not getting a unique value.
+692 
+693     tc->setIntReg(SyscallPseudoReturnReg, process->ppid());
+694     return process->pid();
+695 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a7bfc2fd0fff906f4fcf3798992aa385c}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getppidFunc@{getppidFunc}}
+\index{getppidFunc@{getppidFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getppidFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getppidFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a7bfc2fd0fff906f4fcf3798992aa385c}
+
+
+Target getppid() handler. 
+
+
+\begin{DoxyCode}
+746 {
+747     return process->ppid();
+748 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_abda22e6d45080ba7498136f15e046d61}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getrlimitFunc@{getrlimitFunc}}
+\index{getrlimitFunc@{getrlimitFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getrlimitFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getrlimitFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_abda22e6d45080ba7498136f15e046d61}
+
+
+Target getrlimit() handler. 
+
+
+\begin{DoxyCode}
+1285 {
+1286     int index = 0;
+1287     unsigned resource = process->getSyscallArg(tc, index);
+1288     TypedBufferArg<typename OS::rlimit> rlp(process->getSyscallArg(tc, index));
+1289 
+1290     switch (resource) {
+1291         case OS::TGT_RLIMIT_STACK:
+1292             // max stack size in bytes: make up a number (8MB for now)
+1293             rlp->rlim_cur = rlp->rlim_max = 8 * 1024 * 1024;
+1294             rlp->rlim_cur = TheISA::htog(rlp->rlim_cur);
+1295             rlp->rlim_max = TheISA::htog(rlp->rlim_max);
+1296             break;
+1297 
+1298         case OS::TGT_RLIMIT_DATA:
+1299             // max data segment size in bytes: make up a number
+1300             rlp->rlim_cur = rlp->rlim_max = 256 * 1024 * 1024;
+1301             rlp->rlim_cur = TheISA::htog(rlp->rlim_cur);
+1302             rlp->rlim_max = TheISA::htog(rlp->rlim_max);
+1303             break;
+1304 
+1305         default:
+1306             std::cerr << "getrlimitFunc: unimplemented resource " << resource
+1307                 << std::endl;
+1308             abort();
+1309             break;
+1310     }
+1311 
+1312     rlp.copyOut(tc->getMemProxy());
+1313     return 0;
+1314 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aa7d05f11e84b91416b82898ca0233e20}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getrusageFunc@{getrusageFunc}}
+\index{getrusageFunc@{getrusageFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getrusageFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getrusageFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_aa7d05f11e84b91416b82898ca0233e20}
+
+
+Target getrusage() function. 
+
+
+\begin{DoxyCode}
+1376 {
+1377     int index = 0;
+1378     int who = process->getSyscallArg(tc, index); // THREAD, SELF, or CHILDREN
+1379     TypedBufferArg<typename OS::rusage> rup(process->getSyscallArg(tc, index));
+1380 
+1381     rup->ru_utime.tv_sec = 0;
+1382     rup->ru_utime.tv_usec = 0;
+1383     rup->ru_stime.tv_sec = 0;
+1384     rup->ru_stime.tv_usec = 0;
+1385     rup->ru_maxrss = 0;
+1386     rup->ru_ixrss = 0;
+1387     rup->ru_idrss = 0;
+1388     rup->ru_isrss = 0;
+1389     rup->ru_minflt = 0;
+1390     rup->ru_majflt = 0;
+1391     rup->ru_nswap = 0;
+1392     rup->ru_inblock = 0;
+1393     rup->ru_oublock = 0;
+1394     rup->ru_msgsnd = 0;
+1395     rup->ru_msgrcv = 0;
+1396     rup->ru_nsignals = 0;
+1397     rup->ru_nvcsw = 0;
+1398     rup->ru_nivcsw = 0;
+1399 
+1400     switch (who) {
+1401       case OS::TGT_RUSAGE_SELF:
+1402         getElapsedTime(rup->ru_utime.tv_sec, rup->ru_utime.tv_usec);
+1403         rup->ru_utime.tv_sec = TheISA::htog(rup->ru_utime.tv_sec);
+1404         rup->ru_utime.tv_usec = TheISA::htog(rup->ru_utime.tv_usec);
+1405         break;
+1406 
+1407       case OS::TGT_RUSAGE_CHILDREN:
+1408         // do nothing.  We have no child processes, so they take no time.
+1409         break;
+1410 
+1411       default:
+1412         // don't really handle THREAD or CHILDREN, but just warn and
+1413         // plow ahead
+1414         warn("getrusage() only supports RUSAGE_SELF.  Parameter %d ignored.",
+1415              who);
+1416     }
+1417 
+1418     rup.copyOut(tc->getMemProxy());
+1419 
+1420     return 0;
+1421 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aa8d95336bb3f10b1d9416b32fea82c9d}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!gettimeofdayFunc@{gettimeofdayFunc}}
+\index{gettimeofdayFunc@{gettimeofdayFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{gettimeofdayFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} gettimeofdayFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_aa8d95336bb3f10b1d9416b32fea82c9d}
+
+
+Target gettimeofday() handler. 
+
+
+\begin{DoxyCode}
+1321 {
+1322     int index = 0;
+1323     TypedBufferArg<typename OS::timeval> tp(process->getSyscallArg(tc, index));
+1324 
+1325     getElapsedTime(tp->tv_sec, tp->tv_usec);
+1326     tp->tv_sec += seconds_since_epoch;
+1327     tp->tv_sec = TheISA::htog(tp->tv_sec);
+1328     tp->tv_usec = TheISA::htog(tp->tv_usec);
+1329 
+1330     tp.copyOut(tc->getMemProxy());
+1331 
+1332     return 0;
+1333 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a383f24dfb168d66c98717246b91e01f5}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getuidFunc@{getuidFunc}}
+\index{getuidFunc@{getuidFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getuidFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getuidFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a383f24dfb168d66c98717246b91e01f5}
+
+
+Target getuid() handler. 
+
+
+\begin{DoxyCode}
+753 {
+754     return process->uid();              // UID
+755 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a4a4bc3599400554b3e122765ffaa17db}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!getuidPseudoFunc@{getuidPseudoFunc}}
+\index{getuidPseudoFunc@{getuidPseudoFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{getuidPseudoFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} getuidPseudoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a4a4bc3599400554b3e122765ffaa17db}
+
+
+Target getuidPseudo() handler. 
+
+
+\begin{DoxyCode}
+701 {
+702     // Make up a UID and EUID... it shouldn't matter, and we want the
+703     // simulation to be deterministic.
+704 
+705     // EUID goes in r20.
+706     tc->setIntReg(SyscallPseudoReturnReg, process->euid()); //EUID
+707     return process->uid();              // UID
+708 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a8f35ef9e245d5ed14d8080adec47f75e}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!ignoreFunc@{ignoreFunc}}
+\index{ignoreFunc@{ignoreFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{ignoreFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} ignoreFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a8f35ef9e245d5ed14d8080adec47f75e}
+Handler for unimplemented syscalls that we never intend to implement (signal handling, etc.) and should not affect the correct behavior of the program. Print a warning only if the appropriate trace flag is enabled. Return success to the target program. 
+
+
+\begin{DoxyCode}
+92 {
+93     int index = 0;
+94     warn("ignoring syscall %s(%d, %d, ...)", desc->name,
+95          process->getSyscallArg(tc, index), process->getSyscallArg(tc, index));
+96 
+97     return 0;
+98 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a9e15ddc8451a50fcb56cb48592a56fe3}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!ignoreWarnOnceFunc@{ignoreWarnOnceFunc}}
+\index{ignoreWarnOnceFunc@{ignoreWarnOnceFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{ignoreWarnOnceFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} ignoreWarnOnceFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a9e15ddc8451a50fcb56cb48592a56fe3}
+
+
+
+\begin{DoxyCode}
+104 {
+105     int index = 0;
+106     warn_once("ignoring syscall %s(%d, %d, ...)", desc->name,
+107          process->getSyscallArg(tc, index), process->getSyscallArg(tc, index));
+108 
+109     return 0;
+110 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_af6b366bfb30ebd76fe4647b2c29c94cf}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!ioctlFunc@{ioctlFunc}}
+\index{ioctlFunc@{ioctlFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{ioctlFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} ioctlFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_af6b366bfb30ebd76fe4647b2c29c94cf}
+Target ioctl() handler. For the most part, programs call ioctl() only to find out if their stdout is a tty, to determine whether to do line or block buffering. We always claim that output fds are not TTYs to provide repeatable results. 
+
+
+\begin{DoxyCode}
+600 {
+601     int index = 0;
+602     int fd = process->getSyscallArg(tc, index);
+603     unsigned req = process->getSyscallArg(tc, index);
+604 
+605     DPRINTF(SyscallVerbose, "ioctl(%d, 0x%x, ...)\n", fd, req);
+606 
+607     if (fd < 0 || process->sim_fd(fd) < 0) {
+608         // doesn't map to any simulator fd: not a valid target fd
+609         return -EBADF;
+610     }
+611 
+612     if (OS::isTtyReq(req)) {
+613         return -ENOTTY;
+614     }
+615 
+616     warn("Unsupported ioctl call: ioctl(%d, 0x%x, ...) @ \n",
+617          fd, req, tc->pcState());
+618     return -ENOTTY;
+619 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aa37fa875550097f17e97de14c6964464}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!lseekFunc@{lseekFunc}}
+\index{lseekFunc@{lseekFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{lseekFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} lseekFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_aa37fa875550097f17e97de14c6964464}
+
+
+Target lseek() handler. 
+
+
+\begin{DoxyCode}
+250 {
+251     int index = 0;
+252     int fd = p->sim_fd(p->getSyscallArg(tc, index));
+253     uint64_t offs = p->getSyscallArg(tc, index);
+254     int whence = p->getSyscallArg(tc, index);
+255 
+256     off_t result = lseek(fd, offs, whence);
+257 
+258     return (result == (off_t)-1) ? -errno : result;
+259 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a6a65e067e9f7873eb4153258df5b34e0}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!lstat64Func@{lstat64Func}}
+\index{lstat64Func@{lstat64Func}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{lstat64Func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} lstat64Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a6a65e067e9f7873eb4153258df5b34e0}
+
+
+Target lstat64() handler. 
+
+
+\begin{DoxyCode}
+1040 {
+1041     std::string path;
+1042 
+1043     int index = 0;
+1044     if (!tc->getMemProxy().tryReadString(path,
+1045                 process->getSyscallArg(tc, index))) {
+1046         return -EFAULT;
+1047     }
+1048     Addr bufPtr = process->getSyscallArg(tc, index);
+1049 
+1050     // Adjust path for current working directory
+1051     path = process->fullPath(path);
+1052 
+1053 #if NO_STAT64
+1054     struct stat hostBuf;
+1055     int result = lstat(path.c_str(), &hostBuf);
+1056 #else
+1057     struct stat64 hostBuf;
+1058     int result = lstat64(path.c_str(), &hostBuf);
+1059 #endif
+1060 
+1061     if (result < 0)
+1062         return -errno;
+1063 
+1064     copyOutStat64Buf<OS>(tc->getMemProxy(), bufPtr, &hostBuf);
+1065 
+1066     return 0;
+1067 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a720a371d0fcbe5f6ef57bee91d7fe238}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!lstatFunc@{lstatFunc}}
+\index{lstatFunc@{lstatFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{lstatFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} lstatFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a720a371d0fcbe5f6ef57bee91d7fe238}
+
+
+Target lstat() handler. 
+
+
+\begin{DoxyCode}
+1011 {
+1012     std::string path;
+1013 
+1014     int index = 0;
+1015     if (!tc->getMemProxy().tryReadString(path,
+1016                 process->getSyscallArg(tc, index))) {
+1017         return -EFAULT;
+1018     }
+1019     Addr bufPtr = process->getSyscallArg(tc, index);
+1020 
+1021     // Adjust path for current working directory
+1022     path = process->fullPath(path);
+1023 
+1024     struct stat hostBuf;
+1025     int result = lstat(path.c_str(), &hostBuf);
+1026 
+1027     if (result < 0)
+1028         return -errno;
+1029 
+1030     copyOutStatBuf<OS>(tc->getMemProxy(), bufPtr, &hostBuf);
+1031 
+1032     return 0;
+1033 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aeada7d30dbed17e022348fdce3bdebc6}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!mkdirFunc@{mkdirFunc}}
+\index{mkdirFunc@{mkdirFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{mkdirFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} mkdirFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_aeada7d30dbed17e022348fdce3bdebc6}
+
+
+Target mkdir() handler. 
+
+
+\begin{DoxyCode}
+405 {
+406     string path;
+407 
+408     int index = 0;
+409     if (!tc->getMemProxy().tryReadString(path, p->getSyscallArg(tc, index)))
+410         return -EFAULT;
+411 
+412     // Adjust path for current working directory
+413     path = p->fullPath(path);
+414 
+415     mode_t mode = p->getSyscallArg(tc, index);
+416 
+417     int result = mkdir(path.c_str(), mode);
+418     return (result == -1) ? -errno : result;
+419 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ab55f07f32ed5eff0cbfb28d3da9d05c4}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!mmapFunc@{mmapFunc}}
+\index{mmapFunc@{mmapFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{mmapFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} mmapFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_ab55f07f32ed5eff0cbfb28d3da9d05c4}
+Target mmap() handler.
+
+We don't really handle mmap(). If the target is mmaping an anonymous region or /dev/zero, we can get away with doing basically nothing (since memory is initialized to zero and the simulator doesn't really check addresses anyway). 
+
+
+\begin{DoxyCode}
+1201 {
+1202     int index = 0;
+1203     Addr start = p->getSyscallArg(tc, index);
+1204     uint64_t length = p->getSyscallArg(tc, index);
+1205     index++; // int prot = p->getSyscallArg(tc, index);
+1206     int flags = p->getSyscallArg(tc, index);
+1207     int tgt_fd = p->getSyscallArg(tc, index);
+1208     // int offset = p->getSyscallArg(tc, index);
+1209 
+1210     if (length > 0x100000000ULL)
+1211         warn("mmap length argument %#x is unreasonably large.\n", length);
+1212 
+1213     if (!(flags & OS::TGT_MAP_ANONYMOUS)) {
+1214         Process::FdMap *fd_map = p->sim_fd_obj(tgt_fd);
+1215         if (!fd_map || fd_map->fd < 0) {
+1216             warn("mmap failing: target fd %d is not valid\n", tgt_fd);
+1217             return -EBADF;
+1218         }
+1219 
+1220         if (fd_map->filename != "/dev/zero") {
+1221             // This is very likely broken, but leave a warning here
+1222             // (rather than panic) in case /dev/zero is known by
+1223             // another name on some platform
+1224             warn("allowing mmap of file %s; mmap not supported on files"
+1225                  " other than /dev/zero\n", fd_map->filename);
+1226         }
+1227     }
+1228 
+1229     if ((start  % TheISA::VMPageSize) != 0 ||
+1230         (length % TheISA::VMPageSize) != 0) {
+1231         warn("mmap failing: arguments not page-aligned: "
+1232              "start 0x%x length 0x%x",
+1233              start, length);
+1234         return -EINVAL;
+1235     }
+1236 
+1237     // are we ok with clobbering existing mappings?  only set this to
+1238     // true if the user has been warned.
+1239     bool clobber = false;
+1240 
+1241     // try to use the caller-provided address if there is one
+1242     bool use_provided_address = (start != 0);
+1243 
+1244     if (use_provided_address) {
+1245         // check to see if the desired address is already in use
+1246         if (!p->pTable->isUnmapped(start, length)) {
+1247             // there are existing mappings in the desired range
+1248             // whether we clobber them or not depends on whether the caller
+1249             // specified MAP_FIXED
+1250             if (flags & OS::TGT_MAP_FIXED) {
+1251                 // MAP_FIXED specified: clobber existing mappings
+1252                 warn("mmap: MAP_FIXED at 0x%x overwrites existing mappings\n",
+1253                      start);
+1254                 clobber = true;
+1255             } else {
+1256                 // MAP_FIXED not specified: ignore suggested start address
+1257                 warn("mmap: ignoring suggested map address 0x%x\n", start);
+1258                 use_provided_address = false;
+1259             }
+1260         }
+1261     }
+1262 
+1263     if (!use_provided_address) {
+1264         // no address provided, or provided address unusable:
+1265         // pick next address from our "mmap region"
+1266         if (OS::mmapGrowsDown()) {
+1267             start = p->mmap_end - length;
+1268             p->mmap_end = start;
+1269         } else {
+1270             start = p->mmap_end;
+1271             p->mmap_end += length;
+1272         }
+1273     }
+1274 
+1275     p->allocateMem(start, length, clobber);
+1276 
+1277     return start;
+1278 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aece41171f976116d684969b11ff688fb}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!mremapFunc@{mremapFunc}}
+\index{mremapFunc@{mremapFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{mremapFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} mremapFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_aece41171f976116d684969b11ff688fb}
+
+
+Target mremap() handler. 
+
+
+\begin{DoxyCode}
+813 {
+814     int index = 0;
+815     Addr start = process->getSyscallArg(tc, index);
+816     uint64_t old_length = process->getSyscallArg(tc, index);
+817     uint64_t new_length = process->getSyscallArg(tc, index);
+818     uint64_t flags = process->getSyscallArg(tc, index);
+819     uint64_t provided_address = 0;
+820     bool use_provided_address = flags & OS::TGT_MREMAP_FIXED;
+821 
+822     if (use_provided_address)
+823         provided_address = process->getSyscallArg(tc, index);
+824 
+825     if ((start % TheISA::VMPageSize != 0) ||
+826         (new_length % TheISA::VMPageSize != 0) ||
+827         (provided_address % TheISA::VMPageSize != 0)) {
+828         warn("mremap failing: arguments not page aligned");
+829         return -EINVAL;
+830     }
+831 
+832     if (new_length > old_length) {
+833         if ((start + old_length) == process->mmap_end &&
+834             (!use_provided_address || provided_address == start)) {
+835             uint64_t diff = new_length - old_length;
+836             process->allocateMem(process->mmap_end, diff);
+837             process->mmap_end += diff;
+838             return start;
+839         } else {
+840             if (!use_provided_address && !(flags & OS::TGT_MREMAP_MAYMOVE)) {
+841                 warn("can't remap here and MREMAP_MAYMOVE flag not set\n");
+842                 return -ENOMEM;
+843             } else {
+844                 uint64_t new_start = use_provided_address ?
+845                     provided_address : process->mmap_end;
+846                 process->pTable->remap(start, old_length, new_start);
+847                 warn("mremapping to new vaddr %08p-%08p, adding %d\n",
+848                      new_start, new_start + new_length,
+849                      new_length - old_length);
+850                 // add on the remaining unallocated pages
+851                 process->allocateMem(new_start + old_length,
+852                                      new_length - old_length,
+853                                      use_provided_address /* clobber */);
+854                 if (!use_provided_address)
+855                     process->mmap_end += new_length;
+856                 if (use_provided_address &&
+857                     new_start + new_length > process->mmap_end) {
+858                     // something fishy going on here, at least notify the user
+859                     // @todo: increase mmap_end?
+860                     warn("mmap region limit exceeded with MREMAP_FIXED\n");
+861                 }
+862                 warn("returning %08p as start\n", new_start);
+863                 return new_start;
+864             }
+865         }
+866     } else {
+867         if (use_provided_address && provided_address != start)
+868             process->pTable->remap(start, new_length, provided_address);
+869         process->pTable->unmap(start + new_length, old_length - new_length);
+870         return use_provided_address ? provided_address : start;
+871     }
+872 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a627dd30ab77faa503107792836ea2158}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!munmapFunc@{munmapFunc}}
+\index{munmapFunc@{munmapFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{munmapFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} munmapFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a627dd30ab77faa503107792836ea2158}
+
+
+Target munmap() handler. 
+
+
+\begin{DoxyCode}
+298 {
+299     // given that we don't really implement mmap, munmap is really easy
+300     return 0;
+301 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a796691a0efbcbad98107fe763c22083b}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!openatFunc@{openatFunc}}
+\index{openatFunc@{openatFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{openatFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} openatFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a796691a0efbcbad98107fe763c22083b}
+
+
+Target openat() handler. 
+
+
+\begin{DoxyCode}
+697 {
+698     int index = 0;
+699     int dirfd = process->getSyscallArg(tc, index);
+700     if (dirfd != OS::TGT_AT_FDCWD)
+701         warn("openat: first argument not AT_FDCWD; unlikely to work");
+702     return openFunc<OS>(desc, callnum, process, tc, 1);
+703 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aee9c33e8ab3dbe5b14af21d403675465}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!openFunc@{openFunc}}
+\index{openFunc@{openFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{openFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} openFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_aee9c33e8ab3dbe5b14af21d403675465}
+
+
+Target open() handler. 
+
+
+\begin{DoxyCode}
+688 {
+689     return openFunc<OS>(desc, callnum, process, tc, 0);
+690 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ae8b330340cfb5e878941b80c190e1bcb}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!openFunc@{openFunc}}
+\index{openFunc@{openFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{openFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} openFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em index})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{syscall__emul_8hh_ae8b330340cfb5e878941b80c190e1bcb}
+
+
+
+\begin{DoxyCode}
+625 {
+626     std::string path;
+627 
+628     if (!tc->getMemProxy().tryReadString(path,
+629                 process->getSyscallArg(tc, index)))
+630         return -EFAULT;
+631 
+632     if (path == "/dev/sysdev0") {
+633         // This is a memory-mapped high-resolution timer device on Alpha.
+634         // We don't support it, so just punt.
+635         warn("Ignoring open(%s, ...)\n", path);
+636         return -ENOENT;
+637     }
+638 
+639     int tgtFlags = process->getSyscallArg(tc, index);
+640     int mode = process->getSyscallArg(tc, index);
+641     int hostFlags = 0;
+642 
+643     // translate open flags
+644     for (int i = 0; i < OS::NUM_OPEN_FLAGS; i++) {
+645         if (tgtFlags & OS::openFlagTable[i].tgtFlag) {
+646             tgtFlags &= ~OS::openFlagTable[i].tgtFlag;
+647             hostFlags |= OS::openFlagTable[i].hostFlag;
+648         }
+649     }
+650 
+651     // any target flags left?
+652     if (tgtFlags != 0)
+653         warn("Syscall: open: cannot decode flags 0x%x", tgtFlags);
+654 
+655 #ifdef __CYGWIN32__
+656     hostFlags |= O_BINARY;
+657 #endif
+658 
+659     // Adjust path for current working directory
+660     path = process->fullPath(path);
+661 
+662     DPRINTF(SyscallVerbose, "opening file %s\n", path.c_str());
+663 
+664     int fd;
+665     int local_errno;
+666     if (startswith(path, "/proc/") || startswith(path, "/system/") ||
+667         startswith(path, "/platform/") || startswith(path, "/sys/")) {
+668         // It's a proc/sys entry and requires special handling
+669         fd = OS::openSpecialFile(path, process, tc);
+670         local_errno = ENOENT;
+671      } else {
+672         // open the file
+673         fd = open(path.c_str(), hostFlags, mode);
+674         local_errno = errno;
+675      }
+676 
+677     if (fd == -1)
+678         return -local_errno;
+679 
+680     return process->alloc_fd(fd, path.c_str(), hostFlags, mode, false);
+681 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a58d1892bcde783939ea74a6685ebc68b}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!pipePseudoFunc@{pipePseudoFunc}}
+\index{pipePseudoFunc@{pipePseudoFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{pipePseudoFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} pipePseudoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a58d1892bcde783939ea74a6685ebc68b}
+Pseudo Funcs -\/ These functions use a different return convension, returning a second value in a register other than the normal return register 
+
+
+\begin{DoxyCode}
+665 {
+666     int fds[2], sim_fds[2];
+667     int pipe_retval = pipe(fds);
+668 
+669     if (pipe_retval < 0) {
+670         // error
+671         return pipe_retval;
+672     }
+673 
+674     sim_fds[0] = process->alloc_fd(fds[0], "PIPE-READ", O_WRONLY, -1, true);
+675     sim_fds[1] = process->alloc_fd(fds[1], "PIPE-WRITE", O_RDONLY, -1, true);
+676 
+677     process->setReadPipeSource(sim_fds[0], sim_fds[1]);
+678     // Alpha Linux convention for pipe() is that fd[0] is returned as
+679     // the return value of the function, and fd[1] is returned in r20.
+680     tc->setIntReg(SyscallPseudoReturnReg, sim_fds[1]);
+681     return sim_fds[0];
+682 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a5cb187a0afcfb802a06396f382fe5ada}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!readFunc@{readFunc}}
+\index{readFunc@{readFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{readFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} readFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a5cb187a0afcfb802a06396f382fe5ada}
+
+
+Target read() handler. 
+
+
+\begin{DoxyCode}
+214 {
+215     int index = 0;
+216     int fd = p->sim_fd(p->getSyscallArg(tc, index));
+217     Addr bufPtr = p->getSyscallArg(tc, index);
+218     int nbytes = p->getSyscallArg(tc, index);
+219     BufferArg bufArg(bufPtr, nbytes);
+220 
+221     int bytes_read = read(fd, bufArg.bufferPtr(), nbytes);
+222 
+223     if (bytes_read != -1)
+224         bufArg.copyOut(tc->getMemProxy());
+225 
+226     return bytes_read;
+227 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aa7c9ee715f608210172fa284884d6ae7}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!readlinkatFunc@{readlinkatFunc}}
+\index{readlinkatFunc@{readlinkatFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{readlinkatFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} readlinkatFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_aa7c9ee715f608210172fa284884d6ae7}
+
+
+Target readlinkat() handler. 
+
+
+\begin{DoxyCode}
+723 {
+724     int index = 0;
+725     int dirfd = process->getSyscallArg(tc, index);
+726     if (dirfd != OS::TGT_AT_FDCWD)
+727         warn("openat: first argument not AT_FDCWD; unlikely to work");
+728     return readlinkFunc(desc, callnum, process, tc, 1);
+729 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ad3f837adc09d39f3de515a223236040e}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!readlinkFunc@{readlinkFunc}}
+\index{readlinkFunc@{readlinkFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{readlinkFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} readlinkFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ad3f837adc09d39f3de515a223236040e}
+
+
+Target open() handler. 
+
+
+\begin{DoxyCode}
+358 {
+359     return readlinkFunc(desc, callnum, process, tc, 0);
+360 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a713e8bc427660dda08453f913ee48c21}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!readlinkFunc@{readlinkFunc}}
+\index{readlinkFunc@{readlinkFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{readlinkFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} readlinkFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em index} = {\ttfamily 0})}}
+\label{syscall__emul_8hh_a713e8bc427660dda08453f913ee48c21}
+
+
+Target readlink() handler. 
+
+
+\begin{DoxyCode}
+365 {
+366     string path;
+367 
+368     if (!tc->getMemProxy().tryReadString(path, p->getSyscallArg(tc, index)))
+369         return -EFAULT;
+370 
+371     // Adjust path for current working directory
+372     path = p->fullPath(path);
+373 
+374     Addr bufPtr = p->getSyscallArg(tc, index);
+375     size_t bufsiz = p->getSyscallArg(tc, index);
+376 
+377     BufferArg buf(bufPtr, bufsiz);
+378 
+379     int result = readlink(path.c_str(), (char *)buf.bufferPtr(), bufsiz);
+380 
+381     buf.copyOut(tc->getMemProxy());
+382 
+383     return (result == -1) ? -errno : result;
+384 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a7a4679edd20bcb6c6095d9641bf60a41}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!renameFunc@{renameFunc}}
+\index{renameFunc@{renameFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{renameFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} renameFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a7a4679edd20bcb6c6095d9641bf60a41}
+
+
+Target rename() handler. 
+
+
+\begin{DoxyCode}
+423 {
+424     string old_name;
+425 
+426     int index = 0;
+427     if (!tc->getMemProxy().tryReadString(old_name, p->getSyscallArg(tc, index)))
+428         return -EFAULT;
+429 
+430     string new_name;
+431 
+432     if (!tc->getMemProxy().tryReadString(new_name, p->getSyscallArg(tc, index)))
+433         return -EFAULT;
+434 
+435     // Adjust path for current working directory
+436     old_name = p->fullPath(old_name);
+437     new_name = p->fullPath(new_name);
+438 
+439     int64_t result = rename(old_name.c_str(), new_name.c_str());
+440     return (result == -1) ? -errno : result;
+441 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a5dc53a9bd2d0fac6fedb24a8e50c375d}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!setuidFunc@{setuidFunc}}
+\index{setuidFunc@{setuidFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{setuidFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} setuidFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a5dc53a9bd2d0fac6fedb24a8e50c375d}
+
+
+Target setuid() handler. 
+
+
+\begin{DoxyCode}
+724 {
+725     // can't fathom why a benchmark would call this.
+726     int index = 0;
+727     warn("Ignoring call to setuid(%d)\n", process->getSyscallArg(tc, index));
+728     return 0;
+729 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a03ce27f716fe9fc0eb250d09c1ff1683}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!stat64Func@{stat64Func}}
+\index{stat64Func@{stat64Func}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{stat64Func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} stat64Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a03ce27f716fe9fc0eb250d09c1ff1683}
+
+
+Target stat64() handler. 
+
+
+\begin{DoxyCode}
+909 {
+910     std::string path;
+911 
+912     int index = 0;
+913     if (!tc->getMemProxy().tryReadString(path,
+914                 process->getSyscallArg(tc, index)))
+915         return -EFAULT;
+916     Addr bufPtr = process->getSyscallArg(tc, index);
+917 
+918     // Adjust path for current working directory
+919     path = process->fullPath(path);
+920 
+921 #if NO_STAT64
+922     struct stat  hostBuf;
+923     int result = stat(path.c_str(), &hostBuf);
+924 #else
+925     struct stat64 hostBuf;
+926     int result = stat64(path.c_str(), &hostBuf);
+927 #endif
+928 
+929     if (result < 0)
+930         return -errno;
+931 
+932     copyOutStat64Buf<OS>(tc->getMemProxy(), bufPtr, &hostBuf);
+933 
+934     return 0;
+935 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_aeeffeafdf73963270562a90525eeef65}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!statfsFunc@{statfsFunc}}
+\index{statfsFunc@{statfsFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{statfsFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} statfsFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_aeeffeafdf73963270562a90525eeef65}
+
+
+Target statfs() handler. 
+
+
+\begin{DoxyCode}
+1101 {
+1102     std::string path;
+1103 
+1104     int index = 0;
+1105     if (!tc->getMemProxy().tryReadString(path,
+1106                 process->getSyscallArg(tc, index))) {
+1107         return -EFAULT;
+1108     }
+1109     Addr bufPtr = process->getSyscallArg(tc, index);
+1110 
+1111     // Adjust path for current working directory
+1112     path = process->fullPath(path);
+1113 
+1114     struct statfs hostBuf;
+1115     int result = statfs(path.c_str(), &hostBuf);
+1116 
+1117     if (result < 0)
+1118         return -errno;
+1119 
+1120     OS::copyOutStatfsBuf(tc->getMemProxy(), bufPtr, &hostBuf);
+1121 
+1122     return 0;
+1123 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a90a4079ec4c293ae75368d283892a19a}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!statFunc@{statFunc}}
+\index{statFunc@{statFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{statFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} statFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a90a4079ec4c293ae75368d283892a19a}
+
+
+Target stat() handler. 
+
+
+\begin{DoxyCode}
+879 {
+880     std::string path;
+881 
+882     int index = 0;
+883     if (!tc->getMemProxy().tryReadString(path,
+884                 process->getSyscallArg(tc, index))) {
+885         return -EFAULT;
+886     }
+887     Addr bufPtr = process->getSyscallArg(tc, index);
+888 
+889     // Adjust path for current working directory
+890     path = process->fullPath(path);
+891 
+892     struct stat hostBuf;
+893     int result = stat(path.c_str(), &hostBuf);
+894 
+895     if (result < 0)
+896         return -errno;
+897 
+898     copyOutStatBuf<OS>(tc->getMemProxy(), bufPtr, &hostBuf);
+899 
+900     return 0;
+901 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a6a54d59c2aacf12179e4ab68440f29b4}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!sysinfoFunc@{sysinfoFunc}}
+\index{sysinfoFunc@{sysinfoFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{sysinfoFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} sysinfoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a6a54d59c2aacf12179e4ab68440f29b4}
+
+
+Target sysinfo() handler. 
+
+
+\begin{DoxyCode}
+736 {
+737 
+738     int index = 0;
+739     TypedBufferArg<typename OS::tgt_sysinfo>
+740         sysinfo(process->getSyscallArg(tc, index));   
+741 
+742     sysinfo->uptime=seconds_since_epoch;
+743     sysinfo->totalram=process->system->memSize();
+744 
+745     sysinfo.copyOut(tc->getMemProxy());
+746 
+747     return 0;
+748 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ac73c74c47ae346b8e74a8d60682c3211}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!timeFunc@{timeFunc}}
+\index{timeFunc@{timeFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{timeFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} timeFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_ac73c74c47ae346b8e74a8d60682c3211}
+
+
+Target time() function. 
+
+
+\begin{DoxyCode}
+1454 {
+1455     typename OS::time_t sec, usec;
+1456     getElapsedTime(sec, usec);
+1457     sec += seconds_since_epoch;
+1458 
+1459     int index = 0;
+1460     Addr taddr = (Addr)process->getSyscallArg(tc, index);
+1461     if(taddr != 0) {
+1462         typename OS::time_t t = sec;
+1463         t = TheISA::htog(t);
+1464         SETranslatingPortProxy &p = tc->getMemProxy();
+1465         p.writeBlob(taddr, (uint8_t*)&t, (int)sizeof(typename OS::time_t));
+1466     }
+1467     return sec;
+1468 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_af669a50393a3e59f5d77210b44b8c645}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!timesFunc@{timesFunc}}
+\index{timesFunc@{timesFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{timesFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} timesFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_af669a50393a3e59f5d77210b44b8c645}
+
+
+Target times() function. 
+
+
+\begin{DoxyCode}
+1428 {
+1429     int index = 0;
+1430     TypedBufferArg<typename OS::tms> bufp(process->getSyscallArg(tc, index));
+1431 
+1432     // Fill in the time structure (in clocks)
+1433     int64_t clocks = curTick() * OS::M5_SC_CLK_TCK / SimClock::Int::s;
+1434     bufp->tms_utime = clocks;
+1435     bufp->tms_stime = 0;
+1436     bufp->tms_cutime = 0;
+1437     bufp->tms_cstime = 0;
+1438 
+1439     // Convert to host endianness
+1440     bufp->tms_utime = TheISA::htog(bufp->tms_utime);
+1441 
+1442     // Write back
+1443     bufp.copyOut(tc->getMemProxy());
+1444 
+1445     // Return clock ticks since system boot
+1446     return clocks;
+1447 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ae8fe2ae6e9a7f93b2fec78dd445ee0bd}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!truncate64Func@{truncate64Func}}
+\index{truncate64Func@{truncate64Func}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{truncate64Func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} truncate64Func ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ae8fe2ae6e9a7f93b2fec78dd445ee0bd}
+
+
+Target truncate64() handler. 
+
+
+\begin{DoxyCode}
+480 {
+481     int index = 0;
+482     string path;
+483 
+484     if (!tc->getMemProxy().tryReadString(path, process->getSyscallArg(tc, index))
+      )
+485        return -EFAULT;
+486 
+487     int64_t length = process->getSyscallArg(tc, index, 64);
+488 
+489     // Adjust path for current working directory
+490     path = process->fullPath(path);
+491 
+492 #if NO_STAT64
+493     int result = truncate(path.c_str(), length);
+494 #else
+495     int result = truncate64(path.c_str(), length);
+496 #endif
+497     return (result == -1) ? -errno : result;
+498 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a6e21e57c806344e2ecbb7d2c952af5f9}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!truncateFunc@{truncateFunc}}
+\index{truncateFunc@{truncateFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{truncateFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} truncateFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a6e21e57c806344e2ecbb7d2c952af5f9}
+
+
+Target truncate() handler. 
+
+
+\begin{DoxyCode}
+445 {
+446     string path;
+447 
+448     int index = 0;
+449     if (!tc->getMemProxy().tryReadString(path, p->getSyscallArg(tc, index)))
+450         return -EFAULT;
+451 
+452     off_t length = p->getSyscallArg(tc, index);
+453 
+454     // Adjust path for current working directory
+455     path = p->fullPath(path);
+456 
+457     int result = truncate(path.c_str(), length);
+458     return (result == -1) ? -errno : result;
+459 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a90bdffbc29a5b2b7953ae380819fc903}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!umaskFunc@{umaskFunc}}
+\index{umaskFunc@{umaskFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{umaskFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} umaskFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a90bdffbc29a5b2b7953ae380819fc903}
+
+
+Target umask() handler. 
+
+
+\begin{DoxyCode}
+522 {
+523     // Letting the simulated program change the simulator's umask seems like
+524     // a bad idea.  Compromise by just returning the current umask but not
+525     // changing anything.
+526     mode_t oldMask = umask(0);
+527     umask(oldMask);
+528     return (int)oldMask;
+529 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_ac8f61c104c0b3ab72cee8268d0c5467e}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!unimplementedFunc@{unimplementedFunc}}
+\index{unimplementedFunc@{unimplementedFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{unimplementedFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} unimplementedFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_ac8f61c104c0b3ab72cee8268d0c5467e}
+
+
+Handler for unimplemented syscalls that we haven't thought about. 
+
+
+\begin{DoxyCode}
+82 {
+83     fatal("syscall %s (#%d) unimplemented.", desc->name, callnum);
+84 
+85     return 1;
+86 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a332ee720b2d3c8f128b10627f87a9a67}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!unlinkFunc@{unlinkFunc}}
+\index{unlinkFunc@{unlinkFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{unlinkFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} unlinkFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a332ee720b2d3c8f128b10627f87a9a67}
+
+
+Target unlink() handler. 
+
+
+\begin{DoxyCode}
+388 {
+389     string path;
+390 
+391     int index = 0;
+392     if (!tc->getMemProxy().tryReadString(path, p->getSyscallArg(tc, index)))
+393         return -EFAULT;
+394 
+395     // Adjust path for current working directory
+396     path = p->fullPath(path);
+397 
+398     int result = unlink(path.c_str());
+399     return (result == -1) ? -errno : result;
+400 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a14cb480609d141a40fb4b6ad36c7dbed}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!utimesFunc@{utimesFunc}}
+\index{utimesFunc@{utimesFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{utimesFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} utimesFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a14cb480609d141a40fb4b6ad36c7dbed}
+
+
+Target utimes() handler. 
+
+
+\begin{DoxyCode}
+1341 {
+1342     std::string path;
+1343 
+1344     int index = 0;
+1345     if (!tc->getMemProxy().tryReadString(path,
+1346                 process->getSyscallArg(tc, index))) {
+1347         return -EFAULT;
+1348     }
+1349 
+1350     TypedBufferArg<typename OS::timeval [2]>
+1351         tp(process->getSyscallArg(tc, index));
+1352     tp.copyIn(tc->getMemProxy());
+1353 
+1354     struct timeval hostTimeval[2];
+1355     for (int i = 0; i < 2; ++i)
+1356     {
+1357         hostTimeval[i].tv_sec = TheISA::gtoh((*tp)[i].tv_sec);
+1358         hostTimeval[i].tv_usec = TheISA::gtoh((*tp)[i].tv_usec);
+1359     }
+1360 
+1361     // Adjust path for current working directory
+1362     path = process->fullPath(path);
+1363 
+1364     int result = utimes(path.c_str(), hostTimeval);
+1365 
+1366     if (result < 0)
+1367         return -errno;
+1368 
+1369     return 0;
+1370 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a0d5b24a5c07baeac543de44989b73d43}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!writeFunc@{writeFunc}}
+\index{writeFunc@{writeFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{writeFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} writeFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em num}, \/  {\bf LiveProcess} $\ast$ {\em p}, \/  {\bf ThreadContext} $\ast$ {\em tc})}}
+\label{syscall__emul_8hh_a0d5b24a5c07baeac543de44989b73d43}
+
+
+Target write() handler. 
+
+
+\begin{DoxyCode}
+231 {
+232     int index = 0;
+233     int fd = p->sim_fd(p->getSyscallArg(tc, index));
+234     Addr bufPtr = p->getSyscallArg(tc, index);
+235     int nbytes = p->getSyscallArg(tc, index);
+236     BufferArg bufArg(bufPtr, nbytes);
+237 
+238     bufArg.copyIn(tc->getMemProxy());
+239 
+240     int bytes_written = write(fd, bufArg.bufferPtr(), nbytes);
+241 
+242     fsync(fd);
+243 
+244     return bytes_written;
+245 }
+\end{DoxyCode}
+\hypertarget{syscall__emul_8hh_a5ddafb78a103551d95e66674ad49a104}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!writevFunc@{writevFunc}}
+\index{writevFunc@{writevFunc}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{writevFunc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} writevFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{syscall__emul_8hh_a5ddafb78a103551d95e66674ad49a104}
+
+
+Target writev() handler. 
+
+
+\begin{DoxyCode}
+1156 {
+1157     int index = 0;
+1158     int fd = process->getSyscallArg(tc, index);
+1159     if (fd < 0 || process->sim_fd(fd) < 0) {
+1160         // doesn't map to any simulator fd: not a valid target fd
+1161         return -EBADF;
+1162     }
+1163 
+1164     SETranslatingPortProxy &p = tc->getMemProxy();
+1165     uint64_t tiov_base = process->getSyscallArg(tc, index);
+1166     size_t count = process->getSyscallArg(tc, index);
+1167     struct iovec hiov[count];
+1168     for (size_t i = 0; i < count; ++i) {
+1169         typename OS::tgt_iovec tiov;
+1170 
+1171         p.readBlob(tiov_base + i*sizeof(typename OS::tgt_iovec),
+1172                    (uint8_t*)&tiov, sizeof(typename OS::tgt_iovec));
+1173         hiov[i].iov_len = TheISA::gtoh(tiov.iov_len);
+1174         hiov[i].iov_base = new char [hiov[i].iov_len];
+1175         p.readBlob(TheISA::gtoh(tiov.iov_base), (uint8_t *)hiov[i].iov_base,
+1176                    hiov[i].iov_len);
+1177     }
+1178 
+1179     int result = writev(process->sim_fd(fd), hiov, count);
+1180 
+1181     for (size_t i = 0; i < count; ++i)
+1182         delete [] (char *)hiov[i].iov_base;
+1183 
+1184     if (result < 0)
+1185         return -errno;
+1186 
+1187     return 0;
+1188 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{syscall__emul_8hh_a669e0ac171376b8be956f4ac131e78a7}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!one\_\-million@{one\_\-million}}
+\index{one\_\-million@{one\_\-million}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{one\_\-million}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf one\_\-million} = 1000000}}
+\label{syscall__emul_8hh_a669e0ac171376b8be956f4ac131e78a7}
+
+
+A readable name for 1,000,000, for converting microseconds to seconds. \hypertarget{syscall__emul_8hh_a39e588dacd751ca716fd5352f319e401}{
+\index{syscall\_\-emul.hh@{syscall\_\-emul.hh}!seconds\_\-since\_\-epoch@{seconds\_\-since\_\-epoch}}
+\index{seconds\_\-since\_\-epoch@{seconds\_\-since\_\-epoch}!syscall_emul.hh@{syscall\_\-emul.hh}}
+\subsubsection[{seconds\_\-since\_\-epoch}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned {\bf seconds\_\-since\_\-epoch} = 1000000000}}
+\label{syscall__emul_8hh_a39e588dacd751ca716fd5352f319e401}
+Approximate seconds since the epoch (1/1/1970). About a billion, by my reckoning. We want to keep this a constant (not use the real-\/world time) to keep simulations repeatable. 

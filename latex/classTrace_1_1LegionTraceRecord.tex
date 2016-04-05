@@ -1,0 +1,489 @@
+\hypertarget{classTrace_1_1LegionTraceRecord}{
+\section{クラス LegionTraceRecord}
+\label{classTrace_1_1LegionTraceRecord}\index{Trace::LegionTraceRecord@{Trace::LegionTraceRecord}}
+}
+
+
+{\ttfamily \#include $<$legiontrace.hh$>$}LegionTraceRecordに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classTrace_1_1LegionTraceRecord}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTrace_1_1LegionTraceRecord_a8add08b26e4c66dcd19ad95f318443c2}{LegionTraceRecord} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \_\-when, \hyperlink{classThreadContext}{ThreadContext} $\ast$\_\-thread, const \hyperlink{classRefCountingPtr}{StaticInstPtr} \_\-staticInst, TheISA::PCState \_\-pc, bool spec, const \hyperlink{classRefCountingPtr}{StaticInstPtr} \_\-macroStaticInst=NULL)
+\item 
+void \hyperlink{classTrace_1_1LegionTraceRecord_accd2600060dbaee3a3b41aed4034c63c}{dump} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTrace_1_1LegionTraceRecord_a8add08b26e4c66dcd19ad95f318443c2}{
+\index{Trace::LegionTraceRecord@{Trace::LegionTraceRecord}!LegionTraceRecord@{LegionTraceRecord}}
+\index{LegionTraceRecord@{LegionTraceRecord}!Trace::LegionTraceRecord@{Trace::LegionTraceRecord}}
+\subsubsection[{LegionTraceRecord}]{\setlength{\rightskip}{0pt plus 5cm}{\bf LegionTraceRecord} ({\bf Tick} {\em \_\-when}, \/  {\bf ThreadContext} $\ast$ {\em \_\-thread}, \/  const {\bf StaticInstPtr} {\em \_\-staticInst}, \/  TheISA::PCState {\em \_\-pc}, \/  bool {\em spec}, \/  const {\bf StaticInstPtr} {\em \_\-macroStaticInst} = {\ttfamily NULL})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrace_1_1LegionTraceRecord_a8add08b26e4c66dcd19ad95f318443c2}
+
+
+
+\begin{DoxyCode}
+53         : InstRecord(_when, _thread, _staticInst, _pc, spec,
+54                 _macroStaticInst)
+55     {
+56     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTrace_1_1LegionTraceRecord_accd2600060dbaee3a3b41aed4034c63c}{
+\index{Trace::LegionTraceRecord@{Trace::LegionTraceRecord}!dump@{dump}}
+\index{dump@{dump}!Trace::LegionTraceRecord@{Trace::LegionTraceRecord}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}void dump ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTrace_1_1LegionTraceRecord_accd2600060dbaee3a3b41aed4034c63c}
+
+
+\hyperlink{classTrace_1_1InstRecord_abf1ad25f5e8a680b74ae28575b1f0539}{InstRecord}を実装しています。
+
+
+\begin{DoxyCode}
+145 {
+146     ostream &outs = Trace::output();
+147 
+148     // Compare
+149     bool compared = false;
+150     bool diffPC   = false;
+151     bool diffCC   = false;
+152     bool diffInst = false;
+153     bool diffIntRegs = false;
+154     bool diffFpRegs = false;
+155     bool diffTpc = false;
+156     bool diffTnpc = false;
+157     bool diffTstate = false;
+158     bool diffTt = false;
+159     bool diffTba M5_VAR_USED = false;
+160     bool diffHpstate = false;
+161     bool diffHtstate = false;
+162     bool diffHtba = false;
+163     bool diffPstate = false;
+164     bool diffY = false;
+165     bool diffFsr = false;
+166     bool diffCcr = false;
+167     bool diffTl = false;
+168     bool diffGl = false;
+169     bool diffAsi = false;
+170     bool diffPil = false;
+171     bool diffCwp = false;
+172     bool diffCansave = false;
+173     bool diffCanrestore = false;
+174     bool diffOtherwin = false;
+175     bool diffCleanwin = false;
+176     bool diffTlb = false;
+177     Addr m5Pc, lgnPc;
+178 
+179     if (!shared_data)
+180         setupSharedData();
+181 
+182     // We took a trap on a micro-op...
+183     if (wasMicro && !staticInst->isMicroop())
+184     {
+185         // let's skip comparing this tick
+186         while (!compared)
+187             if (shared_data->flags == OWN_M5) {
+188                 shared_data->flags = OWN_LEGION;
+189                 compared = true;
+190             }
+191         compared = false;
+192         wasMicro = false;
+193     }
+194 
+195     if (staticInst->isLastMicroop())
+196         wasMicro = false;
+197     else if (staticInst->isMicroop())
+198         wasMicro = true;
+199 
+200 
+201     if(!staticInst->isMicroop() || staticInst->isLastMicroop()) {
+202         while (!compared) {
+203             if (shared_data->flags == OWN_M5) {
+204                 m5Pc = pc.instAddr() & SparcISA::PAddrImplMask;
+205                 if (bits(shared_data->pstate,3,3)) {
+206                     m5Pc &= mask(32);
+207                 }
+208                 lgnPc = shared_data->pc & SparcISA::PAddrImplMask;
+209                 if (lgnPc != m5Pc)
+210                    diffPC = true;
+211 
+212                 if (shared_data->cycle_count !=
+213                         thread->getCpuPtr()->instCount())
+214                     diffCC = true;
+215 
+216                 if (shared_data->instruction !=
+217                         (SparcISA::MachInst)staticInst->machInst) {
+218                     diffInst = true;
+219                 }
+220                 // assume we have %g0 working correctly
+221                 for (int i = 1; i < TheISA::NumIntArchRegs; i++) {
+222                     if (thread->readIntReg(i) != shared_data->intregs[i]) {
+223                         diffIntRegs = true;
+224                     }
+225                 }
+226                 for (int i = 0; i < TheISA::NumFloatRegs/2; i++) {
+227                     if (thread->readFloatRegBits(i*2) !=
+228                             shared_data->fpregs[i]) {
+229                         diffFpRegs = true;
+230                     }
+231                 }
+232                         uint64_t oldTl =
+233                             thread->readMiscRegNoEffect(MISCREG_TL);
+234                 if (oldTl != shared_data->tl)
+235                     diffTl = true;
+236                 for (int i = 1; i <= MaxTL; i++) {
+237                     thread->setMiscRegNoEffect(MISCREG_TL, i);
+238                     if (thread->readMiscRegNoEffect(MISCREG_TPC) !=
+239                             shared_data->tpc[i-1])
+240                         diffTpc = true;
+241                     if (thread->readMiscRegNoEffect(MISCREG_TNPC) !=
+242                             shared_data->tnpc[i-1])
+243                         diffTnpc = true;
+244                     if (thread->readMiscRegNoEffect(MISCREG_TSTATE) !=
+245                             shared_data->tstate[i-1])
+246                         diffTstate = true;
+247                     if (thread->readMiscRegNoEffect(MISCREG_TT) !=
+248                             shared_data->tt[i-1])
+249                         diffTt = true;
+250                     if (thread->readMiscRegNoEffect(MISCREG_HTSTATE) !=
+251                             shared_data->htstate[i-1])
+252                         diffHtstate = true;
+253                 }
+254                 thread->setMiscRegNoEffect(MISCREG_TL, oldTl);
+255 
+256                 if(shared_data->tba != thread->readMiscRegNoEffect(MISCREG_TBA))
+257                     diffTba = true;
+258                 //When the hpstate register is read by an instruction,
+259                 //legion has bit 11 set. When it's in storage, it doesn't.
+260                 //Since we don't directly support seperate interpretations
+261                 //of the registers like that, the bit is always set to 1 and
+262                 //we just don't compare it. It's not supposed to matter
+263                 //anyway.
+264                 if((shared_data->hpstate | (1 << 11)) !=
+265                         thread->readMiscRegNoEffect(MISCREG_HPSTATE))
+266                     diffHpstate = true;
+267                 if(shared_data->htba !=
+268                         thread->readMiscRegNoEffect(MISCREG_HTBA))
+269                     diffHtba = true;
+270                 if(shared_data->pstate !=
+271                         thread->readMiscRegNoEffect(MISCREG_PSTATE))
+272                     diffPstate = true;
+273                 //if(shared_data->y !=
+274                 //        thread->readMiscRegNoEffect(MISCREG_Y))
+275                 if(shared_data->y !=
+276                         thread->readIntReg(NumIntArchRegs + 1))
+277                     diffY = true;
+278                 if(shared_data->fsr !=
+279                         thread->readMiscRegNoEffect(MISCREG_FSR)) {
+280                     diffFsr = true;
+281                     if (mbits(shared_data->fsr, 63,10) ==
+282                             mbits(thread->readMiscRegNoEffect(MISCREG_FSR),
+283                                 63,10)) {
+284                         thread->setMiscRegNoEffect(MISCREG_FSR,
+285                                 shared_data->fsr);
+286                         diffFsr = false;
+287                     }
+288                 }
+289                 //if(shared_data->ccr !=
+290                 //        thread->readMiscRegNoEffect(MISCREG_CCR))
+291                 if(shared_data->ccr !=
+292                         thread->readIntReg(NumIntArchRegs + 2))
+293                     diffCcr = true;
+294                 if(shared_data->gl !=
+295                         thread->readMiscRegNoEffect(MISCREG_GL))
+296                     diffGl = true;
+297                 if(shared_data->asi !=
+298                         thread->readMiscRegNoEffect(MISCREG_ASI))
+299                     diffAsi = true;
+300                 if(shared_data->pil !=
+301                         thread->readMiscRegNoEffect(MISCREG_PIL))
+302                     diffPil = true;
+303                 if(shared_data->cwp !=
+304                         thread->readMiscRegNoEffect(MISCREG_CWP))
+305                     diffCwp = true;
+306                 //if(shared_data->cansave !=
+307                 //        thread->readMiscRegNoEffect(MISCREG_CANSAVE))
+308                 if(shared_data->cansave !=
+309                         thread->readIntReg(NumIntArchRegs + 3))
+310                     diffCansave = true;
+311                 //if(shared_data->canrestore !=
+312                 //        thread->readMiscRegNoEffect(MISCREG_CANRESTORE))
+313                 if(shared_data->canrestore !=
+314                         thread->readIntReg(NumIntArchRegs + 4))
+315                     diffCanrestore = true;
+316                 //if(shared_data->otherwin !=
+317                 //        thread->readMiscRegNoEffect(MISCREG_OTHERWIN))
+318                 if(shared_data->otherwin !=
+319                         thread->readIntReg(NumIntArchRegs + 6))
+320                     diffOtherwin = true;
+321                 //if(shared_data->cleanwin !=
+322                 //        thread->readMiscRegNoEffect(MISCREG_CLEANWIN))
+323                 if(shared_data->cleanwin !=
+324                         thread->readIntReg(NumIntArchRegs + 5))
+325                     diffCleanwin = true;
+326 
+327                 for (int i = 0; i < 64; i++) {
+328                     if (shared_data->itb[i] !=
+329                             thread->getITBPtr()->TteRead(i))
+330                         diffTlb = true;
+331                     if (shared_data->dtb[i] !=
+332                             thread->getDTBPtr()->TteRead(i))
+333                         diffTlb = true;
+334                 }
+335 
+336                 if (diffPC || diffCC || diffInst ||
+337                     diffIntRegs || diffFpRegs ||
+338                     diffTpc || diffTnpc || diffTstate || diffTt ||
+339                     diffHpstate || diffHtstate || diffHtba ||
+340                     diffPstate || diffY || diffCcr || diffTl || diffFsr ||
+341                     diffGl || diffAsi || diffPil || diffCwp ||
+342                     diffCansave || diffCanrestore ||
+343                     diffOtherwin || diffCleanwin || diffTlb) {
+344 
+345                     outs << "Differences found between M5 and Legion:";
+346                     if (diffPC)
+347                         outs << " [PC]";
+348                     if (diffCC)
+349                         outs << " [CC]";
+350                     if (diffInst)
+351                         outs << " [Instruction]";
+352                     if (diffIntRegs)
+353                         outs << " [IntRegs]";
+354                     if (diffFpRegs)
+355                         outs << " [FpRegs]";
+356                     if (diffTpc)
+357                         outs << " [Tpc]";
+358                     if (diffTnpc)
+359                         outs << " [Tnpc]";
+360                     if (diffTstate)
+361                         outs << " [Tstate]";
+362                     if (diffTt)
+363                         outs << " [Tt]";
+364                     if (diffHpstate)
+365                         outs << " [Hpstate]";
+366                     if (diffHtstate)
+367                         outs << " [Htstate]";
+368                     if (diffHtba)
+369                         outs << " [Htba]";
+370                     if (diffPstate)
+371                         outs << " [Pstate]";
+372                     if (diffY)
+373                         outs << " [Y]";
+374                     if (diffFsr)
+375                         outs << " [FSR]";
+376                     if (diffCcr)
+377                         outs << " [Ccr]";
+378                     if (diffTl)
+379                         outs << " [Tl]";
+380                     if (diffGl)
+381                         outs << " [Gl]";
+382                     if (diffAsi)
+383                         outs << " [Asi]";
+384                     if (diffPil)
+385                         outs << " [Pil]";
+386                     if (diffCwp)
+387                         outs << " [Cwp]";
+388                     if (diffCansave)
+389                         outs << " [Cansave]";
+390                     if (diffCanrestore)
+391                         outs << " [Canrestore]";
+392                     if (diffOtherwin)
+393                         outs << " [Otherwin]";
+394                     if (diffCleanwin)
+395                         outs << " [Cleanwin]";
+396                     if (diffTlb)
+397                         outs << " [Tlb]";
+398                     outs << endl << endl;
+399 
+400                     outs << right << setfill(' ') << setw(15)
+401                          << "M5 PC: " << "0x"<< setw(16) << setfill('0')
+402                          << hex << m5Pc << endl;
+403                     outs << setfill(' ') << setw(15)
+404                          << "Legion PC: " << "0x"
+405                          << setw(16) << setfill('0') << hex
+406                          << lgnPc << endl << endl;
+407 
+408                     outs << right << setfill(' ') << setw(15)
+409                          << "M5 CC: " << "0x"
+410                          << setw(16) << setfill('0') << hex
+411                          << thread->getCpuPtr()->instCount() << endl;
+412                     outs << setfill(' ') << setw(15)
+413                          << "Legion CC: " << "0x"
+414                          << setw(16) << setfill('0') << hex
+415                          << shared_data->cycle_count << endl << endl;
+416 
+417                     outs << setfill(' ') << setw(15)
+418                          << "M5 Inst: " << "0x"
+419                          << setw(8) << setfill('0') << hex
+420                          << staticInst->machInst
+421                          << staticInst->disassemble(m5Pc, debugSymbolTable)
+422                          << endl;
+423 
+424                     TheISA::Decoder *decoder = thread->getDecoderPtr();
+425                     decoder->moreBytes(m5Pc, m5Pc, shared_data->instruction);
+426 
+427                     assert(decoder->instReady());
+428 
+429                     PCState tempPC = pc;
+430                     StaticInstPtr legionInst = decoder->decode(tempPC);
+431                     outs << setfill(' ') << setw(15)
+432                          << " Legion Inst: "
+433                          << "0x" << setw(8) << setfill('0') << hex
+434                          << shared_data->instruction
+435                          << legionInst->disassemble(lgnPc, debugSymbolTable)
+436                          << endl << endl;
+437 
+438                     printSectionHeader(outs, "General State");
+439                     printColumnLabels(outs);
+440                     printRegPair(outs, "HPstate",
+441                             thread->readMiscRegNoEffect(MISCREG_HPSTATE),
+442                             shared_data->hpstate | (1 << 11));
+443                     printRegPair(outs, "Htba",
+444                             thread->readMiscRegNoEffect(MISCREG_HTBA),
+445                             shared_data->htba);
+446                     printRegPair(outs, "Pstate",
+447                             thread->readMiscRegNoEffect(MISCREG_PSTATE),
+448                             shared_data->pstate);
+449                     printRegPair(outs, "Y",
+450                             //thread->readMiscRegNoEffect(MISCREG_Y),
+451                             thread->readIntReg(NumIntArchRegs + 1),
+452                             shared_data->y);
+453                     printRegPair(outs, "FSR",
+454                             thread->readMiscRegNoEffect(MISCREG_FSR),
+455                             shared_data->fsr);
+456                     printRegPair(outs, "Ccr",
+457                             //thread->readMiscRegNoEffect(MISCREG_CCR),
+458                             thread->readIntReg(NumIntArchRegs + 2),
+459                             shared_data->ccr);
+460                     printRegPair(outs, "Tl",
+461                             thread->readMiscRegNoEffect(MISCREG_TL),
+462                             shared_data->tl);
+463                     printRegPair(outs, "Gl",
+464                             thread->readMiscRegNoEffect(MISCREG_GL),
+465                             shared_data->gl);
+466                     printRegPair(outs, "Asi",
+467                             thread->readMiscRegNoEffect(MISCREG_ASI),
+468                             shared_data->asi);
+469                     printRegPair(outs, "Pil",
+470                             thread->readMiscRegNoEffect(MISCREG_PIL),
+471                             shared_data->pil);
+472                     printRegPair(outs, "Cwp",
+473                             thread->readMiscRegNoEffect(MISCREG_CWP),
+474                             shared_data->cwp);
+475                     printRegPair(outs, "Cansave",
+476                             //thread->readMiscRegNoEffect(MISCREG_CANSAVE),
+477                             thread->readIntReg(NumIntArchRegs + 3),
+478                             shared_data->cansave);
+479                     printRegPair(outs, "Canrestore",
+480                             //thread->readMiscRegNoEffect(MISCREG_CANRESTORE),
+481                             thread->readIntReg(NumIntArchRegs + 4),
+482                             shared_data->canrestore);
+483                     printRegPair(outs, "Otherwin",
+484                             //thread->readMiscRegNoEffect(MISCREG_OTHERWIN),
+485                             thread->readIntReg(NumIntArchRegs + 6),
+486                             shared_data->otherwin);
+487                     printRegPair(outs, "Cleanwin",
+488                             //thread->readMiscRegNoEffect(MISCREG_CLEANWIN),
+489                             thread->readIntReg(NumIntArchRegs + 5),
+490                             shared_data->cleanwin);
+491                     outs << endl;
+492                     for (int i = 1; i <= MaxTL; i++) {
+493                         printLevelHeader(outs, i);
+494                         printColumnLabels(outs);
+495                         thread->setMiscRegNoEffect(MISCREG_TL, i);
+496                         printRegPair(outs, "Tpc",
+497                                 thread->readMiscRegNoEffect(MISCREG_TPC),
+498                                 shared_data->tpc[i-1]);
+499                         printRegPair(outs, "Tnpc",
+500                                 thread->readMiscRegNoEffect(MISCREG_TNPC),
+501                                 shared_data->tnpc[i-1]);
+502                         printRegPair(outs, "Tstate",
+503                                 thread->readMiscRegNoEffect(MISCREG_TSTATE),
+504                                 shared_data->tstate[i-1]);
+505                         printRegPair(outs, "Tt",
+506                                 thread->readMiscRegNoEffect(MISCREG_TT),
+507                                 shared_data->tt[i-1]);
+508                         printRegPair(outs, "Htstate",
+509                                 thread->readMiscRegNoEffect(MISCREG_HTSTATE),
+510                                 shared_data->htstate[i-1]);
+511                     }
+512                     thread->setMiscRegNoEffect(MISCREG_TL, oldTl);
+513                     outs << endl;
+514 
+515                     printSectionHeader(outs, "General Purpose Registers");
+516                     static const char * regtypes[4] =
+517                         {"%g", "%o", "%l", "%i"};
+518                     for(int y = 0; y < 4; y++) {
+519                         for(int x = 0; x < 8; x++) {
+520                             char label[8];
+521                             sprintf(label, "%s%d", regtypes[y], x);
+522                             printRegPair(outs, label,
+523                                     thread->readIntReg(y*8+x),
+524                                     shared_data->intregs[y*8+x]);
+525                         }
+526                     }
+527                     if (diffFpRegs) {
+528                         for (int x = 0; x < 32; x++) {
+529                             char label[8];
+530                             sprintf(label, "%%f%d", x);
+531                             printRegPair(outs, label,
+532                                 thread->readFloatRegBits(x*2),
+533                                 shared_data->fpregs[x]);
+534                         }
+535                     }
+536                     if (diffTlb) {
+537                         printColumnLabels(outs);
+538                         char label[9];
+539                         for (int x = 0; x < 64; x++) {
+540                             if (shared_data->itb[x] !=
+541                                     ULL(0xFFFFFFFFFFFFFFFF) ||
+542                                 thread->getITBPtr()->TteRead(x) !=
+543                                 ULL(0xFFFFFFFFFFFFFFFF)) {
+544                                     sprintf(label, "I-TLB:%02d", x);
+545                                     printRegPair(outs, label,
+546                                             thread->getITBPtr()->TteRead(x),
+547                                             shared_data->itb[x]);
+548                             }
+549                         }
+550                         for (int x = 0; x < 64; x++) {
+551                             if (shared_data->dtb[x] !=
+552                                     ULL(0xFFFFFFFFFFFFFFFF) ||
+553                                 thread->getDTBPtr()->TteRead(x) !=
+554                                 ULL(0xFFFFFFFFFFFFFFFF))  {
+555                                     sprintf(label, "D-TLB:%02d", x);
+556                                     printRegPair(outs, label,
+557                                             thread->getDTBPtr()->TteRead(x),
+558                                             shared_data->dtb[x]);
+559                             }
+560                         }
+561                         thread->getITBPtr()->dumpAll();
+562                         thread->getDTBPtr()->dumpAll();
+563                     }
+564 
+565                     diffcount++;
+566                     if (diffcount > 3)
+567                         fatal("Differences found between Legion and M5\n");
+568                 } else
+569                     diffcount = 0;
+570 
+571                 compared = true;
+572                 shared_data->flags = OWN_LEGION;
+573             }
+574         } // while
+575     } // if not microop
+576 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/\hyperlink{legiontrace_8hh}{legiontrace.hh}\item 
+cpu/\hyperlink{legiontrace_8cc}{legiontrace.cc}\end{DoxyCompactItemize}

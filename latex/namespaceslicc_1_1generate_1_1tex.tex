@@ -1,0 +1,66 @@
+\hypertarget{namespaceslicc_1_1generate_1_1tex}{
+\section{ネームスペース slicc::generate::tex}
+\label{namespaceslicc_1_1generate_1_1tex}\index{slicc::generate::tex@{slicc::generate::tex}}
+}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classslicc_1_1generate_1_1tex_1_1tex__formatter}{tex\_\-formatter}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespaceslicc_1_1generate_1_1tex_a792a4db29fef0d611deca70a36af9b3f}{printTexTable}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespaceslicc_1_1generate_1_1tex_a792a4db29fef0d611deca70a36af9b3f}{
+\index{slicc::generate::tex@{slicc::generate::tex}!printTexTable@{printTexTable}}
+\index{printTexTable@{printTexTable}!slicc::generate::tex@{slicc::generate::tex}}
+\subsubsection[{printTexTable}]{\setlength{\rightskip}{0pt plus 5cm}def slicc::generate::tex::printTexTable ( {\em sm}, \/   {\em code})}}
+\label{namespaceslicc_1_1generate_1_1tex_a792a4db29fef0d611deca70a36af9b3f}
+
+
+
+\begin{DoxyCode}
+34                            :
+35     tex = tex_formatter()
+36     tex(r'''
+37 %& latex
+38 \documentclass[12pt]{article}
+39 \usepackage{graphics}
+40 \begin{document}
+41 \begin{tabular}{|l||$<<"l" * len(sm.events)>>|} \hline
+42 ''')
+43 
+44     for event in sm.events:
+45         code(r" & \rotatebox{90}{$<<event.short>>}")
+46     tex(r'\\ \hline \hline')
+47 
+48     for state in sm.states:
+49         state_str = state.short
+50         for event in sm.events:
+51             state_str += ' & '
+52             trans = sm.get_transition(state, event)
+53             if trans:
+54                 actions = trans.getActionShorthands()
+55                 # FIXME: should compare index, not the string
+56                 if trans.getNextStateShorthand() != state.short:
+57                     nextState = trans.getNextStateShorthand()
+58                 else:
+59                     nextState = ""
+60                 state_str += actions
+61                 if nextState and actions:
+62                     state_str += '/'
+63                 state_str += nextState
+64         tex(r'$0 \\', state_str)
+65     tex(r'''
+66 \hline
+67 \end{tabular}
+68 \end{document}
+69 ''')
+70 
+71     code.append(tex)
+    code.append(tex)
+\end{DoxyCode}

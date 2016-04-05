@@ -1,0 +1,101 @@
+\hypertarget{classPowerISA_1_1PCDependentDisassembly}{
+\section{クラス PCDependentDisassembly}
+\label{classPowerISA_1_1PCDependentDisassembly}\index{PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}}
+}
+
+
+{\ttfamily \#include $<$branch.hh$>$}PCDependentDisassemblyに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classPowerISA_1_1PCDependentDisassembly}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPowerISA_1_1PCDependentDisassembly_a14ed7b5973f7faa16a2692e177b7b8e3}{PCDependentDisassembly} (const char $\ast$mnem, \hyperlink{classStaticInst_a5605d4fc727eae9e595325c90c0ec108}{ExtMachInst} \_\-machInst, OpClass \_\-\_\-opClass)
+\begin{DoxyCompactList}\small\item\em Constructor. \item\end{DoxyCompactList}\item 
+const std::string \& \hyperlink{classPowerISA_1_1PCDependentDisassembly_a8b5fcb5ee981f062dfbdd09d676922f6}{disassemble} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} pc, const SymbolTable $\ast$symtab) const 
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classPowerISA_1_1PCDependentDisassembly_a92e75fec0c774a50b26a771e76837a1d}{cachedPC}
+\begin{DoxyCompactList}\small\item\em Cached program counter from last disassembly. \item\end{DoxyCompactList}\item 
+const \hyperlink{classSymbolTable}{SymbolTable} $\ast$ \hyperlink{classPowerISA_1_1PCDependentDisassembly_a1caab72ff070063c1be05a93a7014546}{cachedSymtab}
+\begin{DoxyCompactList}\small\item\em Cached symbol table pointer from last disassembly. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Base class for instructions whose disassembly is not purely a function of the machine instruction (i.e., it depends on the PC). This class overrides the \hyperlink{classPowerISA_1_1PCDependentDisassembly_a8b5fcb5ee981f062dfbdd09d676922f6}{disassemble()} method to check the PC and symbol table values before re-\/using a cached disassembly string. This is necessary for branches and jumps, where the disassembly string includes the target address (which may depend on the PC and/or symbol table). 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPowerISA_1_1PCDependentDisassembly_a14ed7b5973f7faa16a2692e177b7b8e3}{
+\index{PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}!PCDependentDisassembly@{PCDependentDisassembly}}
+\index{PCDependentDisassembly@{PCDependentDisassembly}!PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}}
+\subsubsection[{PCDependentDisassembly}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PCDependentDisassembly} (const char $\ast$ {\em mnem}, \/  {\bf ExtMachInst} {\em \_\-machInst}, \/  OpClass {\em \_\-\_\-opClass})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classPowerISA_1_1PCDependentDisassembly_a14ed7b5973f7faa16a2692e177b7b8e3}
+
+
+Constructor. 
+
+
+\begin{DoxyCode}
+59         : PowerStaticInst(mnem, _machInst, __opClass),
+60           cachedPC(0), cachedSymtab(0)
+61     {
+62     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPowerISA_1_1PCDependentDisassembly_a8b5fcb5ee981f062dfbdd09d676922f6}{
+\index{PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}!disassemble@{disassemble}}
+\index{disassemble@{disassemble}!PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}}
+\subsubsection[{disassemble}]{\setlength{\rightskip}{0pt plus 5cm}const std::string \& disassemble ({\bf Addr} {\em pc}, \/  const SymbolTable $\ast$ {\em symtab}) const\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classPowerISA_1_1PCDependentDisassembly_a8b5fcb5ee981f062dfbdd09d676922f6}
+Return string representation of disassembled instruction. The default version of this function will call the internal virtual \hyperlink{classPowerISA_1_1PowerStaticInst_a95d323a22a5f07e14d6b4c9385a91896}{generateDisassembly()} function to get the string, then cache it in \hyperlink{classStaticInst_aca407a93c3360ff06d5d52f92583a6e1}{cachedDisassembly}. If the disassembly should not be cached, this function should be overridden directly. 
+
+\hyperlink{classStaticInst_acce45da56f8154aec68848514c4f819f}{StaticInst}を再定義しています。
+
+
+\begin{DoxyCode}
+39 {
+40     if (!cachedDisassembly ||
+41         pc != cachedPC || symtab != cachedSymtab)
+42     {
+43         if (cachedDisassembly)
+44             delete cachedDisassembly;
+45 
+46         cachedDisassembly =
+47             new std::string(generateDisassembly(pc, symtab));
+48         cachedPC = pc;
+49         cachedSymtab = symtab;
+50     }
+51 
+52     return *cachedDisassembly;
+53 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPowerISA_1_1PCDependentDisassembly_a92e75fec0c774a50b26a771e76837a1d}{
+\index{PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}!cachedPC@{cachedPC}}
+\index{cachedPC@{cachedPC}!PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}}
+\subsubsection[{cachedPC}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf cachedPC}\hspace{0.3cm}{\ttfamily  \mbox{[}mutable, protected\mbox{]}}}}
+\label{classPowerISA_1_1PCDependentDisassembly_a92e75fec0c774a50b26a771e76837a1d}
+
+
+Cached program counter from last disassembly. \hypertarget{classPowerISA_1_1PCDependentDisassembly_a1caab72ff070063c1be05a93a7014546}{
+\index{PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}!cachedSymtab@{cachedSymtab}}
+\index{cachedSymtab@{cachedSymtab}!PowerISA::PCDependentDisassembly@{PowerISA::PCDependentDisassembly}}
+\subsubsection[{cachedSymtab}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf SymbolTable}$\ast$ {\bf cachedSymtab}\hspace{0.3cm}{\ttfamily  \mbox{[}mutable, protected\mbox{]}}}}
+\label{classPowerISA_1_1PCDependentDisassembly_a1caab72ff070063c1be05a93a7014546}
+
+
+Cached symbol table pointer from last disassembly. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/power/insts/\hyperlink{power_2insts_2branch_8hh}{branch.hh}\item 
+arch/power/insts/\hyperlink{branch_8cc}{branch.cc}\end{DoxyCompactItemize}

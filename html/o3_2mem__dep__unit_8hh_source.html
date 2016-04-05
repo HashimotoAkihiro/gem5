@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/mem_dep_unit.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/mem_dep_unit.hh</h1><a href="o3_2mem__dep__unit_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __CPU_O3_MEM_DEP_UNIT_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_MEM_DEP_UNIT_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &lt;set&gt;</span>
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="hashmap_8hh.html">base/hashmap.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="refcnt_8hh.html">base/refcnt.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;debug/MemDepUnit.hh&quot;</span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a><a class="code" href="structSNHash.html">00055</a> <span class="keyword">struct </span><a class="code" href="structSNHash.html">SNHash</a> {
+<a name="l00056"></a><a class="code" href="structSNHash.html#a75f8fc845b3130c527cc477708efe117">00056</a>     <span class="keywordtype">size_t</span> <a class="code" href="structSNHash.html#a75f8fc845b3130c527cc477708efe117">operator() </a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;seq_num)<span class="keyword"> const </span>{
+<a name="l00057"></a>00057         <span class="keywordtype">unsigned</span> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a> = (unsigned)seq_num;
+<a name="l00058"></a>00058         <span class="keywordtype">unsigned</span> hash = (((a &gt;&gt; 14) ^ ((a &gt;&gt; 2) &amp; 0xffff))) &amp; 0x7FFFFFFF;
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060         <span class="keywordflow">return</span> hash;
+<a name="l00061"></a>00061     }
+<a name="l00062"></a>00062 };
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064 <span class="keyword">struct </span>DerivO3CPUParams;
+<a name="l00065"></a>00065 
+<a name="l00066"></a>00066 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00067"></a>00067 <span class="keyword">class </span><a class="code" href="classInstructionQueue.html">InstructionQueue</a>;
+<a name="l00068"></a>00068 
+<a name="l00080"></a>00080 <span class="keyword">template</span> &lt;<span class="keyword">class</span> MemDepPred, <span class="keyword">class</span> Impl&gt;
+<a name="l00081"></a>00081 <span class="keyword">class </span><a class="code" href="classMemDepUnit.html">MemDepUnit</a>
+<a name="l00082"></a>00082 {
+<a name="l00083"></a>00083   <span class="keyword">protected</span>:
+<a name="l00084"></a><a class="code" href="classMemDepUnit.html#aaf2ed934b37cbbd236fdd1b01a5f5005">00084</a>     std::string <a class="code" href="classMemDepUnit.html#aaf2ed934b37cbbd236fdd1b01a5f5005">_name</a>;
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086   <span class="keyword">public</span>:
+<a name="l00087"></a><a class="code" href="classMemDepUnit.html#a028ce10889c5f6450239d9e9a7347976">00087</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classRefCountingPtr.html">DynInstPtr</a>;
+<a name="l00088"></a>00088 
+<a name="l00090"></a>00090     <a class="code" href="classMemDepUnit.html#a6a36e6c9f97f9e122c96398a39f53c7e">MemDepUnit</a>();
+<a name="l00091"></a>00091 
+<a name="l00093"></a>00093     <a class="code" href="classMemDepUnit.html#a6a36e6c9f97f9e122c96398a39f53c7e">MemDepUnit</a>(DerivO3CPUParams *params);
+<a name="l00094"></a>00094 
+<a name="l00096"></a>00096     <a class="code" href="classMemDepUnit.html#a45331beda5c09d8c776b6bd7c1814b59">~MemDepUnit</a>();
+<a name="l00097"></a>00097 
+<a name="l00099"></a><a class="code" href="classMemDepUnit.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00099</a>     std::string <a class="code" href="classMemDepUnit.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classMemDepUnit.html#aaf2ed934b37cbbd236fdd1b01a5f5005">_name</a>; }
+<a name="l00100"></a>00100 
+<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classResource.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>(DerivO3CPUParams *params, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00103"></a>00103 
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00106"></a>00106 
+<a name="l00108"></a>00108     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a0240eb42fa57fe5d3788093f62b77347">drainSanityCheck</a>() <span class="keyword">const</span>;
+<a name="l00109"></a>00109 
+<a name="l00111"></a>00111     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a8674059ce345e23aac5086b2c3e24a43">takeOverFrom</a>();
+<a name="l00112"></a>00112 
+<a name="l00114"></a>00114     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a9f2164f7d32d0906f0818ac724921840">setIQ</a>(<a class="code" href="classInstructionQueue.html">InstructionQueue&lt;Impl&gt;</a> *iq_ptr);
+<a name="l00115"></a>00115 
+<a name="l00117"></a>00117     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a773e88db1aa010c3755e603493bf40ec">insert</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00118"></a>00118 
+<a name="l00120"></a>00120     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#ad7036279ba36a8cfaf65554d1a5dbaac">insertNonSpec</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00121"></a>00121 
+<a name="l00123"></a>00123     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#ae556f19566bae9c4f55350eab17abacd">insertBarrier</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;barr_inst);
+<a name="l00124"></a>00124 
+<a name="l00126"></a>00126     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a386af6dbeff30f5152fd5dc076143ff6">regsReady</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00127"></a>00127 
+<a name="l00129"></a>00129     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#aa85e9b95e406478a19cb070b13b89c85">nonSpecInstReady</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00130"></a>00130 
+<a name="l00132"></a>00132     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a6a8d5eec636c2815cb1bc7ca3c467412">reschedule</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00133"></a>00133 
+<a name="l00137"></a>00137     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#ace9b968c62d08a19c21a17b57bfb52fe">replay</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00138"></a>00138 
+<a name="l00140"></a>00140     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a4970c417e5fac50b9a28caea195717c3">completed</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00141"></a>00141 
+<a name="l00143"></a>00143     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a9debd021c4b533f5bbd174890037d2dd">completeBarrier</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00144"></a>00144 
+<a name="l00146"></a>00146     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a84834d31005dcede47e334bfee5b52d3">wakeDependents</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00147"></a>00147 
+<a name="l00151"></a>00151     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a74283dfde2ab06c84e10bd85000c168b">squash</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;squashed_num, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00152"></a>00152 
+<a name="l00154"></a>00154     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#aac3ab1b2d6cc44bd1e7c42bf39538316">violation</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;store_inst, <a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;violating_load);
+<a name="l00155"></a>00155 
+<a name="l00157"></a>00157     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a6abd0e2390123c2fe82ab377b76b5347">issue</a>(<a class="code" href="classMemDepUnit.html#af9d0c8a46736ba6aa2d8bb94da1a5e73">DynInstPtr</a> &amp;inst);
+<a name="l00158"></a>00158 
+<a name="l00160"></a>00160     <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#a3d1dae45e8e0b5cf7c1f4f8c796d070e">dumpLists</a>();
+<a name="l00161"></a>00161 
+<a name="l00162"></a>00162   <span class="keyword">private</span>:
+<a name="l00163"></a><a class="code" href="classMemDepUnit.html#a184cb829e22cc656acb41864f68f51ea">00163</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classMemDepUnit.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a>;
+<a name="l00164"></a>00164 
+<a name="l00165"></a><a class="code" href="classMemDepUnit.html#a3ebb51dea989551d10194eb1b09cff41">00165</a>     <span class="keyword">class </span><a class="code" href="classMemDepUnit_1_1MemDepEntry.html">MemDepEntry</a>;
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167     <span class="keyword">typedef</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;MemDepEntry&gt;</a> <a class="code" href="classRefCountingPtr.html">MemDepEntryPtr</a>;
+<a name="l00168"></a>00168 
+<a name="l00173"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html">00173</a>     <span class="keyword">class </span><a class="code" href="classMemDepUnit_1_1MemDepEntry.html">MemDepEntry</a> : <span class="keyword">public</span> <a class="code" href="classRefCounted.html">RefCounted</a> {
+<a name="l00174"></a>00174       <span class="keyword">public</span>:
+<a name="l00176"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#ad9b3189e351f38b82275ea8605f6e3b3">00176</a>         <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#ad9b3189e351f38b82275ea8605f6e3b3">MemDepEntry</a>(<a class="code" href="classRefCountingPtr.html">DynInstPtr</a> &amp;new_inst)
+<a name="l00177"></a>00177             : <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>(new_inst), <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#afc55485f8d2b3483d6b56df95ffc0156">regsReady</a>(false), <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a1f5ab91d27c3ebd7a0bdc85c87030126">memDepReady</a>(false),
+<a name="l00178"></a>00178               <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a8c06e370b709d689e392a4b7b53b47c5">completed</a>(false), <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#ab80f932400baee226095b8eb35f92383">squashed</a>(false)
+<a name="l00179"></a>00179         {
+<a name="l00180"></a>00180 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00181"></a>00181 <span class="preprocessor"></span>            ++memdep_count;
+<a name="l00182"></a>00182 
+<a name="l00183"></a>00183             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classMemDepUnit.html">MemDepUnit</a>, <span class="stringliteral">&quot;Memory dependency entry created.  &quot;</span>
+<a name="l00184"></a>00184                     <span class="stringliteral">&quot;memdep_count=%i %s\n&quot;</span>, memdep_count, <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>-&gt;pcState());
+<a name="l00185"></a>00185 <span class="preprocessor">#endif</span>
+<a name="l00186"></a>00186 <span class="preprocessor"></span>        }
+<a name="l00187"></a>00187 
+<a name="l00189"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a6b10def69437a251be0b0666daa22114">00189</a>         <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a6b10def69437a251be0b0666daa22114">~MemDepEntry</a>()
+<a name="l00190"></a>00190         {
+<a name="l00191"></a>00191             <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#acb5f13b3085f8fd62136e9118aaa8e81">dependInsts</a>.size(); ++<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) {
+<a name="l00192"></a>00192                 <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#acb5f13b3085f8fd62136e9118aaa8e81">dependInsts</a>[<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>] = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00193"></a>00193             }
+<a name="l00194"></a>00194 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00195"></a>00195 <span class="preprocessor"></span>            --memdep_count;
+<a name="l00196"></a>00196 
+<a name="l00197"></a>00197             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classMemDepUnit.html">MemDepUnit</a>, <span class="stringliteral">&quot;Memory dependency entry deleted.  &quot;</span>
+<a name="l00198"></a>00198                     <span class="stringliteral">&quot;memdep_count=%i %s\n&quot;</span>, memdep_count, <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>-&gt;pcState());
+<a name="l00199"></a>00199 <span class="preprocessor">#endif</span>
+<a name="l00200"></a>00200 <span class="preprocessor"></span>        }
+<a name="l00201"></a>00201 
+<a name="l00203"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00203</a>         std::string <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="stringliteral">&quot;memdepentry&quot;</span>; }
+<a name="l00204"></a>00204 
+<a name="l00206"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">00206</a>         <a class="code" href="classRefCountingPtr.html">DynInstPtr</a> <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>;
+<a name="l00207"></a>00207 
+<a name="l00209"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#ac8188604da9551279a59cfbbc6683fdb">00209</a>         <a class="code" href="classMemDepUnit.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#ac8188604da9551279a59cfbbc6683fdb">listIt</a>;
+<a name="l00210"></a>00210 
+<a name="l00212"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#acb5f13b3085f8fd62136e9118aaa8e81">00212</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;MemDepEntryPtr&gt;</a> <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#acb5f13b3085f8fd62136e9118aaa8e81">dependInsts</a>;
+<a name="l00213"></a>00213 
+<a name="l00215"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#afc55485f8d2b3483d6b56df95ffc0156">00215</a>         <span class="keywordtype">bool</span> <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#afc55485f8d2b3483d6b56df95ffc0156">regsReady</a>;
+<a name="l00217"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a1f5ab91d27c3ebd7a0bdc85c87030126">00217</a>         <span class="keywordtype">bool</span> <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a1f5ab91d27c3ebd7a0bdc85c87030126">memDepReady</a>;
+<a name="l00219"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a8c06e370b709d689e392a4b7b53b47c5">00219</a>         <span class="keywordtype">bool</span> <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#a8c06e370b709d689e392a4b7b53b47c5">completed</a>;
+<a name="l00221"></a><a class="code" href="classMemDepUnit_1_1MemDepEntry.html#ab80f932400baee226095b8eb35f92383">00221</a>         <span class="keywordtype">bool</span> <a class="code" href="classMemDepUnit_1_1MemDepEntry.html#ab80f932400baee226095b8eb35f92383">squashed</a>;
+<a name="l00222"></a>00222 
+<a name="l00224"></a>00224 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00225"></a>00225 <span class="preprocessor"></span>        <span class="keyword">static</span> <span class="keywordtype">int</span> memdep_count;
+<a name="l00226"></a>00226         <span class="keyword">static</span> <span class="keywordtype">int</span> memdep_insert;
+<a name="l00227"></a>00227         <span class="keyword">static</span> <span class="keywordtype">int</span> memdep_erase;
+<a name="l00228"></a>00228 <span class="preprocessor">#endif</span>
+<a name="l00229"></a>00229 <span class="preprocessor"></span>    };
+<a name="l00230"></a>00230 
+<a name="l00232"></a>00232     <span class="keyword">inline</span> <a class="code" href="classRefCountingPtr.html">MemDepEntryPtr</a> &amp;<a class="code" href="classMemDepUnit.html#a7c1fadef5550f6fd9382259565101bec">findInHash</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">DynInstPtr</a> &amp;inst);
+<a name="l00233"></a>00233 
+<a name="l00235"></a>00235     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classMemDepUnit.html#ac1e743ad9d95132dd76847a784259e11">moveToReady</a>(<a class="code" href="classRefCountingPtr.html">MemDepEntryPtr</a> &amp;ready_inst_entry);
+<a name="l00236"></a>00236 
+<a name="l00237"></a><a class="code" href="classMemDepUnit.html#a0552beec197948e07bf69cb6ea45407e">00237</a>     <span class="keyword">typedef</span> m5::hash_map&lt;InstSeqNum, MemDepEntryPtr, SNHash&gt; <a class="code" href="classMemDepUnit.html#a0552beec197948e07bf69cb6ea45407e">MemDepHash</a>;
+<a name="l00238"></a>00238 
+<a name="l00239"></a><a class="code" href="classMemDepUnit.html#a4579af5e07d66f86f6e8aa193e0f926a">00239</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> MemDepHash::iterator <a class="code" href="classMemDepUnit.html#a4579af5e07d66f86f6e8aa193e0f926a">MemDepHashIt</a>;
+<a name="l00240"></a>00240 
+<a name="l00242"></a><a class="code" href="classMemDepUnit.html#ac0b12f9eec0e0c6b639c7370177e5c36">00242</a>     <a class="code" href="classMemDepUnit.html#a0552beec197948e07bf69cb6ea45407e">MemDepHash</a> <a class="code" href="classMemDepUnit.html#ac0b12f9eec0e0c6b639c7370177e5c36">memDepHash</a>;
+<a name="l00243"></a>00243 
+<a name="l00245"></a><a class="code" href="classMemDepUnit.html#a7f2828a4f877a4a4d4b85a6788536b82">00245</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classMemDepUnit.html#a7f2828a4f877a4a4d4b85a6788536b82">instList</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00246"></a>00246 
+<a name="l00248"></a><a class="code" href="classMemDepUnit.html#a4c7e8849e2a4606478c2e93f9dcb6c54">00248</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classMemDepUnit.html#a4c7e8849e2a4606478c2e93f9dcb6c54">instsToReplay</a>;
+<a name="l00249"></a>00249 
+<a name="l00255"></a><a class="code" href="classMemDepUnit.html#a2b12193ddce173c34c8c54e0201925bc">00255</a>     MemDepPred <a class="code" href="classMemDepUnit.html#a2b12193ddce173c34c8c54e0201925bc">depPred</a>;
+<a name="l00256"></a>00256 
+<a name="l00258"></a><a class="code" href="classMemDepUnit.html#a84cd010b1d5bb1d8a72a2603a9b58393">00258</a>     <span class="keywordtype">bool</span> <a class="code" href="classMemDepUnit.html#a84cd010b1d5bb1d8a72a2603a9b58393">loadBarrier</a>;
+<a name="l00260"></a><a class="code" href="classMemDepUnit.html#adbdb10ce572ac89847d1541d471f0be6">00260</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classMemDepUnit.html#adbdb10ce572ac89847d1541d471f0be6">loadBarrierSN</a>;
+<a name="l00262"></a><a class="code" href="classMemDepUnit.html#ac066575fbaeda40cc6b2017292dfb0bf">00262</a>     <span class="keywordtype">bool</span> <a class="code" href="classMemDepUnit.html#ac066575fbaeda40cc6b2017292dfb0bf">storeBarrier</a>;
+<a name="l00264"></a><a class="code" href="classMemDepUnit.html#ae3e16866c4d84194ff7f414f00d71e94">00264</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classMemDepUnit.html#ae3e16866c4d84194ff7f414f00d71e94">storeBarrierSN</a>;
+<a name="l00265"></a>00265 
+<a name="l00267"></a><a class="code" href="classMemDepUnit.html#ae1fd26993119273f381c42894e2672c6">00267</a>     <a class="code" href="classInstructionQueue.html">InstructionQueue&lt;Impl&gt;</a> *<a class="code" href="classMemDepUnit.html#ae1fd26993119273f381c42894e2672c6">iqPtr</a>;
+<a name="l00268"></a>00268 
+<a name="l00270"></a><a class="code" href="classMemDepUnit.html#a7441ef0865bcb3db9b8064dd7375c1ea">00270</a>     <span class="keywordtype">int</span> <a class="code" href="classMemDepUnit.html#a7441ef0865bcb3db9b8064dd7375c1ea">id</a>;
+<a name="l00271"></a>00271 
+<a name="l00273"></a><a class="code" href="classMemDepUnit.html#a7810bf3f4630c9898e404e7d46900ad5">00273</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classMemDepUnit.html#a7810bf3f4630c9898e404e7d46900ad5">insertedLoads</a>;
+<a name="l00275"></a><a class="code" href="classMemDepUnit.html#a5f8daf9e076650e5b9f2f9a6876a3bf7">00275</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classMemDepUnit.html#a5f8daf9e076650e5b9f2f9a6876a3bf7">insertedStores</a>;
+<a name="l00277"></a><a class="code" href="classMemDepUnit.html#ad5a10b8601553be6d0f3bfa3495dd5a5">00277</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classMemDepUnit.html#ad5a10b8601553be6d0f3bfa3495dd5a5">conflictingLoads</a>;
+<a name="l00279"></a><a class="code" href="classMemDepUnit.html#ab481d99d6034a2db5e14efd072448635">00279</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classMemDepUnit.html#ab481d99d6034a2db5e14efd072448635">conflictingStores</a>;
+<a name="l00280"></a>00280 };
+<a name="l00281"></a>00281 
+<a name="l00282"></a>00282 <span class="preprocessor">#endif // __CPU_O3_MEM_DEP_UNIT_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

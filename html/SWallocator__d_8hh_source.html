@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/network/garnet/fixed-pipeline/SWallocator_d.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/network/garnet/fixed-pipeline/SWallocator_d.hh</h1><a href="SWallocator__d_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2008 Princeton University</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Niket Agarwal</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __MEM_RUBY_NETWORK_GARNET_FIXED_PIPELINE_SW_ALLOCATOR_D_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_NETWORK_GARNET_FIXED_PIPELINE_SW_ALLOCATOR_D_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="Consumer_8hh.html">mem/ruby/common/Consumer.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="NetworkHeader_8hh.html">mem/ruby/network/garnet/NetworkHeader.hh</a>&quot;</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="keyword">class </span><a class="code" href="classRouter__d.html">Router_d</a>;
+<a name="l00041"></a>00041 <span class="keyword">class </span><a class="code" href="classInputUnit__d.html">InputUnit_d</a>;
+<a name="l00042"></a>00042 <span class="keyword">class </span><a class="code" href="classOutputUnit__d.html">OutputUnit_d</a>;
+<a name="l00043"></a>00043 
+<a name="l00044"></a><a class="code" href="classSWallocator__d.html">00044</a> <span class="keyword">class </span><a class="code" href="classSWallocator__d.html">SWallocator_d</a> : <span class="keyword">public</span> <a class="code" href="classConsumer.html">Consumer</a>
+<a name="l00045"></a>00045 {
+<a name="l00046"></a>00046   <span class="keyword">public</span>:
+<a name="l00047"></a>00047     <a class="code" href="classSWallocator__d.html#a596f26738ddedb9680507152eaeb3f5c">SWallocator_d</a>(<a class="code" href="classRouter__d.html">Router_d</a> *router);
+<a name="l00048"></a>00048     <span class="keywordtype">void</span> <a class="code" href="classSWallocator__d.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>();
+<a name="l00049"></a>00049     <span class="keywordtype">void</span> <a class="code" href="classSWallocator__d.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00050"></a>00050     <span class="keywordtype">void</span> <a class="code" href="classSWallocator__d.html#ac8b7aea8034854f208223b1c36fe1b68">clear_request_vector</a>();
+<a name="l00051"></a>00051     <span class="keywordtype">void</span> <a class="code" href="classSWallocator__d.html#a3312235aad1a35d2eb8dfe6b3a93d880">check_for_wakeup</a>();
+<a name="l00052"></a>00052     <span class="keywordtype">int</span> <a class="code" href="classSWallocator__d.html#afdff1bb4dda9168cb4bf8b78aa0cf9d8">get_vnet</a> (<span class="keywordtype">int</span> invc);
+<a name="l00053"></a><a class="code" href="classSWallocator__d.html#ac55fe386a101fbae38c716067c9966a0">00053</a>     <span class="keywordtype">void</span> <a class="code" href="classSWallocator__d.html#ac55fe386a101fbae38c716067c9966a0">print</a>(std::ostream&amp; out)<span class="keyword"> const </span>{};
+<a name="l00054"></a>00054     <span class="keywordtype">void</span> <a class="code" href="classSWallocator__d.html#ad8b8a8461af75f7a4d5bd0157ad99e20">arbitrate_inports</a>();
+<a name="l00055"></a>00055     <span class="keywordtype">void</span> <a class="code" href="classSWallocator__d.html#a275d37eb2473a7b01f806f9822a09657">arbitrate_outports</a>();
+<a name="l00056"></a>00056     <span class="keywordtype">bool</span> <a class="code" href="classSWallocator__d.html#ae08b6831390b7d551e176fe35de2bd38">is_candidate_inport</a>(<span class="keywordtype">int</span> inport, <span class="keywordtype">int</span> invc);
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058     <span class="keyword">inline</span> <span class="keywordtype">double</span>
+<a name="l00059"></a><a class="code" href="classSWallocator__d.html#a23b4a72d39fe6a47f8e896c3ba267426">00059</a>     <a class="code" href="classSWallocator__d.html#a23b4a72d39fe6a47f8e896c3ba267426">get_local_arbit_count</a>()
+<a name="l00060"></a>00060     {
+<a name="l00061"></a>00061         <span class="keywordflow">return</span> <a class="code" href="classSWallocator__d.html#a5b24950c88c061e1744f0e0c80546a5a">m_local_arbiter_activity</a>;
+<a name="l00062"></a>00062     }
+<a name="l00063"></a>00063     <span class="keyword">inline</span> <span class="keywordtype">double</span>
+<a name="l00064"></a><a class="code" href="classSWallocator__d.html#aac435b881c9b265abadc8989c48dab3f">00064</a>     <a class="code" href="classSWallocator__d.html#aac435b881c9b265abadc8989c48dab3f">get_global_arbit_count</a>()
+<a name="l00065"></a>00065     {
+<a name="l00066"></a>00066         <span class="keywordflow">return</span> <a class="code" href="classSWallocator__d.html#af7d1f06c927d3409642fcf9ecfb7eae5">m_global_arbiter_activity</a>;
+<a name="l00067"></a>00067     }
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069   <span class="keyword">private</span>:
+<a name="l00070"></a><a class="code" href="classSWallocator__d.html#ae83c00a45968faba20d5c3bc92891fee">00070</a>     <span class="keywordtype">int</span> <a class="code" href="classSWallocator__d.html#a260af5f608c447554a07e3d62bf6b9f7">m_num_inports</a>, <a class="code" href="classSWallocator__d.html#ae83c00a45968faba20d5c3bc92891fee">m_num_outports</a>;
+<a name="l00071"></a><a class="code" href="classSWallocator__d.html#a2d66b8cad5144408ed492eeff4d37c2f">00071</a>     <span class="keywordtype">int</span> <a class="code" href="classSWallocator__d.html#a2e1a9213321dfa0386cdedaf6fc22996">m_num_vcs</a>, <a class="code" href="classSWallocator__d.html#a2d66b8cad5144408ed492eeff4d37c2f">m_vc_per_vnet</a>;
+<a name="l00072"></a>00072 
+<a name="l00073"></a><a class="code" href="classSWallocator__d.html#a5b24950c88c061e1744f0e0c80546a5a">00073</a>     <span class="keywordtype">double</span> <a class="code" href="classSWallocator__d.html#a5b24950c88c061e1744f0e0c80546a5a">m_local_arbiter_activity</a>, <a class="code" href="classSWallocator__d.html#af7d1f06c927d3409642fcf9ecfb7eae5">m_global_arbiter_activity</a>;
+<a name="l00074"></a>00074 
+<a name="l00075"></a><a class="code" href="classSWallocator__d.html#a81d53a65b375007289068e764da769d8">00075</a>     <a class="code" href="classRouter__d.html">Router_d</a> *<a class="code" href="classSWallocator__d.html#a81d53a65b375007289068e764da769d8">m_router</a>;
+<a name="l00076"></a><a class="code" href="classSWallocator__d.html#a933149a71bec4a9e88a7da48e2a101ff">00076</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classSWallocator__d.html#a933149a71bec4a9e88a7da48e2a101ff">m_round_robin_outport</a>;
+<a name="l00077"></a><a class="code" href="classSWallocator__d.html#a7861d7c128705c720f1270b25ce53f6a">00077</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classSWallocator__d.html#a7861d7c128705c720f1270b25ce53f6a">m_round_robin_inport</a>;
+<a name="l00078"></a><a class="code" href="classSWallocator__d.html#afd2909e42b8f246d3844f4fc94367932">00078</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::vector&lt;bool&gt;</a> &gt; <a class="code" href="classSWallocator__d.html#afd2909e42b8f246d3844f4fc94367932">m_port_req</a>;
+<a name="l00079"></a><a class="code" href="classSWallocator__d.html#ac0ce291e579e519a16f76107b9796052">00079</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::vector&lt;int&gt;</a> &gt; <a class="code" href="classSWallocator__d.html#ac0ce291e579e519a16f76107b9796052">m_vc_winners</a>; <span class="comment">// a list for each outport</span>
+<a name="l00080"></a><a class="code" href="classSWallocator__d.html#a474451572c5e5813250c2f17ac3ec986">00080</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;InputUnit_d *&gt;</a> <a class="code" href="classSWallocator__d.html#a474451572c5e5813250c2f17ac3ec986">m_input_unit</a>;
+<a name="l00081"></a><a class="code" href="classSWallocator__d.html#ab8b34c9f5479c61b8022de1aad185bae">00081</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;OutputUnit_d *&gt;</a> <a class="code" href="classSWallocator__d.html#ab8b34c9f5479c61b8022de1aad185bae">m_output_unit</a>;
+<a name="l00082"></a>00082 };
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084 <span class="preprocessor">#endif // __MEM_RUBY_NETWORK_GARNET_FIXED_PIPELINE_SW_ALLOCATOR_D_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

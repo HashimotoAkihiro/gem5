@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/simple/atomic.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/simple/atomic.hh</h1><a href="atomic_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Steve Reinhardt</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __CPU_SIMPLE_ATOMIC_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_SIMPLE_ATOMIC_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="hashmap_8hh.html">base/hashmap.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2simple_2base_8hh.html">cpu/simple/base.hh</a>&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;params/AtomicSimpleCPU.hh&quot;</span>
+<a name="l00049"></a>00049 
+<a name="l00056"></a><a class="code" href="atomic_8hh.html#aa63e4e0e926d882e71c1af09578986e1">00056</a> <span class="keyword">typedef</span> <a class="code" href="classstd_1_1pair.html">std::pair&lt;Addr, Addr&gt;</a> <a class="code" href="classstd_1_1pair.html">BasicBlockRange</a>;
+<a name="l00057"></a>00057 
+<a name="l00059"></a>00059 <a class="code" href="hashmap_8hh.html#a6d9c8851148dfa7e5b7f65373c4eb87a">__hash_namespace_begin</a>
+<a name="l00060"></a>00060 <span class="keyword">template</span> &lt;&gt;
+<a name="l00061"></a><a class="code" href="structhash_3_01BasicBlockRange_01_4.html">00061</a> <span class="keyword">struct </span>hash&lt;<a class="code" href="classstd_1_1pair.html">BasicBlockRange</a>&gt;
+<a name="l00062"></a>00062 {
+<a name="l00063"></a>00063   <span class="keyword">public</span>:
+<a name="l00064"></a><a class="code" href="structhash_3_01BasicBlockRange_01_4.html#a4ff2491210b665732234a829a7d26f3c">00064</a>     <span class="keywordtype">size_t</span> <a class="code" href="structhash_3_01BasicBlockRange_01_4.html#a4ff2491210b665732234a829a7d26f3c">operator()</a>(<span class="keyword">const</span> <a class="code" href="classstd_1_1pair.html">BasicBlockRange</a> &amp;<a class="code" href="namespacePowerISA.html#a785dc68b728d07f223e417e322826285">bb</a>)<span class="keyword"> const </span>{
+<a name="l00065"></a>00065         <span class="keywordflow">return</span> hash&lt;Addr&gt;()(bb.first + bb.second);
+<a name="l00066"></a>00066     }
+<a name="l00067"></a>00067 };
+<a name="l00068"></a>00068 <a class="code" href="hashmap_8hh.html#a1dc86c73a247ef8b54cdb9eff7aeb723">__hash_namespace_end</a>
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070 
+<a name="l00071"></a><a class="code" href="classAtomicSimpleCPU.html">00071</a> <span class="keyword">class </span><a class="code" href="classAtomicSimpleCPU_1_1AtomicSimpleCPU.html">AtomicSimpleCPU</a> : <span class="keyword">public</span> <a class="code" href="classBaseSimpleCPU_1_1BaseSimpleCPU.html">BaseSimpleCPU</a>
+<a name="l00072"></a>00072 {
+<a name="l00073"></a>00073   <span class="keyword">public</span>:
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075     <a class="code" href="classAtomicSimpleCPU.html#ad25e81d46bd9fe8b4f176b129a012bc6">AtomicSimpleCPU</a>(AtomicSimpleCPUParams *params);
+<a name="l00076"></a>00076     <span class="keyword">virtual</span> <a class="code" href="classAtomicSimpleCPU.html#a0c1821e85cf304f5a090c51f3460d577">~AtomicSimpleCPU</a>();
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00079"></a>00079 
+<a name="l00080"></a>00080   <span class="keyword">private</span>:
+<a name="l00081"></a>00081 
+<a name="l00082"></a><a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html">00082</a>     <span class="keyword">struct </span><a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html">TickEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00083"></a>00083     {
+<a name="l00084"></a><a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html#a9e783a4cebf1e9800f0368c175ed094f">00084</a>         <a class="code" href="classAtomicSimpleCPU_1_1AtomicSimpleCPU.html">AtomicSimpleCPU</a> *<a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html#a9e783a4cebf1e9800f0368c175ed094f">cpu</a>;
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086         <a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html#ad7e0906d397674efc0284e231e9ffa8e">TickEvent</a>(<a class="code" href="classAtomicSimpleCPU_1_1AtomicSimpleCPU.html">AtomicSimpleCPU</a> *<a class="code" href="namespaceArmISA.html#a29b9f05234a93d5391014a3cfc5658b1">c</a>);
+<a name="l00087"></a>00087         <span class="keywordtype">void</span> <a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00088"></a>00088         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00089"></a>00089     };
+<a name="l00090"></a>00090 
+<a name="l00091"></a><a class="code" href="classAtomicSimpleCPU.html#aa36b8e894416f0ec98f701ab08f2ac22">00091</a>     <a class="code" href="structAtomicSimpleCPU_1_1TickEvent.html">TickEvent</a> <a class="code" href="classAtomicSimpleCPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>;
+<a name="l00092"></a>00092 
+<a name="l00093"></a><a class="code" href="classAtomicSimpleCPU.html#a837aabdd54757cb86d0f66387511753f">00093</a>     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classAtomicSimpleCPU.html#a837aabdd54757cb86d0f66387511753f">width</a>;
+<a name="l00094"></a><a class="code" href="classAtomicSimpleCPU.html#a18a0f1e6c3d21c252b14ea6ae162e2ff">00094</a>     <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#a18a0f1e6c3d21c252b14ea6ae162e2ff">locked</a>;
+<a name="l00095"></a><a class="code" href="classAtomicSimpleCPU.html#aab46afe7eb154b233d2ba1886a4b399f">00095</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#aab46afe7eb154b233d2ba1886a4b399f">simulate_data_stalls</a>;
+<a name="l00096"></a><a class="code" href="classAtomicSimpleCPU.html#ac5ff523d495df7133594dec7894aacc7">00096</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#ac5ff523d495df7133594dec7894aacc7">simulate_inst_stalls</a>;
+<a name="l00097"></a>00097 
+<a name="l00103"></a><a class="code" href="classAtomicSimpleCPU.html#af9ba920f669cbe0f18c71846715d690a">00103</a>     <a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="classAtomicSimpleCPU.html#af9ba920f669cbe0f18c71846715d690a">drain_manager</a>;
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105     <span class="comment">// main simulation loop (one cycle)</span>
+<a name="l00106"></a>00106     <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00107"></a>00107 
+<a name="l00126"></a><a class="code" href="classAtomicSimpleCPU.html#ac166e5bc3ddf730beb1282cf821096ae">00126</a>     <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#ac166e5bc3ddf730beb1282cf821096ae">isDrained</a>() {
+<a name="l00127"></a>00127         <span class="keywordflow">return</span> <a class="code" href="classBaseSimpleCPU.html#a1a21696f33a7d38f251687ae0b5e9718">microPC</a>() == 0 &amp;&amp;
+<a name="l00128"></a>00128             !<a class="code" href="classAtomicSimpleCPU.html#a18a0f1e6c3d21c252b14ea6ae162e2ff">locked</a> &amp;&amp;
+<a name="l00129"></a>00129             !<a class="code" href="classBaseSimpleCPU.html#ae91a837c03d66c9c15de3da2fc76e811">stayAtPC</a>;
+<a name="l00130"></a>00130     }
+<a name="l00131"></a>00131 
+<a name="l00137"></a>00137     <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#abfea8f75a7a7480716801affeebbe87b">tryCompleteDrain</a>();
+<a name="l00138"></a>00138 
+<a name="l00145"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html">00145</a>     <span class="keyword">class </span><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html">AtomicCPUPort</a> : <span class="keyword">public</span> <a class="code" href="classMasterPort.html">MasterPort</a>
+<a name="l00146"></a>00146     {
+<a name="l00147"></a>00147 
+<a name="l00148"></a>00148       <span class="keyword">public</span>:
+<a name="l00149"></a>00149 
+<a name="l00150"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#ab7510fb4487981ef766c2183a23534df">00150</a>         <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#ab7510fb4487981ef766c2183a23534df">AtomicCPUPort</a>(<span class="keyword">const</span> std::string &amp;_name, <a class="code" href="classBaseSimpleCPU_1_1BaseSimpleCPU.html">BaseSimpleCPU</a>* _cpu)
+<a name="l00151"></a>00151             : <a class="code" href="classMasterPort.html">MasterPort</a>(_name, _cpu)
+<a name="l00152"></a>00152         { }
+<a name="l00153"></a>00153 
+<a name="l00154"></a>00154       <span class="keyword">protected</span>:
+<a name="l00155"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#ae1160d8f94f042aba1dc9a07a72e1e82">00155</a>         <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#ae1160d8f94f042aba1dc9a07a72e1e82">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) { <span class="keywordflow">return</span> 0; }
+<a name="l00156"></a>00156 
+<a name="l00157"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#a482dba5588f4bee43e498875a61e5e0b">00157</a>         <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00158"></a>00158         {
+<a name="l00159"></a>00159             <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Atomic CPU doesn&apos;t expect recvTimingResp!\n&quot;</span>);
+<a name="l00160"></a>00160             <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00161"></a>00161         }
+<a name="l00162"></a>00162 
+<a name="l00163"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#a29cb5a4f98063ce6e9210eacbdb35298">00163</a>         <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>()
+<a name="l00164"></a>00164         {
+<a name="l00165"></a>00165             <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Atomic CPU doesn&apos;t expect recvRetry!\n&quot;</span>);
+<a name="l00166"></a>00166         }
+<a name="l00167"></a>00167 
+<a name="l00168"></a>00168     };
+<a name="l00169"></a>00169 
+<a name="l00170"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html">00170</a>     <span class="keyword">class </span><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html">AtomicCPUDPort</a> : <span class="keyword">public</span> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html">AtomicCPUPort</a>
+<a name="l00171"></a>00171     {
+<a name="l00172"></a>00172 
+<a name="l00173"></a>00173       <span class="keyword">public</span>:
+<a name="l00174"></a>00174 
+<a name="l00175"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a92cd757612aceef75cb77f72bed7ec83">00175</a>         <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a92cd757612aceef75cb77f72bed7ec83">AtomicCPUDPort</a>(<span class="keyword">const</span> std::string &amp;_name, <a class="code" href="classBaseSimpleCPU_1_1BaseSimpleCPU.html">BaseSimpleCPU</a>* _cpu)
+<a name="l00176"></a>00176             : <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html">AtomicCPUPort</a>(_name, _cpu), <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a9b015cabe76f0632445ecc63fa883163">cpu</a>(_cpu)
+<a name="l00177"></a>00177         {
+<a name="l00178"></a>00178             <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#af4264b12b32db39099b579e1ed670312">cacheBlockMask</a> = ~(<a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a9b015cabe76f0632445ecc63fa883163">cpu</a>-&gt;cacheLineSize() - 1);
+<a name="l00179"></a>00179         }
+<a name="l00180"></a>00180 
+<a name="l00181"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a5ce11b7a254d3cb756d94568f7cbc25d">00181</a>         <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a5ce11b7a254d3cb756d94568f7cbc25d">isSnooping</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00182"></a>00182 
+<a name="l00183"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#af4264b12b32db39099b579e1ed670312">00183</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#af4264b12b32db39099b579e1ed670312">cacheBlockMask</a>;
+<a name="l00184"></a>00184       <span class="keyword">protected</span>:
+<a name="l00185"></a><a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a9b015cabe76f0632445ecc63fa883163">00185</a>         <a class="code" href="classBaseSimpleCPU_1_1BaseSimpleCPU.html">BaseSimpleCPU</a> *<a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a9b015cabe76f0632445ecc63fa883163">cpu</a>;
+<a name="l00186"></a>00186 
+<a name="l00187"></a>00187         <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a886d584c81ee4e398ff8069907f6e1a5">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00188"></a>00188         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html#a284dfb90c168233c9d416bc07de8fefe">recvFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00189"></a>00189     };
+<a name="l00190"></a>00190 
+<a name="l00191"></a>00191 
+<a name="l00192"></a><a class="code" href="classAtomicSimpleCPU.html#a35e511691227100effd63e8a7fc12989">00192</a>     <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUPort.html">AtomicCPUPort</a> <a class="code" href="classAtomicSimpleCPU.html#a35e511691227100effd63e8a7fc12989">icachePort</a>;
+<a name="l00193"></a><a class="code" href="classAtomicSimpleCPU.html#ab6b7665b418b12dc80b485e66d23ed19">00193</a>     <a class="code" href="classAtomicSimpleCPU_1_1AtomicCPUDPort.html">AtomicCPUDPort</a> <a class="code" href="classAtomicSimpleCPU.html#ab6b7665b418b12dc80b485e66d23ed19">dcachePort</a>;
+<a name="l00194"></a>00194 
+<a name="l00195"></a><a class="code" href="classAtomicSimpleCPU.html#a66f9c88f6fa05c882787a7e98a7101f5">00195</a>     <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#a66f9c88f6fa05c882787a7e98a7101f5">fastmem</a>;
+<a name="l00196"></a><a class="code" href="classAtomicSimpleCPU.html#a64ba0dde58d6c2c1c5e24a0b3e3b506f">00196</a>     <a class="code" href="classRequest.html">Request</a> <a class="code" href="classAtomicSimpleCPU.html#a64ba0dde58d6c2c1c5e24a0b3e3b506f">ifetch_req</a>;
+<a name="l00197"></a><a class="code" href="classAtomicSimpleCPU.html#a836513db061d14f39d79751c40fa9951">00197</a>     <a class="code" href="classRequest.html">Request</a> <a class="code" href="classAtomicSimpleCPU.html#a836513db061d14f39d79751c40fa9951">data_read_req</a>;
+<a name="l00198"></a><a class="code" href="classAtomicSimpleCPU.html#af2cc98a9d486d932d85c4513a4670ca8">00198</a>     <a class="code" href="classRequest.html">Request</a> <a class="code" href="classAtomicSimpleCPU.html#af2cc98a9d486d932d85c4513a4670ca8">data_write_req</a>;
+<a name="l00199"></a>00199 
+<a name="l00200"></a><a class="code" href="classAtomicSimpleCPU.html#a40a30a05f8e2b8b4c62c0ee0a019686a">00200</a>     <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#a40a30a05f8e2b8b4c62c0ee0a019686a">dcache_access</a>;
+<a name="l00201"></a><a class="code" href="classAtomicSimpleCPU.html#a08f04a43a6d731e966308aaeece77208">00201</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classAtomicSimpleCPU.html#a08f04a43a6d731e966308aaeece77208">dcache_latency</a>;
+<a name="l00202"></a>00202 
+<a name="l00208"></a>00208     <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#aa51e4d7f169cd8e8b2e144fdcfd36f33">profileSimPoint</a>();
+<a name="l00209"></a>00209 
+<a name="l00215"></a><a class="code" href="classAtomicSimpleCPU.html#a556c6eb1f8f869ee7d0802381701c49f">00215</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classAtomicSimpleCPU.html#a556c6eb1f8f869ee7d0802381701c49f">simpoint</a>;
+<a name="l00217"></a><a class="code" href="classAtomicSimpleCPU.html#afa2df438a2925349299948892f519ea2">00217</a>     <span class="keyword">const</span> uint64_t <a class="code" href="classAtomicSimpleCPU.html#afa2df438a2925349299948892f519ea2">intervalSize</a>;
+<a name="l00218"></a>00218 
+<a name="l00220"></a><a class="code" href="classAtomicSimpleCPU.html#a4ba2ebd08d9a7f8efe072ed006f2ba56">00220</a>     uint64_t <a class="code" href="classAtomicSimpleCPU.html#a4ba2ebd08d9a7f8efe072ed006f2ba56">intervalCount</a>;
+<a name="l00222"></a><a class="code" href="classAtomicSimpleCPU.html#a0c93f234d5028e73f388f7e730db728f">00222</a>     uint64_t <a class="code" href="classAtomicSimpleCPU.html#a0c93f234d5028e73f388f7e730db728f">intervalDrift</a>;
+<a name="l00224"></a><a class="code" href="classAtomicSimpleCPU.html#a77497fabc62f774e824e9b57974e0301">00224</a>     std::ostream *<a class="code" href="classAtomicSimpleCPU.html#a77497fabc62f774e824e9b57974e0301">simpointStream</a>;
+<a name="l00225"></a>00225 
+<a name="l00227"></a><a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html">00227</a>     <span class="keyword">struct </span><a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html">BBInfo</a> {
+<a name="l00229"></a><a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html#a7e290573ef1be67b92a2c745e3b00d1d">00229</a>         uint64_t <a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html#a7e290573ef1be67b92a2c745e3b00d1d">id</a>;
+<a name="l00231"></a><a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html#a659dd2264a0d7ab44861e6ddb1a5073f">00231</a>         uint64_t <a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html#a659dd2264a0d7ab44861e6ddb1a5073f">insts</a>;
+<a name="l00233"></a><a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html#afcc68e9eec57ce069fcdc37815837d6d">00233</a>         uint64_t <a class="code" href="structAtomicSimpleCPU_1_1BBInfo.html#afcc68e9eec57ce069fcdc37815837d6d">count</a>;
+<a name="l00234"></a>00234     };
+<a name="l00235"></a>00235 
+<a name="l00237"></a><a class="code" href="classAtomicSimpleCPU.html#a06bfab070d35f298897393f7ee6e066c">00237</a>     m5::hash_map&lt;BasicBlockRange, BBInfo&gt; <a class="code" href="classAtomicSimpleCPU.html#a06bfab070d35f298897393f7ee6e066c">bbMap</a>;
+<a name="l00239"></a><a class="code" href="classAtomicSimpleCPU.html#aa13454a445c3711abe528bdd288a953c">00239</a>     <a class="code" href="classstd_1_1pair.html">BasicBlockRange</a> <a class="code" href="classAtomicSimpleCPU.html#aa13454a445c3711abe528bdd288a953c">currentBBV</a>;
+<a name="l00241"></a><a class="code" href="classAtomicSimpleCPU.html#a375bb98c835fcacb306ec154ac3c7f85">00241</a>     uint64_t <a class="code" href="classAtomicSimpleCPU.html#a375bb98c835fcacb306ec154ac3c7f85">currentBBVInstCount</a>;
+<a name="l00242"></a>00242 
+<a name="l00247"></a>00247   <span class="keyword">protected</span>:
+<a name="l00248"></a>00248 
+<a name="l00250"></a><a class="code" href="classAtomicSimpleCPU.html#aeea6b55ae1c4be53c21dbee434b221d4">00250</a>     <span class="keyword">virtual</span> <a class="code" href="classMasterPort.html">MasterPort</a> &amp;<a class="code" href="classAtomicSimpleCPU.html#aeea6b55ae1c4be53c21dbee434b221d4">getDataPort</a>() { <span class="keywordflow">return</span> <a class="code" href="classAtomicSimpleCPU.html#ab6b7665b418b12dc80b485e66d23ed19">dcachePort</a>; }
+<a name="l00251"></a>00251 
+<a name="l00253"></a><a class="code" href="classAtomicSimpleCPU.html#a40da530cb5dd380fd7fc0d786e94d5eb">00253</a>     <span class="keyword">virtual</span> <a class="code" href="classMasterPort.html">MasterPort</a> &amp;<a class="code" href="classAtomicSimpleCPU.html#a40da530cb5dd380fd7fc0d786e94d5eb">getInstPort</a>() { <span class="keywordflow">return</span> <a class="code" href="classAtomicSimpleCPU.html#a35e511691227100effd63e8a7fc12989">icachePort</a>; }
+<a name="l00254"></a>00254 
+<a name="l00255"></a>00255   <span class="keyword">public</span>:
+<a name="l00256"></a>00256 
+<a name="l00257"></a>00257     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classAtomicSimpleCPU.html#a4e932bfc8aa6dfb998b8496a0f04ace3">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="classAtomicSimpleCPU.html#af9ba920f669cbe0f18c71846715d690a">drain_manager</a>);
+<a name="l00258"></a>00258     <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00259"></a>00259 
+<a name="l00260"></a>00260     <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#a05f299b443f8cc73a93d61572edc0218">switchOut</a>();
+<a name="l00261"></a>00261     <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#ac82d2b8d331b2e8e6854a95d2917dfa2">takeOverFrom</a>(<a class="code" href="classBaseCPU.html">BaseCPU</a> *oldCPU);
+<a name="l00262"></a>00262 
+<a name="l00263"></a>00263     <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#ae2e1ccebe596a180f8105d57f9a93645">verifyMemoryMode</a>() <span class="keyword">const</span>;
+<a name="l00264"></a>00264 
+<a name="l00265"></a>00265     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#ad7a501b28bdbe8b3e708cd1ef69ac191">activateContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> thread_num, <a class="code" href="classCycles.html">Cycles</a> delay);
+<a name="l00266"></a>00266     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#a1dad4c4d2c3df4ef367e14fcc973ce74">suspendContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> thread_num);
+<a name="l00267"></a>00267 
+<a name="l00268"></a>00268     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classAtomicSimpleCPU.html#a66191b2d8a45050b7df3c3efa7bb07c6">readMem</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, uint8_t *data, <span class="keywordtype">unsigned</span> size, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>);
+<a name="l00269"></a>00269 
+<a name="l00270"></a>00270     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classAtomicSimpleCPU.html#ad46c5edeb1ee9b60445f3e26364e2c5e">writeMem</a>(uint8_t *data, <span class="keywordtype">unsigned</span> size,
+<a name="l00271"></a>00271                    <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>, uint64_t *res);
+<a name="l00272"></a>00272 
+<a name="l00277"></a>00277     <span class="keywordtype">void</span> <a class="code" href="classAtomicSimpleCPU.html#a88aa41e2693dd0091afae2604eba9bed">printAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>);
+<a name="l00278"></a>00278 };
+<a name="l00279"></a>00279 
+<a name="l00280"></a>00280 <span class="preprocessor">#endif // __CPU_SIMPLE_ATOMIC_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

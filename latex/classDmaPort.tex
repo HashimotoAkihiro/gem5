@@ -1,0 +1,390 @@
+\hypertarget{classDmaPort}{
+\section{クラス DmaPort}
+\label{classDmaPort}\index{DmaPort@{DmaPort}}
+}
+
+
+{\ttfamily \#include $<$dma\_\-device.hh$>$}DmaPortに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classDmaPort}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structDmaPort_1_1DmaReqState}{DmaReqState}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDmaPort_a7e3134f5a5a31bf28df04f0d6223ac3b}{DmaPort} (\hyperlink{classMemObject}{MemObject} $\ast$dev, \hyperlink{classSystem}{System} $\ast$s)
+\item 
+void \hyperlink{classDmaPort_ac9a04fe85b8cb0292631680073eddb86}{dmaAction} (\hyperlink{classMemCmd_a2afce0a47a93eee73a314d53e4890153}{Packet::Command} cmd, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, int size, \hyperlink{classEvent}{Event} $\ast$event, uint8\_\-t $\ast$data, \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} delay, \hyperlink{classFlags}{Request::Flags} flag=0)
+\item 
+bool \hyperlink{classDmaPort_a481b9352c138101d0f84f163a760c6e5}{dmaPending} () const 
+\item 
+unsigned int \hyperlink{classDmaPort_a6bf479c521c7c3eb473822d953275b26}{drain} (\hyperlink{classDrainManager}{DrainManager} $\ast$drainManger)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classDmaPort_a482dba5588f4bee43e498875a61e5e0b}{recvTimingResp} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+void \hyperlink{classDmaPort_a29cb5a4f98063ce6e9210eacbdb35298}{recvRetry} ()
+\item 
+void \hyperlink{classDmaPort_a39ecf6d3539b9a83c7df974058a5846d}{queueDma} (\hyperlink{classPacket}{PacketPtr} pkt)
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classDmaPort_ab4a48e8fe7bec0588669bb654736c5e8}{trySendTimingReq} ()
+\item 
+void \hyperlink{classDmaPort_accc908efe0611b7a131c978f0d1e2e15}{sendDma} ()
+\item 
+void \hyperlink{classDmaPort_aa7a9b0bb526bd92c0f952a55f875d443}{handleResp} (\hyperlink{classPacket}{PacketPtr} pkt, \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} delay=0)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMemObject}{MemObject} $\ast$ \hyperlink{classDmaPort_a4be8e04a8b8092d55e6b8707f95c1921}{device}
+\item 
+\hyperlink{classstd_1_1deque}{std::deque}$<$ \hyperlink{classPacket}{PacketPtr} $>$ \hyperlink{classDmaPort_aa1daf4e9dc0076207688f30abccdaab5}{transmitList}
+\item 
+\hyperlink{classEventWrapper}{EventWrapper}$<$ \hyperlink{classDmaPort}{DmaPort},\&DmaPort::sendDma $>$ \hyperlink{classDmaPort_a944ed919343d4c184161d71c8b113c98}{sendEvent}
+\item 
+\hyperlink{classSystem}{System} $\ast$ \hyperlink{classDmaPort_a8ae37465ba84acfef6af3e9b9e6dbbd5}{sys}
+\item 
+const \hyperlink{request_8hh_ac366b729262fd8e7cbd3283da6f775cf}{MasterID} \hyperlink{classDmaPort_a4fe950c0a01bfb6dd81ee92b18162d26}{masterId}
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classDmaPort_a42162a6fc29d8d8b33c43a0d19b60058}{pendingCount}
+\item 
+\hyperlink{classDrainManager}{DrainManager} $\ast$ \hyperlink{classDmaPort_a329b71fb934a93312ca0aacbf5a3f982}{drainManager}
+\item 
+bool \hyperlink{classDmaPort_a86588337eae6e277173a8da0cb966462}{inRetry}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classDmaPort_a7e3134f5a5a31bf28df04f0d6223ac3b}{
+\index{DmaPort@{DmaPort}!DmaPort@{DmaPort}}
+\index{DmaPort@{DmaPort}!DmaPort@{DmaPort}}
+\subsubsection[{DmaPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DmaPort} ({\bf MemObject} $\ast$ {\em dev}, \/  {\bf System} $\ast$ {\em s})}}
+\label{classDmaPort_a7e3134f5a5a31bf28df04f0d6223ac3b}
+
+
+
+\begin{DoxyCode}
+52     : MasterPort(dev->name() + ".dma", dev), device(dev), sendEvent(this),
+53       sys(s), masterId(s->getMasterId(dev->name())),
+54       pendingCount(0), drainManager(NULL),
+55       inRetry(false)
+56 { }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classDmaPort_ac9a04fe85b8cb0292631680073eddb86}{
+\index{DmaPort@{DmaPort}!dmaAction@{dmaAction}}
+\index{dmaAction@{dmaAction}!DmaPort@{DmaPort}}
+\subsubsection[{dmaAction}]{\setlength{\rightskip}{0pt plus 5cm}void dmaAction ({\bf Packet::Command} {\em cmd}, \/  {\bf Addr} {\em addr}, \/  int {\em size}, \/  {\bf Event} $\ast$ {\em event}, \/  uint8\_\-t $\ast$ {\em data}, \/  {\bf Tick} {\em delay}, \/  {\bf Request::Flags} {\em flag} = {\ttfamily 0})}}
+\label{classDmaPort_ac9a04fe85b8cb0292631680073eddb86}
+
+
+
+\begin{DoxyCode}
+158 {
+159     // one DMA request sender state for every action, that is then
+160     // split into many requests and packets based on the block size,
+161     // i.e. cache line size
+162     DmaReqState *reqState = new DmaReqState(event, size, delay);
+163 
+164     DPRINTF(DMA, "Starting DMA for addr: %#x size: %d sched: %d\n", addr, size,
+165             event ? event->scheduled() : -1);
+166     for (ChunkGenerator gen(addr, size, sys->cacheLineSize());
+167          !gen.done(); gen.next()) {
+168         Request *req = new Request(gen.addr(), gen.size(), flag, masterId);
+169         req->taskId(ContextSwitchTaskId::DMA);
+170         PacketPtr pkt = new Packet(req, cmd);
+171 
+172         // Increment the data pointer on a write
+173         if (data)
+174             pkt->dataStatic(data + gen.complete());
+175 
+176         pkt->senderState = reqState;
+177 
+178         DPRINTF(DMA, "--Queuing DMA for addr: %#x size: %d\n", gen.addr(),
+179                 gen.size());
+180         queueDma(pkt);
+181     }
+182 
+183     // in zero time also initiate the sending of the packets we have
+184     // just created, for atomic this involves actually completing all
+185     // the requests
+186     sendDma();
+187 }
+\end{DoxyCode}
+\hypertarget{classDmaPort_a481b9352c138101d0f84f163a760c6e5}{
+\index{DmaPort@{DmaPort}!dmaPending@{dmaPending}}
+\index{dmaPending@{dmaPending}!DmaPort@{DmaPort}}
+\subsubsection[{dmaPending}]{\setlength{\rightskip}{0pt plus 5cm}bool dmaPending () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classDmaPort_a481b9352c138101d0f84f163a760c6e5}
+
+
+
+\begin{DoxyCode}
+148 { return pendingCount > 0; }
+\end{DoxyCode}
+\hypertarget{classDmaPort_a6bf479c521c7c3eb473822d953275b26}{
+\index{DmaPort@{DmaPort}!drain@{drain}}
+\index{drain@{drain}!DmaPort@{DmaPort}}
+\subsubsection[{drain}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int drain ({\bf DrainManager} $\ast$ {\em drainManger})}}
+\label{classDmaPort_a6bf479c521c7c3eb473822d953275b26}
+
+
+
+\begin{DoxyCode}
+140 {
+141     if (pendingCount == 0)
+142         return 0;
+143     drainManager = dm;
+144     DPRINTF(Drain, "DmaPort not drained\n");
+145     return 1;
+146 }
+\end{DoxyCode}
+\hypertarget{classDmaPort_aa7a9b0bb526bd92c0f952a55f875d443}{
+\index{DmaPort@{DmaPort}!handleResp@{handleResp}}
+\index{handleResp@{handleResp}!DmaPort@{DmaPort}}
+\subsubsection[{handleResp}]{\setlength{\rightskip}{0pt plus 5cm}void handleResp ({\bf PacketPtr} {\em pkt}, \/  {\bf Tick} {\em delay} = {\ttfamily 0})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_aa7a9b0bb526bd92c0f952a55f875d443}
+Handle a response packet by updating the corresponding DMA request state to reflect the bytes received, and also update the pending request counter. If the DMA request that this packet is part of is complete, then signal the completion event if present, potentially with a delay added to it.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]Response packet to handler \item[{\em delay}]Additional delay for scheduling the completion event \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+60 {
+61     // should always see a response with a sender state
+62     assert(pkt->isResponse());
+63 
+64     // get the DMA sender state
+65     DmaReqState *state = dynamic_cast<DmaReqState*>(pkt->senderState);
+66     assert(state);
+67 
+68     DPRINTF(DMA, "Received response %s for addr: %#x size: %d nb: %d,"  \
+69             " tot: %d sched %d\n",
+70             pkt->cmdString(), pkt->getAddr(), pkt->req->getSize(),
+71             state->numBytes, state->totBytes,
+72             state->completionEvent ?
+73             state->completionEvent->scheduled() : 0);
+74 
+75     assert(pendingCount != 0);
+76     pendingCount--;
+77 
+78     // update the number of bytes received based on the request rather
+79     // than the packet as the latter could be rounded up to line sizes
+80     state->numBytes += pkt->req->getSize();
+81     assert(state->totBytes >= state->numBytes);
+82 
+83     // if we have reached the total number of bytes for this DMA
+84     // request, then signal the completion and delete the sate
+85     if (state->totBytes == state->numBytes) {
+86         if (state->completionEvent) {
+87             delay += state->delay;
+88             device->schedule(state->completionEvent, curTick() + delay);
+89         }
+90         delete state;
+91     }
+92 
+93     // delete the request that we created and also the packet
+94     delete pkt->req;
+95     delete pkt;
+96 
+97     // we might be drained at this point, if so signal the drain event
+98     if (pendingCount == 0 && drainManager) {
+99         drainManager->signalDrainDone();
+100         drainManager = NULL;
+101     }
+102 }
+\end{DoxyCode}
+\hypertarget{classDmaPort_a39ecf6d3539b9a83c7df974058a5846d}{
+\index{DmaPort@{DmaPort}!queueDma@{queueDma}}
+\index{queueDma@{queueDma}!DmaPort@{DmaPort}}
+\subsubsection[{queueDma}]{\setlength{\rightskip}{0pt plus 5cm}void queueDma ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classDmaPort_a39ecf6d3539b9a83c7df974058a5846d}
+
+
+
+\begin{DoxyCode}
+191 {
+192     transmitList.push_back(pkt);
+193 
+194     // remember that we have another packet pending, this will only be
+195     // decremented once a response comes back
+196     pendingCount++;
+197 }
+\end{DoxyCode}
+\hypertarget{classDmaPort_a29cb5a4f98063ce6e9210eacbdb35298}{
+\index{DmaPort@{DmaPort}!recvRetry@{recvRetry}}
+\index{recvRetry@{recvRetry}!DmaPort@{DmaPort}}
+\subsubsection[{recvRetry}]{\setlength{\rightskip}{0pt plus 5cm}void recvRetry ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classDmaPort_a29cb5a4f98063ce6e9210eacbdb35298}
+Called by the slave port if sendTimingReq or sendTimingSnoopResp was called on this master port (causing recvTimingReq and recvTimingSnoopResp to be called on the slave port) and was unsuccesful. 
+
+\hyperlink{classMasterPort_ac1ccc3bcf7ebabb20b57fab99b2be5b0}{MasterPort}を実装しています。
+
+
+\begin{DoxyCode}
+150 {
+151     assert(transmitList.size());
+152     trySendTimingReq();
+153 }
+\end{DoxyCode}
+\hypertarget{classDmaPort_a482dba5588f4bee43e498875a61e5e0b}{
+\index{DmaPort@{DmaPort}!recvTimingResp@{recvTimingResp}}
+\index{recvTimingResp@{recvTimingResp}!DmaPort@{DmaPort}}
+\subsubsection[{recvTimingResp}]{\setlength{\rightskip}{0pt plus 5cm}bool recvTimingResp ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classDmaPort_a482dba5588f4bee43e498875a61e5e0b}
+Receive a timing response from the slave port. 
+
+\hyperlink{classMasterPort_abd323548d6c93f8b0543f1fe3a86ca35}{MasterPort}を実装しています。
+
+
+\begin{DoxyCode}
+106 {
+107     // We shouldn't ever get a block in ownership state
+108     assert(!(pkt->memInhibitAsserted() && !pkt->sharedAsserted()));
+109 
+110     handleResp(pkt);
+111 
+112     return true;
+113 }
+\end{DoxyCode}
+\hypertarget{classDmaPort_accc908efe0611b7a131c978f0d1e2e15}{
+\index{DmaPort@{DmaPort}!sendDma@{sendDma}}
+\index{sendDma@{sendDma}!DmaPort@{DmaPort}}
+\subsubsection[{sendDma}]{\setlength{\rightskip}{0pt plus 5cm}void sendDma ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_accc908efe0611b7a131c978f0d1e2e15}
+For timing, attempt to send the first item on the transmit list, and if it is successful and there are more packets waiting, then schedule the sending of the next packet. For atomic, simply send and process everything on the transmit list. 
+
+
+\begin{DoxyCode}
+230 {
+231     // some kind of selcetion between access methods
+232     // more work is going to have to be done to make
+233     // switching actually work
+234     assert(transmitList.size());
+235 
+236     if (sys->isTimingMode()) {
+237         // if we are either waiting for a retry or are still waiting
+238         // after sending the last packet, then do not proceed
+239         if (inRetry || sendEvent.scheduled()) {
+240             DPRINTF(DMA, "Can't send immediately, waiting to send\n");
+241             return;
+242         }
+243 
+244         trySendTimingReq();
+245     } else if (sys->isAtomicMode()) {
+246         // send everything there is to send in zero time
+247         while (!transmitList.empty()) {
+248             PacketPtr pkt = transmitList.front();
+249             transmitList.pop_front();
+250 
+251             DPRINTF(DMA, "Sending  DMA for addr: %#x size: %d\n",
+252                     pkt->req->getPaddr(), pkt->req->getSize());
+253             Tick lat = sendAtomic(pkt);
+254 
+255             handleResp(pkt, lat);
+256         }
+257     } else
+258         panic("Unknown memory mode.");
+259 }
+\end{DoxyCode}
+\hypertarget{classDmaPort_ab4a48e8fe7bec0588669bb654736c5e8}{
+\index{DmaPort@{DmaPort}!trySendTimingReq@{trySendTimingReq}}
+\index{trySendTimingReq@{trySendTimingReq}!DmaPort@{DmaPort}}
+\subsubsection[{trySendTimingReq}]{\setlength{\rightskip}{0pt plus 5cm}void trySendTimingReq ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_ab4a48e8fe7bec0588669bb654736c5e8}
+Take the first packet of the transmit list and attempt to send it as a timing request. If it is successful, schedule the sending of the next packet, otherwise remember that we are waiting for a retry. 
+
+
+\begin{DoxyCode}
+201 {
+202     // send the first packet on the transmit list and schedule the
+203     // following send if it is successful
+204     PacketPtr pkt = transmitList.front();
+205 
+206     DPRINTF(DMA, "Trying to send %s addr %#x\n", pkt->cmdString(),
+207             pkt->getAddr());
+208 
+209     inRetry = !sendTimingReq(pkt);
+210     if (!inRetry) {
+211         transmitList.pop_front();
+212         DPRINTF(DMA, "-- Done\n");
+213         // if there is more to do, then do so
+214         if (!transmitList.empty())
+215             // this should ultimately wait for as many cycles as the
+216             // device needs to send the packet, but currently the port
+217             // does not have any known width so simply wait a single
+218             // cycle
+219             device->schedule(sendEvent, device->clockEdge(Cycles(1)));
+220     } else {
+221         DPRINTF(DMA, "-- Failed, waiting for retry\n");
+222     }
+223 
+224     DPRINTF(DMA, "TransmitList: %d, inRetry: %d\n",
+225             transmitList.size(), inRetry);
+226 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classDmaPort_a4be8e04a8b8092d55e6b8707f95c1921}{
+\index{DmaPort@{DmaPort}!device@{device}}
+\index{device@{device}!DmaPort@{DmaPort}}
+\subsubsection[{device}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MemObject}$\ast$ {\bf device}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_a4be8e04a8b8092d55e6b8707f95c1921}
+The device that owns this port. \hypertarget{classDmaPort_a329b71fb934a93312ca0aacbf5a3f982}{
+\index{DmaPort@{DmaPort}!drainManager@{drainManager}}
+\index{drainManager@{drainManager}!DmaPort@{DmaPort}}
+\subsubsection[{drainManager}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DrainManager}$\ast$ {\bf drainManager}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_a329b71fb934a93312ca0aacbf5a3f982}
+If we need to drain, keep the drain event around until we're done here. \hypertarget{classDmaPort_a86588337eae6e277173a8da0cb966462}{
+\index{DmaPort@{DmaPort}!inRetry@{inRetry}}
+\index{inRetry@{inRetry}!DmaPort@{DmaPort}}
+\subsubsection[{inRetry}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf inRetry}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_a86588337eae6e277173a8da0cb966462}
+If the port is currently waiting for a retry before it can send whatever it is that it's sending. \hypertarget{classDmaPort_a4fe950c0a01bfb6dd81ee92b18162d26}{
+\index{DmaPort@{DmaPort}!masterId@{masterId}}
+\index{masterId@{masterId}!DmaPort@{DmaPort}}
+\subsubsection[{masterId}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf MasterID} {\bf masterId}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_a4fe950c0a01bfb6dd81ee92b18162d26}
+Id for all requests \hypertarget{classDmaPort_a42162a6fc29d8d8b33c43a0d19b60058}{
+\index{DmaPort@{DmaPort}!pendingCount@{pendingCount}}
+\index{pendingCount@{pendingCount}!DmaPort@{DmaPort}}
+\subsubsection[{pendingCount}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} {\bf pendingCount}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_a42162a6fc29d8d8b33c43a0d19b60058}
+Number of outstanding packets the dma port has. \hypertarget{classDmaPort_a944ed919343d4c184161d71c8b113c98}{
+\index{DmaPort@{DmaPort}!sendEvent@{sendEvent}}
+\index{sendEvent@{sendEvent}!DmaPort@{DmaPort}}
+\subsubsection[{sendEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EventWrapper}$<${\bf DmaPort}, \&DmaPort::sendDma$>$ {\bf sendEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_a944ed919343d4c184161d71c8b113c98}
+\hyperlink{classEvent}{Event} used to schedule a future sending from the transmit list. \hypertarget{classDmaPort_a8ae37465ba84acfef6af3e9b9e6dbbd5}{
+\index{DmaPort@{DmaPort}!sys@{sys}}
+\index{sys@{sys}!DmaPort@{DmaPort}}
+\subsubsection[{sys}]{\setlength{\rightskip}{0pt plus 5cm}{\bf System}$\ast$ {\bf sys}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_a8ae37465ba84acfef6af3e9b9e6dbbd5}
+The system that device/port are in. This is used to select which mode we are currently operating in. \hypertarget{classDmaPort_aa1daf4e9dc0076207688f30abccdaab5}{
+\index{DmaPort@{DmaPort}!transmitList@{transmitList}}
+\index{transmitList@{transmitList}!DmaPort@{DmaPort}}
+\subsubsection[{transmitList}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::deque}$<${\bf PacketPtr}$>$ {\bf transmitList}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDmaPort_aa1daf4e9dc0076207688f30abccdaab5}
+Use a deque as we never do any insertion or removal in the middle 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/\hyperlink{dma__device_8hh}{dma\_\-device.hh}\item 
+dev/\hyperlink{dma__device_8cc}{dma\_\-device.cc}\end{DoxyCompactItemize}

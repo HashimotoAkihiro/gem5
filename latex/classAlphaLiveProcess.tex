@@ -1,0 +1,307 @@
+\hypertarget{classAlphaLiveProcess}{
+\section{クラス AlphaLiveProcess}
+\label{classAlphaLiveProcess}\index{AlphaLiveProcess@{AlphaLiveProcess}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}AlphaLiveProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classAlphaLiveProcess}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{namespaceAlphaISA_a0e080577527fb3e9685399f75b5caf15}{AlphaISA::IntReg} \hyperlink{classAlphaLiveProcess_afcdc0ffa30f2ddff7b435be15da7a6af}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i)
+\item 
+void \hyperlink{classAlphaLiveProcess_aeaf2b415297449d001c053d7d0d95586}{setSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int i, \hyperlink{namespaceAlphaISA_a0e080577527fb3e9685399f75b5caf15}{AlphaISA::IntReg} val)
+\item 
+void \hyperlink{classAlphaLiveProcess_aaefd02663c1eae206b851290d9276a5e}{setSyscallReturn} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classSyscallReturn}{SyscallReturn} return\_\-value)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classAlphaLiveProcess_a01ab49d1a6d4c484cd4818c2ec4c7a1c}{AlphaLiveProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile})
+\item 
+void \hyperlink{classAlphaLiveProcess_a0c3e6eb311ceff72035b11f2a5e0f186}{loadState} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp)
+\item 
+void \hyperlink{classAlphaLiveProcess_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\item 
+void \hyperlink{classAlphaLiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{argsInit} (int intSize, int pageSize)
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classAlphaLiveProcess_a53a76c20b309afae10d511cf9fa8beb0}{setupASNReg} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classAlphaLiveProcess_a01ab49d1a6d4c484cd4818c2ec4c7a1c}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!AlphaLiveProcess@{AlphaLiveProcess}}
+\index{AlphaLiveProcess@{AlphaLiveProcess}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{AlphaLiveProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf AlphaLiveProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classAlphaLiveProcess_a01ab49d1a6d4c484cd4818c2ec4c7a1c}
+
+
+
+\begin{DoxyCode}
+49     : LiveProcess(params, objFile)
+50 {
+51     brk_point = objFile->dataBase() + objFile->dataSize() + objFile->bssSize();
+52     brk_point = roundUp(brk_point, VMPageSize);
+53 
+54     // Set up stack.  On Alpha, stack goes below text section.  This
+55     // code should get moved to some architecture-specific spot.
+56     stack_base = objFile->textBase() - (409600+4096);
+57 
+58     // Set up region for mmaps.  Tru64 seems to start just above 0 and
+59     // grow up from there.
+60     mmap_start = mmap_end = 0x10000;
+61 
+62     // Set pointer for next thread stack.  Reserve 8M for main stack.
+63     next_thread_stack_base = stack_base - (8 * 1024 * 1024);
+64 
+65 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classAlphaLiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!argsInit@{argsInit}}
+\index{argsInit@{argsInit}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{argsInit}]{\setlength{\rightskip}{0pt plus 5cm}void argsInit (int {\em intSize}, \/  int {\em pageSize})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classAlphaLiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}
+
+
+
+\begin{DoxyCode}
+69 {
+70     objFile->loadSections(initVirtMem);
+71 
+72     typedef AuxVector<uint64_t> auxv_t;
+73     std::vector<auxv_t>  auxv;
+74 
+75     ElfObject * elfObject = dynamic_cast<ElfObject *>(objFile);
+76     if(elfObject)
+77     {
+78         // modern glibc uses a bunch of auxiliary vectors to set up 
+79         // TLS as well as do a bunch of other stuff
+80         // these vectors go on the bottom of the stack, below argc/argv/envp
+81         // pointers but above actual arg strings
+82         // I don't have all the ones glibc looks at here, but so far it doesn't
+83         // seem to be a problem.
+84         // check out _dl_aux_init() in glibc/elf/dl-support.c for details
+85         // --Lisa
+86         auxv.push_back(auxv_t(M5_AT_PAGESZ, AlphaISA::VMPageSize));
+87         auxv.push_back(auxv_t(M5_AT_CLKTCK, 100));
+88         auxv.push_back(auxv_t(M5_AT_PHDR, elfObject->programHeaderTable()));
+89         DPRINTF(Loader, "auxv at PHDR %08p\n", elfObject->programHeaderTable());
+90         auxv.push_back(auxv_t(M5_AT_PHNUM, elfObject->programHeaderCount()));
+91         auxv.push_back(auxv_t(M5_AT_ENTRY, objFile->entryPoint()));
+92         auxv.push_back(auxv_t(M5_AT_UID, uid()));
+93         auxv.push_back(auxv_t(M5_AT_EUID, euid()));
+94         auxv.push_back(auxv_t(M5_AT_GID, gid()));
+95         auxv.push_back(auxv_t(M5_AT_EGID, egid()));
+96 
+97     }
+98 
+99     // Calculate how much space we need for arg & env & auxv arrays.
+100     int argv_array_size = intSize * (argv.size() + 1);
+101     int envp_array_size = intSize * (envp.size() + 1);
+102     int auxv_array_size = intSize * 2 * (auxv.size() + 1);
+103 
+104     int arg_data_size = 0;
+105     for (vector<string>::size_type i = 0; i < argv.size(); ++i) {
+106         arg_data_size += argv[i].size() + 1;
+107     }
+108     int env_data_size = 0;
+109     for (vector<string>::size_type i = 0; i < envp.size(); ++i) {
+110         env_data_size += envp[i].size() + 1;
+111     }
+112 
+113     int space_needed =
+114         argv_array_size + 
+115         envp_array_size + 
+116         auxv_array_size +
+117         arg_data_size + 
+118         env_data_size;
+119 
+120     if (space_needed < 32*1024)
+121         space_needed = 32*1024;
+122 
+123     // set bottom of stack
+124     stack_min = stack_base - space_needed;
+125     // align it
+126     stack_min = roundDown(stack_min, pageSize);
+127     stack_size = stack_base - stack_min;
+128     // map memory
+129     allocateMem(stack_min, roundUp(stack_size, pageSize));
+130 
+131     // map out initial stack contents
+132     Addr argv_array_base = stack_min + intSize; // room for argc
+133     Addr envp_array_base = argv_array_base + argv_array_size;
+134     Addr auxv_array_base = envp_array_base + envp_array_size;
+135     Addr arg_data_base = auxv_array_base + auxv_array_size;
+136     Addr env_data_base = arg_data_base + arg_data_size;
+137 
+138     // write contents to stack
+139     uint64_t argc = argv.size();
+140     if (intSize == 8)
+141         argc = htog((uint64_t)argc);
+142     else if (intSize == 4)
+143         argc = htog((uint32_t)argc);
+144     else
+145         panic("Unknown int size");
+146 
+147     initVirtMem.writeBlob(stack_min, (uint8_t*)&argc, intSize);
+148 
+149     copyStringArray(argv, argv_array_base, arg_data_base, initVirtMem);
+150     copyStringArray(envp, envp_array_base, env_data_base, initVirtMem);
+151 
+152     //Copy the aux stuff
+153     for (vector<auxv_t>::size_type x = 0; x < auxv.size(); x++) {
+154         initVirtMem.writeBlob(auxv_array_base + x * 2 * intSize,
+155                 (uint8_t*)&(auxv[x].a_type), intSize);
+156         initVirtMem.writeBlob(auxv_array_base + (x * 2 + 1) * intSize,
+157                 (uint8_t*)&(auxv[x].a_val), intSize);
+158     }
+159 
+160     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+161 
+162     setSyscallArg(tc, 0, argc);
+163     setSyscallArg(tc, 1, argv_array_base);
+164     tc->setIntReg(StackPointerReg, stack_min);
+165 
+166     tc->pcState(objFile->entryPoint());
+167 }
+\end{DoxyCode}
+\hypertarget{classAlphaLiveProcess_afcdc0ffa30f2ddff7b435be15da7a6af}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf AlphaISA::IntReg} getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classAlphaLiveProcess_afcdc0ffa30f2ddff7b435be15da7a6af}
+
+
+\hyperlink{classLiveProcess_aa001ff57ec460026facb89ba19c7bf96}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+209 {
+210     assert(i < 6);
+211     return tc->readIntReg(FirstArgumentReg + i++);
+212 }
+\end{DoxyCode}
+\hypertarget{classAlphaLiveProcess_a3c34ea9b29f410748d4435a667484924}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!initState@{initState}}
+\index{initState@{initState}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classAlphaLiveProcess_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classAlphaLiveProcess_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classProcess_a3c34ea9b29f410748d4435a667484924}{Process}を再定義しています。
+
+
+\begin{DoxyCode}
+189 {
+190     // need to set up ASN before further initialization since init
+191     // will involve writing to virtual memory addresses
+192     setupASNReg();
+193 
+194     LiveProcess::initState();
+195 
+196     argsInit(MachineBytes, VMPageSize);
+197 
+198     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+199     tc->setIntReg(GlobalPointerReg, objFile->globalPointer());
+200     //Operate in user mode
+201     tc->setMiscRegNoEffect(IPR_ICM, mode_user << 3);
+202     tc->setMiscRegNoEffect(IPR_DTB_CM, mode_user << 3);
+203     //No super page mapping
+204     tc->setMiscRegNoEffect(IPR_MCSR, 0);
+205 }
+\end{DoxyCode}
+\hypertarget{classAlphaLiveProcess_a0c3e6eb311ceff72035b11f2a5e0f186}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!loadState@{loadState}}
+\index{loadState@{loadState}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{loadState}]{\setlength{\rightskip}{0pt plus 5cm}void loadState ({\bf Checkpoint} $\ast$ {\em cp})\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classAlphaLiveProcess_a0c3e6eb311ceff72035b11f2a5e0f186}
+\hyperlink{classAlphaLiveProcess_a0c3e6eb311ceff72035b11f2a5e0f186}{loadState()} is called on each \hyperlink{classSimObject}{SimObject} when restoring from a checkpoint. The default implementation simply calls \hyperlink{classProcess_af22e5d6d660b97db37003ac61ac4ee49}{unserialize()} if there is a corresponding section in the checkpoint. However, objects can override \hyperlink{classAlphaLiveProcess_a0c3e6eb311ceff72035b11f2a5e0f186}{loadState()} to get other behaviors, e.g., doing other programmed initializations after \hyperlink{classProcess_af22e5d6d660b97db37003ac61ac4ee49}{unserialize()}, or complaining if no checkpoint section is found.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em \hyperlink{namespacecp}{cp}}]\hyperlink{classCheckpoint}{Checkpoint} to restore the state from. \end{DoxyParams}
+
+
+\hyperlink{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}{SimObject}を再定義しています。
+
+
+\begin{DoxyCode}
+179 {
+180     LiveProcess::loadState(cp);
+181     // need to set up ASN after unserialization since M5_pid value may
+182     // come from checkpoint
+183     setupASNReg();
+184 }
+\end{DoxyCode}
+\hypertarget{classAlphaLiveProcess_aeaf2b415297449d001c053d7d0d95586}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!setSyscallArg@{setSyscallArg}}
+\index{setSyscallArg@{setSyscallArg}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{setSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em i}, \/  {\bf AlphaISA::IntReg} {\em val})}}
+\label{classAlphaLiveProcess_aeaf2b415297449d001c053d7d0d95586}
+
+
+
+\begin{DoxyCode}
+217 {
+218     assert(i < 6);
+219     tc->setIntReg(FirstArgumentReg + i, val);
+220 }
+\end{DoxyCode}
+\hypertarget{classAlphaLiveProcess_aaefd02663c1eae206b851290d9276a5e}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!setSyscallReturn@{setSyscallReturn}}
+\index{setSyscallReturn@{setSyscallReturn}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{setSyscallReturn}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallReturn ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf SyscallReturn} {\em return\_\-value})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classAlphaLiveProcess_aaefd02663c1eae206b851290d9276a5e}
+
+
+\hyperlink{classLiveProcess_a5955e790542b86589b9fd75df24ec2d3}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+224 {
+225     // check for error condition.  Alpha syscall convention is to
+226     // indicate success/failure in reg a3 (r19) and put the
+227     // return value itself in the standard return value reg (v0).
+228     if (sysret.successful()) {
+229         // no error
+230         tc->setIntReg(SyscallSuccessReg, 0);
+231         tc->setIntReg(ReturnValueReg, sysret.returnValue());
+232     } else {
+233         // got an error, return details
+234         tc->setIntReg(SyscallSuccessReg, (IntReg)-1);
+235         tc->setIntReg(ReturnValueReg, sysret.errnoValue());
+236     }
+237 }
+\end{DoxyCode}
+\hypertarget{classAlphaLiveProcess_a53a76c20b309afae10d511cf9fa8beb0}{
+\index{AlphaLiveProcess@{AlphaLiveProcess}!setupASNReg@{setupASNReg}}
+\index{setupASNReg@{setupASNReg}!AlphaLiveProcess@{AlphaLiveProcess}}
+\subsubsection[{setupASNReg}]{\setlength{\rightskip}{0pt plus 5cm}void setupASNReg ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classAlphaLiveProcess_a53a76c20b309afae10d511cf9fa8beb0}
+
+
+
+\begin{DoxyCode}
+171 {
+172     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+173     tc->setMiscRegNoEffect(IPR_DTB_ASN, M5_pid << 57);
+174 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/alpha/\hyperlink{arch_2alpha_2process_8hh}{process.hh}\item 
+arch/alpha/\hyperlink{arch_2alpha_2process_8cc}{process.cc}\end{DoxyCompactItemize}

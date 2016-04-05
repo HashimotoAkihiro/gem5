@@ -1,0 +1,261 @@
+\hypertarget{base_2remote__gdb_8hh}{
+\section{base/remote\_\-gdb.hh}
+\label{base_2remote__gdb_8hh}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}
+}
+{\ttfamily \#include $<$sys/signal.h$>$}\par
+{\ttfamily \#include $<$map$>$}\par
+{\ttfamily \#include \char`\"{}arch/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/pollevent.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/socket.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/pc\_\-event.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classBaseRemoteGDB}{BaseRemoteGDB}
+\item 
+class \hyperlink{classBaseRemoteGDB_1_1Event}{Event}
+\item 
+class \hyperlink{classBaseRemoteGDB_1_1GdbRegCache}{GdbRegCache}
+\item 
+class \hyperlink{classBaseRemoteGDB_1_1HardBreakpoint}{HardBreakpoint}
+\item 
+class \hyperlink{classGDBListener}{GDBListener}
+\item 
+class \hyperlink{classGDBListener_1_1Event}{Event}
+\end{DoxyCompactItemize}
+\subsection*{列挙型}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497}{GDBCommands} \{ \par
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a9acb86313ec944166d9794e95485b9f3}{GDBSignal} =  '?', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a32f6834a6d41a1b2cf93b990a8fb2802}{GDBSetBaud} =  'b', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af183bccc532c34c0529414ed1a6d8d1d}{GDBSetBreak} =  'B', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a5116c6ce41f7f6cbed15e76f7850d9b8}{GDBCont} =  'c', 
+\par
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a7f54d24132f309117d6df73a311401fc}{GDBAsyncCont} =  'C', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a06eaad120ec15dd5f663afff69ca4abf}{GDBDebug} =  'd', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a4329d2707e2615ebf514324e22c9147e}{GDBDetach} =  'D', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a27e3f55ab7507805b07214ffc5112caa}{GDBRegR} =  'g', 
+\par
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af3ff51a9620f66082f6698de0521b986}{GDBRegW} =  'G', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a719b61a9c713bbdcca7fc4148e899e7c}{GDBSetThread} =  'H', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a2a20298cc6295ee66556e733118b34e2}{GDBCycleStep} =  'i', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af33260007323a31a14dca0b20579bb35}{GDBSigCycleStep} =  'I', 
+\par
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a2ae8dcdea0e90eb0980507158b6478ea}{GDBKill} =  'k', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497afbcb02edcc4cb7d0f7fb2c8a9a82a3d4}{GDBMemR} =  'm', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a6694323b497f2acbd690bb030eb36b8b}{GDBMemW} =  'M', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a07fe6ffd98eb01494b115e860d52ade6}{GDBReadReg} =  'p', 
+\par
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a8a75153eb9b61ad50353ff07672f8453}{GDBSetReg} =  'P', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497ab6d45fb94f09b488967f93999dcfd1f2}{GDBQueryVar} =  'q', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497aecc7624d45fae28295d2f7f1bf0b470b}{GDBSetVar} =  'Q', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a51f7b8c24bb63590754cd8c0d709a72e}{GDBReset} =  'r', 
+\par
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a97f95c3ab542120d5e9dfec25c1e2d60}{GDBStep} =  's', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497acbc40326c7d502ea24fb2299ab1b94e3}{GDBAsyncStep} =  'S', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a02a96e461b322d3971cd6108d1e81b44}{GDBThreadAlive} =  'T', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497ac9269a79ec5c92381f58083823c0d4c2}{GDBTargetExit} =  'W', 
+\par
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a5f15d8ffbc4c5baa05f73b7d997d882c}{GDBBinaryDload} =  'X', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a81ee9db02e7aba80482f745540febfbc}{GDBClrHwBkpt} =  'z', 
+\hyperlink{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497abf939a1a586587f591156b2aeb4c268f}{GDBSetHwBkpt} =  'Z'
+ \}
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+const char \hyperlink{base_2remote__gdb_8hh_a05c13e29a32dcf8a9af97d1dcb81b170}{GDBStart} = '\$'
+\item 
+const char \hyperlink{base_2remote__gdb_8hh_a71e0b9ce6fd576fc3ce9dbb5989d5978}{GDBEnd} = '\#'
+\item 
+const char \hyperlink{base_2remote__gdb_8hh_aed92843772362fd32e1305e05ed1e0c5}{GDBGoodP} = '+'
+\item 
+const char \hyperlink{base_2remote__gdb_8hh_a5aef3fc10123b588700dba5c2ab9de24}{GDBBadP} = '-\/'
+\item 
+const int \hyperlink{base_2remote__gdb_8hh_a346de31138a53901e54429d682270d8e}{GDBPacketBufLen} = 1024
+\end{DoxyCompactItemize}
+
+
+\subsection{列挙型}
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497}{
+\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBCommands@{GDBCommands}}
+\index{GDBCommands@{GDBCommands}!base/remote_gdb.hh@{base/remote\_\-gdb.hh}}
+\subsubsection[{GDBCommands}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf GDBCommands}}}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{GDBSignal@{GDBSignal}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSignal@{GDBSignal}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a9acb86313ec944166d9794e95485b9f3}{
+GDBSignal}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a9acb86313ec944166d9794e95485b9f3}
+}]\index{GDBSetBaud@{GDBSetBaud}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSetBaud@{GDBSetBaud}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a32f6834a6d41a1b2cf93b990a8fb2802}{
+GDBSetBaud}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a32f6834a6d41a1b2cf93b990a8fb2802}
+}]\index{GDBSetBreak@{GDBSetBreak}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSetBreak@{GDBSetBreak}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af183bccc532c34c0529414ed1a6d8d1d}{
+GDBSetBreak}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af183bccc532c34c0529414ed1a6d8d1d}
+}]\index{GDBCont@{GDBCont}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBCont@{GDBCont}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a5116c6ce41f7f6cbed15e76f7850d9b8}{
+GDBCont}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a5116c6ce41f7f6cbed15e76f7850d9b8}
+}]\index{GDBAsyncCont@{GDBAsyncCont}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBAsyncCont@{GDBAsyncCont}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a7f54d24132f309117d6df73a311401fc}{
+GDBAsyncCont}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a7f54d24132f309117d6df73a311401fc}
+}]\index{GDBDebug@{GDBDebug}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBDebug@{GDBDebug}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a06eaad120ec15dd5f663afff69ca4abf}{
+GDBDebug}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a06eaad120ec15dd5f663afff69ca4abf}
+}]\index{GDBDetach@{GDBDetach}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBDetach@{GDBDetach}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a4329d2707e2615ebf514324e22c9147e}{
+GDBDetach}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a4329d2707e2615ebf514324e22c9147e}
+}]\index{GDBRegR@{GDBRegR}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBRegR@{GDBRegR}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a27e3f55ab7507805b07214ffc5112caa}{
+GDBRegR}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a27e3f55ab7507805b07214ffc5112caa}
+}]\index{GDBRegW@{GDBRegW}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBRegW@{GDBRegW}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af3ff51a9620f66082f6698de0521b986}{
+GDBRegW}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af3ff51a9620f66082f6698de0521b986}
+}]\index{GDBSetThread@{GDBSetThread}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSetThread@{GDBSetThread}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a719b61a9c713bbdcca7fc4148e899e7c}{
+GDBSetThread}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a719b61a9c713bbdcca7fc4148e899e7c}
+}]\index{GDBCycleStep@{GDBCycleStep}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBCycleStep@{GDBCycleStep}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a2a20298cc6295ee66556e733118b34e2}{
+GDBCycleStep}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a2a20298cc6295ee66556e733118b34e2}
+}]\index{GDBSigCycleStep@{GDBSigCycleStep}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSigCycleStep@{GDBSigCycleStep}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af33260007323a31a14dca0b20579bb35}{
+GDBSigCycleStep}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497af33260007323a31a14dca0b20579bb35}
+}]\index{GDBKill@{GDBKill}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBKill@{GDBKill}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a2ae8dcdea0e90eb0980507158b6478ea}{
+GDBKill}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a2ae8dcdea0e90eb0980507158b6478ea}
+}]\index{GDBMemR@{GDBMemR}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBMemR@{GDBMemR}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497afbcb02edcc4cb7d0f7fb2c8a9a82a3d4}{
+GDBMemR}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497afbcb02edcc4cb7d0f7fb2c8a9a82a3d4}
+}]\index{GDBMemW@{GDBMemW}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBMemW@{GDBMemW}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a6694323b497f2acbd690bb030eb36b8b}{
+GDBMemW}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a6694323b497f2acbd690bb030eb36b8b}
+}]\index{GDBReadReg@{GDBReadReg}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBReadReg@{GDBReadReg}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a07fe6ffd98eb01494b115e860d52ade6}{
+GDBReadReg}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a07fe6ffd98eb01494b115e860d52ade6}
+}]\index{GDBSetReg@{GDBSetReg}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSetReg@{GDBSetReg}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a8a75153eb9b61ad50353ff07672f8453}{
+GDBSetReg}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a8a75153eb9b61ad50353ff07672f8453}
+}]\index{GDBQueryVar@{GDBQueryVar}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBQueryVar@{GDBQueryVar}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497ab6d45fb94f09b488967f93999dcfd1f2}{
+GDBQueryVar}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497ab6d45fb94f09b488967f93999dcfd1f2}
+}]\index{GDBSetVar@{GDBSetVar}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSetVar@{GDBSetVar}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497aecc7624d45fae28295d2f7f1bf0b470b}{
+GDBSetVar}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497aecc7624d45fae28295d2f7f1bf0b470b}
+}]\index{GDBReset@{GDBReset}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBReset@{GDBReset}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a51f7b8c24bb63590754cd8c0d709a72e}{
+GDBReset}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a51f7b8c24bb63590754cd8c0d709a72e}
+}]\index{GDBStep@{GDBStep}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBStep@{GDBStep}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a97f95c3ab542120d5e9dfec25c1e2d60}{
+GDBStep}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a97f95c3ab542120d5e9dfec25c1e2d60}
+}]\index{GDBAsyncStep@{GDBAsyncStep}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBAsyncStep@{GDBAsyncStep}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497acbc40326c7d502ea24fb2299ab1b94e3}{
+GDBAsyncStep}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497acbc40326c7d502ea24fb2299ab1b94e3}
+}]\index{GDBThreadAlive@{GDBThreadAlive}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBThreadAlive@{GDBThreadAlive}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a02a96e461b322d3971cd6108d1e81b44}{
+GDBThreadAlive}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a02a96e461b322d3971cd6108d1e81b44}
+}]\index{GDBTargetExit@{GDBTargetExit}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBTargetExit@{GDBTargetExit}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497ac9269a79ec5c92381f58083823c0d4c2}{
+GDBTargetExit}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497ac9269a79ec5c92381f58083823c0d4c2}
+}]\index{GDBBinaryDload@{GDBBinaryDload}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBBinaryDload@{GDBBinaryDload}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a5f15d8ffbc4c5baa05f73b7d997d882c}{
+GDBBinaryDload}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a5f15d8ffbc4c5baa05f73b7d997d882c}
+}]\index{GDBClrHwBkpt@{GDBClrHwBkpt}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBClrHwBkpt@{GDBClrHwBkpt}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a81ee9db02e7aba80482f745540febfbc}{
+GDBClrHwBkpt}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497a81ee9db02e7aba80482f745540febfbc}
+}]\index{GDBSetHwBkpt@{GDBSetHwBkpt}!base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}}\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBSetHwBkpt@{GDBSetHwBkpt}}\item[{\em 
+\hypertarget{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497abf939a1a586587f591156b2aeb4c268f}{
+GDBSetHwBkpt}
+\label{base_2remote__gdb_8hh_a5f3ce331fa8c2c19ed26b852847a3497abf939a1a586587f591156b2aeb4c268f}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+49 {
+50     GDBSignal              = '?', // last signal
+51     GDBSetBaud             = 'b', // set baud (depracated)
+52     GDBSetBreak            = 'B', // set breakpoint (depracated)
+53     GDBCont                = 'c', // resume
+54     GDBAsyncCont           = 'C', // continue with signal
+55     GDBDebug               = 'd', // toggle debug flags (deprecated)
+56     GDBDetach              = 'D', // detach remote gdb
+57     GDBRegR                = 'g', // read general registers
+58     GDBRegW                = 'G', // write general registers
+59     GDBSetThread           = 'H', // set thread
+60     GDBCycleStep           = 'i', // step a single cycle
+61     GDBSigCycleStep        = 'I', // signal then cycle step
+62     GDBKill                = 'k', // kill program
+63     GDBMemR                = 'm', // read memory
+64     GDBMemW                = 'M', // write memory
+65     GDBReadReg             = 'p', // read register
+66     GDBSetReg              = 'P', // write register
+67     GDBQueryVar            = 'q', // query variable
+68     GDBSetVar              = 'Q', // set variable
+69     GDBReset               = 'r', // reset system.  (Deprecated)
+70     GDBStep                = 's', // step
+71     GDBAsyncStep           = 'S', // signal and step
+72     GDBThreadAlive         = 'T', // find out if the thread is alive
+73     GDBTargetExit          = 'W', // target exited
+74     GDBBinaryDload         = 'X', // write memory
+75     GDBClrHwBkpt           = 'z', // remove breakpoint or watchpoint
+76     GDBSetHwBkpt           = 'Z'  // insert breakpoint or watchpoint
+77 };
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{base_2remote__gdb_8hh_a5aef3fc10123b588700dba5c2ab9de24}{
+\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBBadP@{GDBBadP}}
+\index{GDBBadP@{GDBBadP}!base/remote_gdb.hh@{base/remote\_\-gdb.hh}}
+\subsubsection[{GDBBadP}]{\setlength{\rightskip}{0pt plus 5cm}const char {\bf GDBBadP} = '-\/'}}
+\label{base_2remote__gdb_8hh_a5aef3fc10123b588700dba5c2ab9de24}
+\hypertarget{base_2remote__gdb_8hh_a71e0b9ce6fd576fc3ce9dbb5989d5978}{
+\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBEnd@{GDBEnd}}
+\index{GDBEnd@{GDBEnd}!base/remote_gdb.hh@{base/remote\_\-gdb.hh}}
+\subsubsection[{GDBEnd}]{\setlength{\rightskip}{0pt plus 5cm}const char {\bf GDBEnd} = '\#'}}
+\label{base_2remote__gdb_8hh_a71e0b9ce6fd576fc3ce9dbb5989d5978}
+\hypertarget{base_2remote__gdb_8hh_aed92843772362fd32e1305e05ed1e0c5}{
+\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBGoodP@{GDBGoodP}}
+\index{GDBGoodP@{GDBGoodP}!base/remote_gdb.hh@{base/remote\_\-gdb.hh}}
+\subsubsection[{GDBGoodP}]{\setlength{\rightskip}{0pt plus 5cm}const char {\bf GDBGoodP} = '+'}}
+\label{base_2remote__gdb_8hh_aed92843772362fd32e1305e05ed1e0c5}
+\hypertarget{base_2remote__gdb_8hh_a346de31138a53901e54429d682270d8e}{
+\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBPacketBufLen@{GDBPacketBufLen}}
+\index{GDBPacketBufLen@{GDBPacketBufLen}!base/remote_gdb.hh@{base/remote\_\-gdb.hh}}
+\subsubsection[{GDBPacketBufLen}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf GDBPacketBufLen} = 1024}}
+\label{base_2remote__gdb_8hh_a346de31138a53901e54429d682270d8e}
+\hypertarget{base_2remote__gdb_8hh_a05c13e29a32dcf8a9af97d1dcb81b170}{
+\index{base/remote\_\-gdb.hh@{base/remote\_\-gdb.hh}!GDBStart@{GDBStart}}
+\index{GDBStart@{GDBStart}!base/remote_gdb.hh@{base/remote\_\-gdb.hh}}
+\subsubsection[{GDBStart}]{\setlength{\rightskip}{0pt plus 5cm}const char {\bf GDBStart} = '\$'}}
+\label{base_2remote__gdb_8hh_a05c13e29a32dcf8a9af97d1dcb81b170}

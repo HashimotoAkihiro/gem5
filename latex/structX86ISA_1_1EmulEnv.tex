@@ -1,0 +1,206 @@
+\hypertarget{structX86ISA_1_1EmulEnv}{
+\section{構造体 EmulEnv}
+\label{structX86ISA_1_1EmulEnv}\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+}
+
+
+{\ttfamily \#include $<$emulenv.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structX86ISA_1_1EmulEnv_a150178afb4bf886ad49be8f31f98e14b}{EmulEnv} (\hyperlink{namespaceX86ISA_a69329e1d929a534ff51be6cf8216b69a}{RegIndex} \_\-reg, \hyperlink{namespaceX86ISA_a69329e1d929a534ff51be6cf8216b69a}{RegIndex} \_\-regm, int \_\-dataSize, int \_\-addressSize, int \_\-stackSize)
+\item 
+void \hyperlink{structX86ISA_1_1EmulEnv_ae8a901694f1a63aaa9cf3c28faabe4ed}{doModRM} (const \hyperlink{structX86ISA_1_1ExtMachInst}{ExtMachInst} \&machInst)
+\item 
+void \hyperlink{structX86ISA_1_1EmulEnv_a1551fe2bf04bbf608dbcf23167211192}{setSeg} (const \hyperlink{structX86ISA_1_1ExtMachInst}{ExtMachInst} \&machInst)
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{namespaceX86ISA_a69329e1d929a534ff51be6cf8216b69a}{RegIndex} \hyperlink{structX86ISA_1_1EmulEnv_ab3cfff93a9eaf4043816e6667f4f4b5c}{reg}
+\item 
+\hyperlink{namespaceX86ISA_a69329e1d929a534ff51be6cf8216b69a}{RegIndex} \hyperlink{structX86ISA_1_1EmulEnv_a23102d8465dd60d680f731af9a84f689}{regm}
+\item 
+\hyperlink{namespaceX86ISA_acea32b07c2303d31296b1c07a16c4795}{SegmentRegIndex} \hyperlink{structX86ISA_1_1EmulEnv_af746478528438f57577dbfd5f772079e}{seg}
+\item 
+uint8\_\-t \hyperlink{structX86ISA_1_1EmulEnv_a616c0a72f0e4af38b93c736773ac7210}{scale}
+\item 
+\hyperlink{namespaceX86ISA_a69329e1d929a534ff51be6cf8216b69a}{RegIndex} \hyperlink{structX86ISA_1_1EmulEnv_a4873352bf9ab22e599f727e0140b6cc0}{index}
+\item 
+\hyperlink{namespaceX86ISA_a69329e1d929a534ff51be6cf8216b69a}{RegIndex} \hyperlink{structX86ISA_1_1EmulEnv_acd7cdac3bd7929336e8da2a081692dc3}{base}
+\item 
+int \hyperlink{structX86ISA_1_1EmulEnv_a8c8e474bb8d2c6f7162455416b488e50}{dataSize}
+\item 
+int \hyperlink{structX86ISA_1_1EmulEnv_a634857712134690946c76d27713b6fa4}{addressSize}
+\item 
+int \hyperlink{structX86ISA_1_1EmulEnv_aa19ead659daf6b0a04ef9cd9ad3f1d8d}{stackSize}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{structX86ISA_1_1EmulEnv_a150178afb4bf886ad49be8f31f98e14b}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!EmulEnv@{EmulEnv}}
+\index{EmulEnv@{EmulEnv}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{EmulEnv}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EmulEnv} ({\bf RegIndex} {\em \_\-reg}, \/  {\bf RegIndex} {\em \_\-regm}, \/  int {\em \_\-dataSize}, \/  int {\em \_\-addressSize}, \/  int {\em \_\-stackSize})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structX86ISA_1_1EmulEnv_a150178afb4bf886ad49be8f31f98e14b}
+
+
+
+\begin{DoxyCode}
+63                                                                  :
+64             reg(_reg), regm(_regm), seg(SEGMENT_REG_DS),
+65             scale(0), index(NUM_INTREGS),
+66             base(NUM_INTREGS),
+67             dataSize(_dataSize), addressSize(_addressSize),
+68             stackSize(_stackSize)
+69         {;}
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{structX86ISA_1_1EmulEnv_ae8a901694f1a63aaa9cf3c28faabe4ed}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!doModRM@{doModRM}}
+\index{doModRM@{doModRM}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{doModRM}]{\setlength{\rightskip}{0pt plus 5cm}void doModRM (const {\bf ExtMachInst} \& {\em machInst})}}
+\label{structX86ISA_1_1EmulEnv_ae8a901694f1a63aaa9cf3c28faabe4ed}
+
+
+
+\begin{DoxyCode}
+48 {
+49     assert(machInst.modRM.mod != 3);
+50     //Use the SIB byte for addressing if the modrm byte calls for it.
+51     if (machInst.modRM.rm == 4 && machInst.addrSize != 2) {
+52         scale = 1 << machInst.sib.scale;
+53         index = machInst.sib.index | (machInst.rex.x << 3);
+54         base = machInst.sib.base | (machInst.rex.b << 3);
+55         //In this special case, we don't use a base. The displacement also
+56         //changes, but that's managed by the decoder.
+57         if (machInst.sib.base == INTREG_RBP && machInst.modRM.mod == 0)
+58             base = NUM_INTREGS;
+59         //In -this- special case, we don't use an index.
+60         if (index == INTREG_RSP)
+61             index = NUM_INTREGS;
+62     } else {
+63         if (machInst.addrSize == 2) {
+64             unsigned rm = machInst.modRM.rm;
+65             if (rm <= 3) {
+66                 scale = 1;
+67                 if (rm < 2) {
+68                     base = INTREG_RBX;
+69                 } else {
+70                     base = INTREG_RBP;
+71                 }
+72                 index = (rm % 2) ? INTREG_RDI : INTREG_RSI;
+73             } else {
+74                 scale = 0;
+75                 switch (rm) {
+76                   case 4:
+77                     base = INTREG_RSI;
+78                     break;
+79                   case 5:
+80                     base = INTREG_RDI;
+81                     break;
+82                   case 6:
+83                     base = INTREG_RBP;
+84                     break;
+85                   case 7:
+86                     base = INTREG_RBX;
+87                     break;
+88                 }
+89             }
+90         } else {
+91             scale = 0;
+92             base = machInst.modRM.rm | (machInst.rex.b << 3);
+93             if (machInst.modRM.mod == 0 && machInst.modRM.rm == 5) {
+94                 //Since we need to use a different encoding of this
+95                 //instruction anyway, just ignore the base in those cases
+96                 base = NUM_INTREGS;
+97             }
+98         }
+99     }
+100     //Figure out what segment to use. This won't be entirely accurate since
+101     //the presence of a displacement is supposed to make the instruction
+102     //default to the data segment.
+103     if ((base != INTREG_RBP && base != INTREG_RSP) || machInst.dispSize) {
+104         seg = SEGMENT_REG_DS;
+105         //Handle any segment override that might have been in the instruction
+106         int segFromInst = machInst.legacy.seg;
+107         if (segFromInst)
+108             seg = (SegmentRegIndex)(segFromInst - 1);
+109     } else {
+110         seg = SEGMENT_REG_SS;
+111     }
+112 }
+\end{DoxyCode}
+\hypertarget{structX86ISA_1_1EmulEnv_a1551fe2bf04bbf608dbcf23167211192}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!setSeg@{setSeg}}
+\index{setSeg@{setSeg}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{setSeg}]{\setlength{\rightskip}{0pt plus 5cm}void setSeg (const {\bf ExtMachInst} \& {\em machInst})}}
+\label{structX86ISA_1_1EmulEnv_a1551fe2bf04bbf608dbcf23167211192}
+
+
+
+\begin{DoxyCode}
+115 {
+116     seg = SEGMENT_REG_DS;
+117     //Handle any segment override that might have been in the instruction
+118     int segFromInst = machInst.legacy.seg;
+119     if (segFromInst)
+120         seg = (SegmentRegIndex)(segFromInst - 1);
+121 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{structX86ISA_1_1EmulEnv_a634857712134690946c76d27713b6fa4}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!addressSize@{addressSize}}
+\index{addressSize@{addressSize}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{addressSize}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf addressSize}}}
+\label{structX86ISA_1_1EmulEnv_a634857712134690946c76d27713b6fa4}
+\hypertarget{structX86ISA_1_1EmulEnv_acd7cdac3bd7929336e8da2a081692dc3}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!base@{base}}
+\index{base@{base}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{base}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegIndex} {\bf base}}}
+\label{structX86ISA_1_1EmulEnv_acd7cdac3bd7929336e8da2a081692dc3}
+\hypertarget{structX86ISA_1_1EmulEnv_a8c8e474bb8d2c6f7162455416b488e50}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!dataSize@{dataSize}}
+\index{dataSize@{dataSize}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{dataSize}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf dataSize}}}
+\label{structX86ISA_1_1EmulEnv_a8c8e474bb8d2c6f7162455416b488e50}
+\hypertarget{structX86ISA_1_1EmulEnv_a4873352bf9ab22e599f727e0140b6cc0}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!index@{index}}
+\index{index@{index}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{index}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegIndex} {\bf index}}}
+\label{structX86ISA_1_1EmulEnv_a4873352bf9ab22e599f727e0140b6cc0}
+\hypertarget{structX86ISA_1_1EmulEnv_ab3cfff93a9eaf4043816e6667f4f4b5c}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!reg@{reg}}
+\index{reg@{reg}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{reg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegIndex} {\bf reg}}}
+\label{structX86ISA_1_1EmulEnv_ab3cfff93a9eaf4043816e6667f4f4b5c}
+\hypertarget{structX86ISA_1_1EmulEnv_a23102d8465dd60d680f731af9a84f689}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!regm@{regm}}
+\index{regm@{regm}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{regm}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegIndex} {\bf regm}}}
+\label{structX86ISA_1_1EmulEnv_a23102d8465dd60d680f731af9a84f689}
+\hypertarget{structX86ISA_1_1EmulEnv_a616c0a72f0e4af38b93c736773ac7210}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!scale@{scale}}
+\index{scale@{scale}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{scale}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf scale}}}
+\label{structX86ISA_1_1EmulEnv_a616c0a72f0e4af38b93c736773ac7210}
+\hypertarget{structX86ISA_1_1EmulEnv_af746478528438f57577dbfd5f772079e}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!seg@{seg}}
+\index{seg@{seg}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{seg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SegmentRegIndex} {\bf seg}}}
+\label{structX86ISA_1_1EmulEnv_af746478528438f57577dbfd5f772079e}
+\hypertarget{structX86ISA_1_1EmulEnv_aa19ead659daf6b0a04ef9cd9ad3f1d8d}{
+\index{X86ISA::EmulEnv@{X86ISA::EmulEnv}!stackSize@{stackSize}}
+\index{stackSize@{stackSize}!X86ISA::EmulEnv@{X86ISA::EmulEnv}}
+\subsubsection[{stackSize}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf stackSize}}}
+\label{structX86ISA_1_1EmulEnv_aa19ead659daf6b0a04ef9cd9ad3f1d8d}
+
+
+この構造体の説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/\hyperlink{emulenv_8hh}{emulenv.hh}\item 
+arch/x86/\hyperlink{emulenv_8cc}{emulenv.cc}\end{DoxyCompactItemize}

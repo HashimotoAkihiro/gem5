@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/kvm/base.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/kvm/base.hh</h1><a href="cpu_2kvm_2base_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Andreas Sandberg</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __CPU_KVM_BASE_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_KVM_BASE_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &lt;pthread.h&gt;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="preprocessor">#include &lt;csignal&gt;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;memory&gt;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="perfevent_8hh.html">cpu/kvm/perfevent.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="timer_8hh.html">cpu/kvm/timer.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="vm_8hh.html">cpu/kvm/vm.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2base_8hh.html">cpu/base.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="simple__thread_8hh.html">cpu/simple_thread.hh</a>&quot;</span>
+<a name="l00054"></a>00054 
+<a name="l00056"></a><a class="code" href="cpu_2kvm_2base_8hh.html#a7aba22a2f8cca986ad7802c54c654847">00056</a> <span class="preprocessor">#define KVM_KICK_SIGNAL SIGRTMIN</span>
+<a name="l00057"></a>00057 <span class="preprocessor"></span>
+<a name="l00058"></a>00058 <span class="comment">// forward declarations</span>
+<a name="l00059"></a>00059 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00060"></a>00060 <span class="keyword">struct </span>BaseKvmCPUParams;
+<a name="l00061"></a>00061 
+<a name="l00077"></a><a class="code" href="classBaseKvmCPU.html">00077</a> <span class="keyword">class </span><a class="code" href="classBaseKvmCPU_1_1BaseKvmCPU.html">BaseKvmCPU</a> : <span class="keyword">public</span> <a class="code" href="classBaseCPU.html">BaseCPU</a>
+<a name="l00078"></a>00078 {
+<a name="l00079"></a>00079   <span class="keyword">public</span>:
+<a name="l00080"></a>00080     <a class="code" href="classBaseKvmCPU.html#a9eb0b030bd0367a335c97b465d98f01c">BaseKvmCPU</a>(BaseKvmCPUParams *params);
+<a name="l00081"></a>00081     <span class="keyword">virtual</span> <a class="code" href="classBaseKvmCPU.html#abd186de5de7d9b8e90d2c1f08daf1ecd">~BaseKvmCPU</a>();
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00084"></a>00084     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#aecc7d8debf54990ffeaaed5bac7d7d81">startup</a>();
+<a name="l00085"></a>00085     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a688ca491f5419c29fb81f8235ba1dc13">serializeThread</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00088"></a>00088     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a5122e6d6fdbdb3cb9ba72ae970f00a9e">unserializeThread</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section,
+<a name="l00089"></a>00089                            <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00090"></a>00090 
+<a name="l00091"></a>00091     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classBaseKvmCPU.html#aa8a18d230dba7a674ac8a0b4f35bc36a">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="namespaceMipsISA.html#a2575c29e7f4617b6076486f340b6fe19">dm</a>);
+<a name="l00092"></a>00092     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a05f299b443f8cc73a93d61572edc0218">switchOut</a>();
+<a name="l00095"></a>00095     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a6ab19fbe58a682743f9e652e9777fdac">takeOverFrom</a>(<a class="code" href="classBaseCPU.html">BaseCPU</a> *cpu);
+<a name="l00096"></a>00096 
+<a name="l00097"></a>00097     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ae2e1ccebe596a180f8105d57f9a93645">verifyMemoryMode</a>() <span class="keyword">const</span>;
+<a name="l00098"></a>00098 
+<a name="l00099"></a><a class="code" href="classBaseKvmCPU.html#a041a57fcad534c1bed3702a0f8f3a6b1">00099</a>     <a class="code" href="classMasterPort.html">MasterPort</a> &amp;<a class="code" href="classBaseKvmCPU.html#a041a57fcad534c1bed3702a0f8f3a6b1">getDataPort</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseKvmCPU.html#a3f709bd88ed61bca6788f8cc3cda97cb">dataPort</a>; }
+<a name="l00100"></a><a class="code" href="classBaseKvmCPU.html#ab8ce6baf7cb0aaaf4ca346896a86fa03">00100</a>     <a class="code" href="classMasterPort.html">MasterPort</a> &amp;<a class="code" href="classBaseKvmCPU.html#ab8ce6baf7cb0aaaf4ca346896a86fa03">getInstPort</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseKvmCPU.html#a3d1157769fdf1f3b9566f70b9e7c30ea">instPort</a>; }
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>();
+<a name="l00103"></a>00103     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ad7a501b28bdbe8b3e708cd1ef69ac191">activateContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> thread_num, <a class="code" href="classCycles.html">Cycles</a> delay);
+<a name="l00104"></a>00104     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a1dad4c4d2c3df4ef367e14fcc973ce74">suspendContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> thread_num);
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a49259982c98a7959f39b77db5069fea0">deallocateContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> thread_num);
+<a name="l00106"></a>00106     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ab39525f324a8a93139e17327f6ccde10">haltContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> thread_num);
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classBaseKvmCPU.html#a2199ea70043ddde97c86e49a656b7ba9">getContext</a>(<span class="keywordtype">int</span> tn);
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classBaseKvmCPU.html#a7e01d94bb5a6e15fa8c94bcdf276115d">totalInsts</a>() <span class="keyword">const</span>;
+<a name="l00111"></a>00111     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classBaseKvmCPU.html#a76fa5df6827aaa8fc26deebad97d9e78">totalOps</a>() <span class="keyword">const</span>;
+<a name="l00112"></a>00112 
+<a name="l00114"></a>00114     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#accd2600060dbaee3a3b41aed4034c63c">dump</a>();
+<a name="l00115"></a>00115 
+<a name="l00122"></a><a class="code" href="classBaseKvmCPU.html#ae984a01dc23c52800f5fe28344f59b81">00122</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ae984a01dc23c52800f5fe28344f59b81">kick</a>()<span class="keyword"> const </span>{ pthread_kill(<a class="code" href="classBaseKvmCPU.html#a8a181f878f7db2579a3a67dd2d8c5902">vcpuThread</a>, <a class="code" href="cpu_2kvm_2base_8hh.html#a7aba22a2f8cca986ad7802c54c654847">KVM_KICK_SIGNAL</a>); }
+<a name="l00123"></a>00123 
+<a name="l00137"></a><a class="code" href="classBaseKvmCPU.html#af9572fa907cd21b54cb14bd626010d39">00137</a>     <a class="code" href="classSimpleThread.html">SimpleThread</a> *<a class="code" href="classBaseKvmCPU.html#af9572fa907cd21b54cb14bd626010d39">thread</a>;
+<a name="l00138"></a>00138 
+<a name="l00142"></a><a class="code" href="classBaseKvmCPU.html#a4455a4759e69e5ebe68ae7298cbcc37d">00142</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classBaseKvmCPU.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>;
+<a name="l00143"></a>00143 
+<a name="l00144"></a><a class="code" href="classBaseKvmCPU.html#a6b8ecd9ec419f0cbe3c1047be643fe08">00144</a>     <a class="code" href="classKvmVM.html">KvmVM</a> &amp;<a class="code" href="classBaseKvmCPU.html#a6b8ecd9ec419f0cbe3c1047be643fe08">vm</a>;
+<a name="l00145"></a>00145 
+<a name="l00146"></a>00146   <span class="keyword">protected</span>:
+<a name="l00169"></a><a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">00169</a>     <span class="keyword">enum</span> <a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> {
+<a name="l00179"></a><a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">00179</a>         <a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00185"></a><a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">00185</a>         <a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">Running</a>,
+<a name="l00198"></a><a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba30f0df86d1d54bb5ea7ee293977f73df">00198</a>         <a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba30f0df86d1d54bb5ea7ee293977f73df">RunningService</a>,
+<a name="l00207"></a><a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba8d38f5f3c8c186646364b893e12e6ae0">00207</a>         <a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba8d38f5f3c8c186646364b893e12e6ae0">RunningServiceCompletion</a>,
+<a name="l00208"></a>00208     };
+<a name="l00209"></a>00209 
+<a name="l00211"></a><a class="code" href="classBaseKvmCPU.html#a6cdf6e6db875a442f3ab6db542bd2bb5">00211</a>     <a class="code" href="classBaseKvmCPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classBaseKvmCPU.html#a6cdf6e6db875a442f3ab6db542bd2bb5">_status</a>;
+<a name="l00212"></a>00212 
+<a name="l00217"></a>00217     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00218"></a>00218 
+<a name="l00232"></a>00232     <span class="keyword">virtual</span> uint64_t <a class="code" href="classBaseKvmCPU.html#abcad2a22057ba48360b17b978f694b48">getHostCycles</a>() <span class="keyword">const</span>;
+<a name="l00233"></a>00233 
+<a name="l00260"></a>00260     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#aed3dbd0c0bf26d82ee56367a3f350506">kvmRun</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> ticks);
+<a name="l00261"></a>00261 
+<a name="l00273"></a>00273     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a405afc17ad0dee3b816012ce909b2b6f">kvmRunDrain</a>();
+<a name="l00274"></a>00274 
+<a name="l00279"></a><a class="code" href="classBaseKvmCPU.html#ae544593d8bd3763ec6cf4cc7d0fd614b">00279</a>     <span class="keyword">struct </span>kvm_run *<a class="code" href="classBaseKvmCPU.html#ae544593d8bd3763ec6cf4cc7d0fd614b">getKvmRunState</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseKvmCPU.html#ab174cc060c981cfd21406dc3797c8c6b">_kvmRun</a>; };
+<a name="l00280"></a>00280 
+<a name="l00289"></a><a class="code" href="classBaseKvmCPU.html#a0e5c1a55b7cce45487f5778ee272acdf">00289</a>     uint8_t *<a class="code" href="classBaseKvmCPU.html#a0e5c1a55b7cce45487f5778ee272acdf">getGuestData</a>(uint64_t <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>)<span class="keyword"> const </span>{
+<a name="l00290"></a>00290         <span class="keywordflow">return</span> (uint8_t *)<a class="code" href="classBaseKvmCPU.html#ab174cc060c981cfd21406dc3797c8c6b">_kvmRun</a> + offset;
+<a name="l00291"></a>00291     };
+<a name="l00292"></a>00292 
+<a name="l00302"></a>00302     <span class="keywordtype">void</span> <a class="code" href="group__KvmInterrupts.html#gabc700469cba2d4bba666902e552e7c2e">kvmNonMaskableInterrupt</a>();
+<a name="l00303"></a>00303 
+<a name="l00314"></a>00314     <span class="keywordtype">void</span> <a class="code" href="group__KvmInterrupts.html#ga16b8f95e3f70098952604e6b8a121679">kvmInterrupt</a>(<span class="keyword">const</span> <span class="keyword">struct</span> kvm_interrupt &amp;interrupt);
+<a name="l00315"></a>00315 
+<a name="l00328"></a>00328     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a422ac5896dab3bae0379fa65831e3778">getRegisters</a>(<span class="keyword">struct</span> kvm_regs &amp;regs) <span class="keyword">const</span>;
+<a name="l00329"></a>00329     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a104d34588afdf9e14607bad09f01bd53">setRegisters</a>(<span class="keyword">const</span> <span class="keyword">struct</span> kvm_regs &amp;regs);
+<a name="l00330"></a>00330     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a5b5f3c0a541efb9b8567a5e835421c15">getSpecialRegisters</a>(<span class="keyword">struct</span> kvm_sregs &amp;regs) <span class="keyword">const</span>;
+<a name="l00331"></a>00331     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#aefaac43fa62903f42a68a637083d5f09">setSpecialRegisters</a>(<span class="keyword">const</span> <span class="keyword">struct</span> kvm_sregs &amp;regs);
+<a name="l00338"></a>00338     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a9fdafd736b7b9ef041b6c3e4768a61d6">getFPUState</a>(<span class="keyword">struct</span> kvm_fpu &amp;state) <span class="keyword">const</span>;
+<a name="l00339"></a>00339     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a31b5d1e73edb46a17fa0a8ddd29e7604">setFPUState</a>(<span class="keyword">const</span> <span class="keyword">struct</span> kvm_fpu &amp;state);
+<a name="l00348"></a>00348     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ad96695f9596f808056054f3c2026b818">setOneReg</a>(uint64_t <span class="keywordtype">id</span>, <span class="keyword">const</span> <span class="keywordtype">void</span> *<a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00349"></a><a class="code" href="classBaseKvmCPU.html#a0f8ff23affd5f22fc47c4d00e6d24979">00349</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a0f8ff23affd5f22fc47c4d00e6d24979">setOneReg</a>(uint64_t <span class="keywordtype">id</span>, uint64_t <a class="code" href="namespacegenini.html#a7e5f482a3a8a4f98bd1a9c124485f572">value</a>) { <a class="code" href="classBaseKvmCPU.html#a0f8ff23affd5f22fc47c4d00e6d24979">setOneReg</a>(<span class="keywordtype">id</span>, &amp;value); }
+<a name="l00350"></a><a class="code" href="classBaseKvmCPU.html#ab70d563942fa831d4de5da7d94ba8064">00350</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ab70d563942fa831d4de5da7d94ba8064">setOneReg</a>(uint64_t <span class="keywordtype">id</span>, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespacegenini.html#a7e5f482a3a8a4f98bd1a9c124485f572">value</a>) { <a class="code" href="classBaseKvmCPU.html#ab70d563942fa831d4de5da7d94ba8064">setOneReg</a>(<span class="keywordtype">id</span>, &amp;value); }
+<a name="l00351"></a>00351     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ab5a47c64ebf5a4de2539c6f71f7acc51">getOneReg</a>(uint64_t <span class="keywordtype">id</span>, <span class="keywordtype">void</span> *<a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span>;
+<a name="l00352"></a><a class="code" href="classBaseKvmCPU.html#a803c633f6b9fc380a376a5a6d2ca17ee">00352</a>     uint64_t <a class="code" href="classBaseKvmCPU.html#a803c633f6b9fc380a376a5a6d2ca17ee">getOneRegU64</a>(uint64_t <span class="keywordtype">id</span>)<span class="keyword"> const </span>{
+<a name="l00353"></a>00353         uint64_t <a class="code" href="namespacegenini.html#a7e5f482a3a8a4f98bd1a9c124485f572">value</a>;
+<a name="l00354"></a>00354         <a class="code" href="classBaseKvmCPU.html#ab5a47c64ebf5a4de2539c6f71f7acc51">getOneReg</a>(<span class="keywordtype">id</span>, &amp;value);
+<a name="l00355"></a>00355         <span class="keywordflow">return</span> value;
+<a name="l00356"></a>00356     }
+<a name="l00357"></a><a class="code" href="classBaseKvmCPU.html#abb51d3ccd07e153be4d5982c324a95bc">00357</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classBaseKvmCPU.html#abb51d3ccd07e153be4d5982c324a95bc">getOneRegU32</a>(uint64_t <span class="keywordtype">id</span>)<span class="keyword"> const </span>{
+<a name="l00358"></a>00358         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespacegenini.html#a7e5f482a3a8a4f98bd1a9c124485f572">value</a>;
+<a name="l00359"></a>00359         <a class="code" href="classBaseKvmCPU.html#ab5a47c64ebf5a4de2539c6f71f7acc51">getOneReg</a>(<span class="keywordtype">id</span>, &amp;value);
+<a name="l00360"></a>00360         <span class="keywordflow">return</span> value;
+<a name="l00361"></a>00361     }
+<a name="l00372"></a>00372     std::string <a class="code" href="classBaseKvmCPU.html#af080be5963a74cfafcfc1db16f294f1a">getAndFormatOneReg</a>(uint64_t <span class="keywordtype">id</span>) <span class="keyword">const</span>;
+<a name="l00373"></a>00373 
+<a name="l00383"></a>00383     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a48817be7bf03ef44cc5114ecf4df9b27">updateKvmState</a>() = 0;
+<a name="l00384"></a>00384 
+<a name="l00393"></a>00393     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#ac47bfb587580ca76050e0c9bc753c10d">updateThreadContext</a>() = 0;
+<a name="l00394"></a>00394 
+<a name="l00399"></a>00399     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a5d4ee3823af24f9210efb370a4c8ce93">syncThreadContext</a>();
+<a name="l00400"></a>00400 
+<a name="l00404"></a>00404     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a8633407bfc3732fef1f78ef60345873d">syncKvmState</a>();
+<a name="l00414"></a>00414     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#ab7dc26d4e02dbccc343942dd7a3ed7d8">handleKvmExit</a>();
+<a name="l00415"></a>00415 
+<a name="l00421"></a>00421     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a404fbd80d6676724d026a932b2258dc7">handleKvmExitIO</a>();
+<a name="l00422"></a>00422 
+<a name="l00428"></a>00428     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a32523a85b6259326f71aea298ae96ff6">handleKvmExitHypercall</a>();
+<a name="l00429"></a>00429 
+<a name="l00439"></a>00439     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a405e34c9d079e8823ac2a1ca0e816a47">handleKvmExitIRQWindowOpen</a>();
+<a name="l00440"></a>00440 
+<a name="l00453"></a>00453     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a00e63a4b01cf730bba2c42ef852b0876">handleKvmExitUnknown</a>();
+<a name="l00454"></a>00454 
+<a name="l00464"></a>00464     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a9e36bfbe1df222d0ceeaa2f83ad8fa2b">handleKvmExitException</a>();
+<a name="l00465"></a>00465 
+<a name="l00474"></a>00474     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a0dfcd253bad58e13a071f638d6638b1e">handleKvmExitFailEntry</a>();
+<a name="l00493"></a><a class="code" href="classBaseKvmCPU.html#a4ee4cbdc5d3315fd8016b44d3e77abd5">00493</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classBaseKvmCPU.html#a4ee4cbdc5d3315fd8016b44d3e77abd5">archIsDrained</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00494"></a>00494 
+<a name="l00504"></a>00504     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a1a68601eed760a2ebbe974e685901b60">doMMIOAccess</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> paddr, <span class="keywordtype">void</span> *data, <span class="keywordtype">int</span> size, <span class="keywordtype">bool</span> write);
+<a name="l00505"></a>00505 
+<a name="l00519"></a>00519     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a76bff52136628a5be57e6d1ea8ff5370">setSignalMask</a>(<span class="keyword">const</span> sigset_t *<a class="code" href="namespaceArmISA.html#a9534dbda5e7db9881c7955c6e08cfdc0">mask</a>);
+<a name="l00535"></a>00535     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(<span class="keywordtype">int</span> request, <span class="keywordtype">long</span> p1) <span class="keyword">const</span>;
+<a name="l00536"></a><a class="code" href="group__KvmIoctl.html#ga89db87cb31fe2ba732de8fa68c8bd1f1">00536</a>     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga89db87cb31fe2ba732de8fa68c8bd1f1">ioctl</a>(<span class="keywordtype">int</span> request, <span class="keywordtype">void</span> *p1)<span class="keyword"> const </span>{
+<a name="l00537"></a>00537         <span class="keywordflow">return</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(request, (<span class="keywordtype">long</span>)p1);
+<a name="l00538"></a>00538     }
+<a name="l00539"></a><a class="code" href="group__KvmIoctl.html#ga32cd3b0742689c29c9ab9e3e03feb5f2">00539</a>     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga32cd3b0742689c29c9ab9e3e03feb5f2">ioctl</a>(<span class="keywordtype">int</span> request)<span class="keyword"> const </span>{
+<a name="l00540"></a>00540         <span class="keywordflow">return</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(request, 0<a class="code" href="namespaceX86ISA.html#a0485da3ef528ce3058f6f335248c0764">L</a>);
+<a name="l00541"></a>00541     }
+<a name="l00549"></a><a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html">00549</a>     <span class="keyword">class </span><a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html">KVMCpuPort</a> : <span class="keyword">public</span> <a class="code" href="classMasterPort.html">MasterPort</a>
+<a name="l00550"></a>00550     {
+<a name="l00551"></a>00551 
+<a name="l00552"></a>00552       <span class="keyword">public</span>:
+<a name="l00553"></a><a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html#ab931237cb0e359b959dda61ba1bcc011">00553</a>         <a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html#ab931237cb0e359b959dda61ba1bcc011">KVMCpuPort</a>(<span class="keyword">const</span> std::string &amp;_name, <a class="code" href="classBaseKvmCPU_1_1BaseKvmCPU.html">BaseKvmCPU</a> *_cpu)
+<a name="l00554"></a>00554             : <a class="code" href="classMasterPort.html">MasterPort</a>(_name, _cpu)
+<a name="l00555"></a>00555         { }
+<a name="l00556"></a>00556 
+<a name="l00557"></a>00557       <span class="keyword">protected</span>:
+<a name="l00558"></a><a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html#a482dba5588f4bee43e498875a61e5e0b">00558</a>         <span class="keywordtype">bool</span> <a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00559"></a>00559         {
+<a name="l00560"></a>00560             <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;The KVM CPU doesn&apos;t expect recvTimingResp!\n&quot;</span>);
+<a name="l00561"></a>00561             <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00562"></a>00562         }
+<a name="l00563"></a>00563 
+<a name="l00564"></a><a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html#a29cb5a4f98063ce6e9210eacbdb35298">00564</a>         <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>()
+<a name="l00565"></a>00565         {
+<a name="l00566"></a>00566             <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;The KVM CPU doesn&apos;t expect recvRetry!\n&quot;</span>);
+<a name="l00567"></a>00567         }
+<a name="l00568"></a>00568 
+<a name="l00569"></a>00569     };
+<a name="l00570"></a>00570 
+<a name="l00572"></a><a class="code" href="classBaseKvmCPU.html#a3f709bd88ed61bca6788f8cc3cda97cb">00572</a>     <a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html">KVMCpuPort</a> <a class="code" href="classBaseKvmCPU.html#a3f709bd88ed61bca6788f8cc3cda97cb">dataPort</a>;
+<a name="l00573"></a>00573 
+<a name="l00575"></a><a class="code" href="classBaseKvmCPU.html#a3d1157769fdf1f3b9566f70b9e7c30ea">00575</a>     <a class="code" href="classBaseKvmCPU_1_1KVMCpuPort.html">KVMCpuPort</a> <a class="code" href="classBaseKvmCPU.html#a3d1157769fdf1f3b9566f70b9e7c30ea">instPort</a>;
+<a name="l00576"></a>00576 
+<a name="l00578"></a><a class="code" href="classBaseKvmCPU.html#a22caf021a7ece8d92e5ab612191b1b57">00578</a>     <a class="code" href="classRequest.html">Request</a> <a class="code" href="classBaseKvmCPU.html#a22caf021a7ece8d92e5ab612191b1b57">mmio_req</a>;
+<a name="l00579"></a>00579 
+<a name="l00584"></a><a class="code" href="classBaseKvmCPU.html#a8d712456c8dd8a9842aa40a69dbc27dd">00584</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseKvmCPU.html#a8d712456c8dd8a9842aa40a69dbc27dd">threadContextDirty</a>;
+<a name="l00585"></a>00585 
+<a name="l00590"></a><a class="code" href="classBaseKvmCPU.html#a32fdccc14987171c2381947096c363f1">00590</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseKvmCPU.html#a32fdccc14987171c2381947096c363f1">kvmStateDirty</a>;
+<a name="l00591"></a>00591 
+<a name="l00593"></a><a class="code" href="classBaseKvmCPU.html#ac52bdf6886dcfd53068633de9ed83184">00593</a>     <span class="keyword">const</span> <span class="keywordtype">long</span> <a class="code" href="classBaseKvmCPU.html#ac52bdf6886dcfd53068633de9ed83184">vcpuID</a>;
+<a name="l00594"></a>00594 
+<a name="l00596"></a><a class="code" href="classBaseKvmCPU.html#a8a181f878f7db2579a3a67dd2d8c5902">00596</a>     pthread_t <a class="code" href="classBaseKvmCPU.html#a8a181f878f7db2579a3a67dd2d8c5902">vcpuThread</a>;
+<a name="l00597"></a>00597 
+<a name="l00598"></a>00598   <span class="keyword">private</span>:
+<a name="l00599"></a><a class="code" href="structBaseKvmCPU_1_1TickEvent.html">00599</a>     <span class="keyword">struct </span><a class="code" href="structBaseKvmCPU_1_1TickEvent.html">TickEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00600"></a>00600     {
+<a name="l00601"></a><a class="code" href="structBaseKvmCPU_1_1TickEvent.html#ad3132ce2aaba599747054be6dd41e0b8">00601</a>         <a class="code" href="classBaseKvmCPU_1_1BaseKvmCPU.html">BaseKvmCPU</a> &amp;cpu;
+<a name="l00602"></a>00602 
+<a name="l00603"></a><a class="code" href="structBaseKvmCPU_1_1TickEvent.html#a0cf125d5e9c74145a4b007bdfd646236">00603</a>         <a class="code" href="structBaseKvmCPU_1_1TickEvent.html#a0cf125d5e9c74145a4b007bdfd646236">TickEvent</a>(<a class="code" href="classBaseKvmCPU_1_1BaseKvmCPU.html">BaseKvmCPU</a> &amp;<a class="code" href="namespaceArmISA.html#a29b9f05234a93d5391014a3cfc5658b1">c</a>)
+<a name="l00604"></a>00604             : <a class="code" href="classEvent.html">Event</a>(<a class="code" href="classEventBase.html#a654adc14d3292be01ccfcfc16cda2e88">CPU_Tick_Pri</a>), cpu(c) {}
+<a name="l00605"></a>00605 
+<a name="l00606"></a><a class="code" href="structBaseKvmCPU_1_1TickEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">00606</a>         <span class="keywordtype">void</span> <a class="code" href="structBaseKvmCPU_1_1TickEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>() { cpu.tick(); }
+<a name="l00607"></a>00607 
+<a name="l00608"></a><a class="code" href="structBaseKvmCPU_1_1TickEvent.html#a2bd90422eece9190794479e08092a252">00608</a>         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="structBaseKvmCPU_1_1TickEvent.html#a2bd90422eece9190794479e08092a252">description</a>()<span class="keyword"> const </span>{
+<a name="l00609"></a>00609             <span class="keywordflow">return</span> <span class="stringliteral">&quot;BaseKvmCPU tick&quot;</span>;
+<a name="l00610"></a>00610         }
+<a name="l00611"></a>00611     };
+<a name="l00612"></a>00612 
+<a name="l00620"></a>00620     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseKvmCPU.html#a2858df681aa95b652e3d371d56def5a3">flushCoalescedMMIO</a>();
+<a name="l00621"></a>00621 
+<a name="l00626"></a>00626     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#acae9fda1e38c2cd8a3d7c8659a4a66fa">setupSignalHandler</a>();
+<a name="l00627"></a>00627 
+<a name="l00634"></a>00634     <span class="keywordtype">bool</span> <a class="code" href="classBaseKvmCPU.html#a8e9cbc5cd93017313960f88c346493ee">discardPendingSignal</a>(<span class="keywordtype">int</span> signum) <span class="keyword">const</span>;
+<a name="l00635"></a>00635 
+<a name="l00648"></a>00648     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#abc1464ae4d17eb8f6ea86c6bb5f68532">startupThread</a>();
+<a name="l00649"></a>00649 
+<a name="l00651"></a>00651     <span class="keywordtype">bool</span> <a class="code" href="classBaseKvmCPU.html#a250ca18dfc0316e340eaa2ec45d73c3e">tryDrain</a>();
+<a name="l00652"></a>00652 
+<a name="l00654"></a>00654     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a745968f1246564028e5b3fd8dde0548d">ioctlRun</a>();
+<a name="l00655"></a>00655 
+<a name="l00657"></a><a class="code" href="classBaseKvmCPU.html#a6b91f8b5649b80e8424cebfa3047e1d0">00657</a>     <span class="keywordtype">int</span> <a class="code" href="classBaseKvmCPU.html#a6b91f8b5649b80e8424cebfa3047e1d0">vcpuFD</a>;
+<a name="l00659"></a><a class="code" href="classBaseKvmCPU.html#a0915679bdc25b2c015f15996f6d4ff6d">00659</a>     <span class="keywordtype">int</span> <a class="code" href="classBaseKvmCPU.html#a0915679bdc25b2c015f15996f6d4ff6d">vcpuMMapSize</a>;
+<a name="l00668"></a><a class="code" href="classBaseKvmCPU.html#ab174cc060c981cfd21406dc3797c8c6b">00668</a>     <span class="keyword">struct </span>kvm_run *<a class="code" href="classBaseKvmCPU.html#ab174cc060c981cfd21406dc3797c8c6b">_kvmRun</a>;
+<a name="l00673"></a><a class="code" href="classBaseKvmCPU.html#ad4e1bcd3f032d2921aa97aec1fc7a45c">00673</a>     <span class="keyword">struct </span>kvm_coalesced_mmio_ring *<a class="code" href="classBaseKvmCPU.html#ad4e1bcd3f032d2921aa97aec1fc7a45c">mmioRing</a>;
+<a name="l00675"></a><a class="code" href="classBaseKvmCPU.html#a8386a4766759aabc32038300820a64aa">00675</a>     <span class="keyword">const</span> <span class="keywordtype">long</span> <a class="code" href="classBaseKvmCPU.html#a8386a4766759aabc32038300820a64aa">pageSize</a>;
+<a name="l00676"></a>00676 
+<a name="l00677"></a><a class="code" href="classBaseKvmCPU.html#aa36b8e894416f0ec98f701ab08f2ac22">00677</a>     <a class="code" href="structBaseKvmCPU_1_1TickEvent.html">TickEvent</a> <a class="code" href="classBaseKvmCPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>;
+<a name="l00678"></a>00678 
+<a name="l00689"></a>00689     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a10bd071dda7c87970b3595b2d3c5408e">setupInstStop</a>();
+<a name="l00690"></a>00690 
+<a name="l00693"></a>00693     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a9a2709df130ee7a63e53f9d65a0ebb36">setupCounters</a>();
+<a name="l00694"></a>00694 
+<a name="l00705"></a>00705     <span class="keywordtype">void</span> <a class="code" href="classBaseKvmCPU.html#a807cad1db3257b823ffdb698c1e62a9a">setupInstCounter</a>(uint64_t period = 0);
+<a name="l00706"></a>00706 
+<a name="l00708"></a><a class="code" href="classBaseKvmCPU.html#a9b8c93980540464141f0989b8258295b">00708</a>     uint64_t <a class="code" href="classBaseKvmCPU.html#a9b8c93980540464141f0989b8258295b">activeInstPeriod</a>;
+<a name="l00709"></a>00709 
+<a name="l00718"></a><a class="code" href="classBaseKvmCPU.html#a496c1c0ab30aeafdeeeede34db1edf45">00718</a>     <a class="code" href="classPerfKvmCounter.html">PerfKvmCounter</a> <a class="code" href="classBaseKvmCPU.html#a496c1c0ab30aeafdeeeede34db1edf45">hwCycles</a>;
+<a name="l00719"></a>00719 
+<a name="l00731"></a><a class="code" href="classBaseKvmCPU.html#ab3360069d449c748e7b9efe5f6d427e9">00731</a>     <a class="code" href="classPerfKvmCounter.html">PerfKvmCounter</a> <a class="code" href="classBaseKvmCPU.html#ab3360069d449c748e7b9efe5f6d427e9">hwInstructions</a>;
+<a name="l00732"></a>00732 
+<a name="l00740"></a><a class="code" href="classBaseKvmCPU.html#a569365e1361250361be1c3f703a52914">00740</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseKvmCPU.html#a569365e1361250361be1c3f703a52914">perfControlledByTimer</a>;
+<a name="l00749"></a><a class="code" href="classBaseKvmCPU.html#a28c546a9aa908313559ed074632a0c37">00749</a>     std::unique_ptr&lt;BaseKvmTimer&gt; <a class="code" href="classBaseKvmCPU.html#a28c546a9aa908313559ed074632a0c37">runTimer</a>;
+<a name="l00750"></a>00750 
+<a name="l00752"></a><a class="code" href="classBaseKvmCPU.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">00752</a>     <span class="keywordtype">float</span> <a class="code" href="classBaseKvmCPU.html#a0ef366aa4bbbcdc2f7eeb7fcd3962dde">hostFactor</a>;
+<a name="l00753"></a>00753 
+<a name="l00759"></a><a class="code" href="classBaseKvmCPU.html#a329b71fb934a93312ca0aacbf5a3f982">00759</a>     <a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="classBaseKvmCPU.html#a329b71fb934a93312ca0aacbf5a3f982">drainManager</a>;
+<a name="l00760"></a>00760 
+<a name="l00761"></a>00761   <span class="keyword">public</span>:
+<a name="l00762"></a>00762     <span class="comment">/* @{ */</span>
+<a name="l00763"></a><a class="code" href="classBaseKvmCPU.html#a302bf9a6fd3b54c46eb3e2bfb18a320e">00763</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a302bf9a6fd3b54c46eb3e2bfb18a320e">numInsts</a>;
+<a name="l00764"></a><a class="code" href="classBaseKvmCPU.html#a6184fcde9e075404315cd7c343054d30">00764</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a6184fcde9e075404315cd7c343054d30">numVMExits</a>;
+<a name="l00765"></a><a class="code" href="classBaseKvmCPU.html#a8ef83ba51e6ab5f5db813c16e3cebb1d">00765</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a8ef83ba51e6ab5f5db813c16e3cebb1d">numVMHalfEntries</a>;
+<a name="l00766"></a><a class="code" href="classBaseKvmCPU.html#a6cdcd551476b4e8234d5bfd987218d88">00766</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a6cdcd551476b4e8234d5bfd987218d88">numExitSignal</a>;
+<a name="l00767"></a><a class="code" href="classBaseKvmCPU.html#a4030a87068a8b133f5efabfc19f7542d">00767</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a4030a87068a8b133f5efabfc19f7542d">numMMIO</a>;
+<a name="l00768"></a><a class="code" href="classBaseKvmCPU.html#a99a92abe3f29c3d0f59af4e384a8fe7f">00768</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a99a92abe3f29c3d0f59af4e384a8fe7f">numCoalescedMMIO</a>;
+<a name="l00769"></a><a class="code" href="classBaseKvmCPU.html#ae3a09de1034e0294f5df0ce66d876727">00769</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#ae3a09de1034e0294f5df0ce66d876727">numIO</a>;
+<a name="l00770"></a><a class="code" href="classBaseKvmCPU.html#a65e906b9e123036deb6bc8922ce53e96">00770</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a65e906b9e123036deb6bc8922ce53e96">numHalt</a>;
+<a name="l00771"></a><a class="code" href="classBaseKvmCPU.html#a5ff214621d200e4672d581b12832886a">00771</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a5ff214621d200e4672d581b12832886a">numInterrupts</a>;
+<a name="l00772"></a><a class="code" href="classBaseKvmCPU.html#a230908c23db440bfcee954fb8d72f269">00772</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseKvmCPU.html#a230908c23db440bfcee954fb8d72f269">numHypercalls</a>;
+<a name="l00773"></a>00773     <span class="comment">/* @} */</span>
+<a name="l00774"></a>00774 
+<a name="l00776"></a><a class="code" href="classBaseKvmCPU.html#a4a8e80967bf91692eb1703752a8203b3">00776</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classBaseKvmCPU.html#a4a8e80967bf91692eb1703752a8203b3">ctrInsts</a>;
+<a name="l00777"></a>00777 };
+<a name="l00778"></a>00778 
+<a name="l00779"></a>00779 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

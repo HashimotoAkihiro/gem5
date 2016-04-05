@@ -1,0 +1,436 @@
+\hypertarget{namespacem5_1_1main}{
+\section{ネームスペース m5::main}
+\label{namespacem5_1_1main}\index{m5::main@{m5::main}}
+}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacem5_1_1main_a2bce6a0d2b107fc626748115ead2278d}{parse\_\-options}
+\item 
+def \hyperlink{namespacem5_1_1main_a659ca203513b5e8b6629d56f817d2c56}{interact}
+\item 
+def \hyperlink{namespacem5_1_1main_ad7f72c0fe293565319a7f5e3a7100fcb}{main}
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+list \hyperlink{namespacem5_1_1main_aa4a022e6ddacd362b83964da5cc5d044}{\_\-\_\-all\_\-\_\-} = \mbox{[} 'options', 'arguments', 'main' \mbox{]}
+\item 
+string \hyperlink{namespacem5_1_1main_a61e5f066c879e5430d8f713c2c3a8b31}{usage} = \char`\"{}\%prog \mbox{[}gem5 options\mbox{]} script.py \mbox{[}script options\mbox{]}\char`\"{}
+\item 
+string \hyperlink{namespacem5_1_1main_af9c8593b58583463efe6932e24c9d6e6}{version} = \char`\"{}\%prog 2.0\char`\"{}
+\item 
+\hyperlink{namespacem5_1_1main_ada1894ffa84d88fb55d34087f203ddca}{brief\_\-copyright} = $\backslash$
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespacem5_1_1main_a659ca203513b5e8b6629d56f817d2c56}{
+\index{m5::main@{m5::main}!interact@{interact}}
+\index{interact@{interact}!m5::main@{m5::main}}
+\subsubsection[{interact}]{\setlength{\rightskip}{0pt plus 5cm}def m5::main::interact ( {\em scope})}}
+\label{namespacem5_1_1main_a659ca203513b5e8b6629d56f817d2c56}
+
+
+
+\begin{DoxyCode}
+127                    :
+128     banner = "gem5 Interactive Console"
+129 
+130     ipshell = None
+131     prompt_in1 = "gem5 \\#> "
+132     prompt_out = "gem5 \\#: "
+133 
+134     # Is IPython version 0.10 or earlier available?
+135     try:
+136         from IPython.Shell import IPShellEmbed
+137         ipshell = IPShellEmbed(argv=["-prompt_in1", prompt_in1,
+138                                      "-prompt_out", prompt_out],
+139                                banner=banner, user_ns=scope)
+140     except ImportError:
+141         pass
+142 
+143     # Is IPython version 0.11 or later available?
+144     if not ipshell:
+145         try:
+146             import IPython
+147             from IPython.config.loader import Config
+148             from IPython.frontend.terminal.embed import InteractiveShellEmbed
+149 
+150             cfg = Config()
+151             cfg.PromptManager.in_template = prompt_in1
+152             cfg.PromptManager.out_template = prompt_out
+153             ipshell = InteractiveShellEmbed(config=cfg, user_ns=scope,
+154                                             banner1=banner)
+155         except ImportError:
+156             pass
+157 
+158     if ipshell:
+159         ipshell()
+160     else:
+161         # Use the Python shell in the standard library if IPython
+162         # isn't available.
+163         code.InteractiveConsole(scope).interact(banner)
+164 
+def main(*args):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1main_ad7f72c0fe293565319a7f5e3a7100fcb}{
+\index{m5::main@{m5::main}!main@{main}}
+\index{main@{main}!m5::main@{m5::main}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}def m5::main::main ( {\em args})}}
+\label{namespacem5_1_1main_ad7f72c0fe293565319a7f5e3a7100fcb}
+
+
+
+\begin{DoxyCode}
+165                :
+166     import m5
+167 
+168     import core
+169     import debug
+170     import defines
+171     import event
+172     import info
+173     import stats
+174     import trace
+175 
+176     from util import fatal
+177 
+178     if len(args) == 0:
+179         options, arguments = parse_options()
+180     elif len(args) == 2:
+181         options, arguments = args
+182     else:
+183         raise TypeError, "main() takes 0 or 2 arguments (%d given)" % len(args)
+184 
+185     m5.options = options
+186 
+187     def check_tracing():
+188         if defines.TRACING_ON:
+189             return
+190 
+191         fatal("Tracing is not enabled.  Compile with TRACING_ON")
+192 
+193     # Set the main event queue for the main thread.
+194     event.mainq = event.getEventQueue(0)
+195     event.setEventQueue(event.mainq)
+196 
+197     if not os.path.isdir(options.outdir):
+198         os.makedirs(options.outdir)
+199 
+200     # These filenames are used only if the redirect_std* options are set
+201     stdout_file = os.path.join(options.outdir, options.stdout_file)
+202     stderr_file = os.path.join(options.outdir, options.stderr_file)
+203 
+204     # Print redirection notices here before doing any redirection
+205     if options.redirect_stdout and not options.redirect_stderr:
+206         print "Redirecting stdout and stderr to", stdout_file
+207     else:
+208         if options.redirect_stdout:
+209             print "Redirecting stdout to", stdout_file
+210         if options.redirect_stderr:
+211             print "Redirecting stderr to", stderr_file
+212 
+213     # Now redirect stdout/stderr as desired
+214     if options.redirect_stdout:
+215         redir_fd = os.open(stdout_file, os. O_WRONLY | os.O_CREAT | os.O_TRUNC)
+216         os.dup2(redir_fd, sys.stdout.fileno())
+217         if not options.redirect_stderr:
+218             os.dup2(redir_fd, sys.stderr.fileno())
+219 
+220     if options.redirect_stderr:
+221         redir_fd = os.open(stderr_file, os. O_WRONLY | os.O_CREAT | os.O_TRUNC)
+222         os.dup2(redir_fd, sys.stderr.fileno())
+223 
+224     done = False
+225 
+226     if options.build_info:
+227         done = True
+228         print 'Build information:'
+229         print
+230         print 'compiled %s' % defines.compileDate;
+231         print 'build options:'
+232         keys = defines.buildEnv.keys()
+233         keys.sort()
+234         for key in keys:
+235             val = defines.buildEnv[key]
+236             print '    %s = %s' % (key, val)
+237         print
+238 
+239     if options.copyright:
+240         done = True
+241         print info.COPYING
+242         print
+243 
+244     if options.readme:
+245         done = True
+246         print 'Readme:'
+247         print
+248         print info.README
+249         print
+250 
+251     if options.debug_help:
+252         done = True
+253         check_tracing()
+254         debug.help()
+255 
+256     if options.list_sim_objects:
+257         import SimObject
+258         done = True
+259         print "SimObjects:"
+260         objects = SimObject.allClasses.keys()
+261         objects.sort()
+262         for name in objects:
+263             obj = SimObject.allClasses[name]
+264             print "    %s" % obj
+265             params = obj._params.keys()
+266             params.sort()
+267             for pname in params:
+268                 param = obj._params[pname]
+269                 default = getattr(param, 'default', '')
+270                 print "        %s" % pname
+271                 if default:
+272                     print "            default: %s" % default
+273                 print "            desc: %s" % param.desc
+274                 print
+275             print
+276 
+277     if done:
+278         sys.exit(0)
+279 
+280     # setting verbose and quiet at the same time doesn't make sense
+281     if options.verbose > 0 and options.quiet > 0:
+282         options.usage(2)
+283 
+284     verbose = options.verbose - options.quiet
+285     if verbose >= 0:
+286         print "gem5 Simulator System.  http://gem5.org"
+287         print brief_copyright
+288         print
+289 
+290         print "gem5 compiled %s" % defines.compileDate;
+291 
+292         print "gem5 started %s" % \
+293             datetime.datetime.now().strftime("%b %e %Y %X")
+294         print "gem5 executing on %s" % socket.gethostname()
+295 
+296         print "command line:",
+297         for argv in sys.argv:
+298             print argv,
+299         print
+300 
+301     # check to make sure we can find the listed script
+302     if not arguments or not os.path.isfile(arguments[0]):
+303         if arguments and not os.path.isfile(arguments[0]):
+304             print "Script %s not found" % arguments[0]
+305 
+306         options.usage(2)
+307 
+308     # tell C++ about output directory
+309     core.setOutputDir(options.outdir)
+310 
+311     # update the system path with elements from the -p option
+312     sys.path[0:0] = options.path
+313 
+314     # set stats options
+315     stats.initText(options.stats_file)
+316 
+317     # set debugging options
+318     debug.setRemoteGDBPort(options.remote_gdb_port)
+319     for when in options.debug_break:
+320         debug.schedBreak(int(when))
+321 
+322     if options.debug_flags:
+323         check_tracing()
+324 
+325         on_flags = []
+326         off_flags = []
+327         for flag in options.debug_flags:
+328             off = False
+329             if flag.startswith('-'):
+330                 flag = flag[1:]
+331                 off = True
+332 
+333             if flag not in debug.flags:
+334                 print >>sys.stderr, "invalid debug flag '%s'" % flag
+335                 sys.exit(1)
+336 
+337             if off:
+338                 debug.flags[flag].disable()
+339             else:
+340                 debug.flags[flag].enable()
+341 
+342     if options.debug_start:
+343         check_tracing()
+344         e = event.create(trace.enable, event.Event.Debug_Enable_Pri)
+345         event.mainq.schedule(e, options.debug_start)
+346     else:
+347         trace.enable()
+348 
+349     trace.output(options.debug_file)
+350 
+351     for ignore in options.debug_ignore:
+352         check_tracing()
+353         trace.ignore(ignore)
+354 
+355     sys.argv = arguments
+356     sys.path = [ os.path.dirname(sys.argv[0]) ] + sys.path
+357 
+358     filename = sys.argv[0]
+359     filedata = file(filename, 'r').read()
+360     filecode = compile(filedata, filename, 'exec')
+361     scope = { '__file__' : filename,
+362               '__name__' : '__m5_main__' }
+363 
+364     # we want readline if we're doing anything interactive
+365     if options.interactive or options.pdb:
+366         exec "import readline" in scope
+367 
+368     # if pdb was requested, execfile the thing under pdb, otherwise,
+369     # just do the execfile normally
+370     if options.pdb:
+371         import pdb
+372         import traceback
+373 
+374         pdb = pdb.Pdb()
+375         try:
+376             pdb.run(filecode, scope)
+377         except SystemExit:
+378             print "The program exited via sys.exit(). Exit status: ",
+379             print sys.exc_info()[1]
+380         except:
+381             traceback.print_exc()
+382             print "Uncaught exception. Entering post mortem debugging"
+383             t = sys.exc_info()[2]
+384             while t.tb_next is not None:
+385                 t = t.tb_next
+386                 pdb.interaction(t.tb_frame,t)
+387     else:
+388         exec filecode in scope
+389 
+390     # once the script is done
+391     if options.interactive:
+392         interact(scope)
+393 
+if __name__ == '__main__':
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1main_a2bce6a0d2b107fc626748115ead2278d}{
+\index{m5::main@{m5::main}!parse\_\-options@{parse\_\-options}}
+\index{parse\_\-options@{parse\_\-options}!m5::main@{m5::main}}
+\subsubsection[{parse\_\-options}]{\setlength{\rightskip}{0pt plus 5cm}def m5::main::parse\_\-options ()}}
+\label{namespacem5_1_1main_a2bce6a0d2b107fc626748115ead2278d}
+
+
+
+\begin{DoxyCode}
+42                    :
+43     import config
+44     from options import OptionParser
+45 
+46     options = OptionParser(usage=usage, version=version,
+47                            description=brief_copyright)
+48     option = options.add_option
+49     group = options.set_group
+50 
+51     # Help options
+52     option('-B', "--build-info", action="store_true", default=False,
+53         help="Show build information")
+54     option('-C', "--copyright", action="store_true", default=False,
+55         help="Show full copyright information")
+56     option('-R', "--readme", action="store_true", default=False,
+57         help="Show the readme")
+58 
+59     # Options for configuring the base simulator
+60     option('-d', "--outdir", metavar="DIR", default="m5out",
+61         help="Set the output directory to DIR [Default: %default]")
+62     option('-r', "--redirect-stdout", action="store_true", default=False,
+63         help="Redirect stdout (& stderr, without -e) to file")
+64     option('-e', "--redirect-stderr", action="store_true", default=False,
+65         help="Redirect stderr to file")
+66     option("--stdout-file", metavar="FILE", default="simout",
+67         help="Filename for -r redirection [Default: %default]")
+68     option("--stderr-file", metavar="FILE", default="simerr",
+69         help="Filename for -e redirection [Default: %default]")
+70     option('-i', "--interactive", action="store_true", default=False,
+71         help="Invoke the interactive interpreter after running the script")
+72     option("--pdb", action="store_true", default=False,
+73         help="Invoke the python debugger before running the script")
+74     option('-p', "--path", metavar="PATH[:PATH]", action='append', split=':',
+75         help="Prepend PATH to the system path when invoking the script")
+76     option('-q', "--quiet", action="count", default=0,
+77         help="Reduce verbosity")
+78     option('-v', "--verbose", action="count", default=0,
+79         help="Increase verbosity")
+80 
+81     # Statistics options
+82     group("Statistics Options")
+83     option("--stats-file", metavar="FILE", default="stats.txt",
+84         help="Sets the output file for statistics [Default: %default]")
+85 
+86     # Configuration Options
+87     group("Configuration Options")
+88     option("--dump-config", metavar="FILE", default="config.ini",
+89         help="Dump configuration output file [Default: %default]")
+90     option("--json-config", metavar="FILE", default="config.json",
+91         help="Create JSON output of the configuration [Default: %default]")
+92     option("--dot-config", metavar="FILE", default="config.dot",
+93         help="Create DOT & pdf outputs of the configuration [Default: %default]")
+      
+94 
+95     # Debugging options
+96     group("Debugging Options")
+97     option("--debug-break", metavar="TIME[,TIME]", action='append', split=',',
+98         help="Tick to create a breakpoint")
+99     option("--debug-help", action='store_true',
+100         help="Print help on debug flags")
+101     option("--debug-flags", metavar="FLAG[,FLAG]", action='append', split=',',
+102         help="Sets the flags for debug output (-FLAG disables a flag)")
+103     option("--debug-start", metavar="TIME", type='int',
+104         help="Start debug output at TIME (must be in ticks)")
+105     option("--debug-file", metavar="FILE", default="cout",
+106         help="Sets the output file for debug [Default: %default]")
+107     option("--debug-ignore", metavar="EXPR", action='append', split=':',
+108         help="Ignore EXPR sim objects")
+109     option("--remote-gdb-port", type='int', default=7000,
+110         help="Remote gdb base port (set to 0 to disable listening)")
+111 
+112     # Help options
+113     group("Help Options")
+114     option("--list-sim-objects", action='store_true', default=False,
+115         help="List all built-in SimObjects, their params and default values")
+116 
+117     # load the options.py config file to allow people to set their own
+118     # default options
+119     options_file = config.get('options.py')
+120     if options_file:
+121         scope = { 'options' : options }
+122         execfile(options_file, scope)
+123 
+124     arguments = options.parse_args()
+125     return options,arguments
+126 
+def interact(scope):
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{namespacem5_1_1main_aa4a022e6ddacd362b83964da5cc5d044}{
+\index{m5::main@{m5::main}!\_\-\_\-all\_\-\_\-@{\_\-\_\-all\_\-\_\-}}
+\index{\_\-\_\-all\_\-\_\-@{\_\-\_\-all\_\-\_\-}!m5::main@{m5::main}}
+\subsubsection[{\_\-\_\-all\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}list {\bf \_\-\_\-all\_\-\_\-} = \mbox{[} 'options', 'arguments', 'main' \mbox{]}}}
+\label{namespacem5_1_1main_aa4a022e6ddacd362b83964da5cc5d044}
+\hypertarget{namespacem5_1_1main_ada1894ffa84d88fb55d34087f203ddca}{
+\index{m5::main@{m5::main}!brief\_\-copyright@{brief\_\-copyright}}
+\index{brief\_\-copyright@{brief\_\-copyright}!m5::main@{m5::main}}
+\subsubsection[{brief\_\-copyright}]{\setlength{\rightskip}{0pt plus 5cm}{\bf brief\_\-copyright} = $\backslash$}}
+\label{namespacem5_1_1main_ada1894ffa84d88fb55d34087f203ddca}
+\hypertarget{namespacem5_1_1main_a61e5f066c879e5430d8f713c2c3a8b31}{
+\index{m5::main@{m5::main}!usage@{usage}}
+\index{usage@{usage}!m5::main@{m5::main}}
+\subsubsection[{usage}]{\setlength{\rightskip}{0pt plus 5cm}string {\bf usage} = \char`\"{}\%prog \mbox{[}gem5 options\mbox{]} script.py \mbox{[}script options\mbox{]}\char`\"{}}}
+\label{namespacem5_1_1main_a61e5f066c879e5430d8f713c2c3a8b31}
+\hypertarget{namespacem5_1_1main_af9c8593b58583463efe6932e24c9d6e6}{
+\index{m5::main@{m5::main}!version@{version}}
+\index{version@{version}!m5::main@{m5::main}}
+\subsubsection[{version}]{\setlength{\rightskip}{0pt plus 5cm}string {\bf version} = \char`\"{}\%prog 2.0\char`\"{}}}
+\label{namespacem5_1_1main_af9c8593b58583463efe6932e24c9d6e6}

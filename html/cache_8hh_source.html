@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/cache/cache.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/cache/cache.hh</h1><a href="cache_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Erik Hallnor</span>
+<a name="l00041"></a>00041 <span class="comment"> *          Dave Greene</span>
+<a name="l00042"></a>00042 <span class="comment"> *          Steve Reinhardt</span>
+<a name="l00043"></a>00043 <span class="comment"> *          Ron Dreslinski</span>
+<a name="l00044"></a>00044 <span class="comment"> *          Andreas Hansson</span>
+<a name="l00045"></a>00045 <span class="comment"> */</span>
+<a name="l00046"></a>00046 
+<a name="l00052"></a>00052 <span class="preprocessor">#ifndef __CACHE_HH__</span>
+<a name="l00053"></a>00053 <span class="preprocessor"></span><span class="preprocessor">#define __CACHE_HH__</span>
+<a name="l00054"></a>00054 <span class="preprocessor"></span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="base_2misc_8hh.html">base/misc.hh</a>&quot;</span> <span class="comment">// fatal, panic, and warn</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="mem_2cache_2base_8hh.html">mem/cache/base.hh</a>&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;<a class="code" href="blk_8hh.html">mem/cache/blk.hh</a>&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="mshr_8hh.html">mem/cache/mshr.hh</a>&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061 <span class="comment">//Forward decleration</span>
+<a name="l00062"></a>00062 <span class="keyword">class </span><a class="code" href="classBasePrefetcher.html">BasePrefetcher</a>;
+<a name="l00063"></a>00063 
+<a name="l00069"></a>00069 <span class="keyword">template</span> &lt;<span class="keyword">class</span> TagStore&gt;
+<a name="l00070"></a><a class="code" href="classCache.html">00070</a> <span class="keyword">class </span><a class="code" href="classCache.html">Cache</a> : <span class="keyword">public</span> <a class="code" href="classBaseCache_1_1BaseCache.html">BaseCache</a>
+<a name="l00071"></a>00071 {
+<a name="l00072"></a>00072   <span class="keyword">public</span>:
+<a name="l00074"></a><a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">00074</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> TagStore::BlkType <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a>;
+<a name="l00076"></a><a class="code" href="classCache.html#a83744fbcce9e00711343dafa32bcb921">00076</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> TagStore::BlkList <a class="code" href="classCache.html#a83744fbcce9e00711343dafa32bcb921">BlkList</a>;
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078   <span class="keyword">protected</span>:
+<a name="l00079"></a><a class="code" href="classCache.html#afe5f62b7007c3a3cf9170e85041b38d8">00079</a>     <span class="keyword">typedef</span> <a class="code" href="classCacheBlkVisitorWrapper.html">CacheBlkVisitorWrapper&lt;Cache&lt;TagStore&gt;</a>, <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a>&gt; <a class="code" href="classCacheBlkVisitorWrapper.html">WrappedBlkVisitor</a>;
+<a name="l00080"></a>00080 
+<a name="l00085"></a><a class="code" href="classCache_1_1CpuSidePort.html">00085</a>     <span class="keyword">class </span><a class="code" href="classCache_1_1CpuSidePort.html">CpuSidePort</a> : <span class="keyword">public</span> <a class="code" href="classBaseCache_1_1CacheSlavePort.html">CacheSlavePort</a>
+<a name="l00086"></a>00086     {
+<a name="l00087"></a>00087       <span class="keyword">private</span>:
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089         <span class="comment">// a pointer to our specific cache implementation</span>
+<a name="l00090"></a><a class="code" href="classCache_1_1CpuSidePort.html#ae1a869e306f5bc5028f706229d68aba1">00090</a>         <a class="code" href="classCache.html">Cache&lt;TagStore&gt;</a> *<a class="code" href="classCache_1_1CpuSidePort.html#ae1a869e306f5bc5028f706229d68aba1">cache</a>;
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092       <span class="keyword">protected</span>:
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classCache_1_1CpuSidePort.html#a9b643d565edc21dac11ce15a560238a7">recvTimingSnoopResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classCache_1_1CpuSidePort.html#a3344d9dd0f83257feab5424e761f31c6">recvTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098         <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCache_1_1CpuSidePort.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00099"></a>00099 
+<a name="l00100"></a>00100         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCache_1_1CpuSidePort.html#aeefa907fb6d6a787e6dab90e8138ea90">recvFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102         <span class="keyword">virtual</span> <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classCache_1_1CpuSidePort.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00103"></a>00103 
+<a name="l00104"></a>00104       <span class="keyword">public</span>:
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106         <a class="code" href="classCache_1_1CpuSidePort.html#a3caee65fa12179ad530ea38fe45bd8be">CpuSidePort</a>(<span class="keyword">const</span> std::string &amp;_name, <a class="code" href="classCache.html">Cache&lt;TagStore&gt;</a> *_cache,
+<a name="l00107"></a>00107                     <span class="keyword">const</span> std::string &amp;_label);
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109     };
+<a name="l00110"></a>00110 
+<a name="l00117"></a><a class="code" href="classCache_1_1MemSidePacketQueue.html">00117</a>     <span class="keyword">class </span><a class="code" href="classCache_1_1MemSidePacketQueue.html">MemSidePacketQueue</a> : <span class="keyword">public</span> <a class="code" href="classMasterPacketQueue.html">MasterPacketQueue</a>
+<a name="l00118"></a>00118     {
+<a name="l00119"></a>00119 
+<a name="l00120"></a>00120       <span class="keyword">protected</span>:
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="classCache_1_1MemSidePacketQueue.html#adf2b34ffa42914b9356a0788fc109bcc">00122</a>         <a class="code" href="classCache.html">Cache&lt;TagStore&gt;</a> &amp;<a class="code" href="classCache_1_1MemSidePacketQueue.html#adf2b34ffa42914b9356a0788fc109bcc">cache</a>;
+<a name="l00123"></a>00123 
+<a name="l00124"></a>00124       <span class="keyword">public</span>:
+<a name="l00125"></a>00125 
+<a name="l00126"></a><a class="code" href="classCache_1_1MemSidePacketQueue.html#af98f7e700e64b2c5f5bd8f96b7368b0a">00126</a>         <a class="code" href="classCache_1_1MemSidePacketQueue.html#af98f7e700e64b2c5f5bd8f96b7368b0a">MemSidePacketQueue</a>(<a class="code" href="classCache.html">Cache&lt;TagStore&gt;</a> &amp;<a class="code" href="classCache_1_1MemSidePacketQueue.html#adf2b34ffa42914b9356a0788fc109bcc">cache</a>, <a class="code" href="classMasterPort.html">MasterPort</a> &amp;port,
+<a name="l00127"></a>00127                            <span class="keyword">const</span> std::string &amp;<a class="code" href="classPacketQueue.html#ae471a4c4073716b769170188214fe93d">label</a>) :
+<a name="l00128"></a>00128             <a class="code" href="classMasterPacketQueue.html">MasterPacketQueue</a>(cache, port, label), cache(cache) { }
+<a name="l00129"></a>00129 
+<a name="l00135"></a>00135         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCache_1_1MemSidePacketQueue.html#a3ce3f4b79c2caf000124b3de8ba9157c">sendDeferredPacket</a>();
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137     };
+<a name="l00138"></a>00138 
+<a name="l00143"></a><a class="code" href="classCache_1_1MemSidePort.html">00143</a>     <span class="keyword">class </span><a class="code" href="classCache_1_1MemSidePort.html">MemSidePort</a> : <span class="keyword">public</span> <a class="code" href="classBaseCache_1_1CacheMasterPort.html">CacheMasterPort</a>
+<a name="l00144"></a>00144     {
+<a name="l00145"></a>00145       <span class="keyword">private</span>:
+<a name="l00146"></a>00146 
+<a name="l00148"></a><a class="code" href="classCache_1_1MemSidePort.html#a3a20f77334fdfcb8ec2e8cccd925f95f">00148</a>         <a class="code" href="classCache_1_1MemSidePacketQueue.html">MemSidePacketQueue</a> <a class="code" href="classCache_1_1MemSidePort.html#a3a20f77334fdfcb8ec2e8cccd925f95f">_queue</a>;
+<a name="l00149"></a>00149 
+<a name="l00150"></a>00150         <span class="comment">// a pointer to our specific cache implementation</span>
+<a name="l00151"></a><a class="code" href="classCache_1_1MemSidePort.html#ae1a869e306f5bc5028f706229d68aba1">00151</a>         <a class="code" href="classCache.html">Cache&lt;TagStore&gt;</a> *<a class="code" href="classCache_1_1MemSidePort.html#ae1a869e306f5bc5028f706229d68aba1">cache</a>;
+<a name="l00152"></a>00152 
+<a name="l00153"></a>00153       <span class="keyword">protected</span>:
+<a name="l00154"></a>00154 
+<a name="l00155"></a>00155         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCache_1_1MemSidePort.html#aff3031c56fc4947a19695c868bb8233e">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00156"></a>00156 
+<a name="l00157"></a>00157         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classCache_1_1MemSidePort.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00158"></a>00158 
+<a name="l00159"></a>00159         <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCache_1_1MemSidePort.html#a886d584c81ee4e398ff8069907f6e1a5">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00160"></a>00160 
+<a name="l00161"></a>00161         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCache_1_1MemSidePort.html#a284dfb90c168233c9d416bc07de8fefe">recvFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00162"></a>00162 
+<a name="l00163"></a>00163       <span class="keyword">public</span>:
+<a name="l00164"></a>00164 
+<a name="l00165"></a>00165         <a class="code" href="classCache_1_1MemSidePort.html#ae5fb366af0a2e94b8c3ecb4e8594a6eb">MemSidePort</a>(<span class="keyword">const</span> std::string &amp;_name, <a class="code" href="classCache.html">Cache&lt;TagStore&gt;</a> *_cache,
+<a name="l00166"></a>00166                     <span class="keyword">const</span> std::string &amp;_label);
+<a name="l00167"></a>00167     };
+<a name="l00168"></a>00168 
+<a name="l00170"></a><a class="code" href="classCache.html#adb086ae267638f3864a6b3199f1d01e9">00170</a>     TagStore *<a class="code" href="classCache.html#adb086ae267638f3864a6b3199f1d01e9">tags</a>;
+<a name="l00171"></a>00171 
+<a name="l00173"></a><a class="code" href="classCache.html#a320f5a2352104b9b633113f9045461a3">00173</a>     <a class="code" href="classBasePrefetcher.html">BasePrefetcher</a> *<a class="code" href="classCache.html#a320f5a2352104b9b633113f9045461a3">prefetcher</a>;
+<a name="l00174"></a>00174 
+<a name="l00176"></a><a class="code" href="classCache.html#a0ca2086b66114357dd17032178adce17">00176</a>     <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *<a class="code" href="classCache.html#a0ca2086b66114357dd17032178adce17">tempBlock</a>;
+<a name="l00177"></a>00177 
+<a name="l00181"></a><a class="code" href="classCache.html#a9b589ab6323a2796b7ae762dc7236bb5">00181</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a9b589ab6323a2796b7ae762dc7236bb5">doFastWrites</a>;
+<a name="l00182"></a>00182 
+<a name="l00186"></a><a class="code" href="classCache.html#a146f074bf7af4a70fc378862eab0b15a">00186</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a146f074bf7af4a70fc378862eab0b15a">prefetchOnAccess</a>;
+<a name="l00187"></a>00187 
+<a name="l00193"></a><a class="code" href="classCache.html#a21da4bea3554874b557428e4cce5d4a4">00193</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;PacketPtr&gt;</a> <a class="code" href="classCache.html#a21da4bea3554874b557428e4cce5d4a4">pendingDelete</a>;
+<a name="l00194"></a>00194 
+<a name="l00203"></a>00203     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#ae24e0e790eea2373d750eb6642007750">access</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *&amp;blk,
+<a name="l00204"></a>00204                 <a class="code" href="classCycles.html">Cycles</a> &amp;lat, <a class="code" href="classstd_1_1list.html">PacketList</a> &amp;<a class="code" href="group__CacheStatistics.html#gace2b37e760e47862f243e4b03c05ef5e">writebacks</a>);
+<a name="l00205"></a>00205 
+<a name="l00209"></a>00209     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a911af8215907296fb2453c696cb89a02">cmpAndSwap</a>(<a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *blk, <a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00210"></a>00210 
+<a name="l00218"></a>00218     <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *<a class="code" href="classCache.html#a3da8f395921d5519e28d1c60961ae6c5">allocateBlock</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">bool</span> is_secure, <a class="code" href="classstd_1_1list.html">PacketList</a> &amp;<a class="code" href="group__CacheStatistics.html#gace2b37e760e47862f243e4b03c05ef5e">writebacks</a>);
+<a name="l00219"></a>00219 
+<a name="l00229"></a>00229     <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *<a class="code" href="classCache.html#a4943b9a8a4801f454a968416b456dc21">handleFill</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *blk,
+<a name="l00230"></a>00230                         <a class="code" href="classstd_1_1list.html">PacketList</a> &amp;<a class="code" href="group__CacheStatistics.html#gace2b37e760e47862f243e4b03c05ef5e">writebacks</a>);
+<a name="l00231"></a>00231 
+<a name="l00232"></a>00232 
+<a name="l00238"></a>00238     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a3344d9dd0f83257feab5424e761f31c6">recvTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00239"></a>00239 
+<a name="l00244"></a>00244     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a083c4da6cf866d660a126f4174bba7fc">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00245"></a>00245 
+<a name="l00250"></a>00250     <span class="keywordtype">void</span> <a class="code" href="classCache.html#aff3031c56fc4947a19695c868bb8233e">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00251"></a>00251 
+<a name="l00256"></a>00256     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a55143a3333ff75d0df66bd6e4eb50fb7">recvTimingSnoopResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00257"></a>00257 
+<a name="l00263"></a>00263     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCache.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00264"></a>00264 
+<a name="l00271"></a>00271     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCache.html#a886d584c81ee4e398ff8069907f6e1a5">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00272"></a>00272 
+<a name="l00278"></a>00278     <span class="keywordtype">void</span> <a class="code" href="classCache.html#ae764e8af8ed82d5b1e78530e56a16470">functionalAccess</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <span class="keywordtype">bool</span> fromCpuSide);
+<a name="l00279"></a>00279 
+<a name="l00280"></a>00280     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a5d5d5944479d29a7bfc183f4b2b6a4fa">satisfyCpuSideRequest</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *blk,
+<a name="l00281"></a>00281                                <span class="keywordtype">bool</span> deferred_response = <span class="keyword">false</span>,
+<a name="l00282"></a>00282                                <span class="keywordtype">bool</span> pending_downgrade = <span class="keyword">false</span>);
+<a name="l00283"></a>00283     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a65c1c67b81573ca17c8ad40e0e6d85d8">satisfyMSHR</a>(<a class="code" href="classMSHR.html">MSHR</a> *mshr, <a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *blk);
+<a name="l00284"></a>00284 
+<a name="l00285"></a>00285     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a87256886a1eea4638abe1b437f4fe226">doTimingSupplyResponse</a>(<a class="code" href="classPacket.html">PacketPtr</a> req_pkt, uint8_t *blk_data,
+<a name="l00286"></a>00286                                 <span class="keywordtype">bool</span> already_copied, <span class="keywordtype">bool</span> pending_inval);
+<a name="l00287"></a>00287 
+<a name="l00293"></a>00293     <span class="keywordtype">void</span> <a class="code" href="classCache.html#affa22df454ca8619381018b222c49c2d">handleSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> ptk, <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *blk,
+<a name="l00294"></a>00294                      <span class="keywordtype">bool</span> is_timing, <span class="keywordtype">bool</span> is_deferred, <span class="keywordtype">bool</span> pending_inval);
+<a name="l00295"></a>00295 
+<a name="l00301"></a>00301     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classCache.html#a4451141787cceb771eec3ea4d4a4a8d4">writebackBlk</a>(<a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *blk);
+<a name="l00302"></a>00302 
+<a name="l00303"></a>00303 
+<a name="l00304"></a>00304     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a381272ae5c2cc173adb59cd67a76b458">memWriteback</a>();
+<a name="l00305"></a>00305     <span class="keywordtype">void</span> <a class="code" href="classCache.html#afea64b0aa579c17485db54c6a5c2ede3">memInvalidate</a>();
+<a name="l00306"></a>00306     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#ad66f409af3c387e166ff7ee95169b7b6">isDirty</a>() <span class="keyword">const</span>;
+<a name="l00307"></a>00307 
+<a name="l00314"></a>00314     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a0f9ea802ec68e58830a83fdf795a9b9f">writebackVisitor</a>(<a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> &amp;blk);
+<a name="l00322"></a>00322     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a0a830cf4879a74de1790653f861c7d93">invalidateVisitor</a>(<a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> &amp;blk);
+<a name="l00323"></a>00323 
+<a name="l00334"></a>00334     <span class="keywordtype">void</span> <a class="code" href="classCache.html#af5dfa0f9fd3542f24b728e25a1d658b2">uncacheableFlush</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00335"></a>00335 
+<a name="l00341"></a>00341     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a94c2c174856cbab1e3478cb02ae8ed80">squash</a>(<span class="keywordtype">int</span> threadNum);
+<a name="l00342"></a>00342 
+<a name="l00354"></a>00354     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classCache.html#a3bdcf30020fcb7b18e1d1f95cc86648e">getBusPacket</a>(<a class="code" href="classPacket.html">PacketPtr</a> cpu_pkt, <a class="code" href="classCache.html#a10db52a1c10bfd238e0e3d37c4560495">BlkType</a> *blk,
+<a name="l00355"></a>00355                            <span class="keywordtype">bool</span> needsExclusive) <span class="keyword">const</span>;
+<a name="l00356"></a>00356 
+<a name="l00363"></a>00363     <a class="code" href="classMSHR.html">MSHR</a> *<a class="code" href="classCache.html#a3ce02537ee4a8918300802fda9b82b47">getNextMSHR</a>();
+<a name="l00364"></a>00364 
+<a name="l00370"></a>00370     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classCache.html#a52bd0127c43c9167c1d092fc060cc472">getTimingPacket</a>();
+<a name="l00371"></a>00371 
+<a name="l00378"></a>00378     <span class="keywordtype">void</span> <a class="code" href="classCache.html#ac7fb6ca824d25de54878584fd9dd8162">markInService</a>(<a class="code" href="classMSHR.html">MSHR</a> *mshr, <a class="code" href="classPacket.html">PacketPtr</a> pkt = 0);
+<a name="l00379"></a>00379 
+<a name="l00383"></a><a class="code" href="classCache.html#ac40e843a35136aebfb61fc0c9f57aa27">00383</a>     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#ac40e843a35136aebfb61fc0c9f57aa27">outstandingMisses</a>()<span class="keyword"> const</span>
+<a name="l00384"></a>00384 <span class="keyword">    </span>{
+<a name="l00385"></a>00385         <span class="keywordflow">return</span> <a class="code" href="classBaseCache.html#aa73933a75144caca7a7d3d77cf285c23">mshrQueue</a>.<a class="code" href="classMSHRQueue.html#a115235fc25fdf1c03d856bd072b6cead">allocated</a> != 0;
+<a name="l00386"></a>00386     }
+<a name="l00387"></a>00387 
+<a name="l00388"></a><a class="code" href="classCache.html#a4789f9031d3220604c62c0e31a94c539">00388</a>     <a class="code" href="classCacheBlk.html">CacheBlk</a> *<a class="code" href="classCache.html#a4789f9031d3220604c62c0e31a94c539">findBlock</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">bool</span> is_secure)<span class="keyword"> const </span>{
+<a name="l00389"></a>00389         <span class="keywordflow">return</span> <a class="code" href="classCache.html#adb086ae267638f3864a6b3199f1d01e9">tags</a>-&gt;findBlock(addr, is_secure);
+<a name="l00390"></a>00390     }
+<a name="l00391"></a>00391 
+<a name="l00392"></a><a class="code" href="classCache.html#a2a9a72a19c7910262542bc96de2488fb">00392</a>     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a2a9a72a19c7910262542bc96de2488fb">inCache</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">bool</span> is_secure)<span class="keyword"> const </span>{
+<a name="l00393"></a>00393         <span class="keywordflow">return</span> (<a class="code" href="classCache.html#adb086ae267638f3864a6b3199f1d01e9">tags</a>-&gt;findBlock(addr, is_secure) != 0);
+<a name="l00394"></a>00394     }
+<a name="l00395"></a>00395 
+<a name="l00396"></a><a class="code" href="classCache.html#a01f08168ad1a2fee8ccff0f562da70de">00396</a>     <span class="keywordtype">bool</span> <a class="code" href="classCache.html#a01f08168ad1a2fee8ccff0f562da70de">inMissQueue</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">bool</span> is_secure)<span class="keyword"> const </span>{
+<a name="l00397"></a>00397         <span class="keywordflow">return</span> (<a class="code" href="classBaseCache.html#aa73933a75144caca7a7d3d77cf285c23">mshrQueue</a>.<a class="code" href="classMSHRQueue.html#aab842d63dcd254dfe655e16075f7e0fe">findMatch</a>(addr, is_secure) != 0);
+<a name="l00398"></a>00398     }
+<a name="l00399"></a>00399 
+<a name="l00403"></a>00403     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCache.html#a4601a57ba7740776052541f212c29cbd">nextMSHRReadyTime</a>() <span class="keyword">const</span>;
+<a name="l00404"></a>00404 
+<a name="l00405"></a>00405   <span class="keyword">public</span>:
+<a name="l00407"></a>00407     <a class="code" href="classCache.html#a82f0d3b81dc0dc573633d0634508218a">Cache</a>(<span class="keyword">const</span> <a class="code" href="classBaseCache.html#a23c1728f4d2cabb1996560194937d427">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00408"></a>00408 
+<a name="l00410"></a>00410     <span class="keyword">virtual</span> <a class="code" href="classCache.html#a899b8bf120ecc87b59e142f00b2987b0">~Cache</a>();
+<a name="l00411"></a>00411 
+<a name="l00412"></a>00412     <span class="keywordtype">void</span> <a class="code" href="classCache.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00413"></a>00413 
+<a name="l00417"></a>00417     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCache.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00418"></a>00418     <span class="keywordtype">void</span> <a class="code" href="classCache.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00419"></a>00419 };
+<a name="l00420"></a>00420 
+<a name="l00421"></a>00421 <span class="preprocessor">#endif // __CACHE_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

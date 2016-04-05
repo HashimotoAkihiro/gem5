@@ -1,0 +1,130 @@
+\hypertarget{classPythonEvent}{
+\section{クラス PythonEvent}
+\label{classPythonEvent}\index{PythonEvent@{PythonEvent}}
+}
+
+
+{\ttfamily \#include $<$pyevent.hh$>$}PythonEventに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classPythonEvent}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPythonEvent_a7b5b591484681e521fc822e2e17492ff}{PythonEvent} (\hyperlink{init_8hh_ae19630c1f4ca6d5236b30719d9140013}{PyObject} $\ast$obj, \hyperlink{classEventBase_a6d92f7ee8144a5911ed46d85a89a4934}{Event::Priority} priority)
+\item 
+\hyperlink{classPythonEvent_a3c32227a61801ec263cc1bb68f5a0546}{$\sim$PythonEvent} ()
+\item 
+void \hyperlink{classPythonEvent_ad16d34c97e8d6a988fd2b5ea36bccbf4}{incref} ()
+\item 
+void \hyperlink{classPythonEvent_a0ff5c4fba5e67643030a3e2f5b70a737}{decref} ()
+\item 
+virtual void \hyperlink{classPythonEvent_a2e9c5136d19b1a95fc427e0852deab5c}{process} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{init_8hh_ae19630c1f4ca6d5236b30719d9140013}{PyObject} $\ast$ \hyperlink{classPythonEvent_adb7ba59fec8a5847f73c56fccee0f1a0}{object}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPythonEvent_a7b5b591484681e521fc822e2e17492ff}{
+\index{PythonEvent@{PythonEvent}!PythonEvent@{PythonEvent}}
+\index{PythonEvent@{PythonEvent}!PythonEvent@{PythonEvent}}
+\subsubsection[{PythonEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PythonEvent} ({\bf PyObject} $\ast$ {\em obj}, \/  {\bf Event::Priority} {\em priority})}}
+\label{classPythonEvent_a7b5b591484681e521fc822e2e17492ff}
+
+
+
+\begin{DoxyCode}
+37     : Event(priority), object(obj)
+38 {
+39     if (object == NULL)
+40         panic("Passed in invalid object");
+41 }
+\end{DoxyCode}
+\hypertarget{classPythonEvent_a3c32227a61801ec263cc1bb68f5a0546}{
+\index{PythonEvent@{PythonEvent}!$\sim$PythonEvent@{$\sim$PythonEvent}}
+\index{$\sim$PythonEvent@{$\sim$PythonEvent}!PythonEvent@{PythonEvent}}
+\subsubsection[{$\sim$PythonEvent}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf PythonEvent} ()}}
+\label{classPythonEvent_a3c32227a61801ec263cc1bb68f5a0546}
+
+
+
+\begin{DoxyCode}
+44 {
+45 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPythonEvent_a0ff5c4fba5e67643030a3e2f5b70a737}{
+\index{PythonEvent@{PythonEvent}!decref@{decref}}
+\index{decref@{decref}!PythonEvent@{PythonEvent}}
+\subsubsection[{decref}]{\setlength{\rightskip}{0pt plus 5cm}void decref ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPythonEvent_a0ff5c4fba5e67643030a3e2f5b70a737}
+
+
+
+\begin{DoxyCode}
+47 { Py_DECREF(object); }
+\end{DoxyCode}
+\hypertarget{classPythonEvent_ad16d34c97e8d6a988fd2b5ea36bccbf4}{
+\index{PythonEvent@{PythonEvent}!incref@{incref}}
+\index{incref@{incref}!PythonEvent@{PythonEvent}}
+\subsubsection[{incref}]{\setlength{\rightskip}{0pt plus 5cm}void incref ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPythonEvent_ad16d34c97e8d6a988fd2b5ea36bccbf4}
+
+
+
+\begin{DoxyCode}
+46 { Py_INCREF(object); }
+\end{DoxyCode}
+\hypertarget{classPythonEvent_a2e9c5136d19b1a95fc427e0852deab5c}{
+\index{PythonEvent@{PythonEvent}!process@{process}}
+\index{process@{process}!PythonEvent@{PythonEvent}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}void process ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPythonEvent_a2e9c5136d19b1a95fc427e0852deab5c}
+
+
+\hyperlink{classEvent_a142b75b68a6291400e20fb0dd905b1c8}{Event}を実装しています。
+
+
+\begin{DoxyCode}
+49 {
+50     PyObject *args = PyTuple_New(0);
+51     PyObject *result = PyObject_Call(object, args, NULL);
+52     Py_DECREF(args);
+53 
+54     if (result) {
+55         // Nothing to do just decrement the reference count
+56         Py_DECREF(result);
+57     } else {
+58         // Somethign should be done to signal back to the main interpreter
+59         // that there's been an exception.
+60         async_event = true;
+61         async_exception = true;
+62     }
+63 
+64     // Since the object has been removed from the event queue, its
+65     // reference count must be decremented.
+66     Py_DECREF(object);
+67 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPythonEvent_adb7ba59fec8a5847f73c56fccee0f1a0}{
+\index{PythonEvent@{PythonEvent}!object@{object}}
+\index{object@{object}!PythonEvent@{PythonEvent}}
+\subsubsection[{object}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PyObject}$\ast$ {\bf object}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPythonEvent_adb7ba59fec8a5847f73c56fccee0f1a0}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+python/swig/\hyperlink{pyevent_8hh}{pyevent.hh}\item 
+python/swig/\hyperlink{pyevent_8cc}{pyevent.cc}\end{DoxyCompactItemize}

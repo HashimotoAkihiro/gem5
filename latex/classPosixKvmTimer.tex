@@ -1,0 +1,210 @@
+\hypertarget{classPosixKvmTimer}{
+\section{クラス PosixKvmTimer}
+\label{classPosixKvmTimer}\index{PosixKvmTimer@{PosixKvmTimer}}
+}
+
+
+{\ttfamily \#include $<$timer.hh$>$}PosixKvmTimerに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classPosixKvmTimer}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPosixKvmTimer_a8de164097b5374e298ea92b3e23c1951}{PosixKvmTimer} (int \hyperlink{classBaseKvmTimer_a68acd751895efa9ac5a6461017f1d2d8}{signo}, clockid\_\-t \hyperlink{classPosixKvmTimer_a3ad1d5e961d76190ddbf7559f642a11e}{clockID}, float \hyperlink{classBaseKvmTimer_a0ef366aa4bbbcdc2f7eeb7fcd3962dde}{hostFactor}, \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classBaseKvmTimer_af880b55be2bf83ac65eb9b0abe62ae49}{hostFreq})
+\item 
+\hyperlink{classPosixKvmTimer_a83d2c8118d7b82a9bbd040e05626d705}{$\sim$PosixKvmTimer} ()
+\item 
+void \hyperlink{classPosixKvmTimer_a5041ff590d50fcb1f0f5149b2e7eb4bb}{arm} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} ticks)
+\item 
+void \hyperlink{classPosixKvmTimer_a9882bfa120cede575461197f2a13cd8b}{disarm} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classPosixKvmTimer_a02798cc202bebceef3ff0e3ff3d7b5b8}{calcResolution} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+clockid\_\-t \hyperlink{classPosixKvmTimer_a3ad1d5e961d76190ddbf7559f642a11e}{clockID}
+\item 
+timer\_\-t \hyperlink{classPosixKvmTimer_a1a1e2de3a80567484c9b4d4f20d5a3d0}{timer}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Timer based on standard POSIX timers. The POSIX timer API supports several different clock with different characteristics.
+
+\begin{DoxyNote}{覚え書き}
+It might be tempting to use CLOCK\_\-(THREAD$|$PROCESS)\_\-CPUTIME\_\-ID, however, this clock usually has much lower resolution than the real-\/time clocks. 
+\end{DoxyNote}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPosixKvmTimer_a8de164097b5374e298ea92b3e23c1951}{
+\index{PosixKvmTimer@{PosixKvmTimer}!PosixKvmTimer@{PosixKvmTimer}}
+\index{PosixKvmTimer@{PosixKvmTimer}!PosixKvmTimer@{PosixKvmTimer}}
+\subsubsection[{PosixKvmTimer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PosixKvmTimer} (int {\em signo}, \/  clockid\_\-t {\em clockID}, \/  float {\em hostFactor}, \/  {\bf Tick} {\em hostFreq})}}
+\label{classPosixKvmTimer_a8de164097b5374e298ea92b3e23c1951}
+
+\begin{DoxyParams}{引数}
+\item[{\em signo}]Signal to deliver \item[{\em clockID}]ID of the clock to use \item[{\em hostFactor}]Performance scaling factor \item[{\em hostFreq}]\hyperlink{classClock}{Clock} frequency of the host \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+78     : BaseKvmTimer(signo, hostFactor, hostFreq),
+79       clockID(clockID)
+80 {
+81     struct sigevent sev;
+82 
+83     sev.sigev_notify = SIGEV_THREAD_ID;
+84     sev.sigev_signo = signo;
+85     sev.sigev_notify_thread_id = gettid();
+86     sev.sigev_value.sival_ptr = NULL;
+87 
+88     while (timer_create(clockID, &sev, &timer) == -1) {
+89         if (errno != EAGAIN)
+90             panic("timer_create: %i", errno);
+91     }
+92 }
+\end{DoxyCode}
+\hypertarget{classPosixKvmTimer_a83d2c8118d7b82a9bbd040e05626d705}{
+\index{PosixKvmTimer@{PosixKvmTimer}!$\sim$PosixKvmTimer@{$\sim$PosixKvmTimer}}
+\index{$\sim$PosixKvmTimer@{$\sim$PosixKvmTimer}!PosixKvmTimer@{PosixKvmTimer}}
+\subsubsection[{$\sim$PosixKvmTimer}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf PosixKvmTimer} ()}}
+\label{classPosixKvmTimer_a83d2c8118d7b82a9bbd040e05626d705}
+
+
+
+\begin{DoxyCode}
+95 {
+96     timer_delete(timer);
+97 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPosixKvmTimer_a5041ff590d50fcb1f0f5149b2e7eb4bb}{
+\index{PosixKvmTimer@{PosixKvmTimer}!arm@{arm}}
+\index{arm@{arm}!PosixKvmTimer@{PosixKvmTimer}}
+\subsubsection[{arm}]{\setlength{\rightskip}{0pt plus 5cm}void arm ({\bf Tick} {\em ticks})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPosixKvmTimer_a5041ff590d50fcb1f0f5149b2e7eb4bb}
+Arm the timer so that it fires after a certain number of ticks.
+
+\begin{DoxyNote}{覚え書き}
+A timer implementation is free to convert between simulation ticks and virtualized time using any method it chooses. The accuracy of the timer therefore depends on what it measures, an accurate timer implementation should measure the number of cycles or instructions executed in the guest. If such counters are unavailable, it may fallback to wall clock time.
+\end{DoxyNote}
+
+\begin{DoxyParams}{引数}
+\item[{\em ticks}]Number of ticks until the timer fires \end{DoxyParams}
+
+
+\hyperlink{classBaseKvmTimer_af6a92c8cd2abd0bf8699cbefe1257074}{BaseKvmTimer}を実装しています。
+
+
+\begin{DoxyCode}
+101 {
+102     struct itimerspec ts;
+103     memset(&ts, 0, sizeof(ts));
+104 
+105     ts.it_interval.tv_sec = 0;
+106     ts.it_interval.tv_nsec = 0;
+107     ts.it_value.tv_sec = hostNs(ticks) / 1000000000ULL;
+108     ts.it_value.tv_nsec = hostNs(ticks) % 1000000000ULL;
+109 
+110     assert(ts.it_value.tv_nsec > 0 || ts.it_value.tv_sec > 0);
+111 
+112     DPRINTF(KvmTimer, "Arming POSIX timer: %i ticks (%is%ins)\n",
+113             ticks, ts.it_value.tv_sec, ts.it_value.tv_nsec);
+114 
+115     if (timer_settime(timer, 0, &ts, NULL) == -1)
+116         panic("PosixKvmTimer: Failed to arm timer\n");
+117 }
+\end{DoxyCode}
+\hypertarget{classPosixKvmTimer_a02798cc202bebceef3ff0e3ff3d7b5b8}{
+\index{PosixKvmTimer@{PosixKvmTimer}!calcResolution@{calcResolution}}
+\index{calcResolution@{calcResolution}!PosixKvmTimer@{PosixKvmTimer}}
+\subsubsection[{calcResolution}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} calcResolution ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classPosixKvmTimer_a02798cc202bebceef3ff0e3ff3d7b5b8}
+Calculate the timer resolution, used by \hyperlink{classBaseKvmTimer_a4450cc644b16fe4cb8b25ed02fb6446f}{resolution()} which caches the result.
+
+\begin{DoxyReturn}{戻り値}
+Minimum number of ticks the timer can resolve 
+\end{DoxyReturn}
+
+
+\hyperlink{classBaseKvmTimer_a8bff362cf60f8a6adbdc0aa31cb9be27}{BaseKvmTimer}を実装しています。
+
+
+\begin{DoxyCode}
+133 {
+134     struct timespec ts;
+135 
+136     if (clock_getres(clockID, &ts) == -1)
+137         panic("PosixKvmTimer: Failed to get timer resolution\n");
+138 
+139     const uint64_t res_ns(ts.tv_sec * 1000000000ULL + ts.tv_nsec);
+140     // We preferrably want ticksFromHostNs() to calculate the the
+141     // ceiling rather than truncating the value. However, there are
+142     // other cases where truncating is fine, so we just add 1 here to
+143     // make sure that the actual resolution is strictly less than what
+144     // we return. We could get all kinds of nasty behavior if
+145     // arm(resolution) is called and the resulting time is 0 (which
+146     // could happen if we truncate the results and the resolution is
+147     // 1ns).
+148     const Tick resolution(ticksFromHostNs(res_ns) + 1);
+149     // It might not make sense to enter into KVM for less than a
+150     // certain number of host cycles. In some systems (e.g., Linux)
+151     // the resolution of the timer we use is 1ns (a few cycles on most
+152     // CPUs), which isn't very useful.
+153     const Tick min_cycles(ticksFromHostCycles(MIN_HOST_CYCLES));
+154 
+155     return std::max(resolution, min_cycles);
+156 }
+\end{DoxyCode}
+\hypertarget{classPosixKvmTimer_a9882bfa120cede575461197f2a13cd8b}{
+\index{PosixKvmTimer@{PosixKvmTimer}!disarm@{disarm}}
+\index{disarm@{disarm}!PosixKvmTimer@{PosixKvmTimer}}
+\subsubsection[{disarm}]{\setlength{\rightskip}{0pt plus 5cm}void disarm ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPosixKvmTimer_a9882bfa120cede575461197f2a13cd8b}
+Disarm the timer.
+
+When this method has returned, the timer may no longer deliver signals upon timeout. 
+
+\hyperlink{classBaseKvmTimer_aaef5c4bcad609bff2d6580c368020346}{BaseKvmTimer}を実装しています。
+
+
+\begin{DoxyCode}
+121 {
+122     struct itimerspec ts;
+123     memset(&ts, 0, sizeof(ts));
+124 
+125     DPRINTF(KvmTimer, "Disarming POSIX timer\n");
+126 
+127     if (timer_settime(timer, 0, &ts, NULL) == -1)
+128         panic("PosixKvmTimer: Failed to disarm timer\n");
+129 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPosixKvmTimer_a3ad1d5e961d76190ddbf7559f642a11e}{
+\index{PosixKvmTimer@{PosixKvmTimer}!clockID@{clockID}}
+\index{clockID@{clockID}!PosixKvmTimer@{PosixKvmTimer}}
+\subsubsection[{clockID}]{\setlength{\rightskip}{0pt plus 5cm}clockid\_\-t {\bf clockID}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPosixKvmTimer_a3ad1d5e961d76190ddbf7559f642a11e}
+\hypertarget{classPosixKvmTimer_a1a1e2de3a80567484c9b4d4f20d5a3d0}{
+\index{PosixKvmTimer@{PosixKvmTimer}!timer@{timer}}
+\index{timer@{timer}!PosixKvmTimer@{PosixKvmTimer}}
+\subsubsection[{timer}]{\setlength{\rightskip}{0pt plus 5cm}timer\_\-t {\bf timer}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPosixKvmTimer_a1a1e2de3a80567484c9b4d4f20d5a3d0}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/kvm/\hyperlink{timer_8hh}{timer.hh}\item 
+cpu/kvm/\hyperlink{timer_8cc}{timer.cc}\end{DoxyCompactItemize}

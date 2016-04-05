@@ -1,0 +1,323 @@
+\hypertarget{classTopology}{
+\section{クラス Topology}
+\label{classTopology}\index{Topology@{Topology}}
+}
+
+
+{\ttfamily \#include $<$Topology.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTopology_a0153481ba5c73c2eb2e5267f3dc9ac89}{Topology} (\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} num\_\-routers, \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classBasicExtLink}{BasicExtLink} $\ast$ $>$ ext\_\-links, \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classBasicIntLink}{BasicIntLink} $\ast$ $>$ int\_\-links)
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classTopology_a2a6b2aa79e812a5e4168dc5a670891c0}{numSwitches} () const 
+\item 
+void \hyperlink{classTopology_a6d36a345f1cb410128c9fb5c653e17b1}{createLinks} (\hyperlink{classNetwork}{Network} $\ast$net)
+\item 
+void \hyperlink{classTopology_ac55fe386a101fbae38c716067c9966a0}{print} (std::ostream \&out) const 
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classTopology_a259a2ab68e1f0dd5b79daa26031862f2}{addLink} (\hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} src, \hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} dest, \hyperlink{classBasicLink}{BasicLink} $\ast$link, LinkDirection dir)
+\item 
+void \hyperlink{classTopology_a00d2816a2478d6f300159f8cefe12354}{makeLink} (\hyperlink{classNetwork}{Network} $\ast$net, \hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} src, \hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} dest, const \hyperlink{classNetDest}{NetDest} \&routing\_\-table\_\-entry)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{TypeDefines_8hh_a83c14b4ae37e80071f6b3506a6c46151}{NodeID} \hyperlink{classTopology_a7848ab01a6ad135426df6bb144453914}{m\_\-nodes}
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classTopology_a2eba391273b82b4c4ed877d2afc3a32e}{m\_\-number\_\-of\_\-switches}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classBasicExtLink}{BasicExtLink} $\ast$ $>$ \hyperlink{classTopology_aa084d35eb02d87885681c2485fe150a3}{m\_\-ext\_\-link\_\-vector}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classBasicIntLink}{BasicIntLink} $\ast$ $>$ \hyperlink{classTopology_a96f6560390d8d9fb6326abbaae50fc20}{m\_\-int\_\-link\_\-vector}
+\item 
+\hyperlink{classstd_1_1vector}{Matrix} \hyperlink{classTopology_a55985d2239fc2d5b912233c00cc4b924}{m\_\-component\_\-latencies}
+\item 
+\hyperlink{classstd_1_1vector}{Matrix} \hyperlink{classTopology_a5683259c7f9fef54d3a0b105e5b7778a}{m\_\-component\_\-inter\_\-switches}
+\item 
+\hyperlink{Topology_8hh_a4d8351b0e997e9522e41a5f481d9abfd}{LinkMap} \hyperlink{classTopology_acffefd560ca1c4dd1092c89a15ec0d19}{m\_\-link\_\-map}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTopology_a0153481ba5c73c2eb2e5267f3dc9ac89}{
+\index{Topology@{Topology}!Topology@{Topology}}
+\index{Topology@{Topology}!Topology@{Topology}}
+\subsubsection[{Topology}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Topology} ({\bf uint32\_\-t} {\em num\_\-routers}, \/  {\bf std::vector}$<$ {\bf BasicExtLink} $\ast$ $>$ {\em ext\_\-links}, \/  {\bf std::vector}$<$ {\bf BasicIntLink} $\ast$ $>$ {\em int\_\-links})}}
+\label{classTopology_a0153481ba5c73c2eb2e5267f3dc9ac89}
+
+
+
+\begin{DoxyCode}
+61     : m_number_of_switches(num_routers)
+62 {
+63 
+64     // initialize component latencies record
+65     m_component_latencies.resize(0);
+66     m_component_inter_switches.resize(0);
+67 
+68     // Total nodes/controllers in network
+69     // Must make sure this is called after the State Machine constructors
+70     m_nodes = MachineType_base_number(MachineType_NUM);
+71     assert(m_nodes > 1);
+72 
+73     if (m_nodes != ext_links.size()) {
+74         fatal("m_nodes (%d) != ext_links vector length (%d)\n",
+75               m_nodes, ext_links.size());
+76     }
+77 
+78     // analyze both the internal and external links, create data structures
+79     // Note that the python created links are bi-directional, but that the
+80     // topology and networks utilize uni-directional links.  Thus each 
+81     // BasicLink is converted to two calls to add link, on for each direction
+82     for (vector<BasicExtLink*>::const_iterator i = ext_links.begin();
+83          i != ext_links.end(); ++i) {
+84         BasicExtLink *ext_link = (*i);
+85         AbstractController *abs_cntrl = ext_link->params()->ext_node;
+86         BasicRouter *router = ext_link->params()->int_node;
+87 
+88         // Store the ExtLink pointers for later
+89         m_ext_link_vector.push_back(ext_link);
+90 
+91         int machine_base_idx = MachineType_base_number(abs_cntrl->getType());
+92         int ext_idx1 = machine_base_idx + abs_cntrl->getVersion();
+93         int ext_idx2 = ext_idx1 + m_nodes;
+94         int int_idx = router->params()->router_id + 2*m_nodes;
+95 
+96         // create the internal uni-directional links in both directions
+97         //   the first direction is marked: In
+98         addLink(ext_idx1, int_idx, ext_link, LinkDirection_In);
+99         //   the first direction is marked: Out
+100         addLink(int_idx, ext_idx2, ext_link, LinkDirection_Out);
+101     }
+102 
+103     for (vector<BasicIntLink*>::const_iterator i = int_links.begin();
+104          i != int_links.end(); ++i) {
+105         BasicIntLink *int_link = (*i);
+106         BasicRouter *router_a = int_link->params()->node_a;
+107         BasicRouter *router_b = int_link->params()->node_b;
+108 
+109         // Store the IntLink pointers for later
+110         m_int_link_vector.push_back(int_link);
+111 
+112         int a = router_a->params()->router_id + 2*m_nodes;
+113         int b = router_b->params()->router_id + 2*m_nodes;
+114 
+115         // create the internal uni-directional links in both directions
+116         //   the first direction is marked: In
+117         addLink(a, b, int_link, LinkDirection_In);
+118         //   the second direction is marked: Out
+119         addLink(b, a, int_link, LinkDirection_Out);
+120     }
+121 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTopology_a259a2ab68e1f0dd5b79daa26031862f2}{
+\index{Topology@{Topology}!addLink@{addLink}}
+\index{addLink@{addLink}!Topology@{Topology}}
+\subsubsection[{addLink}]{\setlength{\rightskip}{0pt plus 5cm}void addLink ({\bf SwitchID} {\em src}, \/  {\bf SwitchID} {\em dest}, \/  {\bf BasicLink} $\ast$ {\em link}, \/  LinkDirection {\em dir})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_a259a2ab68e1f0dd5b79daa26031862f2}
+
+
+
+\begin{DoxyCode}
+193 {
+194     assert(src <= m_number_of_switches+m_nodes+m_nodes);
+195     assert(dest <= m_number_of_switches+m_nodes+m_nodes);
+196     
+197     std::pair<int, int> src_dest_pair;
+198     LinkEntry link_entry;
+199 
+200     src_dest_pair.first = src;
+201     src_dest_pair.second = dest;
+202     link_entry.direction = dir;
+203     link_entry.link = link;
+204     m_link_map[src_dest_pair] = link_entry;
+205 }
+\end{DoxyCode}
+\hypertarget{classTopology_a6d36a345f1cb410128c9fb5c653e17b1}{
+\index{Topology@{Topology}!createLinks@{createLinks}}
+\index{createLinks@{createLinks}!Topology@{Topology}}
+\subsubsection[{createLinks}]{\setlength{\rightskip}{0pt plus 5cm}void createLinks ({\bf Network} $\ast$ {\em net})}}
+\label{classTopology_a6d36a345f1cb410128c9fb5c653e17b1}
+
+
+
+\begin{DoxyCode}
+125 {
+126     // Find maximum switchID
+127     SwitchID max_switch_id = 0;
+128     for (LinkMap::const_iterator i = m_link_map.begin();
+129          i != m_link_map.end(); ++i) {
+130         std::pair<SwitchID, SwitchID> src_dest = (*i).first;
+131         max_switch_id = max(max_switch_id, src_dest.first);
+132         max_switch_id = max(max_switch_id, src_dest.second);        
+133     }
+134 
+135     // Initialize weight, latency, and inter switched vectors
+136     Matrix topology_weights;
+137     int num_switches = max_switch_id+1;
+138     topology_weights.resize(num_switches);
+139     m_component_latencies.resize(num_switches);
+140     m_component_inter_switches.resize(num_switches);
+141 
+142     for (int i = 0; i < topology_weights.size(); i++) {
+143         topology_weights[i].resize(num_switches);
+144         m_component_latencies[i].resize(num_switches);
+145         m_component_inter_switches[i].resize(num_switches);
+146 
+147         for (int j = 0; j < topology_weights[i].size(); j++) {
+148             topology_weights[i][j] = INFINITE_LATENCY;
+149 
+150             // initialize to invalid values
+151             m_component_latencies[i][j] = -1;
+152 
+153             // initially assume direct connections / no intermediate
+154             // switches between components
+155             m_component_inter_switches[i][j] = 0;
+156         }
+157     }
+158 
+159     // Set identity weights to zero
+160     for (int i = 0; i < topology_weights.size(); i++) {
+161         topology_weights[i][i] = 0;
+162     }
+163 
+164     // Fill in the topology weights and bandwidth multipliers
+165     for (LinkMap::const_iterator i = m_link_map.begin();
+166          i != m_link_map.end(); ++i) {
+167         std::pair<int, int> src_dest = (*i).first;
+168         BasicLink* link = (*i).second.link;
+169         int src = src_dest.first;
+170         int dst = src_dest.second;
+171         m_component_latencies[src][dst] = link->m_latency;
+172         topology_weights[src][dst] = link->m_weight;
+173     }
+174         
+175     // Walk topology and hookup the links
+176     Matrix dist = shortest_path(topology_weights, m_component_latencies,
+177         m_component_inter_switches);
+178     for (int i = 0; i < topology_weights.size(); i++) {
+179         for (int j = 0; j < topology_weights[i].size(); j++) {
+180             int weight = topology_weights[i][j];
+181             if (weight > 0 && weight != INFINITE_LATENCY) {
+182                 NetDest destination_set =
+183                         shortest_path_to_node(i, j, topology_weights, dist);
+184                 makeLink(net, i, j, destination_set);
+185             }
+186         }
+187     }
+188 }
+\end{DoxyCode}
+\hypertarget{classTopology_a00d2816a2478d6f300159f8cefe12354}{
+\index{Topology@{Topology}!makeLink@{makeLink}}
+\index{makeLink@{makeLink}!Topology@{Topology}}
+\subsubsection[{makeLink}]{\setlength{\rightskip}{0pt plus 5cm}void makeLink ({\bf Network} $\ast$ {\em net}, \/  {\bf SwitchID} {\em src}, \/  {\bf SwitchID} {\em dest}, \/  const {\bf NetDest} \& {\em routing\_\-table\_\-entry})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_a00d2816a2478d6f300159f8cefe12354}
+
+
+
+\begin{DoxyCode}
+210 {
+211     // Make sure we're not trying to connect two end-point nodes
+212     // directly together
+213     assert(src >= 2 * m_nodes || dest >= 2 * m_nodes);
+214 
+215     std::pair<int, int> src_dest;
+216     LinkEntry link_entry;    
+217 
+218     if (src < m_nodes) {
+219         src_dest.first = src;
+220         src_dest.second = dest;
+221         link_entry = m_link_map[src_dest];
+222         net->makeInLink(src, dest - (2 * m_nodes), link_entry.link,
+223                         link_entry.direction, routing_table_entry);
+224     } else if (dest < 2*m_nodes) {
+225         assert(dest >= m_nodes);
+226         NodeID node = dest - m_nodes;
+227         src_dest.first = src;
+228         src_dest.second = dest;
+229         link_entry = m_link_map[src_dest];
+230         net->makeOutLink(src - (2 * m_nodes), node, link_entry.link,
+231                          link_entry.direction, routing_table_entry);
+232     } else {
+233         assert((src >= 2 * m_nodes) && (dest >= 2 * m_nodes));
+234         src_dest.first = src;
+235         src_dest.second = dest;
+236         link_entry = m_link_map[src_dest];
+237         net->makeInternalLink(src - (2 * m_nodes), dest - (2 * m_nodes),
+238                               link_entry.link, link_entry.direction,
+239                               routing_table_entry);
+240     }
+241 }
+\end{DoxyCode}
+\hypertarget{classTopology_a2a6b2aa79e812a5e4168dc5a670891c0}{
+\index{Topology@{Topology}!numSwitches@{numSwitches}}
+\index{numSwitches@{numSwitches}!Topology@{Topology}}
+\subsubsection[{numSwitches}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} numSwitches () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTopology_a2a6b2aa79e812a5e4168dc5a670891c0}
+
+
+
+\begin{DoxyCode}
+70 { return m_number_of_switches; }
+\end{DoxyCode}
+\hypertarget{classTopology_ac55fe386a101fbae38c716067c9966a0}{
+\index{Topology@{Topology}!print@{print}}
+\index{print@{print}!Topology@{Topology}}
+\subsubsection[{print}]{\setlength{\rightskip}{0pt plus 5cm}void print (std::ostream \& {\em out}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTopology_ac55fe386a101fbae38c716067c9966a0}
+
+
+
+\begin{DoxyCode}
+72 { out << "[Topology]"; }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classTopology_a5683259c7f9fef54d3a0b105e5b7778a}{
+\index{Topology@{Topology}!m\_\-component\_\-inter\_\-switches@{m\_\-component\_\-inter\_\-switches}}
+\index{m\_\-component\_\-inter\_\-switches@{m\_\-component\_\-inter\_\-switches}!Topology@{Topology}}
+\subsubsection[{m\_\-component\_\-inter\_\-switches}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix} {\bf m\_\-component\_\-inter\_\-switches}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_a5683259c7f9fef54d3a0b105e5b7778a}
+\hypertarget{classTopology_a55985d2239fc2d5b912233c00cc4b924}{
+\index{Topology@{Topology}!m\_\-component\_\-latencies@{m\_\-component\_\-latencies}}
+\index{m\_\-component\_\-latencies@{m\_\-component\_\-latencies}!Topology@{Topology}}
+\subsubsection[{m\_\-component\_\-latencies}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix} {\bf m\_\-component\_\-latencies}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_a55985d2239fc2d5b912233c00cc4b924}
+\hypertarget{classTopology_aa084d35eb02d87885681c2485fe150a3}{
+\index{Topology@{Topology}!m\_\-ext\_\-link\_\-vector@{m\_\-ext\_\-link\_\-vector}}
+\index{m\_\-ext\_\-link\_\-vector@{m\_\-ext\_\-link\_\-vector}!Topology@{Topology}}
+\subsubsection[{m\_\-ext\_\-link\_\-vector}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf BasicExtLink}$\ast$$>$ {\bf m\_\-ext\_\-link\_\-vector}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_aa084d35eb02d87885681c2485fe150a3}
+\hypertarget{classTopology_a96f6560390d8d9fb6326abbaae50fc20}{
+\index{Topology@{Topology}!m\_\-int\_\-link\_\-vector@{m\_\-int\_\-link\_\-vector}}
+\index{m\_\-int\_\-link\_\-vector@{m\_\-int\_\-link\_\-vector}!Topology@{Topology}}
+\subsubsection[{m\_\-int\_\-link\_\-vector}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf BasicIntLink}$\ast$$>$ {\bf m\_\-int\_\-link\_\-vector}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_a96f6560390d8d9fb6326abbaae50fc20}
+\hypertarget{classTopology_acffefd560ca1c4dd1092c89a15ec0d19}{
+\index{Topology@{Topology}!m\_\-link\_\-map@{m\_\-link\_\-map}}
+\index{m\_\-link\_\-map@{m\_\-link\_\-map}!Topology@{Topology}}
+\subsubsection[{m\_\-link\_\-map}]{\setlength{\rightskip}{0pt plus 5cm}{\bf LinkMap} {\bf m\_\-link\_\-map}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_acffefd560ca1c4dd1092c89a15ec0d19}
+\hypertarget{classTopology_a7848ab01a6ad135426df6bb144453914}{
+\index{Topology@{Topology}!m\_\-nodes@{m\_\-nodes}}
+\index{m\_\-nodes@{m\_\-nodes}!Topology@{Topology}}
+\subsubsection[{m\_\-nodes}]{\setlength{\rightskip}{0pt plus 5cm}{\bf NodeID} {\bf m\_\-nodes}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_a7848ab01a6ad135426df6bb144453914}
+\hypertarget{classTopology_a2eba391273b82b4c4ed877d2afc3a32e}{
+\index{Topology@{Topology}!m\_\-number\_\-of\_\-switches@{m\_\-number\_\-of\_\-switches}}
+\index{m\_\-number\_\-of\_\-switches@{m\_\-number\_\-of\_\-switches}!Topology@{Topology}}
+\subsubsection[{m\_\-number\_\-of\_\-switches}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} {\bf m\_\-number\_\-of\_\-switches}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTopology_a2eba391273b82b4c4ed877d2afc3a32e}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/network/\hyperlink{Topology_8hh}{Topology.hh}\item 
+mem/ruby/network/\hyperlink{Topology_8cc}{Topology.cc}\end{DoxyCompactItemize}

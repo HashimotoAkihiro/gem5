@@ -1,0 +1,222 @@
+\hypertarget{classListenSocket}{
+\section{クラス ListenSocket}
+\label{classListenSocket}\index{ListenSocket@{ListenSocket}}
+}
+
+
+{\ttfamily \#include $<$socket.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classListenSocket_a34502b1f4b90c3f0fcd713cccebbd5fa}{ListenSocket} ()
+\item 
+virtual \hyperlink{classListenSocket_ad0bf1771782f4882ca89a9c9d3e5f8c6}{$\sim$ListenSocket} ()
+\item 
+virtual int \hyperlink{classListenSocket_a456b2a8397007045eca1f89d086b5778}{accept} (bool nodelay=false)
+\item 
+virtual bool \hyperlink{classListenSocket_adc0204f049c93d5c4ed27c604d1127a4}{listen} (int port, bool reuse=true)
+\item 
+int \hyperlink{classListenSocket_a6246250322a585921fc1e9d27b0d7b80}{getfd} () const 
+\item 
+bool \hyperlink{classListenSocket_a2848e5513ce657609b8210b7d23e4f6b}{islistening} () const 
+\end{DoxyCompactItemize}
+\subsection*{Static Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classListenSocket_a238885c747f586049b766fa4fcd5ec12}{disableAll} ()
+\item 
+static bool \hyperlink{classListenSocket_a70ba2cf446c7e6363080efd46cd330c5}{allDisabled} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classListenSocket_a3e57a9a7cb30c699695affc832678a57}{listening}
+\item 
+int \hyperlink{classListenSocket_a6f8059414f0228f0256115e024eeed4b}{fd}
+\end{DoxyCompactItemize}
+\subsection*{Static Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+static bool \hyperlink{classListenSocket_a14090a905e7feb385e20d56ab2941384}{listeningDisabled} = false
+\item 
+static bool \hyperlink{classListenSocket_aebef6e518aa8b11bc3b9b850cb6051a6}{anyListening} = false
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classListenSocket_a34502b1f4b90c3f0fcd713cccebbd5fa}{
+\index{ListenSocket@{ListenSocket}!ListenSocket@{ListenSocket}}
+\index{ListenSocket@{ListenSocket}!ListenSocket@{ListenSocket}}
+\subsubsection[{ListenSocket}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ListenSocket} ()}}
+\label{classListenSocket_a34502b1f4b90c3f0fcd713cccebbd5fa}
+
+
+
+\begin{DoxyCode}
+67     : listening(false), fd(-1)
+68 {}
+\end{DoxyCode}
+\hypertarget{classListenSocket_ad0bf1771782f4882ca89a9c9d3e5f8c6}{
+\index{ListenSocket@{ListenSocket}!$\sim$ListenSocket@{$\sim$ListenSocket}}
+\index{$\sim$ListenSocket@{$\sim$ListenSocket}!ListenSocket@{ListenSocket}}
+\subsubsection[{$\sim$ListenSocket}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf ListenSocket} ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classListenSocket_ad0bf1771782f4882ca89a9c9d3e5f8c6}
+
+
+
+\begin{DoxyCode}
+71 {
+72     if (fd != -1)
+73         close(fd);
+74 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classListenSocket_a456b2a8397007045eca1f89d086b5778}{
+\index{ListenSocket@{ListenSocket}!accept@{accept}}
+\index{accept@{accept}!ListenSocket@{ListenSocket}}
+\subsubsection[{accept}]{\setlength{\rightskip}{0pt plus 5cm}int accept (bool {\em nodelay} = {\ttfamily false})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classListenSocket_a456b2a8397007045eca1f89d086b5778}
+
+
+
+\begin{DoxyCode}
+123 {
+124     struct sockaddr_in sockaddr;
+125     socklen_t slen = sizeof (sockaddr);
+126     int sfd = ::accept(fd, (struct sockaddr *)&sockaddr, &slen);
+127     if (sfd != -1 && nodelay) {
+128         int i = 1;
+129         ::setsockopt(sfd, IPPROTO_TCP, TCP_NODELAY, (char *)&i, sizeof(i));
+130     }
+131 
+132     return sfd;
+133 }
+\end{DoxyCode}
+\hypertarget{classListenSocket_a70ba2cf446c7e6363080efd46cd330c5}{
+\index{ListenSocket@{ListenSocket}!allDisabled@{allDisabled}}
+\index{allDisabled@{allDisabled}!ListenSocket@{ListenSocket}}
+\subsubsection[{allDisabled}]{\setlength{\rightskip}{0pt plus 5cm}bool allDisabled ()\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classListenSocket_a70ba2cf446c7e6363080efd46cd330c5}
+
+
+
+\begin{DoxyCode}
+58 {
+59     return listeningDisabled;
+60 }
+\end{DoxyCode}
+\hypertarget{classListenSocket_a238885c747f586049b766fa4fcd5ec12}{
+\index{ListenSocket@{ListenSocket}!disableAll@{disableAll}}
+\index{disableAll@{disableAll}!ListenSocket@{ListenSocket}}
+\subsubsection[{disableAll}]{\setlength{\rightskip}{0pt plus 5cm}void disableAll ()\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classListenSocket_a238885c747f586049b766fa4fcd5ec12}
+
+
+
+\begin{DoxyCode}
+50 {
+51     if (anyListening)
+52         panic("Too late to disable all listeners, already have a listener");
+53     listeningDisabled = true;
+54 }
+\end{DoxyCode}
+\hypertarget{classListenSocket_a6246250322a585921fc1e9d27b0d7b80}{
+\index{ListenSocket@{ListenSocket}!getfd@{getfd}}
+\index{getfd@{getfd}!ListenSocket@{ListenSocket}}
+\subsubsection[{getfd}]{\setlength{\rightskip}{0pt plus 5cm}int getfd () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classListenSocket_a6246250322a585921fc1e9d27b0d7b80}
+
+
+
+\begin{DoxyCode}
+55 { return fd; }
+\end{DoxyCode}
+\hypertarget{classListenSocket_a2848e5513ce657609b8210b7d23e4f6b}{
+\index{ListenSocket@{ListenSocket}!islistening@{islistening}}
+\index{islistening@{islistening}!ListenSocket@{ListenSocket}}
+\subsubsection[{islistening}]{\setlength{\rightskip}{0pt plus 5cm}bool islistening () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classListenSocket_a2848e5513ce657609b8210b7d23e4f6b}
+
+
+
+\begin{DoxyCode}
+56 { return listening; }
+\end{DoxyCode}
+\hypertarget{classListenSocket_adc0204f049c93d5c4ed27c604d1127a4}{
+\index{ListenSocket@{ListenSocket}!listen@{listen}}
+\index{listen@{listen}!ListenSocket@{ListenSocket}}
+\subsubsection[{listen}]{\setlength{\rightskip}{0pt plus 5cm}bool listen (int {\em port}, \/  bool {\em reuse} = {\ttfamily true})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classListenSocket_adc0204f049c93d5c4ed27c604d1127a4}
+
+
+
+\begin{DoxyCode}
+79 {
+80     if (listening)
+81         panic("Socket already listening!");
+82 
+83     fd = ::socket(PF_INET, SOCK_STREAM, 0);
+84     if (fd < 0)
+85         panic("Can't create socket:%s !", strerror(errno));
+86 
+87     if (reuse) {
+88         int i = 1;
+89         if (::setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, (char *)&i,
+90                          sizeof(i)) < 0)
+91             panic("ListenSocket(listen): setsockopt() SO_REUSEADDR failed!");
+92     }
+93 
+94     struct sockaddr_in sockaddr;
+95     sockaddr.sin_family = PF_INET;
+96     sockaddr.sin_addr.s_addr = INADDR_ANY;
+97 
+98     sockaddr.sin_port = htons(port);
+99     int ret = ::bind(fd, (struct sockaddr *)&sockaddr, sizeof (sockaddr));
+100     if (ret != 0) {
+101         if (ret == -1 && errno != EADDRINUSE)
+102             panic("ListenSocket(listen): bind() failed!");
+103         return false;
+104     }
+105 
+106     if (::listen(fd, 1) == -1) {
+107         if (errno != EADDRINUSE)
+108             panic("ListenSocket(listen): listen() failed!");
+109 
+110         return false;
+111     }
+112 
+113     listening = true;
+114     anyListening = true;
+115     return true;
+116 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classListenSocket_aebef6e518aa8b11bc3b9b850cb6051a6}{
+\index{ListenSocket@{ListenSocket}!anyListening@{anyListening}}
+\index{anyListening@{anyListening}!ListenSocket@{ListenSocket}}
+\subsubsection[{anyListening}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf anyListening} = false\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classListenSocket_aebef6e518aa8b11bc3b9b850cb6051a6}
+\hypertarget{classListenSocket_a6f8059414f0228f0256115e024eeed4b}{
+\index{ListenSocket@{ListenSocket}!fd@{fd}}
+\index{fd@{fd}!ListenSocket@{ListenSocket}}
+\subsubsection[{fd}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf fd}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classListenSocket_a6f8059414f0228f0256115e024eeed4b}
+\hypertarget{classListenSocket_a3e57a9a7cb30c699695affc832678a57}{
+\index{ListenSocket@{ListenSocket}!listening@{listening}}
+\index{listening@{listening}!ListenSocket@{ListenSocket}}
+\subsubsection[{listening}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf listening}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classListenSocket_a3e57a9a7cb30c699695affc832678a57}
+\hypertarget{classListenSocket_a14090a905e7feb385e20d56ab2941384}{
+\index{ListenSocket@{ListenSocket}!listeningDisabled@{listeningDisabled}}
+\index{listeningDisabled@{listeningDisabled}!ListenSocket@{ListenSocket}}
+\subsubsection[{listeningDisabled}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf listeningDisabled} = false\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classListenSocket_a14090a905e7feb385e20d56ab2941384}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{socket_8hh}{socket.hh}\item 
+base/\hyperlink{socket_8cc}{socket.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,247 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: kern/linux/linux.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>kern/linux/linux.hh</h1><a href="kern_2linux_2linux_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2004-2009 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __LINUX_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __LINUX_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="operatingsystem_8hh.html">kern/operatingsystem.hh</a>&quot;</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00041"></a>00041 <span class="keyword">class </span><a class="code" href="classLiveProcess.html">LiveProcess</a>;
+<a name="l00042"></a>00042 
+<a name="l00048"></a><a class="code" href="classLinux.html">00048</a> <span class="keyword">class </span><a class="code" href="classLinux.html">Linux</a> : <span class="keyword">public</span> <a class="code" href="classOperatingSystem.html">OperatingSystem</a>
+<a name="l00049"></a>00049 {
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051   <span class="keyword">public</span>:
+<a name="l00052"></a>00052 
+<a name="l00054"></a>00054 
+<a name="l00055"></a><a class="code" href="classLinux.html#a186ea1339bffb378854987065835afe3">00055</a>     <span class="keyword">typedef</span> uint64_t <a class="code" href="classLinux.html#a186ea1339bffb378854987065835afe3" title="Basic Linux types.">size_t</a>;
+<a name="l00056"></a><a class="code" href="classLinux.html#a2cb84cf5f02a29b7e8f237ff151a9225">00056</a>     <span class="keyword">typedef</span> uint64_t <a class="code" href="classLinux.html#a2cb84cf5f02a29b7e8f237ff151a9225">off_t</a>;
+<a name="l00057"></a><a class="code" href="classLinux.html#a7f5991675a84025dc7c24754a9b257c0">00057</a>     <span class="keyword">typedef</span> int64_t <a class="code" href="classLinux.html#a7f5991675a84025dc7c24754a9b257c0">time_t</a>;
+<a name="l00058"></a><a class="code" href="classLinux.html#a0001c50514d27f51d408e051dc803ad4">00058</a>     <span class="keyword">typedef</span> int64_t <a class="code" href="classLinux.html#a0001c50514d27f51d408e051dc803ad4">clock_t</a>;
+<a name="l00059"></a><a class="code" href="classLinux.html#af2306308627701b66dc6f3babe821ab4">00059</a>     <span class="keyword">typedef</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classLinux.html#af2306308627701b66dc6f3babe821ab4">uid_t</a>;
+<a name="l00060"></a><a class="code" href="classLinux.html#aa7352f1065fe606194d792e2b292cf83">00060</a>     <span class="keyword">typedef</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classLinux.html#aa7352f1065fe606194d792e2b292cf83">gid_t</a>;
+<a name="l00062"></a>00062 
+<a name="l00066"></a><a class="code" href="structLinux_1_1tgt__stat.html">00066</a>     <span class="keyword">typedef</span> <span class="keyword">struct </span>{
+<a name="l00067"></a><a class="code" href="structLinux_1_1tgt__stat.html#a96c0e3ea3acf24a90e33ed627147bf84">00067</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_dev;         
+<a name="l00068"></a><a class="code" href="structLinux_1_1tgt__stat.html#a30ef9dc767fe6e3dca64f8fbf71af690">00068</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_ino;         
+<a name="l00069"></a><a class="code" href="structLinux_1_1tgt__stat.html#a75f55d064ed3b380b0315de36e178885">00069</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_mode;        
+<a name="l00070"></a><a class="code" href="structLinux_1_1tgt__stat.html#ab77c257c135fa586e930ef0bf0977c08">00070</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_nlink;       
+<a name="l00071"></a><a class="code" href="structLinux_1_1tgt__stat.html#ad5477a292a4edf27aa5766e01e0f5d1f">00071</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_uid;         
+<a name="l00072"></a><a class="code" href="structLinux_1_1tgt__stat.html#a1faa6012541b83fd5218e2b229f876ec">00072</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_gid;         
+<a name="l00073"></a><a class="code" href="structLinux_1_1tgt__stat.html#ac4a67c3d290b4f93d0d91b99776f4207">00073</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_rdev;        
+<a name="l00074"></a><a class="code" href="structLinux_1_1tgt__stat.html#a902f52ddee3e9cb51a33fb353723d79e">00074</a>         int32_t         _pad1;          
+<a name="l00075"></a><a class="code" href="structLinux_1_1tgt__stat.html#aec608d79c93ed6d010aec9f7487e0064">00075</a>         int64_t         st_size;        
+<a name="l00076"></a><a class="code" href="structLinux_1_1tgt__stat.html#a6602fcfc6e3137ac04ca7a50efbc3d34">00076</a>         uint64_t        st_atimeX;      
+<a name="l00077"></a><a class="code" href="structLinux_1_1tgt__stat.html#ab8b373ea7421a08973572a52f534c7f7">00077</a>         uint64_t        st_mtimeX;      
+<a name="l00078"></a><a class="code" href="structLinux_1_1tgt__stat.html#a00568e9305d84f1177fcf07f6a5e28e4">00078</a>         uint64_t        st_ctimeX;      
+<a name="l00079"></a><a class="code" href="structLinux_1_1tgt__stat.html#a952cc52eb5efd16f9cebffe863823593">00079</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_blksize;     
+<a name="l00080"></a><a class="code" href="structLinux_1_1tgt__stat.html#a9bdc90ebe5192856e17c3ad67c0cb140">00080</a>         int32_t         st_blocks;      
+<a name="l00081"></a><a class="code" href="structLinux_1_1tgt__stat.html#a2bac91973217293ac3be9cd5f402a819">00081</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_flags;       
+<a name="l00082"></a><a class="code" href="structLinux_1_1tgt__stat.html#a5c579182b97b4e228d986b8b856d44ce">00082</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_gen;         
+<a name="l00083"></a>00083     } <a class="code" href="structLinux_1_1tgt__stat.html">tgt_stat</a>;
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085     <span class="comment">// same for stat64</span>
+<a name="l00086"></a><a class="code" href="structLinux_1_1tgt__stat64.html">00086</a>     <span class="keyword">typedef</span> <span class="keyword">struct </span>{
+<a name="l00087"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a0146849d3da5c91d9776888b14b82dcc">00087</a>         uint64_t        st_dev;
+<a name="l00088"></a><a class="code" href="structLinux_1_1tgt__stat64.html#abb54f0e7d91659ba9f4ab77a5392c08a">00088</a>         uint64_t        st_ino;
+<a name="l00089"></a><a class="code" href="structLinux_1_1tgt__stat64.html#ac430407fd3b0e421da1ee8f66c95a786">00089</a>         uint64_t        st_rdev;
+<a name="l00090"></a><a class="code" href="structLinux_1_1tgt__stat64.html#aec608d79c93ed6d010aec9f7487e0064">00090</a>         int64_t         st_size;
+<a name="l00091"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a72c24b54949be7eaac849d71fc056a3c">00091</a>         uint64_t        st_blocks;
+<a name="l00092"></a>00092 
+<a name="l00093"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a75f55d064ed3b380b0315de36e178885">00093</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_mode;
+<a name="l00094"></a><a class="code" href="structLinux_1_1tgt__stat64.html#ad5477a292a4edf27aa5766e01e0f5d1f">00094</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_uid;
+<a name="l00095"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a1faa6012541b83fd5218e2b229f876ec">00095</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_gid;
+<a name="l00096"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a952cc52eb5efd16f9cebffe863823593">00096</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_blksize;
+<a name="l00097"></a><a class="code" href="structLinux_1_1tgt__stat64.html#ab77c257c135fa586e930ef0bf0977c08">00097</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        st_nlink;
+<a name="l00098"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a8a67e7e5a583fb9e94edf6f27d30cb09">00098</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        __pad0;
+<a name="l00099"></a>00099 
+<a name="l00100"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a6602fcfc6e3137ac04ca7a50efbc3d34">00100</a>         uint64_t        st_atimeX;
+<a name="l00101"></a><a class="code" href="structLinux_1_1tgt__stat64.html#acb7200d0409f0e23d437284ac855e601">00101</a>         uint64_t        st_atime_nsec;
+<a name="l00102"></a><a class="code" href="structLinux_1_1tgt__stat64.html#ab8b373ea7421a08973572a52f534c7f7">00102</a>         uint64_t        st_mtimeX;
+<a name="l00103"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a04f665a5a40d0b9b0317a59776088931">00103</a>         uint64_t        st_mtime_nsec;
+<a name="l00104"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a00568e9305d84f1177fcf07f6a5e28e4">00104</a>         uint64_t        st_ctimeX;
+<a name="l00105"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a0d5e7bb39a902e0e50961163ac064ef4">00105</a>         uint64_t        st_ctime_nsec;
+<a name="l00106"></a><a class="code" href="structLinux_1_1tgt__stat64.html#a851e0f04d59998d6361240f719559e87">00106</a>         int64_t         ___unused[3];
+<a name="l00107"></a>00107     } <a class="code" href="structLinux_1_1tgt__stat64.html">tgt_stat64</a>;
+<a name="l00108"></a>00108 
+<a name="l00110"></a><a class="code" href="classLinux.html#a1a19d4c9718c9a4ad5fa2e48271fccc9">00110</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classLinux.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a> = 65;
+<a name="l00111"></a>00111 
+<a name="l00113"></a><a class="code" href="structLinux_1_1utsname.html">00113</a>     <span class="keyword">struct </span><a class="code" href="structLinux_1_1utsname.html" title="Interface struct for uname().">utsname</a> {
+<a name="l00114"></a><a class="code" href="structLinux_1_1utsname.html#a2deb62088193f0a1a1c7169961ef9417">00114</a>         <span class="keywordtype">char</span> <a class="code" href="structLinux_1_1utsname.html#a2deb62088193f0a1a1c7169961ef9417" title="System name.">sysname</a>[<a class="code" href="classLinux.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00115"></a><a class="code" href="structLinux_1_1utsname.html#a3e8872e682806e061de2b1ee07bc75f3">00115</a>         <span class="keywordtype">char</span> <a class="code" href="structLinux_1_1utsname.html#a3e8872e682806e061de2b1ee07bc75f3" title="Node name.">nodename</a>[<a class="code" href="classLinux.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];       
+<a name="l00116"></a><a class="code" href="structLinux_1_1utsname.html#a4015ecb9ca3fd601ff8b8961eda3e7e2">00116</a>         <span class="keywordtype">char</span> <a class="code" href="structLinux_1_1utsname.html#a4015ecb9ca3fd601ff8b8961eda3e7e2" title="OS release.">release</a>[<a class="code" href="classLinux.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00117"></a><a class="code" href="structLinux_1_1utsname.html#a1e88526d3e96aa25d88df1541dafe922">00117</a>         <span class="keywordtype">char</span> <a class="code" href="structLinux_1_1utsname.html#a1e88526d3e96aa25d88df1541dafe922" title="OS version.">version</a>[<a class="code" href="classLinux.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00118"></a><a class="code" href="structLinux_1_1utsname.html#a0687759450f1b8396e8e9415abe4b867">00118</a>         <span class="keywordtype">char</span> <a class="code" href="structLinux_1_1utsname.html#a0687759450f1b8396e8e9415abe4b867" title="Machine type.">machine</a>[<a class="code" href="classLinux.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00119"></a>00119     };
+<a name="l00120"></a>00120 
+<a name="l00122"></a><a class="code" href="structLinux_1_1rlimit.html">00122</a>     <span class="keyword">struct </span><a class="code" href="structLinux_1_1rlimit.html" title="Limit struct for getrlimit/setrlimit.">rlimit</a> {
+<a name="l00123"></a><a class="code" href="structLinux_1_1rlimit.html#af39897d07737cb27ef9484ae73c05fa4">00123</a>         uint64_t  <a class="code" href="structLinux_1_1rlimit.html#af39897d07737cb27ef9484ae73c05fa4" title="soft limit">rlim_cur</a>;     
+<a name="l00124"></a><a class="code" href="structLinux_1_1rlimit.html#af8e4fdfd658610e9b762fb606dce339a">00124</a>         uint64_t  <a class="code" href="structLinux_1_1rlimit.html#af8e4fdfd658610e9b762fb606dce339a" title="hard limit">rlim_max</a>;     
+<a name="l00125"></a>00125     };
+<a name="l00126"></a>00126 
+<a name="l00128"></a><a class="code" href="structLinux_1_1timeval.html">00128</a>     <span class="keyword">struct </span><a class="code" href="structLinux_1_1timeval.html" title="For gettimeofday().">timeval</a> {
+<a name="l00129"></a><a class="code" href="structLinux_1_1timeval.html#ade91ea7e70df7db611d15bdda30a6dd9">00129</a>         int64_t <a class="code" href="structLinux_1_1timeval.html#ade91ea7e70df7db611d15bdda30a6dd9" title="seconds">tv_sec</a>;         
+<a name="l00130"></a><a class="code" href="structLinux_1_1timeval.html#a73863c3643de3f79fefa8b4d6d3cfaa8">00130</a>         int64_t <a class="code" href="structLinux_1_1timeval.html#a73863c3643de3f79fefa8b4d6d3cfaa8" title="microseconds">tv_usec</a>;        
+<a name="l00131"></a>00131     };
+<a name="l00132"></a>00132 
+<a name="l00134"></a><a class="code" href="classLinux.html#a06eb9dad0a85c4478f07f398cd87b3f1">00134</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classLinux.html#a06eb9dad0a85c4478f07f398cd87b3f1" title="Clock ticks per second, for times().">M5_SC_CLK_TCK</a> = 100;
+<a name="l00135"></a>00135 
+<a name="l00137"></a><a class="code" href="structLinux_1_1tms.html">00137</a>     <span class="keyword">struct </span><a class="code" href="structLinux_1_1tms.html" title="For times().">tms</a> {
+<a name="l00138"></a><a class="code" href="structLinux_1_1tms.html#ab04ac3ffd1b9aab37d4a7857e0ffcdb8">00138</a>         int64_t <a class="code" href="structLinux_1_1tms.html#ab04ac3ffd1b9aab37d4a7857e0ffcdb8" title="user time">tms_utime</a>;      
+<a name="l00139"></a><a class="code" href="structLinux_1_1tms.html#a35539e36d7debbc4664f2470764bbad0">00139</a>         int64_t <a class="code" href="structLinux_1_1tms.html#a35539e36d7debbc4664f2470764bbad0" title="system time">tms_stime</a>;      
+<a name="l00140"></a><a class="code" href="structLinux_1_1tms.html#a6da7d6e7d686aa5a9bf91b8bf6c4139f">00140</a>         int64_t <a class="code" href="structLinux_1_1tms.html#a6da7d6e7d686aa5a9bf91b8bf6c4139f" title="user time of children">tms_cutime</a>;     
+<a name="l00141"></a><a class="code" href="structLinux_1_1tms.html#ad28846c008175f5be865cdfc14721139">00141</a>         int64_t <a class="code" href="structLinux_1_1tms.html#ad28846c008175f5be865cdfc14721139" title="system time of children">tms_cstime</a>;     
+<a name="l00142"></a>00142     };
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144     <span class="comment">// For writev/readv</span>
+<a name="l00145"></a><a class="code" href="structLinux_1_1tgt__iovec.html">00145</a>     <span class="keyword">struct </span><a class="code" href="structLinux_1_1tgt__iovec.html">tgt_iovec</a> {
+<a name="l00146"></a><a class="code" href="structLinux_1_1tgt__iovec.html#ac59b8387398fca5cb863b59eb13a8363">00146</a>         uint64_t <a class="code" href="structLinux_1_1tgt__iovec.html#ac59b8387398fca5cb863b59eb13a8363">iov_base</a>; <span class="comment">// void *</span>
+<a name="l00147"></a><a class="code" href="structLinux_1_1tgt__iovec.html#a530d392bf52a29de04bb57ffd97bef5d">00147</a>         uint64_t <a class="code" href="structLinux_1_1tgt__iovec.html#a530d392bf52a29de04bb57ffd97bef5d">iov_len</a>;
+<a name="l00148"></a>00148     };
+<a name="l00149"></a>00149 
+<a name="l00151"></a>00151 
+<a name="l00152"></a><a class="code" href="classLinux.html#a50e5d880569ec2cb9a2f3d4aaa55cc64">00152</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a50e5d880569ec2cb9a2f3d4aaa55cc64" title="ioctl() command codes.">TGT_TCGETS</a>     = 0x5401;
+<a name="l00153"></a><a class="code" href="classLinux.html#a804fc265279c5dbd78e0f95da998b267">00153</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a804fc265279c5dbd78e0f95da998b267">TGT_TCGETA</a>     = 0x5405;
+<a name="l00154"></a><a class="code" href="classLinux.html#a96e06e042526ea5e89c4e8a020636c52">00154</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a96e06e042526ea5e89c4e8a020636c52">TGT_TCSETAW</a>    = 0x5407;
+<a name="l00155"></a><a class="code" href="classLinux.html#a1def346ff527c8efccfd52463f3b5dc1">00155</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a1def346ff527c8efccfd52463f3b5dc1">TGT_FIONREAD</a>   = 0x541B;
+<a name="l00157"></a>00157 
+<a name="l00162"></a>00162     <span class="keyword">static</span> <span class="keywordtype">bool</span>
+<a name="l00163"></a><a class="code" href="classLinux.html#ab20bdd4422ecf6e1736a5587be296b3f">00163</a>     <a class="code" href="classLinux.html#ab20bdd4422ecf6e1736a5587be296b3f">isTtyReq</a>(<span class="keywordtype">unsigned</span> req)
+<a name="l00164"></a>00164     {
+<a name="l00165"></a>00165         <span class="keywordflow">switch</span> (req) {
+<a name="l00166"></a>00166           <span class="keywordflow">case</span> <a class="code" href="classLinux.html#a1def346ff527c8efccfd52463f3b5dc1">TGT_FIONREAD</a>:
+<a name="l00167"></a>00167           <span class="keywordflow">case</span> <a class="code" href="classLinux.html#a96e06e042526ea5e89c4e8a020636c52">TGT_TCSETAW</a>:
+<a name="l00168"></a>00168           <span class="keywordflow">case</span> <a class="code" href="classLinux.html#a50e5d880569ec2cb9a2f3d4aaa55cc64" title="ioctl() command codes.">TGT_TCGETS</a>:
+<a name="l00169"></a>00169           <span class="keywordflow">case</span> <a class="code" href="classLinux.html#a804fc265279c5dbd78e0f95da998b267">TGT_TCGETA</a>:
+<a name="l00170"></a>00170             <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00171"></a>00171           <span class="keywordflow">default</span>:
+<a name="l00172"></a>00172             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00173"></a>00173         }
+<a name="l00174"></a>00174     }
+<a name="l00175"></a>00175 
+<a name="l00176"></a>00176 
+<a name="l00178"></a><a class="code" href="classLinux.html#a2e4654637dbfb58e118058627146b080">00178</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a2e4654637dbfb58e118058627146b080" title="Resource constants for getrlimit().">TGT_RLIMIT_CPU</a> = 0;
+<a name="l00179"></a><a class="code" href="classLinux.html#ac9f91f21e30cdd3121d5df0c433bc9b2">00179</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#ac9f91f21e30cdd3121d5df0c433bc9b2">TGT_RLIMIT_FSIZE</a> = 1;
+<a name="l00180"></a><a class="code" href="classLinux.html#ab7cdbf4aa0a8adf81dd4b7296f3f569e">00180</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#ab7cdbf4aa0a8adf81dd4b7296f3f569e">TGT_RLIMIT_DATA</a> = 2;
+<a name="l00181"></a><a class="code" href="classLinux.html#ab251873bf0e7cec0ff214e53b11045ea">00181</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#ab251873bf0e7cec0ff214e53b11045ea">TGT_RLIMIT_STACK</a> = 3;
+<a name="l00182"></a><a class="code" href="classLinux.html#ae30241d39abfaa273c33b7ea312069e8">00182</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#ae30241d39abfaa273c33b7ea312069e8">TGT_RLIMIT_CORE</a> = 4;
+<a name="l00183"></a><a class="code" href="classLinux.html#a0821c1df130aa7cf89fefd5aea653d9e">00183</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a0821c1df130aa7cf89fefd5aea653d9e">TGT_RLIMIT_RSS</a> = 5;
+<a name="l00184"></a><a class="code" href="classLinux.html#af16b609dcc51ebef365e8258e28d777c">00184</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#af16b609dcc51ebef365e8258e28d777c">TGT_RLIMIT_NPROC</a> = 6;
+<a name="l00185"></a><a class="code" href="classLinux.html#a7eca1a56bf2a00dce74320c95a0b176e">00185</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a7eca1a56bf2a00dce74320c95a0b176e">TGT_RLIMIT_NOFILE</a> = 7;
+<a name="l00186"></a><a class="code" href="classLinux.html#acfa2b204cbb5bca2fbc2c1f15649aca2">00186</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#acfa2b204cbb5bca2fbc2c1f15649aca2">TGT_RLIMIT_MEMLOCK</a> = 8;
+<a name="l00187"></a><a class="code" href="classLinux.html#a6e372e5f43e2da816e9bbf5088d89c21">00187</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a6e372e5f43e2da816e9bbf5088d89c21">TGT_RLIMIT_AS</a> = 9;
+<a name="l00188"></a><a class="code" href="classLinux.html#a173b686f10c7ca880e7a9527195a1816">00188</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a173b686f10c7ca880e7a9527195a1816">TGT_RLIMIT_LOCKS</a> = 10;
+<a name="l00189"></a><a class="code" href="classLinux.html#ac21355dd5e59b445cb99e98fcb2b96ba">00189</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#ac21355dd5e59b445cb99e98fcb2b96ba">TGT_RLIMIT_SIGPENDING</a> = 11;
+<a name="l00190"></a><a class="code" href="classLinux.html#a9f8bde4350834d90717317d21b3b9c51">00190</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a9f8bde4350834d90717317d21b3b9c51">TGT_RLIMIT_MSGQUEUE</a> = 12;
+<a name="l00191"></a><a class="code" href="classLinux.html#a23805c9c845a1a5023596d06fc7ee2e0">00191</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a23805c9c845a1a5023596d06fc7ee2e0">TGT_RLIMIT_NICE</a> = 13;
+<a name="l00192"></a><a class="code" href="classLinux.html#ab7db6b4a69a3034ee6799727a6e0181c">00192</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#ab7db6b4a69a3034ee6799727a6e0181c">TGT_RLIMIT_RTPRIO</a> = 14;
+<a name="l00193"></a><a class="code" href="classLinux.html#a7d1f3330f2489be24c06fd967c6c3938">00193</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a7d1f3330f2489be24c06fd967c6c3938">TGT_RLIMIT_RTTIME</a> = 15;
+<a name="l00194"></a><a class="code" href="classLinux.html#a2156324051ade9812d3df5b805264862">00194</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a2156324051ade9812d3df5b805264862">TGT_RLIM_NLIMITS</a> = 16;
+<a name="l00195"></a>00195 
+<a name="l00197"></a><a class="code" href="classLinux.html#a9e303b6c52672934210e6db497f0da88">00197</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classLinux.html#a9e303b6c52672934210e6db497f0da88" title="For getrusage().">TGT_RUSAGE_SELF</a>     = 0;
+<a name="l00198"></a><a class="code" href="classLinux.html#a9a340e7463be441b8aeb8ea0a109e1bc">00198</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classLinux.html#a9a340e7463be441b8aeb8ea0a109e1bc">TGT_RUSAGE_CHILDREN</a> = -1;
+<a name="l00199"></a><a class="code" href="classLinux.html#af555fb2e49227259e6f6a78e2f6996e4">00199</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classLinux.html#af555fb2e49227259e6f6a78e2f6996e4">TGT_RUSAGE_BOTH</a>     = -2;
+<a name="l00200"></a>00200 
+<a name="l00201"></a><a class="code" href="structLinux_1_1rusage.html">00201</a>     <span class="keyword">struct </span><a class="code" href="structLinux_1_1rusage.html">rusage</a> {
+<a name="l00202"></a><a class="code" href="structLinux_1_1rusage.html#a40e27c5d4340b0c6532787d6740b22ab">00202</a>         <span class="keyword">struct </span><a class="code" href="structLinux_1_1timeval.html" title="For gettimeofday().">timeval</a> <a class="code" href="structLinux_1_1rusage.html#a40e27c5d4340b0c6532787d6740b22ab" title="user time used">ru_utime</a>;        
+<a name="l00203"></a><a class="code" href="structLinux_1_1rusage.html#a15f836efd7b69c0a0eb19f5d9505e3e9">00203</a>         <span class="keyword">struct </span><a class="code" href="structLinux_1_1timeval.html" title="For gettimeofday().">timeval</a> <a class="code" href="structLinux_1_1rusage.html#a15f836efd7b69c0a0eb19f5d9505e3e9" title="system time used">ru_stime</a>;        
+<a name="l00204"></a><a class="code" href="structLinux_1_1rusage.html#a67b085d370d7a42fec998a14f6ea1eab">00204</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a67b085d370d7a42fec998a14f6ea1eab" title="max rss">ru_maxrss</a>;              
+<a name="l00205"></a><a class="code" href="structLinux_1_1rusage.html#a13da5e5855b52e8b43ecd6c6d671708e">00205</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a13da5e5855b52e8b43ecd6c6d671708e" title="integral shared memory size">ru_ixrss</a>;               
+<a name="l00206"></a><a class="code" href="structLinux_1_1rusage.html#a957d4290597d297f4fe76a7136182b75">00206</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a957d4290597d297f4fe76a7136182b75" title="integral unshared data ">ru_idrss</a>;               
+<a name="l00207"></a><a class="code" href="structLinux_1_1rusage.html#a0877b3c5286c832a066901dd5fc49666">00207</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a0877b3c5286c832a066901dd5fc49666" title="integral unshared stack ">ru_isrss</a>;               
+<a name="l00208"></a><a class="code" href="structLinux_1_1rusage.html#af7e9e25146355dc88377697f04142b58">00208</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#af7e9e25146355dc88377697f04142b58" title="page reclaims - total vmfaults">ru_minflt</a>;              
+<a name="l00209"></a><a class="code" href="structLinux_1_1rusage.html#af31606201b14c2fb86ba9b400fab6c14">00209</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#af31606201b14c2fb86ba9b400fab6c14" title="page faults">ru_majflt</a>;              
+<a name="l00210"></a><a class="code" href="structLinux_1_1rusage.html#afc5c49c140619cf89254b7d8c5d4a7e4">00210</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#afc5c49c140619cf89254b7d8c5d4a7e4" title="swaps">ru_nswap</a>;               
+<a name="l00211"></a><a class="code" href="structLinux_1_1rusage.html#aa780084c2236b27d026fff5d04104c6a">00211</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#aa780084c2236b27d026fff5d04104c6a" title="block input operations">ru_inblock</a>;             
+<a name="l00212"></a><a class="code" href="structLinux_1_1rusage.html#a15fb59113ce07eadb77fd013deda9ed6">00212</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a15fb59113ce07eadb77fd013deda9ed6" title="block output operations">ru_oublock</a>;             
+<a name="l00213"></a><a class="code" href="structLinux_1_1rusage.html#a8a85535607de3d7ead85c6204de1261f">00213</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a8a85535607de3d7ead85c6204de1261f" title="messages sent">ru_msgsnd</a>;              
+<a name="l00214"></a><a class="code" href="structLinux_1_1rusage.html#a76a1a216776ce4c8e99d59e12b94469d">00214</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a76a1a216776ce4c8e99d59e12b94469d" title="messages received">ru_msgrcv</a>;              
+<a name="l00215"></a><a class="code" href="structLinux_1_1rusage.html#afafc5b85af3aa14ff03dc9051cd99803">00215</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#afafc5b85af3aa14ff03dc9051cd99803" title="signals received">ru_nsignals</a>;            
+<a name="l00216"></a><a class="code" href="structLinux_1_1rusage.html#a488b8289bbd360fe61edb0bc26ccdb4d">00216</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#a488b8289bbd360fe61edb0bc26ccdb4d" title="voluntary context switches">ru_nvcsw</a>;               
+<a name="l00217"></a><a class="code" href="structLinux_1_1rusage.html#ad6c040bd0a4bea27aac25d2b46398f13">00217</a>         int64_t <a class="code" href="structLinux_1_1rusage.html#ad6c040bd0a4bea27aac25d2b46398f13" title="involuntary ">ru_nivcsw</a>;              
+<a name="l00218"></a>00218     };
+<a name="l00219"></a>00219 
+<a name="l00220"></a>00220     <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classLinux.html#a4d991052a0ab25e074acd669d8570c30">openSpecialFile</a>(std::string path, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00221"></a>00221     <span class="keyword">static</span> std::string <a class="code" href="classLinux.html#a01194ef4e453eb1292403de676b86dd9">procMeminfo</a>(<a class="code" href="classLiveProcess.html">LiveProcess</a> *process, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00222"></a>00222 
+<a name="l00223"></a>00223     <span class="comment">// For futex system call</span>
+<a name="l00224"></a><a class="code" href="classLinux.html#a50b3e4a3042049bc573124af60355eb6">00224</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#a50b3e4a3042049bc573124af60355eb6">TGT_FUTEX_WAIT</a>  = 0;
+<a name="l00225"></a><a class="code" href="classLinux.html#adc16305e4b504b1250c0684ac15f529d">00225</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#adc16305e4b504b1250c0684ac15f529d">TGT_FUTEX_WAKE</a>  = 1;
+<a name="l00226"></a><a class="code" href="classLinux.html#aefc7de6c39dd68b971f1fe2c797acd04">00226</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#aefc7de6c39dd68b971f1fe2c797acd04">TGT_EAGAIN</a>      = 11;
+<a name="l00227"></a><a class="code" href="classLinux.html#ad8327bcce81f6ea29f92e6422808bbdd">00227</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#ad8327bcce81f6ea29f92e6422808bbdd">TGT_EWOULDBLOCK</a> = <a class="code" href="classLinux.html#aefc7de6c39dd68b971f1fe2c797acd04">TGT_EAGAIN</a>;
+<a name="l00228"></a><a class="code" href="classLinux.html#aac48b0673ec47bd265f960a40df8174a">00228</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#aac48b0673ec47bd265f960a40df8174a">TGT_FUTEX_PRIVATE_FLAG</a> = 128;
+<a name="l00229"></a>00229 
+<a name="l00230"></a>00230     <span class="comment">// for *at syscalls</span>
+<a name="l00231"></a><a class="code" href="classLinux.html#ac982d09ce88b29dcb1eb35091e2a6b5f">00231</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classLinux.html#ac982d09ce88b29dcb1eb35091e2a6b5f">TGT_AT_FDCWD</a>   = -100;
+<a name="l00232"></a>00232 
+<a name="l00233"></a>00233     <span class="comment">// for MREMAP</span>
+<a name="l00234"></a><a class="code" href="classLinux.html#adf3fd76eea9d78e56cc53f77300e1b1d">00234</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#adf3fd76eea9d78e56cc53f77300e1b1d">TGT_MREMAP_MAYMOVE</a>    = 0x1;
+<a name="l00235"></a><a class="code" href="classLinux.html#aebbe098e8d7b38f0b58663068ebb2215">00235</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <a class="code" href="classLinux.html#aebbe098e8d7b38f0b58663068ebb2215">TGT_MREMAP_FIXED</a>      = 0x2;
+<a name="l00236"></a>00236 };  <span class="comment">// class Linux</span>
+<a name="l00237"></a>00237 
+<a name="l00238"></a>00238 <span class="preprocessor">#endif // __LINUX_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

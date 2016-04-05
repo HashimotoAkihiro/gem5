@@ -1,0 +1,121 @@
+\hypertarget{hostinfo_8hh}{
+\section{base/hostinfo.hh}
+\label{hostinfo_8hh}\index{base/hostinfo.hh@{base/hostinfo.hh}}
+}
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+std::string \hyperlink{hostinfo_8hh_a869f93f94aa9f8c038e4b71d01c2e404}{\_\-\_\-get\_\-hostname} ()
+\item 
+std::string \& \hyperlink{hostinfo_8hh_a5beda2563652aebef726573dff1e3d6a}{hostname} ()
+\item 
+uint64\_\-t \hyperlink{hostinfo_8hh_af828f458b0892e2778f8ffb6ed6f0610}{procInfo} (const char $\ast$filename, const char $\ast$target)
+\item 
+uint64\_\-t \hyperlink{hostinfo_8hh_af25c7a8864229307a3f0523a45328c9b}{memUsage} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{hostinfo_8hh_a869f93f94aa9f8c038e4b71d01c2e404}{
+\index{hostinfo.hh@{hostinfo.hh}!\_\-\_\-get\_\-hostname@{\_\-\_\-get\_\-hostname}}
+\index{\_\-\_\-get\_\-hostname@{\_\-\_\-get\_\-hostname}!hostinfo.hh@{hostinfo.hh}}
+\subsubsection[{\_\-\_\-get\_\-hostname}]{\setlength{\rightskip}{0pt plus 5cm}std::string \_\-\_\-get\_\-hostname ()}}
+\label{hostinfo_8hh_a869f93f94aa9f8c038e4b71d01c2e404}
+
+
+
+\begin{DoxyCode}
+56 {
+57     char host[256];
+58     if (gethostname(host, sizeof host) == -1)
+59         warn("could not get host name!");
+60     return host;
+61 }
+\end{DoxyCode}
+\hypertarget{hostinfo_8hh_a5beda2563652aebef726573dff1e3d6a}{
+\index{hostinfo.hh@{hostinfo.hh}!hostname@{hostname}}
+\index{hostname@{hostname}!hostinfo.hh@{hostinfo.hh}}
+\subsubsection[{hostname}]{\setlength{\rightskip}{0pt plus 5cm}std::string\& hostname ()}}
+\label{hostinfo_8hh_a5beda2563652aebef726573dff1e3d6a}
+
+
+
+\begin{DoxyCode}
+65 {
+66     static string hostname = __get_hostname();
+67     return hostname;
+68 }
+\end{DoxyCode}
+\hypertarget{hostinfo_8hh_af25c7a8864229307a3f0523a45328c9b}{
+\index{hostinfo.hh@{hostinfo.hh}!memUsage@{memUsage}}
+\index{memUsage@{memUsage}!hostinfo.hh@{hostinfo.hh}}
+\subsubsection[{memUsage}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t memUsage ()}}
+\label{hostinfo_8hh_af25c7a8864229307a3f0523a45328c9b}
+Determine the simulator process' total virtual memory usage.
+
+\begin{DoxyReturn}{戻り値}
+virtual memory usage in kilobytes 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+100 {
+101 // For the Mach-based Darwin kernel, use the task_info of the self task
+102 #ifdef __APPLE__
+103     struct task_basic_info t_info;
+104     mach_msg_type_number_t t_info_count = TASK_BASIC_INFO_COUNT;
+105 
+106     if (KERN_SUCCESS != task_info(mach_task_self(),
+107                                   TASK_BASIC_INFO, (task_info_t)&t_info,
+108                                   &t_info_count)) {
+109         return 0;
+110     }
+111 
+112     // Mimic Darwin's implementation of top and subtract
+113     // SHARED_REGION_SIZE from the tasks virtual size to account for the
+114     // shared memory submap that is incorporated into every process.
+115     return (t_info.virtual_size - SHARED_REGION_SIZE) / 1024;
+116 #else
+117     // Linux implementation
+118     return procInfo("/proc/self/status", "VmSize:");
+119 #endif
+120 }
+\end{DoxyCode}
+\hypertarget{hostinfo_8hh_af828f458b0892e2778f8ffb6ed6f0610}{
+\index{hostinfo.hh@{hostinfo.hh}!procInfo@{procInfo}}
+\index{procInfo@{procInfo}!hostinfo.hh@{hostinfo.hh}}
+\subsubsection[{procInfo}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t procInfo (const char $\ast$ {\em filename}, \/  const char $\ast$ {\em target})}}
+\label{hostinfo_8hh_af828f458b0892e2778f8ffb6ed6f0610}
+
+
+
+\begin{DoxyCode}
+72 {
+73     int  done = 0;
+74     char line[80];
+75     char format[80];
+76     long usage;
+77 
+78     FILE *fp = fopen(filename, "r");
+79 
+80     while (fp && !feof(fp) && !done) {
+81         if (fgets(line, 80, fp)) {
+82             if (startswith(line, target)) {
+83                 snprintf(format, sizeof(format), "%s %%ld", target);
+84                 sscanf(line, format, &usage);
+85 
+86                 fclose(fp);
+87                 return usage ;
+88             }
+89         }
+90     }
+91 
+92     if (fp)
+93         fclose(fp);
+94 
+95     return 0;
+96 }
+\end{DoxyCode}

@@ -1,0 +1,269 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/base_dyn_inst_impl.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/base_dyn_inst_impl.hh</h1><a href="base__dyn__inst__impl_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __CPU_BASE_DYN_INST_IMPL_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_BASE_DYN_INST_IMPL_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &lt;set&gt;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &lt;sstream&gt;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="cprintf_8hh.html">base/cprintf.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="trace_8hh.html">base/trace.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="base__dyn__inst_8hh.html">cpu/base_dyn_inst.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="exetrace_8hh.html">cpu/exetrace.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;debug/DynInst.hh&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;debug/IQ.hh&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="request_8hh.html">mem/request.hh</a>&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00062"></a><a class="code" href="classBaseDynInst.html#a840565bb821f30293af92f0db4ddb28a">00062</a> <a class="code" href="classBaseDynInst.html#a840565bb821f30293af92f0db4ddb28a">BaseDynInst&lt;Impl&gt;::BaseDynInst</a>(<a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> _staticInst,
+<a name="l00063"></a>00063                                <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> _macroop,
+<a name="l00064"></a>00064                                <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> _pc, <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> _predPC,
+<a name="l00065"></a>00065                                <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> seq_num, ImplCPU *cpu)
+<a name="l00066"></a>00066   : staticInst(_staticInst), cpu(cpu), traceData(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), macroop(_macroop)
+<a name="l00067"></a>00067 {
+<a name="l00068"></a>00068     <a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a> = seq_num;
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070     <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a> = _pc;
+<a name="l00071"></a>00071     <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a> = _predPC;
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073     <a class="code" href="classBaseDynInst.html#a1b19937d8cca25bf52a51ae7de67ea94">initVars</a>();
+<a name="l00074"></a>00074 }
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00077"></a><a class="code" href="classBaseDynInst.html#a7ebce8e9adfcd43b1e8b3a58f235d289">00077</a> <a class="code" href="classBaseDynInst.html#a840565bb821f30293af92f0db4ddb28a">BaseDynInst&lt;Impl&gt;::BaseDynInst</a>(<a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> _staticInst,
+<a name="l00078"></a>00078                                <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> _macroop)
+<a name="l00079"></a>00079     : staticInst(_staticInst), traceData(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), macroop(_macroop)
+<a name="l00080"></a>00080 {
+<a name="l00081"></a>00081     <a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a> = 0;
+<a name="l00082"></a>00082     <a class="code" href="classBaseDynInst.html#a1b19937d8cca25bf52a51ae7de67ea94">initVars</a>();
+<a name="l00083"></a>00083 }
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00086"></a>00086 <span class="keywordtype">void</span>
+<a name="l00087"></a><a class="code" href="classBaseDynInst.html#a1b19937d8cca25bf52a51ae7de67ea94">00087</a> <a class="code" href="classBaseDynInst.html#a1b19937d8cca25bf52a51ae7de67ea94">BaseDynInst&lt;Impl&gt;::initVars</a>()
+<a name="l00088"></a>00088 {
+<a name="l00089"></a>00089     <a class="code" href="classBaseDynInst.html#a9c9a186aff5eddf449916952b8398116">memData</a> = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00090"></a>00090     <a class="code" href="classBaseDynInst.html#a1097c58b547d58e4544cbf31fa68a390">effAddr</a> = 0;
+<a name="l00091"></a>00091     <a class="code" href="classBaseDynInst.html#a159ce173047bae421effda8028f07d68">physEffAddr</a> = 0;
+<a name="l00092"></a>00092     <a class="code" href="classBaseDynInst.html#a98d0c5a64298b2b2d1bb8e99124b0963">readyRegs</a> = 0;
+<a name="l00093"></a>00093     <a class="code" href="classBaseDynInst.html#aba29e5174ccb47ac17cc2ff228a8e2af">memReqFlags</a> = 0;
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095     <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset();
+<a name="l00096"></a>00096 
+<a name="l00097"></a>00097     <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>.reset();
+<a name="l00098"></a>00098     <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa5a7ffa46df69da4492bfa380bb56eba6">RecordResult</a>] = <span class="keyword">true</span>;
+<a name="l00099"></a>00099     <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faf3f0ec77fa58b6268327a87170b3b204">Predicate</a>] = <span class="keyword">true</span>;
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101     <a class="code" href="classBaseDynInst.html#a543896e8c656ce7cce978a1ec4d29afe">lqIdx</a> = -1;
+<a name="l00102"></a>00102     <a class="code" href="classBaseDynInst.html#a9f5a94c5a008c1580f89d38e425a6528">sqIdx</a> = -1;
+<a name="l00103"></a>00103 
+<a name="l00104"></a>00104     <span class="comment">// Eventually make this a parameter.</span>
+<a name="l00105"></a>00105     <a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">threadNumber</a> = 0;
+<a name="l00106"></a>00106 
+<a name="l00107"></a>00107     <span class="comment">// Also make this a parameter, or perhaps get it from xc or cpu.</span>
+<a name="l00108"></a>00108     <a class="code" href="classBaseDynInst.html#a03f3e3cd7500e78001075b53eab05a53">asid</a> = 0;
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110     <span class="comment">// Initialize the fault to be NoFault.</span>
+<a name="l00111"></a>00111     <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> = <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00114"></a>00114 <span class="preprocessor"></span>    ++<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;instcount;
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;instcount &gt; 1500) {
+<a name="l00117"></a>00117 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00118"></a>00118 <span class="preprocessor"></span>        <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;dumpInsts();
+<a name="l00119"></a>00119         dumpSNList();
+<a name="l00120"></a>00120 <span class="preprocessor">#endif</span>
+<a name="l00121"></a>00121 <span class="preprocessor"></span>        assert(<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;instcount &lt;= 1500);
+<a name="l00122"></a>00122     }
+<a name="l00123"></a>00123 
+<a name="l00124"></a>00124     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(DynInst,
+<a name="l00125"></a>00125         <span class="stringliteral">&quot;DynInst: [sn:%lli] Instruction created. Instcount for %s = %i\n&quot;</span>,
+<a name="l00126"></a>00126         <a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a>, <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;name(), <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;instcount);
+<a name="l00127"></a>00127 <span class="preprocessor">#endif</span>
+<a name="l00128"></a>00128 <span class="preprocessor"></span>
+<a name="l00129"></a>00129 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00130"></a>00130 <span class="preprocessor"></span>    <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;snList.insert(<a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a>);
+<a name="l00131"></a>00131 <span class="preprocessor">#endif</span>
+<a name="l00132"></a>00132 <span class="preprocessor"></span>
+<a name="l00133"></a>00133     <a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a> = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00134"></a>00134 }
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00137"></a><a class="code" href="classBaseDynInst.html#af446a3befb983b87ef04566ad283c371">00137</a> <a class="code" href="classBaseDynInst.html#af446a3befb983b87ef04566ad283c371">BaseDynInst&lt;Impl&gt;::~BaseDynInst</a>()
+<a name="l00138"></a>00138 {
+<a name="l00139"></a>00139     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a9c9a186aff5eddf449916952b8398116">memData</a>) {
+<a name="l00140"></a>00140         <span class="keyword">delete</span> [] <a class="code" href="classBaseDynInst.html#a9c9a186aff5eddf449916952b8398116">memData</a>;
+<a name="l00141"></a>00141     }
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>) {
+<a name="l00144"></a>00144         <span class="keyword">delete</span> <a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>;
+<a name="l00145"></a>00145     }
+<a name="l00146"></a>00146 
+<a name="l00147"></a>00147     <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> = <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00150"></a>00150 <span class="preprocessor"></span>    --<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;instcount;
+<a name="l00151"></a>00151 
+<a name="l00152"></a>00152     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(DynInst,
+<a name="l00153"></a>00153         <span class="stringliteral">&quot;DynInst: [sn:%lli] Instruction destroyed. Instcount for %s = %i\n&quot;</span>,
+<a name="l00154"></a>00154         <a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a>, <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;name(), <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;instcount);
+<a name="l00155"></a>00155 <span class="preprocessor">#endif</span>
+<a name="l00156"></a>00156 <span class="preprocessor"></span><span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00157"></a>00157 <span class="preprocessor"></span>    <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;snList.erase(<a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a>);
+<a name="l00158"></a>00158 <span class="preprocessor">#endif</span>
+<a name="l00159"></a>00159 <span class="preprocessor"></span>
+<a name="l00160"></a>00160     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a>)
+<a name="l00161"></a>00161         <span class="keyword">delete</span> <a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a>;
+<a name="l00162"></a>00162 }
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00165"></a>00165 <span class="preprocessor"></span><span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00166"></a>00166 <span class="keywordtype">void</span>
+<a name="l00167"></a>00167 <a class="code" href="classBaseDynInst.html">BaseDynInst&lt;Impl&gt;::dumpSNList</a>()
+<a name="l00168"></a>00168 {
+<a name="l00169"></a>00169     std::set&lt;InstSeqNum&gt;::iterator sn_it = <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;snList.begin();
+<a name="l00170"></a>00170 
+<a name="l00171"></a>00171     <span class="keywordtype">int</span> <a class="code" href="classRefCounted.html#ad43c3812e6d13e0518d9f8b8f463ffcf">count</a> = 0;
+<a name="l00172"></a>00172     <span class="keywordflow">while</span> (sn_it != <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;snList.end()) {
+<a name="l00173"></a>00173         <a class="code" href="cprintf_8hh.html#a46231f0e413d30a2560384d0ae05536b">cprintf</a>(<span class="stringliteral">&quot;%i: [sn:%lli] not destroyed\n&quot;</span>, count, (*sn_it));
+<a name="l00174"></a>00174         count++;
+<a name="l00175"></a>00175         sn_it++;
+<a name="l00176"></a>00176     }
+<a name="l00177"></a>00177 }
+<a name="l00178"></a>00178 <span class="preprocessor">#endif</span>
+<a name="l00179"></a>00179 <span class="preprocessor"></span>
+<a name="l00180"></a>00180 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00181"></a>00181 <span class="keywordtype">void</span>
+<a name="l00182"></a><a class="code" href="classBaseDynInst.html#accd2600060dbaee3a3b41aed4034c63c">00182</a> <a class="code" href="classBaseDynInst.html#accd2600060dbaee3a3b41aed4034c63c">BaseDynInst&lt;Impl&gt;::dump</a>()
+<a name="l00183"></a>00183 {
+<a name="l00184"></a>00184     <a class="code" href="cprintf_8hh.html#a46231f0e413d30a2560384d0ae05536b">cprintf</a>(<span class="stringliteral">&quot;T%d : %#08d `&quot;</span>, <a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">threadNumber</a>, <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.instAddr());
+<a name="l00185"></a>00185     std::cout &lt;&lt; <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;disassemble(<a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.instAddr());
+<a name="l00186"></a>00186     <a class="code" href="cprintf_8hh.html#a46231f0e413d30a2560384d0ae05536b">cprintf</a>(<span class="stringliteral">&quot;&apos;\n&quot;</span>);
+<a name="l00187"></a>00187 }
+<a name="l00188"></a>00188 
+<a name="l00189"></a>00189 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00190"></a>00190 <span class="keywordtype">void</span>
+<a name="l00191"></a><a class="code" href="classBaseDynInst.html#a5d337b0f151368459d1a95a6470f18ca">00191</a> <a class="code" href="classBaseDynInst.html#accd2600060dbaee3a3b41aed4034c63c">BaseDynInst&lt;Impl&gt;::dump</a>(std::string &amp;outstring)
+<a name="l00192"></a>00192 {
+<a name="l00193"></a>00193     std::ostringstream <a class="code" href="namespaceArmISA.html#afaeb18e17f862d8fcb76dfb68a18854f">s</a>;
+<a name="l00194"></a>00194     s &lt;&lt; <span class="stringliteral">&quot;T&quot;</span> &lt;&lt; <a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">threadNumber</a> &lt;&lt; <span class="stringliteral">&quot; : 0x&quot;</span> &lt;&lt; <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.instAddr() &lt;&lt; <span class="stringliteral">&quot; &quot;</span>
+<a name="l00195"></a>00195       &lt;&lt; <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;disassemble(<a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.instAddr());
+<a name="l00196"></a>00196 
+<a name="l00197"></a>00197     outstring = s.str();
+<a name="l00198"></a>00198 }
+<a name="l00199"></a>00199 
+<a name="l00200"></a>00200 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00201"></a>00201 <span class="keywordtype">void</span>
+<a name="l00202"></a><a class="code" href="classBaseDynInst.html#acd6444fdff2557922a35895eccab2d0f">00202</a> <a class="code" href="classBaseDynInst.html#acd6444fdff2557922a35895eccab2d0f">BaseDynInst&lt;Impl&gt;::markSrcRegReady</a>()
+<a name="l00203"></a>00203 {
+<a name="l00204"></a>00204     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IQ, <span class="stringliteral">&quot;[sn:%lli] has %d ready out of %d sources. RTI %d)\n&quot;</span>,
+<a name="l00205"></a>00205             <a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a>, <a class="code" href="classBaseDynInst.html#a98d0c5a64298b2b2d1bb8e99124b0963">readyRegs</a>+1, <a class="code" href="classBaseDynInst.html#a3902ecc708a6f28e94ee9aa975692915">numSrcRegs</a>(), <a class="code" href="classBaseDynInst.html#a29fcc55658982386428d8035e438589f">readyToIssue</a>());
+<a name="l00206"></a>00206     <span class="keywordflow">if</span> (++<a class="code" href="classBaseDynInst.html#a98d0c5a64298b2b2d1bb8e99124b0963">readyRegs</a> == <a class="code" href="classBaseDynInst.html#a3902ecc708a6f28e94ee9aa975692915">numSrcRegs</a>()) {
+<a name="l00207"></a>00207         <a class="code" href="classBaseDynInst.html#a2531049d5481976af68c8586015f0047">setCanIssue</a>();
+<a name="l00208"></a>00208     }
+<a name="l00209"></a>00209 }
+<a name="l00210"></a>00210 
+<a name="l00211"></a>00211 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00212"></a>00212 <span class="keywordtype">void</span>
+<a name="l00213"></a><a class="code" href="classBaseDynInst.html#a20a741d6245dcbf24bb3bc167946e1ec">00213</a> <a class="code" href="classBaseDynInst.html#acd6444fdff2557922a35895eccab2d0f">BaseDynInst&lt;Impl&gt;::markSrcRegReady</a>(<a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">RegIndex</a> src_idx)
+<a name="l00214"></a>00214 {
+<a name="l00215"></a>00215     <a class="code" href="classBaseDynInst.html#a78a797b8c24ad873d0cbe5f52487b02f">_readySrcRegIdx</a>[src_idx] = <span class="keyword">true</span>;
+<a name="l00216"></a>00216 
+<a name="l00217"></a>00217     <a class="code" href="classBaseDynInst.html#acd6444fdff2557922a35895eccab2d0f">markSrcRegReady</a>();
+<a name="l00218"></a>00218 }
+<a name="l00219"></a>00219 
+<a name="l00220"></a>00220 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00221"></a>00221 <span class="keywordtype">bool</span>
+<a name="l00222"></a><a class="code" href="classBaseDynInst.html#ae3a07556a5b5d8248cbfb1c99561340d">00222</a> <a class="code" href="classBaseDynInst.html#ae3a07556a5b5d8248cbfb1c99561340d">BaseDynInst&lt;Impl&gt;::eaSrcsReady</a>()
+<a name="l00223"></a>00223 {
+<a name="l00224"></a>00224     <span class="comment">// For now I am assuming that src registers 1..n-1 are the ones that the</span>
+<a name="l00225"></a>00225     <span class="comment">// EA calc depends on.  (i.e. src reg 0 is the source of the data to be</span>
+<a name="l00226"></a>00226     <span class="comment">// stored)</span>
+<a name="l00227"></a>00227 
+<a name="l00228"></a>00228     <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 1; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; <a class="code" href="classBaseDynInst.html#a3902ecc708a6f28e94ee9aa975692915">numSrcRegs</a>(); ++<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) {
+<a name="l00229"></a>00229         <span class="keywordflow">if</span> (!<a class="code" href="classBaseDynInst.html#a78a797b8c24ad873d0cbe5f52487b02f">_readySrcRegIdx</a>[<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>])
+<a name="l00230"></a>00230             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00231"></a>00231     }
+<a name="l00232"></a>00232 
+<a name="l00233"></a>00233     <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00234"></a>00234 }
+<a name="l00235"></a>00235 
+<a name="l00236"></a>00236 <span class="preprocessor">#endif//__CPU_BASE_DYN_INST_IMPL_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

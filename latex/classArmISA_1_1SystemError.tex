@@ -1,0 +1,110 @@
+\hypertarget{classArmISA_1_1SystemError}{
+\section{クラス SystemError}
+\label{classArmISA_1_1SystemError}\index{ArmISA::SystemError@{ArmISA::SystemError}}
+}
+
+
+\hyperlink{classSystem}{System} error (AArch64 only).  
+
+
+{\ttfamily \#include $<$faults.hh$>$}SystemErrorに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classArmISA_1_1SystemError}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1SystemError_a952c3a95357c9c6e8602a0853d8f982c}{SystemError} ()
+\item 
+void \hyperlink{classArmISA_1_1SystemError_a2bd783b42262278d41157d428e1f8d6f}{invoke} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}, \hyperlink{classRefCountingPtr}{StaticInstPtr} inst=\hyperlink{classStaticInst_aa793d9793af735f09096369fb17567b6}{StaticInst::nullStaticInstPtr})
+\item 
+bool \hyperlink{classArmISA_1_1SystemError_afd7a21fdb010230ad53094254739dde8}{routeToMonitor} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\item 
+bool \hyperlink{classArmISA_1_1SystemError_a16facd13ba8e6d15d2b865882c379d5f}{routeToHyp} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\hyperlink{classSystem}{System} error (AArch64 only). 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1SystemError_a952c3a95357c9c6e8602a0853d8f982c}{
+\index{ArmISA::SystemError@{ArmISA::SystemError}!SystemError@{SystemError}}
+\index{SystemError@{SystemError}!ArmISA::SystemError@{ArmISA::SystemError}}
+\subsubsection[{SystemError}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SystemError} ()}}
+\label{classArmISA_1_1SystemError_a952c3a95357c9c6e8602a0853d8f982c}
+
+
+
+\begin{DoxyCode}
+1351 {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classArmISA_1_1SystemError_a2bd783b42262278d41157d428e1f8d6f}{
+\index{ArmISA::SystemError@{ArmISA::SystemError}!invoke@{invoke}}
+\index{invoke@{invoke}!ArmISA::SystemError@{ArmISA::SystemError}}
+\subsubsection[{invoke}]{\setlength{\rightskip}{0pt plus 5cm}void invoke ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf StaticInstPtr} {\em inst} = {\ttfamily {\bf StaticInst::nullStaticInstPtr}})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1SystemError_a2bd783b42262278d41157d428e1f8d6f}
+
+
+\hyperlink{classArmISA_1_1ArmFault_a2bd783b42262278d41157d428e1f8d6f}{ArmFault}を再定義しています。
+
+
+\begin{DoxyCode}
+1355 {
+1356     tc->getCpuPtr()->clearInterrupt(INT_ABT, 0);
+1357     ArmFault::invoke(tc, inst);
+1358 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1SystemError_a16facd13ba8e6d15d2b865882c379d5f}{
+\index{ArmISA::SystemError@{ArmISA::SystemError}!routeToHyp@{routeToHyp}}
+\index{routeToHyp@{routeToHyp}!ArmISA::SystemError@{ArmISA::SystemError}}
+\subsubsection[{routeToHyp}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToHyp ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1SystemError_a16facd13ba8e6d15d2b865882c379d5f}
+
+
+\hyperlink{classArmISA_1_1ArmFault_a6fa7b734487c2a8da04a28ace414a355}{ArmFault}を再定義しています。
+
+
+\begin{DoxyCode}
+1371 {
+1372     bool toHyp;
+1373     assert(from64);
+1374 
+1375     SCR scr = tc->readMiscRegNoEffect(MISCREG_SCR_EL3);
+1376     HCR hcr  = tc->readMiscRegNoEffect(MISCREG_HCR);
+1377     CPSR cpsr = tc->readMiscRegNoEffect(MISCREG_CPSR);
+1378 
+1379     toHyp = (!scr.ea && hcr.amo && !inSecureState(scr, cpsr)) ||
+1380             (!scr.ea && !scr.rw && !hcr.amo && !inSecureState(scr,cpsr));
+1381     return toHyp;
+1382 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1SystemError_afd7a21fdb010230ad53094254739dde8}{
+\index{ArmISA::SystemError@{ArmISA::SystemError}!routeToMonitor@{routeToMonitor}}
+\index{routeToMonitor@{routeToMonitor}!ArmISA::SystemError@{ArmISA::SystemError}}
+\subsubsection[{routeToMonitor}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToMonitor ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1SystemError_afd7a21fdb010230ad53094254739dde8}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_a9a0a467b98f43890c1d89d1d59a5923c}{ArmFaultVals$<$ SystemError $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1362 {
+1363     assert(ArmSystem::haveSecurity(tc));
+1364     assert(from64);
+1365     SCR scr = tc->readMiscRegNoEffect(MISCREG_SCR_EL3);
+1366     return scr.ea;
+1367 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8hh}{faults.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,93 @@
+\hypertarget{classLinux_1_1UDelayEvent}{
+\section{クラス UDelayEvent}
+\label{classLinux_1_1UDelayEvent}\index{Linux::UDelayEvent@{Linux::UDelayEvent}}
+}
+
+
+{\ttfamily \#include $<$events.hh$>$}UDelayEventに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classLinux_1_1UDelayEvent}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classLinux_1_1UDelayEvent_a0b3c05abde3a4fc6b3ee00842bc8cd19}{UDelayEvent} (\hyperlink{classPCEventQueue}{PCEventQueue} $\ast$q, const std::string \&desc, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, uint64\_\-t mult, uint64\_\-t div)
+\item 
+virtual void \hyperlink{classLinux_1_1UDelayEvent_a7f346b2e15a406283e587b1123735488}{process} (\hyperlink{classThreadContext}{ThreadContext} $\ast$xc)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+uint64\_\-t \hyperlink{classLinux_1_1UDelayEvent_a53a99750094ff662ba0e0ce44b16879d}{argDivToNs}
+\item 
+uint64\_\-t \hyperlink{classLinux_1_1UDelayEvent_a5a6e4a5afa3827ac67897e3e2ca27291}{argMultToNs}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+A class to skip udelay() and related calls in the kernel. This class has two additional parameters that take the argument to udelay and manipulated it to come up with ns and eventually ticks to quiesce for. See descriptions of argDivToNs and argMultToNs below. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classLinux_1_1UDelayEvent_a0b3c05abde3a4fc6b3ee00842bc8cd19}{
+\index{Linux::UDelayEvent@{Linux::UDelayEvent}!UDelayEvent@{UDelayEvent}}
+\index{UDelayEvent@{UDelayEvent}!Linux::UDelayEvent@{Linux::UDelayEvent}}
+\subsubsection[{UDelayEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf UDelayEvent} ({\bf PCEventQueue} $\ast$ {\em q}, \/  const std::string \& {\em desc}, \/  {\bf Addr} {\em addr}, \/  uint64\_\-t {\em mult}, \/  uint64\_\-t {\em div})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classLinux_1_1UDelayEvent_a0b3c05abde3a4fc6b3ee00842bc8cd19}
+
+
+
+\begin{DoxyCode}
+69         : SkipFuncEvent(q, desc, addr), argDivToNs(div), argMultToNs(mult) {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classLinux_1_1UDelayEvent_a7f346b2e15a406283e587b1123735488}{
+\index{Linux::UDelayEvent@{Linux::UDelayEvent}!process@{process}}
+\index{process@{process}!Linux::UDelayEvent@{Linux::UDelayEvent}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}void process ({\bf ThreadContext} $\ast$ {\em xc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classLinux_1_1UDelayEvent_a7f346b2e15a406283e587b1123735488}
+
+
+\hyperlink{classSkipFuncEvent_ad66a9d5ec7cfe597b848a17c0df5cc28}{SkipFuncEvent}を再定義しています。
+
+
+\begin{DoxyCode}
+74 {
+75     int arg_num  = 0;
+76 
+77     // Get the time in native size
+78     uint64_t time = TheISA::getArgument(tc, arg_num,  (uint16_t)-1, false);
+79 
+80     // convert parameter to ns
+81     if (argDivToNs)
+82         time /= argDivToNs;
+83 
+84     time *= argMultToNs;
+85 
+86     SkipFuncEvent::process(tc);
+87 
+88     PseudoInst::quiesceNs(tc, time);
+89 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classLinux_1_1UDelayEvent_a53a99750094ff662ba0e0ce44b16879d}{
+\index{Linux::UDelayEvent@{Linux::UDelayEvent}!argDivToNs@{argDivToNs}}
+\index{argDivToNs@{argDivToNs}!Linux::UDelayEvent@{Linux::UDelayEvent}}
+\subsubsection[{argDivToNs}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t argDivToNs\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLinux_1_1UDelayEvent_a53a99750094ff662ba0e0ce44b16879d}
+value to divide arg by to create ns. This is present beacues the linux kernel code sometime precomputes the first multiply that is done in udelay() if the parameter is a constant. We need to undo it so here is how. \hypertarget{classLinux_1_1UDelayEvent_a5a6e4a5afa3827ac67897e3e2ca27291}{
+\index{Linux::UDelayEvent@{Linux::UDelayEvent}!argMultToNs@{argMultToNs}}
+\index{argMultToNs@{argMultToNs}!Linux::UDelayEvent@{Linux::UDelayEvent}}
+\subsubsection[{argMultToNs}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t argMultToNs\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLinux_1_1UDelayEvent_a5a6e4a5afa3827ac67897e3e2ca27291}
+value to multiple arg by to create ns. Nominally, this is 1000 to convert us to ns, but since linux can do some preprocessing of constant values something else might be required. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+kern/linux/\hyperlink{events_8hh}{events.hh}\item 
+kern/linux/\hyperlink{events_8cc}{events.cc}\end{DoxyCompactItemize}

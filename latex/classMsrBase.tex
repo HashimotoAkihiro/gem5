@@ -1,0 +1,119 @@
+\hypertarget{classMsrBase}{
+\section{クラス MsrBase}
+\label{classMsrBase}\index{MsrBase@{MsrBase}}
+}
+
+
+{\ttfamily \#include $<$misc.hh$>$}MsrBaseに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classMsrBase}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMsrBase_a79fafc489c6b875f952c43514d1f714b}{MsrBase} (const char $\ast$mnem, \hyperlink{classStaticInst_a5605d4fc727eae9e595325c90c0ec108}{ExtMachInst} \_\-machInst, OpClass \_\-\_\-opClass, uint8\_\-t \_\-byteMask)
+\item 
+void \hyperlink{classMsrBase_ad199fe95a1c0915252b3b46eaacd1515}{printMsrBase} (std::ostream \&os) const 
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+uint8\_\-t \hyperlink{classMsrBase_a88c8ed0fe728ebc0bbc5182201205bfb}{byteMask}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classMsrBase_a79fafc489c6b875f952c43514d1f714b}{
+\index{MsrBase@{MsrBase}!MsrBase@{MsrBase}}
+\index{MsrBase@{MsrBase}!MsrBase@{MsrBase}}
+\subsubsection[{MsrBase}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MsrBase} (const char $\ast$ {\em mnem}, \/  {\bf ExtMachInst} {\em \_\-machInst}, \/  OpClass {\em \_\-\_\-opClass}, \/  uint8\_\-t {\em \_\-byteMask})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classMsrBase_a79fafc489c6b875f952c43514d1f714b}
+
+
+
+\begin{DoxyCode}
+64                                :
+65         PredOp(mnem, _machInst, __opClass), byteMask(_byteMask)
+66     {}
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classMsrBase_ad199fe95a1c0915252b3b46eaacd1515}{
+\index{MsrBase@{MsrBase}!printMsrBase@{printMsrBase}}
+\index{printMsrBase@{printMsrBase}!MsrBase@{MsrBase}}
+\subsubsection[{printMsrBase}]{\setlength{\rightskip}{0pt plus 5cm}void printMsrBase (std::ostream \& {\em os}) const\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classMsrBase_ad199fe95a1c0915252b3b46eaacd1515}
+
+
+
+\begin{DoxyCode}
+77 {
+78     printMnemonic(os);
+79     bool apsr = false;
+80     bool foundPsr = false;
+81     for (unsigned i = 0; i < numDestRegs(); i++) {
+82         int idx = destRegIdx(i);
+83         if (idx < Misc_Reg_Base) {
+84             continue;
+85         }
+86         idx -= Misc_Reg_Base;
+87         if (idx == MISCREG_CPSR) {
+88             os << "cpsr_";
+89             foundPsr = true;
+90             break;
+91         }
+92         if (idx == MISCREG_SPSR) {
+93             if (bits(byteMask, 1, 0)) {
+94                 os << "spsr_";
+95             } else {
+96                 os << "apsr_";
+97                 apsr = true;
+98             }
+99             foundPsr = true;
+100             break;
+101         }
+102     }
+103     if (!foundPsr) {
+104         os << "????";
+105         return;
+106     }
+107     if (bits(byteMask, 3)) {
+108         if (apsr) {
+109             os << "nzcvq";
+110         } else {
+111             os << "f";
+112         }
+113     }
+114     if (bits(byteMask, 2)) {
+115         if (apsr) {
+116             os << "g";
+117         } else {
+118             os << "s";
+119         }
+120     }
+121     if (bits(byteMask, 1)) {
+122         os << "x";
+123     }
+124     if (bits(byteMask, 0)) {
+125         os << "c";
+126     }
+127 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classMsrBase_a88c8ed0fe728ebc0bbc5182201205bfb}{
+\index{MsrBase@{MsrBase}!byteMask@{byteMask}}
+\index{byteMask@{byteMask}!MsrBase@{MsrBase}}
+\subsubsection[{byteMask}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf byteMask}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classMsrBase_a88c8ed0fe728ebc0bbc5182201205bfb}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/insts/\hyperlink{arch_2arm_2insts_2misc_8hh}{misc.hh}\item 
+arch/arm/insts/\hyperlink{arch_2arm_2insts_2misc_8cc}{misc.cc}\end{DoxyCompactItemize}

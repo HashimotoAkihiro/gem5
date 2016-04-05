@@ -1,0 +1,143 @@
+\hypertarget{classTapListener}{
+\section{クラス TapListener}
+\label{classTapListener}\index{TapListener@{TapListener}}
+}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classTapListener_1_1Event}{Event}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTapListener_abbe73917dbac66cd5cbb5546595150ff}{TapListener} (\hyperlink{classEtherTap}{EtherTap} $\ast$t, int p)
+\item 
+\hyperlink{classTapListener_a7cbe6ce128d9f0afb6d6d0e3da85e283}{$\sim$TapListener} ()
+\item 
+void \hyperlink{classTapListener_aadb9f3b844fb4cf98288cd3c60a3af91}{accept} ()
+\item 
+void \hyperlink{classTapListener_a458bbe4cf81360301586b2e62a7f9dd2}{listen} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTapListener_1_1Event}{Event} $\ast$ \hyperlink{classTapListener_a765488c8f26c7f8713d5245212dcae01}{event}
+\item 
+\hyperlink{classListenSocket}{ListenSocket} \hyperlink{classTapListener_acf9ea448b26a541b4a197f1ca92f700b}{listener}
+\item 
+\hyperlink{classEtherTap}{EtherTap} $\ast$ \hyperlink{classTapListener_afceac4e4f9153ef0f38b7c423422dd2e}{tap}
+\item 
+int \hyperlink{classTapListener_a63c89c04d1feae07ca35558055155ffb}{port}
+\end{DoxyCompactItemize}
+\subsection*{フレンド}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classTapListener_a3c7b3c89bf96f51e80a919b3a82a3915}{Event}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTapListener_abbe73917dbac66cd5cbb5546595150ff}{
+\index{TapListener@{TapListener}!TapListener@{TapListener}}
+\index{TapListener@{TapListener}!TapListener@{TapListener}}
+\subsubsection[{TapListener}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TapListener} ({\bf EtherTap} $\ast$ {\em t}, \/  int {\em p})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTapListener_abbe73917dbac66cd5cbb5546595150ff}
+
+
+
+\begin{DoxyCode}
+86         : event(NULL), tap(t), port(p) {}
+\end{DoxyCode}
+\hypertarget{classTapListener_a7cbe6ce128d9f0afb6d6d0e3da85e283}{
+\index{TapListener@{TapListener}!$\sim$TapListener@{$\sim$TapListener}}
+\index{$\sim$TapListener@{$\sim$TapListener}!TapListener@{TapListener}}
+\subsubsection[{$\sim$TapListener}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf TapListener} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTapListener_a7cbe6ce128d9f0afb6d6d0e3da85e283}
+
+
+
+\begin{DoxyCode}
+87 { if (event) delete event; }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTapListener_aadb9f3b844fb4cf98288cd3c60a3af91}{
+\index{TapListener@{TapListener}!accept@{accept}}
+\index{accept@{accept}!TapListener@{TapListener}}
+\subsubsection[{accept}]{\setlength{\rightskip}{0pt plus 5cm}void accept ()}}
+\label{classTapListener_aadb9f3b844fb4cf98288cd3c60a3af91}
+
+
+
+\begin{DoxyCode}
+108 {
+109     // As a consequence of being called from the PollQueue, we might
+110     // have been called from a different thread. Migrate to "our"
+111     // thread.
+112     EventQueue::ScopedMigration migrate(tap->eventQueue());
+113 
+114     if (!listener.islistening())
+115         panic("TapListener(accept): cannot accept if we're not listening!");
+116 
+117     int sfd = listener.accept(true);
+118     if (sfd != -1)
+119         tap->attach(sfd);
+120 }
+\end{DoxyCode}
+\hypertarget{classTapListener_a458bbe4cf81360301586b2e62a7f9dd2}{
+\index{TapListener@{TapListener}!listen@{listen}}
+\index{listen@{listen}!TapListener@{TapListener}}
+\subsubsection[{listen}]{\setlength{\rightskip}{0pt plus 5cm}void listen ()}}
+\label{classTapListener_a458bbe4cf81360301586b2e62a7f9dd2}
+
+
+
+\begin{DoxyCode}
+95 {
+96     while (!listener.listen(port, true)) {
+97         DPRINTF(Ethernet, "TapListener(listen): Can't bind port %d\n", port);
+98         port++;
+99     }
+100 
+101     ccprintf(cerr, "Listening for tap connection on port %d\n", port);
+102     event = new Event(this, listener.getfd(), POLLIN|POLLERR);
+103     pollQueue.schedule(event);
+104 }
+\end{DoxyCode}
+
+
+\subsection{フレンドと関連する関数}
+\hypertarget{classTapListener_a3c7b3c89bf96f51e80a919b3a82a3915}{
+\index{TapListener@{TapListener}!Event@{Event}}
+\index{Event@{Event}!TapListener@{TapListener}}
+\subsubsection[{Event}]{\setlength{\rightskip}{0pt plus 5cm}friend class {\bf Event}\hspace{0.3cm}{\ttfamily  \mbox{[}friend\mbox{]}}}}
+\label{classTapListener_a3c7b3c89bf96f51e80a919b3a82a3915}
+
+
+\subsection{変数}
+\hypertarget{classTapListener_a765488c8f26c7f8713d5245212dcae01}{
+\index{TapListener@{TapListener}!event@{event}}
+\index{event@{event}!TapListener@{TapListener}}
+\subsubsection[{event}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Event}$\ast$ {\bf event}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTapListener_a765488c8f26c7f8713d5245212dcae01}
+\hypertarget{classTapListener_acf9ea448b26a541b4a197f1ca92f700b}{
+\index{TapListener@{TapListener}!listener@{listener}}
+\index{listener@{listener}!TapListener@{TapListener}}
+\subsubsection[{listener}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ListenSocket} {\bf listener}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTapListener_acf9ea448b26a541b4a197f1ca92f700b}
+\hypertarget{classTapListener_a63c89c04d1feae07ca35558055155ffb}{
+\index{TapListener@{TapListener}!port@{port}}
+\index{port@{port}!TapListener@{TapListener}}
+\subsubsection[{port}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf port}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTapListener_a63c89c04d1feae07ca35558055155ffb}
+\hypertarget{classTapListener_afceac4e4f9153ef0f38b7c423422dd2e}{
+\index{TapListener@{TapListener}!tap@{tap}}
+\index{tap@{tap}!TapListener@{TapListener}}
+\subsubsection[{tap}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EtherTap}$\ast$ {\bf tap}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTapListener_afceac4e4f9153ef0f38b7c423422dd2e}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/\hyperlink{ethertap_8cc}{ethertap.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,344 @@
+\hypertarget{classRRArbiter}{
+\section{クラス RRArbiter}
+\label{classRRArbiter}\index{RRArbiter@{RRArbiter}}
+}
+
+
+{\ttfamily \#include $<$RRArbiter.hh$>$}RRArbiterに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classRRArbiter}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classRRArbiter_a87e05ea60c9d10abe5a0195f10ae2585}{RRArbiter} (const string \&ff\_\-model\_\-str\_\-, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} req\_\-width\_\-, double len\_\-in\_\-wire\_\-, const \hyperlink{classTechParameter}{TechParameter} $\ast$tech\_\-param\_\-ptr\_\-)
+\item 
+\hyperlink{classRRArbiter_a04a00082f0532adf4a3228317836eb6e}{$\sim$RRArbiter} ()
+\item 
+double \hyperlink{classRRArbiter_adf7ecbfcfee50be4847889bf0bc725b1}{calc\_\-dynamic\_\-energy} (double num\_\-req\_\-, bool is\_\-max\_\-) const 
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classRRArbiter_aa30ab0383b17214d69595df443fe4223}{init} (const string \&ff\_\-model\_\-str\_\-)
+\item 
+double \hyperlink{classRRArbiter_ad328bcd6c4435aff24a79afd9ac8b978}{calc\_\-req\_\-cap} ()
+\item 
+double \hyperlink{classRRArbiter_ab7379d0e829c19b19c699f8bca018b9d}{calc\_\-pri\_\-cap} ()
+\item 
+double \hyperlink{classRRArbiter_a1ca031abb0d310b02168d439e1e858d2}{calc\_\-grant\_\-cap} ()
+\item 
+double \hyperlink{classRRArbiter_a2f477f24564e2e59b52b6ae201bb6170}{calc\_\-carry\_\-cap} ()
+\item 
+double \hyperlink{classRRArbiter_a664fec3f5e3d085af117c292b371162e}{calc\_\-carry\_\-in\_\-cap} ()
+\item 
+double \hyperlink{classRRArbiter_a0027807356ac4ca07fe2e593234eb884}{calc\_\-i\_\-static} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+double \hyperlink{classRRArbiter_aa1a5911d89a454e02f2f20019d44d2cf}{m\_\-e\_\-chg\_\-carry}
+\item 
+double \hyperlink{classRRArbiter_aeb10b57399d5501679bdb3cdaf33af92}{m\_\-e\_\-chg\_\-carry\_\-in}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classRRArbiter_a87e05ea60c9d10abe5a0195f10ae2585}{
+\index{RRArbiter@{RRArbiter}!RRArbiter@{RRArbiter}}
+\index{RRArbiter@{RRArbiter}!RRArbiter@{RRArbiter}}
+\subsubsection[{RRArbiter}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RRArbiter} (const string \& {\em ff\_\-model\_\-str\_\-}, \/  {\bf uint32\_\-t} {\em req\_\-width\_\-}, \/  double {\em len\_\-in\_\-wire\_\-}, \/  const {\bf TechParameter} $\ast$ {\em tech\_\-param\_\-ptr\_\-})}}
+\label{classRRArbiter_a87e05ea60c9d10abe5a0195f10ae2585}
+
+
+
+\begin{DoxyCode}
+50           : Arbiter(RR_ARBITER, req_width_, len_in_wire_, tech_param_ptr_)
+51 {
+52     init(ff_model_str_);
+53 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_a04a00082f0532adf4a3228317836eb6e}{
+\index{RRArbiter@{RRArbiter}!$\sim$RRArbiter@{$\sim$RRArbiter}}
+\index{$\sim$RRArbiter@{$\sim$RRArbiter}!RRArbiter@{RRArbiter}}
+\subsubsection[{$\sim$RRArbiter}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf RRArbiter} ()}}
+\label{classRRArbiter_a04a00082f0532adf4a3228317836eb6e}
+
+
+
+\begin{DoxyCode}
+56 {
+57     delete m_ff_ptr;
+58 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classRRArbiter_a2f477f24564e2e59b52b6ae201bb6170}{
+\index{RRArbiter@{RRArbiter}!calc\_\-carry\_\-cap@{calc\_\-carry\_\-cap}}
+\index{calc\_\-carry\_\-cap@{calc\_\-carry\_\-cap}!RRArbiter@{RRArbiter}}
+\subsubsection[{calc\_\-carry\_\-cap}]{\setlength{\rightskip}{0pt plus 5cm}double calc\_\-carry\_\-cap ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_a2f477f24564e2e59b52b6ae201bb6170}
+
+
+
+\begin{DoxyCode}
+177 {
+178     double total_cap = 0;
+179 
+180     double WdecNORn = m_tech_param_ptr->get_WdecNORn();
+181     double WdecNORp = m_tech_param_ptr->get_WdecNORp();
+182     // part 1: drain cap of NOR gate (this bloc)
+183     // FIXME: need actual size
+184     total_cap += 2*m_tech_param_ptr->calc_draincap(WdecNORn, TechParameter::NCH, 
+      1)
+185         + m_tech_param_ptr->calc_draincap(WdecNORp, TechParameter::PCH, 2);
+186 
+187     // part 2: gate cap of NOR gate (next block)
+188     // FIXME: need actual size
+189     total_cap += m_tech_param_ptr->calc_gatecap(WdecNORn+WdecNORp, 0);
+190 
+191     return total_cap;
+192 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_a664fec3f5e3d085af117c292b371162e}{
+\index{RRArbiter@{RRArbiter}!calc\_\-carry\_\-in\_\-cap@{calc\_\-carry\_\-in\_\-cap}}
+\index{calc\_\-carry\_\-in\_\-cap@{calc\_\-carry\_\-in\_\-cap}!RRArbiter@{RRArbiter}}
+\subsubsection[{calc\_\-carry\_\-in\_\-cap}]{\setlength{\rightskip}{0pt plus 5cm}double calc\_\-carry\_\-in\_\-cap ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_a664fec3f5e3d085af117c292b371162e}
+
+
+
+\begin{DoxyCode}
+196 {
+197     double total_cap = 0;
+198 
+199     double WdecNORn = m_tech_param_ptr->get_WdecNORn();
+200     double WdecNORp = m_tech_param_ptr->get_WdecNORp();
+201     // part 1: gate cap of 2 NOR gate
+202     // FIXME: need actual size
+203     total_cap += 2*m_tech_param_ptr->calc_gatecap(WdecNORn+WdecNORp, 0);
+204 
+205     // part 2: drain cap of NOR gate (this bloc)
+206     // FIXME: need actual size
+207     total_cap += 2*m_tech_param_ptr->calc_draincap(WdecNORn, TechParameter::NCH, 
+      1)
+208         + m_tech_param_ptr->calc_draincap(WdecNORp, TechParameter::PCH, 2);
+209 
+210     return total_cap;
+211 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_adf7ecbfcfee50be4847889bf0bc725b1}{
+\index{RRArbiter@{RRArbiter}!calc\_\-dynamic\_\-energy@{calc\_\-dynamic\_\-energy}}
+\index{calc\_\-dynamic\_\-energy@{calc\_\-dynamic\_\-energy}!RRArbiter@{RRArbiter}}
+\subsubsection[{calc\_\-dynamic\_\-energy}]{\setlength{\rightskip}{0pt plus 5cm}double calc\_\-dynamic\_\-energy (double {\em num\_\-req\_\-}, \/  bool {\em is\_\-max\_\-}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classRRArbiter_adf7ecbfcfee50be4847889bf0bc725b1}
+
+
+\hyperlink{classArbiter_a11ad46c0a5f20df98190b479117a7dee}{Arbiter}を実装しています。
+
+
+\begin{DoxyCode}
+61 {
+62     if (num_req_ > m_req_width)
+63     {
+64         cerr << "WARNING: (num_req_ > m_req_width). Set num_req_ = m_req_width" <
+      < endl;
+65         num_req_ = m_req_width;
+66     }
+67 
+68     double num_grant;
+69     if (num_req_ >= 1) num_grant = 1;
+70     else if (num_req_) num_grant = 1.0 / ceil(1.0/num_req_);
+71     else num_grant = 0;
+72 
+73     double e_atomic;
+74     double e_arb = 0;
+75 
+76     e_atomic = m_e_chg_req*num_req_;
+77     e_arb += e_atomic;
+78 
+79     e_atomic = m_e_chg_grant*num_grant;
+80     e_arb += e_atomic;
+81 
+82     // assume carry signal propagates half length in average case */
+83     // carry does not propagate in maximum case, i.e. all carrys go down */
+84     e_atomic = m_e_chg_carry*m_req_width*(is_max_? 1:0.5)*num_grant;
+85     e_arb += e_atomic;
+86 
+87     e_atomic = m_e_chg_carry_in*(m_req_width*(is_max_? 1:0.5)-1)*num_grant;
+88     e_arb += e_atomic;
+89 
+90     // priority register
+91     e_atomic = m_ff_ptr->get_e_switch()*2*num_grant;
+92     e_arb += e_atomic;
+93 
+94     e_atomic = m_ff_ptr->get_e_keep_0()*(m_req_width-2*num_grant);
+95     e_arb += e_atomic;
+96 
+97     e_atomic = m_ff_ptr->get_e_clock()*m_req_width;
+98     e_arb += e_atomic;
+99 
+100     return e_arb;
+101 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_a1ca031abb0d310b02168d439e1e858d2}{
+\index{RRArbiter@{RRArbiter}!calc\_\-grant\_\-cap@{calc\_\-grant\_\-cap}}
+\index{calc\_\-grant\_\-cap@{calc\_\-grant\_\-cap}!RRArbiter@{RRArbiter}}
+\subsubsection[{calc\_\-grant\_\-cap}]{\setlength{\rightskip}{0pt plus 5cm}double calc\_\-grant\_\-cap ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_a1ca031abb0d310b02168d439e1e858d2}
+
+
+
+\begin{DoxyCode}
+162 {
+163     double total_cap = 0;
+164 
+165     // part 1: drain cap of NOR gate
+166     // FIXME: need actual size
+167     double WdecNORn = m_tech_param_ptr->get_WdecNORn();
+168     double WdecNORp = m_tech_param_ptr->get_WdecNORp();
+169     total_cap += 2*m_tech_param_ptr->calc_draincap(WdecNORn, TechParameter::NCH, 
+      1)
+170         + m_tech_param_ptr->calc_draincap(WdecNORp, TechParameter::PCH, 2);
+171 
+172     return total_cap;
+173 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_a0027807356ac4ca07fe2e593234eb884}{
+\index{RRArbiter@{RRArbiter}!calc\_\-i\_\-static@{calc\_\-i\_\-static}}
+\index{calc\_\-i\_\-static@{calc\_\-i\_\-static}!RRArbiter@{RRArbiter}}
+\subsubsection[{calc\_\-i\_\-static}]{\setlength{\rightskip}{0pt plus 5cm}double calc\_\-i\_\-static ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_a0027807356ac4ca07fe2e593234eb884}
+
+
+
+\begin{DoxyCode}
+214 {
+215     double i_static = 0;
+216 
+217     double WdecNORn = m_tech_param_ptr->get_WdecNORn();
+218     double WdecNORp = m_tech_param_ptr->get_WdecNORp();
+219     double Wdecinvn = m_tech_param_ptr->get_Wdecinvn();
+220     double Wdecinvp = m_tech_param_ptr->get_Wdecinvp();
+221     double Wdff = m_tech_param_ptr->get_Wdff();
+222     double NOR2_TAB_0 = m_tech_param_ptr->get_NOR2_TAB(0);
+223     double NOR2_TAB_1 = m_tech_param_ptr->get_NOR2_TAB(1);
+224     double NOR2_TAB_2 = m_tech_param_ptr->get_NOR2_TAB(2);
+225     double NOR2_TAB_3 = m_tech_param_ptr->get_NOR2_TAB(3);
+226     double NMOS_TAB_0 = m_tech_param_ptr->get_NMOS_TAB(0);
+227     double PMOS_TAB_0 = m_tech_param_ptr->get_PMOS_TAB(0);
+228     double DFF_TAB_0 = m_tech_param_ptr->get_DFF_TAB(0);
+229 
+230     // NOR
+231     i_static += (6*m_req_width*((WdecNORp*NOR2_TAB_0+WdecNORn*(NOR2_TAB_1+NOR2_TA
+      B_2+NOR2_TAB_3))/4));
+232     // inverter
+233     i_static += 2*m_req_width*((Wdecinvn*NMOS_TAB_0+Wdecinvp*PMOS_TAB_0)/2);
+234     // dff
+235     i_static += m_req_width*Wdff*DFF_TAB_0;
+236 
+237     return i_static;
+238 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_ab7379d0e829c19b19c699f8bca018b9d}{
+\index{RRArbiter@{RRArbiter}!calc\_\-pri\_\-cap@{calc\_\-pri\_\-cap}}
+\index{calc\_\-pri\_\-cap@{calc\_\-pri\_\-cap}!RRArbiter@{RRArbiter}}
+\subsubsection[{calc\_\-pri\_\-cap}]{\setlength{\rightskip}{0pt plus 5cm}double calc\_\-pri\_\-cap ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_ab7379d0e829c19b19c699f8bca018b9d}
+
+
+
+\begin{DoxyCode}
+148 {
+149     double total_cap = 0;
+150 
+151     // part 1: gate cap of NOR gate
+152     // FIXME: need actual size
+153     double WdecNORn = m_tech_param_ptr->get_WdecNORn();
+154     double WdecNORp = m_tech_param_ptr->get_WdecNORp();
+155     total_cap += m_tech_param_ptr->calc_gatecap(WdecNORn+WdecNORp, 0);
+156 
+157     return total_cap;
+158 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_ad328bcd6c4435aff24a79afd9ac8b978}{
+\index{RRArbiter@{RRArbiter}!calc\_\-req\_\-cap@{calc\_\-req\_\-cap}}
+\index{calc\_\-req\_\-cap@{calc\_\-req\_\-cap}!RRArbiter@{RRArbiter}}
+\subsubsection[{calc\_\-req\_\-cap}]{\setlength{\rightskip}{0pt plus 5cm}double calc\_\-req\_\-cap ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_ad328bcd6c4435aff24a79afd9ac8b978}
+
+
+
+\begin{DoxyCode}
+122 {
+123     double total_cap = 0;
+124 
+125     // part 1: gate cap of 2 NOR gates
+126     // FIXME: need actual size
+127     double WdecNORn = m_tech_param_ptr->get_WdecNORn();
+128     double WdecNORp = m_tech_param_ptr->get_WdecNORp();
+129     total_cap += 2*m_tech_param_ptr->calc_gatecap(WdecNORn+WdecNORp, 0);
+130 
+131     // part 2: inverter
+132     // FIXME: need actual size
+133     double Wdecinvn = m_tech_param_ptr->get_Wdecinvn();
+134     double Wdecinvp = m_tech_param_ptr->get_Wdecinvp();
+135     total_cap += m_tech_param_ptr->calc_draincap(Wdecinvn, TechParameter::NCH, 1)
+      
+136         + m_tech_param_ptr->calc_draincap(Wdecinvp, TechParameter::PCH, 1)
+137         + m_tech_param_ptr->calc_gatecap(Wdecinvn+Wdecinvp, 0);
+138 
+139     // part 3: wire cap
+140     double Cmetal = m_tech_param_ptr->get_Cmetal();
+141     total_cap += m_len_in_wire*Cmetal;
+142 
+143     return total_cap;
+144 }
+\end{DoxyCode}
+\hypertarget{classRRArbiter_aa30ab0383b17214d69595df443fe4223}{
+\index{RRArbiter@{RRArbiter}!init@{init}}
+\index{init@{init}!RRArbiter@{RRArbiter}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void init (const string \& {\em ff\_\-model\_\-str\_\-})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_aa30ab0383b17214d69595df443fe4223}
+
+
+
+\begin{DoxyCode}
+104 {
+105     double e_factor = m_tech_param_ptr->get_EnergyFactor();
+106 
+107     m_e_chg_req = calc_req_cap()/2*e_factor;
+108     // two grant signals switch together, so no 1/2
+109     m_e_chg_grant = calc_grant_cap()*e_factor;
+110     m_e_chg_carry = calc_carry_cap()/2*e_factor;
+111     m_e_chg_carry_in = calc_carry_in_cap()/2*e_factor;
+112 
+113     double ff_load = calc_pri_cap();
+114     m_ff_ptr = new FlipFlop(ff_model_str_, ff_load, m_tech_param_ptr);
+115 
+116     m_i_static = calc_i_static();
+117     return;
+118 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classRRArbiter_aa1a5911d89a454e02f2f20019d44d2cf}{
+\index{RRArbiter@{RRArbiter}!m\_\-e\_\-chg\_\-carry@{m\_\-e\_\-chg\_\-carry}}
+\index{m\_\-e\_\-chg\_\-carry@{m\_\-e\_\-chg\_\-carry}!RRArbiter@{RRArbiter}}
+\subsubsection[{m\_\-e\_\-chg\_\-carry}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf m\_\-e\_\-chg\_\-carry}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_aa1a5911d89a454e02f2f20019d44d2cf}
+\hypertarget{classRRArbiter_aeb10b57399d5501679bdb3cdaf33af92}{
+\index{RRArbiter@{RRArbiter}!m\_\-e\_\-chg\_\-carry\_\-in@{m\_\-e\_\-chg\_\-carry\_\-in}}
+\index{m\_\-e\_\-chg\_\-carry\_\-in@{m\_\-e\_\-chg\_\-carry\_\-in}!RRArbiter@{RRArbiter}}
+\subsubsection[{m\_\-e\_\-chg\_\-carry\_\-in}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf m\_\-e\_\-chg\_\-carry\_\-in}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRRArbiter_aeb10b57399d5501679bdb3cdaf33af92}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/network/orion/Allocator/\hyperlink{RRArbiter_8hh}{RRArbiter.hh}\item 
+mem/ruby/network/orion/Allocator/\hyperlink{RRArbiter_8cc}{RRArbiter.cc}\end{DoxyCompactItemize}

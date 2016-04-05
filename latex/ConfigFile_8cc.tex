@@ -1,0 +1,120 @@
+\hypertarget{ConfigFile_8cc}{
+\section{mem/ruby/network/orion/ConfigFile.cc}
+\label{ConfigFile_8cc}\index{mem/ruby/network/orion/ConfigFile.cc@{mem/ruby/network/orion/ConfigFile.cc}}
+}
+{\ttfamily \#include \char`\"{}mem/ruby/network/orion/ConfigFile.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+std::ostream \& \hyperlink{ConfigFile_8cc_a8ccacbc37db1992a5515e2c72fc83ce6}{operator$<$$<$} (std::ostream \&os, const \hyperlink{classConfigFile}{ConfigFile} \&cf)
+\item 
+std::istream \& \hyperlink{ConfigFile_8cc_a25042475439039e70f90febe7d0e63ec}{operator$>$$>$} (std::istream \&is, \hyperlink{classConfigFile}{ConfigFile} \&cf)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{ConfigFile_8cc_a8ccacbc37db1992a5515e2c72fc83ce6}{
+\index{ConfigFile.cc@{ConfigFile.cc}!operator$<$$<$@{operator$<$$<$}}
+\index{operator$<$$<$@{operator$<$$<$}!ConfigFile.cc@{ConfigFile.cc}}
+\subsubsection[{operator$<$$<$}]{\setlength{\rightskip}{0pt plus 5cm}std::ostream\& operator$<$$<$ (std::ostream \& {\em os}, \/  const {\bf ConfigFile} \& {\em cf})}}
+\label{ConfigFile_8cc_a8ccacbc37db1992a5515e2c72fc83ce6}
+
+
+
+\begin{DoxyCode}
+83 {
+84     // Save a ConfigFile to os
+85     for( ConfigFile::mapci p = cf.myContents.begin();
+86             p != cf.myContents.end();
+87             ++p )
+88     {
+89         os << p->first << " " << cf.myDelimiter << " ";
+90         os << p->second << std::endl;
+91     }
+92     return os;
+93 }
+\end{DoxyCode}
+\hypertarget{ConfigFile_8cc_a25042475439039e70f90febe7d0e63ec}{
+\index{ConfigFile.cc@{ConfigFile.cc}!operator$>$$>$@{operator$>$$>$}}
+\index{operator$>$$>$@{operator$>$$>$}!ConfigFile.cc@{ConfigFile.cc}}
+\subsubsection[{operator$>$$>$}]{\setlength{\rightskip}{0pt plus 5cm}std::istream\& operator$>$$>$ (std::istream \& {\em is}, \/  {\bf ConfigFile} \& {\em cf})}}
+\label{ConfigFile_8cc_a25042475439039e70f90febe7d0e63ec}
+
+
+
+\begin{DoxyCode}
+97 {
+98     // Load a ConfigFile from is
+99     // Read in keys and values, keeping internal whitespace
+100     typedef string::size_type pos;
+101     const string& delim  = cf.myDelimiter;  // separator
+102     const string& comm   = cf.myComment;    // comment
+103     const string& sentry = cf.mySentry;     // end of file sentry
+104     const pos skip = delim.length();        // length of separator
+105 
+106     string nextline = "";  // might need to read ahead to see where value ends
+107 
+108     while( is || nextline.length() > 0 )
+109     {
+110         // Read an entire line at a time
+111         string line;
+112         if( nextline.length() > 0 )
+113         {
+114             line = nextline;  // we read ahead; use it now
+115             nextline = "";
+116         }
+117         else
+118         {
+119             std::getline( is, line );
+120         }
+121 
+122         // Ignore comments
+123         line = line.substr( 0, line.find(comm) );
+124 
+125         // Check for end of file sentry
+126         if( sentry != "" && line.find(sentry) != string::npos ) return is;
+127 
+128         // Parse the line if it contains a delimiter
+129         pos delimPos = line.find( delim );
+130         if( delimPos < string::npos )
+131         {
+132             // Extract the key
+133             string key = line.substr( 0, delimPos );
+134             line.replace( 0, delimPos+skip, "" );
+135 
+136             // See if value continues on the next line
+137             // Stop at blank line, next line with a key, end of stream,
+138             // or end of file sentry
+139             bool terminate = false;
+140             while( !terminate && is )
+141             {
+142                 std::getline( is, nextline );
+143                 terminate = true;
+144 
+145                 string nlcopy = nextline;
+146                 ConfigFile::trim(nlcopy);
+147                 if( nlcopy == "" ) continue;
+148 
+149                 nextline = nextline.substr( 0, nextline.find(comm) );
+150                 if( nextline.find(delim) != string::npos )
+151                     continue;
+152                 if( sentry != "" && nextline.find(sentry) != string::npos )
+153                     continue;
+154 
+155                 nlcopy = nextline;
+156                 ConfigFile::trim(nlcopy);
+157                 if( nlcopy != "" ) line += "\n";
+158                 line += nextline;
+159                 terminate = false;
+160             }
+161 
+162             // Store key and value
+163             ConfigFile::trim(key);
+164             ConfigFile::trim(line);
+165             cf.myContents[key] = line;  // overwrites if key is repeated
+166         }
+167     }
+168 
+169     return is;
+170 }
+\end{DoxyCode}

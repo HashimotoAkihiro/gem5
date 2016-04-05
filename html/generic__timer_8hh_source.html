@@ -1,0 +1,192 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/arm/generic_timer.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/arm/generic_timer.hh</h1><a href="generic__timer_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Giacomo Gabrielli</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __DEV_ARM_GENERIC_TIMER_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_ARM_GENERIC_TIMER_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="bitunion_8hh.html">base/bitunion.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;params/GenericTimer.hh&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="core_8hh.html">sim/core.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00047"></a>00047 
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="keyword">class </span><a class="code" href="classCheckpoint.html">Checkpoint</a>;
+<a name="l00054"></a>00054 <span class="keyword">class </span><a class="code" href="classBaseGic.html">BaseGic</a>;
+<a name="l00055"></a>00055 
+<a name="l00058"></a><a class="code" href="classGenericTimer.html">00058</a> <span class="keyword">class </span><a class="code" href="classGenericTimer.html">GenericTimer</a> : <span class="keyword">public</span> <a class="code" href="classSimObject.html">SimObject</a>
+<a name="l00059"></a>00059 {
+<a name="l00060"></a>00060   <span class="keyword">public</span>:
+<a name="l00061"></a>00061 
+<a name="l00064"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html">00064</a>     <span class="keyword">class </span><a class="code" href="classGenericTimer_1_1SystemCounter.html">SystemCounter</a>
+<a name="l00065"></a>00065     {
+<a name="l00066"></a>00066       <span class="keyword">protected</span>:
+<a name="l00068"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html#acf4c3a958c13bdb7f0115780a27dd982">00068</a>         uint64_t <a class="code" href="classGenericTimer_1_1SystemCounter.html#acf4c3a958c13bdb7f0115780a27dd982" title="Counter frequency (as specified by CNTFRQ).">_freq</a>;
+<a name="l00070"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html#a8788f63b755d8a1d2a06a60f4738e970">00070</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classGenericTimer_1_1SystemCounter.html#a8788f63b755d8a1d2a06a60f4738e970" title="Cached copy of the counter period (inverse of the frequency).">_period</a>;
+<a name="l00072"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html#acaf0706f2d4dfb34660df9ceb3780897">00072</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classGenericTimer_1_1SystemCounter.html#acaf0706f2d4dfb34660df9ceb3780897" title="Tick when the counter was reset.">_resetTick</a>;
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074       <span class="keyword">public</span>:
+<a name="l00076"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html#aa4747e677bcc91e4b46002512732f203">00076</a>         <a class="code" href="classGenericTimer_1_1SystemCounter.html#aa4747e677bcc91e4b46002512732f203" title="Ctor.">SystemCounter</a>()
+<a name="l00077"></a>00077             : <a class="code" href="classGenericTimer_1_1SystemCounter.html#acf4c3a958c13bdb7f0115780a27dd982" title="Counter frequency (as specified by CNTFRQ).">_freq</a>(0), <a class="code" href="classGenericTimer_1_1SystemCounter.html#a8788f63b755d8a1d2a06a60f4738e970" title="Cached copy of the counter period (inverse of the frequency).">_period</a>(0), <a class="code" href="classGenericTimer_1_1SystemCounter.html#acaf0706f2d4dfb34660df9ceb3780897" title="Tick when the counter was reset.">_resetTick</a>(0)
+<a name="l00078"></a>00078         {
+<a name="l00079"></a>00079             <a class="code" href="classGenericTimer_1_1SystemCounter.html#a3b94395b3dcff3869dd1f0a376d7eb65">setFreq</a>(0x01800000);
+<a name="l00080"></a>00080         }
+<a name="l00081"></a>00081 
+<a name="l00083"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html#a22d235cc68f1573b7db58a6f13756797">00083</a>         uint64_t <a class="code" href="classGenericTimer_1_1SystemCounter.html#a22d235cc68f1573b7db58a6f13756797" title="Returns the current value of the physical counter.">value</a>()<span class="keyword"> const</span>
+<a name="l00084"></a>00084 <span class="keyword">        </span>{
+<a name="l00085"></a>00085             <span class="keywordflow">if</span> (<a class="code" href="classGenericTimer_1_1SystemCounter.html#acf4c3a958c13bdb7f0115780a27dd982" title="Counter frequency (as specified by CNTFRQ).">_freq</a> == 0)
+<a name="l00086"></a>00086                 <span class="keywordflow">return</span> 0;  <span class="comment">// Counter is still off.</span>
+<a name="l00087"></a>00087             <span class="keywordflow">return</span> (<a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>() - <a class="code" href="classGenericTimer_1_1SystemCounter.html#acaf0706f2d4dfb34660df9ceb3780897" title="Tick when the counter was reset.">_resetTick</a>) / <a class="code" href="classGenericTimer_1_1SystemCounter.html#a8788f63b755d8a1d2a06a60f4738e970" title="Cached copy of the counter period (inverse of the frequency).">_period</a>;
+<a name="l00088"></a>00088         }
+<a name="l00089"></a>00089 
+<a name="l00091"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html#a00e7a4566af18a56108947d8c929c0e3">00091</a>         uint64_t <a class="code" href="classGenericTimer_1_1SystemCounter.html#a00e7a4566af18a56108947d8c929c0e3" title="Returns the counter frequency.">freq</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classGenericTimer_1_1SystemCounter.html#acf4c3a958c13bdb7f0115780a27dd982" title="Counter frequency (as specified by CNTFRQ).">_freq</a>; }
+<a name="l00094"></a>00094         <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1SystemCounter.html#a3b94395b3dcff3869dd1f0a376d7eb65">setFreq</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classGenericTimer_1_1SystemCounter.html#a00e7a4566af18a56108947d8c929c0e3" title="Returns the counter frequency.">freq</a>);
+<a name="l00095"></a>00095 
+<a name="l00097"></a><a class="code" href="classGenericTimer_1_1SystemCounter.html#a03f23d1f4180d4c5fe907543679ca146">00097</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classGenericTimer_1_1SystemCounter.html#a03f23d1f4180d4c5fe907543679ca146" title="Returns the counter period.">period</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classGenericTimer_1_1SystemCounter.html#a8788f63b755d8a1d2a06a60f4738e970" title="Cached copy of the counter period (inverse of the frequency).">_period</a>; }
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099         <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1SystemCounter.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00100"></a>00100         <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1SystemCounter.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00101"></a>00101     };
+<a name="l00102"></a>00102 
+<a name="l00104"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html">00104</a>     <span class="keyword">class </span><a class="code" href="classGenericTimer_1_1ArchTimer.html" title="Per-CPU architected timer.">ArchTimer</a>
+<a name="l00105"></a>00105     {
+<a name="l00106"></a>00106       <span class="keyword">protected</span>:
+<a name="l00108"></a>00108         <a class="code" href="classGenericTimer_1_1ArchTimer.html#a34ca41431610ed97a96ebaee72938bf4" title="Control register.">BitUnion32</a>(ArchTimerCtrl)
+<a name="l00109"></a>00109             Bitfield&lt;0&gt; <a class="code" href="namespaceX86ISA.html#a240abf52b962b44d8f18aad15edace65">enable</a>;
+<a name="l00110"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#ad52539c365dfb10b7ee0d2bdc178c2d8">00110</a>             Bitfield&lt;1&gt; <a class="code" href="classGenericTimer_1_1ArchTimer.html#ad52539c365dfb10b7ee0d2bdc178c2d8">imask</a>;
+<a name="l00111"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a8bbee8ee464bb7f6275e9f06c6e279fe">00111</a>             Bitfield&lt;2&gt; <a class="code" href="classGenericTimer_1_1ArchTimer.html#a8bbee8ee464bb7f6275e9f06c6e279fe">istatus</a>;
+<a name="l00112"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a4de0833faa175ea06f056c4661ddba69">00112</a>         <a class="code" href="bitunion_8hh.html#a2b65fb4c081b1e4853eac07e606060e5">EndBitUnion</a>(ArchTimerCtrl)
+<a name="l00113"></a>00113 
+<a name="l00114"></a>00114         
+<a name="l00115"></a>00115         std::<span class="keywordtype">string</span> _name;
+<a name="l00117"></a>00117         <a class="code" href="classGenericTimer.html">GenericTimer</a> *<a class="code" href="classGenericTimer_1_1ArchTimer.html#a4de0833faa175ea06f056c4661ddba69" title="Name of this timer.">_parent</a>;
+<a name="l00119"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a20843f1c5d7b269ec4cd9f246d83e932">00119</a>         <a class="code" href="classGenericTimer_1_1SystemCounter.html">SystemCounter</a> *<a class="code" href="classGenericTimer_1_1ArchTimer.html#a20843f1c5d7b269ec4cd9f246d83e932" title="Pointer to the global system counter.">_counter</a>;
+<a name="l00121"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#ada4874eb9ccf0bd190c82504cb7f00dc">00121</a>         <span class="keywordtype">int</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#ada4874eb9ccf0bd190c82504cb7f00dc" title="ID of the CPU this timer is attached to.">_cpuNum</a>;
+<a name="l00123"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a898e65f2e5a34e6e211acb79ab3aaae2">00123</a>         <span class="keywordtype">int</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#a898e65f2e5a34e6e211acb79ab3aaae2" title="ID of the interrupt to be triggered.">_intNum</a>;
+<a name="l00125"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#ac5f2bc920c716e4c333635c6acc3e928">00125</a>         ArchTimerCtrl <a class="code" href="classGenericTimer_1_1ArchTimer.html#ac5f2bc920c716e4c333635c6acc3e928" title="Cached value of the control register ({CNTP/CNTHP/CNTV}_CTL).">_control</a>;
+<a name="l00127"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#aabfe56278c393b1a362bf291f2d5fa1b">00127</a>         uint64_t <a class="code" href="classGenericTimer_1_1ArchTimer.html#aabfe56278c393b1a362bf291f2d5fa1b" title="Programmed limit value for the upcounter ({CNTP/CNTHP/CNTV}_CVAL).">_counterLimit</a>;
+<a name="l00128"></a>00128 
+<a name="l00130"></a>00130         <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#acc4e0298c1061147051688ef6dd627de" title="Called when the upcounter reaches the programmed value.">counterLimitReached</a>();
+<a name="l00131"></a>00131         <a class="code" href="classEventWrapper.html">EventWrapper</a>&lt;<a class="code" href="classGenericTimer_1_1ArchTimer.html" title="Per-CPU architected timer.">ArchTimer</a>, &amp;ArchTimer::counterLimitReached&gt;
+<a name="l00132"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#af3d9b927e7a4e847638d2703b3e9053c">00132</a>             <a class="code" href="classGenericTimer_1_1ArchTimer.html#af3d9b927e7a4e847638d2703b3e9053c">_counterLimitReachedEvent</a>;
+<a name="l00133"></a>00133 
+<a name="l00135"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#afeb6e6524af1f7d73d5233438369a5ae">00135</a>         uint64_t <a class="code" href="classGenericTimer_1_1ArchTimer.html#afeb6e6524af1f7d73d5233438369a5ae" title="Returns the value of the counter which this timer relies on.">counterValue</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _counter-&gt;<a class="code" href="classGenericTimer_1_1SystemCounter.html#a22d235cc68f1573b7db58a6f13756797" title="Returns the current value of the physical counter.">value</a>(); }
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137       <span class="keyword">public</span>:
+<a name="l00139"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a8b96adab98c203cf9238b92cd1376ef5">00139</a>         <a class="code" href="classGenericTimer_1_1ArchTimer.html#a8b96adab98c203cf9238b92cd1376ef5" title="Ctor.">ArchTimer</a>()
+<a name="l00140"></a>00140             : <a class="code" href="classGenericTimer_1_1ArchTimer.html#ac5f2bc920c716e4c333635c6acc3e928" title="Cached value of the control register ({CNTP/CNTHP/CNTV}_CTL).">_control</a>(0), <a class="code" href="classGenericTimer_1_1ArchTimer.html#aabfe56278c393b1a362bf291f2d5fa1b" title="Programmed limit value for the upcounter ({CNTP/CNTHP/CNTV}_CVAL).">_counterLimit</a>(0), <a class="code" href="classGenericTimer_1_1ArchTimer.html#af3d9b927e7a4e847638d2703b3e9053c">_counterLimitReachedEvent</a>(this)
+<a name="l00141"></a>00141         {}
+<a name="l00142"></a>00142 
+<a name="l00144"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00144</a>         std::string <a class="code" href="classGenericTimer_1_1ArchTimer.html#a37627d5d5bba7f4a8690c71c2ab3cb07" title="Returns the timer name.">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _name; }
+<a name="l00145"></a>00145 
+<a name="l00147"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a695f6515c1ffd9033de3acdde32f5bce">00147</a>         uint64_t <a class="code" href="classGenericTimer_1_1ArchTimer.html#a695f6515c1ffd9033de3acdde32f5bce" title="Returns the CompareValue view of the timer.">compareValue</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#aabfe56278c393b1a362bf291f2d5fa1b" title="Programmed limit value for the upcounter ({CNTP/CNTHP/CNTV}_CVAL).">_counterLimit</a>; }
+<a name="l00149"></a>00149         <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#aa636bac63879171a06c4b39782c84e66" title="Sets the CompareValue view of the timer.">setCompareValue</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00150"></a>00150 
+<a name="l00152"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a5bd6c4174ad5bdcd52b55f1da765218e">00152</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classGenericTimer_1_1ArchTimer.html#a5bd6c4174ad5bdcd52b55f1da765218e" title="Returns the TimerValue view of the timer.">timerValue</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#aabfe56278c393b1a362bf291f2d5fa1b" title="Programmed limit value for the upcounter ({CNTP/CNTHP/CNTV}_CVAL).">_counterLimit</a> - <a class="code" href="classGenericTimer_1_1ArchTimer.html#afeb6e6524af1f7d73d5233438369a5ae" title="Returns the value of the counter which this timer relies on.">counterValue</a>(); }
+<a name="l00154"></a>00154         <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#ac19d12d53a8aa1e9296dde6d4755c854" title="Sets the TimerValue view of the timer.">setTimerValue</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00155"></a>00155 
+<a name="l00157"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a75c980484dfd57725a2378d0958f046c">00157</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classGenericTimer_1_1ArchTimer.html#a75c980484dfd57725a2378d0958f046c" title="Sets the control register.">control</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#ac5f2bc920c716e4c333635c6acc3e928" title="Cached value of the control register ({CNTP/CNTHP/CNTV}_CTL).">_control</a>; }
+<a name="l00158"></a>00158         <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#ab57ae80f8d45e22d44bd70e5e4655c1c">setControl</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00159"></a>00159 
+<a name="l00160"></a>00160         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00161"></a>00161         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classGenericTimer_1_1ArchTimer.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00162"></a>00162 
+<a name="l00163"></a><a class="code" href="classGenericTimer_1_1ArchTimer.html#a2ee40beffc6dffc416498927895820e7">00163</a>         <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classGenericTimer.html">GenericTimer</a>;
+<a name="l00164"></a>00164     };
+<a name="l00165"></a>00165 
+<a name="l00166"></a>00166   <span class="keyword">protected</span>:
+<a name="l00167"></a>00167 
+<a name="l00168"></a><a class="code" href="classGenericTimer.html#a4b102c882c8ecd5172c3f918fcde9c6d">00168</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classGenericTimer.html#a4b102c882c8ecd5172c3f918fcde9c6d">CPU_MAX</a> = 8;
+<a name="l00169"></a>00169 
+<a name="l00171"></a><a class="code" href="classGenericTimer.html#a3e5f959a7b42b68c04c24579d7694403">00171</a>     <a class="code" href="classBaseGic.html">BaseGic</a> *<a class="code" href="classGenericTimer.html#a3e5f959a7b42b68c04c24579d7694403" title="Pointer to the GIC, needed to trigger timer interrupts.">_gic</a>;
+<a name="l00173"></a><a class="code" href="classGenericTimer.html#afd7c96638f55784d1c67600fe458440b">00173</a>     <a class="code" href="classGenericTimer_1_1SystemCounter.html">SystemCounter</a> <a class="code" href="classGenericTimer.html#afd7c96638f55784d1c67600fe458440b" title="System counter.">_systemCounter</a>;
+<a name="l00175"></a>00175     <span class="comment">// @todo: this would become a 2-dim. array with Security and Virt.</span>
+<a name="l00176"></a><a class="code" href="classGenericTimer.html#af68f66e102b05b60384be22f871c89ec">00176</a>     <a class="code" href="classGenericTimer_1_1ArchTimer.html" title="Per-CPU architected timer.">ArchTimer</a> <a class="code" href="classGenericTimer.html#af68f66e102b05b60384be22f871c89ec" title="Per-CPU architected timers.">_archTimers</a>[<a class="code" href="classGenericTimer.html#a4b102c882c8ecd5172c3f918fcde9c6d">CPU_MAX</a>];
+<a name="l00177"></a>00177 
+<a name="l00178"></a>00178   <span class="keyword">public</span>:
+<a name="l00179"></a><a class="code" href="classGenericTimer.html#a22b88e736eb537a678104e1f9d03b967">00179</a>     <span class="keyword">typedef</span> GenericTimerParams <a class="code" href="classGenericTimer.html#a22b88e736eb537a678104e1f9d03b967">Params</a>;
+<a name="l00180"></a>00180     <span class="keyword">const</span> <a class="code" href="classGenericTimer.html#a22b88e736eb537a678104e1f9d03b967">Params</a> *
+<a name="l00181"></a><a class="code" href="classGenericTimer.html#acd3c3feb78ae7a8f88fe0f110a718dff">00181</a>     <a class="code" href="classGenericTimer.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00182"></a>00182 <span class="keyword">    </span>{
+<a name="l00183"></a>00183         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classGenericTimer.html#a22b88e736eb537a678104e1f9d03b967">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00184"></a>00184     }
+<a name="l00185"></a>00185 
+<a name="l00187"></a>00187     <a class="code" href="classGenericTimer.html#ab181001a27fc011ac7f4cf037355fe52" title="Ctor.">GenericTimer</a>(<a class="code" href="classGenericTimer.html#a22b88e736eb537a678104e1f9d03b967">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00188"></a>00188 
+<a name="l00190"></a><a class="code" href="classGenericTimer.html#aa2f9dd95a2e3e767b4f84eb8f3fe1b3c">00190</a>     <a class="code" href="classGenericTimer_1_1SystemCounter.html">SystemCounter</a> *<a class="code" href="classGenericTimer.html#aa2f9dd95a2e3e767b4f84eb8f3fe1b3c" title="Returns a pointer to the system counter.">getSystemCounter</a>() { <span class="keywordflow">return</span> &amp;<a class="code" href="classGenericTimer.html#afd7c96638f55784d1c67600fe458440b" title="System counter.">_systemCounter</a>; }
+<a name="l00191"></a>00191 
+<a name="l00193"></a><a class="code" href="classGenericTimer.html#a29c0ab5dcf6b80bda0bcab1529bbdb12">00193</a>     <a class="code" href="classGenericTimer_1_1ArchTimer.html" title="Per-CPU architected timer.">ArchTimer</a> *<a class="code" href="classGenericTimer.html#a29c0ab5dcf6b80bda0bcab1529bbdb12" title="Returns a pointer to the architected timer for cpu_id.">getArchTimer</a>(<span class="keywordtype">int</span> cpu_id) { <span class="keywordflow">return</span> &amp;<a class="code" href="classGenericTimer.html#af68f66e102b05b60384be22f871c89ec" title="Per-CPU architected timers.">_archTimers</a>[cpu_id]; }
+<a name="l00194"></a>00194 
+<a name="l00195"></a>00195     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classGenericTimer.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00196"></a>00196     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classGenericTimer.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00197"></a>00197 };
+<a name="l00198"></a>00198 
+<a name="l00199"></a>00199 <span class="preprocessor">#endif // __DEV_ARM_GENERIC_TIMER_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

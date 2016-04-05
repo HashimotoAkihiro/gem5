@@ -1,0 +1,128 @@
+\hypertarget{classBackEnd_1_1LdWritebackEvent}{
+\section{クラス LdWritebackEvent}
+\label{classBackEnd_1_1LdWritebackEvent}\index{BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}}
+}
+
+
+{\ttfamily \#include $<$back\_\-end.hh$>$}LdWritebackEventに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classBackEnd_1_1LdWritebackEvent}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBackEnd_1_1LdWritebackEvent_acb4a3159b31096e59f3c05256151e7e0}{LdWritebackEvent} (\hyperlink{classBackEnd_a028ce10889c5f6450239d9e9a7347976}{DynInstPtr} \&\_\-inst, \hyperlink{classBackEnd}{BackEnd} $\ast$\hyperlink{classBackEnd_1_1LdWritebackEvent_a84f815aa1fa864ba2e6d75f5ad2b52d1}{be})
+\item 
+virtual void \hyperlink{classBackEnd_1_1LdWritebackEvent_a2e9c5136d19b1a95fc427e0852deab5c}{process} ()
+\item 
+virtual const char $\ast$ \hyperlink{classBackEnd_1_1LdWritebackEvent_a5a14fe478e2393ff51f02e9b7be27e00}{description} () const 
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBackEnd_a028ce10889c5f6450239d9e9a7347976}{DynInstPtr} \hyperlink{classBackEnd_1_1LdWritebackEvent_af5d4fb974eeb4507d4c837d365d0cefc}{inst}
+\item 
+\hyperlink{classBackEnd}{BackEnd} $\ast$ \hyperlink{classBackEnd_1_1LdWritebackEvent_a84f815aa1fa864ba2e6d75f5ad2b52d1}{be}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\subsubsection*{template$<$class Impl$>$ class BackEnd$<$ Impl $>$::LdWritebackEvent}
+
+LdWriteback event for a load completion. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classBackEnd_1_1LdWritebackEvent_acb4a3159b31096e59f3c05256151e7e0}{
+\index{BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}!LdWritebackEvent@{LdWritebackEvent}}
+\index{LdWritebackEvent@{LdWritebackEvent}!BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}}
+\subsubsection[{LdWritebackEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf LdWritebackEvent} ({\bf DynInstPtr} \& {\em \_\-inst}, \/  {\bf BackEnd} $\ast$ {\em be})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classBackEnd_1_1LdWritebackEvent_acb4a3159b31096e59f3c05256151e7e0}
+Constructs a load writeback event. 
+
+
+\begin{DoxyCode}
+548     : Event(&mainEventQueue), inst(_inst), be(_be)
+549 {
+550     this->setFlags(Event::AutoDelete);
+551 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classBackEnd_1_1LdWritebackEvent_a5a14fe478e2393ff51f02e9b7be27e00}{
+\index{BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}!description@{description}}
+\index{description@{description}!BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}}
+\subsubsection[{description}]{\setlength{\rightskip}{0pt plus 5cm}const char $\ast$ description () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classBackEnd_1_1LdWritebackEvent_a5a14fe478e2393ff51f02e9b7be27e00}
+Returns the description of the writeback event. 
+
+\hyperlink{classEvent_a130ddddf003422b413e2e891b1b80e8f}{Event}を再定義しています。
+
+
+\begin{DoxyCode}
+588 {
+589     return "Load writeback";
+590 }
+\end{DoxyCode}
+\hypertarget{classBackEnd_1_1LdWritebackEvent_a2e9c5136d19b1a95fc427e0852deab5c}{
+\index{BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}!process@{process}}
+\index{process@{process}!BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}void process ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classBackEnd_1_1LdWritebackEvent_a2e9c5136d19b1a95fc427e0852deab5c}
+Processes writeback event. 
+
+\hyperlink{classEvent_a142b75b68a6291400e20fb0dd905b1c8}{Event}を実装しています。
+
+
+\begin{DoxyCode}
+556 {
+557     DPRINTF(BE, "Load writeback event [sn:%lli]\n", inst->seqNum);
+558 //    DPRINTF(Activity, "Activity: Ld Writeback event [sn:%lli]\n", inst->seqNum)
+      ;
+559 
+560     //iewStage->ldstQueue.removeMSHR(inst->threadNumber,inst->seqNum);
+561 
+562 //    iewStage->wakeCPU();
+563 
+564     if (inst->isSquashed()) {
+565         inst = NULL;
+566         return;
+567     }
+568 
+569     if (!inst->isExecuted()) {
+570         inst->setExecuted();
+571 
+572         // Execute again to copy data to proper place.
+573         inst->completeAcc();
+574     }
+575 
+576     // Need to insert instruction into queue to commit
+577     be->instToCommit(inst);
+578 
+579     //wroteToTimeBuffer = true;
+580 //    iewStage->activityThisCycle();
+581 
+582     inst = NULL;
+583 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classBackEnd_1_1LdWritebackEvent_a84f815aa1fa864ba2e6d75f5ad2b52d1}{
+\index{BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}!be@{be}}
+\index{be@{be}!BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}}
+\subsubsection[{be}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BackEnd}$\ast$ {\bf be}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBackEnd_1_1LdWritebackEvent_a84f815aa1fa864ba2e6d75f5ad2b52d1}
+Pointer to IEW stage. \hypertarget{classBackEnd_1_1LdWritebackEvent_af5d4fb974eeb4507d4c837d365d0cefc}{
+\index{BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}!inst@{inst}}
+\index{inst@{inst}!BackEnd::LdWritebackEvent@{BackEnd::LdWritebackEvent}}
+\subsubsection[{inst}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DynInstPtr} {\bf inst}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBackEnd_1_1LdWritebackEvent_af5d4fb974eeb4507d4c837d365d0cefc}
+Instruction that is writing back data to the register file. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/ozone/\hyperlink{back__end_8hh}{back\_\-end.hh}\item 
+cpu/ozone/\hyperlink{back__end__impl_8hh}{back\_\-end\_\-impl.hh}\end{DoxyCompactItemize}

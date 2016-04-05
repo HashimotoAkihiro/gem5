@@ -1,0 +1,457 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/ozone/lw_back_end.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/ozone/lw_back_end.hh</h1><a href="lw__back__end_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2006 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __CPU_OZONE_LW_BACK_END_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_OZONE_LW_BACK_END_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;set&gt;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00038"></a>00038 
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="rename__table_8hh.html">cpu/ozone/rename_table.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="ozone_2thread__state_8hh.html">cpu/ozone/thread_state.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="timebuf_8hh.html">cpu/timebuf.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="request_8hh.html">mem/request.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="keyword">template</span> &lt;<span class="keyword">class</span>&gt;
+<a name="l00048"></a>00048 <span class="keyword">class </span><a class="code" href="classChecker.html">Checker</a>;
+<a name="l00049"></a>00049 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00052"></a>00052 <span class="keyword">class </span><a class="code" href="structOzoneThreadState.html">OzoneThreadState</a>;
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keyword">class </span><a class="code" href="classPort.html">Port</a>;
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00057"></a><a class="code" href="classLWBackEnd.html">00057</a> <span class="keyword">class </span><a class="code" href="classLWBackEnd.html">LWBackEnd</a>
+<a name="l00058"></a>00058 {
+<a name="l00059"></a>00059   <span class="keyword">public</span>:
+<a name="l00060"></a><a class="code" href="classLWBackEnd.html#a9311aca87e8229ec3f7a7422ccbc9fbe">00060</a>     <span class="keyword">typedef</span> <a class="code" href="structOzoneThreadState.html">OzoneThreadState&lt;Impl&gt;</a> <a class="code" href="structOzoneThreadState.html">Thread</a>;
+<a name="l00061"></a>00061 
+<a name="l00062"></a><a class="code" href="classLWBackEnd.html#a818e103eae798a24a06a0a34631849ea">00062</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#ab62ca16eeca26566ad2422b5df4943ce">Impl::Params</a> <a class="code" href="classLWBackEnd.html#a818e103eae798a24a06a0a34631849ea">Params</a>;
+<a name="l00063"></a><a class="code" href="classLWBackEnd.html#ab741745c86a14c765b999c11167636d9">00063</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::DynInst <a class="code" href="classLWBackEnd.html#ab741745c86a14c765b999c11167636d9">DynInst</a>;
+<a name="l00064"></a><a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">00064</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00065"></a><a class="code" href="classLWBackEnd.html#a9730cc41bccb218cae8f32869b8d887e">00065</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::OzoneCPU <a class="code" href="classOzoneCPU.html">OzoneCPU</a>;
+<a name="l00066"></a><a class="code" href="classLWBackEnd.html#abe8e1d8243582d5024a1076f6091d9fe">00066</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::FrontEnd <a class="code" href="classFrontEnd.html">FrontEnd</a>;
+<a name="l00067"></a><a class="code" href="classLWBackEnd.html#abdf3026ccc30c2ed3cb77dbe3cfbacad">00067</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::OzoneCPU::CommStruct <a class="code" href="classLWBackEnd.html#abdf3026ccc30c2ed3cb77dbe3cfbacad">CommStruct</a>;
+<a name="l00068"></a>00068 
+<a name="l00069"></a><a class="code" href="structLWBackEnd_1_1SizeStruct.html">00069</a>     <span class="keyword">struct </span><a class="code" href="structLWBackEnd_1_1SizeStruct.html">SizeStruct</a> {
+<a name="l00070"></a><a class="code" href="structLWBackEnd_1_1SizeStruct.html#a439227feff9d7f55384e8780cfc2eb82">00070</a>         <span class="keywordtype">int</span> <a class="code" href="structLWBackEnd_1_1SizeStruct.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00071"></a>00071     };
+<a name="l00072"></a>00072 
+<a name="l00073"></a><a class="code" href="classLWBackEnd.html#a99d236038ce57aa3ef78858228c5f972">00073</a>     <span class="keyword">typedef</span> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">SizeStruct</a> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">DispatchToIssue</a>;
+<a name="l00074"></a><a class="code" href="classLWBackEnd.html#a5badfe54e71b8fccb3d371013a8eef73">00074</a>     <span class="keyword">typedef</span> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">SizeStruct</a> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">IssueToExec</a>;
+<a name="l00075"></a><a class="code" href="classLWBackEnd.html#a91ea582041466725b4b17ce19f98685f">00075</a>     <span class="keyword">typedef</span> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">SizeStruct</a> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">ExecToCommit</a>;
+<a name="l00076"></a><a class="code" href="classLWBackEnd.html#a20d1fb15b536d49c687dee42d95c1a87">00076</a>     <span class="keyword">typedef</span> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">SizeStruct</a> <a class="code" href="structLWBackEnd_1_1SizeStruct.html">Writeback</a>;
+<a name="l00077"></a>00077 
+<a name="l00078"></a><a class="code" href="classLWBackEnd.html#ae446eaddd47d5f227ed00af24aaefe68">00078</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;DispatchToIssue&gt;</a> <a class="code" href="classLWBackEnd.html#ae446eaddd47d5f227ed00af24aaefe68">d2i</a>;
+<a name="l00079"></a><a class="code" href="classLWBackEnd.html#ace1cd34be1eca99cb8c1d3a30e32fcbe">00079</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;DispatchToIssue&gt;::wire</a> <a class="code" href="classLWBackEnd.html#ace1cd34be1eca99cb8c1d3a30e32fcbe">instsToDispatch</a>;
+<a name="l00080"></a><a class="code" href="classLWBackEnd.html#a055203b013ada25d70a2a2c8b2364455">00080</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IssueToExec&gt;</a> <a class="code" href="classLWBackEnd.html#a055203b013ada25d70a2a2c8b2364455">i2e</a>;
+<a name="l00081"></a><a class="code" href="classLWBackEnd.html#a45c3ddf2275eab2326190578f1fcbee2">00081</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IssueToExec&gt;::wire</a> <a class="code" href="classLWBackEnd.html#a45c3ddf2275eab2326190578f1fcbee2">instsToExecute</a>;
+<a name="l00082"></a><a class="code" href="classLWBackEnd.html#a114248f83077c8e99f4f4aa0236aafeb">00082</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;ExecToCommit&gt;</a> <a class="code" href="classLWBackEnd.html#a114248f83077c8e99f4f4aa0236aafeb">e2c</a>;
+<a name="l00083"></a><a class="code" href="classLWBackEnd.html#a34cd6ffaeb59e3f95f2cc2aaf8eb7ecf">00083</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;int&gt;</a> <a class="code" href="classLWBackEnd.html#a34cd6ffaeb59e3f95f2cc2aaf8eb7ecf">numInstsToWB</a>;
+<a name="l00084"></a>00084 
+<a name="l00085"></a><a class="code" href="classLWBackEnd.html#a282f2307a986f183b83e887756561687">00085</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;CommStruct&gt;</a> *<a class="code" href="classLWBackEnd.html#a282f2307a986f183b83e887756561687">comm</a>;
+<a name="l00086"></a><a class="code" href="classLWBackEnd.html#acf56450a952ce19a7cc68c86f0334c0c">00086</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;CommStruct&gt;::wire</a> <a class="code" href="classLWBackEnd.html#acf56450a952ce19a7cc68c86f0334c0c">toIEW</a>;
+<a name="l00087"></a><a class="code" href="classLWBackEnd.html#a77bf6c956edddf1d551d5371ff72162e">00087</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;CommStruct&gt;::wire</a> <a class="code" href="classLWBackEnd.html#a77bf6c956edddf1d551d5371ff72162e">fromCommit</a>;
+<a name="l00088"></a>00088 
+<a name="l00089"></a><a class="code" href="classLWBackEnd_1_1TrapEvent.html">00089</a>     <span class="keyword">class </span><a class="code" href="classLWBackEnd_1_1TrapEvent.html">TrapEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a> {
+<a name="l00090"></a>00090       <span class="keyword">private</span>:
+<a name="l00091"></a><a class="code" href="classLWBackEnd_1_1TrapEvent.html#aed04a4a61301f7e61684f9c765c28f15">00091</a>         <a class="code" href="classLWBackEnd.html">LWBackEnd&lt;Impl&gt;</a> *<a class="code" href="classLWBackEnd_1_1TrapEvent.html#aed04a4a61301f7e61684f9c765c28f15">be</a>;
+<a name="l00092"></a>00092 
+<a name="l00093"></a>00093       <span class="keyword">public</span>:
+<a name="l00094"></a>00094         <a class="code" href="classLWBackEnd_1_1TrapEvent.html#a4caaa81ac3c9c998182937e381339316">TrapEvent</a>(<a class="code" href="classLWBackEnd.html">LWBackEnd&lt;Impl&gt;</a> *_be);
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096         <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd_1_1TrapEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00097"></a>00097         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classLWBackEnd_1_1TrapEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00098"></a>00098     };
+<a name="l00099"></a>00099 
+<a name="l00100"></a>00100     <a class="code" href="classLWBackEnd.html#a547c62cea335ccc135b28bf60afc1a65">LWBackEnd</a>(<a class="code" href="classLWBackEnd.html#a818e103eae798a24a06a0a34631849ea">Params</a> *params);
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102     std::string <a class="code" href="classLWBackEnd.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>() <span class="keyword">const</span>;
+<a name="l00103"></a>00103 
+<a name="l00104"></a>00104     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#ab8056057b67b41f234f56940cc115cc1">setCPU</a>(<a class="code" href="classOzoneCPU.html">OzoneCPU</a> *cpu_ptr);
+<a name="l00107"></a>00107 
+<a name="l00108"></a><a class="code" href="classLWBackEnd.html#a122009fa2730cee3898ac945227da8eb">00108</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a122009fa2730cee3898ac945227da8eb">setFrontEnd</a>(<a class="code" href="classFrontEnd.html">FrontEnd</a> *front_end_ptr)
+<a name="l00109"></a>00109     { <a class="code" href="classLWBackEnd.html#a67c762418bb2017cb2dce5a0c94f0788">frontEnd</a> = front_end_ptr; }
+<a name="l00110"></a>00110 
+<a name="l00111"></a><a class="code" href="classLWBackEnd.html#ac6ccaaea6ac518cab92f71723b5a739e">00111</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#ac6ccaaea6ac518cab92f71723b5a739e">setTC</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc_ptr)
+<a name="l00112"></a>00112     { <a class="code" href="classLWBackEnd.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a> = tc_ptr; }
+<a name="l00113"></a>00113 
+<a name="l00114"></a><a class="code" href="classLWBackEnd.html#a850bea4a9b9f631e7b6a4c7dc92f662a">00114</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a850bea4a9b9f631e7b6a4c7dc92f662a">setThreadState</a>(<a class="code" href="structOzoneThreadState.html">Thread</a> *thread_ptr)
+<a name="l00115"></a>00115     { <a class="code" href="classLWBackEnd.html#a743989b66f3b52f1eda2a8498a93da0b">thread</a> = thread_ptr; }
+<a name="l00116"></a>00116 
+<a name="l00117"></a>00117     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#aeabdb9f0aae07df67c3029f8fddb2693">setCommBuffer</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;CommStruct&gt;</a> *_comm);
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classLWBackEnd.html#a32e64f82b805fe23a17b01dda0f44fb0">00119</a>     <a class="code" href="classPort.html">Port</a> *<a class="code" href="classLWBackEnd.html#a32e64f82b805fe23a17b01dda0f44fb0">getDcachePort</a>() { <span class="keywordflow">return</span> <a class="code" href="classLSQ.html">LSQ</a>.getDcachePort(); }
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00122"></a>00122     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a3c68c455d9207edd23ae3bcb7971e653">squash</a>();
+<a name="l00123"></a><a class="code" href="classLWBackEnd.html#aee57f4aad9f2308dcc12325319c170d5">00123</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#aee57f4aad9f2308dcc12325319c170d5">generateTCEvent</a>() { <a class="code" href="classLWBackEnd.html#ae3369c2288f4867553aaca811229bd3c">tcSquash</a> = <span class="keyword">true</span>; }
+<a name="l00124"></a>00124     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a24cd8db837a73b879041bf33da7b2064">squashFromTC</a>();
+<a name="l00125"></a>00125     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a63c6cc9b9d0507c286d035e92a1bc4f4">squashFromTrap</a>();
+<a name="l00126"></a>00126     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a53f309de2e633a8788fc67ba03d23675">checkInterrupts</a>();
+<a name="l00127"></a><a class="code" href="classLWBackEnd.html#a9fe09e5855dab23839c125d21e03c644">00127</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a9fe09e5855dab23839c125d21e03c644">trapSquash</a>;
+<a name="l00128"></a><a class="code" href="classLWBackEnd.html#ae3369c2288f4867553aaca811229bd3c">00128</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#ae3369c2288f4867553aaca811229bd3c">tcSquash</a>;
+<a name="l00129"></a>00129 
+<a name="l00130"></a>00130     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00131"></a>00131     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classLWBackEnd.html#a0747777ac998dabdc20fa0c554d378d3">read</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> load_idx);
+<a name="l00132"></a>00132 
+<a name="l00133"></a>00133     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00134"></a>00134     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classLWBackEnd.html#abbf7bcc93511421a1787650a43e2642a">write</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> store_idx);
+<a name="l00135"></a>00135 
+<a name="l00136"></a><a class="code" href="classLWBackEnd.html#aa28f3fe58fde4b038a92b9f87a40cb10">00136</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLWBackEnd.html#aa28f3fe58fde4b038a92b9f87a40cb10">readCommitPC</a>() { <span class="keywordflow">return</span> <a class="code" href="classLWBackEnd.html#af043d6103c5f173871f527899c41d2d2">commitPC</a>; }
+<a name="l00137"></a>00137 
+<a name="l00138"></a><a class="code" href="classLWBackEnd.html#af043d6103c5f173871f527899c41d2d2">00138</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLWBackEnd.html#af043d6103c5f173871f527899c41d2d2">commitPC</a>;
+<a name="l00139"></a>00139 
+<a name="l00140"></a><a class="code" href="classLWBackEnd.html#aeb527b92e111b469a5358de46cc799b6">00140</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classLWBackEnd.html#aeb527b92e111b469a5358de46cc799b6">lastCommitCycle</a>;
+<a name="l00141"></a>00141 
+<a name="l00142"></a><a class="code" href="classLWBackEnd.html#a5c38df1621043861ada4dd0939509869">00142</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a5c38df1621043861ada4dd0939509869">robEmpty</a>() { <span class="keywordflow">return</span> <a class="code" href="classLWBackEnd.html#a358c879c68910efe5300c4515df35b6c">numInsts</a> == 0; }
+<a name="l00143"></a>00143 
+<a name="l00144"></a><a class="code" href="classLWBackEnd.html#a3e70330939fdfc4dbc2f60c1a660584d">00144</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>() { <span class="keywordflow">return</span> <a class="code" href="classLWBackEnd.html#a358c879c68910efe5300c4515df35b6c">numInsts</a> &gt;= <a class="code" href="classLWBackEnd.html#ae40678133a160367f2207f07975ca0f3">numROBEntries</a>; }
+<a name="l00145"></a><a class="code" href="classLWBackEnd.html#ae6ec007d68382eb124ed25bc90ae9c17">00145</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#ae6ec007d68382eb124ed25bc90ae9c17">isBlocked</a>() { <span class="keywordflow">return</span> <a class="code" href="classLWBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a> == <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">Blocked</a> || <a class="code" href="classLWBackEnd.html#a245e3bace7ab490110304d56450aba64">dispatchStatus</a> == <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">Blocked</a>; }
+<a name="l00146"></a>00146 
+<a name="l00147"></a>00147     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a71dcc69e5b01fa12b8ccd2dccdcc9917">fetchFault</a>(<a class="code" href="classRefCountingPtr.html">Fault</a> &amp;fault);
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a044f74c5b9426d9738e2d015395a3e72">wakeDependents</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst, <span class="keywordtype">bool</span> memory_deps = <span class="keyword">false</span>);
+<a name="l00150"></a>00150 
+<a name="l00154"></a>00154     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#aa9c46f45f491ef90a936c7e2b95f20aa">rescheduleMemInst</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00155"></a>00155 
+<a name="l00157"></a>00157     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#ae165df775b4de9e9430228c7f04c2bc9">replayMemInst</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00158"></a>00158 
+<a name="l00160"></a><a class="code" href="classLWBackEnd.html#a2212f511dc1886c073cf7ff1665f5c87">00160</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a2212f511dc1886c073cf7ff1665f5c87">completeMemInst</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst) { }
+<a name="l00161"></a>00161 
+<a name="l00162"></a><a class="code" href="classLWBackEnd.html#a1a46c3adb06eeecca716b3cffb054d84">00162</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a1a46c3adb06eeecca716b3cffb054d84">addDcacheMiss</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst)
+<a name="l00163"></a>00163     {
+<a name="l00164"></a>00164         <a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.insert(inst-&gt;seqNum);
+<a name="l00165"></a>00165         <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>++;
+<a name="l00166"></a>00166         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(BE, <span class="stringliteral">&quot;Adding a Dcache miss mem op [sn:%lli], total %i\n&quot;</span>,
+<a name="l00167"></a>00167                 inst-&gt;seqNum, <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>);
+<a name="l00168"></a>00168     }
+<a name="l00169"></a>00169 
+<a name="l00170"></a><a class="code" href="classLWBackEnd.html#a3eec16e4a583e6312ba14ffe5a004296">00170</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a3eec16e4a583e6312ba14ffe5a004296">removeDcacheMiss</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst)
+<a name="l00171"></a>00171     {
+<a name="l00172"></a>00172         assert(<a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.find(inst-&gt;seqNum) != <a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.end());
+<a name="l00173"></a>00173         <a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.erase(inst-&gt;seqNum);
+<a name="l00174"></a>00174         <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>--;
+<a name="l00175"></a>00175         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(BE, <span class="stringliteral">&quot;Removing a Dcache miss mem op [sn:%lli], total %i\n&quot;</span>,
+<a name="l00176"></a>00176                 inst-&gt;seqNum, <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>);
+<a name="l00177"></a>00177     }
+<a name="l00178"></a>00178 
+<a name="l00179"></a><a class="code" href="classLWBackEnd.html#a965a423ceedaeb3ec978531621234d0e">00179</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a965a423ceedaeb3ec978531621234d0e">addWaitingMemOp</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst)
+<a name="l00180"></a>00180     {
+<a name="l00181"></a>00181         <a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.insert(inst-&gt;seqNum);
+<a name="l00182"></a>00182         <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>++;
+<a name="l00183"></a>00183         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(BE, <span class="stringliteral">&quot;Adding a waiting mem op [sn:%lli], total %i\n&quot;</span>,
+<a name="l00184"></a>00184                 inst-&gt;seqNum, <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>);
+<a name="l00185"></a>00185     }
+<a name="l00186"></a>00186 
+<a name="l00187"></a><a class="code" href="classLWBackEnd.html#a38f3385718380c23fe08a81063cc37e1">00187</a>     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a38f3385718380c23fe08a81063cc37e1">removeWaitingMemOp</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst)
+<a name="l00188"></a>00188     {
+<a name="l00189"></a>00189         assert(<a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.find(inst-&gt;seqNum) != <a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.end());
+<a name="l00190"></a>00190         <a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>.erase(inst-&gt;seqNum);
+<a name="l00191"></a>00191         <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>--;
+<a name="l00192"></a>00192         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(BE, <span class="stringliteral">&quot;Removing a waiting mem op [sn:%lli], total %i\n&quot;</span>,
+<a name="l00193"></a>00193                 inst-&gt;seqNum, <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>);
+<a name="l00194"></a>00194     }
+<a name="l00195"></a>00195 
+<a name="l00196"></a>00196     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a720e9865ffa6e84b756f5ec1d1a24d94">instToCommit</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00197"></a>00197     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#aaf16f1d27dc8f5db83c4d2b981a100a9">readyInstsForCommit</a>();
+<a name="l00198"></a>00198 
+<a name="l00199"></a>00199     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a05f299b443f8cc73a93d61572edc0218">switchOut</a>();
+<a name="l00200"></a>00200     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a039b639c41c289e1cfe6d71c41d9308c">doSwitchOut</a>();
+<a name="l00201"></a>00201     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a5a901e7ec5b94a55bd61fde88ad0b7f1">takeOverFrom</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *old_tc = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>);
+<a name="l00202"></a>00202 
+<a name="l00203"></a><a class="code" href="classLWBackEnd.html#a471165257f311a78136ce991a3bad31a">00203</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a471165257f311a78136ce991a3bad31a">isSwitchedOut</a>() { <span class="keywordflow">return</span> <a class="code" href="classLWBackEnd.html#a1aee6db9bfb75cf02e38a82e5d02847f">switchedOut</a>; }
+<a name="l00204"></a>00204 
+<a name="l00205"></a>00205   <span class="keyword">private</span>:
+<a name="l00206"></a>00206     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a17fd6203f0789b68f99f618ea93ab6e0">generateTrapEvent</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classLWBackEnd.html#a9c5bf07170b5d91cfb44d4bfd0517128">latency</a> = 0);
+<a name="l00207"></a>00207     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#af3d02b2950c0aaa8cd71d422abd0ef51">handleFault</a>(<a class="code" href="classRefCountingPtr.html">Fault</a> &amp;fault, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classLWBackEnd.html#a9c5bf07170b5d91cfb44d4bfd0517128">latency</a> = 0);
+<a name="l00208"></a>00208     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a1107d388cfcea92a9043608346ce98f0">updateStructures</a>();
+<a name="l00209"></a>00209     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#ac3f94deccc87588d728716efc4dd7ce8">dispatchInsts</a>();
+<a name="l00210"></a>00210     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a3a69629e2b050560eb983bdedffc30ba">dispatchStall</a>();
+<a name="l00211"></a>00211     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#aee5c9997a61eb30564062dcdbda8c246">checkDispatchStatus</a>();
+<a name="l00212"></a>00212     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a2d00e30d66a56e4667e28df302c98ac0">executeInsts</a>();
+<a name="l00213"></a>00213     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#ac8b85fbfdf330d000c094a9d1886d264">commitInsts</a>();
+<a name="l00214"></a>00214     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a1b9c2184abc4f4e7a00285130f39bf26">addToLSQ</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00215"></a>00215     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a5e9a203f943b3a8a243ddc6d2a0a240d">writebackInsts</a>();
+<a name="l00216"></a>00216     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a300f33ed45badc3c856983b1b7469955">commitInst</a>(<span class="keywordtype">int</span> inst_num);
+<a name="l00217"></a>00217     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a3c68c455d9207edd23ae3bcb7971e653">squash</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;sn);
+<a name="l00218"></a>00218     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a05c89a1532adb13cc0632fc3bb600add">squashDueToBranch</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00219"></a>00219     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a493d3b3596dc6e17cc56990a4e71602d">squashDueToMemViolation</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00220"></a>00220     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a5fcf443dc6ada1ab1936df923c3205d2">squashDueToMemBlocked</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00221"></a>00221     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a132db67a5c42af856da64e347e8284d8">updateExeInstStats</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a5bbf266cb0cc97eed138c8fe0d2d76b6">updateComInstStats</a>(<a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00223"></a>00223 
+<a name="l00224"></a>00224   <span class="keyword">public</span>:
+<a name="l00225"></a><a class="code" href="classLWBackEnd.html#a61b5f503eec141308b0cd6b4322b405b">00225</a>     <a class="code" href="classOzoneCPU.html">OzoneCPU</a> *<a class="code" href="classLWBackEnd.html#a61b5f503eec141308b0cd6b4322b405b">cpu</a>;
+<a name="l00226"></a>00226 
+<a name="l00227"></a><a class="code" href="classLWBackEnd.html#a67c762418bb2017cb2dce5a0c94f0788">00227</a>     <a class="code" href="classFrontEnd.html">FrontEnd</a> *<a class="code" href="classLWBackEnd.html#a67c762418bb2017cb2dce5a0c94f0788">frontEnd</a>;
+<a name="l00228"></a>00228 
+<a name="l00229"></a><a class="code" href="classLWBackEnd.html#a4455a4759e69e5ebe68ae7298cbcc37d">00229</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classLWBackEnd.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>;
+<a name="l00230"></a>00230 
+<a name="l00231"></a><a class="code" href="classLWBackEnd.html#a743989b66f3b52f1eda2a8498a93da0b">00231</a>     <a class="code" href="structOzoneThreadState.html">Thread</a> *<a class="code" href="classLWBackEnd.html#a743989b66f3b52f1eda2a8498a93da0b">thread</a>;
+<a name="l00232"></a>00232 
+<a name="l00233"></a><a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">00233</a>     <span class="keyword">enum</span> <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> {
+<a name="l00234"></a><a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">00234</a>         <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">Running</a>,
+<a name="l00235"></a><a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">00235</a>         <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00236"></a><a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba4ba5ae5815b190bd652669e2fdea5ed7">00236</a>         <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba4ba5ae5815b190bd652669e2fdea5ed7">DcacheMissStall</a>,
+<a name="l00237"></a><a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1eb81f4540c1c4b90839b08ae63c5d7f">00237</a>         <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1eb81f4540c1c4b90839b08ae63c5d7f">DcacheMissComplete</a>,
+<a name="l00238"></a><a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">00238</a>         <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">Blocked</a>,
+<a name="l00239"></a><a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba8c49adf6da5f507150d403610c684877">00239</a>         <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba8c49adf6da5f507150d403610c684877">TrapPending</a>
+<a name="l00240"></a>00240     };
+<a name="l00241"></a>00241 
+<a name="l00242"></a><a class="code" href="classLWBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">00242</a>     <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classLWBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a>;
+<a name="l00243"></a>00243 
+<a name="l00244"></a><a class="code" href="classLWBackEnd.html#a245e3bace7ab490110304d56450aba64">00244</a>     <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classLWBackEnd.html#a245e3bace7ab490110304d56450aba64">dispatchStatus</a>;
+<a name="l00245"></a>00245 
+<a name="l00246"></a><a class="code" href="classLWBackEnd.html#aed64bfbc119bb879e8625e3951e26502">00246</a>     <a class="code" href="classLWBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classLWBackEnd.html#aed64bfbc119bb879e8625e3951e26502">commitStatus</a>;
+<a name="l00247"></a>00247 
+<a name="l00248"></a><a class="code" href="classLWBackEnd.html#a344acde4f72898017365be79fd18a323">00248</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classLWBackEnd.html#a344acde4f72898017365be79fd18a323">funcExeInst</a>;
+<a name="l00249"></a>00249 
+<a name="l00250"></a>00250   <span class="keyword">private</span>:
+<a name="l00251"></a><a class="code" href="classLWBackEnd.html#a4c90230ea80fdcedea6e4fb9b43009cd">00251</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::LdstQueue <a class="code" href="classLWBackEnd.html#a4c90230ea80fdcedea6e4fb9b43009cd">LdstQueue</a>;
+<a name="l00252"></a>00252 
+<a name="l00253"></a><a class="code" href="classLWBackEnd.html#a2d033f80e55d1123d747d40f026042aa">00253</a>     <a class="code" href="classLWBackEnd.html#a4c90230ea80fdcedea6e4fb9b43009cd">LdstQueue</a> <a class="code" href="classLSQ.html">LSQ</a>;
+<a name="l00254"></a>00254   <span class="keyword">public</span>:
+<a name="l00255"></a><a class="code" href="classLWBackEnd.html#adbf41f9b1f8e58747002bd5f65f2ded9">00255</a>     <a class="code" href="classRenameTable.html">RenameTable&lt;Impl&gt;</a> <a class="code" href="classLWBackEnd.html#adbf41f9b1f8e58747002bd5f65f2ded9">commitRenameTable</a>;
+<a name="l00256"></a>00256 
+<a name="l00257"></a><a class="code" href="classLWBackEnd.html#af8d3f859e7c0dd9408ba99de6f415616">00257</a>     <a class="code" href="classRenameTable.html">RenameTable&lt;Impl&gt;</a> <a class="code" href="classLWBackEnd.html#af8d3f859e7c0dd9408ba99de6f415616">renameTable</a>;
+<a name="l00258"></a>00258   <span class="keyword">private</span>:
+<a name="l00259"></a><a class="code" href="classLWBackEnd.html#a9c5bf07170b5d91cfb44d4bfd0517128">00259</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a9c5bf07170b5d91cfb44d4bfd0517128">latency</a>;
+<a name="l00260"></a>00260 
+<a name="l00261"></a>00261     <span class="comment">// General back end width. Used if the more specific isn&apos;t given.</span>
+<a name="l00262"></a><a class="code" href="classLWBackEnd.html#a2474a5474cbff19523a51eb1de01cda4">00262</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a2474a5474cbff19523a51eb1de01cda4">width</a>;
+<a name="l00263"></a>00263 
+<a name="l00264"></a>00264     <span class="comment">// Dispatch width.</span>
+<a name="l00265"></a><a class="code" href="classLWBackEnd.html#aa304d4c426ea2bba52be0a3c0b9811e3">00265</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#aa304d4c426ea2bba52be0a3c0b9811e3">dispatchWidth</a>;
+<a name="l00266"></a><a class="code" href="classLWBackEnd.html#a32343e1e9e56c17bb868f861f9b8927d">00266</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a32343e1e9e56c17bb868f861f9b8927d">dispatchSize</a>;
+<a name="l00267"></a>00267 
+<a name="l00268"></a><a class="code" href="classLWBackEnd.html#a9b9600f987928599f17c3549b0de891a">00268</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a9b9600f987928599f17c3549b0de891a">waitingInsts</a>;
+<a name="l00269"></a>00269 
+<a name="l00270"></a><a class="code" href="classLWBackEnd.html#a171bac1210be84c8811563ab35209fce">00270</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a171bac1210be84c8811563ab35209fce">issueWidth</a>;
+<a name="l00271"></a>00271 
+<a name="l00272"></a>00272     <span class="comment">// Writeback width</span>
+<a name="l00273"></a><a class="code" href="classLWBackEnd.html#a20d3086e6bcdc826d99143ac7c9b23a4">00273</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a20d3086e6bcdc826d99143ac7c9b23a4">wbWidth</a>;
+<a name="l00274"></a>00274 
+<a name="l00275"></a>00275     <span class="comment">// Commit width</span>
+<a name="l00276"></a><a class="code" href="classLWBackEnd.html#a328db48cdab1c2a18d8432b647e2785b">00276</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a328db48cdab1c2a18d8432b647e2785b">commitWidth</a>;
+<a name="l00277"></a>00277 
+<a name="l00279"></a><a class="code" href="classLWBackEnd.html#a5fa0799bf5569437190dd1eda1d62b7b">00279</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classLWBackEnd.html#a5fa0799bf5569437190dd1eda1d62b7b">wbNumInst</a>;
+<a name="l00280"></a>00280 
+<a name="l00286"></a><a class="code" href="classLWBackEnd.html#ad2c7b2687f864f2b7359eb393276996f">00286</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classLWBackEnd.html#ad2c7b2687f864f2b7359eb393276996f">wbCycle</a>;
+<a name="l00287"></a>00287 
+<a name="l00288"></a><a class="code" href="classLWBackEnd.html#ae40678133a160367f2207f07975ca0f3">00288</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#ae40678133a160367f2207f07975ca0f3">numROBEntries</a>;
+<a name="l00289"></a><a class="code" href="classLWBackEnd.html#a358c879c68910efe5300c4515df35b6c">00289</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a358c879c68910efe5300c4515df35b6c">numInsts</a>;
+<a name="l00290"></a><a class="code" href="classLWBackEnd.html#a448f97a01f3a53c40ed453a5e27c02ab">00290</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a448f97a01f3a53c40ed453a5e27c02ab">lsqLimits</a>;
+<a name="l00291"></a>00291 
+<a name="l00292"></a><a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">00292</a>     std::set&lt;InstSeqNum&gt; <a class="code" href="classLWBackEnd.html#af9ed5543b904bf082a41d640654588e5">waitingMemOps</a>;
+<a name="l00293"></a><a class="code" href="classLWBackEnd.html#a3beb474846c53de6d7b8047314dcf3cd">00293</a>     <span class="keyword">typedef</span> std::set&lt;InstSeqNum&gt;::iterator <a class="code" href="classLWBackEnd.html#a3beb474846c53de6d7b8047314dcf3cd">MemIt</a>;
+<a name="l00294"></a><a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">00294</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a96e0941aaf8a2dd157434967a452531b">numWaitingMemOps</a>;
+<a name="l00295"></a><a class="code" href="classLWBackEnd.html#ad6fbab05ce17a32ecda942c0cf4398ae">00295</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classLWBackEnd.html#ad6fbab05ce17a32ecda942c0cf4398ae">maxOutstandingMemOps</a>;
+<a name="l00296"></a>00296 
+<a name="l00297"></a><a class="code" href="classLWBackEnd.html#a2aafb6fc593b04986eeed845923a8953">00297</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a2aafb6fc593b04986eeed845923a8953">squashPending</a>;
+<a name="l00298"></a><a class="code" href="classLWBackEnd.html#a34292b1418c46ca63c892e7826510d77">00298</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classLWBackEnd.html#a34292b1418c46ca63c892e7826510d77">squashSeqNum</a>;
+<a name="l00299"></a><a class="code" href="classLWBackEnd.html#aabe0c73b4678ef858d3363c9bed18906">00299</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLWBackEnd.html#aabe0c73b4678ef858d3363c9bed18906">squashNextPC</a>;
+<a name="l00300"></a>00300 
+<a name="l00301"></a><a class="code" href="classLWBackEnd.html#a1aee6db9bfb75cf02e38a82e5d02847f">00301</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a1aee6db9bfb75cf02e38a82e5d02847f">switchedOut</a>;
+<a name="l00302"></a><a class="code" href="classLWBackEnd.html#ace47ce39eea04902597d72ae3040c322">00302</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#ace47ce39eea04902597d72ae3040c322">switchPending</a>;
+<a name="l00303"></a>00303 
+<a name="l00304"></a><a class="code" href="classLWBackEnd.html#aba4f4d748e592a95e9a44184b2f4cfa9">00304</a>     <a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classLWBackEnd.html#aba4f4d748e592a95e9a44184b2f4cfa9">memBarrier</a>;
+<a name="l00305"></a>00305 
+<a name="l00306"></a>00306   <span class="keyword">private</span>:
+<a name="l00307"></a><a class="code" href="structLWBackEnd_1_1pqCompare.html">00307</a>     <span class="keyword">struct </span><a class="code" href="structLWBackEnd_1_1pqCompare.html">pqCompare</a> {
+<a name="l00308"></a><a class="code" href="structLWBackEnd_1_1pqCompare.html#aa171c804e811b84fcefef511a9031fb6">00308</a>         <span class="keywordtype">bool</span> <a class="code" href="structLWBackEnd_1_1pqCompare.html#aa171c804e811b84fcefef511a9031fb6">operator() </a>(<span class="keyword">const</span> <a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;lhs, <span class="keyword">const</span> <a class="code" href="classLWBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;rhs)<span class="keyword"> const</span>
+<a name="l00309"></a>00309 <span class="keyword">        </span>{
+<a name="l00310"></a>00310             <span class="keywordflow">return</span> lhs-&gt;seqNum &gt; rhs-&gt;seqNum;
+<a name="l00311"></a>00311         }
+<a name="l00312"></a>00312     };
+<a name="l00313"></a>00313 
+<a name="l00314"></a><a class="code" href="classLWBackEnd.html#a60636ae8f3b649078c4f1bdd3b20dcad">00314</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> std::priority_queue&lt;DynInstPtr, std::vector&lt;DynInstPtr&gt;, <a class="code" href="structLWBackEnd_1_1pqCompare.html">pqCompare</a>&gt; <a class="code" href="classLWBackEnd.html#a60636ae8f3b649078c4f1bdd3b20dcad">ReadyInstQueue</a>;
+<a name="l00315"></a><a class="code" href="classLWBackEnd.html#a033c224149bfca7d589121bf77f1b681">00315</a>     <a class="code" href="classLWBackEnd.html#a60636ae8f3b649078c4f1bdd3b20dcad">ReadyInstQueue</a> <a class="code" href="classLWBackEnd.html#a033c224149bfca7d589121bf77f1b681">exeList</a>;
+<a name="l00316"></a>00316 
+<a name="l00317"></a><a class="code" href="classLWBackEnd.html#a4da46d72d68fcd5bfe65dc701c358379">00317</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classLWBackEnd.html#a4da46d72d68fcd5bfe65dc701c358379">InstListIt</a>;
+<a name="l00318"></a>00318 
+<a name="l00319"></a><a class="code" href="classLWBackEnd.html#ae10a391d02ce1ef67ee13cd82b7d46e5">00319</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classLWBackEnd.html#ae10a391d02ce1ef67ee13cd82b7d46e5">instList</a>;
+<a name="l00320"></a><a class="code" href="classLWBackEnd.html#a01b09fb4e81dae8e11ca298561afebe9">00320</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classLWBackEnd.html#a01b09fb4e81dae8e11ca298561afebe9">waitingList</a>;
+<a name="l00321"></a><a class="code" href="classLWBackEnd.html#a75af5d227f5f7bbb93a6bb4bf680e6ee">00321</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classLWBackEnd.html#a75af5d227f5f7bbb93a6bb4bf680e6ee">replayList</a>;
+<a name="l00322"></a><a class="code" href="classLWBackEnd.html#ae4b76f4612be07d13b349e13ee9dfa16">00322</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classLWBackEnd.html#ae4b76f4612be07d13b349e13ee9dfa16">writeback</a>;
+<a name="l00323"></a>00323 
+<a name="l00324"></a><a class="code" href="classLWBackEnd.html#a440f8cda1481977c324a827c7c9f1e24">00324</a>     <span class="keywordtype">int</span> <a class="code" href="classLWBackEnd.html#a440f8cda1481977c324a827c7c9f1e24">squashLatency</a>;
+<a name="l00325"></a>00325 
+<a name="l00326"></a><a class="code" href="classLWBackEnd.html#a319e9530b28153883e886be5b9c573eb">00326</a>     <span class="keywordtype">bool</span> <a class="code" href="classLWBackEnd.html#a319e9530b28153883e886be5b9c573eb">exactFullStall</a>;
+<a name="l00327"></a>00327 
+<a name="l00328"></a>00328     <span class="comment">// number of cycles stalled for D-cache misses</span>
+<a name="l00329"></a>00329 <span class="comment">/*    Stats::Scalar dcacheStallCycles;</span>
+<a name="l00330"></a>00330 <span class="comment">      Counter lastDcacheStall;</span>
+<a name="l00331"></a>00331 <span class="comment">*/</span>
+<a name="l00332"></a><a class="code" href="classLWBackEnd.html#a746b17c64f4337f2cf0bd3eb37df8cf5">00332</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a746b17c64f4337f2cf0bd3eb37df8cf5">robCapEvents</a>;
+<a name="l00333"></a><a class="code" href="classLWBackEnd.html#aea092d89c0e23a99adfd1aa642e8ad37">00333</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#aea092d89c0e23a99adfd1aa642e8ad37">robCapInstCount</a>;
+<a name="l00334"></a><a class="code" href="classLWBackEnd.html#a18e004a2b90fafdb8e602ab4fd99f971">00334</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a18e004a2b90fafdb8e602ab4fd99f971">iqCapEvents</a>;
+<a name="l00335"></a><a class="code" href="classLWBackEnd.html#adf3ce08ee23edc6f4b6d1dcea1b39b31">00335</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#adf3ce08ee23edc6f4b6d1dcea1b39b31">iqCapInstCount</a>;
+<a name="l00336"></a>00336     <span class="comment">// total number of instructions executed</span>
+<a name="l00337"></a><a class="code" href="classLWBackEnd.html#a02103b42af4cd3d8b606764dcd24e277">00337</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a02103b42af4cd3d8b606764dcd24e277">exeInst</a>;
+<a name="l00338"></a><a class="code" href="classLWBackEnd.html#a149e196f188dd6166c0c8c16cc023ad2">00338</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a149e196f188dd6166c0c8c16cc023ad2">exeSwp</a>;
+<a name="l00339"></a><a class="code" href="classLWBackEnd.html#acada805051a7dbb6b8459c5856be8a01">00339</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#acada805051a7dbb6b8459c5856be8a01">exeNop</a>;
+<a name="l00340"></a><a class="code" href="classLWBackEnd.html#aad83ba41ef04d5d18ea21b492e5b2313">00340</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#aad83ba41ef04d5d18ea21b492e5b2313">exeRefs</a>;
+<a name="l00341"></a><a class="code" href="classLWBackEnd.html#acdffd7467b37177b4352cc95a4541c7d">00341</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#acdffd7467b37177b4352cc95a4541c7d">exeLoads</a>;
+<a name="l00342"></a><a class="code" href="classLWBackEnd.html#a1c8de90750d60821aba6ab2e07c3564c">00342</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a1c8de90750d60821aba6ab2e07c3564c">exeBranches</a>;
+<a name="l00343"></a>00343 
+<a name="l00344"></a><a class="code" href="classLWBackEnd.html#ace641e242f8066857ee021c0f54488fc">00344</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#ace641e242f8066857ee021c0f54488fc">issuedOps</a>;
+<a name="l00345"></a>00345 
+<a name="l00346"></a>00346     <span class="comment">// total number of loads forwaded from LSQ stores</span>
+<a name="l00347"></a><a class="code" href="classLWBackEnd.html#a8360980798f5ee19e9b6a40c1d2402dd">00347</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a8360980798f5ee19e9b6a40c1d2402dd">lsqForwLoads</a>;
+<a name="l00348"></a>00348 
+<a name="l00349"></a>00349     <span class="comment">// total number of loads ignored due to invalid addresses</span>
+<a name="l00350"></a><a class="code" href="classLWBackEnd.html#ab6f202cc22f2199e7d5cafb2e5af3451">00350</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#ab6f202cc22f2199e7d5cafb2e5af3451">invAddrLoads</a>;
+<a name="l00351"></a>00351 
+<a name="l00352"></a>00352     <span class="comment">// total number of software prefetches ignored due to invalid addresses</span>
+<a name="l00353"></a><a class="code" href="classLWBackEnd.html#a188a7b143a76b88b85fb994dbdd7e0ea">00353</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a188a7b143a76b88b85fb994dbdd7e0ea">invAddrSwpfs</a>;
+<a name="l00354"></a>00354     <span class="comment">// ready loads blocked due to memory disambiguation</span>
+<a name="l00355"></a><a class="code" href="classLWBackEnd.html#a4b6441df3c51e29c627f7dbf5bed8409">00355</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a4b6441df3c51e29c627f7dbf5bed8409">lsqBlockedLoads</a>;
+<a name="l00356"></a>00356 
+<a name="l00357"></a><a class="code" href="classLWBackEnd.html#abf96f4acba126fbcf919829a1125954c">00357</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classLWBackEnd.html#abf96f4acba126fbcf919829a1125954c">lsqInversion</a>;
+<a name="l00358"></a>00358 
+<a name="l00359"></a><a class="code" href="classLWBackEnd.html#a63ce9344b46599ab3db4eb196ee89799">00359</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a63ce9344b46599ab3db4eb196ee89799">nIssuedDist</a>;
+<a name="l00360"></a>00360 <span class="comment">/*</span>
+<a name="l00361"></a>00361 <span class="comment">    Stats::VectorDistribution issueDelayDist;</span>
+<a name="l00362"></a>00362 <span class="comment"></span>
+<a name="l00363"></a>00363 <span class="comment">    Stats::VectorDistribution queueResDist;</span>
+<a name="l00364"></a>00364 <span class="comment">*/</span>
+<a name="l00365"></a>00365 <span class="comment">/*</span>
+<a name="l00366"></a>00366 <span class="comment">    Stats::Vector stat_fu_busy;</span>
+<a name="l00367"></a>00367 <span class="comment">    Stats::Vector2d stat_fuBusy;</span>
+<a name="l00368"></a>00368 <span class="comment">    Stats::Vector dist_unissued;</span>
+<a name="l00369"></a>00369 <span class="comment">    Stats::Vector2d stat_issued_inst_type;</span>
+<a name="l00370"></a>00370 <span class="comment"></span>
+<a name="l00371"></a>00371 <span class="comment">    Stats::Formula misspec_cnt;</span>
+<a name="l00372"></a>00372 <span class="comment">    Stats::Formula misspec_ipc;</span>
+<a name="l00373"></a>00373 <span class="comment">    Stats::Formula issue_rate;</span>
+<a name="l00374"></a>00374 <span class="comment">    Stats::Formula issue_stores;</span>
+<a name="l00375"></a>00375 <span class="comment">    Stats::Formula issue_op_rate;</span>
+<a name="l00376"></a>00376 <span class="comment">    Stats::Formula fu_busy_rate;</span>
+<a name="l00377"></a>00377 <span class="comment">    Stats::Formula commit_stores;</span>
+<a name="l00378"></a>00378 <span class="comment">    Stats::Formula commit_ipc;</span>
+<a name="l00379"></a>00379 <span class="comment">    Stats::Formula commit_ipb;</span>
+<a name="l00380"></a>00380 <span class="comment">    Stats::Formula lsq_inv_rate;</span>
+<a name="l00381"></a>00381 <span class="comment">*/</span>
+<a name="l00382"></a><a class="code" href="classLWBackEnd.html#a85f5041a2e3375a2dc81bc0ae534aa2e">00382</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a85f5041a2e3375a2dc81bc0ae534aa2e">writebackCount</a>;
+<a name="l00383"></a><a class="code" href="classLWBackEnd.html#a79df9c76c4c8c7da92694a4a571d44f0">00383</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a79df9c76c4c8c7da92694a4a571d44f0">producerInst</a>;
+<a name="l00384"></a><a class="code" href="classLWBackEnd.html#a69b21b8b0360b93b3088bbf183fe6abf">00384</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a69b21b8b0360b93b3088bbf183fe6abf">consumerInst</a>;
+<a name="l00385"></a><a class="code" href="classLWBackEnd.html#a364daa8f3a358e41aa13fac115bb5e0f">00385</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a364daa8f3a358e41aa13fac115bb5e0f">wbPenalized</a>;
+<a name="l00386"></a>00386 
+<a name="l00387"></a><a class="code" href="classLWBackEnd.html#a5ab2bb9fa8eb98a735a204082a37c9db">00387</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classLWBackEnd.html#a5ab2bb9fa8eb98a735a204082a37c9db">wbRate</a>;
+<a name="l00388"></a><a class="code" href="classLWBackEnd.html#a667246d811337454bc9ceccf8bbf8f1c">00388</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classLWBackEnd.html#a667246d811337454bc9ceccf8bbf8f1c">wbFanout</a>;
+<a name="l00389"></a><a class="code" href="classLWBackEnd.html#a58a4cd085d39435e69bc1ee729422d84">00389</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classLWBackEnd.html#a58a4cd085d39435e69bc1ee729422d84">wbPenalizedRate</a>;
+<a name="l00390"></a>00390 
+<a name="l00391"></a>00391     <span class="comment">// total number of instructions committed</span>
+<a name="l00392"></a><a class="code" href="classLWBackEnd.html#a17e218fe16ffffa3f596551115cf1592">00392</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a17e218fe16ffffa3f596551115cf1592">statComInst</a>;
+<a name="l00393"></a><a class="code" href="classLWBackEnd.html#a4cb385aa97530dd2621c74f376839e79">00393</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a4cb385aa97530dd2621c74f376839e79">statComSwp</a>;
+<a name="l00394"></a><a class="code" href="classLWBackEnd.html#afe174c4b8e70d840a2e91bf1ca3092ac">00394</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#afe174c4b8e70d840a2e91bf1ca3092ac">statComRefs</a>;
+<a name="l00395"></a><a class="code" href="classLWBackEnd.html#a91927819864b9dc9d1ac706dc55d5dce">00395</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a91927819864b9dc9d1ac706dc55d5dce">statComLoads</a>;
+<a name="l00396"></a><a class="code" href="classLWBackEnd.html#a9b029ac182d54199247dfa90ed86d368">00396</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a9b029ac182d54199247dfa90ed86d368">statComMembars</a>;
+<a name="l00397"></a><a class="code" href="classLWBackEnd.html#a39a7da0b20d1e83ccfe4b2f2b19d6e94">00397</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a39a7da0b20d1e83ccfe4b2f2b19d6e94">statComBranches</a>;
+<a name="l00398"></a>00398 
+<a name="l00399"></a><a class="code" href="classLWBackEnd.html#a95950b28aceca73a1f17427dd767552d">00399</a>     <a class="code" href="classStats_1_1Distribution.html">Stats::Distribution</a> <a class="code" href="classLWBackEnd.html#a95950b28aceca73a1f17427dd767552d">nCommittedDist</a>;
+<a name="l00400"></a>00400 
+<a name="l00401"></a><a class="code" href="classLWBackEnd.html#a16d1a4bbb2cb87488fd876fbf6e7a518">00401</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classLWBackEnd.html#a16d1a4bbb2cb87488fd876fbf6e7a518">commitEligibleSamples</a>;
+<a name="l00402"></a><a class="code" href="classLWBackEnd.html#a26f5138543e43cbaba9459036fc0b04c">00402</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#a26f5138543e43cbaba9459036fc0b04c">commitEligible</a>;
+<a name="l00403"></a>00403 
+<a name="l00404"></a><a class="code" href="classLWBackEnd.html#ab27e4267b3c35957215c1c88c2d6462a">00404</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#ab27e4267b3c35957215c1c88c2d6462a">squashedInsts</a>;
+<a name="l00405"></a><a class="code" href="classLWBackEnd.html#ae0e4c1bd43a0cb1f736062e536168fa3">00405</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classLWBackEnd.html#ae0e4c1bd43a0cb1f736062e536168fa3">ROBSquashedInsts</a>;
+<a name="l00406"></a>00406 
+<a name="l00407"></a><a class="code" href="classLWBackEnd.html#afdfe647a67d89f9620c69019c79547be">00407</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classLWBackEnd.html#afdfe647a67d89f9620c69019c79547be">ROBFcount</a>;
+<a name="l00408"></a><a class="code" href="classLWBackEnd.html#a26d90e83e9d707184d857b5df610d726">00408</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classLWBackEnd.html#a26d90e83e9d707184d857b5df610d726">ROBFullRate</a>;
+<a name="l00409"></a>00409 
+<a name="l00410"></a><a class="code" href="classLWBackEnd.html#a39034d47fcced7afdc840710ff261574">00410</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a>  <a class="code" href="classLWBackEnd.html#a39034d47fcced7afdc840710ff261574">ROBCount</a>;   <span class="comment">// cumulative ROB occupancy</span>
+<a name="l00411"></a><a class="code" href="classLWBackEnd.html#afb382907daa4161f6ea36acfab3a1c40">00411</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classLWBackEnd.html#afb382907daa4161f6ea36acfab3a1c40">ROBOccRate</a>;
+<a name="l00412"></a>00412 <span class="comment">//    Stats::VectorDistribution ROBOccDist;</span>
+<a name="l00413"></a>00413   <span class="keyword">public</span>:
+<a name="l00414"></a>00414     <span class="keywordtype">void</span> <a class="code" href="classLWBackEnd.html#a80587b4fe043bbe1995536cb3b361588">dumpInsts</a>();
+<a name="l00415"></a>00415 
+<a name="l00416"></a><a class="code" href="classLWBackEnd.html#af07b45c0b87d6672f4066d2c189013f9">00416</a>     <a class="code" href="classChecker.html">Checker&lt;DynInstPtr&gt;</a> *<a class="code" href="classLWBackEnd.html#af07b45c0b87d6672f4066d2c189013f9">checker</a>;
+<a name="l00417"></a>00417 };
+<a name="l00418"></a>00418 
+<a name="l00419"></a>00419 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00420"></a>00420 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00421"></a>00421 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00422"></a><a class="code" href="classLWBackEnd.html#a0747777ac998dabdc20fa0c554d378d3">00422</a> <a class="code" href="classLWBackEnd.html#a0747777ac998dabdc20fa0c554d378d3">LWBackEnd&lt;Impl&gt;::read</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> load_idx)
+<a name="l00423"></a>00423 {
+<a name="l00424"></a>00424     <span class="keywordflow">return</span> <a class="code" href="classLSQ.html">LSQ</a>.read(req, data, load_idx);
+<a name="l00425"></a>00425 }
+<a name="l00426"></a>00426 
+<a name="l00427"></a>00427 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00428"></a>00428 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00429"></a>00429 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00430"></a><a class="code" href="classLWBackEnd.html#abbf7bcc93511421a1787650a43e2642a">00430</a> <a class="code" href="classLWBackEnd.html#abbf7bcc93511421a1787650a43e2642a">LWBackEnd&lt;Impl&gt;::write</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> store_idx)
+<a name="l00431"></a>00431 {
+<a name="l00432"></a>00432     <span class="keywordflow">return</span> <a class="code" href="classLSQ.html">LSQ</a>.write(req, data, store_idx);
+<a name="l00433"></a>00433 }
+<a name="l00434"></a>00434 
+<a name="l00435"></a>00435 <span class="preprocessor">#endif // __CPU_OZONE_LW_BACK_END_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

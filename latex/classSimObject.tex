@@ -1,0 +1,403 @@
+\hypertarget{classSimObject}{
+\section{クラス SimObject}
+\label{classSimObject}\index{SimObject@{SimObject}}
+}
+
+
+{\ttfamily \#include $<$sim\_\-object.hh$>$}SimObjectに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=12cm]{classSimObject}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef SimObjectParams \hyperlink{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}{Params} $\ast$ \hyperlink{classSimObject_acd3c3feb78ae7a8f88fe0f110a718dff}{params} () const 
+\item 
+\hyperlink{classSimObject_a153e2844edadce7c286efc5e3a7da911}{SimObject} (const \hyperlink{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}{Params} $\ast$\hyperlink{classSimObject_acaf6024ae9dda44bfb1c67e05ad70aef}{\_\-params})
+\item 
+virtual \hyperlink{classSimObject_a8a5c5109a2eb74056734bb8795eca530}{$\sim$SimObject} ()
+\item 
+virtual const std::string \hyperlink{classSimObject_adbcff144e5e199d332a1352af1798148}{name} () const 
+\item 
+virtual void \hyperlink{classSimObject_a02fd73d861ef2e4aabb38c0c9ff82947}{init} ()
+\item 
+virtual void \hyperlink{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}{loadState} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp)
+\item 
+virtual void \hyperlink{classSimObject_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\item 
+virtual void \hyperlink{classSimObject_a4dc637449366fcdfc4e764cdf12d9b11}{regStats} ()
+\item 
+virtual void \hyperlink{classSimObject_a65880e61108132689a1bd769b9187fb7}{resetStats} ()
+\item 
+virtual void \hyperlink{classSimObject_aa2dab17a363fd4307274d579796adcf7}{regProbePoints} ()
+\item 
+virtual void \hyperlink{classSimObject_aa58a8221691801138d5d9236b8c3e0fb}{regProbeListeners} ()
+\item 
+\hyperlink{classProbeManager}{ProbeManager} $\ast$ \hyperlink{classSimObject_aca474da5df36cfb4df4bfcdbb4df8bf9}{getProbeManager} ()
+\item 
+virtual void \hyperlink{classSimObject_aecc7d8debf54990ffeaaed5bac7d7d81}{startup} ()
+\item 
+unsigned int \hyperlink{classSimObject_a6bf479c521c7c3eb473822d953275b26}{drain} (\hyperlink{classDrainManager}{DrainManager} $\ast$drainManger)
+\end{DoxyCompactItemize}
+\subsection*{Static Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classSimObject_acee9d39d800677e32cf1856780ff9761}{serializeAll} (std::ostream \&os)
+\item 
+static \hyperlink{classSimObject}{SimObject} $\ast$ \hyperlink{classSimObject_a4f441caa815630d644e19ee6bc8fce44}{find} (const char $\ast$name)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+const SimObjectParams $\ast$ \hyperlink{classSimObject_acaf6024ae9dda44bfb1c67e05ad70aef}{\_\-params}
+\end{DoxyCompactItemize}
+\subsection*{Private 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classSimObject}{SimObject} $\ast$ $>$ \hyperlink{classSimObject_a60754b5e4ad2675dfa2974fe82692295}{SimObjectList}
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classProbeManager}{ProbeManager} $\ast$ \hyperlink{classSimObject_a91f0eaabebee1e88aa1c502f3e44c9d1}{probeManager}
+\end{DoxyCompactItemize}
+\subsection*{Static Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classstd_1_1vector}{SimObjectList} \hyperlink{classSimObject_a7ff88c7f8734c4fdbb417055e69001c0}{simObjectList}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Abstract superclass for simulation objects. Represents things that correspond to physical components and can be specified via the config file (CPUs, caches, etc.).
+
+\hyperlink{classSimObject}{SimObject} initialization is controlled by the instantiate method in \hyperlink{simulate_8py}{src/python/m5/simulate.py}. There are slightly different initialization paths when starting the simulation afresh and when loading from a checkpoint. After instantiation and connecting ports, \hyperlink{simulate_8py}{simulate.py} initializes the object using the following call sequence:
+
+
+\begin{DoxyEnumerate}
+\item \hyperlink{classSimObject_a02fd73d861ef2e4aabb38c0c9ff82947}{SimObject::init()} 
+\item \hyperlink{classSimObject_a4dc637449366fcdfc4e764cdf12d9b11}{SimObject::regStats()} 
+\item 
+\begin{DoxyItemize}
+\item \hyperlink{classSimObject_a3c34ea9b29f410748d4435a667484924}{SimObject::initState()} if starting afresh. 
+\item \hyperlink{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}{SimObject::loadState()} if restoring from a checkpoint. 
+\end{DoxyItemize}
+\item \hyperlink{classSimObject_a65880e61108132689a1bd769b9187fb7}{SimObject::resetStats()} 
+\item \hyperlink{classSimObject_aecc7d8debf54990ffeaaed5bac7d7d81}{SimObject::startup()} 
+\item \hyperlink{classDrainable_a8f020d3237536fe007fc488c4125c5d8}{Drainable::drainResume()} if resuming from a checkpoint. 
+\end{DoxyEnumerate}
+
+\begin{DoxyNote}{覚え書き}
+Whenever a method is called on all objects in the simulator's object tree (e.g., \hyperlink{classSimObject_a02fd73d861ef2e4aabb38c0c9ff82947}{init()}, \hyperlink{classSimObject_aecc7d8debf54990ffeaaed5bac7d7d81}{startup()}, or \hyperlink{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}{loadState()}), a pre-\/order depth-\/first traversal is performed (see descendants() in \hyperlink{SimObject_8py}{SimObject.py}). This has the effect of calling the method on the parent node {\itshape before\/} its children. 
+\end{DoxyNote}
+
+
+\subsection{型定義}
+\hypertarget{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}{
+\index{SimObject@{SimObject}!Params@{Params}}
+\index{Params@{Params}!SimObject@{SimObject}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef SimObjectParams {\bf Params}}}
+\label{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}
+
+
+\hyperlink{classFreebsdAlphaSystem_a0cee38b7e957f9f434ee078d80b94d1b}{FreebsdAlphaSystem}, \hyperlink{classLinuxAlphaSystem_a0d8e2379ed014b6039c45eb98c24fed4}{LinuxAlphaSystem}, \hyperlink{classAlphaSystem_a2af24d7a564ee2ca81332fb46406cbe5}{AlphaSystem}, \hyperlink{classAlphaISA_1_1TLB_a9c268a4095d94dfb9eafa97cb58fcc5b}{TLB}, \hyperlink{classTru64AlphaSystem_a653e3d38e55079cc093cc4945c1ac3d1}{Tru64AlphaSystem}, \hyperlink{classLinuxArmSystem_ae0ebf28024a7bb607cc65e59c8faa9d5}{LinuxArmSystem}, \hyperlink{classTrace_1_1ArmNativeTrace_a7c28c46dd6590e680f44a6066c34caf5}{ArmNativeTrace}, \hyperlink{classArmSystem_a8ae84e66b34bac08937a6bad4412ba5d}{ArmSystem}, \hyperlink{classArmISA_1_1TableWalker_a422d0236f689cd69d42b3163a521ea15}{TableWalker}, \hyperlink{classLinuxMipsSystem_a3d1083cbefc15728ca643470f9efbf13}{LinuxMipsSystem}, \hyperlink{classMipsSystem_acf01be080284e8262bc1ff41fbd1710c}{MipsSystem}, \hyperlink{classMipsISA_1_1TLB_a8fcac7e147ea0cf7183de360adcb6efe}{TLB}, \hyperlink{classMipsSystem_acf01be080284e8262bc1ff41fbd1710c}{MipsSystem}, \hyperlink{classMipsISA_1_1TLB_a8fcac7e147ea0cf7183de360adcb6efe}{TLB}, \hyperlink{classPowerISA_1_1TLB_a483872f6d75119b1124c758297acc6da}{TLB}, \hyperlink{classSparcSystem_ad1d7d4179ae16224e8ae3360e3e676b8}{SparcSystem}, \hyperlink{classSparcISA_1_1TLB_a3073524452e67556982db4c27c5f18ea}{TLB}, \hyperlink{classX86ISA_1_1Interrupts_a3c48a671abef695247afdd48259ac20a}{Interrupts}, \hyperlink{classLinuxX86System_a9a9d4fd080ddd5d649f7db5e47cfae8b}{LinuxX86System}, \hyperlink{classX86ISA_1_1Walker_a55ceaa41cdace6176b677cc22eb01bf6}{Walker}, \hyperlink{classX86System_a4f3142e3ba81ac1e14e960636ad3202b}{X86System}, \hyperlink{classX86ISA_1_1TLB_a9122b46075a6970493519b96564e6356}{TLB}, \hyperlink{classVncInput_a33249bc76b6a23eda274363d6f466b79}{VncInput}, \hyperlink{classVncServer_a9bc94e8c47d227e70719e2f0b14d23d8}{VncServer}, \hyperlink{classTrace_1_1ExeTracer_a6680098765037131737b022c9fa9252e}{ExeTracer}, \hyperlink{classIntrControl_afd5ff96050f97729223377021ae69b8f}{IntrControl}, \hyperlink{classTrace_1_1LegionTrace_ac9d15a61af503a8c154a6dc072dd2b3b}{LegionTrace}, \hyperlink{classFUPool_a9d3633c4c2cf6388d3099abc3b5c8eb2}{FUPool}, \hyperlink{classBPredUnit_aa715df0f49f029439cca4c7bd6e3d4fb}{BPredUnit}, \hyperlink{classDirectedGenerator_ac723463fca65df4ca9fb4e67caddf417}{DirectedGenerator}, \hyperlink{classInvalidateGenerator_ad11a79a813ce545d94f4464bebc395eb}{InvalidateGenerator}, \hyperlink{classRubyDirectedTester_af24daccceb54fc519ecd978200efef2d}{RubyDirectedTester}, \hyperlink{classSeriesRequestGenerator_a0f1dfc608e63d6aef0930883cc174b42}{SeriesRequestGenerator}, \hyperlink{classMemTest_a9c0e666eb773a0cfe77b832270b05c24}{MemTest}, \hyperlink{classNetworkTest_aa26fd7704e843bb985048632459a664e}{NetworkTest}, \hyperlink{classRubyTester_a6785f65e1745860fc5b53cbf4aefc2f7}{RubyTester}, \hyperlink{classAlphaBackdoor_a3311d1ef17b579d409e4cf342f9c696f}{AlphaBackdoor}, \hyperlink{classTsunami_a7beeeed12982def83e22faf17f7385e1}{Tsunami}, \hyperlink{classTsunamiCChip_ae88d115af4688355c68945ae8486b7ec}{TsunamiCChip}, \hyperlink{classTsunamiIO_a46efefdf21511fe3655f4589444a8479}{TsunamiIO}, \hyperlink{classTsunamiPChip_ad83d95a5c11dc8215f058bbac3c02dd6}{TsunamiPChip}, \hyperlink{classA9SCU_a6264a26c977c4e8d51cb6b3d6cd3a842}{A9SCU}, \hyperlink{classAmbaPioDevice_ab091a3a8ffa1f3152ec35e30d1b384d5}{AmbaPioDevice}, \hyperlink{classAmbaIntDevice_aa70660260d212b343768d91a298c80de}{AmbaIntDevice}, \hyperlink{classAmbaDmaDevice_ab612ceb7381438552927b7ed0aed5099}{AmbaDmaDevice}, \hyperlink{classAmbaFake_af81895617462b041d86cd650bb1e27d3}{AmbaFake}, \hyperlink{classBaseGic_aacf2140b95fc8c326a11f01521f5018d}{BaseGic}, \hyperlink{classGenericTimer_a22b88e736eb537a678104e1f9d03b967}{GenericTimer}, \hyperlink{classPl390_a1ac197c7f5e1a7b8d7178444a1474e45}{Pl390}, \hyperlink{classHDLcd_a31ccb03af3b5962a67bed42eca6ce2f0}{HDLcd}, \hyperlink{classPl050_a12cd0d18c639c998ce04efabfca4d619}{Pl050}, \hyperlink{classPl011_a7c50120eadc91b7f8522e0e4f1398769}{Pl011}, \hyperlink{classPl111_a98df8e62be26dfc2009a7e53d5d0841d}{Pl111}, \hyperlink{classRealView_aa902b300d4e5553ea4f127d69fc0fa3a}{RealView}, \hyperlink{classPL031_acd44fa02a8cc03d321b406d70faea0d8}{PL031}, \hyperlink{classRealViewCtrl_a7bb0551c15e75a5df04d65454bcb45dc}{RealViewCtrl}, \hyperlink{classCpuLocalTimer_a2abacbbb646e91ed1ef591d6ce81f4e3}{CpuLocalTimer}, \hyperlink{classSp804_af822827c8c9baefc6aafbdc713bc2b8d}{Sp804}, \hyperlink{classVGic_aba305d5be632386ad18939cafec46fee}{VGic}, \hyperlink{classBadDevice_af753d1777865d13ff644f3ce8b944d6b}{BadDevice}, \hyperlink{classCopyEngine_a0b0580d58d6a0384646682653aefb97a}{CopyEngine}, \hyperlink{classDiskImage_a7fcdce57df9801d7eebcb65f9ad2e0c0}{DiskImage}, \hyperlink{classRawDiskImage_af714565806621f1401c71701d4c88e71}{RawDiskImage}, \hyperlink{classCowDiskImage_a564df726143da4914743e9d8c1a17c6c}{CowDiskImage}, \hyperlink{classDmaDevice_aea7daf6105ab956443385f5f5a9b88c5}{DmaDevice}, \hyperlink{classEtherBus_af0984f6bd7717c1679765dfdacae4ddd}{EtherBus}, \hyperlink{classEtherDevice_afcf43c7944288000e850f783bdd66b9d}{EtherDevice}, \hyperlink{classEtherDump_a1c09075a361c5596c4f4523d9b570438}{EtherDump}, \hyperlink{classEtherLink_ae2a807ee6467a63dfb496f847857b7df}{EtherLink}, \hyperlink{classEtherObject_a47be5a25ff75cbf22f60f87dde950e13}{EtherObject}, \hyperlink{classEtherTap_a0d1f916d5d6c5769fc7f043e0f4a6372}{EtherTap}, \hyperlink{classIGbE_ad27b5cfed87f35a483863a73336d8258}{IGbE}, \hyperlink{classIdeController_ac3896424d9bf2d8a838f1e2c38870d02}{IdeController}, \hyperlink{classIdeDisk_a21c0f7d16893ae472d7dbbc6df963053}{IdeDisk}, \hyperlink{classPioDevice_a9cdbda5b5cc24147ce82b7d07bf03cd1}{PioDevice}, \hyperlink{classBasicPioDevice_a2845515ac6467f10540747053c8a0449}{BasicPioDevice}, \hyperlink{classIsaFake_a9d89a786405f83fe384e7aadc17d5ce2}{IsaFake}, \hyperlink{classMalta_a189ad6fd96fd77d2ea4e32ba0a9e5298}{Malta}, \hyperlink{classMaltaCChip_a7a47c530613bf1fa98cc01dad4ffc4e3}{MaltaCChip}, \hyperlink{classMaltaIO_a67250d5117f4f6705cea74a7a228ccf0}{MaltaIO}, \hyperlink{classMaltaPChip_adcfa4143cf090788abe164c8f54c1a54}{MaltaPChip}, \hyperlink{classNSGigE_a3d96e676dc626c146631b6fa53a9d823}{NSGigE}, \hyperlink{classPciConfigAll_a0488eba2a71c6661fef314d8ded28416}{PciConfigAll}, \hyperlink{classPciDevice_aefbfd3f2d9daf3173b779eeff32e8112}{PciDevice}, \hyperlink{classPlatform_af4e77eaf2602e4808deef7d1ba95e579}{Platform}, \hyperlink{classSimpleDisk_a65e935e8cfb2d781b38481c79c2ece76}{SimpleDisk}, \hyperlink{classSinic_1_1Base_ae32fbee6dea75ffbb01b7d869c7bedad}{Base}, \hyperlink{classDumbTOD_ac75d9dee405db8ba88e1f9823b893008}{DumbTOD}, \hyperlink{classIob_a177ee3cfebf080ab43aa1b8310f520b1}{Iob}, \hyperlink{classMmDisk_a9e8be66baf207ea5dcd34d3f71d3734b}{MmDisk}, \hyperlink{classT1000_abc8ac05350758af915732ecded3a736e}{T1000}, \hyperlink{classTerminal_aa60a1659eb9e560503e47d6cbedd5ace}{Terminal}, \hyperlink{classUart_a20a580db9778bd0604704c3c6baabfa6}{Uart}, \hyperlink{classUart8250_aa413e69885bd7a520ee8b988aa3e1c8b}{Uart8250}, \hyperlink{classX86ISA_1_1Cmos_a22dfc4a3fb18df74d309b9996cd9943c}{Cmos}, \hyperlink{classX86ISA_1_1I8042_ae70fe038127f3e2a71a81dde45f38dc5}{I8042}, \hyperlink{classX86ISA_1_1I82094AA_ab98883343dbcbe45660e9b16b61507ad}{I82094AA}, \hyperlink{classX86ISA_1_1I8237_a0e2ad01c52d44a915b5dd253a99ad175}{I8237}, \hyperlink{classX86ISA_1_1I8254_aed9bbf7fa13cb3e5f1c7805d04bffb78}{I8254}, \hyperlink{classX86ISA_1_1I8259_a370f3ee3a425cd3262c46d09b80327fe}{I8259}, \hyperlink{classPc_a3cb59bd5a1945e535ba84d5e34ad19ec}{Pc}, \hyperlink{classSouthBridge_a627de7f454b8e2cbe120a7d6b67a4620}{SouthBridge}, \hyperlink{classX86ISA_1_1Speaker_ae21f9523ca3e32b9fd40e1e647ebd365}{Speaker}, \hyperlink{classAbstractMemory_ab4fcbcbcfef78d6bc871995f8eca40eb}{AbstractMemory}, \hyperlink{classBridge_aff1c1420f91a1e81dfd9dc93d1fd470f}{Bridge}, \hyperlink{classBaseCache_a23c1728f4d2cabb1996560194937d427}{BaseCache}, \hyperlink{classBasePrefetcher_a46661f02a5642b04fd4e12f645ad9c5c}{BasePrefetcher}, \hyperlink{classBaseTags_aab33a5313a7ca07c69f8a4e6e1490375}{BaseTags}, \hyperlink{classFALRU_ac02f095611cbe1cc1b0d89ce95694168}{FALRU}, \hyperlink{classLRU_a7817e729934956b9b3573d13924bf1eb}{LRU}, \hyperlink{classCommMonitor_a945848d2cb95179e45fffc6a7f41da84}{CommMonitor}, \hyperlink{classDRAMSim2_ae66665a06c9d64a6ba0e56d589b74d6c}{DRAMSim2}, \hyperlink{classMemObject_a905bbc621eeec0ed08859e21c8c95412}{MemObject}, \hyperlink{classBasicLink_a2c371814143f1675a601e935bfbd756c}{BasicLink}, \hyperlink{classBasicExtLink_a124f6e2dedf13bd42661a62b7e155cee}{BasicExtLink}, \hyperlink{classBasicIntLink_a22036d2d68b49d72b25678790aae2c9e}{BasicIntLink}, \hyperlink{classBasicRouter_af2c419269bc768b96a7bae9bfbcd3e94}{BasicRouter}, \hyperlink{classFaultModel_a7375aa39205bda869bcfb089a9163679}{FaultModel}, \hyperlink{classBaseGarnetNetwork_a9b387eae2084a167c00ec5550159a245}{BaseGarnetNetwork}, \hyperlink{classCreditLink__d_a5869b5dc6fac750f04b868a201484100}{CreditLink\_\-d}, \hyperlink{classGarnetIntLink__d_a2e35ff7b9010a16d0099e9c6017f4fac}{GarnetIntLink\_\-d}, \hyperlink{classGarnetExtLink__d_a6260fe1aace0793dc83922905dbd435f}{GarnetExtLink\_\-d}, \hyperlink{classGarnetNetwork__d_aa723bef17ce7ec9b7c3ad12002aef3bb}{GarnetNetwork\_\-d}, \hyperlink{classNetworkInterface__d_ab6c40ec3be0502fd09ea61583eecc26a}{NetworkInterface\_\-d}, \hyperlink{classNetworkLink__d_a1384b11c71bbcc86aab6a3a201f7a51e}{NetworkLink\_\-d}, \hyperlink{classRouter__d_a0aa71fc14ebbcbd38c18c172bdbc48eb}{Router\_\-d}, \hyperlink{classGarnetIntLink_ac67f1fad0686704820c88642f65ddcce}{GarnetIntLink}, \hyperlink{classGarnetExtLink_abc394670035aa22f4cda698826986c13}{GarnetExtLink}, \hyperlink{classGarnetNetwork_af1f02e00eac1bf3521780f99a28259a5}{GarnetNetwork}, \hyperlink{classNetworkInterface_a24441f24d6be514d5461dd3b86ea9e99}{NetworkInterface}, \hyperlink{classNetworkLink_a1da148687c9777c23a833785c588c749}{NetworkLink}, \hyperlink{classRouter_aefbd30db7d0c203dbe4553fdfe3c2b0e}{Router}, \hyperlink{classNetwork_a5ebe6802acb5e6e05b54303c1004f080}{Network}, \hyperlink{classSimpleExtLink_a0653c80078cb239e9c7e87cfaead7ec9}{SimpleExtLink}, \hyperlink{classSimpleIntLink_a16df42348b8967c4cc4aa2b9c9fafdf9}{SimpleIntLink}, \hyperlink{classSimpleNetwork_acfd32ca05df7999ec705e4800d022dbf}{SimpleNetwork}, \hyperlink{classSwitch_a07c03790510d4a31198bb5deef53da38}{Switch}, \hyperlink{classAbstractController_a8dd24df4fce13403813bb4f7243a3b13}{AbstractController}, \hyperlink{classPrefetcher_aa178e3582d29b08c028c11634875499c}{Prefetcher}, \hyperlink{classCacheMemory_ae5279e63669c110c0bd87dca490f126d}{CacheMemory}, \hyperlink{classDirectoryMemory_aafb743d69401c676144ae89b3d302665}{DirectoryMemory}, \hyperlink{classDMASequencer_a9827bc75ea7fc70f8a78d2545226f251}{DMASequencer}, \hyperlink{classMemoryControl_aec6d67eaecba2a2311edc4c4c78fb0f5}{MemoryControl}, \hyperlink{classRubyMemoryControl_af43d4e91847a2856227bcb75a70a9a86}{RubyMemoryControl}, \hyperlink{classRubyPort_a73ffda3b6b10849321fd359baf61eb3c}{RubyPort}, \hyperlink{classSequencer_a55b8bba242820df379c5d9139a854e5b}{Sequencer}, \hyperlink{classRubySystem_af3998ceb414058e5e416b8b239698858}{RubySystem}, \hyperlink{classWireBuffer_a7ad77180949dea9bc226a0f7571391a0}{WireBuffer}, \hyperlink{classClockDomain_a38704c6bd51f0677b46da34c8fe16a38}{ClockDomain}, \hyperlink{classSrcClockDomain_a782eceafbcc65d65fa25b7ca97e38b2d}{SrcClockDomain}, \hyperlink{classDerivedClockDomain_a10c51f81ae9968953f7d5c0ee20546c6}{DerivedClockDomain}, \hyperlink{classRoot_a0e87bb7e60cbe3229b1cb552ebb686e0}{Root}, \hyperlink{classSystem_a5f461be6222ce76bffcb70f27d820c56}{System}, と \hyperlink{classVoltageDomain_a61186f371a672d43600e7a1741f9b3fa}{VoltageDomain}で再定義されています。\hypertarget{classSimObject_a60754b5e4ad2675dfa2974fe82692295}{
+\index{SimObject@{SimObject}!SimObjectList@{SimObjectList}}
+\index{SimObjectList@{SimObjectList}!SimObject@{SimObject}}
+\subsubsection[{SimObjectList}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf std::vector}$<${\bf SimObject} $\ast$$>$ {\bf SimObjectList}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSimObject_a60754b5e4ad2675dfa2974fe82692295}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classSimObject_a153e2844edadce7c286efc5e3a7da911}{
+\index{SimObject@{SimObject}!SimObject@{SimObject}}
+\index{SimObject@{SimObject}!SimObject@{SimObject}}
+\subsubsection[{SimObject}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject} (const {\bf Params} $\ast$ {\em \_\-params})}}
+\label{classSimObject_a153e2844edadce7c286efc5e3a7da911}
+
+
+
+\begin{DoxyCode}
+64     : EventManager(getEventQueue(p->eventq_index)), _params(p)
+65 {
+66 #ifdef DEBUG
+67     doDebugBreak = false;
+68 #endif
+69     simObjectList.push_back(this);
+70     probeManager = new ProbeManager(this);
+71 }
+\end{DoxyCode}
+\hypertarget{classSimObject_a8a5c5109a2eb74056734bb8795eca530}{
+\index{SimObject@{SimObject}!$\sim$SimObject@{$\sim$SimObject}}
+\index{$\sim$SimObject@{$\sim$SimObject}!SimObject@{SimObject}}
+\subsubsection[{$\sim$SimObject}]{\setlength{\rightskip}{0pt plus 5cm}virtual $\sim${\bf SimObject} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classSimObject_a8a5c5109a2eb74056734bb8795eca530}
+
+
+
+\begin{DoxyCode}
+104 {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classSimObject_a6bf479c521c7c3eb473822d953275b26}{
+\index{SimObject@{SimObject}!drain@{drain}}
+\index{drain@{drain}!SimObject@{SimObject}}
+\subsubsection[{drain}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int drain ({\bf DrainManager} $\ast$ {\em drainManger})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_a6bf479c521c7c3eb473822d953275b26}
+Provide a default implementation of the drain interface that simply returns 0 (draining completed) and sets the drain state to Drained. 
+
+\hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{Drainable}を実装しています。
+
+\hyperlink{classArmISA_1_1TableWalker_aa8a18d230dba7a674ac8a0b4f35bc36a}{TableWalker}, \hyperlink{classTrafficGen_aa8a18d230dba7a674ac8a0b4f35bc36a}{TrafficGen}, \hyperlink{classCopyEngine_a6bf479c521c7c3eb473822d953275b26}{CopyEngine}, \hyperlink{classDmaDevice_a6bf479c521c7c3eb473822d953275b26}{DmaDevice}, \hyperlink{classIGbE_aa8a18d230dba7a674ac8a0b4f35bc36a}{IGbE}, \hyperlink{classPioDevice_a6bf479c521c7c3eb473822d953275b26}{PioDevice}, \hyperlink{classPciDevice_aa8a18d230dba7a674ac8a0b4f35bc36a}{PciDevice}, \hyperlink{classBaseBus_ac8c1510f7e1591e75a5c79b4b873f6b4}{BaseBus}, \hyperlink{classBaseCache_aa8a18d230dba7a674ac8a0b4f35bc36a}{BaseCache}, \hyperlink{classCoherentBus_aa8a18d230dba7a674ac8a0b4f35bc36a}{CoherentBus}, \hyperlink{classDRAMCtrl_aa8a18d230dba7a674ac8a0b4f35bc36a}{DRAMCtrl}, \hyperlink{classDRAMSim2_aa8a18d230dba7a674ac8a0b4f35bc36a}{DRAMSim2}, \hyperlink{classNoncoherentBus_aa8a18d230dba7a674ac8a0b4f35bc36a}{NoncoherentBus}, \hyperlink{classRubyMemoryControl_aa8a18d230dba7a674ac8a0b4f35bc36a}{RubyMemoryControl}, \hyperlink{classRubyPort_aa8a18d230dba7a674ac8a0b4f35bc36a}{RubyPort}, \hyperlink{classSimpleMemory_aa8a18d230dba7a674ac8a0b4f35bc36a}{SimpleMemory}, と \hyperlink{classSystem_aa8a18d230dba7a674ac8a0b4f35bc36a}{System}で再定義されています。
+
+
+\begin{DoxyCode}
+177 {
+178     setDrainState(Drained);
+179     return 0;
+180 }
+\end{DoxyCode}
+\hypertarget{classSimObject_a4f441caa815630d644e19ee6bc8fce44}{
+\index{SimObject@{SimObject}!find@{find}}
+\index{find@{find}!SimObject@{SimObject}}
+\subsubsection[{find}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject} $\ast$ find (const char $\ast$ {\em name})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSimObject_a4f441caa815630d644e19ee6bc8fce44}
+Find the \hyperlink{classSimObject}{SimObject} with the given name and return a pointer to it. Primarily used for interactive debugging. Argument is char$\ast$ rather than std::string to make it callable from gdb. 
+
+
+\begin{DoxyCode}
+185 {
+186     SimObjectList::const_iterator i = simObjectList.begin();
+187     SimObjectList::const_iterator end = simObjectList.end();
+188 
+189     for (; i != end; ++i) {
+190         SimObject *obj = *i;
+191         if (obj->name() == name)
+192             return obj;
+193     }
+194 
+195     return NULL;
+196 }
+\end{DoxyCode}
+\hypertarget{classSimObject_aca474da5df36cfb4df4bfcdbb4df8bf9}{
+\index{SimObject@{SimObject}!getProbeManager@{getProbeManager}}
+\index{getProbeManager@{getProbeManager}!SimObject@{SimObject}}
+\subsubsection[{getProbeManager}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ProbeManager} $\ast$ getProbeManager ()}}
+\label{classSimObject_aca474da5df36cfb4df4bfcdbb4df8bf9}
+Get the probe manager for this object. 
+
+\hyperlink{classProbeListenerObject_a4cdf821c3b87d8c0440d271b602fcdb5}{ProbeListenerObject}で再定義されています。
+
+
+\begin{DoxyCode}
+130 {
+131     return probeManager;
+132 }
+\end{DoxyCode}
+\hypertarget{classSimObject_a02fd73d861ef2e4aabb38c0c9ff82947}{
+\index{SimObject@{SimObject}!init@{init}}
+\index{init@{init}!SimObject@{SimObject}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void init ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_a02fd73d861ef2e4aabb38c0c9ff82947}
+\hyperlink{classSimObject_a02fd73d861ef2e4aabb38c0c9ff82947}{init()} is called after all C++ SimObjects have been created and all ports are connected. Initializations that are independent of unserialization but rely on a fully instantiated and connected \hyperlink{classSimObject}{SimObject} graph should be done here. 
+
+\hyperlink{classArmISA_1_1TLB_a02fd73d861ef2e4aabb38c0c9ff82947}{TLB}, \hyperlink{classX86ISA_1_1Interrupts_a02fd73d861ef2e4aabb38c0c9ff82947}{Interrupts}, \hyperlink{classRubyDirectedTester_a02fd73d861ef2e4aabb38c0c9ff82947}{RubyDirectedTester}, \hyperlink{classMemTest_a02fd73d861ef2e4aabb38c0c9ff82947}{MemTest}, \hyperlink{classNetworkTest_a02fd73d861ef2e4aabb38c0c9ff82947}{NetworkTest}, \hyperlink{classRubyTester_a02fd73d861ef2e4aabb38c0c9ff82947}{RubyTester}, \hyperlink{classTrafficGen_a02fd73d861ef2e4aabb38c0c9ff82947}{TrafficGen}, \hyperlink{classTsunami_a02fd73d861ef2e4aabb38c0c9ff82947}{Tsunami}, \hyperlink{classDmaDevice_a02fd73d861ef2e4aabb38c0c9ff82947}{DmaDevice}, \hyperlink{classEtherDump_a02fd73d861ef2e4aabb38c0c9ff82947}{EtherDump}, \hyperlink{classIGbE_a02fd73d861ef2e4aabb38c0c9ff82947}{IGbE}, \hyperlink{classPioDevice_a02fd73d861ef2e4aabb38c0c9ff82947}{PioDevice}, \hyperlink{classPciDevice_a02fd73d861ef2e4aabb38c0c9ff82947}{PciDevice}, \hyperlink{classX86ISA_1_1I82094AA_a02fd73d861ef2e4aabb38c0c9ff82947}{I82094AA}, \hyperlink{classPc_a02fd73d861ef2e4aabb38c0c9ff82947}{Pc}, \hyperlink{classAddrMapper_a02fd73d861ef2e4aabb38c0c9ff82947}{AddrMapper}, \hyperlink{classBridge_a02fd73d861ef2e4aabb38c0c9ff82947}{Bridge}, \hyperlink{classBaseBus_a02fd73d861ef2e4aabb38c0c9ff82947}{BaseBus}, \hyperlink{classBaseCache_a02fd73d861ef2e4aabb38c0c9ff82947}{BaseCache}, \hyperlink{classCoherentBus_a02fd73d861ef2e4aabb38c0c9ff82947}{CoherentBus}, \hyperlink{classCommMonitor_a02fd73d861ef2e4aabb38c0c9ff82947}{CommMonitor}, \hyperlink{classDRAMCtrl_a02fd73d861ef2e4aabb38c0c9ff82947}{DRAMCtrl}, \hyperlink{classDRAMSim2_a02fd73d861ef2e4aabb38c0c9ff82947}{DRAMSim2}, \hyperlink{classBasicLink_a02fd73d861ef2e4aabb38c0c9ff82947}{BasicLink}, \hyperlink{classBasicRouter_a02fd73d861ef2e4aabb38c0c9ff82947}{BasicRouter}, \hyperlink{classBaseGarnetNetwork_a02fd73d861ef2e4aabb38c0c9ff82947}{BaseGarnetNetwork}, \hyperlink{classGarnetIntLink__d_a02fd73d861ef2e4aabb38c0c9ff82947}{GarnetIntLink\_\-d}, \hyperlink{classGarnetExtLink__d_a02fd73d861ef2e4aabb38c0c9ff82947}{GarnetExtLink\_\-d}, \hyperlink{classGarnetNetwork__d_a02fd73d861ef2e4aabb38c0c9ff82947}{GarnetNetwork\_\-d}, \hyperlink{classNetworkInterface__d_a02fd73d861ef2e4aabb38c0c9ff82947}{NetworkInterface\_\-d}, \hyperlink{classRouter__d_a02fd73d861ef2e4aabb38c0c9ff82947}{Router\_\-d}, \hyperlink{classGarnetIntLink_a02fd73d861ef2e4aabb38c0c9ff82947}{GarnetIntLink}, \hyperlink{classGarnetExtLink_a02fd73d861ef2e4aabb38c0c9ff82947}{GarnetExtLink}, \hyperlink{classGarnetNetwork_a02fd73d861ef2e4aabb38c0c9ff82947}{GarnetNetwork}, \hyperlink{classNetwork_a02fd73d861ef2e4aabb38c0c9ff82947}{Network}, \hyperlink{classSimpleNetwork_a02fd73d861ef2e4aabb38c0c9ff82947}{SimpleNetwork}, \hyperlink{classSwitch_a02fd73d861ef2e4aabb38c0c9ff82947}{Switch}, \hyperlink{classAbstractController_a02fd73d861ef2e4aabb38c0c9ff82947}{AbstractController}, \hyperlink{classCacheMemory_a02fd73d861ef2e4aabb38c0c9ff82947}{CacheMemory}, \hyperlink{classDirectoryMemory_a02fd73d861ef2e4aabb38c0c9ff82947}{DirectoryMemory}, \hyperlink{classDMASequencer_a02fd73d861ef2e4aabb38c0c9ff82947}{DMASequencer}, \hyperlink{classMemoryControl_ab5be7e5a13ea77d59aac45d21dceb6a0}{MemoryControl}, \hyperlink{classRubyMemoryControl_a02fd73d861ef2e4aabb38c0c9ff82947}{RubyMemoryControl}, \hyperlink{classRubyPort_a02fd73d861ef2e4aabb38c0c9ff82947}{RubyPort}, \hyperlink{classRubyPortProxy_a02fd73d861ef2e4aabb38c0c9ff82947}{RubyPortProxy}, \hyperlink{classWireBuffer_a02fd73d861ef2e4aabb38c0c9ff82947}{WireBuffer}, \hyperlink{classSimpleMemory_a02fd73d861ef2e4aabb38c0c9ff82947}{SimpleMemory}, と \hyperlink{classSystem_a02fd73d861ef2e4aabb38c0c9ff82947}{System}で再定義されています。
+
+
+\begin{DoxyCode}
+75 {
+76 }
+\end{DoxyCode}
+\hypertarget{classSimObject_a3c34ea9b29f410748d4435a667484924}{
+\index{SimObject@{SimObject}!initState@{initState}}
+\index{initState@{initState}!SimObject@{SimObject}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classSimObject_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classLinuxAlphaSystem_a3c34ea9b29f410748d4435a667484924}{LinuxAlphaSystem}, \hyperlink{classAlphaLiveProcess_a3c34ea9b29f410748d4435a667484924}{AlphaLiveProcess}, \hyperlink{classAlphaSystem_a3c34ea9b29f410748d4435a667484924}{AlphaSystem}, \hyperlink{classArmLinuxProcess32_a3c34ea9b29f410748d4435a667484924}{ArmLinuxProcess32}, \hyperlink{classArmLinuxProcess64_a3c34ea9b29f410748d4435a667484924}{ArmLinuxProcess64}, \hyperlink{classLinuxArmSystem_a3c34ea9b29f410748d4435a667484924}{LinuxArmSystem}, \hyperlink{classArmLiveProcess32_a3c34ea9b29f410748d4435a667484924}{ArmLiveProcess32}, \hyperlink{classArmLiveProcess64_a3c34ea9b29f410748d4435a667484924}{ArmLiveProcess64}, \hyperlink{classArmSystem_a3c34ea9b29f410748d4435a667484924}{ArmSystem}, \hyperlink{classMipsLiveProcess_a3c34ea9b29f410748d4435a667484924}{MipsLiveProcess}, \hyperlink{classMipsLiveProcess_a3c34ea9b29f410748d4435a667484924}{MipsLiveProcess}, \hyperlink{classPowerLinuxProcess_a3c34ea9b29f410748d4435a667484924}{PowerLinuxProcess}, \hyperlink{classPowerLiveProcess_a3c34ea9b29f410748d4435a667484924}{PowerLiveProcess}, \hyperlink{classSparcLiveProcess_a3c34ea9b29f410748d4435a667484924}{SparcLiveProcess}, \hyperlink{classSparc32LiveProcess_a3c34ea9b29f410748d4435a667484924}{Sparc32LiveProcess}, \hyperlink{classSparc64LiveProcess_a3c34ea9b29f410748d4435a667484924}{Sparc64LiveProcess}, \hyperlink{classSparcSystem_a3c34ea9b29f410748d4435a667484924}{SparcSystem}, \hyperlink{classLinuxX86System_a3c34ea9b29f410748d4435a667484924}{LinuxX86System}, \hyperlink{classX86ISA_1_1X86__64LiveProcess_a3c34ea9b29f410748d4435a667484924}{X86\_\-64LiveProcess}, \hyperlink{classX86ISA_1_1I386LiveProcess_a3c34ea9b29f410748d4435a667484924}{I386LiveProcess}, \hyperlink{classX86System_a3c34ea9b29f410748d4435a667484924}{X86System}, \hyperlink{classTrafficGen_a3c34ea9b29f410748d4435a667484924}{TrafficGen}, \hyperlink{classProcess_a3c34ea9b29f410748d4435a667484924}{Process}, \hyperlink{classRoot_a3c34ea9b29f410748d4435a667484924}{Root}, と \hyperlink{classSystem_a3c34ea9b29f410748d4435a667484924}{System}で再定義されています。
+
+
+\begin{DoxyCode}
+91 {
+92 }
+\end{DoxyCode}
+\hypertarget{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}{
+\index{SimObject@{SimObject}!loadState@{loadState}}
+\index{loadState@{loadState}!SimObject@{SimObject}}
+\subsubsection[{loadState}]{\setlength{\rightskip}{0pt plus 5cm}void loadState ({\bf Checkpoint} $\ast$ {\em cp})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}
+\hyperlink{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}{loadState()} is called on each \hyperlink{classSimObject}{SimObject} when restoring from a checkpoint. The default implementation simply calls \hyperlink{classSerializable_af100c4e9feabf3cd918619c88c718387}{unserialize()} if there is a corresponding section in the checkpoint. However, objects can override \hyperlink{classSimObject_a0c3e6eb311ceff72035b11f2a5e0f186}{loadState()} to get other behaviors, e.g., doing other programmed initializations after \hyperlink{classSerializable_af100c4e9feabf3cd918619c88c718387}{unserialize()}, or complaining if no checkpoint section is found.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em \hyperlink{namespacecp}{cp}}]\hyperlink{classCheckpoint}{Checkpoint} to restore the state from. \end{DoxyParams}
+
+
+\hyperlink{classAlphaLiveProcess_a0c3e6eb311ceff72035b11f2a5e0f186}{AlphaLiveProcess}, と \hyperlink{classRoot_a0c3e6eb311ceff72035b11f2a5e0f186}{Root}で再定義されています。
+
+
+\begin{DoxyCode}
+80 {
+81     if (cp->sectionExists(name())) {
+82         DPRINTF(Checkpoint, "unserializing\n");
+83         unserialize(cp, name());
+84     } else {
+85         DPRINTF(Checkpoint, "no checkpoint section found\n");
+86     }
+87 }
+\end{DoxyCode}
+\hypertarget{classSimObject_adbcff144e5e199d332a1352af1798148}{
+\index{SimObject@{SimObject}!name@{name}}
+\index{name@{name}!SimObject@{SimObject}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}virtual const std::string name () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classSimObject_adbcff144e5e199d332a1352af1798148}
+
+
+\hyperlink{classSerializable_a2d319721a65496069642871a52e47056}{Serializable}を実装しています。
+
+\hyperlink{classSimpleTrace_a6490f765a824ced1cc94979609fe7e07}{SimpleTrace}で再定義されています。
+
+
+\begin{DoxyCode}
+108 { return params()->name; }
+\end{DoxyCode}
+\hypertarget{classSimObject_acd3c3feb78ae7a8f88fe0f110a718dff}{
+\index{SimObject@{SimObject}!params@{params}}
+\index{params@{params}!SimObject@{SimObject}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Params}$\ast$ params () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSimObject_acd3c3feb78ae7a8f88fe0f110a718dff}
+
+
+\hyperlink{classLinuxAlphaSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{LinuxAlphaSystem}, \hyperlink{classAlphaSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{AlphaSystem}, \hyperlink{classLinuxArmSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{LinuxArmSystem}, \hyperlink{classTrace_1_1ArmNativeTrace_acd3c3feb78ae7a8f88fe0f110a718dff}{ArmNativeTrace}, \hyperlink{classArmSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{ArmSystem}, \hyperlink{classArmISA_1_1TableWalker_acd3c3feb78ae7a8f88fe0f110a718dff}{TableWalker}, \hyperlink{classArmISA_1_1TLB_acd3c3feb78ae7a8f88fe0f110a718dff}{TLB}, \hyperlink{classMipsSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{MipsSystem}, \hyperlink{classMipsSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{MipsSystem}, \hyperlink{classSparcSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{SparcSystem}, \hyperlink{classX86ISA_1_1Interrupts_acd3c3feb78ae7a8f88fe0f110a718dff}{Interrupts}, \hyperlink{classX86ISA_1_1Walker_acd3c3feb78ae7a8f88fe0f110a718dff}{Walker}, \hyperlink{classX86System_acd3c3feb78ae7a8f88fe0f110a718dff}{X86System}, \hyperlink{classAlphaBackdoor_acd3c3feb78ae7a8f88fe0f110a718dff}{AlphaBackdoor}, \hyperlink{classTsunamiCChip_acd3c3feb78ae7a8f88fe0f110a718dff}{TsunamiCChip}, \hyperlink{classTsunamiIO_acd3c3feb78ae7a8f88fe0f110a718dff}{TsunamiIO}, \hyperlink{classTsunamiPChip_acd3c3feb78ae7a8f88fe0f110a718dff}{TsunamiPChip}, \hyperlink{classAmbaFake_acd3c3feb78ae7a8f88fe0f110a718dff}{AmbaFake}, \hyperlink{classBaseGic_ad80365b3b51c15f44416b1b835b23570}{BaseGic}, \hyperlink{classGenericTimer_acd3c3feb78ae7a8f88fe0f110a718dff}{GenericTimer}, \hyperlink{classPl390_acd3c3feb78ae7a8f88fe0f110a718dff}{Pl390}, \hyperlink{classHDLcd_acd3c3feb78ae7a8f88fe0f110a718dff}{HDLcd}, \hyperlink{classPl050_acd3c3feb78ae7a8f88fe0f110a718dff}{Pl050}, \hyperlink{classPl011_acd3c3feb78ae7a8f88fe0f110a718dff}{Pl011}, \hyperlink{classPl111_acd3c3feb78ae7a8f88fe0f110a718dff}{Pl111}, \hyperlink{classRealView_acd3c3feb78ae7a8f88fe0f110a718dff}{RealView}, \hyperlink{classPL031_acd3c3feb78ae7a8f88fe0f110a718dff}{PL031}, \hyperlink{classRealViewCtrl_acd3c3feb78ae7a8f88fe0f110a718dff}{RealViewCtrl}, \hyperlink{classCpuLocalTimer_acd3c3feb78ae7a8f88fe0f110a718dff}{CpuLocalTimer}, \hyperlink{classSp804_acd3c3feb78ae7a8f88fe0f110a718dff}{Sp804}, \hyperlink{classVGic_acd3c3feb78ae7a8f88fe0f110a718dff}{VGic}, \hyperlink{classBadDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{BadDevice}, \hyperlink{classCopyEngine_acd3c3feb78ae7a8f88fe0f110a718dff}{CopyEngine}, \hyperlink{classEtherBus_acd3c3feb78ae7a8f88fe0f110a718dff}{EtherBus}, \hyperlink{classEtherDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{EtherDevice}, \hyperlink{classEtherDevBase_a24c177ef5d1124c3ff3e68a7e53532cf}{EtherDevBase}, \hyperlink{classEtherLink_acd3c3feb78ae7a8f88fe0f110a718dff}{EtherLink}, \hyperlink{classEtherObject_acd3c3feb78ae7a8f88fe0f110a718dff}{EtherObject}, \hyperlink{classEtherTap_acd3c3feb78ae7a8f88fe0f110a718dff}{EtherTap}, \hyperlink{classIGbE_acd3c3feb78ae7a8f88fe0f110a718dff}{IGbE}, \hyperlink{classIdeController_acd3c3feb78ae7a8f88fe0f110a718dff}{IdeController}, \hyperlink{classPioDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{PioDevice}, \hyperlink{classBasicPioDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicPioDevice}, \hyperlink{classIsaFake_acd3c3feb78ae7a8f88fe0f110a718dff}{IsaFake}, \hyperlink{classMaltaCChip_acd3c3feb78ae7a8f88fe0f110a718dff}{MaltaCChip}, \hyperlink{classMaltaIO_acd3c3feb78ae7a8f88fe0f110a718dff}{MaltaIO}, \hyperlink{classMaltaPChip_acd3c3feb78ae7a8f88fe0f110a718dff}{MaltaPChip}, \hyperlink{classNSGigE_acd3c3feb78ae7a8f88fe0f110a718dff}{NSGigE}, \hyperlink{classPciConfigAll_acd3c3feb78ae7a8f88fe0f110a718dff}{PciConfigAll}, \hyperlink{classPciDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{PciDevice}, \hyperlink{classSinic_1_1Base_acd3c3feb78ae7a8f88fe0f110a718dff}{Base}, \hyperlink{classDumbTOD_acd3c3feb78ae7a8f88fe0f110a718dff}{DumbTOD}, \hyperlink{classIob_acd3c3feb78ae7a8f88fe0f110a718dff}{Iob}, \hyperlink{classMmDisk_acd3c3feb78ae7a8f88fe0f110a718dff}{MmDisk}, \hyperlink{classUart_acd3c3feb78ae7a8f88fe0f110a718dff}{Uart}, \hyperlink{classUart8250_acd3c3feb78ae7a8f88fe0f110a718dff}{Uart8250}, \hyperlink{classX86ISA_1_1I8042_acd3c3feb78ae7a8f88fe0f110a718dff}{I8042}, \hyperlink{classX86ISA_1_1I82094AA_acd3c3feb78ae7a8f88fe0f110a718dff}{I82094AA}, \hyperlink{classX86ISA_1_1I8237_acd3c3feb78ae7a8f88fe0f110a718dff}{I8237}, \hyperlink{classX86ISA_1_1I8254_acd3c3feb78ae7a8f88fe0f110a718dff}{I8254}, \hyperlink{classX86ISA_1_1I8259_acd3c3feb78ae7a8f88fe0f110a718dff}{I8259}, \hyperlink{classSouthBridge_acd3c3feb78ae7a8f88fe0f110a718dff}{SouthBridge}, \hyperlink{classX86ISA_1_1Speaker_acd3c3feb78ae7a8f88fe0f110a718dff}{Speaker}, \hyperlink{classAbstractMemory_acd3c3feb78ae7a8f88fe0f110a718dff}{AbstractMemory}, \hyperlink{classBasePrefetcher_acd3c3feb78ae7a8f88fe0f110a718dff}{BasePrefetcher}, \hyperlink{classCommMonitor_acd3c3feb78ae7a8f88fe0f110a718dff}{CommMonitor}, \hyperlink{classMemObject_acd3c3feb78ae7a8f88fe0f110a718dff}{MemObject}, \hyperlink{classBasicLink_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicLink}, \hyperlink{classBasicExtLink_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicExtLink}, \hyperlink{classBasicIntLink_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicIntLink}, \hyperlink{classBasicRouter_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicRouter}, \hyperlink{classFaultModel_acd3c3feb78ae7a8f88fe0f110a718dff}{FaultModel}, \hyperlink{classNetwork_acd3c3feb78ae7a8f88fe0f110a718dff}{Network}, \hyperlink{classSimpleExtLink_acd3c3feb78ae7a8f88fe0f110a718dff}{SimpleExtLink}, \hyperlink{classSimpleIntLink_acd3c3feb78ae7a8f88fe0f110a718dff}{SimpleIntLink}, \hyperlink{classAbstractController_acd3c3feb78ae7a8f88fe0f110a718dff}{AbstractController}, \hyperlink{classMemoryControl_acd3c3feb78ae7a8f88fe0f110a718dff}{MemoryControl}, \hyperlink{classRoot_acd3c3feb78ae7a8f88fe0f110a718dff}{Root}, と \hyperlink{classSystem_acd3c3feb78ae7a8f88fe0f110a718dff}{System}で再定義されています。
+
+
+\begin{DoxyCode}
+102 { return _params; }
+\end{DoxyCode}
+\hypertarget{classSimObject_aa58a8221691801138d5d9236b8c3e0fb}{
+\index{SimObject@{SimObject}!regProbeListeners@{regProbeListeners}}
+\index{regProbeListeners@{regProbeListeners}!SimObject@{SimObject}}
+\subsubsection[{regProbeListeners}]{\setlength{\rightskip}{0pt plus 5cm}void regProbeListeners ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_aa58a8221691801138d5d9236b8c3e0fb}
+\hyperlink{classRegister}{Register} probe listeners for this object.
+
+No probe listeners by default, so do nothing in base. 
+
+\hyperlink{classSimpleTrace_aa58a8221691801138d5d9236b8c3e0fb}{SimpleTrace}で再定義されています。
+
+
+\begin{DoxyCode}
+125 {
+126 }
+\end{DoxyCode}
+\hypertarget{classSimObject_aa2dab17a363fd4307274d579796adcf7}{
+\index{SimObject@{SimObject}!regProbePoints@{regProbePoints}}
+\index{regProbePoints@{regProbePoints}!SimObject@{SimObject}}
+\subsubsection[{regProbePoints}]{\setlength{\rightskip}{0pt plus 5cm}void regProbePoints ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_aa2dab17a363fd4307274d579796adcf7}
+\hyperlink{classRegister}{Register} probe points for this object.
+
+No probe points by default, so do nothing in base. 
+
+
+\begin{DoxyCode}
+117 {
+118 }
+\end{DoxyCode}
+\hypertarget{classSimObject_a4dc637449366fcdfc4e764cdf12d9b11}{
+\index{SimObject@{SimObject}!regStats@{regStats}}
+\index{regStats@{regStats}!SimObject@{SimObject}}
+\subsubsection[{regStats}]{\setlength{\rightskip}{0pt plus 5cm}void regStats ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_a4dc637449366fcdfc4e764cdf12d9b11}
+\hyperlink{classRegister}{Register} statistics for this object. 
+
+\hyperlink{classAlphaISA_1_1TLB_a4dc637449366fcdfc4e764cdf12d9b11}{TLB}, \hyperlink{classArmISA_1_1TLB_a4dc637449366fcdfc4e764cdf12d9b11}{TLB}, \hyperlink{classMipsISA_1_1TLB_a4dc637449366fcdfc4e764cdf12d9b11}{TLB}, \hyperlink{classMipsISA_1_1TLB_a4dc637449366fcdfc4e764cdf12d9b11}{TLB}, \hyperlink{classPowerISA_1_1TLB_a4dc637449366fcdfc4e764cdf12d9b11}{TLB}, \hyperlink{classBPredUnit_a4dc637449366fcdfc4e764cdf12d9b11}{BPredUnit}, \hyperlink{classMemTest_a4dc637449366fcdfc4e764cdf12d9b11}{MemTest}, \hyperlink{classTrafficGen_a4dc637449366fcdfc4e764cdf12d9b11}{TrafficGen}, \hyperlink{classCopyEngine_a4dc637449366fcdfc4e764cdf12d9b11}{CopyEngine}, \hyperlink{classEtherDevice_a4dc637449366fcdfc4e764cdf12d9b11}{EtherDevice}, \hyperlink{classIdeDisk_a4dc637449366fcdfc4e764cdf12d9b11}{IdeDisk}, \hyperlink{classSinic_1_1Device_a4dc637449366fcdfc4e764cdf12d9b11}{Device}, \hyperlink{classAbstractMemory_a4dc637449366fcdfc4e764cdf12d9b11}{AbstractMemory}, \hyperlink{classBaseBus_a4dc637449366fcdfc4e764cdf12d9b11}{BaseBus}, \hyperlink{classBaseCache_a4dc637449366fcdfc4e764cdf12d9b11}{BaseCache}, \hyperlink{classCache_a4dc637449366fcdfc4e764cdf12d9b11}{Cache$<$ TagStore $>$}, \hyperlink{classBasePrefetcher_a4dc637449366fcdfc4e764cdf12d9b11}{BasePrefetcher}, \hyperlink{classBaseTags_a4dc637449366fcdfc4e764cdf12d9b11}{BaseTags}, \hyperlink{classFALRU_a4dc637449366fcdfc4e764cdf12d9b11}{FALRU}, \hyperlink{classCoherentBus_a4dc637449366fcdfc4e764cdf12d9b11}{CoherentBus}, \hyperlink{classCommMonitor_a4dc637449366fcdfc4e764cdf12d9b11}{CommMonitor}, \hyperlink{classDRAMCtrl_a4dc637449366fcdfc4e764cdf12d9b11}{DRAMCtrl}, \hyperlink{classNoncoherentBus_a4dc637449366fcdfc4e764cdf12d9b11}{NoncoherentBus}, \hyperlink{classBaseGarnetNetwork_a4dc637449366fcdfc4e764cdf12d9b11}{BaseGarnetNetwork}, \hyperlink{classGarnetNetwork__d_a4dc637449366fcdfc4e764cdf12d9b11}{GarnetNetwork\_\-d}, \hyperlink{classGarnetNetwork_a4dc637449366fcdfc4e764cdf12d9b11}{GarnetNetwork}, \hyperlink{classSimpleNetwork_a4dc637449366fcdfc4e764cdf12d9b11}{SimpleNetwork}, \hyperlink{classSwitch_a4dc637449366fcdfc4e764cdf12d9b11}{Switch}, \hyperlink{classAbstractController_a4dc637449366fcdfc4e764cdf12d9b11}{AbstractController}, \hyperlink{classPrefetcher_a4dc637449366fcdfc4e764cdf12d9b11}{Prefetcher}, \hyperlink{classCacheMemory_a4dc637449366fcdfc4e764cdf12d9b11}{CacheMemory}, \hyperlink{classDirectoryMemory_a4dc637449366fcdfc4e764cdf12d9b11}{DirectoryMemory}, \hyperlink{classMemoryControl_ac1739a9be0fbd5d96cf441cd3b2c1c78}{MemoryControl}, \hyperlink{classRubyMemoryControl_a4dc637449366fcdfc4e764cdf12d9b11}{RubyMemoryControl}, \hyperlink{classSequencer_a4dc637449366fcdfc4e764cdf12d9b11}{Sequencer}, \hyperlink{classRubySystem_a4dc637449366fcdfc4e764cdf12d9b11}{RubySystem}, \hyperlink{classClockDomain_a4dc637449366fcdfc4e764cdf12d9b11}{ClockDomain}, \hyperlink{classProcess_a4dc637449366fcdfc4e764cdf12d9b11}{Process}, \hyperlink{classSystem_a4dc637449366fcdfc4e764cdf12d9b11}{System}, と \hyperlink{classVoltageDomain_a4dc637449366fcdfc4e764cdf12d9b11}{VoltageDomain}で再定義されています。
+
+
+\begin{DoxyCode}
+104 {
+105 }
+\end{DoxyCode}
+\hypertarget{classSimObject_a65880e61108132689a1bd769b9187fb7}{
+\index{SimObject@{SimObject}!resetStats@{resetStats}}
+\index{resetStats@{resetStats}!SimObject@{SimObject}}
+\subsubsection[{resetStats}]{\setlength{\rightskip}{0pt plus 5cm}void resetStats ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_a65880e61108132689a1bd769b9187fb7}
+Reset statistics associated with this object. 
+
+\hyperlink{classSinic_1_1Device_a65880e61108132689a1bd769b9187fb7}{Device}, \hyperlink{classSwitch_a65880e61108132689a1bd769b9187fb7}{Switch}, \hyperlink{classAbstractController_a9820f96c5343e42ad3fcbc97b83f59d5}{AbstractController}, \hyperlink{classSequencer_a65880e61108132689a1bd769b9187fb7}{Sequencer}, と \hyperlink{classRubySystem_a65880e61108132689a1bd769b9187fb7}{RubySystem}で再定義されています。
+
+
+\begin{DoxyCode}
+109 {
+110 }
+\end{DoxyCode}
+\hypertarget{classSimObject_acee9d39d800677e32cf1856780ff9761}{
+\index{SimObject@{SimObject}!serializeAll@{serializeAll}}
+\index{serializeAll@{serializeAll}!SimObject@{SimObject}}
+\subsubsection[{serializeAll}]{\setlength{\rightskip}{0pt plus 5cm}void serializeAll (std::ostream \& {\em os})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classSimObject_acee9d39d800677e32cf1856780ff9761}
+Serialize all SimObjects in the system. 
+
+
+\begin{DoxyCode}
+139 {
+140     SimObjectList::reverse_iterator ri = simObjectList.rbegin();
+141     SimObjectList::reverse_iterator rend = simObjectList.rend();
+142 
+143     for (; ri != rend; ++ri) {
+144         SimObject *obj = *ri;
+145         obj->nameOut(os);
+146         obj->serialize(os);
+147    }
+148 }
+\end{DoxyCode}
+\hypertarget{classSimObject_aecc7d8debf54990ffeaaed5bac7d7d81}{
+\index{SimObject@{SimObject}!startup@{startup}}
+\index{startup@{startup}!SimObject@{SimObject}}
+\subsubsection[{startup}]{\setlength{\rightskip}{0pt plus 5cm}void startup ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSimObject_aecc7d8debf54990ffeaaed5bac7d7d81}
+\hyperlink{classSimObject_aecc7d8debf54990ffeaaed5bac7d7d81}{startup()} is the final initialization call before simulation. All state is initialized (including unserialized state, if any, such as the \hyperlink{statistics_8hh_a7acdccbf0d35ce0c159c0cdd36371b22}{curTick()} value), so this is the appropriate place to schedule initial event(s) for objects that need them. 
+
+\hyperlink{classAlphaSystem_aecc7d8debf54990ffeaaed5bac7d7d81}{AlphaSystem}, \hyperlink{classLinuxArmSystem_aecc7d8debf54990ffeaaed5bac7d7d81}{LinuxArmSystem}, \hyperlink{classAlphaBackdoor_aecc7d8debf54990ffeaaed5bac7d7d81}{AlphaBackdoor}, \hyperlink{classCommMonitor_aecc7d8debf54990ffeaaed5bac7d7d81}{CommMonitor}, \hyperlink{classDRAMCtrl_aecc7d8debf54990ffeaaed5bac7d7d81}{DRAMCtrl}, \hyperlink{classDRAMSim2_aecc7d8debf54990ffeaaed5bac7d7d81}{DRAMSim2}, と \hyperlink{classRubySystem_aecc7d8debf54990ffeaaed5bac7d7d81}{RubySystem}で再定義されています。
+
+
+\begin{DoxyCode}
+96 {
+97 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classSimObject_acaf6024ae9dda44bfb1c67e05ad70aef}{
+\index{SimObject@{SimObject}!\_\-params@{\_\-params}}
+\index{\_\-params@{\_\-params}!SimObject@{SimObject}}
+\subsubsection[{\_\-params}]{\setlength{\rightskip}{0pt plus 5cm}const SimObjectParams$\ast$ {\bf \_\-params}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classSimObject_acaf6024ae9dda44bfb1c67e05ad70aef}
+Cached copy of the object parameters. 
+
+\hyperlink{classSystem_afb9ae78c3e2cd51a280162491c99366c}{System}で再定義されています。\hypertarget{classSimObject_a91f0eaabebee1e88aa1c502f3e44c9d1}{
+\index{SimObject@{SimObject}!probeManager@{probeManager}}
+\index{probeManager@{probeManager}!SimObject@{SimObject}}
+\subsubsection[{probeManager}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ProbeManager}$\ast$ {\bf probeManager}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSimObject_a91f0eaabebee1e88aa1c502f3e44c9d1}
+Manager coordinates hooking up probe points with listeners. \hypertarget{classSimObject_a7ff88c7f8734c4fdbb417055e69001c0}{
+\index{SimObject@{SimObject}!simObjectList@{simObjectList}}
+\index{simObjectList@{simObjectList}!SimObject@{SimObject}}
+\subsubsection[{simObjectList}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject::SimObjectList} {\bf simObjectList}\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classSimObject_a7ff88c7f8734c4fdbb417055e69001c0}
+List of all instantiated simulation objects. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+sim/\hyperlink{sim__object_8hh}{sim\_\-object.hh}\item 
+sim/\hyperlink{sim__object_8cc}{sim\_\-object.cc}\end{DoxyCompactItemize}

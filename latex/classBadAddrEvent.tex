@@ -1,0 +1,82 @@
+\hypertarget{classBadAddrEvent}{
+\section{クラス BadAddrEvent}
+\label{classBadAddrEvent}\index{BadAddrEvent@{BadAddrEvent}}
+}
+
+
+{\ttfamily \#include $<$tru64\_\-events.hh$>$}BadAddrEventに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classBadAddrEvent}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBadAddrEvent_a6fa14ad6f10a0146f46120b72c5cd500}{BadAddrEvent} (\hyperlink{classPCEventQueue}{PCEventQueue} $\ast$q, const std::string \&desc, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr)
+\item 
+virtual void \hyperlink{classBadAddrEvent_ad66a9d5ec7cfe597b848a17c0df5cc28}{process} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classBadAddrEvent_a6fa14ad6f10a0146f46120b72c5cd500}{
+\index{BadAddrEvent@{BadAddrEvent}!BadAddrEvent@{BadAddrEvent}}
+\index{BadAddrEvent@{BadAddrEvent}!BadAddrEvent@{BadAddrEvent}}
+\subsubsection[{BadAddrEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BadAddrEvent} ({\bf PCEventQueue} $\ast$ {\em q}, \/  const std::string \& {\em desc}, \/  {\bf Addr} {\em addr})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classBadAddrEvent_a6fa14ad6f10a0146f46120b72c5cd500}
+
+
+
+\begin{DoxyCode}
+46         : SkipFuncEvent(q, desc, addr) {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classBadAddrEvent_ad66a9d5ec7cfe597b848a17c0df5cc28}{
+\index{BadAddrEvent@{BadAddrEvent}!process@{process}}
+\index{process@{process}!BadAddrEvent@{BadAddrEvent}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}void process ({\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classBadAddrEvent_ad66a9d5ec7cfe597b848a17c0df5cc28}
+
+
+\hyperlink{classSkipFuncEvent_ad66a9d5ec7cfe597b848a17c0df5cc28}{SkipFuncEvent}を再定義しています。
+
+
+\begin{DoxyCode}
+53 {
+54     // The following gross hack is the equivalent function to the
+55     // annotation for vmunix::badaddr in:
+56     // simos/simulation/apps/tcl/osf/tlaser.tcl
+57 
+58     uint64_t a0 = tc->readIntReg(16);
+59 
+60     AddrRangeIter iter;
+61     bool found = false;
+62 
+63     MasterPort &dataPort = tc->getCpuPtr()->getDataPort();
+64 
+65     // get the address ranges of the connected slave port
+66     AddrRangeList resp = dataPort.getAddrRanges();
+67     for (iter = resp.begin(); iter != resp.end(); iter++) {
+68         if (iter->contains(K0Seg2Phys(a0) & PAddrImplMask))
+69             found = true;
+70     }
+71 
+72     if (!IsK0Seg(a0) || found ) {
+73 
+74         DPRINTF(BADADDR, "badaddr arg=%#x bad\n", a0);
+75         tc->setIntReg(ReturnValueReg, 0x1);
+76         SkipFuncEvent::process(tc);
+77     } else {
+78         DPRINTF(BADADDR, "badaddr arg=%#x good\n", a0);
+79     }
+80 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+kern/tru64/\hyperlink{tru64__events_8hh}{tru64\_\-events.hh}\item 
+kern/tru64/\hyperlink{tru64__events_8cc}{tru64\_\-events.cc}\end{DoxyCompactItemize}

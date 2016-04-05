@@ -1,0 +1,272 @@
+\hypertarget{classDefaultBTB}{
+\section{クラス DefaultBTB}
+\label{classDefaultBTB}\index{DefaultBTB@{DefaultBTB}}
+}
+
+
+{\ttfamily \#include $<$btb.hh$>$}\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structDefaultBTB_1_1BTBEntry}{BTBEntry}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDefaultBTB_aa68341d7ac8d111892e8d8060e65000c}{DefaultBTB} (unsigned \hyperlink{classDefaultBTB_a325de474a9f6652329339d9fc2ea09c0}{numEntries}, unsigned \hyperlink{classDefaultBTB_a451757836c6c786aee898c2af4a278ae}{tagBits}, unsigned \hyperlink{classDefaultBTB_a8ad2ee60a6143561753205840ad144e7}{instShiftAmt})
+\item 
+void \hyperlink{classDefaultBTB_ad20897c5c8bd47f5d4005989bead0e55}{reset} ()
+\item 
+TheISA::PCState \hyperlink{classDefaultBTB_a9d526c907896ac36efb2c884420b0ae9}{lookup} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} instPC, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+bool \hyperlink{classDefaultBTB_aadb1ec726de323616b1d961832dc48cd}{valid} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} instPC, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classDefaultBTB_a57a507feaef6242264a7fc6fa8e15bcd}{update} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} instPC, const TheISA::PCState \&targetPC, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+unsigned \hyperlink{classDefaultBTB_a8b650cb1fd2b3463eacf1966bafd2140}{getIndex} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} instPC)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classDefaultBTB_a16700c6e462c3dc0d378192ebd4818e1}{getTag} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} instPC)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{structDefaultBTB_1_1BTBEntry}{BTBEntry} $>$ \hyperlink{classDefaultBTB_a8c05f4b6036b078da2303da4defcae7b}{btb}
+\item 
+unsigned \hyperlink{classDefaultBTB_a325de474a9f6652329339d9fc2ea09c0}{numEntries}
+\item 
+unsigned \hyperlink{classDefaultBTB_ad0d7752cbf4c876b1ef43c8a15509beb}{idxMask}
+\item 
+unsigned \hyperlink{classDefaultBTB_a451757836c6c786aee898c2af4a278ae}{tagBits}
+\item 
+unsigned \hyperlink{classDefaultBTB_a94589d3da2ffd10f97c00aab77a3a7cb}{tagMask}
+\item 
+unsigned \hyperlink{classDefaultBTB_a8ad2ee60a6143561753205840ad144e7}{instShiftAmt}
+\item 
+unsigned \hyperlink{classDefaultBTB_a44f1c7028775ed7ca93312fd8ec04f22}{tagShiftAmt}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classDefaultBTB_aa68341d7ac8d111892e8d8060e65000c}{
+\index{DefaultBTB@{DefaultBTB}!DefaultBTB@{DefaultBTB}}
+\index{DefaultBTB@{DefaultBTB}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{DefaultBTB}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DefaultBTB} (unsigned {\em numEntries}, \/  unsigned {\em tagBits}, \/  unsigned {\em instShiftAmt})}}
+\label{classDefaultBTB_aa68341d7ac8d111892e8d8060e65000c}
+Creates a BTB with the given number of entries, number of bits per tag, and instruction offset amount. 
+\begin{DoxyParams}{引数}
+\item[{\em numEntries}]Number of entries for the BTB. \item[{\em tagBits}]Number of bits for each tag in the BTB. \item[{\em instShiftAmt}]Offset amount for instructions to ignore alignment. \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+39     : numEntries(_numEntries),
+40       tagBits(_tagBits),
+41       instShiftAmt(_instShiftAmt)
+42 {
+43     DPRINTF(Fetch, "BTB: Creating BTB object.\n");
+44 
+45     if (!isPowerOf2(numEntries)) {
+46         fatal("BTB entries is not a power of 2!");
+47     }
+48 
+49     btb.resize(numEntries);
+50 
+51     for (unsigned i = 0; i < numEntries; ++i) {
+52         btb[i].valid = false;
+53     }
+54 
+55     idxMask = numEntries - 1;
+56 
+57     tagMask = (1 << tagBits) - 1;
+58 
+59     tagShiftAmt = instShiftAmt + floorLog2(numEntries);
+60 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classDefaultBTB_a8b650cb1fd2b3463eacf1966bafd2140}{
+\index{DefaultBTB@{DefaultBTB}!getIndex@{getIndex}}
+\index{getIndex@{getIndex}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{getIndex}]{\setlength{\rightskip}{0pt plus 5cm}unsigned getIndex ({\bf Addr} {\em instPC})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classDefaultBTB_a8b650cb1fd2b3463eacf1966bafd2140}
+Returns the index into the BTB, based on the branch's PC. 
+\begin{DoxyParams}{引数}
+\item[{\em inst\_\-PC}]The branch to look up. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Returns the index into the BTB. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+73 {
+74     // Need to shift PC over by the word offset.
+75     return (instPC >> instShiftAmt) & idxMask;
+76 }
+\end{DoxyCode}
+\hypertarget{classDefaultBTB_a16700c6e462c3dc0d378192ebd4818e1}{
+\index{DefaultBTB@{DefaultBTB}!getTag@{getTag}}
+\index{getTag@{getTag}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{getTag}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} getTag ({\bf Addr} {\em instPC})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classDefaultBTB_a16700c6e462c3dc0d378192ebd4818e1}
+Returns the tag bits of a given address. 
+\begin{DoxyParams}{引数}
+\item[{\em inst\_\-PC}]The branch's address. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Returns the tag bits. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+81 {
+82     return (instPC >> tagShiftAmt) & tagMask;
+83 }
+\end{DoxyCode}
+\hypertarget{classDefaultBTB_a9d526c907896ac36efb2c884420b0ae9}{
+\index{DefaultBTB@{DefaultBTB}!lookup@{lookup}}
+\index{lookup@{lookup}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{lookup}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::PCState lookup ({\bf Addr} {\em instPC}, \/  {\bf ThreadID} {\em tid})}}
+\label{classDefaultBTB_a9d526c907896ac36efb2c884420b0ae9}
+Looks up an address in the BTB. Must call \hyperlink{classDefaultBTB_aadb1ec726de323616b1d961832dc48cd}{valid()} first on the address. 
+\begin{DoxyParams}{引数}
+\item[{\em inst\_\-PC}]The address of the branch to look up. \item[{\em tid}]The thread id. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Returns the target of the branch. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+108 {
+109     unsigned btb_idx = getIndex(instPC);
+110 
+111     Addr inst_tag = getTag(instPC);
+112 
+113     assert(btb_idx < numEntries);
+114 
+115     if (btb[btb_idx].valid
+116         && inst_tag == btb[btb_idx].tag
+117         && btb[btb_idx].tid == tid) {
+118         return btb[btb_idx].target;
+119     } else {
+120         return 0;
+121     }
+122 }
+\end{DoxyCode}
+\hypertarget{classDefaultBTB_ad20897c5c8bd47f5d4005989bead0e55}{
+\index{DefaultBTB@{DefaultBTB}!reset@{reset}}
+\index{reset@{reset}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}void reset ()}}
+\label{classDefaultBTB_ad20897c5c8bd47f5d4005989bead0e55}
+
+
+
+\begin{DoxyCode}
+64 {
+65     for (unsigned i = 0; i < numEntries; ++i) {
+66         btb[i].valid = false;
+67     }
+68 }
+\end{DoxyCode}
+\hypertarget{classDefaultBTB_a57a507feaef6242264a7fc6fa8e15bcd}{
+\index{DefaultBTB@{DefaultBTB}!update@{update}}
+\index{update@{update}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{update}]{\setlength{\rightskip}{0pt plus 5cm}void update ({\bf Addr} {\em instPC}, \/  const TheISA::PCState \& {\em targetPC}, \/  {\bf ThreadID} {\em tid})}}
+\label{classDefaultBTB_a57a507feaef6242264a7fc6fa8e15bcd}
+Updates the BTB with the target of a branch. 
+\begin{DoxyParams}{引数}
+\item[{\em inst\_\-PC}]The address of the branch being updated. \item[{\em target\_\-PC}]The target address of the branch. \item[{\em tid}]The thread id. \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+126 {
+127     unsigned btb_idx = getIndex(instPC);
+128 
+129     assert(btb_idx < numEntries);
+130 
+131     btb[btb_idx].tid = tid;
+132     btb[btb_idx].valid = true;
+133     btb[btb_idx].target = target;
+134     btb[btb_idx].tag = getTag(instPC);
+135 }
+\end{DoxyCode}
+\hypertarget{classDefaultBTB_aadb1ec726de323616b1d961832dc48cd}{
+\index{DefaultBTB@{DefaultBTB}!valid@{valid}}
+\index{valid@{valid}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{valid}]{\setlength{\rightskip}{0pt plus 5cm}bool valid ({\bf Addr} {\em instPC}, \/  {\bf ThreadID} {\em tid})}}
+\label{classDefaultBTB_aadb1ec726de323616b1d961832dc48cd}
+Checks if a branch is in the BTB. 
+\begin{DoxyParams}{引数}
+\item[{\em inst\_\-PC}]The address of the branch to look up. \item[{\em tid}]The thread id. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Whether or not the branch exists in the BTB. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+87 {
+88     unsigned btb_idx = getIndex(instPC);
+89 
+90     Addr inst_tag = getTag(instPC);
+91 
+92     assert(btb_idx < numEntries);
+93 
+94     if (btb[btb_idx].valid
+95         && inst_tag == btb[btb_idx].tag
+96         && btb[btb_idx].tid == tid) {
+97         return true;
+98     } else {
+99         return false;
+100     }
+101 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classDefaultBTB_a8c05f4b6036b078da2303da4defcae7b}{
+\index{DefaultBTB@{DefaultBTB}!btb@{btb}}
+\index{btb@{btb}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{btb}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf BTBEntry}$>$ {\bf btb}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDefaultBTB_a8c05f4b6036b078da2303da4defcae7b}
+The actual BTB. \hypertarget{classDefaultBTB_ad0d7752cbf4c876b1ef43c8a15509beb}{
+\index{DefaultBTB@{DefaultBTB}!idxMask@{idxMask}}
+\index{idxMask@{idxMask}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{idxMask}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf idxMask}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDefaultBTB_ad0d7752cbf4c876b1ef43c8a15509beb}
+The index mask. \hypertarget{classDefaultBTB_a8ad2ee60a6143561753205840ad144e7}{
+\index{DefaultBTB@{DefaultBTB}!instShiftAmt@{instShiftAmt}}
+\index{instShiftAmt@{instShiftAmt}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{instShiftAmt}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf instShiftAmt}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDefaultBTB_a8ad2ee60a6143561753205840ad144e7}
+Number of bits to shift PC when calculating index. \hypertarget{classDefaultBTB_a325de474a9f6652329339d9fc2ea09c0}{
+\index{DefaultBTB@{DefaultBTB}!numEntries@{numEntries}}
+\index{numEntries@{numEntries}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{numEntries}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf numEntries}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDefaultBTB_a325de474a9f6652329339d9fc2ea09c0}
+The number of entries in the BTB. \hypertarget{classDefaultBTB_a451757836c6c786aee898c2af4a278ae}{
+\index{DefaultBTB@{DefaultBTB}!tagBits@{tagBits}}
+\index{tagBits@{tagBits}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{tagBits}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf tagBits}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDefaultBTB_a451757836c6c786aee898c2af4a278ae}
+The number of tag bits per entry. \hypertarget{classDefaultBTB_a94589d3da2ffd10f97c00aab77a3a7cb}{
+\index{DefaultBTB@{DefaultBTB}!tagMask@{tagMask}}
+\index{tagMask@{tagMask}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{tagMask}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf tagMask}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDefaultBTB_a94589d3da2ffd10f97c00aab77a3a7cb}
+The tag mask. \hypertarget{classDefaultBTB_a44f1c7028775ed7ca93312fd8ec04f22}{
+\index{DefaultBTB@{DefaultBTB}!tagShiftAmt@{tagShiftAmt}}
+\index{tagShiftAmt@{tagShiftAmt}!DefaultBTB@{DefaultBTB}}
+\subsubsection[{tagShiftAmt}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf tagShiftAmt}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDefaultBTB_a44f1c7028775ed7ca93312fd8ec04f22}
+Number of bits to shift PC when calculating tag. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/pred/\hyperlink{btb_8hh}{btb.hh}\item 
+cpu/pred/\hyperlink{btb_8cc}{btb.cc}\end{DoxyCompactItemize}

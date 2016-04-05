@@ -1,0 +1,111 @@
+\hypertarget{classRubyPort_1_1MemMasterPort}{
+\section{クラス MemMasterPort}
+\label{classRubyPort_1_1MemMasterPort}\index{RubyPort::MemMasterPort@{RubyPort::MemMasterPort}}
+}
+
+
+{\ttfamily \#include $<$RubyPort.hh$>$}MemMasterPortに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classRubyPort_1_1MemMasterPort}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classRubyPort_1_1MemMasterPort_a9a3e2dce04377a6628c5a4ae457d6fdc}{MemMasterPort} (const std::string \&\_\-name, \hyperlink{classRubyPort}{RubyPort} $\ast$\_\-port)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classRubyPort_1_1MemMasterPort_a482dba5588f4bee43e498875a61e5e0b}{recvTimingResp} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+void \hyperlink{classRubyPort_1_1MemMasterPort_aecf310a01b533ae8700eccac2cf20480}{recvRangeChange} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMasterPacketQueue}{MasterPacketQueue} \hyperlink{classRubyPort_1_1MemMasterPort_aae3ed0c3ef8ff189915e74fe401279b5}{queue}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classRubyPort_1_1MemMasterPort_a9a3e2dce04377a6628c5a4ae457d6fdc}{
+\index{RubyPort::MemMasterPort@{RubyPort::MemMasterPort}!MemMasterPort@{MemMasterPort}}
+\index{MemMasterPort@{MemMasterPort}!RubyPort::MemMasterPort@{RubyPort::MemMasterPort}}
+\subsubsection[{MemMasterPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MemMasterPort} (const std::string \& {\em \_\-name}, \/  {\bf RubyPort} $\ast$ {\em \_\-port})}}
+\label{classRubyPort_1_1MemMasterPort_a9a3e2dce04377a6628c5a4ae457d6fdc}
+
+
+
+\begin{DoxyCode}
+151     : QueuedMasterPort(_name, _port, queue), queue(*_port, *this)
+152 {
+153     DPRINTF(RubyPort, "Created master memport on ruby sequencer %s\n", _name);
+154 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classRubyPort_1_1MemMasterPort_aecf310a01b533ae8700eccac2cf20480}{
+\index{RubyPort::MemMasterPort@{RubyPort::MemMasterPort}!recvRangeChange@{recvRangeChange}}
+\index{recvRangeChange@{recvRangeChange}!RubyPort::MemMasterPort@{RubyPort::MemMasterPort}}
+\subsubsection[{recvRangeChange}]{\setlength{\rightskip}{0pt plus 5cm}void recvRangeChange ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected, virtual\mbox{]}}}}
+\label{classRubyPort_1_1MemMasterPort_aecf310a01b533ae8700eccac2cf20480}
+Called to receive an address range change from the peer slave port. The default implementation ignores the change and does nothing. Override this function in a derived class if the owner needs to be aware of the address ranges, e.g. in an interconnect component like a bus. 
+
+\hyperlink{classMasterPort_af60d9c2c17fb4c9ebc5384a7e0c9f289}{MasterPort}を再定義しています。
+
+
+\begin{DoxyCode}
+70 {}
+\end{DoxyCode}
+\hypertarget{classRubyPort_1_1MemMasterPort_a482dba5588f4bee43e498875a61e5e0b}{
+\index{RubyPort::MemMasterPort@{RubyPort::MemMasterPort}!recvTimingResp@{recvTimingResp}}
+\index{recvTimingResp@{recvTimingResp}!RubyPort::MemMasterPort@{RubyPort::MemMasterPort}}
+\subsubsection[{recvTimingResp}]{\setlength{\rightskip}{0pt plus 5cm}bool recvTimingResp ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classRubyPort_1_1MemMasterPort_a482dba5588f4bee43e498875a61e5e0b}
+Receive a timing response from the slave port. 
+
+\hyperlink{classMasterPort_abd323548d6c93f8b0543f1fe3a86ca35}{MasterPort}を実装しています。
+
+
+\begin{DoxyCode}
+177 {
+178     // got a response from a device
+179     assert(pkt->isResponse());
+180 
+181     // In FS mode, ruby memory will receive pio responses from devices
+182     // and it must forward these responses back to the particular CPU.
+183     DPRINTF(RubyPort,  "Pio response for address %#x, going to %d\n",
+184             pkt->getAddr(), pkt->getDest());
+185 
+186     // First we must retrieve the request port from the sender State
+187     RubyPort::SenderState *senderState =
+188         safe_cast<RubyPort::SenderState *>(pkt->popSenderState());
+189     MemSlavePort *port = senderState->port;
+190     assert(port != NULL);
+191     delete senderState;
+192 
+193     // attempt to send the response in the next cycle
+194     port->schedTimingResp(pkt, curTick() + g_system_ptr->clockPeriod());
+195 
+196     return true;
+197 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classRubyPort_1_1MemMasterPort_aae3ed0c3ef8ff189915e74fe401279b5}{
+\index{RubyPort::MemMasterPort@{RubyPort::MemMasterPort}!queue@{queue}}
+\index{queue@{queue}!RubyPort::MemMasterPort@{RubyPort::MemMasterPort}}
+\subsubsection[{queue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MasterPacketQueue} {\bf queue}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classRubyPort_1_1MemMasterPort_aae3ed0c3ef8ff189915e74fe401279b5}
+\hyperlink{classPacket}{Packet} queue used to store outgoing requests and responses. 
+
+\hyperlink{classQueuedMasterPort_ae4e2ec83c21e5a331cecc31d84b2dbb7}{QueuedMasterPort}を再定義しています。
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/system/\hyperlink{RubyPort_8hh}{RubyPort.hh}\item 
+mem/ruby/system/\hyperlink{RubyPort_8cc}{RubyPort.cc}\end{DoxyCompactItemize}

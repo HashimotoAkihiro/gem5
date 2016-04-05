@@ -1,0 +1,313 @@
+\hypertarget{classCacheRecorder}{
+\section{クラス CacheRecorder}
+\label{classCacheRecorder}\index{CacheRecorder@{CacheRecorder}}
+}
+
+
+{\ttfamily \#include $<$CacheRecorder.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCacheRecorder_aa673c9e5d414051444f039a905c2ae23}{CacheRecorder} ()
+\item 
+\hyperlink{classCacheRecorder_a68f3dcf17846371633e1febffe1d9f59}{$\sim$CacheRecorder} ()
+\item 
+\hyperlink{classCacheRecorder_a4f7b56431467eb96301939488f742090}{CacheRecorder} (uint8\_\-t $\ast$uncompressed\_\-trace, uint64\_\-t uncompressed\_\-trace\_\-size, \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classSequencer}{Sequencer} $\ast$ $>$ \&SequencerMap, uint64\_\-t block\_\-size\_\-bytes)
+\item 
+void \hyperlink{classCacheRecorder_ae272072fe83d29085b21b133b1c9cd68}{addRecord} (int cntrl, const \hyperlink{TypeDefines_8hh_a7901e1a365850c5ff38ec6e12b6b9ffc}{physical\_\-address\_\-t} data\_\-addr, const \hyperlink{TypeDefines_8hh_a7901e1a365850c5ff38ec6e12b6b9ffc}{physical\_\-address\_\-t} pc\_\-addr, RubyRequestType type, \hyperlink{classTime}{Time} time, \hyperlink{classDataBlock}{DataBlock} \&data)
+\item 
+\hyperlink{TypeDefines_8hh_a29940ae63ec06c9998bba873e25407ad}{uint64} \hyperlink{classCacheRecorder_a6ae226d7f41b789f69be6b38862f9f60}{aggregateRecords} (uint8\_\-t $\ast$$\ast$data, \hyperlink{TypeDefines_8hh_a29940ae63ec06c9998bba873e25407ad}{uint64} size)
+\item 
+void \hyperlink{classCacheRecorder_a919f5c212476d98932496ef3327cf4e6}{enqueueNextFlushRequest} ()
+\item 
+void \hyperlink{classCacheRecorder_add70752975809e80cb192a2826b97087}{enqueueNextFetchRequest} ()
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCacheRecorder_af47a811c6378316ead000ba30b045f1d}{CacheRecorder} (const \hyperlink{classCacheRecorder}{CacheRecorder} \&obj)
+\item 
+\hyperlink{classCacheRecorder}{CacheRecorder} \& \hyperlink{classCacheRecorder_a91200370312dc9051e23bd44afafd41f}{operator=} (const \hyperlink{classCacheRecorder}{CacheRecorder} \&obj)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classTraceRecord}{TraceRecord} $\ast$ $>$ \hyperlink{classCacheRecorder_adeb49f912155613a3c1d3c309e061ac6}{m\_\-records}
+\item 
+uint8\_\-t $\ast$ \hyperlink{classCacheRecorder_adc6ca5282f5cfbc266e2474aa9e2482a}{m\_\-uncompressed\_\-trace}
+\item 
+uint64\_\-t \hyperlink{classCacheRecorder_abcd8159fa39387a7fd790671b1d289c0}{m\_\-uncompressed\_\-trace\_\-size}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classSequencer}{Sequencer} $\ast$ $>$ \hyperlink{classCacheRecorder_aa0248d60005113d99eafe0872de03d10}{m\_\-seq\_\-map}
+\item 
+uint64\_\-t \hyperlink{classCacheRecorder_af866ec1fe37d03f2d8349e05521514d1}{m\_\-bytes\_\-read}
+\item 
+uint64\_\-t \hyperlink{classCacheRecorder_a59c4e20378fd85e0437e8a9a5bcf140b}{m\_\-records\_\-read}
+\item 
+uint64\_\-t \hyperlink{classCacheRecorder_af160e7c9a16e7d4534fd53482f7df86b}{m\_\-records\_\-flushed}
+\item 
+uint64\_\-t \hyperlink{classCacheRecorder_ab7f8c478cbc01ff7258e74be8b395b4f}{m\_\-block\_\-size\_\-bytes}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCacheRecorder_aa673c9e5d414051444f039a905c2ae23}{
+\index{CacheRecorder@{CacheRecorder}!CacheRecorder@{CacheRecorder}}
+\index{CacheRecorder@{CacheRecorder}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{CacheRecorder}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CacheRecorder} ()}}
+\label{classCacheRecorder_aa673c9e5d414051444f039a905c2ae23}
+
+
+
+\begin{DoxyCode}
+46     : m_uncompressed_trace(NULL),
+47       m_uncompressed_trace_size(0),
+48       m_block_size_bytes(RubySystem::getBlockSizeBytes())
+49 {
+50 }
+\end{DoxyCode}
+\hypertarget{classCacheRecorder_a68f3dcf17846371633e1febffe1d9f59}{
+\index{CacheRecorder@{CacheRecorder}!$\sim$CacheRecorder@{$\sim$CacheRecorder}}
+\index{$\sim$CacheRecorder@{$\sim$CacheRecorder}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{$\sim$CacheRecorder}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf CacheRecorder} ()}}
+\label{classCacheRecorder_a68f3dcf17846371633e1febffe1d9f59}
+
+
+
+\begin{DoxyCode}
+73 {
+74     if (m_uncompressed_trace != NULL) {
+75         delete [] m_uncompressed_trace;
+76         m_uncompressed_trace = NULL;
+77     }
+78     m_seq_map.clear();
+79 }
+\end{DoxyCode}
+\hypertarget{classCacheRecorder_a4f7b56431467eb96301939488f742090}{
+\index{CacheRecorder@{CacheRecorder}!CacheRecorder@{CacheRecorder}}
+\index{CacheRecorder@{CacheRecorder}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{CacheRecorder}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CacheRecorder} (uint8\_\-t $\ast$ {\em uncompressed\_\-trace}, \/  uint64\_\-t {\em uncompressed\_\-trace\_\-size}, \/  {\bf std::vector}$<$ {\bf Sequencer} $\ast$ $>$ \& {\em SequencerMap}, \/  uint64\_\-t {\em block\_\-size\_\-bytes})}}
+\label{classCacheRecorder_a4f7b56431467eb96301939488f742090}
+
+
+
+\begin{DoxyCode}
+56     : m_uncompressed_trace(uncompressed_trace),
+57       m_uncompressed_trace_size(uncompressed_trace_size),
+58       m_seq_map(seq_map),  m_bytes_read(0), m_records_read(0),
+59       m_records_flushed(0), m_block_size_bytes(block_size_bytes)
+60 {
+61     if (m_uncompressed_trace != NULL) {
+62         if (m_block_size_bytes < RubySystem::getBlockSizeBytes()) {
+63             // Block sizes larger than when the trace was recorded are not
+64             // supported, as we cannot reliably turn accesses to smaller blocks
+65             // into larger ones.
+66             panic("Recorded cache block size (%d) < current block size (%d) !!",
+67                     m_block_size_bytes, RubySystem::getBlockSizeBytes());
+68         }
+69     }
+70 }
+\end{DoxyCode}
+\hypertarget{classCacheRecorder_af47a811c6378316ead000ba30b045f1d}{
+\index{CacheRecorder@{CacheRecorder}!CacheRecorder@{CacheRecorder}}
+\index{CacheRecorder@{CacheRecorder}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{CacheRecorder}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CacheRecorder} (const {\bf CacheRecorder} \& {\em obj})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_af47a811c6378316ead000ba30b045f1d}
+
+
+\subsection{関数}
+\hypertarget{classCacheRecorder_ae272072fe83d29085b21b133b1c9cd68}{
+\index{CacheRecorder@{CacheRecorder}!addRecord@{addRecord}}
+\index{addRecord@{addRecord}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{addRecord}]{\setlength{\rightskip}{0pt plus 5cm}void addRecord (int {\em cntrl}, \/  const {\bf physical\_\-address\_\-t} {\em data\_\-addr}, \/  const {\bf physical\_\-address\_\-t} {\em pc\_\-addr}, \/  RubyRequestType {\em type}, \/  {\bf Time} {\em time}, \/  {\bf DataBlock} \& {\em data})}}
+\label{classCacheRecorder_ae272072fe83d29085b21b133b1c9cd68}
+
+
+
+\begin{DoxyCode}
+147 {
+148     TraceRecord* rec = (TraceRecord*)malloc(sizeof(TraceRecord) +
+149                                             m_block_size_bytes);
+150     rec->m_cntrl_id     = cntrl;
+151     rec->m_time         = time;
+152     rec->m_data_address = data_addr;
+153     rec->m_pc_address   = pc_addr;
+154     rec->m_type         = type;
+155     memcpy(rec->m_data, data.getData(0, m_block_size_bytes),
+156            m_block_size_bytes);
+157 
+158     m_records.push_back(rec);
+159 }
+\end{DoxyCode}
+\hypertarget{classCacheRecorder_a6ae226d7f41b789f69be6b38862f9f60}{
+\index{CacheRecorder@{CacheRecorder}!aggregateRecords@{aggregateRecords}}
+\index{aggregateRecords@{aggregateRecords}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{aggregateRecords}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint64} aggregateRecords (uint8\_\-t $\ast$$\ast$ {\em data}, \/  {\bf uint64} {\em size})}}
+\label{classCacheRecorder_a6ae226d7f41b789f69be6b38862f9f60}
+
+
+
+\begin{DoxyCode}
+163 {
+164     std::sort(m_records.begin(), m_records.end(), compareTraceRecords);
+165 
+166     int size = m_records.size();
+167     uint64 current_size = 0;
+168     int record_size = sizeof(TraceRecord) + m_block_size_bytes;
+169 
+170     for (int i = 0; i < size; ++i) {
+171         // Determine if we need to expand the buffer size
+172         if (current_size + record_size > total_size) {
+173             uint8_t* new_buf = new (nothrow) uint8_t[total_size * 2];
+174             if (new_buf == NULL) {
+175                 fatal("Unable to allocate buffer of size %s\n",
+176                       total_size * 2);
+177             }
+178             total_size = total_size * 2;
+179             uint8_t* old_buf = *buf;
+180             memcpy(new_buf, old_buf, current_size);
+181             *buf = new_buf;
+182             delete [] old_buf;
+183         }
+184 
+185         // Copy the current record into the buffer
+186         memcpy(&((*buf)[current_size]), m_records[i], record_size);
+187         current_size += record_size;
+188 
+189         free(m_records[i]);
+190         m_records[i] = NULL;
+191     }
+192 
+193     m_records.clear();
+194     return current_size;
+195 }
+\end{DoxyCode}
+\hypertarget{classCacheRecorder_add70752975809e80cb192a2826b97087}{
+\index{CacheRecorder@{CacheRecorder}!enqueueNextFetchRequest@{enqueueNextFetchRequest}}
+\index{enqueueNextFetchRequest@{enqueueNextFetchRequest}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{enqueueNextFetchRequest}]{\setlength{\rightskip}{0pt plus 5cm}void enqueueNextFetchRequest ()}}
+\label{classCacheRecorder_add70752975809e80cb192a2826b97087}
+Function for fetching warming up the memory and the caches. It goes through the recorded contents of the caches, as available in the checkpoint and issues fetch requests. Except for the first one, a fetch request is issued only after the previous one has completed. It should be possible to use this with any protocol. 
+
+
+\begin{DoxyCode}
+103 {
+104     if (m_bytes_read < m_uncompressed_trace_size) {
+105         TraceRecord* traceRecord = (TraceRecord*) (m_uncompressed_trace +
+106                                                                 m_bytes_read);
+107 
+108         DPRINTF(RubyCacheTrace, "Issuing %s\n", *traceRecord);
+109 
+110         for (int rec_bytes_read = 0; rec_bytes_read < m_block_size_bytes;
+111                 rec_bytes_read += RubySystem::getBlockSizeBytes()) {
+112             Request* req = new Request();
+113             MemCmd::Command requestType;
+114 
+115             if (traceRecord->m_type == RubyRequestType_LD) {
+116                 requestType = MemCmd::ReadReq;
+117                 req->setPhys(traceRecord->m_data_address + rec_bytes_read,
+118                     RubySystem::getBlockSizeBytes(), 0, Request::funcMasterId);
+119             }   else if (traceRecord->m_type == RubyRequestType_IFETCH) {
+120                 requestType = MemCmd::ReadReq;
+121                 req->setPhys(traceRecord->m_data_address + rec_bytes_read,
+122                         RubySystem::getBlockSizeBytes(),
+123                         Request::INST_FETCH, Request::funcMasterId);
+124             }   else {
+125                 requestType = MemCmd::WriteReq;
+126                 req->setPhys(traceRecord->m_data_address + rec_bytes_read,
+127                     RubySystem::getBlockSizeBytes(), 0, Request::funcMasterId);
+128             }
+129 
+130             Packet *pkt = new Packet(req, requestType);
+131             pkt->dataStatic(traceRecord->m_data + rec_bytes_read);
+132 
+133             Sequencer* m_sequencer_ptr = m_seq_map[traceRecord->m_cntrl_id];
+134             assert(m_sequencer_ptr != NULL);
+135             m_sequencer_ptr->makeRequest(pkt);
+136         }
+137 
+138         m_bytes_read += (sizeof(TraceRecord) + m_block_size_bytes);
+139         m_records_read++;
+140     }
+141 }
+\end{DoxyCode}
+\hypertarget{classCacheRecorder_a919f5c212476d98932496ef3327cf4e6}{
+\index{CacheRecorder@{CacheRecorder}!enqueueNextFlushRequest@{enqueueNextFlushRequest}}
+\index{enqueueNextFlushRequest@{enqueueNextFlushRequest}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{enqueueNextFlushRequest}]{\setlength{\rightskip}{0pt plus 5cm}void enqueueNextFlushRequest ()}}
+\label{classCacheRecorder_a919f5c212476d98932496ef3327cf4e6}
+Function for flushing the memory contents of the caches to the main memory. It goes through the recorded contents of the caches, and issues flush requests. Except for the first one, a flush request is issued only after the previous one has completed. This currently requires use of MOESI Hammer protocol since only that protocol supports flush requests. 
+
+
+\begin{DoxyCode}
+83 {
+84     if (m_records_flushed < m_records.size()) {
+85         TraceRecord* rec = m_records[m_records_flushed];
+86         m_records_flushed++;
+87         Request* req = new Request(rec->m_data_address,
+88                                    m_block_size_bytes, 0,
+89                                    Request::funcMasterId);
+90         MemCmd::Command requestType = MemCmd::FlushReq;
+91         Packet *pkt = new Packet(req, requestType);
+92 
+93         Sequencer* m_sequencer_ptr = m_seq_map[rec->m_cntrl_id];
+94         assert(m_sequencer_ptr != NULL);
+95         m_sequencer_ptr->makeRequest(pkt);
+96 
+97         DPRINTF(RubyCacheTrace, "Flushing %s\n", *rec);
+98     }
+99 }
+\end{DoxyCode}
+\hypertarget{classCacheRecorder_a91200370312dc9051e23bd44afafd41f}{
+\index{CacheRecorder@{CacheRecorder}!operator=@{operator=}}
+\index{operator=@{operator=}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CacheRecorder}\& operator= (const {\bf CacheRecorder} \& {\em obj})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_a91200370312dc9051e23bd44afafd41f}
+
+
+\subsection{変数}
+\hypertarget{classCacheRecorder_ab7f8c478cbc01ff7258e74be8b395b4f}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-block\_\-size\_\-bytes@{m\_\-block\_\-size\_\-bytes}}
+\index{m\_\-block\_\-size\_\-bytes@{m\_\-block\_\-size\_\-bytes}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-block\_\-size\_\-bytes}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf m\_\-block\_\-size\_\-bytes}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_ab7f8c478cbc01ff7258e74be8b395b4f}
+\hypertarget{classCacheRecorder_af866ec1fe37d03f2d8349e05521514d1}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-bytes\_\-read@{m\_\-bytes\_\-read}}
+\index{m\_\-bytes\_\-read@{m\_\-bytes\_\-read}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-bytes\_\-read}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf m\_\-bytes\_\-read}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_af866ec1fe37d03f2d8349e05521514d1}
+\hypertarget{classCacheRecorder_adeb49f912155613a3c1d3c309e061ac6}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-records@{m\_\-records}}
+\index{m\_\-records@{m\_\-records}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-records}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf TraceRecord}$\ast$$>$ {\bf m\_\-records}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_adeb49f912155613a3c1d3c309e061ac6}
+\hypertarget{classCacheRecorder_af160e7c9a16e7d4534fd53482f7df86b}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-records\_\-flushed@{m\_\-records\_\-flushed}}
+\index{m\_\-records\_\-flushed@{m\_\-records\_\-flushed}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-records\_\-flushed}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf m\_\-records\_\-flushed}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_af160e7c9a16e7d4534fd53482f7df86b}
+\hypertarget{classCacheRecorder_a59c4e20378fd85e0437e8a9a5bcf140b}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-records\_\-read@{m\_\-records\_\-read}}
+\index{m\_\-records\_\-read@{m\_\-records\_\-read}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-records\_\-read}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf m\_\-records\_\-read}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_a59c4e20378fd85e0437e8a9a5bcf140b}
+\hypertarget{classCacheRecorder_aa0248d60005113d99eafe0872de03d10}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-seq\_\-map@{m\_\-seq\_\-map}}
+\index{m\_\-seq\_\-map@{m\_\-seq\_\-map}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-seq\_\-map}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf Sequencer}$\ast$$>$ {\bf m\_\-seq\_\-map}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_aa0248d60005113d99eafe0872de03d10}
+\hypertarget{classCacheRecorder_adc6ca5282f5cfbc266e2474aa9e2482a}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-uncompressed\_\-trace@{m\_\-uncompressed\_\-trace}}
+\index{m\_\-uncompressed\_\-trace@{m\_\-uncompressed\_\-trace}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-uncompressed\_\-trace}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t$\ast$ {\bf m\_\-uncompressed\_\-trace}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_adc6ca5282f5cfbc266e2474aa9e2482a}
+\hypertarget{classCacheRecorder_abcd8159fa39387a7fd790671b1d289c0}{
+\index{CacheRecorder@{CacheRecorder}!m\_\-uncompressed\_\-trace\_\-size@{m\_\-uncompressed\_\-trace\_\-size}}
+\index{m\_\-uncompressed\_\-trace\_\-size@{m\_\-uncompressed\_\-trace\_\-size}!CacheRecorder@{CacheRecorder}}
+\subsubsection[{m\_\-uncompressed\_\-trace\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf m\_\-uncompressed\_\-trace\_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCacheRecorder_abcd8159fa39387a7fd790671b1d289c0}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/recorder/\hyperlink{CacheRecorder_8hh}{CacheRecorder.hh}\item 
+mem/ruby/recorder/\hyperlink{CacheRecorder_8cc}{CacheRecorder.cc}\end{DoxyCompactItemize}

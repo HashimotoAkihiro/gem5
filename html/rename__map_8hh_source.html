@@ -1,0 +1,241 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/rename_map.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/rename_map.hh</h1><a href="rename__map_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2004-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00007"></a>00007 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00008"></a>00008 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00009"></a>00009 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00010"></a>00010 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00011"></a>00011 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00012"></a>00012 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00013"></a>00013 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00014"></a>00014 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00015"></a>00015 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00018"></a>00018 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00019"></a>00019 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00020"></a>00020 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00021"></a>00021 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00022"></a>00022 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00023"></a>00023 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00024"></a>00024 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00025"></a>00025 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00026"></a>00026 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00027"></a>00027 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00030"></a>00030 <span class="comment"> *          Steve Reinhardt</span>
+<a name="l00031"></a>00031 <span class="comment"> */</span>
+<a name="l00032"></a>00032 
+<a name="l00033"></a>00033 <span class="comment">// Todo:  Create destructor.</span>
+<a name="l00034"></a>00034 <span class="comment">// Have it so that there&apos;s a more meaningful name given to the variable</span>
+<a name="l00035"></a>00035 <span class="comment">// that marks the beginning of the FP registers.</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#ifndef __CPU_O3_RENAME_MAP_HH__</span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_RENAME_MAP_HH__</span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &lt;utility&gt;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00043"></a>00043 
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="free__list_8hh.html">cpu/o3/free_list.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="regfile_8hh.html">cpu/o3/regfile.hh</a>&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="reg__class_8hh.html">cpu/reg_class.hh</a>&quot;</span>
+<a name="l00049"></a>00049 
+<a name="l00057"></a><a class="code" href="classSimpleRenameMap.html">00057</a> <span class="keyword">class </span><a class="code" href="classSimpleRenameMap.html">SimpleRenameMap</a>
+<a name="l00058"></a>00058 {
+<a name="l00059"></a>00059   <span class="keyword">public</span>:
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="classSimpleRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">00061</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> <a class="code" href="classSimpleRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a>;
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063   <span class="keyword">private</span>:
+<a name="l00064"></a>00064 
+<a name="l00066"></a><a class="code" href="classSimpleRenameMap.html#a20955fcac3b8535e6b1237aa7ba0cccf">00066</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;PhysRegIndex&gt;</a> <a class="code" href="classSimpleRenameMap.html#a20955fcac3b8535e6b1237aa7ba0cccf">map</a>;
+<a name="l00067"></a>00067 
+<a name="l00072"></a><a class="code" href="classSimpleRenameMap.html#a5d2c433781e53552fb56d17e81d4b6bd">00072</a>     <a class="code" href="classSimpleFreeList.html">SimpleFreeList</a> *<a class="code" href="classSimpleRenameMap.html#a5d2c433781e53552fb56d17e81d4b6bd">freeList</a>;
+<a name="l00073"></a>00073 
+<a name="l00081"></a><a class="code" href="classSimpleRenameMap.html#a13b7cf8d0c4baf190d7e75e372c74d86">00081</a>     <a class="code" href="classSimpleRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> <a class="code" href="classSimpleRenameMap.html#a13b7cf8d0c4baf190d7e75e372c74d86">zeroReg</a>;
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083   <span class="keyword">public</span>:
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085     <a class="code" href="classSimpleRenameMap.html#a1dc644bcb497c501890dbc78d1acf28d">SimpleRenameMap</a>();
+<a name="l00086"></a>00086 
+<a name="l00087"></a><a class="code" href="classSimpleRenameMap.html#af5717bfeec7da90752952ab38dcab5c5">00087</a>     <a class="code" href="classSimpleRenameMap.html#af5717bfeec7da90752952ab38dcab5c5">~SimpleRenameMap</a>() {};
+<a name="l00088"></a>00088 
+<a name="l00094"></a>00094     <span class="keywordtype">void</span> <a class="code" href="classSimpleRenameMap.html#a3f27b4e0339fcd39d0f73659b8c72202">init</a>(<span class="keywordtype">unsigned</span> size, <a class="code" href="classSimpleFreeList.html">SimpleFreeList</a> *_freeList, <a class="code" href="classSimpleRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> _zeroReg);
+<a name="l00095"></a>00095 
+<a name="l00102"></a><a class="code" href="classSimpleRenameMap.html#a3dc3673767d81356dfb2000480aed47b">00102</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1pair.html">std::pair&lt;PhysRegIndex, PhysRegIndex&gt;</a> <a class="code" href="classstd_1_1pair.html">RenameInfo</a>;
+<a name="l00103"></a>00103 
+<a name="l00111"></a>00111     <a class="code" href="classstd_1_1pair.html">RenameInfo</a> <a class="code" href="classSimpleRenameMap.html#a18370a31dd17baa3a67d1ce3e0f43885">rename</a>(<a class="code" href="classSimpleRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg);
+<a name="l00112"></a>00112 
+<a name="l00118"></a><a class="code" href="classSimpleRenameMap.html#a149269d2ce2fbf7e13ec91a5647bf170">00118</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classSimpleRenameMap.html#a149269d2ce2fbf7e13ec91a5647bf170">lookup</a>(<a class="code" href="classSimpleRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg)<span class="keyword"> const</span>
+<a name="l00119"></a>00119 <span class="keyword">    </span>{
+<a name="l00120"></a>00120         assert(arch_reg &lt; <a class="code" href="classSimpleRenameMap.html#a20955fcac3b8535e6b1237aa7ba0cccf">map</a>.size());
+<a name="l00121"></a>00121         <span class="keywordflow">return</span> <a class="code" href="classSimpleRenameMap.html#a20955fcac3b8535e6b1237aa7ba0cccf">map</a>[arch_reg];
+<a name="l00122"></a>00122     }
+<a name="l00123"></a>00123 
+<a name="l00130"></a><a class="code" href="classSimpleRenameMap.html#a5c6cad04be83122ff38650d859fbf1d8">00130</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleRenameMap.html#a5c6cad04be83122ff38650d859fbf1d8">setEntry</a>(<a class="code" href="classSimpleRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg, <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg)
+<a name="l00131"></a>00131     {
+<a name="l00132"></a>00132         <a class="code" href="classSimpleRenameMap.html#a20955fcac3b8535e6b1237aa7ba0cccf">map</a>[arch_reg] = phys_reg;
+<a name="l00133"></a>00133     }
+<a name="l00134"></a>00134 
+<a name="l00136"></a><a class="code" href="classSimpleRenameMap.html#a1fb7464c57712609e9d9ca38aff7fc8e">00136</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classSimpleRenameMap.html#a1fb7464c57712609e9d9ca38aff7fc8e">numFreeEntries</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSimpleRenameMap.html#a5d2c433781e53552fb56d17e81d4b6bd">freeList</a>-&gt;<a class="code" href="classSimpleFreeList.html#a95b70656efc827474c66168faefd0c4f">numFreeRegs</a>(); }
+<a name="l00137"></a>00137 };
+<a name="l00138"></a>00138 
+<a name="l00139"></a>00139 
+<a name="l00147"></a><a class="code" href="classUnifiedRenameMap.html">00147</a> <span class="keyword">class </span><a class="code" href="classUnifiedRenameMap.html">UnifiedRenameMap</a>
+<a name="l00148"></a>00148 {
+<a name="l00149"></a>00149   <span class="keyword">private</span>:
+<a name="l00150"></a>00150 
+<a name="l00152"></a><a class="code" href="classUnifiedRenameMap.html#a3133c6b943f6bd39859ab4544cb8099e">00152</a>     <a class="code" href="classSimpleRenameMap.html">SimpleRenameMap</a> <a class="code" href="classUnifiedRenameMap.html#a3133c6b943f6bd39859ab4544cb8099e">intMap</a>;
+<a name="l00153"></a>00153 
+<a name="l00155"></a><a class="code" href="classUnifiedRenameMap.html#a0850a3bd98051c123507bd1d971f5ea5">00155</a>     <a class="code" href="classSimpleRenameMap.html">SimpleRenameMap</a> <a class="code" href="classUnifiedRenameMap.html#a0850a3bd98051c123507bd1d971f5ea5">floatMap</a>;
+<a name="l00156"></a>00156 
+<a name="l00164"></a><a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">00164</a>     <a class="code" href="classPhysRegFile.html">PhysRegFile</a> *<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>;
+<a name="l00165"></a>00165 
+<a name="l00167"></a><a class="code" href="classUnifiedRenameMap.html#a763b488cc757601419547ab2420f4fca">00167</a>     <a class="code" href="classSimpleRenameMap.html">SimpleRenameMap</a> <a class="code" href="classUnifiedRenameMap.html#a763b488cc757601419547ab2420f4fca">ccMap</a>;
+<a name="l00168"></a>00168 
+<a name="l00169"></a>00169   <span class="keyword">public</span>:
+<a name="l00170"></a><a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">00170</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> <a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a>;
+<a name="l00171"></a>00171 
+<a name="l00172"></a><a class="code" href="classUnifiedRenameMap.html#a2d31ea626004f32fc5c2aa11da776b42">00172</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1pair.html">SimpleRenameMap::RenameInfo</a> <a class="code" href="classstd_1_1pair.html">RenameInfo</a>;
+<a name="l00173"></a>00173 
+<a name="l00175"></a><a class="code" href="classUnifiedRenameMap.html#adb68a513c2ed7c97df59815528f619ba">00175</a>     <a class="code" href="classUnifiedRenameMap.html#adb68a513c2ed7c97df59815528f619ba">UnifiedRenameMap</a>() {};
+<a name="l00176"></a>00176 
+<a name="l00178"></a><a class="code" href="classUnifiedRenameMap.html#a6ee32f6177b3a78b38df48300a3ea20e">00178</a>     <a class="code" href="classUnifiedRenameMap.html#a6ee32f6177b3a78b38df48300a3ea20e">~UnifiedRenameMap</a>() {};
+<a name="l00179"></a>00179 
+<a name="l00181"></a>00181     <span class="keywordtype">void</span> <a class="code" href="classUnifiedRenameMap.html#a6e4d0eb7c0c24f15b95cbb4b0265f2bd">init</a>(<a class="code" href="classPhysRegFile.html">PhysRegFile</a> *_regFile,
+<a name="l00182"></a>00182               <a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> _intZeroReg,
+<a name="l00183"></a>00183               <a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> _floatZeroReg,
+<a name="l00184"></a>00184               <a class="code" href="classUnifiedFreeList.html">UnifiedFreeList</a> *freeList);
+<a name="l00185"></a>00185 
+<a name="l00195"></a>00195     <a class="code" href="classUnifiedRenameMap.html#a2d31ea626004f32fc5c2aa11da776b42">RenameInfo</a> <a class="code" href="classUnifiedRenameMap.html#a7942f39856cc0a6ba2479855d2a7ab53">rename</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg);
+<a name="l00196"></a>00196 
+<a name="l00201"></a><a class="code" href="classUnifiedRenameMap.html#a73e9d8eeeeacc94d05a9cbd8524dc893">00201</a>     <a class="code" href="classstd_1_1pair.html">RenameInfo</a> <a class="code" href="classUnifiedRenameMap.html#a73e9d8eeeeacc94d05a9cbd8524dc893">renameInt</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)
+<a name="l00202"></a>00202     {
+<a name="l00203"></a>00203         <a class="code" href="classstd_1_1pair.html">RenameInfo</a> info = <a class="code" href="classUnifiedRenameMap.html#a3133c6b943f6bd39859ab4544cb8099e">intMap</a>.<a class="code" href="classSimpleRenameMap.html#a18370a31dd17baa3a67d1ce3e0f43885">rename</a>(rel_arch_reg);
+<a name="l00204"></a>00204         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#a4484974c71716e3a2e14b8e5207a5002">isIntPhysReg</a>(info.first));
+<a name="l00205"></a>00205         <span class="keywordflow">return</span> info;
+<a name="l00206"></a>00206     }
+<a name="l00207"></a>00207 
+<a name="l00212"></a><a class="code" href="classUnifiedRenameMap.html#a64fe4a0e62e47d9087096b285d6b8d9f">00212</a>     <a class="code" href="classstd_1_1pair.html">RenameInfo</a> <a class="code" href="classUnifiedRenameMap.html#a64fe4a0e62e47d9087096b285d6b8d9f">renameFloat</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)
+<a name="l00213"></a>00213     {
+<a name="l00214"></a>00214         <a class="code" href="classstd_1_1pair.html">RenameInfo</a> info = <a class="code" href="classUnifiedRenameMap.html#a0850a3bd98051c123507bd1d971f5ea5">floatMap</a>.<a class="code" href="classSimpleRenameMap.html#a18370a31dd17baa3a67d1ce3e0f43885">rename</a>(rel_arch_reg);
+<a name="l00215"></a>00215         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#ad4633a6224fc5694bdf2d9558d20501f">isFloatPhysReg</a>(info.first));
+<a name="l00216"></a>00216         <span class="keywordflow">return</span> info;
+<a name="l00217"></a>00217     }
+<a name="l00218"></a>00218 
+<a name="l00223"></a><a class="code" href="classUnifiedRenameMap.html#a1cebbe11de55db60d7ab86de7dbba6c7">00223</a>     <a class="code" href="classstd_1_1pair.html">RenameInfo</a> <a class="code" href="classUnifiedRenameMap.html#a1cebbe11de55db60d7ab86de7dbba6c7">renameCC</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)
+<a name="l00224"></a>00224     {
+<a name="l00225"></a>00225         <a class="code" href="classstd_1_1pair.html">RenameInfo</a> info = <a class="code" href="classUnifiedRenameMap.html#a763b488cc757601419547ab2420f4fca">ccMap</a>.<a class="code" href="classSimpleRenameMap.html#a18370a31dd17baa3a67d1ce3e0f43885">rename</a>(rel_arch_reg);
+<a name="l00226"></a>00226         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#a781ae6a1156bf528a33e2489664c1dd4">isCCPhysReg</a>(info.first));
+<a name="l00227"></a>00227         <span class="keywordflow">return</span> info;
+<a name="l00228"></a>00228     }
+<a name="l00229"></a>00229 
+<a name="l00234"></a><a class="code" href="classUnifiedRenameMap.html#a7d34d22eeeecf2193f17c5f6124db3e8">00234</a>     <a class="code" href="classstd_1_1pair.html">RenameInfo</a> <a class="code" href="classUnifiedRenameMap.html#a7d34d22eeeecf2193f17c5f6124db3e8">renameMisc</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)
+<a name="l00235"></a>00235     {
+<a name="l00236"></a>00236         <span class="comment">// misc regs aren&apos;t really renamed, just remapped</span>
+<a name="l00237"></a>00237         <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg = <a class="code" href="classUnifiedRenameMap.html#aa15bfaea32a01837167598470949c063">lookupMisc</a>(rel_arch_reg);
+<a name="l00238"></a>00238         <span class="comment">// Set the previous register to the same register; mainly it must be</span>
+<a name="l00239"></a>00239         <span class="comment">// known that the prev reg was outside the range of normal registers</span>
+<a name="l00240"></a>00240         <span class="comment">// so the free list can avoid adding it.</span>
+<a name="l00241"></a>00241         <span class="keywordflow">return</span> <a class="code" href="classUnifiedRenameMap.html#a2d31ea626004f32fc5c2aa11da776b42">RenameInfo</a>(phys_reg, phys_reg);
+<a name="l00242"></a>00242     }
+<a name="l00243"></a>00243 
+<a name="l00244"></a>00244 
+<a name="l00252"></a>00252     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classUnifiedRenameMap.html#a149269d2ce2fbf7e13ec91a5647bf170">lookup</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg) <span class="keyword">const</span>;
+<a name="l00253"></a>00253 
+<a name="l00258"></a><a class="code" href="classUnifiedRenameMap.html#af15380c4147afeea6a1d9675a7210244">00258</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classUnifiedRenameMap.html#af15380c4147afeea6a1d9675a7210244">lookupInt</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)<span class="keyword"> const</span>
+<a name="l00259"></a>00259 <span class="keyword">    </span>{
+<a name="l00260"></a>00260         <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg = <a class="code" href="classUnifiedRenameMap.html#a3133c6b943f6bd39859ab4544cb8099e">intMap</a>.<a class="code" href="classSimpleRenameMap.html#a149269d2ce2fbf7e13ec91a5647bf170">lookup</a>(rel_arch_reg);
+<a name="l00261"></a>00261         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#a4484974c71716e3a2e14b8e5207a5002">isIntPhysReg</a>(phys_reg));
+<a name="l00262"></a>00262         <span class="keywordflow">return</span> phys_reg;
+<a name="l00263"></a>00263     }
+<a name="l00264"></a>00264 
+<a name="l00269"></a><a class="code" href="classUnifiedRenameMap.html#a356c0162075adeb1426a1f237da3825e">00269</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classUnifiedRenameMap.html#a356c0162075adeb1426a1f237da3825e">lookupFloat</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)<span class="keyword"> const</span>
+<a name="l00270"></a>00270 <span class="keyword">    </span>{
+<a name="l00271"></a>00271         <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg = <a class="code" href="classUnifiedRenameMap.html#a0850a3bd98051c123507bd1d971f5ea5">floatMap</a>.<a class="code" href="classSimpleRenameMap.html#a149269d2ce2fbf7e13ec91a5647bf170">lookup</a>(rel_arch_reg);
+<a name="l00272"></a>00272         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#ad4633a6224fc5694bdf2d9558d20501f">isFloatPhysReg</a>(phys_reg));
+<a name="l00273"></a>00273         <span class="keywordflow">return</span> phys_reg;
+<a name="l00274"></a>00274     }
+<a name="l00275"></a>00275 
+<a name="l00280"></a><a class="code" href="classUnifiedRenameMap.html#a8ce66153601d299656186b221fc1b264">00280</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classUnifiedRenameMap.html#a8ce66153601d299656186b221fc1b264">lookupCC</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)<span class="keyword"> const</span>
+<a name="l00281"></a>00281 <span class="keyword">    </span>{
+<a name="l00282"></a>00282         <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg = <a class="code" href="classUnifiedRenameMap.html#a763b488cc757601419547ab2420f4fca">ccMap</a>.<a class="code" href="classSimpleRenameMap.html#a149269d2ce2fbf7e13ec91a5647bf170">lookup</a>(rel_arch_reg);
+<a name="l00283"></a>00283         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#a781ae6a1156bf528a33e2489664c1dd4">isCCPhysReg</a>(phys_reg));
+<a name="l00284"></a>00284         <span class="keywordflow">return</span> phys_reg;
+<a name="l00285"></a>00285     }
+<a name="l00286"></a>00286 
+<a name="l00291"></a><a class="code" href="classUnifiedRenameMap.html#aa15bfaea32a01837167598470949c063">00291</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classUnifiedRenameMap.html#aa15bfaea32a01837167598470949c063">lookupMisc</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> rel_arch_reg)<span class="keyword"> const</span>
+<a name="l00292"></a>00292 <span class="keyword">    </span>{
+<a name="l00293"></a>00293         <span class="comment">// misc regs aren&apos;t really renamed, just given an index</span>
+<a name="l00294"></a>00294         <span class="comment">// beyond the range of actual physical registers</span>
+<a name="l00295"></a>00295         <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg = rel_arch_reg + <a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#ad16381c6ff3ee42d5456b1d632a52730">totalNumPhysRegs</a>();
+<a name="l00296"></a>00296         <span class="keywordflow">return</span> phys_reg;
+<a name="l00297"></a>00297     }
+<a name="l00298"></a>00298 
+<a name="l00307"></a>00307     <span class="keywordtype">void</span> <a class="code" href="classUnifiedRenameMap.html#a5c6cad04be83122ff38650d859fbf1d8">setEntry</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg, <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg);
+<a name="l00308"></a>00308 
+<a name="l00313"></a><a class="code" href="classUnifiedRenameMap.html#a1bd71f7635e3eba4028ce0e9e5f88552">00313</a>     <span class="keywordtype">void</span> <a class="code" href="classUnifiedRenameMap.html#a1bd71f7635e3eba4028ce0e9e5f88552">setIntEntry</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg, <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg)
+<a name="l00314"></a>00314     {
+<a name="l00315"></a>00315         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#a4484974c71716e3a2e14b8e5207a5002">isIntPhysReg</a>(phys_reg));
+<a name="l00316"></a>00316         <a class="code" href="classUnifiedRenameMap.html#a3133c6b943f6bd39859ab4544cb8099e">intMap</a>.<a class="code" href="classSimpleRenameMap.html#a5c6cad04be83122ff38650d859fbf1d8">setEntry</a>(arch_reg, phys_reg);
+<a name="l00317"></a>00317     }
+<a name="l00318"></a>00318 
+<a name="l00323"></a><a class="code" href="classUnifiedRenameMap.html#a86eefa45c1ed5ce515d2e8911b3d5a9a">00323</a>     <span class="keywordtype">void</span> <a class="code" href="classUnifiedRenameMap.html#a86eefa45c1ed5ce515d2e8911b3d5a9a">setFloatEntry</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg, <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg)
+<a name="l00324"></a>00324     {
+<a name="l00325"></a>00325         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#ad4633a6224fc5694bdf2d9558d20501f">isFloatPhysReg</a>(phys_reg));
+<a name="l00326"></a>00326         <a class="code" href="classUnifiedRenameMap.html#a0850a3bd98051c123507bd1d971f5ea5">floatMap</a>.<a class="code" href="classSimpleRenameMap.html#a5c6cad04be83122ff38650d859fbf1d8">setEntry</a>(arch_reg, phys_reg);
+<a name="l00327"></a>00327     }
+<a name="l00328"></a>00328 
+<a name="l00333"></a><a class="code" href="classUnifiedRenameMap.html#a3d65458af1654ac17ee2ddf445858ba2">00333</a>     <span class="keywordtype">void</span> <a class="code" href="classUnifiedRenameMap.html#a3d65458af1654ac17ee2ddf445858ba2">setCCEntry</a>(<a class="code" href="classUnifiedRenameMap.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> arch_reg, <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> phys_reg)
+<a name="l00334"></a>00334     {
+<a name="l00335"></a>00335         assert(<a class="code" href="classUnifiedRenameMap.html#a1cb63957414a6c5533e779b0e6e68dd7">regFile</a>-&gt;<a class="code" href="classPhysRegFile.html#a781ae6a1156bf528a33e2489664c1dd4">isCCPhysReg</a>(phys_reg));
+<a name="l00336"></a>00336         <a class="code" href="classUnifiedRenameMap.html#a763b488cc757601419547ab2420f4fca">ccMap</a>.<a class="code" href="classSimpleRenameMap.html#a5c6cad04be83122ff38650d859fbf1d8">setEntry</a>(arch_reg, phys_reg);
+<a name="l00337"></a>00337     }
+<a name="l00338"></a>00338 
+<a name="l00345"></a><a class="code" href="classUnifiedRenameMap.html#a1fb7464c57712609e9d9ca38aff7fc8e">00345</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classUnifiedRenameMap.html#a1fb7464c57712609e9d9ca38aff7fc8e">numFreeEntries</a>()<span class="keyword"> const</span>
+<a name="l00346"></a>00346 <span class="keyword">    </span>{
+<a name="l00347"></a>00347         <span class="keywordflow">return</span> std::min(<a class="code" href="classUnifiedRenameMap.html#a3133c6b943f6bd39859ab4544cb8099e">intMap</a>.<a class="code" href="classSimpleRenameMap.html#a1fb7464c57712609e9d9ca38aff7fc8e">numFreeEntries</a>(), <a class="code" href="classUnifiedRenameMap.html#a0850a3bd98051c123507bd1d971f5ea5">floatMap</a>.<a class="code" href="classSimpleRenameMap.html#a1fb7464c57712609e9d9ca38aff7fc8e">numFreeEntries</a>());
+<a name="l00348"></a>00348     }
+<a name="l00349"></a>00349 };
+<a name="l00350"></a>00350 
+<a name="l00351"></a>00351 <span class="preprocessor">#endif //__CPU_O3_RENAME_MAP_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

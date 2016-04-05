@@ -1,0 +1,328 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/arm/pl111.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/arm/pl111.hh</h1><a href="pl111_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010-2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: William Wang</span>
+<a name="l00038"></a>00038 <span class="comment"> *          Ali Saidi</span>
+<a name="l00039"></a>00039 <span class="comment"> */</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a>00041 
+<a name="l00046"></a>00046 <span class="preprocessor">#ifndef __DEV_ARM_PL111_HH__</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_ARM_PL111_HH__</span>
+<a name="l00048"></a>00048 <span class="preprocessor"></span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &lt;fstream&gt;</span>
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="amba__device_8hh.html">dev/arm/amba_device.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;params/Pl111.hh&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="serialize_8hh.html">sim/serialize.hh</a>&quot;</span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055 <span class="keyword">class </span><a class="code" href="classVncInput.html">VncInput</a>;
+<a name="l00056"></a>00056 <span class="keyword">class </span><a class="code" href="classBitmap.html">Bitmap</a>;
+<a name="l00057"></a>00057 
+<a name="l00058"></a><a class="code" href="classPl111.html">00058</a> <span class="keyword">class </span><a class="code" href="classPl111.html">Pl111</a>: <span class="keyword">public</span> <a class="code" href="classAmbaDmaDevice.html">AmbaDmaDevice</a>
+<a name="l00059"></a>00059 {
+<a name="l00060"></a>00060   <span class="keyword">protected</span>:
+<a name="l00061"></a><a class="code" href="classPl111.html#ae438dff5177bb7a98567cd94061edab4">00061</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint64_t <a class="code" href="classPl111.html#ae438dff5177bb7a98567cd94061edab4">AMBA_ID</a>       = <a class="code" href="base_2types_8hh.html#adcc3cf526a71c0dfaae020d432c78b83">ULL</a>(0xb105f00d00141111);
+<a name="l00063"></a><a class="code" href="classPl111.html#a3527733d2eb0cefb4a83143afa924755">00063</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a3527733d2eb0cefb4a83143afa924755">LcdTiming0</a>       = 0x000;
+<a name="l00064"></a><a class="code" href="classPl111.html#a310527f5b0ebff18e9d61839aaca448e">00064</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a310527f5b0ebff18e9d61839aaca448e">LcdTiming1</a>       = 0x004;
+<a name="l00065"></a><a class="code" href="classPl111.html#afddc0e26839afc83296ce772f7de493c">00065</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#afddc0e26839afc83296ce772f7de493c">LcdTiming2</a>       = 0x008;
+<a name="l00066"></a><a class="code" href="classPl111.html#ae9ebad3cdc05f8b4bd6d58f25671d432">00066</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#ae9ebad3cdc05f8b4bd6d58f25671d432">LcdTiming3</a>       = 0x00C;
+<a name="l00067"></a><a class="code" href="classPl111.html#a385caff7c0262117f8d7241a57b892a5">00067</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a385caff7c0262117f8d7241a57b892a5">LcdUpBase</a>        = 0x010;
+<a name="l00068"></a><a class="code" href="classPl111.html#a8a50fbb9fcfc98bc0fe7809262eacf55">00068</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a8a50fbb9fcfc98bc0fe7809262eacf55">LcdLpBase</a>        = 0x014;
+<a name="l00069"></a><a class="code" href="classPl111.html#a4d50818fad414b34e919b78bd7ee0394">00069</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a4d50818fad414b34e919b78bd7ee0394">LcdControl</a>       = 0x018;
+<a name="l00070"></a><a class="code" href="classPl111.html#a044c182c88148d01bd70c98cce04ddd5">00070</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a044c182c88148d01bd70c98cce04ddd5">LcdImsc</a>          = 0x01C;
+<a name="l00071"></a><a class="code" href="classPl111.html#a7f3aa652b9a702247d99dee87aee4786">00071</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a7f3aa652b9a702247d99dee87aee4786">LcdRis</a>           = 0x020;
+<a name="l00072"></a><a class="code" href="classPl111.html#a50dec57b9ad8f6a398dcc5929a9648f8">00072</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a50dec57b9ad8f6a398dcc5929a9648f8">LcdMis</a>           = 0x024;
+<a name="l00073"></a><a class="code" href="classPl111.html#a19569f83ff4896d1f17dddaadb91e2d7">00073</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a19569f83ff4896d1f17dddaadb91e2d7">LcdIcr</a>           = 0x028;
+<a name="l00074"></a><a class="code" href="classPl111.html#a6116890c11c92aed71a18947756a3423">00074</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a6116890c11c92aed71a18947756a3423">LcdUpCurr</a>        = 0x02C;
+<a name="l00075"></a><a class="code" href="classPl111.html#a13e6a3547fe4af8f82d6d4142da64f1d">00075</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a13e6a3547fe4af8f82d6d4142da64f1d">LcdLpCurr</a>        = 0x030;
+<a name="l00076"></a><a class="code" href="classPl111.html#a097bcd7c2d25dfaeccce1e343cb58495">00076</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a097bcd7c2d25dfaeccce1e343cb58495">LcdPalette</a>       = 0x200;
+<a name="l00077"></a><a class="code" href="classPl111.html#afdfe18094877bc4a8436b4f34ed515f4">00077</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#afdfe18094877bc4a8436b4f34ed515f4">CrsrImage</a>        = 0x800;
+<a name="l00078"></a><a class="code" href="classPl111.html#a026d609da822510f1c3fcc469ed4ba44">00078</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a026d609da822510f1c3fcc469ed4ba44">ClcdCrsrCtrl</a>     = 0xC00;
+<a name="l00079"></a><a class="code" href="classPl111.html#af3d614306a1e372b77b025635dbc46e2">00079</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#af3d614306a1e372b77b025635dbc46e2">ClcdCrsrConfig</a>   = 0xC04;
+<a name="l00080"></a><a class="code" href="classPl111.html#a117f2a62438a22f2087b12f5c4863d7a">00080</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a117f2a62438a22f2087b12f5c4863d7a">ClcdCrsrPalette0</a> = 0xC08;
+<a name="l00081"></a><a class="code" href="classPl111.html#aa357b0e8940dad7feaa2084a10f20e9a">00081</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#aa357b0e8940dad7feaa2084a10f20e9a">ClcdCrsrPalette1</a> = 0xC0C;
+<a name="l00082"></a><a class="code" href="classPl111.html#a8d4bbe591a2f5a1e4ec7123e2bd5b6d0">00082</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a8d4bbe591a2f5a1e4ec7123e2bd5b6d0">ClcdCrsrXY</a>       = 0xC10;
+<a name="l00083"></a><a class="code" href="classPl111.html#ad3ec0e054ab4011d614f776623c6a497">00083</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#ad3ec0e054ab4011d614f776623c6a497">ClcdCrsrClip</a>     = 0xC14;
+<a name="l00084"></a><a class="code" href="classPl111.html#a27c46cba741564bc72503f43526be52b">00084</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a27c46cba741564bc72503f43526be52b">ClcdCrsrImsc</a>     = 0xC20;
+<a name="l00085"></a><a class="code" href="classPl111.html#a1fb557456a3039ce3d0491fe253bfaa6">00085</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a1fb557456a3039ce3d0491fe253bfaa6">ClcdCrsrIcr</a>      = 0xC24;
+<a name="l00086"></a><a class="code" href="classPl111.html#acc89af7644d93d9abef747b1980cb90d">00086</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#acc89af7644d93d9abef747b1980cb90d">ClcdCrsrRis</a>      = 0xC28;
+<a name="l00087"></a><a class="code" href="classPl111.html#a9f080f65498dfff9662cba2f7b2aaac6">00087</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a9f080f65498dfff9662cba2f7b2aaac6">ClcdCrsrMis</a>      = 0xC2C;
+<a name="l00088"></a>00088 
+<a name="l00089"></a><a class="code" href="classPl111.html#a12008db88a2d42b82d27aa2de179af45">00089</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a12008db88a2d42b82d27aa2de179af45">LcdPaletteSize</a>   = 128;
+<a name="l00090"></a><a class="code" href="classPl111.html#aa41c0581029a0907bf48839070059c66">00090</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#aa41c0581029a0907bf48839070059c66">CrsrImageSize</a>    = 256;
+<a name="l00091"></a>00091 
+<a name="l00092"></a><a class="code" href="classPl111.html#a362d9422fca0ce265b4c2059d8cca61e">00092</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a362d9422fca0ce265b4c2059d8cca61e">LcdMaxWidth</a>      = 1024; <span class="comment">// pixels per line</span>
+<a name="l00093"></a><a class="code" href="classPl111.html#a073c8ffbeb968df8b883f5426cf74e4f">00093</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a073c8ffbeb968df8b883f5426cf74e4f">LcdMaxHeight</a>     = 768;  <span class="comment">// lines per panel</span>
+<a name="l00094"></a>00094 
+<a name="l00095"></a><a class="code" href="classPl111.html#a994e38c05b2540d39ba38c10de8ee688">00095</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a994e38c05b2540d39ba38c10de8ee688">dmaSize</a>            = 8;    <span class="comment">// 64 bits</span>
+<a name="l00096"></a><a class="code" href="classPl111.html#a70cf4507219804689529791b7f293efe">00096</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a70cf4507219804689529791b7f293efe">maxOutstandingDma</a>  = 16;   <span class="comment">// 16 deep FIFO of 64 bits</span>
+<a name="l00097"></a>00097 
+<a name="l00098"></a><a class="code" href="classPl111.html#a9bd822a4ae927624f7827c898422d1db">00098</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a9bd822a4ae927624f7827c898422d1db">buffer_size</a> = <a class="code" href="classPl111.html#a362d9422fca0ce265b4c2059d8cca61e">LcdMaxWidth</a> * <a class="code" href="classPl111.html#a073c8ffbeb968df8b883f5426cf74e4f">LcdMaxHeight</a> * <span class="keyword">sizeof</span>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>);
+<a name="l00099"></a>00099 
+<a name="l00100"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3a">00100</a>     <span class="keyword">enum</span> <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3a">LcdMode</a> {
+<a name="l00101"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa80d4a9ded623571dc2bf1843152fcf6d">00101</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa80d4a9ded623571dc2bf1843152fcf6d">bpp1</a> = 0,
+<a name="l00102"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa51abbeb798d9f152cf63dcb687c530e8">00102</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa51abbeb798d9f152cf63dcb687c530e8">bpp2</a>,
+<a name="l00103"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa56a6800b6c1d069ef0acdedd36327261">00103</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa56a6800b6c1d069ef0acdedd36327261">bpp4</a>,
+<a name="l00104"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aac3734ff232f25baa2ab373e3321b0254">00104</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aac3734ff232f25baa2ab373e3321b0254">bpp8</a>,
+<a name="l00105"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa0b1a1639893931871ebb837537ad4cc4">00105</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa0b1a1639893931871ebb837537ad4cc4">bpp16</a>,
+<a name="l00106"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aafdecf556751fc4485c4d9f735ee9fe6d">00106</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aafdecf556751fc4485c4d9f735ee9fe6d">bpp24</a>,
+<a name="l00107"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aac3fbf139df7a9cbcb6b5d281abb13d5c">00107</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aac3fbf139df7a9cbcb6b5d281abb13d5c">bpp16m565</a>,
+<a name="l00108"></a><a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa3484d1f6c5067431bc197ef78e81d0af">00108</a>         <a class="code" href="classPl111.html#a1157b0263169abac7d7eab00e80cca3aa3484d1f6c5067431bc197ef78e81d0af">bpp12</a>
+<a name="l00109"></a>00109     };
+<a name="l00110"></a>00110 
+<a name="l00111"></a>00111     <a class="code" href="classPl111.html#a6314622cb4d926c2f90ff68d0cbbf17c">BitUnion8</a>(InterruptReg)
+<a name="l00112"></a>00112         Bitfield&lt;1&gt; underflow;
+<a name="l00113"></a><a class="code" href="classPl111.html#af9a4a8a02ab8754e43bc287b6c2945b6">00113</a>         Bitfield&lt;2&gt; <a class="code" href="classPl111.html#af9a4a8a02ab8754e43bc287b6c2945b6">baseaddr</a>;
+<a name="l00114"></a><a class="code" href="classPl111.html#ae6e8ea09b21dba5208f69d49b81f9d2a">00114</a>         Bitfield&lt;3&gt; <a class="code" href="classPl111.html#ae6e8ea09b21dba5208f69d49b81f9d2a">vcomp</a>;
+<a name="l00115"></a><a class="code" href="classPl111.html#a5a24e804d6f5f2b797e631ae3b93577c">00115</a>         Bitfield&lt;4&gt; <a class="code" href="classPl111.html#a5a24e804d6f5f2b797e631ae3b93577c">ahbmaster</a>;
+<a name="l00116"></a>00116     <a class="code" href="classPl111.html#a28c76606944b50cce3f43516e6178ea5">EndBitUnion</a>(InterruptReg)
+<a name="l00117"></a>00117 
+<a name="l00118"></a>00118     <a class="code" href="bitunion_8hh.html#a0ccde5c4cc801eb6422a3b9a11d4815f">BitUnion32</a>(TimingReg0)
+<a name="l00119"></a><a class="code" href="classPl111.html#ab221ac2ac5d05273785494a20f07491a">00119</a>         Bitfield&lt;7,2&gt; <a class="code" href="classPl111.html#ab221ac2ac5d05273785494a20f07491a">ppl</a>;
+<a name="l00120"></a><a class="code" href="classPl111.html#aa182f542482835ddda6ef4d523791f30">00120</a>         Bitfield&lt;15,8&gt; <a class="code" href="classPl111.html#aa182f542482835ddda6ef4d523791f30">hsw</a>;
+<a name="l00121"></a><a class="code" href="classPl111.html#af163f5f60393a40cd898b5489d3e5901">00121</a>         Bitfield&lt;23,16&gt; <a class="code" href="classPl111.html#af163f5f60393a40cd898b5489d3e5901">hfp</a>;
+<a name="l00122"></a><a class="code" href="classPl111.html#a49df0f89b9fa1e135522674810b9fa1e">00122</a>         Bitfield&lt;31,24&gt; <a class="code" href="classPl111.html#a49df0f89b9fa1e135522674810b9fa1e">hbp</a>;
+<a name="l00123"></a>00123     <a class="code" href="classPl111.html#a28c76606944b50cce3f43516e6178ea5">EndBitUnion</a>(TimingReg0)
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125     <a class="code" href="bitunion_8hh.html#a0ccde5c4cc801eb6422a3b9a11d4815f">BitUnion32</a>(TimingReg1)
+<a name="l00126"></a><a class="code" href="classPl111.html#a6884856f16e806374ba109eb1047d71d">00126</a>         Bitfield&lt;9,0&gt; <a class="code" href="classPl111.html#a6884856f16e806374ba109eb1047d71d">lpp</a>;
+<a name="l00127"></a><a class="code" href="classPl111.html#aabfa1a418a1d961d706322ca00849cdc">00127</a>         Bitfield&lt;15,10&gt; <a class="code" href="classPl111.html#aabfa1a418a1d961d706322ca00849cdc">vsw</a>;
+<a name="l00128"></a><a class="code" href="classPl111.html#ae4f40002505b03a4890ef738817b9cc1">00128</a>         Bitfield&lt;23,16&gt; <a class="code" href="classPl111.html#ae4f40002505b03a4890ef738817b9cc1">vfp</a>;
+<a name="l00129"></a><a class="code" href="classPl111.html#ac417740b549a1c71499e509490dea6ea">00129</a>         Bitfield&lt;31,24&gt; <a class="code" href="classPl111.html#ac417740b549a1c71499e509490dea6ea">vbp</a>;
+<a name="l00130"></a>00130     <a class="code" href="classPl111.html#a28c76606944b50cce3f43516e6178ea5">EndBitUnion</a>(TimingReg1)
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132     <a class="code" href="bitunion_8hh.html#a0ccde5c4cc801eb6422a3b9a11d4815f">BitUnion32</a>(TimingReg2)
+<a name="l00133"></a><a class="code" href="classPl111.html#a188d5098048b3b3a6fd44a4ecd56c797">00133</a>         Bitfield&lt;4,0&gt; <a class="code" href="classPl111.html#a188d5098048b3b3a6fd44a4ecd56c797">pcdlo</a>;
+<a name="l00134"></a><a class="code" href="classPl111.html#a1347b604581d58e4a1976abce95168d7">00134</a>         Bitfield&lt;5&gt; <a class="code" href="classPl111.html#a1347b604581d58e4a1976abce95168d7">clksel</a>;
+<a name="l00135"></a><a class="code" href="classPl111.html#aec6c41a8f55632082142969f007f3584">00135</a>         Bitfield&lt;10,6&gt; <a class="code" href="classPl111.html#aec6c41a8f55632082142969f007f3584">acb</a>;
+<a name="l00136"></a><a class="code" href="classPl111.html#abf78b497cfd8378559b939137abed8d5">00136</a>         Bitfield&lt;11&gt; <a class="code" href="classPl111.html#abf78b497cfd8378559b939137abed8d5">avs</a>;
+<a name="l00137"></a><a class="code" href="classPl111.html#ae5c21231f6311c0299549cda5105cf33">00137</a>         Bitfield&lt;12&gt; <a class="code" href="classPl111.html#ae5c21231f6311c0299549cda5105cf33">ihs</a>;
+<a name="l00138"></a><a class="code" href="classPl111.html#ae88299d5dc68d6f0f720586f30ad627a">00138</a>         Bitfield&lt;13&gt; <a class="code" href="classPl111.html#ae88299d5dc68d6f0f720586f30ad627a">ipc</a>;
+<a name="l00139"></a><a class="code" href="classPl111.html#a3a6ed57843b9f0709822190663f6477b">00139</a>         Bitfield&lt;14&gt; <a class="code" href="classPl111.html#a3a6ed57843b9f0709822190663f6477b">ioe</a>;
+<a name="l00140"></a><a class="code" href="classPl111.html#af7fd8d8db804fb907b87827d17924085">00140</a>         Bitfield&lt;25,16&gt; <a class="code" href="classPl111.html#af7fd8d8db804fb907b87827d17924085">cpl</a>;
+<a name="l00141"></a><a class="code" href="classPl111.html#a0187bf822dcc45b134574fc55eed6eb1">00141</a>         Bitfield&lt;26&gt; <a class="code" href="classPl111.html#a0187bf822dcc45b134574fc55eed6eb1">bcd</a>;
+<a name="l00142"></a><a class="code" href="classPl111.html#a2c2dac95ed9aeb35e4a37ebdafc357e2">00142</a>         Bitfield&lt;31,27&gt; <a class="code" href="classPl111.html#a2c2dac95ed9aeb35e4a37ebdafc357e2">pcdhi</a>;
+<a name="l00143"></a>00143     <a class="code" href="classPl111.html#a28c76606944b50cce3f43516e6178ea5">EndBitUnion</a>(TimingReg2)
+<a name="l00144"></a>00144 
+<a name="l00145"></a>00145     <a class="code" href="bitunion_8hh.html#a0ccde5c4cc801eb6422a3b9a11d4815f">BitUnion32</a>(TimingReg3)
+<a name="l00146"></a><a class="code" href="classPl111.html#a9109701c3de11ac33b79bf6ff097c638">00146</a>         Bitfield&lt;6,0&gt; <a class="code" href="classPl111.html#a9109701c3de11ac33b79bf6ff097c638">led</a>;
+<a name="l00147"></a><a class="code" href="classPl111.html#a0e01cda43f9c69085148429c5290bbf3">00147</a>         Bitfield&lt;16&gt; <a class="code" href="classPl111.html#a0e01cda43f9c69085148429c5290bbf3">lee</a>;
+<a name="l00148"></a>00148     <a class="code" href="classPl111.html#a28c76606944b50cce3f43516e6178ea5">EndBitUnion</a>(TimingReg3)
+<a name="l00149"></a>00149 
+<a name="l00150"></a>00150     <a class="code" href="bitunion_8hh.html#a0ccde5c4cc801eb6422a3b9a11d4815f">BitUnion32</a>(ControlReg)
+<a name="l00151"></a>00151         Bitfield&lt;0&gt; lcden;
+<a name="l00152"></a><a class="code" href="classPl111.html#abd7707fa3d87acffedc6f4c9209c7c79">00152</a>         Bitfield&lt;3,1&gt; <a class="code" href="classPl111.html#abd7707fa3d87acffedc6f4c9209c7c79">lcdbpp</a>;
+<a name="l00153"></a><a class="code" href="classPl111.html#a4bb5bb1498d8e3732da8289f112ff999">00153</a>         Bitfield&lt;4&gt; <a class="code" href="classPl111.html#a4bb5bb1498d8e3732da8289f112ff999">lcdbw</a>;
+<a name="l00154"></a><a class="code" href="classPl111.html#a5fd2ed83172b7ffc81125a20b85168fe">00154</a>         Bitfield&lt;5&gt; <a class="code" href="classPl111.html#a5fd2ed83172b7ffc81125a20b85168fe">lcdtft</a>;
+<a name="l00155"></a><a class="code" href="classPl111.html#a6e4fb7a990dd12fac2111fcddc777293">00155</a>         Bitfield&lt;6&gt; <a class="code" href="classPl111.html#a6e4fb7a990dd12fac2111fcddc777293">lcdmono8</a>;
+<a name="l00156"></a><a class="code" href="classPl111.html#a32eb960c1f79fd957f27e3b0b22448dc">00156</a>         Bitfield&lt;7&gt; <a class="code" href="classPl111.html#a32eb960c1f79fd957f27e3b0b22448dc">lcddual</a>;
+<a name="l00157"></a><a class="code" href="classPl111.html#ae80ace152cc12bf133df88071c32d698">00157</a>         Bitfield&lt;8&gt; <a class="code" href="classPl111.html#ae80ace152cc12bf133df88071c32d698">bgr</a>;
+<a name="l00158"></a><a class="code" href="classPl111.html#af9df5bc47741af129f092ed0ab995f68">00158</a>         Bitfield&lt;9&gt; <a class="code" href="classPl111.html#af9df5bc47741af129f092ed0ab995f68">bebo</a>;
+<a name="l00159"></a><a class="code" href="classPl111.html#a8f830e5676f3e5df556288700620fefd">00159</a>         Bitfield&lt;10&gt; <a class="code" href="classPl111.html#a8f830e5676f3e5df556288700620fefd">bepo</a>;
+<a name="l00160"></a><a class="code" href="classPl111.html#a3e0d21d15a72646c76bb73983fb1ba0c">00160</a>         Bitfield&lt;11&gt; <a class="code" href="classPl111.html#a3e0d21d15a72646c76bb73983fb1ba0c">lcdpwr</a>;
+<a name="l00161"></a><a class="code" href="classPl111.html#a2a0a19c8b8c96df46fb76554de82dd7f">00161</a>         Bitfield&lt;13,12&gt; <a class="code" href="classPl111.html#a2a0a19c8b8c96df46fb76554de82dd7f">lcdvcomp</a>;
+<a name="l00162"></a><a class="code" href="classPl111.html#a7abe404e6aebfe792ff7ed7a28f74eae">00162</a>         Bitfield&lt;16&gt; <a class="code" href="classPl111.html#a7abe404e6aebfe792ff7ed7a28f74eae">watermark</a>;
+<a name="l00163"></a><a class="code" href="classPl111.html#a1a4be918f70fc01f16ec330702d1042a">00163</a>     <a class="code" href="classPl111.html#a28c76606944b50cce3f43516e6178ea5">EndBitUnion</a>(ControlReg)
+<a name="l00164"></a>00164 
+<a name="l00171"></a>00171     class DmaDoneEvent : public <a class="code" href="classEvent.html">Event</a>
+<a name="l00172"></a>00172     {
+<a name="l00173"></a>00173       <span class="keyword">private</span>:
+<a name="l00174"></a>00174         <a class="code" href="classPl111.html">Pl111</a> &amp;obj;
+<a name="l00175"></a>00175 
+<a name="l00176"></a>00176       <span class="keyword">public</span>:
+<a name="l00177"></a>00177         DmaDoneEvent(<a class="code" href="classPl111.html">Pl111</a> *_obj)
+<a name="l00178"></a>00178             : Event(), obj(*_obj) {}
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180         <span class="keywordtype">void</span> process() {
+<a name="l00181"></a>00181             obj.<a class="code" href="classPl111.html#ada9c1832b166debd201f034b2fcb4ab2">dmaDoneEventFree</a>.push_back(<span class="keyword">this</span>);
+<a name="l00182"></a>00182             obj.<a class="code" href="classPl111.html#a06cfa1e5151d07acbefac240127d471b">dmaDone</a>();
+<a name="l00183"></a>00183         }
+<a name="l00184"></a>00184 
+<a name="l00185"></a>00185         <span class="keyword">const</span> std::string <a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>()<span class="keyword"> const </span>{
+<a name="l00186"></a>00186             <span class="keywordflow">return</span> obj.<a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>() + <span class="stringliteral">&quot;.DmaDoneEvent&quot;</span>;
+<a name="l00187"></a>00187         }
+<a name="l00188"></a><a class="code" href="classPl111.html#a913cd36ff92062c47b446b69308ddc56">00188</a>     };
+<a name="l00189"></a>00189 
+<a name="l00191"></a>00191     TimingReg0 <a class="code" href="classPl111.html#a913cd36ff92062c47b446b69308ddc56">lcdTiming0</a>;
+<a name="l00192"></a>00192 
+<a name="l00194"></a><a class="code" href="classPl111.html#a0d40494e71744c6ea4d0f71361a79716">00194</a>     TimingReg1 <a class="code" href="classPl111.html#a0d40494e71744c6ea4d0f71361a79716">lcdTiming1</a>;
+<a name="l00195"></a>00195 
+<a name="l00197"></a><a class="code" href="classPl111.html#a2f98cbb0ab28ad2c919d0e4f9287cb20">00197</a>     TimingReg2 <a class="code" href="classPl111.html#a2f98cbb0ab28ad2c919d0e4f9287cb20">lcdTiming2</a>;
+<a name="l00198"></a>00198 
+<a name="l00200"></a><a class="code" href="classPl111.html#a731c4b1e7fbe0aaf8b9f98989beda1c4">00200</a>     TimingReg3 <a class="code" href="classPl111.html#a731c4b1e7fbe0aaf8b9f98989beda1c4">lcdTiming3</a>;
+<a name="l00201"></a>00201 
+<a name="l00203"></a><a class="code" href="classPl111.html#aef3cf09646b914943e589e68e3edd88b">00203</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#aef3cf09646b914943e589e68e3edd88b">lcdUpbase</a>;
+<a name="l00204"></a>00204 
+<a name="l00206"></a><a class="code" href="classPl111.html#a91e93048dd9730130b9e92e4bea15df0">00206</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a91e93048dd9730130b9e92e4bea15df0">lcdLpbase</a>;
+<a name="l00207"></a>00207 
+<a name="l00209"></a><a class="code" href="classPl111.html#a1de39f0f15daf9c8b37e47458498b609">00209</a>     ControlReg <a class="code" href="classPl111.html#a1de39f0f15daf9c8b37e47458498b609">lcdControl</a>;
+<a name="l00210"></a>00210 
+<a name="l00212"></a><a class="code" href="classPl111.html#aa5af63833428e4bb947a5f10bab4d043">00212</a>     InterruptReg <a class="code" href="classPl111.html#aa5af63833428e4bb947a5f10bab4d043">lcdImsc</a>;
+<a name="l00213"></a>00213 
+<a name="l00215"></a><a class="code" href="classPl111.html#a977905b70318298f359957fea2723d97">00215</a>     InterruptReg <a class="code" href="classPl111.html#a977905b70318298f359957fea2723d97">lcdRis</a>;
+<a name="l00216"></a>00216 
+<a name="l00218"></a><a class="code" href="classPl111.html#a7410dd40533dc165663f9deda4c36683">00218</a>     InterruptReg <a class="code" href="classPl111.html#a7410dd40533dc165663f9deda4c36683">lcdMis</a>;
+<a name="l00219"></a>00219 
+<a name="l00222"></a><a class="code" href="classPl111.html#ae214882030fa17459f741e5b0afc2b12">00222</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#ae214882030fa17459f741e5b0afc2b12">lcdPalette</a>[<a class="code" href="classPl111.html#a12008db88a2d42b82d27aa2de179af45">LcdPaletteSize</a>];
+<a name="l00223"></a>00223 
+<a name="l00226"></a><a class="code" href="classPl111.html#a739d82d37ea9d8bad535431ceee721d6">00226</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a739d82d37ea9d8bad535431ceee721d6">cursorImage</a>[<a class="code" href="classPl111.html#aa41c0581029a0907bf48839070059c66">CrsrImageSize</a>];
+<a name="l00227"></a>00227 
+<a name="l00229"></a><a class="code" href="classPl111.html#af1aa35ccaa11f11271ede1e39c64c3ad">00229</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#af1aa35ccaa11f11271ede1e39c64c3ad">clcdCrsrCtrl</a>;
+<a name="l00230"></a>00230 
+<a name="l00232"></a><a class="code" href="classPl111.html#a60838816fc4cc7e898042259f9eec917">00232</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a60838816fc4cc7e898042259f9eec917">clcdCrsrConfig</a>;
+<a name="l00233"></a>00233 
+<a name="l00235"></a><a class="code" href="classPl111.html#a8b6f78d34ea5c7859df6b9b42301ceff">00235</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a8b6f78d34ea5c7859df6b9b42301ceff">clcdCrsrPalette0</a>;
+<a name="l00236"></a><a class="code" href="classPl111.html#a5705f1065367bfed27b41d67082286b8">00236</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a5705f1065367bfed27b41d67082286b8">clcdCrsrPalette1</a>;
+<a name="l00237"></a>00237 
+<a name="l00239"></a><a class="code" href="classPl111.html#a73bc81eb6530a013ff4c19a1e3c82ec8">00239</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a73bc81eb6530a013ff4c19a1e3c82ec8">clcdCrsrXY</a>;
+<a name="l00240"></a>00240 
+<a name="l00242"></a><a class="code" href="classPl111.html#a502477050a99c8f88ead81a5c0c0b5de">00242</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a502477050a99c8f88ead81a5c0c0b5de">clcdCrsrClip</a>;
+<a name="l00243"></a>00243 
+<a name="l00245"></a><a class="code" href="classPl111.html#a01cb42930c185c8596117390d75f7441">00245</a>     InterruptReg <a class="code" href="classPl111.html#a01cb42930c185c8596117390d75f7441">clcdCrsrImsc</a>;
+<a name="l00246"></a>00246 
+<a name="l00248"></a><a class="code" href="classPl111.html#a29b7b61cdbcee532d282c29504a725c8">00248</a>     InterruptReg <a class="code" href="classPl111.html#a29b7b61cdbcee532d282c29504a725c8">clcdCrsrIcr</a>;
+<a name="l00249"></a>00249 
+<a name="l00251"></a><a class="code" href="classPl111.html#a63a1037985c9e525a4adf69e4d593b85">00251</a>     InterruptReg <a class="code" href="classPl111.html#a63a1037985c9e525a4adf69e4d593b85">clcdCrsrRis</a>;
+<a name="l00252"></a>00252 
+<a name="l00254"></a><a class="code" href="classPl111.html#aefc053082c6ee9380baa297b80e4ec16">00254</a>     InterruptReg <a class="code" href="classPl111.html#aefc053082c6ee9380baa297b80e4ec16">clcdCrsrMis</a>;
+<a name="l00255"></a>00255 
+<a name="l00257"></a><a class="code" href="classPl111.html#a417073569da6863481ba6470ffc11857">00257</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPl111.html#a417073569da6863481ba6470ffc11857">pixelClock</a>;
+<a name="l00258"></a>00258 
+<a name="l00260"></a><a class="code" href="classPl111.html#a52d1b5d3426a30e18a452cd67d87ec13">00260</a>     <a class="code" href="classVncInput.html">VncInput</a> *<a class="code" href="classPl111.html#a52d1b5d3426a30e18a452cd67d87ec13">vnc</a>;
+<a name="l00261"></a>00261 
+<a name="l00263"></a><a class="code" href="classPl111.html#ada429bf89af3356a338f9532d68623cc">00263</a>     <a class="code" href="classBitmap.html">Bitmap</a> *<a class="code" href="classPl111.html#ada429bf89af3356a338f9532d68623cc">bmp</a>;
+<a name="l00264"></a>00264 
+<a name="l00266"></a><a class="code" href="classPl111.html#af724472dcdfb49ce72ef865c101a1c0d">00266</a>     std::ostream *<a class="code" href="classPl111.html#af724472dcdfb49ce72ef865c101a1c0d">pic</a>;
+<a name="l00267"></a>00267 
+<a name="l00269"></a><a class="code" href="classPl111.html#ad0eab1042455a2067c812ab8071d5376">00269</a>     uint16_t <a class="code" href="classPl111.html#ad0eab1042455a2067c812ab8071d5376">width</a>;
+<a name="l00270"></a>00270 
+<a name="l00272"></a><a class="code" href="classPl111.html#a81c9f8d0b8c3b49d770be14dbe9f0d37">00272</a>     uint16_t <a class="code" href="classPl111.html#a81c9f8d0b8c3b49d770be14dbe9f0d37">height</a>;
+<a name="l00273"></a>00273 
+<a name="l00275"></a><a class="code" href="classPl111.html#a2c6362e11e7da8346152a55d2c1578a6">00275</a>     uint8_t <a class="code" href="classPl111.html#a2c6362e11e7da8346152a55d2c1578a6">bytesPerPixel</a>;
+<a name="l00276"></a>00276 
+<a name="l00278"></a><a class="code" href="classPl111.html#a4ad3773f36449f12f8667bf12237f5a1">00278</a>     uint8_t *<a class="code" href="classPl111.html#a4ad3773f36449f12f8667bf12237f5a1">dmaBuffer</a>;
+<a name="l00279"></a>00279 
+<a name="l00281"></a><a class="code" href="classPl111.html#ab5743263961f5e71b5c28986b8b3dfbe">00281</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPl111.html#ab5743263961f5e71b5c28986b8b3dfbe">startTime</a>;
+<a name="l00282"></a>00282 
+<a name="l00284"></a><a class="code" href="classPl111.html#aee7739bdc9884d0ee837a99b832cf0d1">00284</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classPl111.html#aee7739bdc9884d0ee837a99b832cf0d1">startAddr</a>;
+<a name="l00285"></a>00285 
+<a name="l00287"></a><a class="code" href="classPl111.html#a1e2e5337e1ab8b10d44ef50de51e14ce">00287</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classPl111.html#a1e2e5337e1ab8b10d44ef50de51e14ce">maxAddr</a>;
+<a name="l00288"></a>00288 
+<a name="l00290"></a><a class="code" href="classPl111.html#a791de8c75b67169bea9c7e9b56a294f7">00290</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classPl111.html#a791de8c75b67169bea9c7e9b56a294f7">curAddr</a>;
+<a name="l00291"></a>00291 
+<a name="l00293"></a><a class="code" href="classPl111.html#a9741d287c1526a377487fb3a078a17dd">00293</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a9741d287c1526a377487fb3a078a17dd">waterMark</a>;
+<a name="l00294"></a>00294 
+<a name="l00296"></a><a class="code" href="classPl111.html#a51a10d47f66c47e4701a3d9a7193eef1">00296</a>     <span class="keywordtype">int</span> <a class="code" href="classPl111.html#a51a10d47f66c47e4701a3d9a7193eef1">dmaPendingNum</a>;
+<a name="l00297"></a>00297 
+<a name="l00299"></a>00299     <span class="keywordtype">void</span> <a class="code" href="classPl111.html#a13d435a77cf1f2fa37400a9c98a3764a">updateVideoParams</a>();
+<a name="l00300"></a>00300 
+<a name="l00302"></a>00302     <span class="keywordtype">void</span> <a class="code" href="classPl111.html#a104de82eb7e1fbd4c9180640f507a5f4">readFramebuffer</a>();
+<a name="l00303"></a>00303 
+<a name="l00305"></a>00305     <span class="keywordtype">void</span> <a class="code" href="classPl111.html#ac97605847b61ff35749ab636c2cd1be0">generateReadEvent</a>();
+<a name="l00306"></a>00306 
+<a name="l00308"></a>00308     <span class="keywordtype">void</span> <a class="code" href="classPl111.html#ab251ef5c4d9e1f0239542a9d8aa0dc3e">generateInterrupt</a>();
+<a name="l00309"></a>00309 
+<a name="l00311"></a>00311     <span class="keywordtype">void</span> <a class="code" href="classPl111.html#ab3d994fdac5f0732cdd0a027db03df46">fillFifo</a>();
+<a name="l00312"></a>00312 
+<a name="l00314"></a>00314     <span class="keywordtype">void</span> <a class="code" href="classPl111.html#a3c48da42be160d9646d69fad61037078">startDma</a>();
+<a name="l00315"></a>00315 
+<a name="l00317"></a>00317     <span class="keywordtype">void</span> <a class="code" href="classPl111.html#a06cfa1e5151d07acbefac240127d471b">dmaDone</a>();
+<a name="l00318"></a>00318 
+<a name="l00320"></a><a class="code" href="classPl111.html#a48f76313a745a16ffbdc95fbc4dfebf2">00320</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;Pl111, &amp;Pl111::readFramebuffer&gt;</a> <a class="code" href="classPl111.html#a48f76313a745a16ffbdc95fbc4dfebf2">readEvent</a>;
+<a name="l00321"></a>00321 
+<a name="l00323"></a><a class="code" href="classPl111.html#ae4caf4c339850803aeea275f13b63c39">00323</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;Pl111, &amp;Pl111::fillFifo&gt;</a> <a class="code" href="classPl111.html#ae4caf4c339850803aeea275f13b63c39">fillFifoEvent</a>;
+<a name="l00324"></a>00324 
+<a name="l00342"></a><a class="code" href="classPl111.html#aa50a0179a2d530a0a45d74b014c425fe">00342</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;DmaDoneEvent&gt;</a> <a class="code" href="classPl111.html#aa50a0179a2d530a0a45d74b014c425fe">dmaDoneEventAll</a>;
+<a name="l00343"></a>00343 
+<a name="l00345"></a><a class="code" href="classPl111.html#ada9c1832b166debd201f034b2fcb4ab2">00345</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;DmaDoneEvent *&gt;</a> <a class="code" href="classPl111.html#ada9c1832b166debd201f034b2fcb4ab2">dmaDoneEventFree</a>;
+<a name="l00349"></a><a class="code" href="classPl111.html#a091cc936e2951ae8884e7a54b184811c">00349</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;Pl111, &amp;Pl111::generateInterrupt&gt;</a> <a class="code" href="classPl111.html#a091cc936e2951ae8884e7a54b184811c">intEvent</a>;
+<a name="l00350"></a>00350 
+<a name="l00351"></a><a class="code" href="classPl111.html#abf8ed1a0152ea70d689ffce800cd32fd">00351</a>     <span class="keywordtype">bool</span> <a class="code" href="classPl111.html#abf8ed1a0152ea70d689ffce800cd32fd">enableCapture</a>;
+<a name="l00352"></a>00352 
+<a name="l00353"></a>00353   <span class="keyword">public</span>:
+<a name="l00354"></a><a class="code" href="classPl111.html#a98df8e62be26dfc2009a7e53d5d0841d">00354</a>     <span class="keyword">typedef</span> Pl111Params <a class="code" href="classPl111.html#a98df8e62be26dfc2009a7e53d5d0841d">Params</a>;
+<a name="l00355"></a>00355 
+<a name="l00356"></a>00356     <span class="keyword">const</span> <a class="code" href="classPl111.html#a98df8e62be26dfc2009a7e53d5d0841d">Params</a> *
+<a name="l00357"></a><a class="code" href="classPl111.html#acd3c3feb78ae7a8f88fe0f110a718dff">00357</a>     <a class="code" href="classPl111.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00358"></a>00358 <span class="keyword">    </span>{
+<a name="l00359"></a>00359         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classPl111.html#a98df8e62be26dfc2009a7e53d5d0841d">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00360"></a>00360     }
+<a name="l00361"></a>00361     <a class="code" href="classPl111.html#af9c40731047e4f40c32124db60dd4c19">Pl111</a>(<span class="keyword">const</span> <a class="code" href="classPl111.html#a98df8e62be26dfc2009a7e53d5d0841d">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00362"></a>00362     <a class="code" href="classPl111.html#a2f88fbe458a30b5dfef6be54275440b8">~Pl111</a>();
+<a name="l00363"></a>00363 
+<a name="l00364"></a>00364     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPl111.html#a613ec7d5e1ec64f8d21fec78ae8e568e">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00365"></a>00365     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPl111.html#a4cefab464e72b5dd42c003a0a4341802">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00366"></a>00366 
+<a name="l00367"></a>00367     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classPl111.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00368"></a>00368     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classPl111.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00369"></a>00369 
+<a name="l00375"></a>00375     <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classPl111.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00376"></a>00376 };
+<a name="l00377"></a>00377 
+<a name="l00378"></a>00378 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

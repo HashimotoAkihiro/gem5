@@ -1,0 +1,190 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/power/pagetable.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/power/pagetable.hh</h1><a href="power_2pagetable_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2007 MIPS Technologies, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * Copyright (c) 2007-2008 The Florida State University</span>
+<a name="l00005"></a>00005 <span class="comment"> * Copyright (c) 2009 The University of Edinburgh</span>
+<a name="l00006"></a>00006 <span class="comment"> * All rights reserved.</span>
+<a name="l00007"></a>00007 <span class="comment"> *</span>
+<a name="l00008"></a>00008 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00009"></a>00009 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00010"></a>00010 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00011"></a>00011 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00012"></a>00012 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00013"></a>00013 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00014"></a>00014 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00015"></a>00015 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00016"></a>00016 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00017"></a>00017 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00018"></a>00018 <span class="comment"> *</span>
+<a name="l00019"></a>00019 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00020"></a>00020 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00021"></a>00021 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00022"></a>00022 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00023"></a>00023 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00024"></a>00024 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00025"></a>00025 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00026"></a>00026 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00027"></a>00027 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00028"></a>00028 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00029"></a>00029 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00030"></a>00030 <span class="comment"> *</span>
+<a name="l00031"></a>00031 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00032"></a>00032 <span class="comment"> *          Steve Reinhardt</span>
+<a name="l00033"></a>00033 <span class="comment"> *          Jaidev Patwardhan</span>
+<a name="l00034"></a>00034 <span class="comment"> *          Stephen Hines</span>
+<a name="l00035"></a>00035 <span class="comment"> *          Timothy M. Jones</span>
+<a name="l00036"></a>00036 <span class="comment"> */</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#ifndef __ARCH_POWER_PAGETABLE_H__</span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_POWER_PAGETABLE_H__</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="power_2isa__traits_8hh.html">arch/power/isa_traits.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="power_2utility_8hh.html">arch/power/utility.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="power_2vtophys_8hh.html">arch/power/vtophys.hh</a>&quot;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="keyword">namespace </span>PowerISA {
+<a name="l00046"></a>00046 
+<a name="l00047"></a><a class="code" href="structPowerISA_1_1VAddr.html">00047</a> <span class="keyword">struct </span><a class="code" href="structPowerISA_1_1VAddr.html">VAddr</a>
+<a name="l00048"></a>00048 {
+<a name="l00049"></a><a class="code" href="structPowerISA_1_1VAddr.html#a90a805e8bf3e59628bdcc4ca67fc68c4">00049</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="structPowerISA_1_1VAddr.html#a90a805e8bf3e59628bdcc4ca67fc68c4">ImplBits</a> = 43;
+<a name="l00050"></a><a class="code" href="structPowerISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">00050</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPowerISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">ImplMask</a> = (<a class="code" href="base_2types_8hh.html#adcc3cf526a71c0dfaae020d432c78b83">ULL</a>(1) &lt;&lt; <a class="code" href="structPowerISA_1_1VAddr.html#a90a805e8bf3e59628bdcc4ca67fc68c4">ImplBits</a>) - 1;
+<a name="l00051"></a><a class="code" href="structPowerISA_1_1VAddr.html#aea265d87906fd130da86ab5d0977f26a">00051</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPowerISA_1_1VAddr.html#aea265d87906fd130da86ab5d0977f26a">UnImplMask</a> = ~<a class="code" href="structPowerISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">ImplMask</a>;
+<a name="l00052"></a>00052 
+<a name="l00053"></a><a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">00053</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00054"></a>00054 
+<a name="l00055"></a><a class="code" href="structPowerISA_1_1VAddr.html#aea4be566b2249d0b69dcee270c8b461d">00055</a>     <a class="code" href="structPowerISA_1_1VAddr.html#aea4be566b2249d0b69dcee270c8b461d">VAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>)
+<a name="l00056"></a>00056         : <a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>(a)
+<a name="l00057"></a>00057     {}
+<a name="l00058"></a>00058 
+<a name="l00059"></a><a class="code" href="structPowerISA_1_1VAddr.html#acb58a2b913b1ee45cf52ff8a6f5297c5">00059</a>     <a class="code" href="structPowerISA_1_1VAddr.html#acb58a2b913b1ee45cf52ff8a6f5297c5">operator Addr</a>()<span class="keyword"> const</span>
+<a name="l00060"></a>00060 <span class="keyword">    </span>{
+<a name="l00061"></a>00061         <span class="keywordflow">return</span> <a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00062"></a>00062     }
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064     <span class="keyword">const</span> <a class="code" href="structPowerISA_1_1VAddr.html">VAddr</a>
+<a name="l00065"></a><a class="code" href="structPowerISA_1_1VAddr.html#a7a4215209d20e18c277206574eb1a86e">00065</a>     &amp;<a class="code" href="structPowerISA_1_1VAddr.html#a7a4215209d20e18c277206574eb1a86e">operator=</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>)
+<a name="l00066"></a>00066     {
+<a name="l00067"></a>00067         <a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> = a;
+<a name="l00068"></a>00068         <span class="keywordflow">return</span> *<span class="keyword">this</span>;
+<a name="l00069"></a>00069     }
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00072"></a><a class="code" href="structPowerISA_1_1VAddr.html#ab81a86f36291439a60bf57c10ae767f4">00072</a>     <a class="code" href="structPowerISA_1_1VAddr.html#ab81a86f36291439a60bf57c10ae767f4">vpn</a>()<span class="keyword"> const</span>
+<a name="l00073"></a>00073 <span class="keyword">    </span>{
+<a name="l00074"></a>00074         <span class="keywordflow">return</span> (<a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &amp; <a class="code" href="structPowerISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">ImplMask</a>) &gt;&gt; <a class="code" href="namespacePowerISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>;
+<a name="l00075"></a>00075     }
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00078"></a><a class="code" href="structPowerISA_1_1VAddr.html#a0a2c0c43cd466cb2730c9387a7061a2b">00078</a>     <a class="code" href="structPowerISA_1_1VAddr.html#a0a2c0c43cd466cb2730c9387a7061a2b">page</a>()<span class="keyword"> const</span>
+<a name="l00079"></a>00079 <span class="keyword">    </span>{
+<a name="l00080"></a>00080         <span class="keywordflow">return</span> <a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &amp; <a class="code" href="namespacePowerISA.html#ac2d47d845cf48dbc176f717bb7d50a7f">Page_Mask</a>;
+<a name="l00081"></a>00081     }
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00084"></a><a class="code" href="structPowerISA_1_1VAddr.html#ad7614ecd306d0a915379cd6fae8b02de">00084</a>     <a class="code" href="structPowerISA_1_1VAddr.html#ad7614ecd306d0a915379cd6fae8b02de">offset</a>()<span class="keyword"> const</span>
+<a name="l00085"></a>00085 <span class="keyword">    </span>{
+<a name="l00086"></a>00086         <span class="keywordflow">return</span> <a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &amp; <a class="code" href="namespacePowerISA.html#a51e1064f1269394dc26702651be5061f">PageOffset</a>;
+<a name="l00087"></a>00087     }
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00090"></a><a class="code" href="structPowerISA_1_1VAddr.html#a4ea534e4bdbdfebe2d82eddb86284b5d">00090</a>     <a class="code" href="structPowerISA_1_1VAddr.html#a4ea534e4bdbdfebe2d82eddb86284b5d">level3</a>()<span class="keyword"> const</span>
+<a name="l00091"></a>00091 <span class="keyword">    </span>{
+<a name="l00092"></a>00092         <span class="keywordflow">return</span> <a class="code" href="namespacePowerISA.html#a4e1f8d20048a1b7de1f6df74adbc22f3">PowerISA::PteAddr</a>(<a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &gt;&gt; <a class="code" href="namespacePowerISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>);
+<a name="l00093"></a>00093     }
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00096"></a><a class="code" href="structPowerISA_1_1VAddr.html#a5fb0a2faeaa59b4d186256f71f494020">00096</a>     <a class="code" href="structPowerISA_1_1VAddr.html#a5fb0a2faeaa59b4d186256f71f494020">level2</a>()<span class="keyword"> const</span>
+<a name="l00097"></a>00097 <span class="keyword">    </span>{
+<a name="l00098"></a>00098         <span class="keywordflow">return</span> <a class="code" href="namespacePowerISA.html#a4e1f8d20048a1b7de1f6df74adbc22f3">PowerISA::PteAddr</a>(<a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &gt;&gt; (<a class="code" href="namespacePowerISA.html#a9f060ccda225dfb28dff712695adab46">NPtePageShift</a> + <a class="code" href="namespacePowerISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>));
+<a name="l00099"></a>00099     }
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00102"></a><a class="code" href="structPowerISA_1_1VAddr.html#a6fac2640aa06dbd7e9cf8af5b81f8969">00102</a>     <a class="code" href="structPowerISA_1_1VAddr.html#a6fac2640aa06dbd7e9cf8af5b81f8969">level1</a>()<span class="keyword"> const</span>
+<a name="l00103"></a>00103 <span class="keyword">    </span>{
+<a name="l00104"></a>00104         <span class="keywordflow">return</span> <a class="code" href="namespacePowerISA.html#a4e1f8d20048a1b7de1f6df74adbc22f3">PowerISA::PteAddr</a>(<a class="code" href="structPowerISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &gt;&gt; (2 * <a class="code" href="namespacePowerISA.html#a9f060ccda225dfb28dff712695adab46">NPtePageShift</a> + <a class="code" href="namespacePowerISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>));
+<a name="l00105"></a>00105     }
+<a name="l00106"></a>00106 };
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108 <span class="comment">// ITB/DTB page table entry</span>
+<a name="l00109"></a><a class="code" href="structPowerISA_1_1PTE.html">00109</a> <span class="keyword">struct </span><a class="code" href="structPowerISA_1_1PTE.html">PTE</a>
+<a name="l00110"></a>00110 {
+<a name="l00111"></a>00111     <span class="comment">// What parts of the VAddr (from bits 28..11) should be used in</span>
+<a name="l00112"></a>00112     <span class="comment">// translation (includes Mask and MaskX from PageMask)</span>
+<a name="l00113"></a><a class="code" href="structPowerISA_1_1PTE.html#a55c80cc6dd4632d4322394ed691ac560">00113</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPowerISA_1_1PTE.html#a55c80cc6dd4632d4322394ed691ac560">Mask</a>;
+<a name="l00114"></a>00114 
+<a name="l00115"></a>00115     <span class="comment">// Virtual Page Number (/2) (Includes VPN2 + VPN2X .. bits 31..11</span>
+<a name="l00116"></a>00116     <span class="comment">// from EntryHi)</span>
+<a name="l00117"></a><a class="code" href="structPowerISA_1_1PTE.html#a828b555e1478c60407431dd9f779f208">00117</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPowerISA_1_1PTE.html#a828b555e1478c60407431dd9f779f208">VPN</a>;
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119     <span class="comment">// Address Space ID (8 bits) // Lower 8 bits of EntryHi</span>
+<a name="l00120"></a><a class="code" href="structPowerISA_1_1PTE.html#a79b438bb35263e6b3db98c5390a93516">00120</a>     uint8_t <a class="code" href="structPowerISA_1_1PTE.html#a79b438bb35263e6b3db98c5390a93516">asid</a>;
+<a name="l00121"></a>00121 
+<a name="l00122"></a>00122     <span class="comment">// Global Bit - Obtained by an *AND* of EntryLo0 and EntryLo1 G bit</span>
+<a name="l00123"></a><a class="code" href="structPowerISA_1_1PTE.html#adc50817b9a5196dce387a27280cf2c2c">00123</a>     <span class="keywordtype">bool</span> <a class="code" href="structPowerISA_1_1PTE.html#adc50817b9a5196dce387a27280cf2c2c">G</a>;
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125     <span class="comment">/* Contents of Entry Lo0 */</span>
+<a name="l00126"></a><a class="code" href="structPowerISA_1_1PTE.html#ae07af9e304b40a172b73d912d81635a2">00126</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPowerISA_1_1PTE.html#ae07af9e304b40a172b73d912d81635a2">PFN0</a>; <span class="comment">// Physical Frame Number - Even</span>
+<a name="l00127"></a><a class="code" href="structPowerISA_1_1PTE.html#a5d65319c8ed6ef4b4c18547773a4ccf9">00127</a>     <span class="keywordtype">bool</span> <a class="code" href="structPowerISA_1_1PTE.html#a5d65319c8ed6ef4b4c18547773a4ccf9">D0</a>;   <span class="comment">// Even entry Dirty Bit</span>
+<a name="l00128"></a><a class="code" href="structPowerISA_1_1PTE.html#aef8a8ddc9558c9cff93b2610dddea958">00128</a>     <span class="keywordtype">bool</span> <a class="code" href="structPowerISA_1_1PTE.html#aef8a8ddc9558c9cff93b2610dddea958">V0</a>;   <span class="comment">// Even entry Valid Bit</span>
+<a name="l00129"></a><a class="code" href="structPowerISA_1_1PTE.html#a88317928f6b49bb03517258dd5fd5423">00129</a>     uint8_t <a class="code" href="structPowerISA_1_1PTE.html#a88317928f6b49bb03517258dd5fd5423">C0</a>; <span class="comment">// Cache Coherency Bits - Even</span>
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131     <span class="comment">/* Contents of Entry Lo1 */</span>
+<a name="l00132"></a><a class="code" href="structPowerISA_1_1PTE.html#ab1961d83479850fdb160aec644e973fc">00132</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structPowerISA_1_1PTE.html#ab1961d83479850fdb160aec644e973fc">PFN1</a>; <span class="comment">// Physical Frame Number - Odd</span>
+<a name="l00133"></a><a class="code" href="structPowerISA_1_1PTE.html#ad13637cf05908806c978328c392d8edf">00133</a>     <span class="keywordtype">bool</span> <a class="code" href="structPowerISA_1_1PTE.html#ad13637cf05908806c978328c392d8edf">D1</a>;   <span class="comment">// Odd entry Dirty Bit</span>
+<a name="l00134"></a><a class="code" href="structPowerISA_1_1PTE.html#a2de020451ec6119f325bc89847d6f44a">00134</a>     <span class="keywordtype">bool</span> <a class="code" href="structPowerISA_1_1PTE.html#a2de020451ec6119f325bc89847d6f44a">V1</a>;   <span class="comment">// Odd entry Valid Bit</span>
+<a name="l00135"></a><a class="code" href="structPowerISA_1_1PTE.html#a8286c9d870f31a089d95e6a2285fbe2f">00135</a>     uint8_t <a class="code" href="structPowerISA_1_1PTE.html#a8286c9d870f31a089d95e6a2285fbe2f">C1</a>; <span class="comment">// Cache Coherency Bits (3 bits)</span>
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137     <span class="comment">// The next few variables are put in as optimizations to reduce TLB</span>
+<a name="l00138"></a>00138     <span class="comment">// lookup overheads. For a given Mask, what is the address shift amount</span>
+<a name="l00139"></a>00139     <span class="comment">// and what is the OffsetMask</span>
+<a name="l00140"></a><a class="code" href="structPowerISA_1_1PTE.html#a2426034b7edbceda79a55a0ca28ac68e">00140</a>     <span class="keywordtype">int</span> <a class="code" href="structPowerISA_1_1PTE.html#a2426034b7edbceda79a55a0ca28ac68e">AddrShiftAmount</a>;
+<a name="l00141"></a><a class="code" href="structPowerISA_1_1PTE.html#aef54c305cf60db572e0a9248660ec0d3">00141</a>     <span class="keywordtype">int</span> <a class="code" href="structPowerISA_1_1PTE.html#aef54c305cf60db572e0a9248660ec0d3">OffsetMask</a>;
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143     <span class="keywordtype">bool</span>
+<a name="l00144"></a><a class="code" href="structPowerISA_1_1PTE.html#a62f0e274c1fe43a9411e2c6d3d144913">00144</a>     <a class="code" href="structPowerISA_1_1PTE.html#a62f0e274c1fe43a9411e2c6d3d144913">Valid</a>()
+<a name="l00145"></a>00145     {
+<a name="l00146"></a>00146         <span class="keywordflow">return</span> (<a class="code" href="structPowerISA_1_1PTE.html#aef8a8ddc9558c9cff93b2610dddea958">V0</a> | <a class="code" href="structPowerISA_1_1PTE.html#a2de020451ec6119f325bc89847d6f44a">V1</a>);
+<a name="l00147"></a>00147     };
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149     <span class="keywordtype">void</span> <a class="code" href="structPowerISA_1_1PTE.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151     <span class="keywordtype">void</span> <a class="code" href="structPowerISA_1_1PTE.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00152"></a>00152 };
+<a name="l00153"></a>00153 
+<a name="l00154"></a>00154 } <span class="comment">// namespace PowerISA</span>
+<a name="l00155"></a>00155 
+<a name="l00156"></a>00156 <span class="preprocessor">#endif // __ARCH_POWER_PAGETABLE_H__</span>
+<a name="l00157"></a>00157 <span class="preprocessor"></span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

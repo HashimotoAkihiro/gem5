@@ -1,0 +1,98 @@
+\hypertarget{classSparcISA_1_1PowerOnReset}{
+\section{クラス PowerOnReset}
+\label{classSparcISA_1_1PowerOnReset}\index{SparcISA::PowerOnReset@{SparcISA::PowerOnReset}}
+}
+
+
+{\ttfamily \#include $<$faults.hh$>$}PowerOnResetに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classSparcISA_1_1PowerOnReset}
+\end{center}
+\end{figure}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classSparcISA_1_1PowerOnReset_a2bd783b42262278d41157d428e1f8d6f}{invoke} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classRefCountingPtr}{StaticInstPtr} inst=\hyperlink{classStaticInst_aa793d9793af735f09096369fb17567b6}{StaticInst::nullStaticInstPtr})
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classSparcISA_1_1PowerOnReset_a2bd783b42262278d41157d428e1f8d6f}{
+\index{SparcISA::PowerOnReset@{SparcISA::PowerOnReset}!invoke@{invoke}}
+\index{invoke@{invoke}!SparcISA::PowerOnReset@{SparcISA::PowerOnReset}}
+\subsubsection[{invoke}]{\setlength{\rightskip}{0pt plus 5cm}void invoke ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf StaticInstPtr} {\em inst} = {\ttfamily {\bf StaticInst::nullStaticInstPtr}})\hspace{0.3cm}{\ttfamily  \mbox{[}private, virtual\mbox{]}}}}
+\label{classSparcISA_1_1PowerOnReset_a2bd783b42262278d41157d428e1f8d6f}
+
+
+\hyperlink{classSparcISA_1_1SparcFaultBase_a2bd783b42262278d41157d428e1f8d6f}{SparcFaultBase}を再定義しています。
+
+
+\begin{DoxyCode}
+555 {
+556     // For SPARC, when a system is first started, there is a power
+557     // on reset Trap which sets the processor into the following state.
+558     // Bits that aren't set aren't defined on startup.
+559 
+560     tc->setMiscRegNoEffect(MISCREG_TL, MaxTL);
+561     tc->setMiscRegNoEffect(MISCREG_TT, trapType());
+562     tc->setMiscReg(MISCREG_GL, MaxGL);
+563 
+564     PSTATE pstate = 0;
+565     pstate.pef = 1;
+566     pstate.priv = 1;
+567     tc->setMiscRegNoEffect(MISCREG_PSTATE, pstate);
+568 
+569     // Turn on red and hpriv, set everything else to 0
+570     HPSTATE hpstate = tc->readMiscRegNoEffect(MISCREG_HPSTATE);
+571     hpstate.red = 1;
+572     hpstate.hpriv = 1;
+573     hpstate.ibe = 0;
+574     hpstate.tlz = 0;
+575     tc->setMiscRegNoEffect(MISCREG_HPSTATE, hpstate);
+576 
+577     // The tick register is unreadable by nonprivileged software
+578     tc->setMiscRegNoEffect(MISCREG_TICK, 1ULL << 63);
+579 
+580     // Enter RED state. We do this last so that the actual state preserved in
+581     // the trap stack is the state from before this fault.
+582     enterREDState(tc);
+583 
+584     Addr PC, NPC;
+585     getREDVector(trapType(), PC, NPC);
+586 
+587     PCState pc;
+588     pc.pc(PC);
+589     pc.npc(NPC);
+590     pc.nnpc(NPC + sizeof(MachInst));
+591     pc.upc(0);
+592     pc.nupc(1);
+593     tc->pcState(pc);
+594 
+595     // These registers are specified as "undefined" after a POR, and they
+596     // should have reasonable values after the miscregfile is reset
+597     /*
+598     // Clear all the soft interrupt bits
+599     softint = 0;
+600     // disable timer compare interrupts, reset tick_cmpr
+601     tc->setMiscRegNoEffect(MISCREG_
+602     tick_cmprFields.int_dis = 1;
+603     tick_cmprFields.tick_cmpr = 0; // Reset to 0 for pretty printing
+604     stickFields.npt = 1; // The TICK register is unreadable by by !priv
+605     stick_cmprFields.int_dis = 1; // disable timer compare interrupts
+606     stick_cmprFields.tick_cmpr = 0; // Reset to 0 for pretty printing
+607 
+608     tt[tl] = _trapType;
+609 
+610     hintp = 0; // no interrupts pending
+611     hstick_cmprFields.int_dis = 1; // disable timer compare interrupts
+612     hstick_cmprFields.tick_cmpr = 0; // Reset to 0 for pretty printing
+613     */
+614 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/sparc/\hyperlink{arch_2sparc_2faults_8hh}{faults.hh}\item 
+arch/sparc/\hyperlink{arch_2sparc_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

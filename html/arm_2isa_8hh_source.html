@@ -1,0 +1,457 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/arm/isa.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/arm/isa.hh</h1><a href="arm_2isa_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010, 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2009 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __ARCH_ARM_ISA_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ARM_ISA_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="arm_2registers_8hh.html">arch/arm/registers.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="arch_2arm_2system_8hh.html">arch/arm/system.hh</a>&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="arch_2arm_2tlb_8hh.html">arch/arm/tlb.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="arch_2arm_2types_8hh.html">arch/arm/types.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;debug/Checkpoint.hh&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="generic__timer_8hh.html">dev/arm/generic_timer.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keyword">struct </span>ArmISAParams;
+<a name="l00055"></a>00055 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00056"></a>00056 <span class="keyword">class </span><a class="code" href="classCheckpoint.html">Checkpoint</a>;
+<a name="l00057"></a>00057 <span class="keyword">class </span><a class="code" href="classEventManager.html">EventManager</a>;
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059 <span class="keyword">namespace </span><a class="code" href="classArmISA_1_1ArmISA.html">ArmISA</a>
+<a name="l00060"></a>00060 {
+<a name="l00061"></a>00061 
+<a name="l00067"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582">00067</a>     <span class="keyword">enum</span> <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582">translateTable</a> {
+<a name="l00068"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ab0d7d3c23e655e9cd32a15029e64a11b">00068</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ab0d7d3c23e655e9cd32a15029e64a11b">miscRegTranslateCSSELR_EL1</a>,
+<a name="l00069"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a471fb300a692ac99f7c78cda306c93d8">00069</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a471fb300a692ac99f7c78cda306c93d8">miscRegTranslateSCTLR_EL1</a>,
+<a name="l00070"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a2a6e764a0027101db0f1136d06459a82">00070</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a2a6e764a0027101db0f1136d06459a82">miscRegTranslateSCTLR_EL2</a>,
+<a name="l00071"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a45d0b58df6d9d84ae0d22ee369e4be2b">00071</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a45d0b58df6d9d84ae0d22ee369e4be2b">miscRegTranslateACTLR_EL1</a>,
+<a name="l00072"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a6655a6040021692ee240d40440e9bedc">00072</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a6655a6040021692ee240d40440e9bedc">miscRegTranslateACTLR_EL2</a>,
+<a name="l00073"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a0b1351febccdfc8a11ecc42a0e45e197">00073</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a0b1351febccdfc8a11ecc42a0e45e197">miscRegTranslateCPACR_EL1</a>,
+<a name="l00074"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a7e165fc1e33ba3c88c3a8ea233967c4c">00074</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a7e165fc1e33ba3c88c3a8ea233967c4c">miscRegTranslateCPTR_EL2</a>,
+<a name="l00075"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a1e5f7a645071c70a8c2c46188517e6ac">00075</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a1e5f7a645071c70a8c2c46188517e6ac">miscRegTranslateHCR_EL2</a>,
+<a name="l00076"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a979ca33bcfd94785af198e9eeea4eda2">00076</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a979ca33bcfd94785af198e9eeea4eda2">miscRegTranslateMDCR_EL2</a>,
+<a name="l00077"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a82cbc0d17ae2c4c9bdc486480b721b0a">00077</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a82cbc0d17ae2c4c9bdc486480b721b0a">miscRegTranslateHSTR_EL2</a>,
+<a name="l00078"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad23d9edc889a161ed3f6685767421899">00078</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad23d9edc889a161ed3f6685767421899">miscRegTranslateHACR_EL2</a>,
+<a name="l00079"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad3c4f59363db4ed55db00e576b773284">00079</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad3c4f59363db4ed55db00e576b773284">miscRegTranslateTTBR0_EL1</a>,
+<a name="l00080"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a285651057382eae40c8ad2cb16fb78be">00080</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a285651057382eae40c8ad2cb16fb78be">miscRegTranslateTTBR1_EL1</a>,
+<a name="l00081"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a5b02636aeca6f5674fcfa2919cf78abe">00081</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a5b02636aeca6f5674fcfa2919cf78abe">miscRegTranslateTTBR0_EL2</a>,
+<a name="l00082"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a70109c334d08bb6677afbb08ea27e24e">00082</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a70109c334d08bb6677afbb08ea27e24e">miscRegTranslateVTTBR_EL2</a>,
+<a name="l00083"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a7ac8193cfc81b763b40de05ce1f01703">00083</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a7ac8193cfc81b763b40de05ce1f01703">miscRegTranslateTCR_EL1</a>,
+<a name="l00084"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a9401e51a8d7dd235e02808f923fcf773">00084</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a9401e51a8d7dd235e02808f923fcf773">miscRegTranslateTCR_EL2</a>,
+<a name="l00085"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac8bb70ff6d840b0c88da1bc1a9cc6afe">00085</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac8bb70ff6d840b0c88da1bc1a9cc6afe">miscRegTranslateVTCR_EL2</a>,
+<a name="l00086"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad72283202498f2f9aa0c70ff9917e94e">00086</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad72283202498f2f9aa0c70ff9917e94e">miscRegTranslateAFSR0_EL1</a>,
+<a name="l00087"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a5b6b570d60f94153ddeaf044f1849c73">00087</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a5b6b570d60f94153ddeaf044f1849c73">miscRegTranslateAFSR1_EL1</a>,
+<a name="l00088"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a17d00c3c9c4bc2c9ee38fa165d20dc12">00088</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a17d00c3c9c4bc2c9ee38fa165d20dc12">miscRegTranslateAFSR0_EL2</a>,
+<a name="l00089"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a720baebd9a55acf29ea162fd934ef645">00089</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a720baebd9a55acf29ea162fd934ef645">miscRegTranslateAFSR1_EL2</a>,
+<a name="l00090"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a840823c36e31a9283532d54ee68c201e">00090</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a840823c36e31a9283532d54ee68c201e">miscRegTranslateESR_EL2</a>,
+<a name="l00091"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a4b3a4bb143f43d7191eabfa30bc7bcd5">00091</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a4b3a4bb143f43d7191eabfa30bc7bcd5">miscRegTranslateFAR_EL1</a>,
+<a name="l00092"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582afd341c88d4223037f769d07cc80381d3">00092</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582afd341c88d4223037f769d07cc80381d3">miscRegTranslateFAR_EL2</a>,
+<a name="l00093"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ace440f81b6b70d8f929465aaf221a23c">00093</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ace440f81b6b70d8f929465aaf221a23c">miscRegTranslateHPFAR_EL2</a>,
+<a name="l00094"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad8f282c64d8dc496f8e05f95892a68b7">00094</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad8f282c64d8dc496f8e05f95892a68b7">miscRegTranslatePAR_EL1</a>,
+<a name="l00095"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a317e039af334f7edf3f92d2a323ef5b0">00095</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a317e039af334f7edf3f92d2a323ef5b0">miscRegTranslateMAIR_EL1</a>,
+<a name="l00096"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a742e580744981a00260f9ca0290ac55b">00096</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a742e580744981a00260f9ca0290ac55b">miscRegTranslateMAIR_EL2</a>,
+<a name="l00097"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac5c6a994432a32821f7aa8ef9a499f6a">00097</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac5c6a994432a32821f7aa8ef9a499f6a">miscRegTranslateAMAIR_EL1</a>,
+<a name="l00098"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a2fc51ba22fd38dc623e5b482202f6fed">00098</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a2fc51ba22fd38dc623e5b482202f6fed">miscRegTranslateVBAR_EL1</a>,
+<a name="l00099"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a279fa9fbcc7fec5a4def50b753ea2bfd">00099</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a279fa9fbcc7fec5a4def50b753ea2bfd">miscRegTranslateVBAR_EL2</a>,
+<a name="l00100"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a40f9c0ade270b5d4b66b7438821ac335">00100</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a40f9c0ade270b5d4b66b7438821ac335">miscRegTranslateCONTEXTIDR_EL1</a>,
+<a name="l00101"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a0b20f0cd9de167dc1ccad3d99a547272">00101</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a0b20f0cd9de167dc1ccad3d99a547272">miscRegTranslateTPIDR_EL0</a>,
+<a name="l00102"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad82a68ebee8bddc00785e750150fb1b4">00102</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad82a68ebee8bddc00785e750150fb1b4">miscRegTranslateTPIDRRO_EL0</a>,
+<a name="l00103"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a114bb8d13a05825d32092290d54667f0">00103</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a114bb8d13a05825d32092290d54667f0">miscRegTranslateTPIDR_EL1</a>,
+<a name="l00104"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ab9699683d0741cca6ec709416d88c4c5">00104</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ab9699683d0741cca6ec709416d88c4c5">miscRegTranslateTPIDR_EL2</a>,
+<a name="l00105"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a4f936b1d8c9b59a58208a2803cb9f6cf">00105</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a4f936b1d8c9b59a58208a2803cb9f6cf">miscRegTranslateTEECR32_EL1</a>,
+<a name="l00106"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a05052459a6bf539d8e3e56f2c4995a00">00106</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a05052459a6bf539d8e3e56f2c4995a00">miscRegTranslateCNTFRQ_EL0</a>,
+<a name="l00107"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a61dd22b99485e93ac296c3e9772949d0">00107</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a61dd22b99485e93ac296c3e9772949d0">miscRegTranslateCNTPCT_EL0</a>,
+<a name="l00108"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a8342cc6cfa90dbd8a5039176617b1169">00108</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a8342cc6cfa90dbd8a5039176617b1169">miscRegTranslateCNTVCT_EL0</a>,
+<a name="l00109"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac9660b57fc38cebb896899790cc5fe42">00109</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac9660b57fc38cebb896899790cc5fe42">miscRegTranslateCNTVOFF_EL2</a>,
+<a name="l00110"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a91aaad6e8b18e3769456257e98669a8d">00110</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a91aaad6e8b18e3769456257e98669a8d">miscRegTranslateCNTKCTL_EL1</a>,
+<a name="l00111"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a5b185c8102f456c7b26894034b786e3c">00111</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a5b185c8102f456c7b26894034b786e3c">miscRegTranslateCNTHCTL_EL2</a>,
+<a name="l00112"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a50ff24002708b4a6dcc25ac5de957aca">00112</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a50ff24002708b4a6dcc25ac5de957aca">miscRegTranslateCNTP_TVAL_EL0</a>,
+<a name="l00113"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad783c897a709377e0bdb7e2da10eb0ec">00113</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ad783c897a709377e0bdb7e2da10eb0ec">miscRegTranslateCNTP_CTL_EL0</a>,
+<a name="l00114"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a4e132b11ecaedf44c63f39730c2bd2dd">00114</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a4e132b11ecaedf44c63f39730c2bd2dd">miscRegTranslateCNTP_CVAL_EL0</a>,
+<a name="l00115"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582aa4474db15310597cc93bb907419741a6">00115</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582aa4474db15310597cc93bb907419741a6">miscRegTranslateCNTV_TVAL_EL0</a>,
+<a name="l00116"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a437e68d241e389c5a274fda2dedcce53">00116</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a437e68d241e389c5a274fda2dedcce53">miscRegTranslateCNTV_CTL_EL0</a>,
+<a name="l00117"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a6be29347bc66e3af3a7ab698b2e0b575">00117</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a6be29347bc66e3af3a7ab698b2e0b575">miscRegTranslateCNTV_CVAL_EL0</a>,
+<a name="l00118"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a10fb8d1e940930a6a03f5b29223bc061">00118</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a10fb8d1e940930a6a03f5b29223bc061">miscRegTranslateCNTHP_TVAL_EL2</a>,
+<a name="l00119"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a39f7e223273bc6ed1701250049eb8d5e">00119</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a39f7e223273bc6ed1701250049eb8d5e">miscRegTranslateCNTHP_CTL_EL2</a>,
+<a name="l00120"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a2ca33b734b85cf85218d84dc79d7d1c0">00120</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a2ca33b734b85cf85218d84dc79d7d1c0">miscRegTranslateCNTHP_CVAL_EL2</a>,
+<a name="l00121"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a27045a0ef8fbfb9d536f7ddbead33d17">00121</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a27045a0ef8fbfb9d536f7ddbead33d17">miscRegTranslateDACR32_EL2</a>,
+<a name="l00122"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a0617c3dc909712ae23b17f96445f1530">00122</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582a0617c3dc909712ae23b17f96445f1530">miscRegTranslateIFSR32_EL2</a>,
+<a name="l00123"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582abafbaf2f58a828422fb750fccadaac2f">00123</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582abafbaf2f58a828422fb750fccadaac2f">miscRegTranslateTEEHBR32_EL1</a>,
+<a name="l00124"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac07c0e8b104878de440fb7f7b7bc548f">00124</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ac07c0e8b104878de440fb7f7b7bc548f">miscRegTranslateSDER32_EL3</a>,
+<a name="l00125"></a><a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ab8db5a5637426776d561dd29024a1cc4">00125</a>         <a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ab8db5a5637426776d561dd29024a1cc4">miscRegTranslateMax</a>
+<a name="l00126"></a>00126     };
+<a name="l00127"></a>00127 
+<a name="l00128"></a>00128     <span class="keyword">class </span><a class="code" href="structArmISA_1_1ISA.html">ISA</a> : <span class="keyword">public</span> <a class="code" href="classm5_1_1SimObject_1_1SimObject.html">SimObject</a>
+<a name="l00129"></a>00129     {
+<a name="l00130"></a>00130       <span class="keyword">protected</span>:
+<a name="l00131"></a>00131         <span class="comment">// Parent system</span>
+<a name="l00132"></a><a class="code" href="structArmISA_1_1ISA.html#a5c1351250909b50f57e70dbb5bf443d8">00132</a>         <a class="code" href="classArmSystem.html">ArmSystem</a> *<a class="code" href="structArmISA_1_1ISA.html#a5c1351250909b50f57e70dbb5bf443d8">system</a>;
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134         <span class="comment">// Cached copies of system-level properties</span>
+<a name="l00135"></a><a class="code" href="structArmISA_1_1ISA.html#a9f135583566fb70bba3c10395368f2e4">00135</a>         <span class="keywordtype">bool</span> <a class="code" href="structArmISA_1_1ISA.html#a9f135583566fb70bba3c10395368f2e4">haveSecurity</a>;
+<a name="l00136"></a><a class="code" href="structArmISA_1_1ISA.html#a8e8469d916956ca8b9052ebd6f155e0b">00136</a>         <span class="keywordtype">bool</span> <a class="code" href="structArmISA_1_1ISA.html#a8e8469d916956ca8b9052ebd6f155e0b">haveLPAE</a>;
+<a name="l00137"></a><a class="code" href="structArmISA_1_1ISA.html#a48e6871d9ab14ff31b50307f0c617f95">00137</a>         <span class="keywordtype">bool</span> <a class="code" href="structArmISA_1_1ISA.html#a48e6871d9ab14ff31b50307f0c617f95">haveVirtualization</a>;
+<a name="l00138"></a><a class="code" href="structArmISA_1_1ISA.html#a3aea18414c83c86fa366401cb767e7ab">00138</a>         <span class="keywordtype">bool</span> <a class="code" href="structArmISA_1_1ISA.html#a3aea18414c83c86fa366401cb767e7ab">haveLargeAsid64</a>;
+<a name="l00139"></a><a class="code" href="structArmISA_1_1ISA.html#a4ab96b1a55880cac440e81e794c6f8d7">00139</a>         uint8_t <a class="code" href="structArmISA_1_1ISA.html#a4ab96b1a55880cac440e81e794c6f8d7">physAddrRange64</a>;
+<a name="l00140"></a>00140 
+<a name="l00142"></a><a class="code" href="structArmISA_1_1ISA_1_1MiscRegLUTEntry.html">00142</a>         <span class="keyword">struct </span><a class="code" href="structArmISA_1_1ISA_1_1MiscRegLUTEntry.html">MiscRegLUTEntry</a> {
+<a name="l00143"></a><a class="code" href="structArmISA_1_1ISA_1_1MiscRegLUTEntry.html#aff7d2770e8a15d36e4813a75d1c08ff2">00143</a>             <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structArmISA_1_1ISA_1_1MiscRegLUTEntry.html#aff7d2770e8a15d36e4813a75d1c08ff2">lower</a>;
+<a name="l00144"></a><a class="code" href="structArmISA_1_1ISA_1_1MiscRegLUTEntry.html#a9e4820bf59a6d1c0791b0de3b8a0cd43">00144</a>             <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structArmISA_1_1ISA_1_1MiscRegLUTEntry.html#a9e4820bf59a6d1c0791b0de3b8a0cd43">upper</a>;
+<a name="l00145"></a>00145         };
+<a name="l00146"></a>00146 
+<a name="l00147"></a><a class="code" href="structArmISA_1_1ISA_1_1MiscRegInitializerEntry.html">00147</a>         <span class="keyword">struct </span><a class="code" href="structArmISA_1_1ISA_1_1MiscRegInitializerEntry.html">MiscRegInitializerEntry</a> {
+<a name="l00148"></a><a class="code" href="structArmISA_1_1ISA_1_1MiscRegInitializerEntry.html#aafd95f8c7a99b9189ede7cdf0871ebe8">00148</a>             <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structArmISA_1_1ISA_1_1MiscRegInitializerEntry.html#aafd95f8c7a99b9189ede7cdf0871ebe8">index</a>;
+<a name="l00149"></a><a class="code" href="structArmISA_1_1ISA_1_1MiscRegInitializerEntry.html#a84159fd8bc410be2a74bb58420de73f9">00149</a>             <span class="keyword">struct </span><a class="code" href="structArmISA_1_1ISA_1_1MiscRegLUTEntry.html">MiscRegLUTEntry</a> <a class="code" href="structArmISA_1_1ISA_1_1MiscRegInitializerEntry.html#a84159fd8bc410be2a74bb58420de73f9">entry</a>;
+<a name="l00150"></a>00150         };
+<a name="l00151"></a>00151 
+<a name="l00153"></a><a class="code" href="structArmISA_1_1ISA.html#af82c294831fc5f1bce99f03cacdd8884">00153</a>         <span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">struct </span><a class="code" href="structArmISA_1_1ISA_1_1MiscRegInitializerEntry.html">MiscRegInitializerEntry</a>
+<a name="l00154"></a>00154                             <a class="code" href="structArmISA_1_1ISA.html#af82c294831fc5f1bce99f03cacdd8884">MiscRegSwitch</a>[<a class="code" href="namespaceArmISA.html#aff03b0631c231905f0e5d17518461582ab8db5a5637426776d561dd29024a1cc4">miscRegTranslateMax</a>];
+<a name="l00155"></a>00155 
+<a name="l00157"></a><a class="code" href="structArmISA_1_1ISA.html#ad38b21495dd061c39be969173cdd1c8d">00157</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;struct MiscRegLUTEntry&gt;</a> <a class="code" href="structArmISA_1_1ISA.html#ad38b21495dd061c39be969173cdd1c8d">lookUpMiscReg</a>;
+<a name="l00158"></a>00158 
+<a name="l00159"></a><a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">00159</a>         <a class="code" href="namespaceArmISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>[<a class="code" href="namespaceArmISA.html#a568d4aa96dd7cd963f3b1b1b0446c9c6">NumMiscRegs</a>];
+<a name="l00160"></a><a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">00160</a>         <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791b">IntRegIndex</a> *<a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a>;
+<a name="l00161"></a>00161 
+<a name="l00162"></a>00162         <span class="keywordtype">void</span>
+<a name="l00163"></a><a class="code" href="structArmISA_1_1ISA.html#a2459588c548b25984ed5b75051741841">00163</a>         <a class="code" href="structArmISA_1_1ISA.html#a2459588c548b25984ed5b75051741841">updateRegMap</a>(CPSR <a class="code" href="namespaceArmISA.html#ad377bf9b9c48f8cf3e8e918e0847b1fe">cpsr</a>)
+<a name="l00164"></a>00164         {
+<a name="l00165"></a>00165             <span class="keywordflow">if</span> (cpsr.width == 0) {
+<a name="l00166"></a>00166                 <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#a61b59765372fd10a3c306de953063e1c">IntReg64Map</a>;
+<a name="l00167"></a>00167             } <span class="keywordflow">else</span> {
+<a name="l00168"></a>00168                 <span class="keywordflow">switch</span> (cpsr.mode) {
+<a name="l00169"></a>00169                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa06c431ef2d3daa0430be10958afb75da">MODE_USER</a>:
+<a name="l00170"></a>00170                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa3089ec4290f4fd2378a9843e275e679d">MODE_SYSTEM</a>:
+<a name="l00171"></a>00171                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#a429a1b4e729321ba6e26f9d5431eb0b4">IntRegUsrMap</a>;
+<a name="l00172"></a>00172                     <span class="keywordflow">break</span>;
+<a name="l00173"></a>00173                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa114f4eed33e46c8994d1c28ea790ae69">MODE_FIQ</a>:
+<a name="l00174"></a>00174                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#ad9e04f768864ec44080110584aef455c">IntRegFiqMap</a>;
+<a name="l00175"></a>00175                     <span class="keywordflow">break</span>;
+<a name="l00176"></a>00176                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa6ff5fe07fb1563cee773d932bb66d9b7">MODE_IRQ</a>:
+<a name="l00177"></a>00177                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#a4ebe19e65b77b6992d444734970a6cc3">IntRegIrqMap</a>;
+<a name="l00178"></a>00178                     <span class="keywordflow">break</span>;
+<a name="l00179"></a>00179                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaad0b02e29561c3d3e1c2c919fb8baa17a">MODE_SVC</a>:
+<a name="l00180"></a>00180                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#a36508dcad6bb74839a7c80a03f7aeaeb">IntRegSvcMap</a>;
+<a name="l00181"></a>00181                     <span class="keywordflow">break</span>;
+<a name="l00182"></a>00182                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa5cb887fd4bf61d41bdf6b2d617d9fb33">MODE_MON</a>:
+<a name="l00183"></a>00183                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#a8dbc1fb5a7a205452b8d70872a999abb">IntRegMonMap</a>;
+<a name="l00184"></a>00184                     <span class="keywordflow">break</span>;
+<a name="l00185"></a>00185                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa6258e223348908f6ceefcfe029aba214">MODE_ABORT</a>:
+<a name="l00186"></a>00186                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#ac759f403b33941374fc2f5c727e6dc38">IntRegAbtMap</a>;
+<a name="l00187"></a>00187                     <span class="keywordflow">break</span>;
+<a name="l00188"></a>00188                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa1978fe9b066f3cfc8ad44f06e8a0e199">MODE_HYP</a>:
+<a name="l00189"></a>00189                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#ab02560f4c45ccebd140d1ee0dafd8f99">IntRegHypMap</a>;
+<a name="l00190"></a>00190                     <span class="keywordflow">break</span>;
+<a name="l00191"></a>00191                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa6c9ee0fa90f09f791c2b50805b049ed3">MODE_UNDEFINED</a>:
+<a name="l00192"></a>00192                     <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a> = <a class="code" href="namespaceArmISA.html#aca4e9cd55af6ac65f87443d2fe738af8">IntRegUndMap</a>;
+<a name="l00193"></a>00193                     <span class="keywordflow">break</span>;
+<a name="l00194"></a>00194                   <span class="keywordflow">default</span>:
+<a name="l00195"></a>00195                     <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Unrecognized mode setting in CPSR.\n&quot;</span>);
+<a name="l00196"></a>00196                 }
+<a name="l00197"></a>00197             }
+<a name="l00198"></a>00198         }<a class="code" href="classGenericTimer_1_1SystemCounter.html"></a>
+<a name="l00199"></a>00199 <a class="code" href="classGenericTimer_1_1SystemCounter.html"></a>
+<a name="l00200"></a>00200 <a class="code" href="classGenericTimer_1_1SystemCounter.html">        ::GenericTimer::SystemCounter</a> * <a class="code" href="structArmISA_1_1ISA.html#ae498e9dac91e31ef155c01f0f15113ff">getSystemCounter</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);<a class="code" href="classGenericTimer_1_1ArchTimer.html" title="Per-CPU architected timer."></a>
+<a name="l00201"></a>00201 <a class="code" href="classGenericTimer_1_1ArchTimer.html" title="Per-CPU architected timer.">        ::GenericTimer::ArchTimer</a> * <a class="code" href="structArmISA_1_1ISA.html#a0b17cffd3a0fd5aa2339f4533db424d1">getArchTimer</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00202"></a>00202                                                  <span class="keywordtype">int</span> cpu_id);
+<a name="l00203"></a>00203 
+<a name="l00204"></a>00204 
+<a name="l00205"></a>00205       <span class="keyword">private</span>:
+<a name="l00206"></a><a class="code" href="structArmISA_1_1ISA.html#aa4f7032f366383d3b3696a1d0f5410a2">00206</a>         <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#aa4f7032f366383d3b3696a1d0f5410a2">assert32</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) {
+<a name="l00207"></a>00207             CPSR <a class="code" href="namespaceArmISA.html#ad377bf9b9c48f8cf3e8e918e0847b1fe">cpsr</a> M5_VAR_USED = <a class="code" href="structArmISA_1_1ISA.html#a5e47db3953e6f623b58fee4f22a406bd">readMiscReg</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a6221718f6b42d5072eb2beec580c7f69">MISCREG_CPSR</a>, tc);
+<a name="l00208"></a>00208             assert(<a class="code" href="namespaceArmISA.html#ad377bf9b9c48f8cf3e8e918e0847b1fe">cpsr</a>.width);
+<a name="l00209"></a>00209         }
+<a name="l00210"></a>00210 
+<a name="l00211"></a><a class="code" href="structArmISA_1_1ISA.html#aad0b8ae6c31a34244ccf43b9202b40eb">00211</a>         <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#aad0b8ae6c31a34244ccf43b9202b40eb">assert64</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) {
+<a name="l00212"></a>00212             CPSR <a class="code" href="namespaceArmISA.html#ad377bf9b9c48f8cf3e8e918e0847b1fe">cpsr</a> M5_VAR_USED = <a class="code" href="structArmISA_1_1ISA.html#a5e47db3953e6f623b58fee4f22a406bd">readMiscReg</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a6221718f6b42d5072eb2beec580c7f69">MISCREG_CPSR</a>, tc);
+<a name="l00213"></a>00213             assert(!<a class="code" href="namespaceArmISA.html#ad377bf9b9c48f8cf3e8e918e0847b1fe">cpsr</a>.width);
+<a name="l00214"></a>00214         }
+<a name="l00215"></a>00215 
+<a name="l00216"></a>00216         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#ac79ec0e36bd10b6ae9a109def0b71fb2">tlbiVA</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="namespaceArmISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> newVal, uint8_t <a class="code" href="namespaceArmISA.html#a92720268bdaf1e0e53fc66152af0ff18">asid</a>,
+<a name="l00217"></a>00217                     <span class="keywordtype">bool</span> secure_lookup, uint8_t target_el);
+<a name="l00218"></a>00218 
+<a name="l00219"></a>00219         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#a06e97933d5648bf0558da52b060bd815">tlbiALL</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">bool</span> secure_lookup, uint8_t target_el);
+<a name="l00220"></a>00220 
+<a name="l00221"></a>00221         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#a6ea364a473aab7a0fd9d7f4f68bff214">tlbiALLN</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">bool</span> hyp, uint8_t target_el);
+<a name="l00222"></a>00222 
+<a name="l00223"></a>00223         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#af079c2af6d92761ccb2f8083884479a7">tlbiMVA</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="namespaceArmISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> newVal, <span class="keywordtype">bool</span> secure_lookup,
+<a name="l00224"></a>00224                      <span class="keywordtype">bool</span> hyp, uint8_t target_el);
+<a name="l00225"></a>00225 
+<a name="l00226"></a>00226       <span class="keyword">public</span>:
+<a name="l00227"></a>00227         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#ac8bb3912a3ce86b15842e79d0b421204">clear</a>();
+<a name="l00228"></a>00228         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#acfe5434ce5ff7f87e2ce263d3ac51c24">clear64</a>(<span class="keyword">const</span> ArmISAParams *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00229"></a>00229 
+<a name="l00230"></a>00230         <a class="code" href="namespaceArmISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="structArmISA_1_1ISA.html#a17649252f355bfda86ea00dd728d8c02">readMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg) <span class="keyword">const</span>;
+<a name="l00231"></a>00231         <a class="code" href="namespaceArmISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="structArmISA_1_1ISA.html#a5e47db3953e6f623b58fee4f22a406bd">readMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00232"></a>00232         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#a763517aaea2f3decbc1ef9d064216b6f">setMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00233"></a>00233         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#ae4d63c6d4ee4354d39674ff8c53d9e2f">setMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="namespaceArmISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00234"></a>00234 
+<a name="l00235"></a>00235         <span class="keywordtype">int</span>
+<a name="l00236"></a><a class="code" href="structArmISA_1_1ISA.html#aece4b88ffcab608652e8e9f0fbe643d4">00236</a>         <a class="code" href="structArmISA_1_1ISA.html#aece4b88ffcab608652e8e9f0fbe643d4">flattenIntIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00237"></a>00237 <span class="keyword">        </span>{
+<a name="l00238"></a>00238             assert(reg &gt;= 0);
+<a name="l00239"></a>00239             <span class="keywordflow">if</span> (reg &lt; <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791babe0496d3e400d0264613b4c14651bf18">NUM_ARCH_INTREGS</a>) {
+<a name="l00240"></a>00240                 <span class="keywordflow">return</span> <a class="code" href="structArmISA_1_1ISA.html#afb6be991f3bd99efccaadb4e55a09c1a">intRegMap</a>[reg];
+<a name="l00241"></a>00241             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (reg &lt; <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791baae068f35aef4de2a5673ad98a5dbcb49">NUM_INTREGS</a>) {
+<a name="l00242"></a>00242                 <span class="keywordflow">return</span> reg;
+<a name="l00243"></a>00243             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (reg == <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791ba59d627bd9878655eabb2f44a3843b6e7">INTREG_SPX</a>) {
+<a name="l00244"></a>00244                 CPSR <a class="code" href="namespaceArmISA.html#ad377bf9b9c48f8cf3e8e918e0847b1fe">cpsr</a> = <a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>[<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a6221718f6b42d5072eb2beec580c7f69">MISCREG_CPSR</a>];
+<a name="l00245"></a>00245                 <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5">ExceptionLevel</a> <a class="code" href="namespaceArmISA.html#a88b4b47e4e77eea4a56009ee93e31855">el</a> = <a class="code" href="namespaceArmISA.html#a39510b1c2b9a3bc190a62447a036237e">opModeToEL</a>(
+<a name="l00246"></a>00246                     (<a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaa">OperatingMode</a>) (uint8_t) cpsr.mode);
+<a name="l00247"></a>00247                 <span class="keywordflow">if</span> (!cpsr.sp &amp;&amp; el != <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5a1808d294e1d965cd8d1a3060e2f411ef">EL0</a>)
+<a name="l00248"></a>00248                     <span class="keywordflow">return</span> <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791ba733fb53fecd44173aad562b35939e89a">INTREG_SP0</a>;
+<a name="l00249"></a>00249                 <span class="keywordflow">switch</span> (el) {
+<a name="l00250"></a>00250                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5a44bf3e9d5387a706bdc96b1ec9a2fc15">EL3</a>:
+<a name="l00251"></a>00251                     <span class="keywordflow">return</span> <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791ba0a696a36ec8892d1fa7372c1fc3bc2f3">INTREG_SP3</a>;
+<a name="l00252"></a>00252                   <span class="comment">// @todo: uncomment this to enable Virtualization</span>
+<a name="l00253"></a>00253                   <span class="comment">// case EL2:</span>
+<a name="l00254"></a>00254                   <span class="comment">//   return INTREG_SP2;</span>
+<a name="l00255"></a>00255                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5ab5e42aaf40f117fdce042d02976bf090">EL1</a>:
+<a name="l00256"></a>00256                     <span class="keywordflow">return</span> <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791ba41ae516e0f3021fab6831a69a7c805b6">INTREG_SP1</a>;
+<a name="l00257"></a>00257                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5a1808d294e1d965cd8d1a3060e2f411ef">EL0</a>:
+<a name="l00258"></a>00258                     <span class="keywordflow">return</span> <a class="code" href="namespaceArmISA.html#ae64680ba9fb526106829d6bf92fc791ba733fb53fecd44173aad562b35939e89a">INTREG_SP0</a>;
+<a name="l00259"></a>00259                   <span class="keywordflow">default</span>:
+<a name="l00260"></a>00260                     <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Invalid exception level&quot;</span>);
+<a name="l00261"></a>00261                     <span class="keywordflow">break</span>;
+<a name="l00262"></a>00262                 }
+<a name="l00263"></a>00263             } <span class="keywordflow">else</span> {
+<a name="l00264"></a>00264                 <span class="keywordflow">return</span> <a class="code" href="namespaceArmISA.html#a5145cdbf9c033da6bf91afd54198ae2f">flattenIntRegModeIndex</a>(reg);
+<a name="l00265"></a>00265             }
+<a name="l00266"></a>00266         }
+<a name="l00267"></a>00267 
+<a name="l00268"></a>00268         <span class="keywordtype">int</span>
+<a name="l00269"></a><a class="code" href="structArmISA_1_1ISA.html#a85addcd4f57c5a0ffa81805dcad1eeb7">00269</a>         <a class="code" href="structArmISA_1_1ISA.html#a85addcd4f57c5a0ffa81805dcad1eeb7">flattenFloatIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00270"></a>00270 <span class="keyword">        </span>{
+<a name="l00271"></a>00271             <span class="keywordflow">return</span> reg;
+<a name="l00272"></a>00272         }
+<a name="l00273"></a>00273 
+<a name="l00274"></a>00274         <span class="comment">// dummy</span>
+<a name="l00275"></a>00275         <span class="keywordtype">int</span>
+<a name="l00276"></a><a class="code" href="structArmISA_1_1ISA.html#a7a5d7476bd10e5af09e6e753d1fca087">00276</a>         <a class="code" href="structArmISA_1_1ISA.html#a7a5d7476bd10e5af09e6e753d1fca087">flattenCCIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00277"></a>00277 <span class="keyword">        </span>{
+<a name="l00278"></a>00278             <span class="keywordflow">return</span> reg;
+<a name="l00279"></a>00279         }
+<a name="l00280"></a>00280 
+<a name="l00281"></a>00281         <span class="keywordtype">int</span>
+<a name="l00282"></a><a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">00282</a>         <a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00283"></a>00283 <span class="keyword">        </span>{
+<a name="l00284"></a>00284             <span class="keywordtype">int</span> flat_idx = reg;
+<a name="l00285"></a>00285 
+<a name="l00286"></a>00286             <span class="keywordflow">if</span> (reg == <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aa2661d4a50b0ab13042d96406a101541">MISCREG_SPSR</a>) {
+<a name="l00287"></a>00287                 CPSR <a class="code" href="namespaceArmISA.html#ad377bf9b9c48f8cf3e8e918e0847b1fe">cpsr</a> = <a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>[<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a6221718f6b42d5072eb2beec580c7f69">MISCREG_CPSR</a>];
+<a name="l00288"></a>00288                 <span class="keywordflow">switch</span> (cpsr.mode) {
+<a name="l00289"></a>00289                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa92235269a272456ac75eaa8bab2e3c1b">MODE_EL0T</a>:
+<a name="l00290"></a>00290                     <a class="code" href="base_2misc_8hh.html#a8224a361dddd2ad59b411982e5ea746f">warn</a>(<span class="stringliteral">&quot;User mode does not have SPSR\n&quot;</span>);
+<a name="l00291"></a>00291                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aa2661d4a50b0ab13042d96406a101541">MISCREG_SPSR</a>;
+<a name="l00292"></a>00292                     <span class="keywordflow">break</span>;
+<a name="l00293"></a>00293                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa2b4ce5d3312a1c74faf2cee1294604e3">MODE_EL1T</a>:
+<a name="l00294"></a>00294                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaaa3ae30a3e461968b3ffeee4770b7b42a">MODE_EL1H</a>:
+<a name="l00295"></a>00295                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aec90062368ecc0dbf38ce1e92c941ab3">MISCREG_SPSR_EL1</a>;
+<a name="l00296"></a>00296                     <span class="keywordflow">break</span>;
+<a name="l00297"></a>00297                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaaa89f12e5bc3870720bae90bbdebfbe20">MODE_EL2T</a>:
+<a name="l00298"></a>00298                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa1e8710c38a364f4c007e24d487525eca">MODE_EL2H</a>:
+<a name="l00299"></a>00299                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a64a340b58bc8c5360f002a03eabe69bf">MISCREG_SPSR_EL2</a>;
+<a name="l00300"></a>00300                     <span class="keywordflow">break</span>;
+<a name="l00301"></a>00301                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaaff7394180f8bffb5d94cc12b3698946b">MODE_EL3T</a>:
+<a name="l00302"></a>00302                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaad9168a023d16808e67ae8b9fb7c039b9">MODE_EL3H</a>:
+<a name="l00303"></a>00303                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a0da4d390555ba2579052e6727918aadb">MISCREG_SPSR_EL3</a>;
+<a name="l00304"></a>00304                     <span class="keywordflow">break</span>;
+<a name="l00305"></a>00305                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa06c431ef2d3daa0430be10958afb75da">MODE_USER</a>:
+<a name="l00306"></a>00306                     <a class="code" href="base_2misc_8hh.html#a8224a361dddd2ad59b411982e5ea746f">warn</a>(<span class="stringliteral">&quot;User mode does not have SPSR\n&quot;</span>);
+<a name="l00307"></a>00307                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aa2661d4a50b0ab13042d96406a101541">MISCREG_SPSR</a>;
+<a name="l00308"></a>00308                     <span class="keywordflow">break</span>;
+<a name="l00309"></a>00309                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa114f4eed33e46c8994d1c28ea790ae69">MODE_FIQ</a>:
+<a name="l00310"></a>00310                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a9ed8f88f6e4afcc267376d36760b2ca3">MISCREG_SPSR_FIQ</a>;
+<a name="l00311"></a>00311                     <span class="keywordflow">break</span>;
+<a name="l00312"></a>00312                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa6ff5fe07fb1563cee773d932bb66d9b7">MODE_IRQ</a>:
+<a name="l00313"></a>00313                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a9918210657418df6330236a64b2e1747">MISCREG_SPSR_IRQ</a>;
+<a name="l00314"></a>00314                     <span class="keywordflow">break</span>;
+<a name="l00315"></a>00315                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaad0b02e29561c3d3e1c2c919fb8baa17a">MODE_SVC</a>:
+<a name="l00316"></a>00316                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aa5cb7601fc0523e5008d1ae6281f9532">MISCREG_SPSR_SVC</a>;
+<a name="l00317"></a>00317                     <span class="keywordflow">break</span>;
+<a name="l00318"></a>00318                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa5cb887fd4bf61d41bdf6b2d617d9fb33">MODE_MON</a>:
+<a name="l00319"></a>00319                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67ac03835fe2c37c954c58bca513004a3fd">MISCREG_SPSR_MON</a>;
+<a name="l00320"></a>00320                     <span class="keywordflow">break</span>;
+<a name="l00321"></a>00321                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa6258e223348908f6ceefcfe029aba214">MODE_ABORT</a>:
+<a name="l00322"></a>00322                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a0d23b2f8aebae3e9ee5661cd3321aa57">MISCREG_SPSR_ABT</a>;
+<a name="l00323"></a>00323                     <span class="keywordflow">break</span>;
+<a name="l00324"></a>00324                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa1978fe9b066f3cfc8ad44f06e8a0e199">MODE_HYP</a>:
+<a name="l00325"></a>00325                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a28b5e3302569056d108f006b0b9ccc90">MISCREG_SPSR_HYP</a>;
+<a name="l00326"></a>00326                     <span class="keywordflow">break</span>;
+<a name="l00327"></a>00327                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#ae306b3353ed3d62bb2e6de130b3c9eaaa6c9ee0fa90f09f791c2b50805b049ed3">MODE_UNDEFINED</a>:
+<a name="l00328"></a>00328                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a626b4f56b35837f6c8fae47207289fc9">MISCREG_SPSR_UND</a>;
+<a name="l00329"></a>00329                     <span class="keywordflow">break</span>;
+<a name="l00330"></a>00330                   <span class="keywordflow">default</span>:
+<a name="l00331"></a>00331                     <a class="code" href="base_2misc_8hh.html#a8224a361dddd2ad59b411982e5ea746f">warn</a>(<span class="stringliteral">&quot;Trying to access SPSR in an invalid mode: %d\n&quot;</span>,
+<a name="l00332"></a>00332                          cpsr.mode);
+<a name="l00333"></a>00333                     flat_idx = <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aa2661d4a50b0ab13042d96406a101541">MISCREG_SPSR</a>;
+<a name="l00334"></a>00334                     <span class="keywordflow">break</span>;
+<a name="l00335"></a>00335                 }
+<a name="l00336"></a>00336             } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code" href="namespaceArmISA.html#a921308b4105de47f7c9a0c3597c680f7">miscRegInfo</a>[reg][<a class="code" href="namespaceArmISA.html#a15dbfdc3ddd278a2d74f8126095c4a29acb90eb1feaec74a0e165da3b6fcbf37b">MISCREG_MUTEX</a>]) {
+<a name="l00337"></a>00337                 <span class="comment">// Mutually exclusive CP15 register</span>
+<a name="l00338"></a>00338                 <span class="keywordflow">switch</span> (reg) {
+<a name="l00339"></a>00339                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a06402af5d505491971085b160fd3805d">MISCREG_PRRR_MAIR0</a>:
+<a name="l00340"></a>00340                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a34d1fc2929ce89a759178fcac5bb8614">MISCREG_PRRR_MAIR0_NS</a>:
+<a name="l00341"></a>00341                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a0d026db3bee85fe3d84f627465650778">MISCREG_PRRR_MAIR0_S</a>:
+<a name="l00342"></a>00342                     {
+<a name="l00343"></a>00343                         TTBCR ttbcr = <a class="code" href="structArmISA_1_1ISA.html#a17649252f355bfda86ea00dd728d8c02">readMiscRegNoEffect</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a713784be56a50e1dd69613088bb6af38">MISCREG_TTBCR</a>);
+<a name="l00344"></a>00344                         <span class="comment">// If the muxed reg has been flattened, work out the</span>
+<a name="l00345"></a>00345                         <span class="comment">// offset and apply it to the unmuxed reg</span>
+<a name="l00346"></a>00346                         <span class="keywordtype">int</span> idxOffset = reg - <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a06402af5d505491971085b160fd3805d">MISCREG_PRRR_MAIR0</a>;
+<a name="l00347"></a>00347                         <span class="keywordflow">if</span> (ttbcr.eae)
+<a name="l00348"></a>00348                             flat_idx = <a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a56e98434ad8972b7ea266287f37cb6c6">MISCREG_MAIR0</a> +
+<a name="l00349"></a>00349                                                         idxOffset);
+<a name="l00350"></a>00350                         <span class="keywordflow">else</span>
+<a name="l00351"></a>00351                             flat_idx = <a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a2dd4330c32e639766e4084a25bed61fd">MISCREG_PRRR</a> +
+<a name="l00352"></a>00352                                                         idxOffset);
+<a name="l00353"></a>00353                     }
+<a name="l00354"></a>00354                     <span class="keywordflow">break</span>;
+<a name="l00355"></a>00355                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67adc96a8c84d1d2ff735eec951586a4f48">MISCREG_NMRR_MAIR1</a>:
+<a name="l00356"></a>00356                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a53cfdceeab019f8e76983d33b02020d5">MISCREG_NMRR_MAIR1_NS</a>:
+<a name="l00357"></a>00357                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a76125bd5750c08c47803ffc2b6466ef0">MISCREG_NMRR_MAIR1_S</a>:
+<a name="l00358"></a>00358                     {
+<a name="l00359"></a>00359                         TTBCR ttbcr = <a class="code" href="structArmISA_1_1ISA.html#a17649252f355bfda86ea00dd728d8c02">readMiscRegNoEffect</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a713784be56a50e1dd69613088bb6af38">MISCREG_TTBCR</a>);
+<a name="l00360"></a>00360                         <span class="comment">// If the muxed reg has been flattened, work out the</span>
+<a name="l00361"></a>00361                         <span class="comment">// offset and apply it to the unmuxed reg</span>
+<a name="l00362"></a>00362                         <span class="keywordtype">int</span> idxOffset = reg - <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67adc96a8c84d1d2ff735eec951586a4f48">MISCREG_NMRR_MAIR1</a>;
+<a name="l00363"></a>00363                         <span class="keywordflow">if</span> (ttbcr.eae)
+<a name="l00364"></a>00364                             flat_idx = <a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67aca7760d3a79feaa4118b9698bf5365a3">MISCREG_MAIR1</a> +
+<a name="l00365"></a>00365                                                         idxOffset);
+<a name="l00366"></a>00366                         <span class="keywordflow">else</span>
+<a name="l00367"></a>00367                             flat_idx = <a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a6fb4be4fd646a683f615c3bb4925fc01">MISCREG_NMRR</a> +
+<a name="l00368"></a>00368                                                         idxOffset);
+<a name="l00369"></a>00369                     }
+<a name="l00370"></a>00370                     <span class="keywordflow">break</span>;
+<a name="l00371"></a>00371                   <span class="keywordflow">case</span> <a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67ab15c3e97aaa0077a96fa1ed58168ee47">MISCREG_PMXEVTYPER_PMCCFILTR</a>:
+<a name="l00372"></a>00372                     {
+<a name="l00373"></a>00373                         PMSELR pmselr = <a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>[<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a69dd272ff1035d91d1a3f7171f065967">MISCREG_PMSELR</a>];
+<a name="l00374"></a>00374                         <span class="keywordflow">if</span> (pmselr.sel == 31)
+<a name="l00375"></a>00375                             flat_idx = <a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67ae95a361db9bef77ab874c277be6f8436">MISCREG_PMCCFILTR</a>);
+<a name="l00376"></a>00376                         <span class="keywordflow">else</span>
+<a name="l00377"></a>00377                             flat_idx = <a class="code" href="structArmISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a4ad9a50f810ebdedb398b65f8077c00b">MISCREG_PMXEVTYPER</a>);
+<a name="l00378"></a>00378                     }
+<a name="l00379"></a>00379                     <span class="keywordflow">break</span>;
+<a name="l00380"></a>00380                   <span class="keywordflow">default</span>:
+<a name="l00381"></a>00381                     <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Unrecognized misc. register.\n&quot;</span>);
+<a name="l00382"></a>00382                     <span class="keywordflow">break</span>;
+<a name="l00383"></a>00383                 }
+<a name="l00384"></a>00384             } <span class="keywordflow">else</span> {
+<a name="l00385"></a>00385                 <span class="keywordflow">if</span> (<a class="code" href="namespaceArmISA.html#a921308b4105de47f7c9a0c3597c680f7">miscRegInfo</a>[reg][<a class="code" href="namespaceArmISA.html#a15dbfdc3ddd278a2d74f8126095c4a29a716dd63e30e164b81b00168c5f5d00b6">MISCREG_BANKED</a>]) {
+<a name="l00386"></a>00386                     <span class="keywordtype">bool</span> secureReg = <a class="code" href="structArmISA_1_1ISA.html#a9f135583566fb70bba3c10395368f2e4">haveSecurity</a> &amp;&amp;
+<a name="l00387"></a>00387                                      <a class="code" href="namespaceArmISA.html#abed19d0288e553ad67d221ac6a16a801">inSecureState</a>(<a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>[<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67ab3096cc264b16a71ae70d458b5cd041d">MISCREG_SCR</a>],
+<a name="l00388"></a>00388                                                    <a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>[<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a6221718f6b42d5072eb2beec580c7f69">MISCREG_CPSR</a>]);
+<a name="l00389"></a>00389                     flat_idx += secureReg ? 2 : 1;
+<a name="l00390"></a>00390                 }
+<a name="l00391"></a>00391             }
+<a name="l00392"></a>00392             <span class="keywordflow">return</span> flat_idx;
+<a name="l00393"></a>00393         }
+<a name="l00394"></a>00394 
+<a name="l00395"></a><a class="code" href="structArmISA_1_1ISA.html#a53e036786d17361be4c7320d39c99b84">00395</a>         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>)
+<a name="l00396"></a>00396         {
+<a name="l00397"></a>00397             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a>, <span class="stringliteral">&quot;Serializing Arm Misc Registers\n&quot;</span>);
+<a name="l00398"></a>00398             <a class="code" href="serialize_8hh.html#a9aa03522128bc19a3bc0294501226f8b">SERIALIZE_ARRAY</a>(<a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>, <a class="code" href="namespaceArmISA.html#a568d4aa96dd7cd963f3b1b1b0446c9c6">NumMiscRegs</a>);
+<a name="l00399"></a>00399 
+<a name="l00400"></a>00400             <a class="code" href="serialize_8hh.html#a49163149ec656ffecff0e46aee418e29">SERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a9f135583566fb70bba3c10395368f2e4">haveSecurity</a>);
+<a name="l00401"></a>00401             <a class="code" href="serialize_8hh.html#a49163149ec656ffecff0e46aee418e29">SERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a8e8469d916956ca8b9052ebd6f155e0b">haveLPAE</a>);
+<a name="l00402"></a>00402             <a class="code" href="serialize_8hh.html#a49163149ec656ffecff0e46aee418e29">SERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a48e6871d9ab14ff31b50307f0c617f95">haveVirtualization</a>);
+<a name="l00403"></a>00403             <a class="code" href="serialize_8hh.html#a49163149ec656ffecff0e46aee418e29">SERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a3aea18414c83c86fa366401cb767e7ab">haveLargeAsid64</a>);
+<a name="l00404"></a>00404             <a class="code" href="serialize_8hh.html#a49163149ec656ffecff0e46aee418e29">SERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a4ab96b1a55880cac440e81e794c6f8d7">physAddrRange64</a>);
+<a name="l00405"></a>00405         }
+<a name="l00406"></a><a class="code" href="structArmISA_1_1ISA.html#af22e5d6d660b97db37003ac61ac4ee49">00406</a>         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section)
+<a name="l00407"></a>00407         {
+<a name="l00408"></a>00408             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a>, <span class="stringliteral">&quot;Unserializing Arm Misc Registers\n&quot;</span>);
+<a name="l00409"></a>00409             <a class="code" href="serialize_8hh.html#a8de12bf68d0f92f7ab8585820607932e">UNSERIALIZE_ARRAY</a>(<a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>, <a class="code" href="namespaceArmISA.html#a568d4aa96dd7cd963f3b1b1b0446c9c6">NumMiscRegs</a>);
+<a name="l00410"></a>00410             CPSR tmp_cpsr = <a class="code" href="structArmISA_1_1ISA.html#a1719a90e78518ac5e323ce1fb9fe3639">miscRegs</a>[<a class="code" href="namespaceArmISA.html#a1e522017e015d4c7efd6b2360143aa67a6221718f6b42d5072eb2beec580c7f69">MISCREG_CPSR</a>];
+<a name="l00411"></a>00411             <a class="code" href="structArmISA_1_1ISA.html#a2459588c548b25984ed5b75051741841">updateRegMap</a>(tmp_cpsr);
+<a name="l00412"></a>00412 
+<a name="l00413"></a>00413             <a class="code" href="serialize_8hh.html#a13d18ccba3d8bcbcd5aab2e37c380bff">UNSERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a9f135583566fb70bba3c10395368f2e4">haveSecurity</a>);
+<a name="l00414"></a>00414             <a class="code" href="serialize_8hh.html#a13d18ccba3d8bcbcd5aab2e37c380bff">UNSERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a8e8469d916956ca8b9052ebd6f155e0b">haveLPAE</a>);
+<a name="l00415"></a>00415             <a class="code" href="serialize_8hh.html#a13d18ccba3d8bcbcd5aab2e37c380bff">UNSERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a48e6871d9ab14ff31b50307f0c617f95">haveVirtualization</a>);
+<a name="l00416"></a>00416             <a class="code" href="serialize_8hh.html#a13d18ccba3d8bcbcd5aab2e37c380bff">UNSERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a3aea18414c83c86fa366401cb767e7ab">haveLargeAsid64</a>);
+<a name="l00417"></a>00417             <a class="code" href="serialize_8hh.html#a13d18ccba3d8bcbcd5aab2e37c380bff">UNSERIALIZE_SCALAR</a>(<a class="code" href="structArmISA_1_1ISA.html#a4ab96b1a55880cac440e81e794c6f8d7">physAddrRange64</a>);
+<a name="l00418"></a>00418         }
+<a name="l00419"></a>00419 
+<a name="l00420"></a><a class="code" href="structArmISA_1_1ISA.html#a769e733729615c529fdb54f538f11dba">00420</a>         <span class="keywordtype">void</span> <a class="code" href="structArmISA_1_1ISA.html#a769e733729615c529fdb54f538f11dba">startup</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) {}
+<a name="l00421"></a>00421 
+<a name="l00423"></a>00423         <span class="keyword">using</span> <a class="code" href="classSimObject.html#aecc7d8debf54990ffeaaed5bac7d7d81">SimObject::startup</a>;
+<a name="l00424"></a>00424 
+<a name="l00425"></a><a class="code" href="structArmISA_1_1ISA.html#a44000e19d886af0a346cd5a03302d3b6">00425</a>         <span class="keyword">typedef</span> ArmISAParams <a class="code" href="structArmISA_1_1ISA.html#a44000e19d886af0a346cd5a03302d3b6">Params</a>;
+<a name="l00426"></a>00426 
+<a name="l00427"></a>00427         <span class="keyword">const</span> <a class="code" href="structArmISA_1_1ISA.html#a44000e19d886af0a346cd5a03302d3b6">Params</a> *<a class="code" href="structArmISA_1_1ISA.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>() <span class="keyword">const</span>;
+<a name="l00428"></a>00428 
+<a name="l00429"></a>00429         <a class="code" href="structArmISA_1_1ISA.html#ae9132e021b3f3b20c917fc328a056bbd">ISA</a>(<a class="code" href="structArmISA_1_1ISA.html#a44000e19d886af0a346cd5a03302d3b6">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00430"></a>00430     };
+<a name="l00431"></a>00431 }
+<a name="l00432"></a>00432 
+<a name="l00433"></a>00433 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

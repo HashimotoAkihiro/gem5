@@ -1,0 +1,116 @@
+\hypertarget{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST}{
+\section{クラス StaticCastAST}
+\label{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST}\index{slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}}
+}
+StaticCastASTに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_ac775ee34451fdfa742b318538164070e}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_ad8b9328939df072e4740cd9a63189744}{\_\-\_\-repr\_\-\_\-}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a4555d1cee0dccf3942ea35fe86de2e8e}{generate}
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a2c41e611550596541faa6f64ffecc139}{type\_\-ast}
+\item 
+\hyperlink{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a4faa2d9c34d29aa06b2dacd8c3aee45d}{expr\_\-ast}
+\item 
+\hyperlink{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a36af83e1bc7a4b0e2a167c181fcaa4ef}{type\_\-modifier}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_ac775ee34451fdfa742b318538164070e}{
+\index{slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em slicc}, \/   {\em type\_\-ast}, \/   {\em type\_\-modifier}, \/   {\em expr\_\-ast})}}
+\label{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_ac775ee34451fdfa742b318538164070e}
+
+
+
+\begin{DoxyCode}
+30                                                                 :
+31         super(StaticCastAST, self).__init__(slicc)
+32 
+33         self.type_ast = type_ast
+34         self.expr_ast = expr_ast
+35         self.type_modifier = type_modifier
+36 
+    def __repr__(self):
+\end{DoxyCode}
+\hypertarget{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_ad8b9328939df072e4740cd9a63189744}{
+\index{slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}!\_\-\_\-repr\_\-\_\-@{\_\-\_\-repr\_\-\_\-}}
+\index{\_\-\_\-repr\_\-\_\-@{\_\-\_\-repr\_\-\_\-}!slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}}
+\subsubsection[{\_\-\_\-repr\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-repr\_\-\_\- ( {\em self})}}
+\label{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_ad8b9328939df072e4740cd9a63189744}
+
+
+
+\begin{DoxyCode}
+37                       :
+38         return "[StaticCastAST: %r]" % self.expr_ast
+39 
+    def generate(self, code):
+\end{DoxyCode}
+\hypertarget{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a4555d1cee0dccf3942ea35fe86de2e8e}{
+\index{slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}!generate@{generate}}
+\index{generate@{generate}!slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}}
+\subsubsection[{generate}]{\setlength{\rightskip}{0pt plus 5cm}def generate ( {\em self}, \/   {\em code})}}
+\label{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a4555d1cee0dccf3942ea35fe86de2e8e}
+
+
+
+\begin{DoxyCode}
+40                             :
+41         actual_type, ecode = self.expr_ast.inline(True)
+42         if self.type_modifier == "pointer":
+43             code('static_cast<${{self.type_ast.type.c_ident}} *>($ecode)')
+44         else:
+45             code('static_cast<${{self.type_ast.type.c_ident}} &>($ecode)')
+46 
+47         if not "interface" in self.type_ast.type:
+48             self.expr_ast.error("static cast only premitted for those types " \
+49                                 "that implement inherit an interface")
+50 
+51         # The interface type should match
+52         if str(actual_type) != str(self.type_ast.type["interface"]):
+53             self.expr_ast.error("static cast miss-match, type is '%s'," \
+54                                 "but inherited type is '%s'",
+55                                 actual_type, self.type_ast.type["interface"])
+56 
+57         return self.type_ast.type
+58 
+
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a4faa2d9c34d29aa06b2dacd8c3aee45d}{
+\index{slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}!expr\_\-ast@{expr\_\-ast}}
+\index{expr\_\-ast@{expr\_\-ast}!slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}}
+\subsubsection[{expr\_\-ast}]{\setlength{\rightskip}{0pt plus 5cm}{\bf expr\_\-ast}}}
+\label{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a4faa2d9c34d29aa06b2dacd8c3aee45d}
+\hypertarget{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a2c41e611550596541faa6f64ffecc139}{
+\index{slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}!type\_\-ast@{type\_\-ast}}
+\index{type\_\-ast@{type\_\-ast}!slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}}
+\subsubsection[{type\_\-ast}]{\setlength{\rightskip}{0pt plus 5cm}{\bf type\_\-ast}}}
+\label{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a2c41e611550596541faa6f64ffecc139}
+\hypertarget{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a36af83e1bc7a4b0e2a167c181fcaa4ef}{
+\index{slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}!type\_\-modifier@{type\_\-modifier}}
+\index{type\_\-modifier@{type\_\-modifier}!slicc::ast::StaticCastAST::StaticCastAST@{slicc::ast::StaticCastAST::StaticCastAST}}
+\subsubsection[{type\_\-modifier}]{\setlength{\rightskip}{0pt plus 5cm}{\bf type\_\-modifier}}}
+\label{classslicc_1_1ast_1_1StaticCastAST_1_1StaticCastAST_a36af83e1bc7a4b0e2a167c181fcaa4ef}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/slicc/ast/\hyperlink{StaticCastAST_8py}{StaticCastAST.py}\end{DoxyCompactItemize}

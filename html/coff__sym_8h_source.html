@@ -1,0 +1,552 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: base/loader/coff_sym.h ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>base/loader/coff_sym.h</h1><a href="coff__sym_8h.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2003, 2005-2006 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Steve Reinhardt</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="comment">/*</span>
+<a name="l00032"></a>00032 <span class="comment"> * Taken from binutils-2.14.90.0.5 include/coff/sym.h</span>
+<a name="l00033"></a>00033 <span class="comment"> */</span>
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="comment">/* Declarations of internal format of MIPS ECOFF symbols.</span>
+<a name="l00036"></a>00036 <span class="comment">   Originally contributed by MIPS Computer Systems and Third Eye Software.</span>
+<a name="l00037"></a>00037 <span class="comment">   Changes contributed by Cygnus Support are in the public domain.</span>
+<a name="l00038"></a>00038 <span class="comment"></span>
+<a name="l00039"></a>00039 <span class="comment">   This file is just aggregated with the files that make up the GNU</span>
+<a name="l00040"></a>00040 <span class="comment">   release; it is not considered part of GAS, GDB, or other GNU</span>
+<a name="l00041"></a>00041 <span class="comment">   programs.  */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="comment">/*</span>
+<a name="l00044"></a>00044 <span class="comment"> * |-----------------------------------------------------------|</span>
+<a name="l00045"></a>00045 <span class="comment"> * | Copyright (c) 1992, 1991, 1990 MIPS Computer Systems, Inc.|</span>
+<a name="l00046"></a>00046 <span class="comment"> * | MIPS Computer Systems, Inc. grants reproduction and use   |</span>
+<a name="l00047"></a>00047 <span class="comment"> * | rights to all parties, PROVIDED that this comment is      |</span>
+<a name="l00048"></a>00048 <span class="comment"> * | maintained in the copy.                                   |</span>
+<a name="l00049"></a>00049 <span class="comment"> * |-----------------------------------------------------------|</span>
+<a name="l00050"></a>00050 <span class="comment"> */</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#ifndef _SYM_H</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="preprocessor">#define _SYM_H</span>
+<a name="l00053"></a>00053 <span class="preprocessor"></span>
+<a name="l00054"></a>00054 <span class="comment">/* (C) Copyright 1984 by Third Eye Software, Inc.</span>
+<a name="l00055"></a>00055 <span class="comment"> *</span>
+<a name="l00056"></a>00056 <span class="comment"> * Third Eye Software, Inc. grants reproduction and use rights to</span>
+<a name="l00057"></a>00057 <span class="comment"> * all parties, PROVIDED that this comment is maintained in the copy.</span>
+<a name="l00058"></a>00058 <span class="comment"> *</span>
+<a name="l00059"></a>00059 <span class="comment"> * Third Eye makes no claims about the applicability of this</span>
+<a name="l00060"></a>00060 <span class="comment"> * symbol table to a particular use.</span>
+<a name="l00061"></a>00061 <span class="comment"> */</span>
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063 <span class="comment">/*</span>
+<a name="l00064"></a>00064 <span class="comment"> * This file contains the definition of the Third Eye Symbol Table.</span>
+<a name="l00065"></a>00065 <span class="comment"> *</span>
+<a name="l00066"></a>00066 <span class="comment"> * Symbols are assumed to be in &apos;encounter order&apos; - i.e. the order that</span>
+<a name="l00067"></a>00067 <span class="comment"> * the things they represent were encountered by the compiler/assembler/loader.</span>
+<a name="l00068"></a>00068 <span class="comment"> * EXCEPT for globals!  These are assumed to be bunched together,</span>
+<a name="l00069"></a>00069 <span class="comment"> * probably right after the last &apos;normal&apos; symbol.  Globals ARE sorted</span>
+<a name="l00070"></a>00070 <span class="comment"> * in ascending order.</span>
+<a name="l00071"></a>00071 <span class="comment"> *</span>
+<a name="l00072"></a>00072 <span class="comment"> * -----------------------------------------------------------------------</span>
+<a name="l00073"></a>00073 <span class="comment"> * A brief word about Third Eye naming/use conventions:</span>
+<a name="l00074"></a>00074 <span class="comment"> *</span>
+<a name="l00075"></a>00075 <span class="comment"> * All arrays and index&apos;s are 0 based.</span>
+<a name="l00076"></a>00076 <span class="comment"> * All &quot;ifooMax&quot; values are the highest legal value PLUS ONE. This makes</span>
+<a name="l00077"></a>00077 <span class="comment"> * them good for allocating arrays, etc. All checks are &quot;ifoo &lt; ifooMax&quot;.</span>
+<a name="l00078"></a>00078 <span class="comment"> *</span>
+<a name="l00079"></a>00079 <span class="comment"> * &quot;isym&quot;       Index into the SYMbol table.</span>
+<a name="l00080"></a>00080 <span class="comment"> * &quot;ipd&quot;        Index into the Procedure Descriptor array.</span>
+<a name="l00081"></a>00081 <span class="comment"> * &quot;ifd&quot;        Index into the File Descriptor array.</span>
+<a name="l00082"></a>00082 <span class="comment"> * &quot;iss&quot;        Index into String Space.</span>
+<a name="l00083"></a>00083 <span class="comment"> * &quot;cb&quot;         Count of Bytes.</span>
+<a name="l00084"></a>00084 <span class="comment"> * &quot;rgPd&quot;       array whose domain is &quot;0..ipdMax-1&quot; and RanGe is PDR.</span>
+<a name="l00085"></a>00085 <span class="comment"> * &quot;rgFd&quot;       array whose domain is &quot;0..ifdMax-1&quot; and RanGe is FDR.</span>
+<a name="l00086"></a>00086 <span class="comment"> */</span>
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089 <span class="comment">/*</span>
+<a name="l00090"></a>00090 <span class="comment"> * Symbolic Header (HDR) structure.</span>
+<a name="l00091"></a>00091 <span class="comment"> * As long as all the pointers are set correctly,</span>
+<a name="l00092"></a>00092 <span class="comment"> * we don&apos;t care WHAT order the various sections come out in!</span>
+<a name="l00093"></a>00093 <span class="comment"> *</span>
+<a name="l00094"></a>00094 <span class="comment"> * A file produced solely for the use of CDB will probably NOT have</span>
+<a name="l00095"></a>00095 <span class="comment"> * any instructions or data areas in it, as these are available</span>
+<a name="l00096"></a>00096 <span class="comment"> * in the original.</span>
+<a name="l00097"></a>00097 <span class="comment"> */</span>
+<a name="l00098"></a>00098 
+<a name="l00099"></a><a class="code" href="structecoff__symhdr.html">00099</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structecoff__symhdr.html">ecoff_symhdr</a> {
+<a name="l00100"></a><a class="code" href="structecoff__symhdr.html#a805a601a601ae911a002e031aba5a017">00100</a>     <a class="code" href="ecoff__machdep_8h.html#a5a92a17f14ada2d4b7be26c46466b871">coff_short</a>  <a class="code" href="structecoff__symhdr.html#a805a601a601ae911a002e031aba5a017">magic</a>;          <span class="comment">/* to verify validity of the table */</span>
+<a name="l00101"></a><a class="code" href="structecoff__symhdr.html#ac5b7916498751eb0e1d3258a379d2dd9">00101</a>     <a class="code" href="ecoff__machdep_8h.html#a5a92a17f14ada2d4b7be26c46466b871">coff_short</a>  <a class="code" href="structecoff__symhdr.html#ac5b7916498751eb0e1d3258a379d2dd9">vstamp</a>;         <span class="comment">/* version stamp */</span>
+<a name="l00102"></a><a class="code" href="structecoff__symhdr.html#ad690459ca5ec6247f7896815e8d919f2">00102</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#ad690459ca5ec6247f7896815e8d919f2">ilineMax</a>;       <span class="comment">/* number of line number entries */</span>
+<a name="l00103"></a><a class="code" href="structecoff__symhdr.html#a00f574ac9555f934729d8ded2ca46e61">00103</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#a00f574ac9555f934729d8ded2ca46e61">idnMax</a>;         <span class="comment">/* max index into dense number table */</span>
+<a name="l00104"></a><a class="code" href="structecoff__symhdr.html#acd426cdfa49e9a962feea26a7237970d">00104</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#acd426cdfa49e9a962feea26a7237970d">ipdMax</a>;         <span class="comment">/* number of procedures */</span>
+<a name="l00105"></a><a class="code" href="structecoff__symhdr.html#ae7269aaf3a4d674454f94748a014fe61">00105</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#ae7269aaf3a4d674454f94748a014fe61">isymMax</a>;        <span class="comment">/* number of local symbols */</span>
+<a name="l00106"></a><a class="code" href="structecoff__symhdr.html#a5e2bdfe0cdc41e7425a2704cb9651b04">00106</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#a5e2bdfe0cdc41e7425a2704cb9651b04">ioptMax</a>;        <span class="comment">/* max index into optimization symbol entries */</span>
+<a name="l00107"></a><a class="code" href="structecoff__symhdr.html#a86c16e4bd3790264fb662eef896efcac">00107</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#a86c16e4bd3790264fb662eef896efcac">iauxMax</a>;        <span class="comment">/* number of auxillary symbol entries */</span>
+<a name="l00108"></a><a class="code" href="structecoff__symhdr.html#a5637fa1af56ff0c6e719d0e6e4b77457">00108</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#a5637fa1af56ff0c6e719d0e6e4b77457">issMax</a>;         <span class="comment">/* max index into local strings */</span>
+<a name="l00109"></a><a class="code" href="structecoff__symhdr.html#a9b259532c92b5c7a93472107d0c6f507">00109</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#a9b259532c92b5c7a93472107d0c6f507">issExtMax</a>;      <span class="comment">/* max index into external strings */</span>
+<a name="l00110"></a><a class="code" href="structecoff__symhdr.html#a1c556117c1f9e0f128fc001373e0d6eb">00110</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#a1c556117c1f9e0f128fc001373e0d6eb">ifdMax</a>;         <span class="comment">/* number of file descriptor entries */</span>
+<a name="l00111"></a><a class="code" href="structecoff__symhdr.html#a5b0b3917240a1c3c9908e0c2449f1cef">00111</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#a5b0b3917240a1c3c9908e0c2449f1cef">crfd</a>;           <span class="comment">/* number of relative file descriptor entries */</span>
+<a name="l00112"></a><a class="code" href="structecoff__symhdr.html#aa84221f98c5de75f4f3f95931d6f0674">00112</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__symhdr.html#aa84221f98c5de75f4f3f95931d6f0674">iextMax</a>;        <span class="comment">/* max index into external symbols */</span>
+<a name="l00113"></a><a class="code" href="structecoff__symhdr.html#ab31c46c6e30ce51abc9e9ec2a3284563">00113</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#ab31c46c6e30ce51abc9e9ec2a3284563">cbLine</a>;         <span class="comment">/* number of bytes for line number entries */</span>
+<a name="l00114"></a><a class="code" href="structecoff__symhdr.html#a7332332a06749b52b7210069fc3f6179">00114</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a7332332a06749b52b7210069fc3f6179">cbLineOffset</a>;   <span class="comment">/* offset to start of line number entries*/</span>
+<a name="l00115"></a><a class="code" href="structecoff__symhdr.html#a630ad9a35844306e7f4bd8f6941161b9">00115</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a630ad9a35844306e7f4bd8f6941161b9">cbDnOffset</a>;     <span class="comment">/* offset to start dense number table */</span>
+<a name="l00116"></a><a class="code" href="structecoff__symhdr.html#ae142da1502993d06af7bcb057c29c629">00116</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#ae142da1502993d06af7bcb057c29c629">cbPdOffset</a>;     <span class="comment">/* offset to procedure descriptor table */</span>
+<a name="l00117"></a><a class="code" href="structecoff__symhdr.html#a37dcacfbf35def8b5633660936f15fb5">00117</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a37dcacfbf35def8b5633660936f15fb5">cbSymOffset</a>;    <span class="comment">/* offset to start of local symbols*/</span>
+<a name="l00118"></a><a class="code" href="structecoff__symhdr.html#a183d6ac462933856e86a0f6d91d04b75">00118</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a183d6ac462933856e86a0f6d91d04b75">cbOptOffset</a>;    <span class="comment">/* offset to optimization symbol entries */</span>
+<a name="l00119"></a><a class="code" href="structecoff__symhdr.html#a4a31fa981d0d27afc4df1f2fcbbc91c4">00119</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a4a31fa981d0d27afc4df1f2fcbbc91c4">cbAuxOffset</a>;    <span class="comment">/* offset to start of auxillary symbol entries*/</span>
+<a name="l00120"></a><a class="code" href="structecoff__symhdr.html#adad677b0d8d0ee04a2a7ae5c54b7c016">00120</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#adad677b0d8d0ee04a2a7ae5c54b7c016">cbSsOffset</a>;     <span class="comment">/* offset to start of local strings */</span>
+<a name="l00121"></a><a class="code" href="structecoff__symhdr.html#a188f53494422be804dfaadaa7dfe056a">00121</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a188f53494422be804dfaadaa7dfe056a">cbSsExtOffset</a>;  <span class="comment">/* offset to start of external strings */</span>
+<a name="l00122"></a><a class="code" href="structecoff__symhdr.html#a71ad4ea24f66ba86aa83d16cf5ab12be">00122</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a71ad4ea24f66ba86aa83d16cf5ab12be">cbFdOffset</a>;     <span class="comment">/* offset to file descriptor table */</span>
+<a name="l00123"></a><a class="code" href="structecoff__symhdr.html#a4b50ee3a8f1d53ef0a63506bf9f97431">00123</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a4b50ee3a8f1d53ef0a63506bf9f97431">cbRfdOffset</a>;    <span class="comment">/* offset to relative file descriptor table */</span>
+<a name="l00124"></a><a class="code" href="structecoff__symhdr.html#a235cd8293872b8fadd0fc3c024cd6898">00124</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__symhdr.html#a235cd8293872b8fadd0fc3c024cd6898">cbExtOffset</a>;    <span class="comment">/* offset to start of external symbol entries*/</span>
+<a name="l00125"></a>00125     <span class="comment">/* If you add machine dependent fields, add them here */</span>
+<a name="l00126"></a>00126 } <a class="code" href="structecoff__symhdr.html">HDRR</a>, *<a class="code" href="structecoff__symhdr.html">pHDRR</a>;
+<a name="l00127"></a><a class="code" href="coff__sym_8h.html#af53487112839ac24c38909d6e5bb0dfb">00127</a> <span class="preprocessor">#define cbHDRR sizeof(HDRR)</span>
+<a name="l00128"></a><a class="code" href="coff__sym_8h.html#ac4618ebe7759db10ca39fdfe5cd50ea3">00128</a> <span class="preprocessor"></span><span class="preprocessor">#define hdrNil ((pHDRR)0)</span>
+<a name="l00129"></a>00129 <span class="preprocessor"></span>
+<a name="l00130"></a>00130 <span class="comment">/*</span>
+<a name="l00131"></a>00131 <span class="comment"> * The FDR and PDR structures speed mapping of address &lt;-&gt; name.</span>
+<a name="l00132"></a>00132 <span class="comment"> * They are sorted in ascending memory order and are kept in</span>
+<a name="l00133"></a>00133 <span class="comment"> * memory by CDB at runtime.</span>
+<a name="l00134"></a>00134 <span class="comment"> */</span>
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136 <span class="comment">/*</span>
+<a name="l00137"></a>00137 <span class="comment"> * File Descriptor</span>
+<a name="l00138"></a>00138 <span class="comment"> *</span>
+<a name="l00139"></a>00139 <span class="comment"> * There is one of these for EVERY FILE, whether compiled with</span>
+<a name="l00140"></a>00140 <span class="comment"> * full debugging symbols or not.  The name of a file should be</span>
+<a name="l00141"></a>00141 <span class="comment"> * the path name given to the compiler.  This allows the user</span>
+<a name="l00142"></a>00142 <span class="comment"> * to simply specify the names of the directories where the COMPILES</span>
+<a name="l00143"></a>00143 <span class="comment"> * were done, and we will be able to find their files.</span>
+<a name="l00144"></a>00144 <span class="comment"> * A field whose comment starts with &quot;R - &quot; indicates that it will be</span>
+<a name="l00145"></a>00145 <span class="comment"> * setup at runtime.</span>
+<a name="l00146"></a>00146 <span class="comment"> */</span>
+<a name="l00147"></a><a class="code" href="structecoff__fdr.html">00147</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structecoff__fdr.html">ecoff_fdr</a> {
+<a name="l00148"></a><a class="code" href="structecoff__fdr.html#aa107dae335462ef6611fd0f516d6a35a">00148</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__fdr.html#aa107dae335462ef6611fd0f516d6a35a">adr</a>;            <span class="comment">/* memory address of beginning of file */</span>
+<a name="l00149"></a><a class="code" href="structecoff__fdr.html#a7332332a06749b52b7210069fc3f6179">00149</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__fdr.html#a7332332a06749b52b7210069fc3f6179">cbLineOffset</a>;   <span class="comment">/* byte offset from header for this file ln&apos;s */</span>
+<a name="l00150"></a><a class="code" href="structecoff__fdr.html#ab31c46c6e30ce51abc9e9ec2a3284563">00150</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__fdr.html#ab31c46c6e30ce51abc9e9ec2a3284563">cbLine</a>;         <span class="comment">/* size of lines for this file */</span>
+<a name="l00151"></a><a class="code" href="structecoff__fdr.html#a797047c54f89e5076244083755eff0af">00151</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structecoff__fdr.html#a797047c54f89e5076244083755eff0af">cbSs</a>;           <span class="comment">/* number of bytes in the ss */</span>
+<a name="l00152"></a><a class="code" href="structecoff__fdr.html#a0c20f5c284acb09945a575da6c3b6fad">00152</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#a0c20f5c284acb09945a575da6c3b6fad">rss</a>;            <span class="comment">/* file name (of source, if known) */</span>
+<a name="l00153"></a><a class="code" href="structecoff__fdr.html#ae316ffb42ebf2ef4084de82b15982ff4">00153</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#ae316ffb42ebf2ef4084de82b15982ff4">issBase</a>;        <span class="comment">/* file&apos;s string space */</span>
+<a name="l00154"></a><a class="code" href="structecoff__fdr.html#a235899eb0ac6804211338058e263b095">00154</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#a235899eb0ac6804211338058e263b095">isymBase</a>;       <span class="comment">/* beginning of symbols */</span>
+<a name="l00155"></a><a class="code" href="structecoff__fdr.html#a054238ccd5c0da602ead91972c40fc82">00155</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#a054238ccd5c0da602ead91972c40fc82">csym</a>;           <span class="comment">/* count file&apos;s of symbols */</span>
+<a name="l00156"></a><a class="code" href="structecoff__fdr.html#aa3a898a1d3aa1852801234dfc31b4c65">00156</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#aa3a898a1d3aa1852801234dfc31b4c65">ilineBase</a>;      <span class="comment">/* file&apos;s line symbols */</span>
+<a name="l00157"></a><a class="code" href="structecoff__fdr.html#a84661526f6caef2444deb40802450096">00157</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#a84661526f6caef2444deb40802450096">cline</a>;          <span class="comment">/* count of file&apos;s line symbols */</span>
+<a name="l00158"></a><a class="code" href="structecoff__fdr.html#ae442a80660e81507b97da6be93815767">00158</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#ae442a80660e81507b97da6be93815767">ioptBase</a>;       <span class="comment">/* file&apos;s optimization entries */</span>
+<a name="l00159"></a><a class="code" href="structecoff__fdr.html#a7c4bd6a37221d24ecc0e1cdd28199613">00159</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#a7c4bd6a37221d24ecc0e1cdd28199613">copt</a>;           <span class="comment">/* count of file&apos;s optimization entries */</span>
+<a name="l00160"></a><a class="code" href="structecoff__fdr.html#ae43bc30190a00792f50f88e0f4dc4a5c">00160</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#ae43bc30190a00792f50f88e0f4dc4a5c">ipdFirst</a>;       <span class="comment">/* start of procedures for this file */</span>
+<a name="l00161"></a><a class="code" href="structecoff__fdr.html#ab9179ef169d379b8e2710ac85e8fa83f">00161</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#ab9179ef169d379b8e2710ac85e8fa83f">cpd</a>;            <span class="comment">/* count of procedures for this file */</span>
+<a name="l00162"></a><a class="code" href="structecoff__fdr.html#ac185c26e02d6f1cc28bf082d1b72f6fc">00162</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#ac185c26e02d6f1cc28bf082d1b72f6fc">iauxBase</a>;       <span class="comment">/* file&apos;s auxiliary entries */</span>
+<a name="l00163"></a><a class="code" href="structecoff__fdr.html#aee951482bd265437ca7c40b6a8034759">00163</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#aee951482bd265437ca7c40b6a8034759">caux</a>;           <span class="comment">/* count of file&apos;s auxiliary entries */</span>
+<a name="l00164"></a><a class="code" href="structecoff__fdr.html#a6a181d266cb4b74f21a425cc960b970a">00164</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#a6a181d266cb4b74f21a425cc960b970a">rfdBase</a>;        <span class="comment">/* index into the file indirect table */</span>
+<a name="l00165"></a><a class="code" href="structecoff__fdr.html#a5b0b3917240a1c3c9908e0c2449f1cef">00165</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__fdr.html#a5b0b3917240a1c3c9908e0c2449f1cef">crfd</a>;           <span class="comment">/* count file indirect entries */</span>
+<a name="l00166"></a><a class="code" href="structecoff__fdr.html#a61cb354d70845bf7e77ba0ecf97588d9">00166</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__fdr.html#a61cb354d70845bf7e77ba0ecf97588d9">lang</a>: 5;   <span class="comment">/* language for this file */</span>
+<a name="l00167"></a><a class="code" href="structecoff__fdr.html#a849700aea40430943be8fea04b3c96a1">00167</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__fdr.html#a849700aea40430943be8fea04b3c96a1">fMerge</a> : 1;        <span class="comment">/* whether this file can be merged */</span>
+<a name="l00168"></a><a class="code" href="structecoff__fdr.html#a653f4fa62700385618631e29478952f1">00168</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__fdr.html#a653f4fa62700385618631e29478952f1">fReadin</a> : 1;       <span class="comment">/* true if it was read in (not just created) */</span>
+<a name="l00169"></a><a class="code" href="structecoff__fdr.html#ab10bf33fd36063950d852dab66fc9a2d">00169</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__fdr.html#ab10bf33fd36063950d852dab66fc9a2d">fBigendian</a> : 1;<span class="comment">/* if set, was compiled on big endian machine */</span>
+<a name="l00170"></a>00170     <span class="comment">/*  aux&apos;s will be in compile host&apos;s sex */</span>
+<a name="l00171"></a><a class="code" href="structecoff__fdr.html#a39e2c94b480fae22485b266a4d799b02">00171</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__fdr.html#a39e2c94b480fae22485b266a4d799b02">glevel</a> : 2;        <span class="comment">/* level this file was compiled with */</span>
+<a name="l00172"></a><a class="code" href="structecoff__fdr.html#a6a6017ea077b575677a11d733ec137a3">00172</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__fdr.html#a6a6017ea077b575677a11d733ec137a3">reserved</a> : 22;  <span class="comment">/* reserved for future use */</span>
+<a name="l00173"></a><a class="code" href="structecoff__fdr.html#a24547e83b1ecdc80d20df41dbc81ba87">00173</a>     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   <a class="code" href="structecoff__fdr.html#a24547e83b1ecdc80d20df41dbc81ba87">reserved2</a>;
+<a name="l00174"></a>00174 } <a class="code" href="structecoff__fdr.html">FDR</a>, *<a class="code" href="structecoff__fdr.html">pFDR</a>;
+<a name="l00175"></a><a class="code" href="coff__sym_8h.html#a92518c2a7002e3a249aea4b8cc32ed63">00175</a> <span class="preprocessor">#define cbFDR sizeof(FDR)</span>
+<a name="l00176"></a><a class="code" href="coff__sym_8h.html#aab736d9f7c40b82e048a0a6bb4c76330">00176</a> <span class="preprocessor"></span><span class="preprocessor">#define fdNil ((pFDR)0)</span>
+<a name="l00177"></a><a class="code" href="coff__sym_8h.html#a61e57defc99c3c62ba4a3e5748263d72">00177</a> <span class="preprocessor"></span><span class="preprocessor">#define ifdNil -1</span>
+<a name="l00178"></a><a class="code" href="coff__sym_8h.html#a583c12cd0f63c371e26c93ac4329212c">00178</a> <span class="preprocessor"></span><span class="preprocessor">#define ifdTemp 0</span>
+<a name="l00179"></a><a class="code" href="coff__sym_8h.html#a2443b40cfc9b8440b455deee6359d814">00179</a> <span class="preprocessor"></span><span class="preprocessor">#define ilnNil -1</span>
+<a name="l00180"></a>00180 <span class="preprocessor"></span>
+<a name="l00181"></a>00181 
+<a name="l00182"></a>00182 <span class="comment">/*</span>
+<a name="l00183"></a>00183 <span class="comment"> * Procedure Descriptor</span>
+<a name="l00184"></a>00184 <span class="comment"> *</span>
+<a name="l00185"></a>00185 <span class="comment"> * There is one of these for EVERY TEXT LABEL.</span>
+<a name="l00186"></a>00186 <span class="comment"> * If a procedure is in a file with full symbols, then isym</span>
+<a name="l00187"></a>00187 <span class="comment"> * will point to the PROC symbols, else it will point to the</span>
+<a name="l00188"></a>00188 <span class="comment"> * global symbol for the label.</span>
+<a name="l00189"></a>00189 <span class="comment"> */</span>
+<a name="l00190"></a>00190 
+<a name="l00191"></a><a class="code" href="structpdr.html">00191</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structpdr.html">pdr</a> {
+<a name="l00192"></a><a class="code" href="structpdr.html#aa107dae335462ef6611fd0f516d6a35a">00192</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structpdr.html#aa107dae335462ef6611fd0f516d6a35a">adr</a>;            <span class="comment">/* memory address of start of procedure */</span>
+<a name="l00193"></a><a class="code" href="structpdr.html#a7332332a06749b52b7210069fc3f6179">00193</a>     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   <a class="code" href="structpdr.html#a7332332a06749b52b7210069fc3f6179">cbLineOffset</a>;   <span class="comment">/* byte offset for this procedure from the fd base */</span>
+<a name="l00194"></a><a class="code" href="structpdr.html#a5b41af4e0a780cc1f8537a1f5f9b1eba">00194</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#a5b41af4e0a780cc1f8537a1f5f9b1eba">isym</a>;           <span class="comment">/* start of local symbol entries */</span>
+<a name="l00195"></a><a class="code" href="structpdr.html#ab6bc2a8522a807d9898c2893ba897780">00195</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#ab6bc2a8522a807d9898c2893ba897780">iline</a>;          <span class="comment">/* start of line number entries*/</span>
+<a name="l00196"></a><a class="code" href="structpdr.html#a483285303cfea098d3714bb87f10ffab">00196</a>     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   <a class="code" href="structpdr.html#a483285303cfea098d3714bb87f10ffab">regmask</a>;        <span class="comment">/* save register mask */</span>
+<a name="l00197"></a><a class="code" href="structpdr.html#a00dcff15b999ec73eec85e2ebc34a6a8">00197</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#a00dcff15b999ec73eec85e2ebc34a6a8">regoffset</a>;      <span class="comment">/* save register offset */</span>
+<a name="l00198"></a><a class="code" href="structpdr.html#adae35f7dc77f3a3ca169d88e4e18f9ba">00198</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#adae35f7dc77f3a3ca169d88e4e18f9ba">iopt</a>;           <span class="comment">/* start of optimization symbol entries*/</span>
+<a name="l00199"></a><a class="code" href="structpdr.html#a58a11e19b67f422331fb0af81f0ab43f">00199</a>     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   <a class="code" href="structpdr.html#a58a11e19b67f422331fb0af81f0ab43f">fregmask</a>;       <span class="comment">/* save floating point register mask */</span>
+<a name="l00200"></a><a class="code" href="structpdr.html#a030ee23aa52f858174ec040e20bf5215">00200</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#a030ee23aa52f858174ec040e20bf5215">fregoffset</a>;     <span class="comment">/* save floating point register offset */</span>
+<a name="l00201"></a><a class="code" href="structpdr.html#ac31de955ea1a1fa7a31ecec0a8eae8ce">00201</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#ac31de955ea1a1fa7a31ecec0a8eae8ce">frameoffset</a>;    <span class="comment">/* frame size */</span>
+<a name="l00202"></a><a class="code" href="structpdr.html#a68834ef626d0d0eb5dfc40dc548bae73">00202</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#a68834ef626d0d0eb5dfc40dc548bae73">lnLow</a>;          <span class="comment">/* lowest line in the procedure */</span>
+<a name="l00203"></a><a class="code" href="structpdr.html#a3837125eda724632d08bc57cb015e2ef">00203</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structpdr.html#a3837125eda724632d08bc57cb015e2ef">lnHigh</a>;         <span class="comment">/* highest line in the procedure */</span>
+<a name="l00204"></a>00204     <span class="comment">/* These fields are new for 64 bit ECOFF.  */</span>
+<a name="l00205"></a><a class="code" href="structpdr.html#a555af4e857b397fa0e5efef21f1b94c7">00205</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structpdr.html#a555af4e857b397fa0e5efef21f1b94c7">gp_prologue</a> : 8; <span class="comment">/* byte size of GP prologue */</span>
+<a name="l00206"></a><a class="code" href="structpdr.html#a9f27d4bf9bbf1badebdc9697a1afd33a">00206</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structpdr.html#a9f27d4bf9bbf1badebdc9697a1afd33a">gp_used</a> : 1;       <span class="comment">/* true if the procedure uses GP */</span>
+<a name="l00207"></a><a class="code" href="structpdr.html#a4ddb9baa2b268f220144d0c84d6442d9">00207</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structpdr.html#a4ddb9baa2b268f220144d0c84d6442d9">reg_frame</a> : 1;     <span class="comment">/* true if register frame procedure */</span>
+<a name="l00208"></a><a class="code" href="structpdr.html#a09dbbdd7ee3e83088d61afa06a0a6b59">00208</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structpdr.html#a09dbbdd7ee3e83088d61afa06a0a6b59">prof</a> : 1;  <span class="comment">/* true if compiled with -pg */</span>
+<a name="l00209"></a><a class="code" href="structpdr.html#a6a6017ea077b575677a11d733ec137a3">00209</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structpdr.html#a6a6017ea077b575677a11d733ec137a3">reserved</a> : 13;     <span class="comment">/* reserved: must be zero */</span>
+<a name="l00210"></a><a class="code" href="structpdr.html#a2b77070b482d14096b454e37f616431f">00210</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structpdr.html#a2b77070b482d14096b454e37f616431f">localoff</a> : 8;      <span class="comment">/* offset of local variables from vfp */</span>
+<a name="l00211"></a><a class="code" href="structpdr.html#a447e33c13f88eefe5804d6c37679ab35">00211</a>     <a class="code" href="ecoff__machdep_8h.html#a5a92a17f14ada2d4b7be26c46466b871">coff_short</a>  <a class="code" href="structpdr.html#a447e33c13f88eefe5804d6c37679ab35">framereg</a>;       <span class="comment">/* frame pointer register */</span>
+<a name="l00212"></a><a class="code" href="structpdr.html#ab7f34dd51abb0d2f05258c34d9c2a99c">00212</a>     <a class="code" href="ecoff__machdep_8h.html#a5a92a17f14ada2d4b7be26c46466b871">coff_short</a>  <a class="code" href="structpdr.html#ab7f34dd51abb0d2f05258c34d9c2a99c">pcreg</a>;          <span class="comment">/* offset or reg of return pc */</span>
+<a name="l00213"></a>00213 } <a class="code" href="structpdr.html">PDR</a>, *<a class="code" href="structpdr.html">pPDR</a>;
+<a name="l00214"></a><a class="code" href="coff__sym_8h.html#ab2db8333ec81a27abb75d776ccdb43c8">00214</a> <span class="preprocessor">#define cbPDR sizeof(PDR)</span>
+<a name="l00215"></a><a class="code" href="coff__sym_8h.html#a4fd857d9595afe8581841a5d5bc09df6">00215</a> <span class="preprocessor"></span><span class="preprocessor">#define pdNil ((pPDR) 0)</span>
+<a name="l00216"></a><a class="code" href="coff__sym_8h.html#aad779bed171c420b3d65a41a7f557433">00216</a> <span class="preprocessor"></span><span class="preprocessor">#define ipdNil  -1</span>
+<a name="l00217"></a>00217 <span class="preprocessor"></span>
+<a name="l00218"></a>00218 <span class="comment">/*</span>
+<a name="l00219"></a>00219 <span class="comment"> * The structure of the runtime procedure descriptor created by the loader</span>
+<a name="l00220"></a>00220 <span class="comment"> * for use by the static exception system.</span>
+<a name="l00221"></a>00221 <span class="comment"> */</span>
+<a name="l00222"></a>00222 <span class="comment">/*</span>
+<a name="l00223"></a>00223 <span class="comment"> * If 0&apos;d out because exception_info chokes Visual C++ and because there</span>
+<a name="l00224"></a>00224 <span class="comment"> * don&apos;t seem to be any references to this structure elsewhere in gdb.</span>
+<a name="l00225"></a>00225 <span class="comment"> */</span>
+<a name="l00226"></a>00226 <span class="preprocessor">#if 0</span>
+<a name="l00227"></a>00227 <span class="preprocessor"></span><span class="keyword">typedef</span> <span class="keyword">struct </span>runtime_pdr {
+<a name="l00228"></a>00228     <a class="code" href="ecoff__machdep_8h.html#a4fbfcee7b2a1d29c094364adc6423da0">coff_addr</a>   adr;            <span class="comment">/* memory address of start of procedure */</span>
+<a name="l00229"></a>00229     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   regmask;        <span class="comment">/* save register mask */</span>
+<a name="l00230"></a>00230     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    regoffset;      <span class="comment">/* save register offset */</span>
+<a name="l00231"></a>00231     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   fregmask;       <span class="comment">/* save floating point register mask */</span>
+<a name="l00232"></a>00232     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    fregoffset;     <span class="comment">/* save floating point register offset */</span>
+<a name="l00233"></a>00233     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    frameoffset;    <span class="comment">/* frame size */</span>
+<a name="l00234"></a>00234     <a class="code" href="ecoff__machdep_8h.html#a650e29ece54d87a3fb9db4505a0efb68">coff_ushort</a> framereg;       <span class="comment">/* frame pointer register */</span>
+<a name="l00235"></a>00235     <a class="code" href="ecoff__machdep_8h.html#a650e29ece54d87a3fb9db4505a0efb68">coff_ushort</a> pcreg;          <span class="comment">/* offset or reg of return pc */</span>
+<a name="l00236"></a>00236     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    irpss;          <span class="comment">/* index into the runtime string table */</span>
+<a name="l00237"></a>00237     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   <a class="code" href="namespacemicro__asm.html#a7c0da508b820c6b4db51430d694f6d8b">reserved</a>;
+<a name="l00238"></a>00238     <span class="keyword">struct </span>exception_info *exception_info;<span class="comment">/* pointer to exception array */</span>
+<a name="l00239"></a>00239 } RPDR, *pRPDR;
+<a name="l00240"></a>00240 <span class="preprocessor">#define cbRPDR sizeof(RPDR)</span>
+<a name="l00241"></a>00241 <span class="preprocessor"></span><span class="preprocessor">#define rpdNil ((pRPDR) 0)</span>
+<a name="l00242"></a>00242 <span class="preprocessor"></span><span class="preprocessor">#endif</span>
+<a name="l00243"></a>00243 <span class="preprocessor"></span>
+<a name="l00244"></a>00244 <span class="comment">/*</span>
+<a name="l00245"></a>00245 <span class="comment"> * Line Numbers</span>
+<a name="l00246"></a>00246 <span class="comment"> *</span>
+<a name="l00247"></a>00247 <span class="comment"> * Line Numbers are segregated from the normal symbols because they</span>
+<a name="l00248"></a>00248 <span class="comment"> * are [1] smaller , [2] are of no interest to your</span>
+<a name="l00249"></a>00249 <span class="comment"> * average loader, and [3] are never needed in the middle of normal</span>
+<a name="l00250"></a>00250 <span class="comment"> * scanning and therefore slow things down.</span>
+<a name="l00251"></a>00251 <span class="comment"> *</span>
+<a name="l00252"></a>00252 <span class="comment"> * By definition, the first LINER for any given procedure will have</span>
+<a name="l00253"></a>00253 <span class="comment"> * the first line of a procedure and represent the first address.</span>
+<a name="l00254"></a>00254 <span class="comment"> */</span>
+<a name="l00255"></a>00255 
+<a name="l00256"></a><a class="code" href="coff__sym_8h.html#aacc0a49d336bbac7f85cf63204d2d286">00256</a> <span class="keyword">typedef</span> <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a> <a class="code" href="coff__sym_8h.html#a0aa8be5b4dc55cdf4f565f009f0ae25c">LINER</a>, *<a class="code" href="coff__sym_8h.html#aacc0a49d336bbac7f85cf63204d2d286">pLINER</a>;
+<a name="l00257"></a><a class="code" href="coff__sym_8h.html#a4b7a27c455eb5a2a0f8a94978d629947">00257</a> <span class="preprocessor">#define lineNil ((pLINER)0)</span>
+<a name="l00258"></a><a class="code" href="coff__sym_8h.html#a7363f6ca7086ddd7138f27f2f5cbc106">00258</a> <span class="preprocessor"></span><span class="preprocessor">#define cbLINER sizeof(LINER)</span>
+<a name="l00259"></a><a class="code" href="coff__sym_8h.html#a506ed0c8a87793765d012a6561705e9d">00259</a> <span class="preprocessor"></span><span class="preprocessor">#define ilineNil        -1</span>
+<a name="l00260"></a>00260 <span class="preprocessor"></span>
+<a name="l00261"></a>00261 
+<a name="l00262"></a>00262 
+<a name="l00263"></a>00263 <span class="comment">/*</span>
+<a name="l00264"></a>00264 <span class="comment"> * The Symbol Structure         (GFW, to those who Know!)</span>
+<a name="l00265"></a>00265 <span class="comment"> */</span>
+<a name="l00266"></a>00266 
+<a name="l00267"></a><a class="code" href="structecoff__sym.html">00267</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structecoff__sym.html">ecoff_sym</a> {
+<a name="l00268"></a><a class="code" href="structecoff__sym.html#a5a9763340498bedad4bd83abdaaa3f0a">00268</a>     <a class="code" href="ecoff__machdep_8h.html#a27e096276a8edabb9a2f02f101db01c7">coff_long</a>   <a class="code" href="structecoff__sym.html#a5a9763340498bedad4bd83abdaaa3f0a">value</a>;          <span class="comment">/* value of symbol */</span>
+<a name="l00269"></a><a class="code" href="structecoff__sym.html#afbddcadc409c0ae593b2d7e4d5a368de">00269</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="structecoff__sym.html#afbddcadc409c0ae593b2d7e4d5a368de">iss</a>;            <span class="comment">/* index into String Space of name */</span>
+<a name="l00270"></a><a class="code" href="structecoff__sym.html#ad31a126434d7ce705a87f60e04d987b2">00270</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__sym.html#ad31a126434d7ce705a87f60e04d987b2">st</a> : 6;    <span class="comment">/* symbol type */</span>
+<a name="l00271"></a><a class="code" href="structecoff__sym.html#afeb925285a478f289b24ee0d0c59e96f">00271</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__sym.html#afeb925285a478f289b24ee0d0c59e96f">sc</a>  : 5;   <span class="comment">/* storage class - text, data, etc */</span>
+<a name="l00272"></a><a class="code" href="structecoff__sym.html#a6a6017ea077b575677a11d733ec137a3">00272</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__sym.html#a6a6017ea077b575677a11d733ec137a3">reserved</a> : 1;      <span class="comment">/* reserved */</span>
+<a name="l00273"></a><a class="code" href="structecoff__sym.html#a360ebf6209d16512186ca7adb893abbb">00273</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__sym.html#a360ebf6209d16512186ca7adb893abbb">index</a> : 20;        <span class="comment">/* index into sym/aux table */</span>
+<a name="l00274"></a>00274 } <a class="code" href="structecoff__sym.html">SYMR</a>, *<a class="code" href="structecoff__sym.html">pSYMR</a>;
+<a name="l00275"></a><a class="code" href="coff__sym_8h.html#a78dfdcbf0424df54fb394045bda8aff5">00275</a> <span class="preprocessor">#define symNil ((pSYMR)0)</span>
+<a name="l00276"></a><a class="code" href="coff__sym_8h.html#aa3f28d1470a8e1984042148bfd69851f">00276</a> <span class="preprocessor"></span><span class="preprocessor">#define cbSYMR sizeof(SYMR)</span>
+<a name="l00277"></a><a class="code" href="coff__sym_8h.html#a7a99f41e8edee520c99c326c1845d46b">00277</a> <span class="preprocessor"></span><span class="preprocessor">#define isymNil -1</span>
+<a name="l00278"></a><a class="code" href="coff__sym_8h.html#a14d9db2a8f4eb06810a5f3492f6fe15a">00278</a> <span class="preprocessor"></span><span class="preprocessor">#define indexNil 0xfffff</span>
+<a name="l00279"></a><a class="code" href="coff__sym_8h.html#a86785f48b7b105c6900ea7097751918a">00279</a> <span class="preprocessor"></span><span class="preprocessor">#define issNil -1</span>
+<a name="l00280"></a><a class="code" href="coff__sym_8h.html#a39bc6cbf94886771f87c540c55d1287e">00280</a> <span class="preprocessor"></span><span class="preprocessor">#define issNull 0</span>
+<a name="l00281"></a>00281 <span class="preprocessor"></span>
+<a name="l00282"></a>00282 
+<a name="l00283"></a>00283 <span class="comment">/* The following converts a memory resident string to an iss.</span>
+<a name="l00284"></a>00284 <span class="comment"> * This hack is recognized in SbFIss, in sym.c of the debugger.</span>
+<a name="l00285"></a>00285 <span class="comment"> */</span>
+<a name="l00286"></a><a class="code" href="coff__sym_8h.html#aa9c68dbd1cbcb9da425c64d1f60ffa32">00286</a> <span class="preprocessor">#define IssFSb(sb) (0x80000000 | ((coff_ulong)(sb)))</span>
+<a name="l00287"></a>00287 <span class="preprocessor"></span>
+<a name="l00288"></a>00288 <span class="comment">/* E X T E R N A L   S Y M B O L  R E C O R D</span>
+<a name="l00289"></a>00289 <span class="comment"> *</span>
+<a name="l00290"></a>00290 <span class="comment"> *      Same as the SYMR except it contains file context to determine where</span>
+<a name="l00291"></a>00291 <span class="comment"> *      the index is.</span>
+<a name="l00292"></a>00292 <span class="comment"> */</span>
+<a name="l00293"></a><a class="code" href="structecoff__extsym.html">00293</a> <span class="keyword">typedef</span> <span class="keyword">struct </span><a class="code" href="structecoff__extsym.html">ecoff_extsym</a> {
+<a name="l00294"></a><a class="code" href="structecoff__extsym.html#a7c232c9306e35bcd917dc8676b3e2f61">00294</a>     <a class="code" href="structecoff__sym.html">SYMR</a>        <a class="code" href="structecoff__extsym.html#a7c232c9306e35bcd917dc8676b3e2f61">asym</a>;           <span class="comment">/* symbol for the external */</span>
+<a name="l00295"></a><a class="code" href="structecoff__extsym.html#a8349cfa7ff83bfa4db31aee84ada057d">00295</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__extsym.html#a8349cfa7ff83bfa4db31aee84ada057d">jmptbl</a>:1;  <span class="comment">/* symbol is a jump table entry for shlibs */</span>
+<a name="l00296"></a><a class="code" href="structecoff__extsym.html#aaed39a4650f1de8c2c6531eb0be9aada">00296</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__extsym.html#aaed39a4650f1de8c2c6531eb0be9aada">cobol_main</a>:1;      <span class="comment">/* symbol is a cobol main procedure */</span>
+<a name="l00297"></a><a class="code" href="structecoff__extsym.html#a096f4abf2deec9cdeffabb29a5c970ae">00297</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__extsym.html#a096f4abf2deec9cdeffabb29a5c970ae">weakext</a>:1; <span class="comment">/* symbol is weak external */</span>
+<a name="l00298"></a><a class="code" href="structecoff__extsym.html#a6a6017ea077b575677a11d733ec137a3">00298</a>     <span class="keywordtype">unsigned</span> <a class="code" href="structecoff__extsym.html#a6a6017ea077b575677a11d733ec137a3">reserved</a>:29;       <span class="comment">/* reserved for future use */</span>
+<a name="l00299"></a><a class="code" href="structecoff__extsym.html#af47c2b2ee9314512234a5337b78dc04d">00299</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a> <a class="code" href="structecoff__extsym.html#af47c2b2ee9314512234a5337b78dc04d">ifd</a>;               <span class="comment">/* where the iss and index fields point into */</span>
+<a name="l00300"></a>00300 } <a class="code" href="structecoff__extsym.html">EXTR</a>, *<a class="code" href="structecoff__extsym.html">pEXTR</a>;
+<a name="l00301"></a><a class="code" href="coff__sym_8h.html#a805495adb9b6884f79a79cec3dcb5df7">00301</a> <span class="preprocessor">#define extNil ((pEXTR)0)</span>
+<a name="l00302"></a><a class="code" href="coff__sym_8h.html#abffc11ec564d45dcf1369327ccf51755">00302</a> <span class="preprocessor"></span><span class="preprocessor">#define cbEXTR sizeof(EXTR)</span>
+<a name="l00303"></a>00303 <span class="preprocessor"></span>
+<a name="l00304"></a>00304 
+<a name="l00305"></a>00305 <span class="comment">/* A U X I L L A R Y   T Y P E   I N F O R M A T I O N */</span>
+<a name="l00306"></a>00306 
+<a name="l00307"></a>00307 <span class="comment">/*</span>
+<a name="l00308"></a>00308 <span class="comment"> * Type Information Record</span>
+<a name="l00309"></a>00309 <span class="comment"> */</span>
+<a name="l00310"></a><a class="code" href="structTIR.html">00310</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>{
+<a name="l00311"></a><a class="code" href="structTIR.html#ad246d6944ff21fd623b2600a63e9c0f0">00311</a>     <span class="keywordtype">unsigned</span> fBitfield : 1; <span class="comment">/* set if bit width is specified */</span>
+<a name="l00312"></a><a class="code" href="structTIR.html#a6a85a80877156713ad4f3c0a650f70fe">00312</a>     <span class="keywordtype">unsigned</span> continued : 1; <span class="comment">/* indicates additional TQ info in next AUX */</span>
+<a name="l00313"></a><a class="code" href="structTIR.html#a1a88e6c7f1381b0f286d1fd9b4c0df6c">00313</a>     <span class="keywordtype">unsigned</span> <a class="code" href="namespacePowerISA.html#af20c9a0d3fd487150d22bafc9725cc46">bt</a>  : 6;   <span class="comment">/* basic type */</span>
+<a name="l00314"></a><a class="code" href="structTIR.html#af0f5a4067c613c70800551d5a14d7e2d">00314</a>     <span class="keywordtype">unsigned</span> tq4 : 4;
+<a name="l00315"></a><a class="code" href="structTIR.html#aee720ea4acfc7c04c5f43e5bba7371cf">00315</a>     <span class="keywordtype">unsigned</span> tq5 : 4;
+<a name="l00316"></a>00316     <span class="comment">/* ---- 16 bit boundary ---- */</span>
+<a name="l00317"></a><a class="code" href="structTIR.html#a9dffd81e132126d4c133db1166e8adba">00317</a>     <span class="keywordtype">unsigned</span> tq0 : 4;
+<a name="l00318"></a><a class="code" href="structTIR.html#a1e0fc2bf7f1c036c4b6d021f848c8457">00318</a>     <span class="keywordtype">unsigned</span> tq1 : 4;   <span class="comment">/* 6 type qualifiers - tqPtr, etc. */</span>
+<a name="l00319"></a><a class="code" href="structTIR.html#a543df74ca8233fc70a50ad50b2fe567e">00319</a>     <span class="keywordtype">unsigned</span> tq2 : 4;
+<a name="l00320"></a><a class="code" href="structTIR.html#a8dc4b33bfc40bb4093ae8b8de2cf59b0">00320</a>     <span class="keywordtype">unsigned</span> tq3 : 4;
+<a name="l00321"></a>00321 } <a class="code" href="structTIR.html">TIR</a>, *<a class="code" href="structTIR.html">pTIR</a>;
+<a name="l00322"></a><a class="code" href="coff__sym_8h.html#a90bd7423e65cc87a8c3b57982e937c95">00322</a> <span class="preprocessor">#define cbTIR sizeof(TIR)</span>
+<a name="l00323"></a><a class="code" href="coff__sym_8h.html#afe09bcec2ed330ee78eb914bf85ef40a">00323</a> <span class="preprocessor"></span><span class="preprocessor">#define tiNil ((pTIR)0)</span>
+<a name="l00324"></a><a class="code" href="coff__sym_8h.html#aa27c118f3c6830f350c1992d72706724">00324</a> <span class="preprocessor"></span><span class="preprocessor">#define itqMax 6</span>
+<a name="l00325"></a>00325 <span class="preprocessor"></span>
+<a name="l00326"></a>00326 <span class="comment">/*</span>
+<a name="l00327"></a>00327 <span class="comment"> * Relative symbol record</span>
+<a name="l00328"></a>00328 <span class="comment"> *</span>
+<a name="l00329"></a>00329 <span class="comment"> * If the rfd field is 4095, the index field indexes into the global symbol</span>
+<a name="l00330"></a>00330 <span class="comment"> *      table.</span>
+<a name="l00331"></a>00331 <span class="comment"> */</span>
+<a name="l00332"></a>00332 
+<a name="l00333"></a><a class="code" href="structRNDXR.html">00333</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>{
+<a name="l00334"></a><a class="code" href="structRNDXR.html#adba8730b45cc6c66e22e404a02ea84ee">00334</a>     <span class="keywordtype">unsigned</span>    rfd : 12;    <span class="comment">/* index into the file indirect table */</span>
+<a name="l00335"></a><a class="code" href="structRNDXR.html#a360ebf6209d16512186ca7adb893abbb">00335</a>     <span class="keywordtype">unsigned</span>    <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> : 20; <span class="comment">/* index int sym/aux/iss tables */</span>
+<a name="l00336"></a>00336 } <a class="code" href="structRNDXR.html">RNDXR</a>, *<a class="code" href="structRNDXR.html">pRNDXR</a>;
+<a name="l00337"></a><a class="code" href="coff__sym_8h.html#ae065321f053738b964ce139799edac3d">00337</a> <span class="preprocessor">#define cbRNDXR sizeof(RNDXR)</span>
+<a name="l00338"></a><a class="code" href="coff__sym_8h.html#adba07881cb81c26fecac715d7b5a6d40">00338</a> <span class="preprocessor"></span><span class="preprocessor">#define rndxNil ((pRNDXR)0)</span>
+<a name="l00339"></a>00339 <span class="preprocessor"></span>
+<a name="l00340"></a>00340 <span class="comment">/* dense numbers or sometimes called block numbers are stored in this type,</span>
+<a name="l00341"></a>00341 <span class="comment"> *      a rfd of 0xffffffff is an index into the global table.</span>
+<a name="l00342"></a>00342 <span class="comment"> */</span>
+<a name="l00343"></a><a class="code" href="structDNR.html">00343</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>{
+<a name="l00344"></a><a class="code" href="structDNR.html#a546b54ccb3b41efc45bde58573fcf27d">00344</a>     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   rfd;    <span class="comment">/* index into the file table */</span>
+<a name="l00345"></a><a class="code" href="structDNR.html#aa00f453e8e2196a9451876eee4fe5ae1">00345</a>     <a class="code" href="ecoff__machdep_8h.html#ab38b7c66cf20051c3d7bb0f268d1e2a5">coff_uint</a>   <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>;  <span class="comment">/* index int sym/aux/iss tables */</span>
+<a name="l00346"></a>00346 } <a class="code" href="structDNR.html">DNR</a>, *<a class="code" href="structDNR.html">pDNR</a>;
+<a name="l00347"></a><a class="code" href="coff__sym_8h.html#ae0cd6dcf590b28a1254f59ae23bd8079">00347</a> <span class="preprocessor">#define cbDNR sizeof(DNR)</span>
+<a name="l00348"></a><a class="code" href="coff__sym_8h.html#ae0894929313ab087ff83d9c1f77c54f8">00348</a> <span class="preprocessor"></span><span class="preprocessor">#define dnNil ((pDNR)0)</span>
+<a name="l00349"></a>00349 <span class="preprocessor"></span>
+<a name="l00350"></a>00350 
+<a name="l00351"></a>00351 
+<a name="l00352"></a>00352 <span class="comment">/*</span>
+<a name="l00353"></a>00353 <span class="comment"> * Auxillary information occurs only if needed.</span>
+<a name="l00354"></a>00354 <span class="comment"> * It ALWAYS occurs in this order when present.</span>
+<a name="l00355"></a>00355 <span class="comment"></span>
+<a name="l00356"></a>00356 <span class="comment">            isymMac             used by stProc only</span>
+<a name="l00357"></a>00357 <span class="comment">            TIR                 type info</span>
+<a name="l00358"></a>00358 <span class="comment">            TIR                 additional TQ info (if first TIR was not enough)</span>
+<a name="l00359"></a>00359 <span class="comment">            rndx                if (bt == btStruct,btUnion,btEnum,btSet,btRange,</span>
+<a name="l00360"></a>00360 <span class="comment">                                    btTypedef):</span>
+<a name="l00361"></a>00361 <span class="comment">                                    rsym.index == iaux for btSet or btRange</span>
+<a name="l00362"></a>00362 <span class="comment">                                    else rsym.index == isym</span>
+<a name="l00363"></a>00363 <span class="comment">            dimLow              btRange, btSet</span>
+<a name="l00364"></a>00364 <span class="comment">            dimMac              btRange, btSet</span>
+<a name="l00365"></a>00365 <span class="comment">            rndx0               As many as there are tq arrays</span>
+<a name="l00366"></a>00366 <span class="comment">            dimLow0</span>
+<a name="l00367"></a>00367 <span class="comment">            dimHigh0</span>
+<a name="l00368"></a>00368 <span class="comment">            ...</span>
+<a name="l00369"></a>00369 <span class="comment">            rndxMax-1</span>
+<a name="l00370"></a>00370 <span class="comment">            dimLowMax-1</span>
+<a name="l00371"></a>00371 <span class="comment">            dimHighMax-1</span>
+<a name="l00372"></a>00372 <span class="comment">            width in bits       if (bit field), width in bits.</span>
+<a name="l00373"></a>00373 <span class="comment"> */</span>
+<a name="l00374"></a><a class="code" href="coff__sym_8h.html#a4812ef4198c90c68a1cc7499b0184c7d">00374</a> <span class="preprocessor">#define cAuxMax (6 + (idimMax*3))</span>
+<a name="l00375"></a>00375 <span class="preprocessor"></span>
+<a name="l00376"></a>00376 <span class="comment">/* a union of all possible info in the AUX universe */</span>
+<a name="l00377"></a><a class="code" href="unionAUXU.html">00377</a> <span class="keyword">typedef</span> <span class="keyword">union </span>{
+<a name="l00378"></a><a class="code" href="unionAUXU.html#a548accea0e00f2b327dc98585a2add5b">00378</a>     <a class="code" href="structTIR.html">TIR</a> <a class="code" href="namespaceMipsISA.html#a0e507c9f0ce51c01af3f6dd3fd0b09eb">ti</a>;             <span class="comment">/* type information record */</span>
+<a name="l00379"></a><a class="code" href="unionAUXU.html#a5922441bb6d02af2cb6d840862a40226">00379</a>     <a class="code" href="structRNDXR.html">RNDXR</a>       rndx;           <span class="comment">/* relative index into symbol table */</span>
+<a name="l00380"></a><a class="code" href="unionAUXU.html#af1d3fd41e6f4f96368e3fb0a461d4e3f">00380</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    dnLow;          <span class="comment">/* low dimension */</span>
+<a name="l00381"></a><a class="code" href="unionAUXU.html#a5fe9b969210378a09487c8206a22d821">00381</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    dnHigh;         <span class="comment">/* high dimension */</span>
+<a name="l00382"></a><a class="code" href="unionAUXU.html#a5b41af4e0a780cc1f8537a1f5f9b1eba">00382</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    isym;           <span class="comment">/* symbol table index (end of proc) */</span>
+<a name="l00383"></a><a class="code" href="unionAUXU.html#afbddcadc409c0ae593b2d7e4d5a368de">00383</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    iss;            <span class="comment">/* index into string space (not used) */</span>
+<a name="l00384"></a><a class="code" href="unionAUXU.html#ad70eff56a66904a167767e8fcad8623c">00384</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="namespaceArmISA.html#a0da89c280130b84ae26405a901396428">width</a>;          <span class="comment">/* width for non-default sized struc fields */</span>
+<a name="l00385"></a><a class="code" href="unionAUXU.html#ad7e795ec47cfbfb276fbdb29c91a21f5">00385</a>     <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a>    <a class="code" href="namespaceX86ISA.html#a668f84c330035fdb72824eb18e09cd09">count</a>;          <span class="comment">/* count of ranges for variant arm */</span>
+<a name="l00386"></a>00386 } <a class="code" href="unionAUXU.html">AUXU</a>, *<a class="code" href="unionAUXU.html">pAUXU</a>;
+<a name="l00387"></a><a class="code" href="coff__sym_8h.html#a45e06bbb551950eb92996c8b499666e0">00387</a> <span class="preprocessor">#define cbAUXU sizeof(AUXU)</span>
+<a name="l00388"></a><a class="code" href="coff__sym_8h.html#a8f599dcf881139814644af2a17f3f727">00388</a> <span class="preprocessor"></span><span class="preprocessor">#define auxNil ((pAUXU)0)</span>
+<a name="l00389"></a><a class="code" href="coff__sym_8h.html#aa65da98a6a6cfd5a959c4f51a7271613">00389</a> <span class="preprocessor"></span><span class="preprocessor">#define iauxNil -1</span>
+<a name="l00390"></a>00390 <span class="preprocessor"></span>
+<a name="l00391"></a>00391 
+<a name="l00392"></a>00392 <span class="comment">/*</span>
+<a name="l00393"></a>00393 <span class="comment"> * Optimization symbols</span>
+<a name="l00394"></a>00394 <span class="comment"> *</span>
+<a name="l00395"></a>00395 <span class="comment"> * Optimization symbols contain some overlap information with the normal</span>
+<a name="l00396"></a>00396 <span class="comment"> * symbol table. In particular, the proc information</span>
+<a name="l00397"></a>00397 <span class="comment"> * is somewhat redundant but necessary to easily find the other information</span>
+<a name="l00398"></a>00398 <span class="comment"> * present.</span>
+<a name="l00399"></a>00399 <span class="comment"> *</span>
+<a name="l00400"></a>00400 <span class="comment"> * All of the offsets are relative to the beginning of the last otProc</span>
+<a name="l00401"></a>00401 <span class="comment"> */</span>
+<a name="l00402"></a>00402 
+<a name="l00403"></a><a class="code" href="structOPTR.html">00403</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>{
+<a name="l00404"></a><a class="code" href="structOPTR.html#a4f30504d90d863215719b9cfd2b8ce90">00404</a>     <span class="keywordtype">unsigned</span> ot: 8;             <span class="comment">/* optimization type */</span>
+<a name="l00405"></a><a class="code" href="structOPTR.html#af6d3658bf68f75faf59f2a08f4c4fad1">00405</a>     <span class="keywordtype">unsigned</span> <a class="code" href="namespacegenini.html#a7e5f482a3a8a4f98bd1a9c124485f572">value</a>: 24; <span class="comment">/* address where we are moving it to */</span>
+<a name="l00406"></a><a class="code" href="structOPTR.html#a5922441bb6d02af2cb6d840862a40226">00406</a>     <a class="code" href="structRNDXR.html">RNDXR</a>       rndx;           <span class="comment">/* points to a symbol or opt entry */</span>
+<a name="l00407"></a><a class="code" href="structOPTR.html#afa0c3915b53566ae509a07b45f549627">00407</a>     <a class="code" href="ecoff__machdep_8h.html#a8465ac1e3c6711a52d3103550d8122fc">coff_ulong</a>  <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>; <span class="comment">/* relative offset this occured */</span>
+<a name="l00408"></a>00408 } <a class="code" href="structOPTR.html">OPTR</a>, *<a class="code" href="structOPTR.html">pOPTR</a>;
+<a name="l00409"></a><a class="code" href="coff__sym_8h.html#ac44a263110b5186e5df8c9297cf48b53">00409</a> <span class="preprocessor">#define optNil  ((pOPTR) 0)</span>
+<a name="l00410"></a><a class="code" href="coff__sym_8h.html#ae7ae77f611f3a85b2de893036a710673">00410</a> <span class="preprocessor"></span><span class="preprocessor">#define cbOPTR sizeof(OPTR)</span>
+<a name="l00411"></a><a class="code" href="coff__sym_8h.html#a100bc606426435e574ca83c272d4c13c">00411</a> <span class="preprocessor"></span><span class="preprocessor">#define ioptNil -1</span>
+<a name="l00412"></a>00412 <span class="preprocessor"></span>
+<a name="l00413"></a>00413 <span class="comment">/*</span>
+<a name="l00414"></a>00414 <span class="comment"> * File Indirect</span>
+<a name="l00415"></a>00415 <span class="comment"> *</span>
+<a name="l00416"></a>00416 <span class="comment"> * When a symbol is referenced across files the following procedure is used:</span>
+<a name="l00417"></a>00417 <span class="comment"> *      1) use the file index to get the File indirect entry.</span>
+<a name="l00418"></a>00418 <span class="comment"> *      2) use the file indirect entry to get the File descriptor.</span>
+<a name="l00419"></a>00419 <span class="comment"> *      3) add the sym index to the base of that file&apos;s sym table</span>
+<a name="l00420"></a>00420 <span class="comment"> *</span>
+<a name="l00421"></a>00421 <span class="comment"> */</span>
+<a name="l00422"></a>00422 
+<a name="l00423"></a><a class="code" href="coff__sym_8h.html#af3b0d31573102bf4a731aac9f0ea0024">00423</a> <span class="keyword">typedef</span> <a class="code" href="ecoff__machdep_8h.html#a27e096276a8edabb9a2f02f101db01c7">coff_long</a> <a class="code" href="coff__sym_8h.html#af3b0d31573102bf4a731aac9f0ea0024">RFDT</a>, *<a class="code" href="coff__sym_8h.html#aeed1a93ef5b0e24e8254209007a9d556">pRFDT</a>;
+<a name="l00424"></a><a class="code" href="coff__sym_8h.html#a5b8597955dc6bfe9efdb03a8c26be93c">00424</a> <span class="preprocessor">#define cbRFDT sizeof(RFDT)</span>
+<a name="l00425"></a><a class="code" href="coff__sym_8h.html#abec8b69bc788de1b459595545f69e286">00425</a> <span class="preprocessor"></span><span class="preprocessor">#define rfdNil  -1</span>
+<a name="l00426"></a>00426 <span class="preprocessor"></span>
+<a name="l00427"></a>00427 <span class="comment">/*</span>
+<a name="l00428"></a>00428 <span class="comment"> * The file indirect table in the mips loader is known as an array of FITs.</span>
+<a name="l00429"></a>00429 <span class="comment"> * This is done to keep the code in the loader readable in the area where</span>
+<a name="l00430"></a>00430 <span class="comment"> * these tables are merged.  Note this is only a name change.</span>
+<a name="l00431"></a>00431 <span class="comment"> */</span>
+<a name="l00432"></a><a class="code" href="coff__sym_8h.html#a8965fb86341f3d3cd8dce46fed752b0f">00432</a> <span class="keyword">typedef</span> <a class="code" href="ecoff__machdep_8h.html#a484fbe8ab04f62e9ac2341a8275f3c35">coff_int</a> <a class="code" href="coff__sym_8h.html#a90443212502fe22c03835ef0257f67fe">FIT</a>, *<a class="code" href="coff__sym_8h.html#a8965fb86341f3d3cd8dce46fed752b0f">pFIT</a>;
+<a name="l00433"></a><a class="code" href="coff__sym_8h.html#a62d3abdab1cfc93c040a023cc1095186">00433</a> <span class="preprocessor">#define cbFIT   sizeof(FIT)</span>
+<a name="l00434"></a><a class="code" href="coff__sym_8h.html#a5c2c495d49db9015b91d8b84148c41bb">00434</a> <span class="preprocessor"></span><span class="preprocessor">#define ifiNil  -1</span>
+<a name="l00435"></a><a class="code" href="coff__sym_8h.html#afb8e6daaa5456602b8b69a3253c5a200">00435</a> <span class="preprocessor"></span><span class="preprocessor">#define fiNil   ((pFIT) 0)</span>
+<a name="l00436"></a>00436 <span class="preprocessor"></span>
+<a name="l00437"></a>00437 <span class="preprocessor">#ifdef _LANGUAGE_PASCAL</span>
+<a name="l00438"></a>00438 <span class="preprocessor"></span><span class="preprocessor">#define ifdNil -1</span>
+<a name="l00439"></a>00439 <span class="preprocessor"></span><span class="preprocessor">#define ilnNil -1</span>
+<a name="l00440"></a>00440 <span class="preprocessor"></span><span class="preprocessor">#define ipdNil -1</span>
+<a name="l00441"></a>00441 <span class="preprocessor"></span><span class="preprocessor">#define ilineNil -1</span>
+<a name="l00442"></a>00442 <span class="preprocessor"></span><span class="preprocessor">#define isymNil -1</span>
+<a name="l00443"></a>00443 <span class="preprocessor"></span><span class="preprocessor">#define indexNil 16#fffff</span>
+<a name="l00444"></a>00444 <span class="preprocessor"></span><span class="preprocessor">#define issNil -1</span>
+<a name="l00445"></a>00445 <span class="preprocessor"></span><span class="preprocessor">#define issNull 0</span>
+<a name="l00446"></a>00446 <span class="preprocessor"></span><span class="preprocessor">#define itqMax 6</span>
+<a name="l00447"></a>00447 <span class="preprocessor"></span><span class="preprocessor">#define iauxNil -1</span>
+<a name="l00448"></a>00448 <span class="preprocessor"></span><span class="preprocessor">#define ioptNil -1</span>
+<a name="l00449"></a>00449 <span class="preprocessor"></span><span class="preprocessor">#define rfdNil -1</span>
+<a name="l00450"></a>00450 <span class="preprocessor"></span><span class="preprocessor">#define ifiNil -1</span>
+<a name="l00451"></a>00451 <span class="preprocessor"></span><span class="preprocessor">#endif  </span><span class="comment">/* _LANGUAGE_PASCAL */</span>
+<a name="l00452"></a>00452 
+<a name="l00453"></a>00453 
+<a name="l00454"></a>00454 <span class="comment">/* Dense numbers</span>
+<a name="l00455"></a>00455 <span class="comment"> *</span>
+<a name="l00456"></a>00456 <span class="comment"> * Rather than use file index, symbol index pairs to represent symbols</span>
+<a name="l00457"></a>00457 <span class="comment"> *      and globals, we use dense number so that they can be easily embeded</span>
+<a name="l00458"></a>00458 <span class="comment"> *      in intermediate code and the programs that process them can</span>
+<a name="l00459"></a>00459 <span class="comment"> *      use direct access tabls instead of hash table (which would be</span>
+<a name="l00460"></a>00460 <span class="comment"> *      necesary otherwise because of the sparse name space caused by</span>
+<a name="l00461"></a>00461 <span class="comment"> *      file index, symbol index pairs. Dense number are represented</span>
+<a name="l00462"></a>00462 <span class="comment"> *      by RNDXRs.</span>
+<a name="l00463"></a>00463 <span class="comment"> */</span>
+<a name="l00464"></a>00464 
+<a name="l00465"></a>00465 <span class="comment">/*</span>
+<a name="l00466"></a>00466 <span class="comment"> * The following table defines the meaning of each SYM field as</span>
+<a name="l00467"></a>00467 <span class="comment"> * a function of the &quot;st&quot;. (scD/B == scData OR scBss)</span>
+<a name="l00468"></a>00468 <span class="comment"> *</span>
+<a name="l00469"></a>00469 <span class="comment"> * Note: the value &quot;isymMac&quot; is used by symbols that have the concept</span>
+<a name="l00470"></a>00470 <span class="comment"> * of enclosing a block of related information.  This value is the</span>
+<a name="l00471"></a>00471 <span class="comment"> * isym of the first symbol AFTER the end associated with the primary</span>
+<a name="l00472"></a>00472 <span class="comment"> * symbol. For example if a procedure was at isym==90 and had an</span>
+<a name="l00473"></a>00473 <span class="comment"> * isymMac==155, the associated end would be at isym==154, and the</span>
+<a name="l00474"></a>00474 <span class="comment"> * symbol at 155 would probably (although not necessarily) be the</span>
+<a name="l00475"></a>00475 <span class="comment"> * symbol for the next procedure.  This allows rapid skipping over</span>
+<a name="l00476"></a>00476 <span class="comment"> * internal information of various sorts. &quot;stEnd&quot;s ALWAYS have the</span>
+<a name="l00477"></a>00477 <span class="comment"> * isym of the primary symbol that started the block.</span>
+<a name="l00478"></a>00478 <span class="comment"> *</span>
+<a name="l00479"></a>00479 <span class="comment"></span>
+<a name="l00480"></a>00480 <span class="comment">ST              SC      VALUE           INDEX</span>
+<a name="l00481"></a>00481 <span class="comment">--------        ------  --------        ------</span>
+<a name="l00482"></a>00482 <span class="comment">stFile          scText  address         isymMac</span>
+<a name="l00483"></a>00483 <span class="comment">stLabel         scText  address         ---</span>
+<a name="l00484"></a>00484 <span class="comment">stGlobal        scD/B   address         iaux</span>
+<a name="l00485"></a>00485 <span class="comment">stStatic        scD/B   address         iaux</span>
+<a name="l00486"></a>00486 <span class="comment">stParam         scAbs   offset          iaux</span>
+<a name="l00487"></a>00487 <span class="comment">stLocal         scAbs   offset          iaux</span>
+<a name="l00488"></a>00488 <span class="comment">stProc          scText  address         iaux    (isymMac is first AUX)</span>
+<a name="l00489"></a>00489 <span class="comment">stStaticProc    scText  address         iaux    (isymMac is first AUX)</span>
+<a name="l00490"></a>00490 <span class="comment"></span>
+<a name="l00491"></a>00491 <span class="comment">stMember        scNil   ordinal         ---     (if member of enum)</span>
+<a name="l00492"></a>00492 <span class="comment">        (mipsread thinks the case below has a bit, not byte, offset.)</span>
+<a name="l00493"></a>00493 <span class="comment">stMember        scNil   byte offset     iaux    (if member of struct/union)</span>
+<a name="l00494"></a>00494 <span class="comment">stMember        scBits  bit offset      iaux    (bit field spec)</span>
+<a name="l00495"></a>00495 <span class="comment"></span>
+<a name="l00496"></a>00496 <span class="comment">stBlock         scText  address         isymMac (text block)</span>
+<a name="l00497"></a>00497 <span class="comment">        (the code seems to think that rather than scNil, we see scInfo for</span>
+<a name="l00498"></a>00498 <span class="comment">         the two cases below.)</span>
+<a name="l00499"></a>00499 <span class="comment">stBlock         scNil   cb              isymMac (struct/union member define)</span>
+<a name="l00500"></a>00500 <span class="comment">stBlock         scNil   cMembers        isymMac (enum member define)</span>
+<a name="l00501"></a>00501 <span class="comment"></span>
+<a name="l00502"></a>00502 <span class="comment">        (New types added by SGI to simplify things:)</span>
+<a name="l00503"></a>00503 <span class="comment">stStruct        scInfo  cb              isymMac (struct type define)</span>
+<a name="l00504"></a>00504 <span class="comment">stUnion         scInfo  cb              isymMac (union  type define)</span>
+<a name="l00505"></a>00505 <span class="comment">stEnum          scInfo  cMembers        isymMac (enum   type define)</span>
+<a name="l00506"></a>00506 <span class="comment"></span>
+<a name="l00507"></a>00507 <span class="comment">stEnd           scText  address         isymStart</span>
+<a name="l00508"></a>00508 <span class="comment">stEnd           scNil   -------         isymStart (struct/union/enum)</span>
+<a name="l00509"></a>00509 <span class="comment"></span>
+<a name="l00510"></a>00510 <span class="comment">stTypedef       scNil   -------         iaux</span>
+<a name="l00511"></a>00511 <span class="comment">stRegReloc      sc???   value           old register number</span>
+<a name="l00512"></a>00512 <span class="comment">stForward       sc???   new address     isym to original symbol</span>
+<a name="l00513"></a>00513 <span class="comment"></span>
+<a name="l00514"></a>00514 <span class="comment">stConstant      scInfo  value           --- (scalar)</span>
+<a name="l00515"></a>00515 <span class="comment">stConstant      scInfo  iss             --- (complex, e.g. string)</span>
+<a name="l00516"></a>00516 <span class="comment"></span>
+<a name="l00517"></a>00517 <span class="comment"> *</span>
+<a name="l00518"></a>00518 <span class="comment"> */</span>
+<a name="l00519"></a>00519 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

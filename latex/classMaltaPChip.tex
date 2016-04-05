@@ -1,0 +1,481 @@
+\hypertarget{classMaltaPChip}{
+\section{クラス MaltaPChip}
+\label{classMaltaPChip}\index{MaltaPChip@{MaltaPChip}}
+}
+
+
+{\ttfamily \#include $<$malta\_\-pchip.hh$>$}MaltaPChipに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classMaltaPChip}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef MaltaPChipParams \hyperlink{classMaltaPChip_adcfa4143cf090788abe164c8f54c1a54}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classMaltaPChip_adcfa4143cf090788abe164c8f54c1a54}{Params} $\ast$ \hyperlink{classMaltaPChip_acd3c3feb78ae7a8f88fe0f110a718dff}{params} () const 
+\item 
+\hyperlink{classMaltaPChip_aaafe219c17d10c224cc44de6ec4c7866}{MaltaPChip} (const \hyperlink{classMaltaPChip_adcfa4143cf090788abe164c8f54c1a54}{Params} $\ast$p)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classMaltaPChip_a5de3f8c8c47bf4bb58e072f54f4a7cba}{translatePciToDma} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} busAddr)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classMaltaPChip_ac58937201c28a74230a03b39b03066b6}{calcConfigAddr} (int bus, int dev, int func)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classMaltaPChip_a613ec7d5e1ec64f8d21fec78ae8e568e}{read} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classMaltaPChip_a4cefab464e72b5dd42c003a0a4341802}{write} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual void \hyperlink{classMaltaPChip_a53e036786d17361be4c7320d39c99b84}{serialize} (std::ostream \&os)
+\item 
+virtual void \hyperlink{classMaltaPChip_af22e5d6d660b97db37003ac61ac4ee49}{unserialize} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const std::string \&section)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+uint64\_\-t \hyperlink{classMaltaPChip_a8df2c098b72e9eee77a79290c8e4a6c5}{pctl}
+\item 
+uint64\_\-t \hyperlink{classMaltaPChip_a8281ba8e4694bf75ec8b8b5d4d4ad50f}{wsba} \mbox{[}4\mbox{]}
+\item 
+uint64\_\-t \hyperlink{classMaltaPChip_a16d1e04d18db960e6c8059d404989395}{wsm} \mbox{[}4\mbox{]}
+\item 
+uint64\_\-t \hyperlink{classMaltaPChip_ad35698b8e7094fe0888d00cad38965ec}{tba} \mbox{[}4\mbox{]}
+\end{DoxyCompactItemize}
+\subsection*{Static Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+static const \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classMaltaPChip_a3b0c17d07ca94915a8f0a53df21f2607}{MaltaPciBus0Config} = ULL(0x801fe000000)
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+A very simple implementation of the \hyperlink{classMalta}{Malta} PCI interface chips. 
+
+\subsection{型定義}
+\hypertarget{classMaltaPChip_adcfa4143cf090788abe164c8f54c1a54}{
+\index{MaltaPChip@{MaltaPChip}!Params@{Params}}
+\index{Params@{Params}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef MaltaPChipParams {\bf Params}}}
+\label{classMaltaPChip_adcfa4143cf090788abe164c8f54c1a54}
+
+
+\hyperlink{classBasicPioDevice_a2845515ac6467f10540747053c8a0449}{BasicPioDevice}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classMaltaPChip_aaafe219c17d10c224cc44de6ec4c7866}{
+\index{MaltaPChip@{MaltaPChip}!MaltaPChip@{MaltaPChip}}
+\index{MaltaPChip@{MaltaPChip}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{MaltaPChip}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MaltaPChip} (const {\bf Params} $\ast$ {\em p})}}
+\label{classMaltaPChip_aaafe219c17d10c224cc44de6ec4c7866}
+\hyperlink{classRegister}{Register} the PChip with the mmu and init all wsba, wsm, and tba to 0 
+\begin{DoxyParams}{引数}
+\item[{\em p}]pointer to the parameters struct \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+54     : BasicPioDevice(p, 0x1000)
+55 {
+56     for (int i = 0; i < 4; i++) {
+57         wsba[i] = 0;
+58         wsm[i] = 0;
+59         tba[i] = 0;
+60     }
+61 
+62     // initialize pchip control register
+63     pctl = (ULL(0x1) << 20) | (ULL(0x1) << 32) | (ULL(0x2) << 36);
+64 
+65     //Set back pointer in malta
+66     p->malta->pchip = this;
+67 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classMaltaPChip_ac58937201c28a74230a03b39b03066b6}{
+\index{MaltaPChip@{MaltaPChip}!calcConfigAddr@{calcConfigAddr}}
+\index{calcConfigAddr@{calcConfigAddr}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{calcConfigAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} calcConfigAddr (int {\em bus}, \/  int {\em dev}, \/  int {\em func})}}
+\label{classMaltaPChip_ac58937201c28a74230a03b39b03066b6}
+
+
+
+\begin{DoxyCode}
+305 {
+306     assert(func < 8);
+307     assert(dev < 32);
+308     assert(bus == 0);
+309 
+310     return MaltaPciBus0Config | (func << 8) | (dev << 11);
+311 }
+\end{DoxyCode}
+\hypertarget{classMaltaPChip_acd3c3feb78ae7a8f88fe0f110a718dff}{
+\index{MaltaPChip@{MaltaPChip}!params@{params}}
+\index{params@{params}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Params}$\ast$ params () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classMaltaPChip_acd3c3feb78ae7a8f88fe0f110a718dff}
+
+
+\hyperlink{classBasicPioDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicPioDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+68     {
+69         return dynamic_cast<const Params *>(_params);
+70     }
+\end{DoxyCode}
+\hypertarget{classMaltaPChip_a613ec7d5e1ec64f8d21fec78ae8e568e}{
+\index{MaltaPChip@{MaltaPChip}!read@{read}}
+\index{read@{read}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} read ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classMaltaPChip_a613ec7d5e1ec64f8d21fec78ae8e568e}
+Pure virtual function that the device must implement. Called when a read command is recieved by the port. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]\hyperlink{classPacket}{Packet} describing this request \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+number of ticks it took to complete 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_a842312590432036092c422c87a442358}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+71 {
+72     assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+73 
+74     pkt->allocate();
+75     Addr daddr = (pkt->getAddr() - pioAddr) >> 6;;
+76     assert(pkt->getSize() == sizeof(uint64_t));
+77 
+78 
+79     DPRINTF(Malta, "read  va=%#x size=%d\n", pkt->getAddr(), pkt->getSize());
+80 
+81     switch(daddr) {
+82       case TSDEV_PC_WSBA0:
+83             pkt->set(wsba[0]);
+84             break;
+85       case TSDEV_PC_WSBA1:
+86             pkt->set(wsba[1]);
+87             break;
+88       case TSDEV_PC_WSBA2:
+89             pkt->set(wsba[2]);
+90             break;
+91       case TSDEV_PC_WSBA3:
+92             pkt->set(wsba[3]);
+93             break;
+94       case TSDEV_PC_WSM0:
+95             pkt->set(wsm[0]);
+96             break;
+97       case TSDEV_PC_WSM1:
+98             pkt->set(wsm[1]);
+99             break;
+100       case TSDEV_PC_WSM2:
+101             pkt->set(wsm[2]);
+102             break;
+103       case TSDEV_PC_WSM3:
+104             pkt->set(wsm[3]);
+105             break;
+106       case TSDEV_PC_TBA0:
+107             pkt->set(tba[0]);
+108             break;
+109       case TSDEV_PC_TBA1:
+110             pkt->set(tba[1]);
+111             break;
+112       case TSDEV_PC_TBA2:
+113             pkt->set(tba[2]);
+114             break;
+115       case TSDEV_PC_TBA3:
+116             pkt->set(tba[3]);
+117             break;
+118       case TSDEV_PC_PCTL:
+119             pkt->set(pctl);
+120             break;
+121       case TSDEV_PC_PLAT:
+122             panic("PC_PLAT not implemented\n");
+123       case TSDEV_PC_RES:
+124             panic("PC_RES not implemented\n");
+125       case TSDEV_PC_PERROR:
+126             pkt->set((uint64_t)0x00);
+127             break;
+128       case TSDEV_PC_PERRMASK:
+129             pkt->set((uint64_t)0x00);
+130             break;
+131       case TSDEV_PC_PERRSET:
+132             panic("PC_PERRSET not implemented\n");
+133       case TSDEV_PC_TLBIV:
+134             panic("PC_TLBIV not implemented\n");
+135       case TSDEV_PC_TLBIA:
+136             pkt->set((uint64_t)0x00); // shouldn't be readable, but linux
+137             break;
+138       case TSDEV_PC_PMONCTL:
+139             panic("PC_PMONCTL not implemented\n");
+140       case TSDEV_PC_PMONCNT:
+141             panic("PC_PMONCTN not implemented\n");
+142       default:
+143           panic("Default in PChip Read reached reading 0x%x\n", daddr);
+144     }
+145     pkt->makeAtomicResponse();
+146     return pioDelay;
+147 
+148 }
+\end{DoxyCode}
+\hypertarget{classMaltaPChip_a53e036786d17361be4c7320d39c99b84}{
+\index{MaltaPChip@{MaltaPChip}!serialize@{serialize}}
+\index{serialize@{serialize}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize (std::ostream \& {\em os})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classMaltaPChip_a53e036786d17361be4c7320d39c99b84}
+Serialize this object to the given output stream. 
+\begin{DoxyParams}{引数}
+\item[{\em os}]The stream to serialize to. \end{DoxyParams}
+
+
+\hyperlink{classSerializable_ad6272f80ae37e8331e3969b3f072a801}{Serializable}を再定義しています。
+
+
+\begin{DoxyCode}
+317 {
+318     SERIALIZE_SCALAR(pctl);
+319     SERIALIZE_ARRAY(wsba, 4);
+320     SERIALIZE_ARRAY(wsm, 4);
+321     SERIALIZE_ARRAY(tba, 4);
+322 }
+\end{DoxyCode}
+\hypertarget{classMaltaPChip_a5de3f8c8c47bf4bb58e072f54f4a7cba}{
+\index{MaltaPChip@{MaltaPChip}!translatePciToDma@{translatePciToDma}}
+\index{translatePciToDma@{translatePciToDma}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{translatePciToDma}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} translatePciToDma ({\bf Addr} {\em busAddr})}}
+\label{classMaltaPChip_a5de3f8c8c47bf4bb58e072f54f4a7cba}
+Translate a PCI bus address to a memory address for DMA. \begin{Desc}
+\item[\hyperlink{todo__todo000065}{TODO}]Andrew says this needs to be fixed. What's wrong with it? \end{Desc}
+
+\begin{DoxyParams}{引数}
+\item[{\em busAddr}]PCI address to translate. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+memory system address 
+\end{DoxyReturn}
+
+
+\begin{Desc}
+\item[\hyperlink{todo__todo000064}{TODO}]This currently is faked by just doing a direct read from memory, however, to be realistic, this needs to actually do a bus transaction. The process is explained in the malta documentation on page 10-\/12 and basically munges the address to look up a PTE from a table in memory and then uses that mapping to create an address for the SG page \end{Desc}
+
+
+
+\begin{DoxyCode}
+231 {
+232     // compare the address to the window base registers
+233     uint64_t tbaMask = 0;
+234     uint64_t baMask = 0;
+235 
+236     uint64_t windowMask = 0;
+237     uint64_t windowBase = 0;
+238 
+239     uint64_t pteEntry = 0;
+240 
+241     Addr pteAddr;
+242     Addr dmaAddr;
+243 
+244 #if 0
+245     DPRINTF(IdeDisk, "Translation for bus address: %#x\n", busAddr);
+246     for (int i = 0; i < 4; i++) {
+247         DPRINTF(IdeDisk, "(%d) base:%#x mask:%#x\n",
+248                 i, wsba[i], wsm[i]);
+249 
+250         windowBase = wsba[i];
+251         windowMask = ~wsm[i] & (ULL(0xfff) << 20);
+252 
+253         if ((busAddr & windowMask) == (windowBase & windowMask)) {
+254             DPRINTF(IdeDisk, "Would have matched %d (wb:%#x wm:%#x --> ba&wm:%#x 
+      wb&wm:%#x)\n",
+255                     i, windowBase, windowMask, (busAddr & windowMask),
+256                     (windowBase & windowMask));
+257         }
+258     }
+259 #endif
+260 
+261     for (int i = 0; i < 4; i++) {
+262 
+263         windowBase = wsba[i];
+264         windowMask = ~wsm[i] & (ULL(0xfff) << 20);
+265 
+266         if ((busAddr & windowMask) == (windowBase & windowMask)) {
+267 
+268             if (wsba[i] & 0x1) {   // see if enabled
+269                 if (wsba[i] & 0x2) { // see if SG bit is set
+280                     tbaMask = ~(((wsm[i] & (ULL(0xfff) << 20)) >> 10) | ULL(0x3ff
+      ));
+281                     baMask = (wsm[i] & (ULL(0xfff) << 20)) | (ULL(0x7f) << 13);
+282                     pteAddr = (tba[i] & tbaMask) | ((busAddr & baMask) >> 10);
+283 
+284                     sys->physProxy.readBlob(pteAddr, (uint8_t*)&pteEntry,
+285                                             sizeof(uint64_t));
+286 
+287                     dmaAddr = ((pteEntry & ~ULL(0x1)) << 12) | (busAddr & ULL(0x1
+      fff));
+288 
+289                 } else {
+290                     baMask = (wsm[i] & (ULL(0xfff) << 20)) | ULL(0xfffff);
+291                     tbaMask = ~baMask;
+292                     dmaAddr = (tba[i] & tbaMask) | (busAddr & baMask);
+293                 }
+294 
+295                 return (dmaAddr & DMA_ADDR_MASK);
+296             }
+297         }
+298     }
+299 
+300     // if no match was found, then return the original address
+301     return busAddr;
+302 }
+\end{DoxyCode}
+\hypertarget{classMaltaPChip_af22e5d6d660b97db37003ac61ac4ee49}{
+\index{MaltaPChip@{MaltaPChip}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}void unserialize ({\bf Checkpoint} $\ast$ {\em cp}, \/  const std::string \& {\em section})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classMaltaPChip_af22e5d6d660b97db37003ac61ac4ee49}
+Reconstruct the state of this object from a checkpoint. 
+\begin{DoxyParams}{引数}
+\item[{\em \hyperlink{namespacecp}{cp}}]The checkpoint use. \item[{\em section}]The section name of this object \end{DoxyParams}
+
+
+\hyperlink{classSerializable_af100c4e9feabf3cd918619c88c718387}{Serializable}を再定義しています。
+
+
+\begin{DoxyCode}
+326 {
+327     UNSERIALIZE_SCALAR(pctl);
+328     UNSERIALIZE_ARRAY(wsba, 4);
+329     UNSERIALIZE_ARRAY(wsm, 4);
+330     UNSERIALIZE_ARRAY(tba, 4);
+331 }
+\end{DoxyCode}
+\hypertarget{classMaltaPChip_a4cefab464e72b5dd42c003a0a4341802}{
+\index{MaltaPChip@{MaltaPChip}!write@{write}}
+\index{write@{write}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} write ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classMaltaPChip_a4cefab464e72b5dd42c003a0a4341802}
+Pure virtual function that the device must implement. Called when a write command is recieved by the port. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]\hyperlink{classPacket}{Packet} describing this request \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+number of ticks it took to complete 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_afe8371668d023bb2516b286e5e399b6f}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+152 {
+153     assert(pkt->getAddr() >= pioAddr && pkt->getAddr() < pioAddr + pioSize);
+154     Addr daddr = (pkt->getAddr() - pioAddr) >> 6;
+155 
+156     assert(pkt->getSize() == sizeof(uint64_t));
+157 
+158     DPRINTF(Malta, "write - va=%#x size=%d \n", pkt->getAddr(), pkt->getSize());
+159 
+160     switch(daddr) {
+161         case TSDEV_PC_WSBA0:
+162               wsba[0] = pkt->get<uint64_t>();
+163               break;
+164         case TSDEV_PC_WSBA1:
+165               wsba[1] = pkt->get<uint64_t>();
+166               break;
+167         case TSDEV_PC_WSBA2:
+168               wsba[2] = pkt->get<uint64_t>();
+169               break;
+170         case TSDEV_PC_WSBA3:
+171               wsba[3] = pkt->get<uint64_t>();
+172               break;
+173         case TSDEV_PC_WSM0:
+174               wsm[0] = pkt->get<uint64_t>();
+175               break;
+176         case TSDEV_PC_WSM1:
+177               wsm[1] = pkt->get<uint64_t>();
+178               break;
+179         case TSDEV_PC_WSM2:
+180               wsm[2] = pkt->get<uint64_t>();
+181               break;
+182         case TSDEV_PC_WSM3:
+183               wsm[3] = pkt->get<uint64_t>();
+184               break;
+185         case TSDEV_PC_TBA0:
+186               tba[0] = pkt->get<uint64_t>();
+187               break;
+188         case TSDEV_PC_TBA1:
+189               tba[1] = pkt->get<uint64_t>();
+190               break;
+191         case TSDEV_PC_TBA2:
+192               tba[2] = pkt->get<uint64_t>();
+193               break;
+194         case TSDEV_PC_TBA3:
+195               tba[3] = pkt->get<uint64_t>();
+196               break;
+197         case TSDEV_PC_PCTL:
+198               pctl = pkt->get<uint64_t>();
+199               break;
+200         case TSDEV_PC_PLAT:
+201               panic("PC_PLAT not implemented\n");
+202         case TSDEV_PC_RES:
+203               panic("PC_RES not implemented\n");
+204         case TSDEV_PC_PERROR:
+205               break;
+206         case TSDEV_PC_PERRMASK:
+207               panic("PC_PERRMASK not implemented\n");
+208         case TSDEV_PC_PERRSET:
+209               panic("PC_PERRSET not implemented\n");
+210         case TSDEV_PC_TLBIV:
+211               panic("PC_TLBIV not implemented\n");
+212         case TSDEV_PC_TLBIA:
+213               break; // value ignored, supposted to invalidate SG TLB
+214         case TSDEV_PC_PMONCTL:
+215               panic("PC_PMONCTL not implemented\n");
+216         case TSDEV_PC_PMONCNT:
+217               panic("PC_PMONCTN not implemented\n");
+218         default:
+219             panic("Default in PChip write reached reading 0x%x\n", daddr);
+220 
+221     } // uint64_t
+222 
+223     pkt->makeAtomicResponse();
+224     return pioDelay;
+225 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classMaltaPChip_a3b0c17d07ca94915a8f0a53df21f2607}{
+\index{MaltaPChip@{MaltaPChip}!MaltaPciBus0Config@{MaltaPciBus0Config}}
+\index{MaltaPciBus0Config@{MaltaPciBus0Config}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{MaltaPciBus0Config}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Addr} {\bf MaltaPciBus0Config} = ULL(0x801fe000000)\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classMaltaPChip_a3b0c17d07ca94915a8f0a53df21f2607}
+\hypertarget{classMaltaPChip_a8df2c098b72e9eee77a79290c8e4a6c5}{
+\index{MaltaPChip@{MaltaPChip}!pctl@{pctl}}
+\index{pctl@{pctl}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{pctl}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf pctl}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classMaltaPChip_a8df2c098b72e9eee77a79290c8e4a6c5}
+Pchip control register \hypertarget{classMaltaPChip_ad35698b8e7094fe0888d00cad38965ec}{
+\index{MaltaPChip@{MaltaPChip}!tba@{tba}}
+\index{tba@{tba}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{tba}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf tba}\mbox{[}4\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classMaltaPChip_ad35698b8e7094fe0888d00cad38965ec}
+Translated Base Addresses \hypertarget{classMaltaPChip_a8281ba8e4694bf75ec8b8b5d4d4ad50f}{
+\index{MaltaPChip@{MaltaPChip}!wsba@{wsba}}
+\index{wsba@{wsba}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{wsba}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf wsba}\mbox{[}4\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classMaltaPChip_a8281ba8e4694bf75ec8b8b5d4d4ad50f}
+Window Base addresses \hypertarget{classMaltaPChip_a16d1e04d18db960e6c8059d404989395}{
+\index{MaltaPChip@{MaltaPChip}!wsm@{wsm}}
+\index{wsm@{wsm}!MaltaPChip@{MaltaPChip}}
+\subsubsection[{wsm}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf wsm}\mbox{[}4\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classMaltaPChip_a16d1e04d18db960e6c8059d404989395}
+Window masks 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/mips/\hyperlink{malta__pchip_8hh}{malta\_\-pchip.hh}\item 
+dev/mips/\hyperlink{malta__pchip_8cc}{malta\_\-pchip.cc}\end{DoxyCompactItemize}

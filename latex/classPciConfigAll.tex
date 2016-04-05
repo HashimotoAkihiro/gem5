@@ -1,0 +1,148 @@
+\hypertarget{classPciConfigAll}{
+\section{クラス PciConfigAll}
+\label{classPciConfigAll}\index{PciConfigAll@{PciConfigAll}}
+}
+
+
+{\ttfamily \#include $<$pciconfigall.hh$>$}PciConfigAllに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classPciConfigAll}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef PciConfigAllParams \hyperlink{classPciConfigAll_a0488eba2a71c6661fef314d8ded28416}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classPciConfigAll_a0488eba2a71c6661fef314d8ded28416}{Params} $\ast$ \hyperlink{classPciConfigAll_acd3c3feb78ae7a8f88fe0f110a718dff}{params} () const 
+\item 
+\hyperlink{classPciConfigAll_a618458d1056b88674814a45722d1474e}{PciConfigAll} (const \hyperlink{classPciConfigAll_a0488eba2a71c6661fef314d8ded28416}{Params} $\ast$p)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classPciConfigAll_a613ec7d5e1ec64f8d21fec78ae8e568e}{read} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classPciConfigAll_a4cefab464e72b5dd42c003a0a4341802}{write} (\hyperlink{classPacket}{PacketPtr} pkt)
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+PCI Config Space All of PCI config space needs to return -\/1 on \hyperlink{classTsunami}{Tsunami}, except the devices that exist. This device maps the entire bus config space and passes the requests on to TsunamiPCIDevice devices as appropriate. 
+
+\subsection{型定義}
+\hypertarget{classPciConfigAll_a0488eba2a71c6661fef314d8ded28416}{
+\index{PciConfigAll@{PciConfigAll}!Params@{Params}}
+\index{Params@{Params}!PciConfigAll@{PciConfigAll}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef PciConfigAllParams {\bf Params}}}
+\label{classPciConfigAll_a0488eba2a71c6661fef314d8ded28416}
+
+
+\hyperlink{classBasicPioDevice_a2845515ac6467f10540747053c8a0449}{BasicPioDevice}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPciConfigAll_a618458d1056b88674814a45722d1474e}{
+\index{PciConfigAll@{PciConfigAll}!PciConfigAll@{PciConfigAll}}
+\index{PciConfigAll@{PciConfigAll}!PciConfigAll@{PciConfigAll}}
+\subsubsection[{PciConfigAll}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PciConfigAll} (const {\bf Params} $\ast$ {\em p})}}
+\label{classPciConfigAll_a618458d1056b88674814a45722d1474e}
+Constructor for PCIConfigAll 
+\begin{DoxyParams}{引数}
+\item[{\em p}]parameters structure \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+47     : BasicPioDevice(p, p->size)
+48 {
+49     // the pio_addr Python parameter is ignored, and overridden by
+50     // this caluclated value
+51     pioAddr = p->platform->calcPciConfigAddr(params()->bus,0,0);
+52 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPciConfigAll_acd3c3feb78ae7a8f88fe0f110a718dff}{
+\index{PciConfigAll@{PciConfigAll}!params@{params}}
+\index{params@{params}!PciConfigAll@{PciConfigAll}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Params}$\ast$ params () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPciConfigAll_acd3c3feb78ae7a8f88fe0f110a718dff}
+
+
+\hyperlink{classBasicPioDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{BasicPioDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+55 { return (const Params *)_params; }
+\end{DoxyCode}
+\hypertarget{classPciConfigAll_a613ec7d5e1ec64f8d21fec78ae8e568e}{
+\index{PciConfigAll@{PciConfigAll}!read@{read}}
+\index{read@{read}!PciConfigAll@{PciConfigAll}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} read ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPciConfigAll_a613ec7d5e1ec64f8d21fec78ae8e568e}
+Read something in PCI config space. If the device does not exist -\/1 is returned, if the device does exist its PciDevice::ReadConfig (or the virtual function that overrides) it is called. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]Contains information about the read operation \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Amount of time to do the read 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_a842312590432036092c422c87a442358}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+57 {
+58 
+59     pkt->allocate();
+60 
+61     DPRINTF(PciConfigAll, "read  va=%#x size=%d\n", pkt->getAddr(),
+62             pkt->getSize());
+63 
+64     switch (pkt->getSize()) {
+65       case sizeof(uint32_t):
+66          pkt->set<uint32_t>(0xFFFFFFFF);
+67          break;
+68       case sizeof(uint16_t):
+69          pkt->set<uint16_t>(0xFFFF);
+70          break;
+71       case sizeof(uint8_t):
+72          pkt->set<uint8_t>(0xFF);
+73          break;
+74       default:
+75         panic("invalid access size(?) for PCI configspace!\n");
+76     }
+77     pkt->makeAtomicResponse();
+78     return pioDelay;
+79 }
+\end{DoxyCode}
+\hypertarget{classPciConfigAll_a4cefab464e72b5dd42c003a0a4341802}{
+\index{PciConfigAll@{PciConfigAll}!write@{write}}
+\index{write@{write}!PciConfigAll@{PciConfigAll}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} write ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPciConfigAll_a4cefab464e72b5dd42c003a0a4341802}
+Write to PCI config spcae. If the device does not exit the simulator panics. If it does it is passed on the PciDevice::WriteConfig (or the virtual function that overrides it). 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]Contains information about the write operation \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Amount of time to do the read 
+\end{DoxyReturn}
+
+
+\hyperlink{classPioDevice_afe8371668d023bb2516b286e5e399b6f}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+83 {
+84     panic("Attempting to write to config space on non-existent device\n");
+85     M5_DUMMY_RETURN
+86 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/\hyperlink{pciconfigall_8hh}{pciconfigall.hh}\item 
+dev/\hyperlink{pciconfigall_8cc}{pciconfigall.cc}\end{DoxyCompactItemize}

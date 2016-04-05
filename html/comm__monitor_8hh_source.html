@@ -1,0 +1,351 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/comm_monitor.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/comm_monitor.hh</h1><a href="comm__monitor_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Thomas Grass</span>
+<a name="l00038"></a>00038 <span class="comment"> *          Andreas Hansson</span>
+<a name="l00039"></a>00039 <span class="comment"> */</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a>00041 <span class="preprocessor">#ifndef __MEM_COMM_MONITOR_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_COMM_MONITOR_HH__</span>
+<a name="l00043"></a>00043 <span class="preprocessor"></span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="time_8hh.html">base/time.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="mem__object_8hh.html">mem/mem_object.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;params/CommMonitor.hh&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="protoio_8hh.html">proto/protoio.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="sim_2system_8hh.html">sim/system.hh</a>&quot;</span>
+<a name="l00050"></a>00050 
+<a name="l00062"></a><a class="code" href="classCommMonitor.html">00062</a> <span class="keyword">class </span><a class="code" href="classCommMonitor_1_1CommMonitor.html">CommMonitor</a> : <span class="keyword">public</span> <a class="code" href="classMemObject_1_1MemObject.html">MemObject</a>
+<a name="l00063"></a>00063 {
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065   <span class="keyword">public</span>:
+<a name="l00066"></a>00066 
+<a name="l00068"></a><a class="code" href="classCommMonitor.html#a945848d2cb95179e45fffc6a7f41da84">00068</a>     <span class="keyword">typedef</span> CommMonitorParams <a class="code" href="classCommMonitor.html#a945848d2cb95179e45fffc6a7f41da84">Params</a>;
+<a name="l00069"></a><a class="code" href="classCommMonitor.html#acd3c3feb78ae7a8f88fe0f110a718dff">00069</a>     <span class="keyword">const</span> <a class="code" href="classCommMonitor.html#a945848d2cb95179e45fffc6a7f41da84">Params</a>* <a class="code" href="classCommMonitor.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00070"></a>00070 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <span class="keyword">reinterpret_cast&lt;</span><span class="keyword">const </span><a class="code" href="classCommMonitor.html#a945848d2cb95179e45fffc6a7f41da84">Params</a>*<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>); }
+<a name="l00071"></a>00071 
+<a name="l00077"></a>00077     <a class="code" href="classCommMonitor.html#af8e768be1328f879d2240d44e6f430e1">CommMonitor</a>(<a class="code" href="classCommMonitor.html#a945848d2cb95179e45fffc6a7f41da84">Params</a>* <a class="code" href="classCommMonitor.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>);
+<a name="l00078"></a>00078 
+<a name="l00080"></a><a class="code" href="classCommMonitor.html#a47022a49dc532464956ee511797d53e9">00080</a>     <a class="code" href="classCommMonitor.html#a47022a49dc532464956ee511797d53e9">~CommMonitor</a>() {}
+<a name="l00081"></a>00081 
+<a name="l00086"></a>00086     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a1a9faf3ec2cf5587b9f182041981b72c">closeStreams</a>();
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088     <span class="keyword">virtual</span> <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a>&amp; <a class="code" href="classCommMonitor.html#adc4e675e51defbdd1e354dac729d0703">getMasterPort</a>(<span class="keyword">const</span> std::string&amp; if_name,
+<a name="l00089"></a>00089                                           <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> idx = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00090"></a>00090 
+<a name="l00091"></a>00091     <span class="keyword">virtual</span> <a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>&amp; <a class="code" href="classCommMonitor.html#ac918a145092d7514ebc6dbd952dceafb">getSlavePort</a>(<span class="keyword">const</span> std::string&amp; if_name,
+<a name="l00092"></a>00092                                         <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> idx = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00095"></a>00095 
+<a name="l00097"></a>00097     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099   <span class="keyword">private</span>:
+<a name="l00100"></a>00100 
+<a name="l00105"></a><a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html">00105</a>     <span class="keyword">class </span><a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html">CommMonitorSenderState</a> : <span class="keyword">public</span> <a class="code" href="classPacket.html">Packet</a>::<a class="code" href="structRubyTester_1_1SenderState.html">SenderState</a>
+<a name="l00106"></a>00106     {
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108       <span class="keyword">public</span>:
+<a name="l00109"></a>00109 
+<a name="l00116"></a><a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html#ac479caf694f1ab2ffe5f06991fba167e">00116</a>         <a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html#ac479caf694f1ab2ffe5f06991fba167e">CommMonitorSenderState</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _transmitTime)
+<a name="l00117"></a>00117             : <a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html#ab7077cb90afe42deef3ee128e127d636">transmitTime</a>(_transmitTime)
+<a name="l00118"></a>00118         { }
+<a name="l00119"></a>00119 
+<a name="l00121"></a><a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html#aa0073f8734a0fbce7bf5ec9fcd4c0ca4">00121</a>         <a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html#aa0073f8734a0fbce7bf5ec9fcd4c0ca4">~CommMonitorSenderState</a>() { }
+<a name="l00122"></a>00122 
+<a name="l00124"></a><a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html#ab7077cb90afe42deef3ee128e127d636">00124</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCommMonitor_1_1CommMonitorSenderState.html#ab7077cb90afe42deef3ee128e127d636">transmitTime</a>;
+<a name="l00125"></a>00125 
+<a name="l00126"></a>00126     };
+<a name="l00127"></a>00127 
+<a name="l00134"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html">00134</a>     <span class="keyword">class </span><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html">MonitorMasterPort</a> : <span class="keyword">public</span> <a class="code" href="classMasterPort.html">MasterPort</a>
+<a name="l00135"></a>00135     {
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137       <span class="keyword">public</span>:
+<a name="l00138"></a>00138 
+<a name="l00139"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ad1e9ab98eaca885ba1511068ee61ab87">00139</a>         <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ad1e9ab98eaca885ba1511068ee61ab87">MonitorMasterPort</a>(<span class="keyword">const</span> std::string&amp; _name, <a class="code" href="classCommMonitor_1_1CommMonitor.html">CommMonitor</a>&amp; _mon)
+<a name="l00140"></a>00140             : <a class="code" href="classMasterPort.html">MasterPort</a>(_name, &amp;_mon), <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>(_mon)
+<a name="l00141"></a>00141         { }
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143       <span class="keyword">protected</span>:
+<a name="l00144"></a>00144 
+<a name="l00145"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a284dfb90c168233c9d416bc07de8fefe">00145</a>         <span class="keywordtype">void</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a284dfb90c168233c9d416bc07de8fefe">recvFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00146"></a>00146         {
+<a name="l00147"></a>00147             <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvFunctionalSnoop(pkt);
+<a name="l00148"></a>00148         }
+<a name="l00149"></a>00149 
+<a name="l00150"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a886d584c81ee4e398ff8069907f6e1a5">00150</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a886d584c81ee4e398ff8069907f6e1a5">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00151"></a>00151         {
+<a name="l00152"></a>00152             <span class="keywordflow">return</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvAtomicSnoop(pkt);
+<a name="l00153"></a>00153         }
+<a name="l00154"></a>00154 
+<a name="l00155"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a482dba5588f4bee43e498875a61e5e0b">00155</a>         <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00156"></a>00156         {
+<a name="l00157"></a>00157             <span class="keywordflow">return</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvTimingResp(pkt);
+<a name="l00158"></a>00158         }
+<a name="l00159"></a>00159 
+<a name="l00160"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#aff3031c56fc4947a19695c868bb8233e">00160</a>         <span class="keywordtype">void</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#aff3031c56fc4947a19695c868bb8233e">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00161"></a>00161         {
+<a name="l00162"></a>00162             <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvTimingSnoopReq(pkt);
+<a name="l00163"></a>00163         }
+<a name="l00164"></a>00164 
+<a name="l00165"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#aecf310a01b533ae8700eccac2cf20480">00165</a>         <span class="keywordtype">void</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#aecf310a01b533ae8700eccac2cf20480">recvRangeChange</a>()
+<a name="l00166"></a>00166         {
+<a name="l00167"></a>00167             <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvRangeChange();
+<a name="l00168"></a>00168         }
+<a name="l00169"></a>00169 
+<a name="l00170"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a5ce11b7a254d3cb756d94568f7cbc25d">00170</a>         <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a5ce11b7a254d3cb756d94568f7cbc25d">isSnooping</a>()<span class="keyword"> const</span>
+<a name="l00171"></a>00171 <span class="keyword">        </span>{
+<a name="l00172"></a>00172             <span class="keywordflow">return</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>.isSnooping();
+<a name="l00173"></a>00173         }
+<a name="l00174"></a>00174 
+<a name="l00175"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a29cb5a4f98063ce6e9210eacbdb35298">00175</a>         <span class="keywordtype">void</span> <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>()
+<a name="l00176"></a>00176         {
+<a name="l00177"></a>00177             <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvRetryMaster();
+<a name="l00178"></a>00178         }
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180       <span class="keyword">private</span>:
+<a name="l00181"></a>00181 
+<a name="l00182"></a><a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">00182</a>         <a class="code" href="classCommMonitor_1_1CommMonitor.html">CommMonitor</a>&amp; <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html#ab6833d8d55cb403502472c073464905b">mon</a>;
+<a name="l00183"></a>00183 
+<a name="l00184"></a>00184     };
+<a name="l00185"></a>00185 
+<a name="l00187"></a><a class="code" href="classCommMonitor.html#a2eb439e94fc831a4b07a2e5d4268a365">00187</a>     <a class="code" href="classCommMonitor_1_1MonitorMasterPort.html">MonitorMasterPort</a> <a class="code" href="classCommMonitor.html#a2eb439e94fc831a4b07a2e5d4268a365">masterPort</a>;
+<a name="l00188"></a>00188 
+<a name="l00195"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html">00195</a>     <span class="keyword">class </span><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html">MonitorSlavePort</a> : <span class="keyword">public</span> <a class="code" href="classSlavePort.html">SlavePort</a>
+<a name="l00196"></a>00196     {
+<a name="l00197"></a>00197 
+<a name="l00198"></a>00198       <span class="keyword">public</span>:
+<a name="l00199"></a>00199 
+<a name="l00200"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ae614e8a09ac75ea9a97dcab60aa60099">00200</a>         <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ae614e8a09ac75ea9a97dcab60aa60099">MonitorSlavePort</a>(<span class="keyword">const</span> std::string&amp; _name, <a class="code" href="classCommMonitor_1_1CommMonitor.html">CommMonitor</a>&amp; _mon)
+<a name="l00201"></a>00201             : <a class="code" href="classSlavePort.html">SlavePort</a>(_name, &amp;_mon), <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>(_mon)
+<a name="l00202"></a>00202         { }
+<a name="l00203"></a>00203 
+<a name="l00204"></a>00204       <span class="keyword">protected</span>:
+<a name="l00205"></a>00205 
+<a name="l00206"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#aeefa907fb6d6a787e6dab90e8138ea90">00206</a>         <span class="keywordtype">void</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#aeefa907fb6d6a787e6dab90e8138ea90">recvFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00207"></a>00207         {
+<a name="l00208"></a>00208             <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvFunctional(pkt);
+<a name="l00209"></a>00209         }
+<a name="l00210"></a>00210 
+<a name="l00211"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">00211</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00212"></a>00212         {
+<a name="l00213"></a>00213             <span class="keywordflow">return</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvAtomic(pkt);
+<a name="l00214"></a>00214         }
+<a name="l00215"></a>00215 
+<a name="l00216"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a3344d9dd0f83257feab5424e761f31c6">00216</a>         <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a3344d9dd0f83257feab5424e761f31c6">recvTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00217"></a>00217         {
+<a name="l00218"></a>00218             <span class="keywordflow">return</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvTimingReq(pkt);
+<a name="l00219"></a>00219         }
+<a name="l00220"></a>00220 
+<a name="l00221"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a9b643d565edc21dac11ce15a560238a7">00221</a>         <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a9b643d565edc21dac11ce15a560238a7">recvTimingSnoopResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00222"></a>00222         {
+<a name="l00223"></a>00223             <span class="keywordflow">return</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvTimingSnoopResp(pkt);
+<a name="l00224"></a>00224         }
+<a name="l00225"></a>00225 
+<a name="l00226"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a36cf113d5e5e091ebddb32306c098fae">00226</a>         <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>()<span class="keyword"> const</span>
+<a name="l00227"></a>00227 <span class="keyword">        </span>{
+<a name="l00228"></a>00228             <span class="keywordflow">return</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>.getAddrRanges();
+<a name="l00229"></a>00229         }
+<a name="l00230"></a>00230 
+<a name="l00231"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a29cb5a4f98063ce6e9210eacbdb35298">00231</a>         <span class="keywordtype">void</span> <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>()
+<a name="l00232"></a>00232         {
+<a name="l00233"></a>00233             <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>.recvRetrySlave();
+<a name="l00234"></a>00234         }
+<a name="l00235"></a>00235 
+<a name="l00236"></a>00236       <span class="keyword">private</span>:
+<a name="l00237"></a>00237 
+<a name="l00238"></a><a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">00238</a>         <a class="code" href="classCommMonitor_1_1CommMonitor.html">CommMonitor</a>&amp; <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html#ab6833d8d55cb403502472c073464905b">mon</a>;
+<a name="l00239"></a>00239 
+<a name="l00240"></a>00240     };
+<a name="l00241"></a>00241 
+<a name="l00243"></a><a class="code" href="classCommMonitor.html#a3a2b0c2e0b88fa0a90bf89c0d7e6809e">00243</a>     <a class="code" href="classCommMonitor_1_1MonitorSlavePort.html">MonitorSlavePort</a> <a class="code" href="classCommMonitor.html#a3a2b0c2e0b88fa0a90bf89c0d7e6809e">slavePort</a>;
+<a name="l00244"></a>00244 
+<a name="l00245"></a>00245     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#aeefa907fb6d6a787e6dab90e8138ea90">recvFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00246"></a>00246 
+<a name="l00247"></a>00247     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a284dfb90c168233c9d416bc07de8fefe">recvFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00248"></a>00248 
+<a name="l00249"></a>00249     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCommMonitor.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00250"></a>00250 
+<a name="l00251"></a>00251     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCommMonitor.html#a886d584c81ee4e398ff8069907f6e1a5">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00252"></a>00252 
+<a name="l00253"></a>00253     <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor.html#a3344d9dd0f83257feab5424e761f31c6">recvTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00254"></a>00254 
+<a name="l00255"></a>00255     <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00256"></a>00256 
+<a name="l00257"></a>00257     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#aff3031c56fc4947a19695c868bb8233e">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00258"></a>00258 
+<a name="l00259"></a>00259     <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor.html#a9b643d565edc21dac11ce15a560238a7">recvTimingSnoopResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00260"></a>00260 
+<a name="l00261"></a>00261     <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classCommMonitor.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00262"></a>00262 
+<a name="l00263"></a>00263     <span class="keywordtype">bool</span> <a class="code" href="classCommMonitor.html#a5ce11b7a254d3cb756d94568f7cbc25d">isSnooping</a>() <span class="keyword">const</span>;
+<a name="l00264"></a>00264 
+<a name="l00265"></a>00265     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a74fc0d5bf99b08c9899269e3dd7fab6a">recvRetryMaster</a>();
+<a name="l00266"></a>00266 
+<a name="l00267"></a>00267     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a2292f62803fe220e9629886f24aae91a">recvRetrySlave</a>();
+<a name="l00268"></a>00268 
+<a name="l00269"></a>00269     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#aecf310a01b533ae8700eccac2cf20480">recvRangeChange</a>();
+<a name="l00270"></a>00270 
+<a name="l00271"></a>00271     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a31e31032fcf23dfbf54cf733a71c87a3">periodicTraceDump</a>();
+<a name="l00272"></a>00272 
+<a name="l00274"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html">00274</a>     <span class="keyword">struct </span><a class="code" href="structCommMonitor_1_1MonitorStats.html">MonitorStats</a>
+<a name="l00275"></a>00275     {
+<a name="l00276"></a>00276 
+<a name="l00278"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ab59fda1fe2ca1c0914f9036cc7f99b24">00278</a>         <span class="keywordtype">bool</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ab59fda1fe2ca1c0914f9036cc7f99b24">disableBurstLengthHists</a>;
+<a name="l00279"></a>00279 
+<a name="l00281"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a13870c09c7ac8408c22d8496f77deb21">00281</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a13870c09c7ac8408c22d8496f77deb21">readBurstLengthHist</a>;
+<a name="l00282"></a>00282 
+<a name="l00284"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a338971eda5dd232fa8933ee78c36f6a5">00284</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a338971eda5dd232fa8933ee78c36f6a5">writeBurstLengthHist</a>;
+<a name="l00285"></a>00285 
+<a name="l00287"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#af2f6541f615db84468379c791765da96">00287</a>         <span class="keywordtype">bool</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#af2f6541f615db84468379c791765da96">disableBandwidthHists</a>;
+<a name="l00288"></a>00288 
+<a name="l00293"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a7229cb3b887686f75714605936a6c0f0">00293</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a7229cb3b887686f75714605936a6c0f0">readBytes</a>;
+<a name="l00294"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a4498b86fd1613e25f2d6d7b5d73b12fe">00294</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a4498b86fd1613e25f2d6d7b5d73b12fe">readBandwidthHist</a>;
+<a name="l00295"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a7939b97651af67ffa8d8538cf361eddd">00295</a>         <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a7939b97651af67ffa8d8538cf361eddd">averageReadBW</a>;
+<a name="l00296"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#af214c67519878ead4b72a004fc63f061">00296</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#af214c67519878ead4b72a004fc63f061">totalReadBytes</a>;
+<a name="l00297"></a>00297 
+<a name="l00302"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ae02abb4b2d55a59759efa00ae4fc5f21">00302</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ae02abb4b2d55a59759efa00ae4fc5f21">writtenBytes</a>;
+<a name="l00303"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a9099de3107049308efe76f8cc17b204c">00303</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a9099de3107049308efe76f8cc17b204c">writeBandwidthHist</a>;
+<a name="l00304"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a8a417eebd4d05e2ca471b036b1fb293c">00304</a>         <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a8a417eebd4d05e2ca471b036b1fb293c">averageWriteBW</a>;
+<a name="l00305"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ab2ff0d6e4d3f80d6e4dc46748ee467ff">00305</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ab2ff0d6e4d3f80d6e4dc46748ee467ff">totalWrittenBytes</a>;
+<a name="l00306"></a>00306 
+<a name="l00308"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a072da0821025a37ba56aa59e2dc7ba75">00308</a>         <span class="keywordtype">bool</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a072da0821025a37ba56aa59e2dc7ba75">disableLatencyHists</a>;
+<a name="l00309"></a>00309 
+<a name="l00311"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ac0d798255fcda6961d92d727c4f561e9">00311</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ac0d798255fcda6961d92d727c4f561e9">readLatencyHist</a>;
+<a name="l00312"></a>00312 
+<a name="l00314"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#aae98c6b524c57e5bcbfdec4726032ba8">00314</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#aae98c6b524c57e5bcbfdec4726032ba8">writeLatencyHist</a>;
+<a name="l00315"></a>00315 
+<a name="l00317"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ad5c356c37130132a5d8a44e7020d7bb1">00317</a>         <span class="keywordtype">bool</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ad5c356c37130132a5d8a44e7020d7bb1">disableITTDists</a>;
+<a name="l00318"></a>00318 
+<a name="l00325"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a2898ccf55e5b25e410b8f90553212a71">00325</a>         <a class="code" href="classStats_1_1Distribution.html">Stats::Distribution</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a2898ccf55e5b25e410b8f90553212a71">ittReadRead</a>;
+<a name="l00326"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a6195d4cdad35fc6c4a2c2339ae3f633a">00326</a>         <a class="code" href="classStats_1_1Distribution.html">Stats::Distribution</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a6195d4cdad35fc6c4a2c2339ae3f633a">ittWriteWrite</a>;
+<a name="l00327"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a2534f8cd715e5bc6e07e14f9727428eb">00327</a>         <a class="code" href="classStats_1_1Distribution.html">Stats::Distribution</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a2534f8cd715e5bc6e07e14f9727428eb">ittReqReq</a>;
+<a name="l00328"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a6a581354c5e19eb4e16589d9806fef66">00328</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a6a581354c5e19eb4e16589d9806fef66">timeOfLastRead</a>;
+<a name="l00329"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a330664f7391bb348fd6f6e13d22aef26">00329</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a330664f7391bb348fd6f6e13d22aef26">timeOfLastWrite</a>;
+<a name="l00330"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a2f696df4ccf909e9eb168f897708cbbe">00330</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a2f696df4ccf909e9eb168f897708cbbe">timeOfLastReq</a>;
+<a name="l00331"></a>00331 
+<a name="l00333"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a58fa22f2c5716fcf2e67cfdfb9ccfb24">00333</a>         <span class="keywordtype">bool</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a58fa22f2c5716fcf2e67cfdfb9ccfb24">disableOutstandingHists</a>;
+<a name="l00334"></a>00334 
+<a name="l00340"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a16c997bc474fee7fff61f3716aa5792d">00340</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a16c997bc474fee7fff61f3716aa5792d">outstandingReadsHist</a>;
+<a name="l00341"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#aa930889353c38227127f1f7a7945aa62">00341</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#aa930889353c38227127f1f7a7945aa62">outstandingReadReqs</a>;
+<a name="l00342"></a>00342 
+<a name="l00348"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a4fef3195bdb93fcbb46f1bac89c3b2ef">00348</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a4fef3195bdb93fcbb46f1bac89c3b2ef">outstandingWritesHist</a>;
+<a name="l00349"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ae09e25ada6f50f5e741ba4f7bd3de2ce">00349</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ae09e25ada6f50f5e741ba4f7bd3de2ce">outstandingWriteReqs</a>;
+<a name="l00350"></a>00350 
+<a name="l00352"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ab8f91b70ae09ec94249a1bb50adeba3f">00352</a>         <span class="keywordtype">bool</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ab8f91b70ae09ec94249a1bb50adeba3f">disableTransactionHists</a>;
+<a name="l00353"></a>00353 
+<a name="l00355"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a40c4a13f526893ea4f8d068378ce22a0">00355</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a40c4a13f526893ea4f8d068378ce22a0">readTransHist</a>;
+<a name="l00356"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a1f0c5ba2e762ffa5a72d2377150ec73c">00356</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a1f0c5ba2e762ffa5a72d2377150ec73c">readTrans</a>;
+<a name="l00357"></a>00357 
+<a name="l00359"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#ae8f93c14ae2f3a7576899eb0630db62a">00359</a>         <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#ae8f93c14ae2f3a7576899eb0630db62a">writeTransHist</a>;
+<a name="l00360"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a5e5fcf61cd0db2a5a808623fadd8e23e">00360</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a5e5fcf61cd0db2a5a808623fadd8e23e">writeTrans</a>;
+<a name="l00361"></a>00361 
+<a name="l00363"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#aa3ef9cc6390ad90e102f7027758b0d65">00363</a>         <span class="keywordtype">bool</span> <a class="code" href="structCommMonitor_1_1MonitorStats.html#aa3ef9cc6390ad90e102f7027758b0d65">disableAddrDists</a>;
+<a name="l00364"></a>00364 
+<a name="l00369"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a4031ec599a20d5a1890ba1d37a565fbf">00369</a>         <a class="code" href="classStats_1_1SparseHistogram.html">Stats::SparseHistogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a4031ec599a20d5a1890ba1d37a565fbf">readAddrDist</a>;
+<a name="l00370"></a>00370 
+<a name="l00375"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a2eaaddbc017182789d892a94a8aad545">00375</a>         <a class="code" href="classStats_1_1SparseHistogram.html">Stats::SparseHistogram</a> <a class="code" href="structCommMonitor_1_1MonitorStats.html#a2eaaddbc017182789d892a94a8aad545">writeAddrDist</a>;
+<a name="l00376"></a>00376 
+<a name="l00382"></a><a class="code" href="structCommMonitor_1_1MonitorStats.html#a6e93f7a5c6eb0e765d7a1a51fca229d8">00382</a>         <a class="code" href="structCommMonitor_1_1MonitorStats.html#a6e93f7a5c6eb0e765d7a1a51fca229d8">MonitorStats</a>(<span class="keyword">const</span> CommMonitorParams* <a class="code" href="classCommMonitor.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>) :
+<a name="l00383"></a>00383             <a class="code" href="structCommMonitor_1_1MonitorStats.html#ab59fda1fe2ca1c0914f9036cc7f99b24">disableBurstLengthHists</a>(params-&gt;disable_burst_length_hists),
+<a name="l00384"></a>00384             <a class="code" href="structCommMonitor_1_1MonitorStats.html#af2f6541f615db84468379c791765da96">disableBandwidthHists</a>(params-&gt;disable_bandwidth_hists),
+<a name="l00385"></a>00385             <a class="code" href="structCommMonitor_1_1MonitorStats.html#a7229cb3b887686f75714605936a6c0f0">readBytes</a>(0), <a class="code" href="structCommMonitor_1_1MonitorStats.html#ae02abb4b2d55a59759efa00ae4fc5f21">writtenBytes</a>(0),
+<a name="l00386"></a>00386             <a class="code" href="structCommMonitor_1_1MonitorStats.html#a072da0821025a37ba56aa59e2dc7ba75">disableLatencyHists</a>(params-&gt;disable_latency_hists),
+<a name="l00387"></a>00387             <a class="code" href="structCommMonitor_1_1MonitorStats.html#ad5c356c37130132a5d8a44e7020d7bb1">disableITTDists</a>(params-&gt;disable_itt_dists),
+<a name="l00388"></a>00388             <a class="code" href="structCommMonitor_1_1MonitorStats.html#a6a581354c5e19eb4e16589d9806fef66">timeOfLastRead</a>(0), <a class="code" href="structCommMonitor_1_1MonitorStats.html#a330664f7391bb348fd6f6e13d22aef26">timeOfLastWrite</a>(0), <a class="code" href="structCommMonitor_1_1MonitorStats.html#a2f696df4ccf909e9eb168f897708cbbe">timeOfLastReq</a>(0),
+<a name="l00389"></a>00389             <a class="code" href="structCommMonitor_1_1MonitorStats.html#a58fa22f2c5716fcf2e67cfdfb9ccfb24">disableOutstandingHists</a>(params-&gt;disable_outstanding_hists),
+<a name="l00390"></a>00390             <a class="code" href="structCommMonitor_1_1MonitorStats.html#aa930889353c38227127f1f7a7945aa62">outstandingReadReqs</a>(0), <a class="code" href="structCommMonitor_1_1MonitorStats.html#ae09e25ada6f50f5e741ba4f7bd3de2ce">outstandingWriteReqs</a>(0),
+<a name="l00391"></a>00391             <a class="code" href="structCommMonitor_1_1MonitorStats.html#ab8f91b70ae09ec94249a1bb50adeba3f">disableTransactionHists</a>(params-&gt;disable_transaction_hists),
+<a name="l00392"></a>00392             <a class="code" href="structCommMonitor_1_1MonitorStats.html#a1f0c5ba2e762ffa5a72d2377150ec73c">readTrans</a>(0), <a class="code" href="structCommMonitor_1_1MonitorStats.html#a5e5fcf61cd0db2a5a808623fadd8e23e">writeTrans</a>(0),
+<a name="l00393"></a>00393             <a class="code" href="structCommMonitor_1_1MonitorStats.html#aa3ef9cc6390ad90e102f7027758b0d65">disableAddrDists</a>(params-&gt;disable_addr_dists)
+<a name="l00394"></a>00394         { }
+<a name="l00395"></a>00395 
+<a name="l00396"></a>00396     };
+<a name="l00397"></a>00397 
+<a name="l00399"></a>00399     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#a8d8196ff6539b2e3b6deb4ae81156fc6">samplePeriodic</a>();
+<a name="l00400"></a>00400 
+<a name="l00402"></a>00402     <span class="keywordtype">void</span> <a class="code" href="classCommMonitor.html#aecc7d8debf54990ffeaaed5bac7d7d81">startup</a>();
+<a name="l00403"></a>00403 
+<a name="l00405"></a><a class="code" href="classCommMonitor.html#a59f6dafc1b1b5cf7eda2e4a47a47c515">00405</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;CommMonitor, &amp;CommMonitor::samplePeriodic&gt;</a> <a class="code" href="classCommMonitor.html#a59f6dafc1b1b5cf7eda2e4a47a47c515">samplePeriodicEvent</a>;
+<a name="l00406"></a>00406 
+<a name="l00408"></a><a class="code" href="classCommMonitor.html#a087522d1bccfcac06ee7396d5da731e9">00408</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCommMonitor.html#a087522d1bccfcac06ee7396d5da731e9">samplePeriodTicks</a>;
+<a name="l00409"></a><a class="code" href="classCommMonitor.html#a2b79d72692e74b1c084ea31e63c5cf55">00409</a>     <a class="code" href="classTime.html">Time</a> <a class="code" href="classCommMonitor.html#a2b79d72692e74b1c084ea31e63c5cf55">samplePeriod</a>;
+<a name="l00410"></a>00410 
+<a name="l00412"></a><a class="code" href="classCommMonitor.html#abf0db97222382e11cb1264c6709629b3">00412</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classCommMonitor.html#abf0db97222382e11cb1264c6709629b3">readAddrMask</a>;
+<a name="l00413"></a>00413 
+<a name="l00415"></a><a class="code" href="classCommMonitor.html#aed61db18cf47a6b2d34ba6179dd19b40">00415</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classCommMonitor.html#aed61db18cf47a6b2d34ba6179dd19b40">writeAddrMask</a>;
+<a name="l00416"></a>00416 
+<a name="l00418"></a><a class="code" href="classCommMonitor.html#a271fb3be9460a6727cb088bba7fde65e">00418</a>     <a class="code" href="structCommMonitor_1_1MonitorStats.html">MonitorStats</a> <a class="code" href="classCommMonitor.html#a271fb3be9460a6727cb088bba7fde65e">stats</a>;
+<a name="l00419"></a>00419 
+<a name="l00421"></a><a class="code" href="classCommMonitor.html#afcb6a80c2432e45a3730484625ee1d20">00421</a>     <a class="code" href="classProtoOutputStream.html">ProtoOutputStream</a>* <a class="code" href="classCommMonitor.html#afcb6a80c2432e45a3730484625ee1d20">traceStream</a>;
+<a name="l00422"></a>00422 
+<a name="l00424"></a><a class="code" href="classCommMonitor.html#af27ccd765f13a4b7bd119dc7579e2746">00424</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classCommMonitor.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00425"></a>00425 };
+<a name="l00426"></a>00426 
+<a name="l00427"></a>00427 <span class="preprocessor">#endif //__MEM_COMM_MONITOR_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

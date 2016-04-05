@@ -1,0 +1,176 @@
+\hypertarget{classLinuxX86System}{
+\section{クラス LinuxX86System}
+\label{classLinuxX86System}\index{LinuxX86System@{LinuxX86System}}
+}
+
+
+{\ttfamily \#include $<$system.hh$>$}LinuxX86Systemに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classLinuxX86System}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef LinuxX86SystemParams \hyperlink{classLinuxX86System_a9a9d4fd080ddd5d649f7db5e47cfae8b}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classLinuxX86System_aa374e3ca639a89127a1ee9b0b6c0b346}{LinuxX86System} (\hyperlink{classLinuxX86System_a9a9d4fd080ddd5d649f7db5e47cfae8b}{Params} $\ast$p)
+\item 
+\hyperlink{classLinuxX86System_ab5ad28d8a836f69bc8acbdd69d703062}{$\sim$LinuxX86System} ()
+\item 
+void \hyperlink{classLinuxX86System_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+std::string \hyperlink{classLinuxX86System_a3970bf75d55eef6014911ee4756e783c}{commandLine}
+\item 
+\hyperlink{classX86ISA_1_1E820Table}{X86ISA::E820Table} $\ast$ \hyperlink{classLinuxX86System_ab2edb73e83272dddc25211ddfdc6c7d4}{e820Table}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classLinuxX86System_a9a9d4fd080ddd5d649f7db5e47cfae8b}{
+\index{LinuxX86System@{LinuxX86System}!Params@{Params}}
+\index{Params@{Params}!LinuxX86System@{LinuxX86System}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef LinuxX86SystemParams {\bf Params}}}
+\label{classLinuxX86System_a9a9d4fd080ddd5d649f7db5e47cfae8b}
+
+
+\hyperlink{classX86System_a4f3142e3ba81ac1e14e960636ad3202b}{X86System}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classLinuxX86System_aa374e3ca639a89127a1ee9b0b6c0b346}{
+\index{LinuxX86System@{LinuxX86System}!LinuxX86System@{LinuxX86System}}
+\index{LinuxX86System@{LinuxX86System}!LinuxX86System@{LinuxX86System}}
+\subsubsection[{LinuxX86System}]{\setlength{\rightskip}{0pt plus 5cm}{\bf LinuxX86System} ({\bf Params} $\ast$ {\em p})}}
+\label{classLinuxX86System_aa374e3ca639a89127a1ee9b0b6c0b346}
+
+
+
+\begin{DoxyCode}
+54     : X86System(p), commandLine(p->boot_osflags), e820Table(p->e820_table)
+55 {
+56 }
+\end{DoxyCode}
+\hypertarget{classLinuxX86System_ab5ad28d8a836f69bc8acbdd69d703062}{
+\index{LinuxX86System@{LinuxX86System}!$\sim$LinuxX86System@{$\sim$LinuxX86System}}
+\index{$\sim$LinuxX86System@{$\sim$LinuxX86System}!LinuxX86System@{LinuxX86System}}
+\subsubsection[{$\sim$LinuxX86System}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf LinuxX86System} ()}}
+\label{classLinuxX86System_ab5ad28d8a836f69bc8acbdd69d703062}
+
+
+
+\begin{DoxyCode}
+59 {
+60 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classLinuxX86System_a3c34ea9b29f410748d4435a667484924}{
+\index{LinuxX86System@{LinuxX86System}!initState@{initState}}
+\index{initState@{initState}!LinuxX86System@{LinuxX86System}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classLinuxX86System_a3c34ea9b29f410748d4435a667484924}
+Serialization stuff 
+
+\hyperlink{classX86System_a3c34ea9b29f410748d4435a667484924}{X86System}を再定義しています。
+
+
+\begin{DoxyCode}
+64 {
+65     X86System::initState();
+66 
+67     // The location of the real mode data structure.
+68     const Addr realModeData = 0x90200;
+69 
+70     /*
+71      * Deal with the command line stuff.
+72      */
+73 
+74     // A buffer to store the command line.
+75     const Addr commandLineBuff = 0x90000;
+76     // A pointer to the commandLineBuff stored in the real mode data.
+77     const Addr commandLinePointer = realModeData + 0x228;
+78 
+79     if (commandLine.length() + 1 > realModeData - commandLineBuff)
+80         panic("Command line \"%s\" is longer than %d characters.\n",
+81                 commandLine, realModeData - commandLineBuff - 1);
+82     physProxy.writeBlob(commandLineBuff, (uint8_t *)commandLine.c_str(),
+83                         commandLine.length() + 1);
+84 
+85     // Generate a pointer of the right size and endianness to put into
+86     // commandLinePointer.
+87     uint32_t guestCommandLineBuff =
+88         X86ISA::htog((uint32_t)commandLineBuff);
+89     physProxy.writeBlob(commandLinePointer, (uint8_t *)&guestCommandLineBuff,
+90                         sizeof(guestCommandLineBuff));
+91 
+92     /*
+93      * Screen Info.
+94      */
+95 
+96     // We'll skip on this for now because it's only needed for framebuffers,
+97     // something we don't support at the moment.
+98 
+99     /*
+100      * EDID info
+101      */
+102 
+103     // Skipping for now.
+104 
+105     /*
+106      * Saved video mode
+107      */
+108 
+109     // Skipping for now.
+110 
+111     /*
+112      * Loader type.
+113      */
+114 
+115     // Skipping for now.
+116 
+117     /*
+118      * E820 memory map
+119      */
+120 
+121     // A pointer to the number of E820 entries there are.
+122     const Addr e820MapNrPointer = realModeData + 0x1e8;
+123 
+124     // A pointer to the buffer for E820 entries.
+125     const Addr e820MapPointer = realModeData + 0x2d0;
+126 
+127     e820Table->writeTo(physProxy, e820MapNrPointer, e820MapPointer);
+128 
+129     /*
+130      * Pass the location of the real mode data structure to the kernel
+131      * using register %esi. We'll use %rsi which should be equivalent.
+132      */
+133     threadContexts[0]->setIntReg(INTREG_RSI, realModeData);
+134 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classLinuxX86System_a3970bf75d55eef6014911ee4756e783c}{
+\index{LinuxX86System@{LinuxX86System}!commandLine@{commandLine}}
+\index{commandLine@{commandLine}!LinuxX86System@{LinuxX86System}}
+\subsubsection[{commandLine}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf commandLine}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classLinuxX86System_a3970bf75d55eef6014911ee4756e783c}
+\hypertarget{classLinuxX86System_ab2edb73e83272dddc25211ddfdc6c7d4}{
+\index{LinuxX86System@{LinuxX86System}!e820Table@{e820Table}}
+\index{e820Table@{e820Table}!LinuxX86System@{LinuxX86System}}
+\subsubsection[{e820Table}]{\setlength{\rightskip}{0pt plus 5cm}{\bf X86ISA::E820Table}$\ast$ {\bf e820Table}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classLinuxX86System_ab2edb73e83272dddc25211ddfdc6c7d4}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/linux/\hyperlink{arch_2x86_2linux_2system_8hh}{system.hh}\item 
+arch/x86/linux/\hyperlink{arch_2x86_2linux_2system_8cc}{system.cc}\end{DoxyCompactItemize}

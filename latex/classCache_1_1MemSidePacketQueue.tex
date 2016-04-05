@@ -1,0 +1,118 @@
+\hypertarget{classCache_1_1MemSidePacketQueue}{
+\section{クラス テンプレート MemSidePacketQueue$<$ TagStore $>$}
+\label{classCache_1_1MemSidePacketQueue}\index{Cache::MemSidePacketQueue@{Cache::MemSidePacketQueue}}
+}
+
+
+{\ttfamily \#include $<$cache.hh$>$}MemSidePacketQueue$<$ TagStore $>$に対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classCache_1_1MemSidePacketQueue}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCache_1_1MemSidePacketQueue_af98f7e700e64b2c5f5bd8f96b7368b0a}{MemSidePacketQueue} (\hyperlink{classCache}{Cache}$<$ TagStore $>$ \&\hyperlink{classCache_1_1MemSidePacketQueue_adf2b34ffa42914b9356a0788fc109bcc}{cache}, \hyperlink{classMasterPort}{MasterPort} \&port, const std::string \&\hyperlink{classPacketQueue_ae471a4c4073716b769170188214fe93d}{label})
+\item 
+virtual void \hyperlink{classCache_1_1MemSidePacketQueue_a3ce3f4b79c2caf000124b3de8ba9157c}{sendDeferredPacket} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCache}{Cache}$<$ TagStore $>$ \& \hyperlink{classCache_1_1MemSidePacketQueue_adf2b34ffa42914b9356a0788fc109bcc}{cache}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\subsubsection*{template$<$class TagStore$>$template$<$class TagStore$>$ class Cache$<$ TagStore $>$::MemSidePacketQueue$<$ TagStore $>$}
+
+Override the default behaviour of sendDeferredPacket to enable the memory-\/side cache port to also send requests based on the current \hyperlink{classMSHR}{MSHR} status. This queue has a pointer to our specific cache implementation and is used by the \hyperlink{classCache_1_1MemSidePort}{MemSidePort}. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCache_1_1MemSidePacketQueue_af98f7e700e64b2c5f5bd8f96b7368b0a}{
+\index{Cache::MemSidePacketQueue@{Cache::MemSidePacketQueue}!MemSidePacketQueue@{MemSidePacketQueue}}
+\index{MemSidePacketQueue@{MemSidePacketQueue}!Cache::MemSidePacketQueue@{Cache::MemSidePacketQueue}}
+\subsubsection[{MemSidePacketQueue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MemSidePacketQueue} ({\bf Cache}$<$ TagStore $>$ \& {\em cache}, \/  {\bf MasterPort} \& {\em port}, \/  const std::string \& {\em label})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCache_1_1MemSidePacketQueue_af98f7e700e64b2c5f5bd8f96b7368b0a}
+
+
+
+\begin{DoxyCode}
+127                                                    :
+128             MasterPacketQueue(cache, port, label), cache(cache) { }
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classCache_1_1MemSidePacketQueue_a3ce3f4b79c2caf000124b3de8ba9157c}{
+\index{Cache::MemSidePacketQueue@{Cache::MemSidePacketQueue}!sendDeferredPacket@{sendDeferredPacket}}
+\index{sendDeferredPacket@{sendDeferredPacket}!Cache::MemSidePacketQueue@{Cache::MemSidePacketQueue}}
+\subsubsection[{sendDeferredPacket}]{\setlength{\rightskip}{0pt plus 5cm}void sendDeferredPacket ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classCache_1_1MemSidePacketQueue_a3ce3f4b79c2caf000124b3de8ba9157c}
+Override the normal sendDeferredPacket and do not only consider the transmit list (used for responses), but also requests. 
+
+\hyperlink{classPacketQueue_a3ce3f4b79c2caf000124b3de8ba9157c}{PacketQueue}を再定義しています。
+
+
+\begin{DoxyCode}
+1947 {
+1948     // if we have a response packet waiting we have to start with that
+1949     if (deferredPacketReady()) {
+1950         // use the normal approach from the timing port
+1951         trySendTiming();
+1952     } else {
+1953         // check for request packets (requests & writebacks)
+1954         PacketPtr pkt = cache.getTimingPacket();
+1955         if (pkt == NULL) {
+1956             // can happen if e.g. we attempt a writeback and fail, but
+1957             // before the retry, the writeback is eliminated because
+1958             // we snoop another cache's ReadEx.
+1959             waitingOnRetry = false;
+1960         } else {
+1961             MSHR *mshr = dynamic_cast<MSHR*>(pkt->senderState);
+1962 
+1963             waitingOnRetry = !masterPort.sendTimingReq(pkt);
+1964 
+1965             if (waitingOnRetry) {
+1966                 DPRINTF(CachePort, "now waiting on a retry\n");
+1967                 if (!mshr->isForwardNoResponse()) {
+1968                     // we are awaiting a retry, but we
+1969                     // delete the packet and will be creating a new packet
+1970                     // when we get the opportunity
+1971                     delete pkt;
+1972                 }
+1973                 // note that we have now masked any requestBus and
+1974                 // schedSendEvent (we will wait for a retry before
+1975                 // doing anything), and this is so even if we do not
+1976                 // care about this packet and might override it before
+1977                 // it gets retried
+1978             } else {
+1979                 cache.markInService(mshr, pkt);
+1980             }
+1981         }
+1982     }
+1983 
+1984     // if we succeeded and are not waiting for a retry, schedule the
+1985     // next send, not only looking at the response transmit list, but
+1986     // also considering when the next MSHR is ready
+1987     if (!waitingOnRetry) {
+1988         scheduleSend(cache.nextMSHRReadyTime());
+1989     }
+1990 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCache_1_1MemSidePacketQueue_adf2b34ffa42914b9356a0788fc109bcc}{
+\index{Cache::MemSidePacketQueue@{Cache::MemSidePacketQueue}!cache@{cache}}
+\index{cache@{cache}!Cache::MemSidePacketQueue@{Cache::MemSidePacketQueue}}
+\subsubsection[{cache}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cache}$<$TagStore$>$\& {\bf cache}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCache_1_1MemSidePacketQueue_adf2b34ffa42914b9356a0788fc109bcc}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/cache/\hyperlink{cache_8hh}{cache.hh}\item 
+mem/cache/\hyperlink{cache__impl_8hh}{cache\_\-impl.hh}\end{DoxyCompactItemize}

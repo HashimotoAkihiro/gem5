@@ -1,0 +1,172 @@
+\hypertarget{classArmISA_1_1MacroMemOp}{
+\section{クラス MacroMemOp}
+\label{classArmISA_1_1MacroMemOp}\index{ArmISA::MacroMemOp@{ArmISA::MacroMemOp}}
+}
+
+
+{\ttfamily \#include $<$macromem.hh$>$}MacroMemOpに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classArmISA_1_1MacroMemOp}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1MacroMemOp_a008eeb85abf61c91301851bc54b7a726}{MacroMemOp} (const char $\ast$mnem, \hyperlink{classStaticInst_a5605d4fc727eae9e595325c90c0ec108}{ExtMachInst} \hyperlink{classStaticInst_a744598b194ca3d4201d9414ce4cc4af4}{machInst}, OpClass \_\-\_\-opClass, \hyperlink{namespaceArmISA_ae64680ba9fb526106829d6bf92fc791b}{IntRegIndex} \hyperlink{namespaceArmISA_adf8c6c579ad8729095a637a4f2181211}{rn}, bool index, bool \hyperlink{namespaceArmISA_a3a82fdc0669ddcc0c196b1ac0220c55a}{up}, bool user, bool \hyperlink{namespaceArmISA_a8143fa40e9030da2e8b93ba9990a7bb1}{writeback}, bool load, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} reglist)
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Base class for microcoded integer memory instructions. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1MacroMemOp_a008eeb85abf61c91301851bc54b7a726}{
+\index{ArmISA::MacroMemOp@{ArmISA::MacroMemOp}!MacroMemOp@{MacroMemOp}}
+\index{MacroMemOp@{MacroMemOp}!ArmISA::MacroMemOp@{ArmISA::MacroMemOp}}
+\subsubsection[{MacroMemOp}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MacroMemOp} (const char $\ast$ {\em mnem}, \/  {\bf ExtMachInst} {\em machInst}, \/  OpClass {\em \_\-\_\-opClass}, \/  {\bf IntRegIndex} {\em rn}, \/  bool {\em index}, \/  bool {\em up}, \/  bool {\em user}, \/  bool {\em writeback}, \/  bool {\em load}, \/  {\bf uint32\_\-t} {\em reglist})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1MacroMemOp_a008eeb85abf61c91301851bc54b7a726}
+
+
+
+\begin{DoxyCode}
+59                                                     :
+60     PredMacroOp(mnem, machInst, __opClass)
+61 {
+62     uint32_t regs = reglist;
+63     uint32_t ones = number_of_ones(reglist);
+64     // Remember that writeback adds a uop or two and the temp register adds one
+65     numMicroops = ones + (writeback ? (load ? 2 : 1) : 0) + 1;
+66 
+67     // It's technically legal to do a lot of nothing
+68     if (!ones)
+69         numMicroops = 1;
+70 
+71     microOps = new StaticInstPtr[numMicroops];
+72     uint32_t addr = 0;
+73 
+74     if (!up)
+75         addr = (ones << 2) - 4;
+76 
+77     if (!index)
+78         addr += 4;
+79 
+80     StaticInstPtr *uop = microOps;
+81 
+82     // Add 0 to Rn and stick it in ureg0.
+83     // This is equivalent to a move.
+84     *uop = new MicroAddiUop(machInst, INTREG_UREG0, rn, 0);
+85 
+86     unsigned reg = 0;
+87     unsigned regIdx = 0;
+88     bool force_user = user & !bits(reglist, 15);
+89     bool exception_ret = user & bits(reglist, 15);
+90 
+91     for (int i = 0; i < ones; i++) {
+92         // Find the next register.
+93         while (!bits(regs, reg))
+94             reg++;
+95         replaceBits(regs, reg, 0);
+96 
+97         regIdx = reg;
+98         if (force_user) {
+99             regIdx = intRegInMode(MODE_USER, regIdx);
+100         }
+101 
+102         if (load) {
+103             if (writeback && i == ones - 1) {
+104                 // If it's a writeback and this is the last register
+105                 // do the load into a temporary register which we'll move
+106                 // into the final one later
+107                 *++uop = new MicroLdrUop(machInst, INTREG_UREG1, INTREG_UREG0,
+108                         up, addr);
+109             } else {
+110                 // Otherwise just do it normally
+111                 if (reg == INTREG_PC && exception_ret) {
+112                     // This must be the exception return form of ldm.
+113                     *++uop = new MicroLdrRetUop(machInst, regIdx,
+114                                                INTREG_UREG0, up, addr);
+115                     if (!(condCode == COND_AL || condCode == COND_UC))
+116                         (*uop)->setFlag(StaticInst::IsCondControl);
+117                     else
+118                         (*uop)->setFlag(StaticInst::IsUncondControl);
+119                 } else {
+120                     *++uop = new MicroLdrUop(machInst, regIdx,
+121                                             INTREG_UREG0, up, addr);
+122                     if (reg == INTREG_PC) {
+123                         (*uop)->setFlag(StaticInst::IsControl);
+124                         if (!(condCode == COND_AL || condCode == COND_UC))
+125                             (*uop)->setFlag(StaticInst::IsCondControl);
+126                         else
+127                             (*uop)->setFlag(StaticInst::IsUncondControl);
+128                         (*uop)->setFlag(StaticInst::IsIndirectControl);
+129                     }
+130                 }
+131             }
+132         } else {
+133             *++uop = new MicroStrUop(machInst, regIdx, INTREG_UREG0, up, addr);
+134         }
+135 
+136         if (up)
+137             addr += 4;
+138         else
+139             addr -= 4;
+140     }
+141 
+142     if (writeback && ones) {
+143         // put the register update after we're done all loading
+144         if (up)
+145             *++uop = new MicroAddiUop(machInst, rn, rn, ones * 4);
+146         else
+147             *++uop = new MicroSubiUop(machInst, rn, rn, ones * 4);
+148 
+149         // If this was a load move the last temporary value into place
+150         // this way we can't take an exception after we update the base
+151         // register.
+152         if (load && reg == INTREG_PC && exception_ret) {
+153             *++uop = new MicroUopRegMovRet(machInst, 0, INTREG_UREG1);
+154             if (!(condCode == COND_AL || condCode == COND_UC))
+155                 (*uop)->setFlag(StaticInst::IsCondControl);
+156             else
+157                 (*uop)->setFlag(StaticInst::IsUncondControl);
+158         } else if (load) {
+159             *++uop = new MicroUopRegMov(machInst, regIdx, INTREG_UREG1);
+160             if (reg == INTREG_PC) {
+161                 (*uop)->setFlag(StaticInst::IsControl);
+162                 (*uop)->setFlag(StaticInst::IsCondControl);
+163                 (*uop)->setFlag(StaticInst::IsIndirectControl);
+164                 // This is created as a RAS POP
+165                 if (rn == INTREG_SP)
+166                     (*uop)->setFlag(StaticInst::IsReturn);
+167 
+168             }
+169         }
+170     }
+171 
+172     (*uop)->setLastMicroop();
+173 
+174     /* Take the control flags from the last microop for the macroop */
+175     if ((*uop)->isControl())
+176         setFlag(StaticInst::IsControl);
+177     if ((*uop)->isCondCtrl())
+178         setFlag(StaticInst::IsCondControl);
+179     if ((*uop)->isIndirectCtrl())
+180         setFlag(StaticInst::IsIndirectControl);
+181     if ((*uop)->isReturn())
+182         setFlag(StaticInst::IsReturn);
+183 
+184     for (StaticInstPtr *curUop = microOps;
+185             !(*curUop)->isLastMicroop(); curUop++) {
+186         MicroOp * uopPtr = dynamic_cast<MicroOp *>(curUop->get());
+187         assert(uopPtr);
+188         uopPtr->setDelayedCommit();
+189     }
+190 }
+
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/insts/\hyperlink{macromem_8hh}{macromem.hh}\item 
+arch/arm/insts/\hyperlink{macromem_8cc}{macromem.cc}\end{DoxyCompactItemize}

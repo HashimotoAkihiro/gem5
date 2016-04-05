@@ -1,0 +1,252 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/cache/mshr.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/cache/mshr.hh</h1><a href="mshr_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Erik Hallnor</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00048"></a>00048 <span class="preprocessor">#ifndef __MSHR_HH__</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="preprocessor">#define __MSHR_HH__</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="printable_8hh.html">base/printable.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056 <span class="keyword">class </span><a class="code" href="classCacheBlk.html">CacheBlk</a>;
+<a name="l00057"></a>00057 <span class="keyword">class </span><a class="code" href="classMSHRQueue.html">MSHRQueue</a>;
+<a name="l00058"></a>00058 
+<a name="l00064"></a><a class="code" href="classMSHR.html">00064</a> <span class="keyword">class </span><a class="code" href="classMSHR.html">MSHR</a> : <span class="keyword">public</span> <a class="code" href="classPacket.html">Packet</a>::<a class="code" href="structRubyTester_1_1SenderState.html">SenderState</a>, <span class="keyword">public</span> <a class="code" href="classPrintable.html">Printable</a>
+<a name="l00065"></a>00065 {
+<a name="l00066"></a>00066 
+<a name="l00070"></a><a class="code" href="classMSHR.html#a3d057950abc60f70219bad94198fd407">00070</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classMSHRQueue.html">MSHRQueue</a>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072   <span class="keyword">private</span>:
+<a name="l00073"></a>00073 
+<a name="l00075"></a><a class="code" href="classMSHR.html#a7cb362ebfb8750bd53baf5e8f96e00d0">00075</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classMSHR.html#a7cb362ebfb8750bd53baf5e8f96e00d0">readyTime</a>;
+<a name="l00076"></a>00076 
+<a name="l00078"></a><a class="code" href="classMSHR.html#a1f29f1c59828a6c0fecd2d33c992c8a4">00078</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a1f29f1c59828a6c0fecd2d33c992c8a4">_isUncacheable</a>;
+<a name="l00079"></a>00079 
+<a name="l00081"></a><a class="code" href="classMSHR.html#a5ea3d1c4eadd163d5f9bd35927044ed5">00081</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a5ea3d1c4eadd163d5f9bd35927044ed5">downstreamPending</a>;
+<a name="l00082"></a>00082 
+<a name="l00084"></a><a class="code" href="classMSHR.html#a2c6e696fb220ec9db6d72d614998c800">00084</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a2c6e696fb220ec9db6d72d614998c800">pendingDirty</a>;
+<a name="l00085"></a>00085 
+<a name="l00087"></a><a class="code" href="classMSHR.html#af4c42f3027a6f426f32521a251fd724d">00087</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#af4c42f3027a6f426f32521a251fd724d">postInvalidate</a>;
+<a name="l00088"></a>00088 
+<a name="l00090"></a><a class="code" href="classMSHR.html#a361fccb7e46b8119bda165f80f2753ac">00090</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a361fccb7e46b8119bda165f80f2753ac">postDowngrade</a>;
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092   <span class="keyword">public</span>:
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classMSHR_1_1Target.html">00094</a>     <span class="keyword">class </span><a class="code" href="classMSHR_1_1Target.html">Target</a> {
+<a name="l00095"></a>00095       <span class="keyword">public</span>:
+<a name="l00096"></a>00096 
+<a name="l00097"></a><a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351e">00097</a>         <span class="keyword">enum</span> <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351e">Source</a> {
+<a name="l00098"></a><a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351ead87ddc653bf916825f87a824895e88f7">00098</a>             <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351ead87ddc653bf916825f87a824895e88f7">FromCPU</a>,
+<a name="l00099"></a><a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351eaa3edd380596b2be1636c4a8b7f18611f">00099</a>             <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351eaa3edd380596b2be1636c4a8b7f18611f">FromSnoop</a>,
+<a name="l00100"></a><a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351ea63c0c00defe35fdf63539ff5fff462c7">00100</a>             <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351ea63c0c00defe35fdf63539ff5fff462c7">FromPrefetcher</a>
+<a name="l00101"></a>00101         };
+<a name="l00102"></a>00102 
+<a name="l00103"></a><a class="code" href="classMSHR_1_1Target.html#afb564669ac735617979c31edf7f97e2a">00103</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classMSHR_1_1Target.html#afb564669ac735617979c31edf7f97e2a" title="Time when request was received (for stats).">recvTime</a>;  
+<a name="l00104"></a><a class="code" href="classMSHR_1_1Target.html#a7cb362ebfb8750bd53baf5e8f96e00d0">00104</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classMSHR_1_1Target.html#a7cb362ebfb8750bd53baf5e8f96e00d0" title="Time when request is ready to be serviced.">readyTime</a>; 
+<a name="l00105"></a><a class="code" href="classMSHR_1_1Target.html#a268baba59d9078c070be7059fd90d9bc">00105</a>         <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classMSHR_1_1Target.html#a268baba59d9078c070be7059fd90d9bc" title="Global order (for memory consistency mgmt).">order</a>;  
+<a name="l00106"></a><a class="code" href="classMSHR_1_1Target.html#a3a891bc2a0fcbe6be5297077d94e2df7">00106</a>         <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classMSHR_1_1Target.html#a3a891bc2a0fcbe6be5297077d94e2df7" title="Pending request packet.">pkt</a>;  
+<a name="l00107"></a><a class="code" href="classMSHR_1_1Target.html#a6bfef4fd519b1708e99617d59d9c62cd">00107</a>         <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351e">Source</a> <a class="code" href="classMSHR_1_1Target.html#a6bfef4fd519b1708e99617d59d9c62cd" title="Did request come from cpu, memory, or prefetcher?">source</a>;  
+<a name="l00108"></a><a class="code" href="classMSHR_1_1Target.html#a790487cb2984966102e9eceeb2dd3015">00108</a>         <span class="keywordtype">bool</span> <a class="code" href="classMSHR_1_1Target.html#a790487cb2984966102e9eceeb2dd3015">markedPending</a>; 
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110 
+<a name="l00111"></a><a class="code" href="classMSHR_1_1Target.html#aabb8a1de346c61cffba6edb40bf285a6">00111</a>         <a class="code" href="classMSHR_1_1Target.html#aabb8a1de346c61cffba6edb40bf285a6">Target</a>(<a class="code" href="classPacket.html">PacketPtr</a> _pkt, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _readyTime, <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> _order,
+<a name="l00112"></a>00112                <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351e">Source</a> _source, <span class="keywordtype">bool</span> _markedPending)
+<a name="l00113"></a>00113             : <a class="code" href="classMSHR_1_1Target.html#afb564669ac735617979c31edf7f97e2a" title="Time when request was received (for stats).">recvTime</a>(<a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>()), <a class="code" href="classMSHR_1_1Target.html#a7cb362ebfb8750bd53baf5e8f96e00d0" title="Time when request is ready to be serviced.">readyTime</a>(_readyTime), <a class="code" href="classMSHR_1_1Target.html#a268baba59d9078c070be7059fd90d9bc" title="Global order (for memory consistency mgmt).">order</a>(_order),
+<a name="l00114"></a>00114               <a class="code" href="classMSHR_1_1Target.html#a3a891bc2a0fcbe6be5297077d94e2df7" title="Pending request packet.">pkt</a>(_pkt), <a class="code" href="classMSHR_1_1Target.html#a6bfef4fd519b1708e99617d59d9c62cd" title="Did request come from cpu, memory, or prefetcher?">source</a>(_source), <a class="code" href="classMSHR_1_1Target.html#a790487cb2984966102e9eceeb2dd3015">markedPending</a>(_markedPending)
+<a name="l00115"></a>00115         {}
+<a name="l00116"></a>00116     };
+<a name="l00117"></a>00117 
+<a name="l00118"></a><a class="code" href="classMSHR_1_1TargetList.html">00118</a>     <span class="keyword">class </span><a class="code" href="classMSHR_1_1TargetList.html">TargetList</a> : <span class="keyword">public</span> std::list&lt;Target&gt; {
+<a name="l00120"></a><a class="code" href="classMSHR_1_1TargetList.html#a8e2583d27fed2a1a2c4bc45749e09cf1">00120</a>         <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;Target&gt;::iterator</a> <a class="code" href="classMSHR_1_1TargetList.html#a8e2583d27fed2a1a2c4bc45749e09cf1">Iterator</a>;
+<a name="l00121"></a><a class="code" href="classMSHR_1_1TargetList.html#a13152b569944932d23706d9729a96267">00121</a>         <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;Target&gt;::const_iterator</a> <a class="code" href="classMSHR_1_1TargetList.html#a13152b569944932d23706d9729a96267">ConstIterator</a>;
+<a name="l00122"></a>00122 
+<a name="l00123"></a>00123       <span class="keyword">public</span>:
+<a name="l00124"></a><a class="code" href="classMSHR_1_1TargetList.html#a546082d646a7cf9bda71269184b937b9">00124</a>         <span class="keywordtype">bool</span> <a class="code" href="classMSHR_1_1TargetList.html#a546082d646a7cf9bda71269184b937b9">needsExclusive</a>;
+<a name="l00125"></a><a class="code" href="classMSHR_1_1TargetList.html#afd770d45ac12adb106ed9873fd3b1509">00125</a>         <span class="keywordtype">bool</span> <a class="code" href="classMSHR_1_1TargetList.html#afd770d45ac12adb106ed9873fd3b1509">hasUpgrade</a>;
+<a name="l00126"></a>00126 
+<a name="l00127"></a>00127         <a class="code" href="classMSHR_1_1TargetList.html#aa447a12890c20f5852e14342c550a18d">TargetList</a>();
+<a name="l00128"></a><a class="code" href="classMSHR_1_1TargetList.html#a62735a8af8d77cbab59807d09d9d57df">00128</a>         <span class="keywordtype">void</span> <a class="code" href="classMSHR_1_1TargetList.html#a62735a8af8d77cbab59807d09d9d57df">resetFlags</a>() { <a class="code" href="classMSHR_1_1TargetList.html#a546082d646a7cf9bda71269184b937b9">needsExclusive</a> = <a class="code" href="classMSHR_1_1TargetList.html#afd770d45ac12adb106ed9873fd3b1509">hasUpgrade</a> = <span class="keyword">false</span>; }
+<a name="l00129"></a><a class="code" href="classMSHR_1_1TargetList.html#a69511868e2e419afd1e46803a3debe28">00129</a>         <span class="keywordtype">bool</span> <a class="code" href="classMSHR_1_1TargetList.html#a69511868e2e419afd1e46803a3debe28">isReset</a>()    { <span class="keywordflow">return</span> !<a class="code" href="classMSHR_1_1TargetList.html#a546082d646a7cf9bda71269184b937b9">needsExclusive</a> &amp;&amp; !<a class="code" href="classMSHR_1_1TargetList.html#afd770d45ac12adb106ed9873fd3b1509">hasUpgrade</a>; }
+<a name="l00130"></a>00130         <span class="keywordtype">void</span> <a class="code" href="classMSHR_1_1TargetList.html#af6d681685dd55314bc183bd3305b2a52">add</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classMSHR.html#a7cb362ebfb8750bd53baf5e8f96e00d0">readyTime</a>, <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classMSHR.html#a268baba59d9078c070be7059fd90d9bc">order</a>,
+<a name="l00131"></a>00131                  <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351e">Target::Source</a> source, <span class="keywordtype">bool</span> markPending);
+<a name="l00132"></a>00132         <span class="keywordtype">void</span> <a class="code" href="classMSHR_1_1TargetList.html#a98242f31aa34a435ca066c5e35413a2c">replaceUpgrades</a>();
+<a name="l00133"></a>00133         <span class="keywordtype">void</span> <a class="code" href="classMSHR_1_1TargetList.html#aba459a1fb9c4f01c1911655c1db0e8e4">clearDownstreamPending</a>();
+<a name="l00134"></a>00134         <span class="keywordtype">bool</span> <a class="code" href="classMSHR_1_1TargetList.html#a8eb60d4744b6212ad749f3a586759266">checkFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00135"></a>00135         <span class="keywordtype">void</span> <a class="code" href="classMSHR_1_1TargetList.html#a5cabeee2cd7415822c9088b27b3b9436">print</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>, <span class="keywordtype">int</span> verbosity,
+<a name="l00136"></a>00136                    <span class="keyword">const</span> std::string &amp;prefix) <span class="keyword">const</span>;
+<a name="l00137"></a>00137     };
+<a name="l00138"></a>00138 
+<a name="l00140"></a><a class="code" href="classMSHR.html#ad558dcd5b6beb35c76724ab05f90a077">00140</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;MSHR *&gt;</a> <a class="code" href="classstd_1_1list.html">List</a>;
+<a name="l00142"></a><a class="code" href="classMSHR.html#af944263ff3027ab76cf07354d3a3f0c6">00142</a>     <span class="keyword">typedef</span> List::iterator <a class="code" href="classMSHR.html#af944263ff3027ab76cf07354d3a3f0c6">Iterator</a>;
+<a name="l00144"></a><a class="code" href="classMSHR.html#a91267e1b9ec14096dd01900290a0ba15">00144</a>     <span class="keyword">typedef</span> List::const_iterator <a class="code" href="classMSHR.html#a91267e1b9ec14096dd01900290a0ba15">ConstIterator</a>;
+<a name="l00145"></a>00145 
+<a name="l00147"></a><a class="code" href="classMSHR.html#a524ec1b0c7b11e23904171e42211679e">00147</a>     <a class="code" href="classMSHRQueue.html">MSHRQueue</a> *<a class="code" href="classMSHR.html#a524ec1b0c7b11e23904171e42211679e">queue</a>;
+<a name="l00148"></a>00148 
+<a name="l00150"></a><a class="code" href="classMSHR.html#a268baba59d9078c070be7059fd90d9bc">00150</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classMSHR.html#a268baba59d9078c070be7059fd90d9bc">order</a>;
+<a name="l00151"></a>00151 
+<a name="l00153"></a><a class="code" href="classMSHR.html#a0bb77b4ba61e408313e1118250f9278c">00153</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classMSHR.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00154"></a>00154 
+<a name="l00156"></a><a class="code" href="classMSHR.html#a439227feff9d7f55384e8780cfc2eb82">00156</a>     <span class="keywordtype">int</span> <a class="code" href="classMSHR.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00157"></a>00157 
+<a name="l00159"></a><a class="code" href="classMSHR.html#a62bc84f4251f16cf0cfa0f8d96e00c37">00159</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a62bc84f4251f16cf0cfa0f8d96e00c37">isSecure</a>;
+<a name="l00160"></a>00160 
+<a name="l00162"></a><a class="code" href="classMSHR.html#a7f5c4fb6e9162689992ccd0cd7bce17b">00162</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a7f5c4fb6e9162689992ccd0cd7bce17b">inService</a>;
+<a name="l00163"></a>00163 
+<a name="l00165"></a><a class="code" href="classMSHR.html#a9b36b981f171b10bc35fbd5f79c3bae1">00165</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a9b36b981f171b10bc35fbd5f79c3bae1">isForward</a>;
+<a name="l00166"></a>00166 
+<a name="l00173"></a><a class="code" href="classMSHR.html#aa8e449288b878ff3ff7f286eb4d28b6a">00173</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#aa8e449288b878ff3ff7f286eb4d28b6a">needsExclusive</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">targets</a>.<a class="code" href="classMSHR_1_1TargetList.html#a546082d646a7cf9bda71269184b937b9">needsExclusive</a>; }
+<a name="l00174"></a>00174 
+<a name="l00175"></a><a class="code" href="classMSHR.html#a46636974002da45a91f2019ff47b5025">00175</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a46636974002da45a91f2019ff47b5025">isPendingDirty</a>()<span class="keyword"> const </span>{
+<a name="l00176"></a>00176         assert(<a class="code" href="classMSHR.html#a7f5c4fb6e9162689992ccd0cd7bce17b">inService</a>); <span class="keywordflow">return</span> <a class="code" href="classMSHR.html#a2c6e696fb220ec9db6d72d614998c800">pendingDirty</a>;
+<a name="l00177"></a>00177     }
+<a name="l00178"></a>00178 
+<a name="l00179"></a><a class="code" href="classMSHR.html#a492fb8bb0290ba36d8d05d9f86b8e754">00179</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a492fb8bb0290ba36d8d05d9f86b8e754">hasPostInvalidate</a>()<span class="keyword"> const </span>{
+<a name="l00180"></a>00180         assert(<a class="code" href="classMSHR.html#a7f5c4fb6e9162689992ccd0cd7bce17b">inService</a>); <span class="keywordflow">return</span> <a class="code" href="classMSHR.html#af4c42f3027a6f426f32521a251fd724d">postInvalidate</a>;
+<a name="l00181"></a>00181     }
+<a name="l00182"></a>00182 
+<a name="l00183"></a><a class="code" href="classMSHR.html#a74c74cd6091f9e3e1523d3044ae9e9b4">00183</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a74c74cd6091f9e3e1523d3044ae9e9b4">hasPostDowngrade</a>()<span class="keyword"> const </span>{
+<a name="l00184"></a>00184         assert(<a class="code" href="classMSHR.html#a7f5c4fb6e9162689992ccd0cd7bce17b">inService</a>); <span class="keywordflow">return</span> <a class="code" href="classMSHR.html#a361fccb7e46b8119bda165f80f2753ac">postDowngrade</a>;
+<a name="l00185"></a>00185     }
+<a name="l00186"></a>00186 
+<a name="l00188"></a><a class="code" href="classMSHR.html#a7ec985ceacc8f2c379dbccca0b2e0f44">00188</a>     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classMSHR.html#a7ec985ceacc8f2c379dbccca0b2e0f44">threadNum</a>;
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190   <span class="keyword">private</span>:
+<a name="l00191"></a>00191 
+<a name="l00194"></a><a class="code" href="classMSHR.html#abe222f6d3581e7920dcad5306cc906a8">00194</a>     uint8_t *<a class="code" href="classMSHR.html#abe222f6d3581e7920dcad5306cc906a8">data</a>;
+<a name="l00195"></a>00195 
+<a name="l00200"></a><a class="code" href="classMSHR.html#a6ff6af8d20926ded4e18e8f676784ff6">00200</a>     <a class="code" href="classMSHR.html#af944263ff3027ab76cf07354d3a3f0c6">Iterator</a> <a class="code" href="classMSHR.html#a6ff6af8d20926ded4e18e8f676784ff6">readyIter</a>;
+<a name="l00201"></a>00201 
+<a name="l00206"></a><a class="code" href="classMSHR.html#afd1f01c04c4b2b391083188321ccd47e">00206</a>     <a class="code" href="classMSHR.html#af944263ff3027ab76cf07354d3a3f0c6">Iterator</a> <a class="code" href="classMSHR.html#afd1f01c04c4b2b391083188321ccd47e">allocIter</a>;
+<a name="l00207"></a>00207 
+<a name="l00209"></a><a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">00209</a>     <a class="code" href="classMSHR_1_1TargetList.html">TargetList</a> <a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">targets</a>;
+<a name="l00210"></a>00210 
+<a name="l00211"></a><a class="code" href="classMSHR.html#ab53d68e3f8e523ab7907b830d22bd35d">00211</a>     <a class="code" href="classMSHR_1_1TargetList.html">TargetList</a> <a class="code" href="classMSHR.html#ab53d68e3f8e523ab7907b830d22bd35d">deferredTargets</a>;
+<a name="l00212"></a>00212 
+<a name="l00213"></a>00213   <span class="keyword">public</span>:
+<a name="l00214"></a>00214 
+<a name="l00215"></a><a class="code" href="classMSHR.html#a70c74b2809417ea8701dd6ba9e34312d">00215</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a70c74b2809417ea8701dd6ba9e34312d">isUncacheable</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classMSHR.html#a1f29f1c59828a6c0fecd2d33c992c8a4">_isUncacheable</a>; }
+<a name="l00216"></a>00216 
+<a name="l00225"></a>00225     <span class="keywordtype">void</span> <a class="code" href="classMSHR.html#aea3dd4d447084fd85a6d737beefdc594">allocate</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classMSHR.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>, <span class="keywordtype">int</span> <a class="code" href="classMSHR.html#a439227feff9d7f55384e8780cfc2eb82">size</a>, <a class="code" href="classPacket.html">PacketPtr</a> pkt,
+<a name="l00226"></a>00226                   <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when, <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> _order);
+<a name="l00227"></a>00227 
+<a name="l00228"></a>00228     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a89f5689827090dd1998bd3906e5454d1">markInService</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00229"></a>00229 
+<a name="l00230"></a>00230     <span class="keywordtype">void</span> <a class="code" href="classMSHR.html#aba459a1fb9c4f01c1911655c1db0e8e4">clearDownstreamPending</a>();
+<a name="l00231"></a>00231 
+<a name="l00235"></a>00235     <span class="keywordtype">void</span> <a class="code" href="classMSHR.html#a2d68be4fd20ffdd7f7a9b51579eacc2f">deallocate</a>();
+<a name="l00236"></a>00236 
+<a name="l00241"></a>00241     <span class="keywordtype">void</span> <a class="code" href="classMSHR.html#a84c132450efb0381229d03bba92d3d1d">allocateTarget</a>(<a class="code" href="classPacket.html">PacketPtr</a> target, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when, <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classMSHR.html#a268baba59d9078c070be7059fd90d9bc">order</a>);
+<a name="l00242"></a>00242     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a7501595166901f8ddffcad271441cdf4">handleSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> target, <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classMSHR.html#a268baba59d9078c070be7059fd90d9bc">order</a>);
+<a name="l00243"></a>00243 
+<a name="l00245"></a>00245     <a class="code" href="classMSHR.html#ac9bcc3c4e7dc13e809c1ddc72d1df7b2">MSHR</a>();
+<a name="l00246"></a>00246 
+<a name="l00251"></a><a class="code" href="classMSHR.html#ab22af10809b116b3a7ecba267c795c8a">00251</a>     <span class="keywordtype">int</span> <a class="code" href="classMSHR.html#ab22af10809b116b3a7ecba267c795c8a">getNumTargets</a>()<span class="keyword"> const</span>
+<a name="l00252"></a>00252 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">targets</a>.size() + <a class="code" href="classMSHR.html#ab53d68e3f8e523ab7907b830d22bd35d">deferredTargets</a>.size(); }
+<a name="l00253"></a>00253 
+<a name="l00258"></a><a class="code" href="classMSHR.html#a9b007d67bfb5a6ff382a6d78ec08b3af">00258</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a9b007d67bfb5a6ff382a6d78ec08b3af">hasTargets</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> !<a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">targets</a>.empty(); }
+<a name="l00259"></a>00259 
+<a name="l00264"></a><a class="code" href="classMSHR.html#ae068bab5bed8991efdfcd7829d9ca5e3">00264</a>     <a class="code" href="classMSHR_1_1Target.html">Target</a> *<a class="code" href="classMSHR.html#ae068bab5bed8991efdfcd7829d9ca5e3">getTarget</a>()
+<a name="l00265"></a>00265     {
+<a name="l00266"></a>00266         assert(<a class="code" href="classMSHR.html#a9b007d67bfb5a6ff382a6d78ec08b3af">hasTargets</a>());
+<a name="l00267"></a>00267         <span class="keywordflow">return</span> &amp;<a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">targets</a>.front();
+<a name="l00268"></a>00268     }
+<a name="l00269"></a>00269 
+<a name="l00273"></a><a class="code" href="classMSHR.html#a660e7beed1d7d25852a9bc63d1f314b3">00273</a>     <span class="keywordtype">void</span> <a class="code" href="classMSHR.html#a660e7beed1d7d25852a9bc63d1f314b3">popTarget</a>()
+<a name="l00274"></a>00274     {
+<a name="l00275"></a>00275         <a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">targets</a>.pop_front();
+<a name="l00276"></a>00276     }
+<a name="l00277"></a>00277 
+<a name="l00278"></a><a class="code" href="classMSHR.html#aee2f7196808cfdd31122d93d11b633de">00278</a>     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#aee2f7196808cfdd31122d93d11b633de">isForwardNoResponse</a>()<span class="keyword"> const</span>
+<a name="l00279"></a>00279 <span class="keyword">    </span>{
+<a name="l00280"></a>00280         <span class="keywordflow">if</span> (<a class="code" href="classMSHR.html#ab22af10809b116b3a7ecba267c795c8a">getNumTargets</a>() != 1)
+<a name="l00281"></a>00281             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00282"></a>00282         <span class="keyword">const</span> <a class="code" href="classMSHR_1_1Target.html">Target</a> *tgt = &amp;<a class="code" href="classMSHR.html#ac0771ddfd90fe1ffe0d2da35dad7dd36">targets</a>.front();
+<a name="l00283"></a>00283         <span class="keywordflow">return</span> tgt-&gt;<a class="code" href="classMSHR_1_1Target.html#a6bfef4fd519b1708e99617d59d9c62cd" title="Did request come from cpu, memory, or prefetcher?">source</a> == <a class="code" href="classMSHR_1_1Target.html#a176e1eca2d1e3d1c6a064340bc6a351ead87ddc653bf916825f87a824895e88f7">Target::FromCPU</a> &amp;&amp; !tgt-&gt;<a class="code" href="classMSHR_1_1Target.html#a3a891bc2a0fcbe6be5297077d94e2df7" title="Pending request packet.">pkt</a>-&gt;<a class="code" href="classPacket.html#a390c6cced05593f0a2c75a38a7a24fa9">needsResponse</a>();
+<a name="l00284"></a>00284     }
+<a name="l00285"></a>00285 
+<a name="l00286"></a>00286     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a6b0d016d76a2a7570d1d51eaa3086845">promoteDeferredTargets</a>();
+<a name="l00287"></a>00287 
+<a name="l00288"></a>00288     <span class="keywordtype">void</span> <a class="code" href="classMSHR.html#aff2dbaf9542ae841979f44a7af2fab0b">handleFill</a>(<a class="code" href="classPacket.html">Packet</a> *pkt, <a class="code" href="classCacheBlk.html">CacheBlk</a> *blk);
+<a name="l00289"></a>00289 
+<a name="l00290"></a>00290     <span class="keywordtype">bool</span> <a class="code" href="classMSHR.html#a8eb60d4744b6212ad749f3a586759266">checkFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00291"></a>00291 
+<a name="l00295"></a>00295     <span class="keywordtype">void</span> <a class="code" href="classMSHR.html#ae8a5b5e9e0e6be3b115ee77fa7b4d0c8">print</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>,
+<a name="l00296"></a>00296                <span class="keywordtype">int</span> verbosity = 0,
+<a name="l00297"></a>00297                <span class="keyword">const</span> std::string &amp;prefix = <span class="stringliteral">&quot;&quot;</span>) <span class="keyword">const</span>;
+<a name="l00304"></a>00304     std::string <a class="code" href="classMSHR.html#ae8a5b5e9e0e6be3b115ee77fa7b4d0c8">print</a>() <span class="keyword">const</span>;
+<a name="l00305"></a>00305 };
+<a name="l00306"></a>00306 
+<a name="l00307"></a>00307 <span class="preprocessor">#endif //__MSHR_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

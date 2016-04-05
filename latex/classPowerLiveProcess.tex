@@ -1,0 +1,339 @@
+\hypertarget{classPowerLiveProcess}{
+\section{クラス PowerLiveProcess}
+\label{classPowerLiveProcess}\index{PowerLiveProcess@{PowerLiveProcess}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}PowerLiveProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classPowerLiveProcess}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classPowerLiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{argsInit} (int intSize, int pageSize)
+\item 
+\hyperlink{namespacePowerISA_a0e080577527fb3e9685399f75b5caf15}{PowerISA::IntReg} \hyperlink{classPowerLiveProcess_a4a1521e60b3fd8333fc98a5565c484ec}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i)
+\item 
+void \hyperlink{classPowerLiveProcess_a1e515b39cc799824d1dd93d40ba28416}{setSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int i, \hyperlink{namespacePowerISA_a0e080577527fb3e9685399f75b5caf15}{PowerISA::IntReg} val)
+\item 
+void \hyperlink{classPowerLiveProcess_aaefd02663c1eae206b851290d9276a5e}{setSyscallReturn} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classSyscallReturn}{SyscallReturn} return\_\-value)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPowerLiveProcess_af5aa42a7d1a5ffdd21ec2c4d8b8a5890}{PowerLiveProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile})
+\item 
+void \hyperlink{classPowerLiveProcess_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPowerLiveProcess_af5aa42a7d1a5ffdd21ec2c4d8b8a5890}{
+\index{PowerLiveProcess@{PowerLiveProcess}!PowerLiveProcess@{PowerLiveProcess}}
+\index{PowerLiveProcess@{PowerLiveProcess}!PowerLiveProcess@{PowerLiveProcess}}
+\subsubsection[{PowerLiveProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PowerLiveProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPowerLiveProcess_af5aa42a7d1a5ffdd21ec2c4d8b8a5890}
+
+
+
+\begin{DoxyCode}
+50     : LiveProcess(params, objFile)
+51 {
+52     stack_base = 0xbf000000L;
+53 
+54     // Set pointer for next thread stack.  Reserve 8M for main stack.
+55     next_thread_stack_base = stack_base - (8 * 1024 * 1024);
+56 
+57     // Set up break point (Top of Heap)
+58     brk_point = objFile->dataBase() + objFile->dataSize() + objFile->bssSize();
+59     brk_point = roundUp(brk_point, VMPageSize);
+60 
+61     // Set up region for mmaps. For now, start at bottom of kuseg space.
+62     mmap_start = mmap_end = 0x70000000L;
+63 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPowerLiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{
+\index{PowerLiveProcess@{PowerLiveProcess}!argsInit@{argsInit}}
+\index{argsInit@{argsInit}!PowerLiveProcess@{PowerLiveProcess}}
+\subsubsection[{argsInit}]{\setlength{\rightskip}{0pt plus 5cm}void argsInit (int {\em intSize}, \/  int {\em pageSize})}}
+\label{classPowerLiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}
+
+
+
+\begin{DoxyCode}
+75 {
+76     typedef AuxVector<uint32_t> auxv_t;
+77     std::vector<auxv_t> auxv;
+78 
+79     string filename;
+80     if (argv.size() < 1)
+81         filename = "";
+82     else
+83         filename = argv[0];
+84 
+85     //We want 16 byte alignment
+86     uint64_t align = 16;
+87 
+88     // load object file into target memory
+89     objFile->loadSections(initVirtMem);
+90 
+91     //Setup the auxilliary vectors. These will already have endian conversion.
+92     //Auxilliary vectors are loaded only for elf formatted executables.
+93     ElfObject * elfObject = dynamic_cast<ElfObject *>(objFile);
+94     if (elfObject) {
+95         uint32_t features = 0;
+96 
+97         //Bits which describe the system hardware capabilities
+98         //XXX Figure out what these should be
+99         auxv.push_back(auxv_t(M5_AT_HWCAP, features));
+100         //The system page size
+101         auxv.push_back(auxv_t(M5_AT_PAGESZ, PowerISA::VMPageSize));
+102         //Frequency at which times() increments
+103         auxv.push_back(auxv_t(M5_AT_CLKTCK, 0x64));
+104         // For statically linked executables, this is the virtual address of the
+105         // program header tables if they appear in the executable image
+106         auxv.push_back(auxv_t(M5_AT_PHDR, elfObject->programHeaderTable()));
+107         // This is the size of a program header entry from the elf file.
+108         auxv.push_back(auxv_t(M5_AT_PHENT, elfObject->programHeaderSize()));
+109         // This is the number of program headers from the original elf file.
+110         auxv.push_back(auxv_t(M5_AT_PHNUM, elfObject->programHeaderCount()));
+111         //This is the address of the elf "interpreter", It should be set
+112         //to 0 for regular executables. It should be something else
+113         //(not sure what) for dynamic libraries.
+114         auxv.push_back(auxv_t(M5_AT_BASE, 0));
+115 
+116         //XXX Figure out what this should be.
+117         auxv.push_back(auxv_t(M5_AT_FLAGS, 0));
+118         //The entry point to the program
+119         auxv.push_back(auxv_t(M5_AT_ENTRY, objFile->entryPoint()));
+120         //Different user and group IDs
+121         auxv.push_back(auxv_t(M5_AT_UID, uid()));
+122         auxv.push_back(auxv_t(M5_AT_EUID, euid()));
+123         auxv.push_back(auxv_t(M5_AT_GID, gid()));
+124         auxv.push_back(auxv_t(M5_AT_EGID, egid()));
+125         //Whether to enable "secure mode" in the executable
+126         auxv.push_back(auxv_t(M5_AT_SECURE, 0));
+127         //The filename of the program
+128         auxv.push_back(auxv_t(M5_AT_EXECFN, 0));
+129         //The string "v51" with unknown meaning
+130         auxv.push_back(auxv_t(M5_AT_PLATFORM, 0));
+131     }
+132 
+133     //Figure out how big the initial stack nedes to be
+134 
+135     // A sentry NULL void pointer at the top of the stack.
+136     int sentry_size = intSize;
+137 
+138     string platform = "v51";
+139     int platform_size = platform.size() + 1;
+140 
+141     // The aux vectors are put on the stack in two groups. The first group are
+142     // the vectors that are generated as the elf is loaded. The second group
+143     // are the ones that were computed ahead of time and include the platform
+144     // string.
+145     int aux_data_size = filename.size() + 1;
+146 
+147     int env_data_size = 0;
+148     for (int i = 0; i < envp.size(); ++i) {
+149         env_data_size += envp[i].size() + 1;
+150     }
+151     int arg_data_size = 0;
+152     for (int i = 0; i < argv.size(); ++i) {
+153         arg_data_size += argv[i].size() + 1;
+154     }
+155 
+156     int info_block_size =
+157         sentry_size + env_data_size + arg_data_size +
+158         aux_data_size + platform_size;
+159 
+160     //Each auxilliary vector is two 4 byte words
+161     int aux_array_size = intSize * 2 * (auxv.size() + 1);
+162 
+163     int envp_array_size = intSize * (envp.size() + 1);
+164     int argv_array_size = intSize * (argv.size() + 1);
+165 
+166     int argc_size = intSize;
+167 
+168     //Figure out the size of the contents of the actual initial frame
+169     int frame_size =
+170         info_block_size +
+171         aux_array_size +
+172         envp_array_size +
+173         argv_array_size +
+174         argc_size;
+175 
+176     //There needs to be padding after the auxiliary vector data so that the
+177     //very bottom of the stack is aligned properly.
+178     int partial_size = frame_size;
+179     int aligned_partial_size = roundUp(partial_size, align);
+180     int aux_padding = aligned_partial_size - partial_size;
+181 
+182     int space_needed = frame_size + aux_padding;
+183 
+184     stack_min = stack_base - space_needed;
+185     stack_min = roundDown(stack_min, align);
+186     stack_size = stack_base - stack_min;
+187 
+188     // map memory
+189     allocateMem(roundDown(stack_min, pageSize), roundUp(stack_size, pageSize));
+190 
+191     // map out initial stack contents
+192     uint32_t sentry_base = stack_base - sentry_size;
+193     uint32_t aux_data_base = sentry_base - aux_data_size;
+194     uint32_t env_data_base = aux_data_base - env_data_size;
+195     uint32_t arg_data_base = env_data_base - arg_data_size;
+196     uint32_t platform_base = arg_data_base - platform_size;
+197     uint32_t auxv_array_base = platform_base - aux_array_size - aux_padding;
+198     uint32_t envp_array_base = auxv_array_base - envp_array_size;
+199     uint32_t argv_array_base = envp_array_base - argv_array_size;
+200     uint32_t argc_base = argv_array_base - argc_size;
+201 
+202     DPRINTF(Stack, "The addresses of items on the initial stack:\n");
+203     DPRINTF(Stack, "0x%x - aux data\n", aux_data_base);
+204     DPRINTF(Stack, "0x%x - env data\n", env_data_base);
+205     DPRINTF(Stack, "0x%x - arg data\n", arg_data_base);
+206     DPRINTF(Stack, "0x%x - platform base\n", platform_base);
+207     DPRINTF(Stack, "0x%x - auxv array\n", auxv_array_base);
+208     DPRINTF(Stack, "0x%x - envp array\n", envp_array_base);
+209     DPRINTF(Stack, "0x%x - argv array\n", argv_array_base);
+210     DPRINTF(Stack, "0x%x - argc \n", argc_base);
+211     DPRINTF(Stack, "0x%x - stack min\n", stack_min);
+212 
+213     // write contents to stack
+214 
+215     // figure out argc
+216     uint32_t argc = argv.size();
+217     uint32_t guestArgc = PowerISA::htog(argc);
+218 
+219     //Write out the sentry void *
+220     uint32_t sentry_NULL = 0;
+221     initVirtMem.writeBlob(sentry_base,
+222             (uint8_t*)&sentry_NULL, sentry_size);
+223 
+224     //Fix up the aux vectors which point to other data
+225     for (int i = auxv.size() - 1; i >= 0; i--) {
+226         if (auxv[i].a_type == M5_AT_PLATFORM) {
+227             auxv[i].a_val = platform_base;
+228             initVirtMem.writeString(platform_base, platform.c_str());
+229         } else if (auxv[i].a_type == M5_AT_EXECFN) {
+230             auxv[i].a_val = aux_data_base;
+231             initVirtMem.writeString(aux_data_base, filename.c_str());
+232         }
+233     }
+234 
+235     //Copy the aux stuff
+236     for (int x = 0; x < auxv.size(); x++)
+237     {
+238         initVirtMem.writeBlob(auxv_array_base + x * 2 * intSize,
+239                 (uint8_t*)&(auxv[x].a_type), intSize);
+240         initVirtMem.writeBlob(auxv_array_base + (x * 2 + 1) * intSize,
+241                 (uint8_t*)&(auxv[x].a_val), intSize);
+242     }
+243     //Write out the terminating zeroed auxilliary vector
+244     const uint64_t zero = 0;
+245     initVirtMem.writeBlob(auxv_array_base + 2 * intSize * auxv.size(),
+246             (uint8_t*)&zero, 2 * intSize);
+247 
+248     copyStringArray(envp, envp_array_base, env_data_base, initVirtMem);
+249     copyStringArray(argv, argv_array_base, arg_data_base, initVirtMem);
+250 
+251     initVirtMem.writeBlob(argc_base, (uint8_t*)&guestArgc, intSize);
+252 
+253     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+254 
+255     //Set the stack pointer register
+256     tc->setIntReg(StackPointerReg, stack_min);
+257 
+258     tc->pcState(objFile->entryPoint());
+259 
+260     //Align the "stack_min" to a page boundary.
+261     stack_min = roundDown(stack_min, pageSize);
+262 }
+\end{DoxyCode}
+\hypertarget{classPowerLiveProcess_a4a1521e60b3fd8333fc98a5565c484ec}{
+\index{PowerLiveProcess@{PowerLiveProcess}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!PowerLiveProcess@{PowerLiveProcess}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PowerISA::IntReg} getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPowerLiveProcess_a4a1521e60b3fd8333fc98a5565c484ec}
+
+
+\hyperlink{classLiveProcess_aa001ff57ec460026facb89ba19c7bf96}{LiveProcess}を実装しています。
+
+\hyperlink{classPowerLinuxProcess_a4a1521e60b3fd8333fc98a5565c484ec}{PowerLinuxProcess}で再定義されています。
+
+
+\begin{DoxyCode}
+266 {
+267     assert(i < 5);
+268     return tc->readIntReg(ArgumentReg0 + i++);
+269 }
+\end{DoxyCode}
+\hypertarget{classPowerLiveProcess_a3c34ea9b29f410748d4435a667484924}{
+\index{PowerLiveProcess@{PowerLiveProcess}!initState@{initState}}
+\index{initState@{initState}!PowerLiveProcess@{PowerLiveProcess}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classPowerLiveProcess_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classPowerLiveProcess_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classProcess_a3c34ea9b29f410748d4435a667484924}{Process}を再定義しています。
+
+\hyperlink{classPowerLinuxProcess_a3c34ea9b29f410748d4435a667484924}{PowerLinuxProcess}で再定義されています。
+
+
+\begin{DoxyCode}
+67 {
+68     Process::initState();
+69 
+70     argsInit(MachineBytes, VMPageSize);
+71 }
+\end{DoxyCode}
+\hypertarget{classPowerLiveProcess_a1e515b39cc799824d1dd93d40ba28416}{
+\index{PowerLiveProcess@{PowerLiveProcess}!setSyscallArg@{setSyscallArg}}
+\index{setSyscallArg@{setSyscallArg}!PowerLiveProcess@{PowerLiveProcess}}
+\subsubsection[{setSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em i}, \/  {\bf PowerISA::IntReg} {\em val})}}
+\label{classPowerLiveProcess_a1e515b39cc799824d1dd93d40ba28416}
+
+
+\hyperlink{classPowerLinuxProcess_a1e515b39cc799824d1dd93d40ba28416}{PowerLinuxProcess}で再定義されています。
+
+
+\begin{DoxyCode}
+274 {
+275     assert(i < 5);
+276     tc->setIntReg(ArgumentReg0 + i, val);
+277 }
+\end{DoxyCode}
+\hypertarget{classPowerLiveProcess_aaefd02663c1eae206b851290d9276a5e}{
+\index{PowerLiveProcess@{PowerLiveProcess}!setSyscallReturn@{setSyscallReturn}}
+\index{setSyscallReturn@{setSyscallReturn}!PowerLiveProcess@{PowerLiveProcess}}
+\subsubsection[{setSyscallReturn}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallReturn ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf SyscallReturn} {\em return\_\-value})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPowerLiveProcess_aaefd02663c1eae206b851290d9276a5e}
+
+
+\hyperlink{classLiveProcess_a5955e790542b86589b9fd75df24ec2d3}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+281 {
+282     Cr cr = tc->readIntReg(INTREG_CR);
+283     if (sysret.successful()) {
+284         cr.cr0.so = 0;
+285     } else {
+286         cr.cr0.so = 1;
+287     }
+288     tc->setIntReg(INTREG_CR, cr);
+289     tc->setIntReg(ReturnValueReg, sysret.encodedValue());
+290 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/power/\hyperlink{arch_2power_2process_8hh}{process.hh}\item 
+arch/power/\hyperlink{arch_2power_2process_8cc}{process.cc}\end{DoxyCompactItemize}

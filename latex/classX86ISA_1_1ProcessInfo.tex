@@ -1,0 +1,184 @@
+\hypertarget{classX86ISA_1_1ProcessInfo}{
+\section{クラス ProcessInfo}
+\label{classX86ISA_1_1ProcessInfo}\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+}
+
+
+{\ttfamily \#include $<$stacktrace.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1ProcessInfo_a9c31978febe8b0cc8e9e76eb6791312b}{ProcessInfo} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\_\-tc)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classX86ISA_1_1ProcessInfo_a05de971c556b8e4418a60289f92dfba3}{task} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} ksp) const 
+\item 
+int \hyperlink{classX86ISA_1_1ProcessInfo_a27d14b3fdb576a4081e5c58c55375042}{pid} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} ksp) const 
+\item 
+std::string \hyperlink{classX86ISA_1_1ProcessInfo_ae39ec1168c2ea31862bebf2afeda34d8}{name} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} ksp) const 
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classThreadContext}{ThreadContext} $\ast$ \hyperlink{classX86ISA_1_1ProcessInfo_a4455a4759e69e5ebe68ae7298cbcc37d}{tc}
+\item 
+int \hyperlink{classX86ISA_1_1ProcessInfo_aa02520c2e86b94388e0d4f4a7b0873b3}{thread\_\-info\_\-size}
+\item 
+int \hyperlink{classX86ISA_1_1ProcessInfo_a6bca839d8255baba5c53a5eace70d72e}{task\_\-struct\_\-size}
+\item 
+int \hyperlink{classX86ISA_1_1ProcessInfo_ad17cb97383cfef8dd965eb3a7e66aae1}{task\_\-off}
+\item 
+int \hyperlink{classX86ISA_1_1ProcessInfo_a8f4dbd24e9c86dd360c08e6e2e98cbcb}{pid\_\-off}
+\item 
+int \hyperlink{classX86ISA_1_1ProcessInfo_aaffc7baa14183a2f0faa8d8d51d0889b}{name\_\-off}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classX86ISA_1_1ProcessInfo_a9c31978febe8b0cc8e9e76eb6791312b}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!ProcessInfo@{ProcessInfo}}
+\index{ProcessInfo@{ProcessInfo}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{ProcessInfo}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ProcessInfo} ({\bf ThreadContext} $\ast$ {\em \_\-tc})}}
+\label{classX86ISA_1_1ProcessInfo_a9c31978febe8b0cc8e9e76eb6791312b}
+
+
+
+\begin{DoxyCode}
+47         : tc(_tc)
+48     {
+49         Addr addr = 0;
+50 
+51         FSTranslatingPortProxy &vp = tc->getVirtProxy();
+52 
+53         if (!tc->getSystemPtr()->kernelSymtab->findAddress("thread_info_size", ad
+      dr))
+54             panic("thread info not compiled into kernel\n");
+55         thread_info_size = vp.readGtoH<int32_t>(addr);
+56 
+57         if (!tc->getSystemPtr()->kernelSymtab->findAddress("task_struct_size", ad
+      dr))
+58             panic("thread info not compiled into kernel\n");
+59         task_struct_size = vp.readGtoH<int32_t>(addr);
+60 
+61         if (!tc->getSystemPtr()->kernelSymtab->findAddress("thread_info_task", ad
+      dr))
+62             panic("thread info not compiled into kernel\n");
+63         task_off = vp.readGtoH<int32_t>(addr);
+64 
+65         if (!tc->getSystemPtr()->kernelSymtab->findAddress("task_struct_pid", add
+      r))
+66             panic("thread info not compiled into kernel\n");
+67         pid_off = vp.readGtoH<int32_t>(addr);
+68 
+69         if (!tc->getSystemPtr()->kernelSymtab->findAddress("task_struct_comm", ad
+      dr))
+70             panic("thread info not compiled into kernel\n");
+71         name_off = vp.readGtoH<int32_t>(addr);
+72     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classX86ISA_1_1ProcessInfo_ae39ec1168c2ea31862bebf2afeda34d8}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!name@{name}}
+\index{name@{name}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}string name ({\bf Addr} {\em ksp}) const}}
+\label{classX86ISA_1_1ProcessInfo_ae39ec1168c2ea31862bebf2afeda34d8}
+
+
+
+\begin{DoxyCode}
+106     {
+107         Addr task = this->task(ksp);
+108         if (!task)
+109             return "console";
+110 
+111         char comm[256];
+112         CopyStringOut(tc, comm, task + name_off, sizeof(comm));
+113         if (!comm[0])
+114             return "startup";
+115 
+116         return comm;
+117     }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1ProcessInfo_a27d14b3fdb576a4081e5c58c55375042}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!pid@{pid}}
+\index{pid@{pid}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{pid}]{\setlength{\rightskip}{0pt plus 5cm}int pid ({\bf Addr} {\em ksp}) const}}
+\label{classX86ISA_1_1ProcessInfo_a27d14b3fdb576a4081e5c58c55375042}
+
+
+
+\begin{DoxyCode}
+91     {
+92         Addr task = this->task(ksp);
+93         if (!task)
+94             return -1;
+95 
+96         uint16_t pd;
+97 
+98         FSTranslatingPortProxy &vp = tc->getVirtProxy();
+99         pd = vp.readGtoH<uint16_t>(task + pid_off);
+100 
+101         return pd;
+102     }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1ProcessInfo_a05de971c556b8e4418a60289f92dfba3}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!task@{task}}
+\index{task@{task}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{task}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} task ({\bf Addr} {\em ksp}) const}}
+\label{classX86ISA_1_1ProcessInfo_a05de971c556b8e4418a60289f92dfba3}
+
+
+
+\begin{DoxyCode}
+76     {
+77         Addr base = ksp & ~0x3fff;
+78         if (base == ULL(0xfffffc0000000000))
+79             return 0;
+80 
+81         Addr tsk;
+82 
+83         FSTranslatingPortProxy &vp = tc->getVirtProxy();
+84         tsk = vp.readGtoH<Addr>(base + task_off);
+85 
+86         return tsk;
+87     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classX86ISA_1_1ProcessInfo_aaffc7baa14183a2f0faa8d8d51d0889b}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!name\_\-off@{name\_\-off}}
+\index{name\_\-off@{name\_\-off}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{name\_\-off}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf name\_\-off}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1ProcessInfo_aaffc7baa14183a2f0faa8d8d51d0889b}
+\hypertarget{classX86ISA_1_1ProcessInfo_a8f4dbd24e9c86dd360c08e6e2e98cbcb}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!pid\_\-off@{pid\_\-off}}
+\index{pid\_\-off@{pid\_\-off}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{pid\_\-off}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf pid\_\-off}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1ProcessInfo_a8f4dbd24e9c86dd360c08e6e2e98cbcb}
+\hypertarget{classX86ISA_1_1ProcessInfo_ad17cb97383cfef8dd965eb3a7e66aae1}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!task\_\-off@{task\_\-off}}
+\index{task\_\-off@{task\_\-off}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{task\_\-off}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf task\_\-off}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1ProcessInfo_ad17cb97383cfef8dd965eb3a7e66aae1}
+\hypertarget{classX86ISA_1_1ProcessInfo_a6bca839d8255baba5c53a5eace70d72e}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!task\_\-struct\_\-size@{task\_\-struct\_\-size}}
+\index{task\_\-struct\_\-size@{task\_\-struct\_\-size}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{task\_\-struct\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf task\_\-struct\_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1ProcessInfo_a6bca839d8255baba5c53a5eace70d72e}
+\hypertarget{classX86ISA_1_1ProcessInfo_a4455a4759e69e5ebe68ae7298cbcc37d}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!tc@{tc}}
+\index{tc@{tc}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{tc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadContext}$\ast$ {\bf tc}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1ProcessInfo_a4455a4759e69e5ebe68ae7298cbcc37d}
+\hypertarget{classX86ISA_1_1ProcessInfo_aa02520c2e86b94388e0d4f4a7b0873b3}{
+\index{X86ISA::ProcessInfo@{X86ISA::ProcessInfo}!thread\_\-info\_\-size@{thread\_\-info\_\-size}}
+\index{thread\_\-info\_\-size@{thread\_\-info\_\-size}!X86ISA::ProcessInfo@{X86ISA::ProcessInfo}}
+\subsubsection[{thread\_\-info\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf thread\_\-info\_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1ProcessInfo_aa02520c2e86b94388e0d4f4a7b0873b3}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/\hyperlink{x86_2stacktrace_8hh}{stacktrace.hh}\item 
+arch/x86/\hyperlink{x86_2stacktrace_8cc}{stacktrace.cc}\end{DoxyCompactItemize}

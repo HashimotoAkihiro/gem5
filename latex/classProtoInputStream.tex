@@ -1,0 +1,210 @@
+\hypertarget{classProtoInputStream}{
+\section{クラス ProtoInputStream}
+\label{classProtoInputStream}\index{ProtoInputStream@{ProtoInputStream}}
+}
+
+
+{\ttfamily \#include $<$protoio.hh$>$}ProtoInputStreamに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classProtoInputStream}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classProtoInputStream_a98d96d79c96828f28c14d812bd3b43a7}{ProtoInputStream} (const std::string \&filename)
+\item 
+\hyperlink{classProtoInputStream_a26df47bdbd419ade481a0b13dbfca644}{$\sim$ProtoInputStream} ()
+\item 
+bool \hyperlink{classProtoInputStream_a4b1481de1970fef94f28772e00b4ae53}{read} (google::protobuf::Message \&msg)
+\item 
+void \hyperlink{classProtoInputStream_ad20897c5c8bd47f5d4005989bead0e55}{reset} ()
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classProtoInputStream_a120791921d99499a4f35da13544dca57}{createStreams} ()
+\item 
+void \hyperlink{classProtoInputStream_a47259bcb029441264a635ffc9483349c}{destroyStreams} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+std::ifstream \hyperlink{classProtoInputStream_a23e831057f578570b5bc50b8249d7868}{fileStream}
+\begin{DoxyCompactList}\small\item\em Underlying file input stream. \item\end{DoxyCompactList}\item 
+const std::string \hyperlink{classProtoInputStream_ab7777c9b2f880a5587b6602dbc331097}{fileName}
+\begin{DoxyCompactList}\small\item\em Hold on to the file name for debug messages. \item\end{DoxyCompactList}\item 
+bool \hyperlink{classProtoInputStream_a63bd265ebd8a0e6a43a46091b150f09f}{useGzip}
+\begin{DoxyCompactList}\small\item\em Boolean flag to remember whether we use gzip or not. \item\end{DoxyCompactList}\item 
+google::protobuf::io::IstreamInputStream $\ast$ \hyperlink{classProtoInputStream_a14b2c5b4efb9f0bc3b6aec7b2f4748e2}{wrappedFileStream}
+\begin{DoxyCompactList}\small\item\em Zero Copy stream wrapping the STL input stream. \item\end{DoxyCompactList}\item 
+google::protobuf::io::GzipInputStream $\ast$ \hyperlink{classProtoInputStream_a9c61d33e805fe8fffb88db16ca97e44c}{gzipStream}
+\begin{DoxyCompactList}\small\item\em Optional Gzip stream to wrap the Zero Copy stream. \item\end{DoxyCompactList}\item 
+google::protobuf::io::ZeroCopyInputStream $\ast$ \hyperlink{classProtoInputStream_ac8cebc34dff8667f4d940ad84a61ea13}{zeroCopyStream}
+\begin{DoxyCompactList}\small\item\em Top-\/level zero-\/copy stream, either with compression or not. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+A \hyperlink{classProtoInputStream}{ProtoInputStream} wraps a coded stream, potentially with decompression, based on looking at the file name. Reading from the stream is done on a per-\/message basis to avoid having to deal with huge data structures. The latter assumes the length of each message is encoded in the stream when it is written. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classProtoInputStream_a98d96d79c96828f28c14d812bd3b43a7}{
+\index{ProtoInputStream@{ProtoInputStream}!ProtoInputStream@{ProtoInputStream}}
+\index{ProtoInputStream@{ProtoInputStream}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{ProtoInputStream}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ProtoInputStream} (const std::string \& {\em filename})}}
+\label{classProtoInputStream_a98d96d79c96828f28c14d812bd3b43a7}
+Create an input stream for a given file name. If the filename ends with .gz then the file will be decompressed accordingly.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em filename}]Path to the file to read from \end{DoxyParams}
+\hypertarget{classProtoInputStream_a26df47bdbd419ade481a0b13dbfca644}{
+\index{ProtoInputStream@{ProtoInputStream}!$\sim$ProtoInputStream@{$\sim$ProtoInputStream}}
+\index{$\sim$ProtoInputStream@{$\sim$ProtoInputStream}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{$\sim$ProtoInputStream}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf ProtoInputStream} ()}}
+\label{classProtoInputStream_a26df47bdbd419ade481a0b13dbfca644}
+Destruct the input stream, and also close the underlying file streams and coded streams. 
+
+
+\begin{DoxyCode}
+159 {
+160     destroyStreams();
+161     fileStream.close();
+162 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classProtoInputStream_a120791921d99499a4f35da13544dca57}{
+\index{ProtoInputStream@{ProtoInputStream}!createStreams@{createStreams}}
+\index{createStreams@{createStreams}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{createStreams}]{\setlength{\rightskip}{0pt plus 5cm}void createStreams ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_a120791921d99499a4f35da13544dca57}
+Create the internal streams that are wrapping the input file. 
+
+
+\begin{DoxyCode}
+119 {
+120     // All streams should be NULL at this point
+121     assert(wrappedFileStream == NULL && gzipStream == NULL &&
+122            zeroCopyStream == NULL);
+123 
+124     // Wrap the input file in a zero copy stream, that in turn is
+125     // wrapped in a gzip stream if the filename ends with .gz. The
+126     // latter stream is in turn wrapped in a coded stream
+127     wrappedFileStream = new io::IstreamInputStream(&fileStream);
+128     if (useGzip) {
+129         gzipStream = new io::GzipInputStream(wrappedFileStream);
+130         zeroCopyStream = gzipStream;
+131     } else {
+132         zeroCopyStream = wrappedFileStream;
+133     }
+134 
+135     uint32_t magic_check;
+136     io::CodedInputStream codedStream(zeroCopyStream);
+137     if (!codedStream.ReadLittleEndian32(&magic_check) ||
+138         magic_check != magicNumber)
+139         panic("Input file %s is not a valid gem5 proto format.\n",
+140               fileName);
+141 }
+\end{DoxyCode}
+\hypertarget{classProtoInputStream_a47259bcb029441264a635ffc9483349c}{
+\index{ProtoInputStream@{ProtoInputStream}!destroyStreams@{destroyStreams}}
+\index{destroyStreams@{destroyStreams}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{destroyStreams}]{\setlength{\rightskip}{0pt plus 5cm}void destroyStreams ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_a47259bcb029441264a635ffc9483349c}
+Destroy the internal streams that are wrapping the input file. 
+
+
+\begin{DoxyCode}
+145 {
+146     // As the compression is optional, see if the stream exists
+147     if (gzipStream != NULL) {
+148         delete gzipStream;
+149         gzipStream = NULL;
+150     }
+151     delete wrappedFileStream;
+152     wrappedFileStream = NULL;
+153 
+154     zeroCopyStream = NULL;
+155 }
+\end{DoxyCode}
+\hypertarget{classProtoInputStream_a4b1481de1970fef94f28772e00b4ae53}{
+\index{ProtoInputStream@{ProtoInputStream}!read@{read}}
+\index{read@{read}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}bool read (google::protobuf::Message \& {\em msg})}}
+\label{classProtoInputStream_a4b1481de1970fef94f28772e00b4ae53}
+Read a message from the stream.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em msg}]\hyperlink{classMessage}{Message} read from the stream \item[{\em return}]True if a message was read, false if reading fails \end{DoxyParams}
+\hypertarget{classProtoInputStream_ad20897c5c8bd47f5d4005989bead0e55}{
+\index{ProtoInputStream@{ProtoInputStream}!reset@{reset}}
+\index{reset@{reset}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}void reset ()}}
+\label{classProtoInputStream_ad20897c5c8bd47f5d4005989bead0e55}
+Reset the input stream and seek to the beginning of the file. 
+
+
+\begin{DoxyCode}
+167 {
+168     destroyStreams();
+169     // seek to the start of the input file and clear any flags
+170     fileStream.clear();
+171     fileStream.seekg(0, ifstream::beg);
+172     createStreams();
+173 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classProtoInputStream_ab7777c9b2f880a5587b6602dbc331097}{
+\index{ProtoInputStream@{ProtoInputStream}!fileName@{fileName}}
+\index{fileName@{fileName}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{fileName}]{\setlength{\rightskip}{0pt plus 5cm}const std::string {\bf fileName}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_ab7777c9b2f880a5587b6602dbc331097}
+
+
+Hold on to the file name for debug messages. \hypertarget{classProtoInputStream_a23e831057f578570b5bc50b8249d7868}{
+\index{ProtoInputStream@{ProtoInputStream}!fileStream@{fileStream}}
+\index{fileStream@{fileStream}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{fileStream}]{\setlength{\rightskip}{0pt plus 5cm}std::ifstream {\bf fileStream}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_a23e831057f578570b5bc50b8249d7868}
+
+
+Underlying file input stream. \hypertarget{classProtoInputStream_a9c61d33e805fe8fffb88db16ca97e44c}{
+\index{ProtoInputStream@{ProtoInputStream}!gzipStream@{gzipStream}}
+\index{gzipStream@{gzipStream}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{gzipStream}]{\setlength{\rightskip}{0pt plus 5cm}google::protobuf::io::GzipInputStream$\ast$ {\bf gzipStream}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_a9c61d33e805fe8fffb88db16ca97e44c}
+
+
+Optional Gzip stream to wrap the Zero Copy stream. \hypertarget{classProtoInputStream_a63bd265ebd8a0e6a43a46091b150f09f}{
+\index{ProtoInputStream@{ProtoInputStream}!useGzip@{useGzip}}
+\index{useGzip@{useGzip}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{useGzip}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf useGzip}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_a63bd265ebd8a0e6a43a46091b150f09f}
+
+
+Boolean flag to remember whether we use gzip or not. \hypertarget{classProtoInputStream_a14b2c5b4efb9f0bc3b6aec7b2f4748e2}{
+\index{ProtoInputStream@{ProtoInputStream}!wrappedFileStream@{wrappedFileStream}}
+\index{wrappedFileStream@{wrappedFileStream}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{wrappedFileStream}]{\setlength{\rightskip}{0pt plus 5cm}google::protobuf::io::IstreamInputStream$\ast$ {\bf wrappedFileStream}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_a14b2c5b4efb9f0bc3b6aec7b2f4748e2}
+
+
+Zero Copy stream wrapping the STL input stream. \hypertarget{classProtoInputStream_ac8cebc34dff8667f4d940ad84a61ea13}{
+\index{ProtoInputStream@{ProtoInputStream}!zeroCopyStream@{zeroCopyStream}}
+\index{zeroCopyStream@{zeroCopyStream}!ProtoInputStream@{ProtoInputStream}}
+\subsubsection[{zeroCopyStream}]{\setlength{\rightskip}{0pt plus 5cm}google::protobuf::io::ZeroCopyInputStream$\ast$ {\bf zeroCopyStream}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classProtoInputStream_ac8cebc34dff8667f4d940ad84a61ea13}
+
+
+Top-\/level zero-\/copy stream, either with compression or not. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+proto/\hyperlink{protoio_8hh}{protoio.hh}\item 
+proto/\hyperlink{protoio_8cc}{protoio.cc}\end{DoxyCompactItemize}

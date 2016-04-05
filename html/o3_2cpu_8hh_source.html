@@ -1,0 +1,665 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/cpu.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/cpu.hh</h1><a href="o3_2cpu_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00007"></a>00007 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00008"></a>00008 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00009"></a>00009 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00010"></a>00010 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00011"></a>00011 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00012"></a>00012 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00013"></a>00013 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00014"></a>00014 <span class="comment"> *</span>
+<a name="l00015"></a>00015 <span class="comment"> * Copyright (c) 2004-2005 The Regents of The University of Michigan</span>
+<a name="l00016"></a>00016 <span class="comment"> * Copyright (c) 2011 Regents of the University of California</span>
+<a name="l00017"></a>00017 <span class="comment"> * All rights reserved.</span>
+<a name="l00018"></a>00018 <span class="comment"> *</span>
+<a name="l00019"></a>00019 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00020"></a>00020 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00021"></a>00021 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00023"></a>00023 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00024"></a>00024 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00025"></a>00025 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00026"></a>00026 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00027"></a>00027 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00028"></a>00028 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00029"></a>00029 <span class="comment"> *</span>
+<a name="l00030"></a>00030 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00031"></a>00031 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00032"></a>00032 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00033"></a>00033 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00034"></a>00034 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00035"></a>00035 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00036"></a>00036 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00037"></a>00037 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00038"></a>00038 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00039"></a>00039 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00040"></a>00040 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00041"></a>00041 <span class="comment"> *</span>
+<a name="l00042"></a>00042 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00043"></a>00043 <span class="comment"> *          Korey Sewell</span>
+<a name="l00044"></a>00044 <span class="comment"> *          Rick Strong</span>
+<a name="l00045"></a>00045 <span class="comment"> */</span>
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="preprocessor">#ifndef __CPU_O3_CPU_HH__</span>
+<a name="l00048"></a>00048 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_CPU_HH__</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &lt;set&gt;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;<a class="code" href="o3_2comm_8hh.html">cpu/o3/comm.hh</a>&quot;</span>
+<a name="l00060"></a>00060 <span class="preprocessor">#include &quot;<a class="code" href="cpu__policy_8hh.html">cpu/o3/cpu_policy.hh</a>&quot;</span>
+<a name="l00061"></a>00061 <span class="preprocessor">#include &quot;<a class="code" href="scoreboard_8hh.html">cpu/o3/scoreboard.hh</a>&quot;</span>
+<a name="l00062"></a>00062 <span class="preprocessor">#include &quot;<a class="code" href="o3_2thread__state_8hh.html">cpu/o3/thread_state.hh</a>&quot;</span>
+<a name="l00063"></a>00063 <span class="preprocessor">#include &quot;<a class="code" href="activity_8hh.html">cpu/activity.hh</a>&quot;</span>
+<a name="l00064"></a>00064 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2base_8hh.html">cpu/base.hh</a>&quot;</span>
+<a name="l00065"></a>00065 <span class="preprocessor">#include &quot;<a class="code" href="simple__thread_8hh.html">cpu/simple_thread.hh</a>&quot;</span>
+<a name="l00066"></a>00066 <span class="preprocessor">#include &quot;<a class="code" href="timebuf_8hh.html">cpu/timebuf.hh</a>&quot;</span>
+<a name="l00067"></a>00067 <span class="comment">//#include &quot;cpu/o3/thread_context.hh&quot;</span>
+<a name="l00068"></a>00068 <span class="preprocessor">#include &quot;params/DerivO3CPU.hh&quot;</span>
+<a name="l00069"></a>00069 <span class="preprocessor">#include &quot;<a class="code" href="sim_2process_8hh.html">sim/process.hh</a>&quot;</span>
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071 <span class="keyword">template</span> &lt;<span class="keyword">class</span>&gt;
+<a name="l00072"></a>00072 <span class="keyword">class </span><a class="code" href="classChecker.html">Checker</a>;
+<a name="l00073"></a>00073 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00074"></a>00074 <span class="keyword">template</span> &lt;<span class="keyword">class</span>&gt;
+<a name="l00075"></a>00075 <span class="keyword">class </span><a class="code" href="classO3ThreadContext.html">O3ThreadContext</a>;
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077 <span class="keyword">class </span><a class="code" href="classCheckpoint.html">Checkpoint</a>;
+<a name="l00078"></a>00078 <span class="keyword">class </span><a class="code" href="classMemObject.html">MemObject</a>;
+<a name="l00079"></a>00079 <span class="keyword">class </span><a class="code" href="classProcess.html">Process</a>;
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081 <span class="keyword">struct </span>BaseCPUParams;
+<a name="l00082"></a>00082 
+<a name="l00083"></a><a class="code" href="classBaseO3CPU.html">00083</a> <span class="keyword">class </span><a class="code" href="classBaseO3CPU.html">BaseO3CPU</a> : <span class="keyword">public</span> <a class="code" href="classBaseCPU.html">BaseCPU</a>
+<a name="l00084"></a>00084 {
+<a name="l00085"></a>00085     <span class="comment">//Stuff that&apos;s pretty ISA independent will go here.</span>
+<a name="l00086"></a>00086   <span class="keyword">public</span>:
+<a name="l00087"></a>00087     <a class="code" href="classBaseO3CPU.html#a35c252bd3c7d14915d4e91e8bd757e0b">BaseO3CPU</a>(BaseCPUParams *params);
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089     <span class="keywordtype">void</span> <a class="code" href="classBaseO3CPU.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00090"></a>00090 };
+<a name="l00091"></a>00091 
+<a name="l00097"></a>00097 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00098"></a><a class="code" href="classFullO3CPU.html">00098</a> <span class="keyword">class </span><a class="code" href="classFullO3CPU.html">FullO3CPU</a> : <span class="keyword">public</span> <a class="code" href="classBaseO3CPU.html">BaseO3CPU</a>
+<a name="l00099"></a>00099 {
+<a name="l00100"></a>00100   <span class="keyword">public</span>:
+<a name="l00101"></a>00101     <span class="comment">// Typedefs from the Impl here.</span>
+<a name="l00102"></a><a class="code" href="classFullO3CPU.html#a622513cd9a0b12a706b26c3320585f92">00102</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUPol <a class="code" href="structSimpleCPUPolicy.html">CPUPolicy</a>;
+<a name="l00103"></a><a class="code" href="classFullO3CPU.html#a028ce10889c5f6450239d9e9a7347976">00103</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classRefCountingPtr.html">DynInstPtr</a>;
+<a name="l00104"></a><a class="code" href="classFullO3CPU.html#a44622cf06940413482836cb62931ac3f">00104</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::O3CPU <a class="code" href="classFullO3CPU.html">O3CPU</a>;
+<a name="l00105"></a>00105 
+<a name="l00106"></a><a class="code" href="classFullO3CPU.html#a19d73166363cbf2e4ed0ddec44afa8d4">00106</a>     <span class="keyword">typedef</span> <a class="code" href="structO3ThreadState.html">O3ThreadState&lt;Impl&gt;</a> <a class="code" href="structO3ThreadState.html">ImplState</a>;
+<a name="l00107"></a><a class="code" href="classFullO3CPU.html#ad5e0f9b655492f45720f8d756f11d3b5">00107</a>     <span class="keyword">typedef</span> <a class="code" href="structO3ThreadState.html">O3ThreadState&lt;Impl&gt;</a> <a class="code" href="structO3ThreadState.html">Thread</a>;
+<a name="l00108"></a>00108 
+<a name="l00109"></a><a class="code" href="classFullO3CPU.html#a184cb829e22cc656acb41864f68f51ea">00109</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classFullO3CPU.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a>;
+<a name="l00110"></a>00110 
+<a name="l00111"></a><a class="code" href="classFullO3CPU.html#a8744c7a2c370330e0f577992900dfb66">00111</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classO3ThreadContext.html">O3ThreadContext</a>&lt;Impl&gt;;
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113   <span class="keyword">public</span>:
+<a name="l00114"></a><a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">00114</a>     <span class="keyword">enum</span> <a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> {
+<a name="l00115"></a><a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">00115</a>         <a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">Running</a>,
+<a name="l00116"></a><a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">00116</a>         <a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00117"></a><a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba185a75df63e845aec97632afd6a34d6a">00117</a>         <a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba185a75df63e845aec97632afd6a34d6a">Halted</a>,
+<a name="l00118"></a><a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">00118</a>         <a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">Blocked</a>,
+<a name="l00119"></a><a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2c25b24188e2b53c8706769167a82779">00119</a>         <a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2c25b24188e2b53c8706769167a82779">SwitchedOut</a>
+<a name="l00120"></a>00120     };
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="classFullO3CPU.html#abcb37ddc11515555d8484702697bc4bb">00122</a>     TheISA::TLB * <a class="code" href="classFullO3CPU.html#abcb37ddc11515555d8484702697bc4bb">itb</a>;
+<a name="l00123"></a><a class="code" href="classFullO3CPU.html#ad2fd039621f87592c4b344d4f8948e78">00123</a>     TheISA::TLB * <a class="code" href="classFullO3CPU.html#ad2fd039621f87592c4b344d4f8948e78" title="choose inline that I chose dtb,itb is Data and Instructino TLB.">dtb</a>;
+<a name="l00124"></a>00124 
+<a name="l00126"></a><a class="code" href="classFullO3CPU.html#a6cdf6e6db875a442f3ab6db542bd2bb5">00126</a>     <a class="code" href="classFullO3CPU.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classFullO3CPU.html#a6cdf6e6db875a442f3ab6db542bd2bb5">_status</a>;
+<a name="l00127"></a>00127 
+<a name="l00128"></a>00128   <span class="keyword">private</span>:
+<a name="l00129"></a>00129 
+<a name="l00133"></a><a class="code" href="classFullO3CPU_1_1IcachePort.html">00133</a>     <span class="keyword">class </span><a class="code" href="classFullO3CPU_1_1IcachePort.html">IcachePort</a> : <span class="keyword">public</span> <a class="code" href="classMasterPort.html">MasterPort</a>
+<a name="l00134"></a>00134     {
+<a name="l00135"></a>00135       <span class="keyword">protected</span>:
+<a name="l00137"></a><a class="code" href="classFullO3CPU_1_1IcachePort.html#a10f1a41fdcff6e7574a83b020d3c1a91">00137</a>         <a class="code" href="classDefaultFetch.html">DefaultFetch&lt;Impl&gt;</a> *<a class="code" href="classFullO3CPU_1_1IcachePort.html#a10f1a41fdcff6e7574a83b020d3c1a91">fetch</a>;
+<a name="l00138"></a>00138 
+<a name="l00139"></a>00139       <span class="keyword">public</span>:
+<a name="l00141"></a><a class="code" href="classFullO3CPU_1_1IcachePort.html#ab905fcd26bb5e01f16795ab04c55f159">00141</a>         <a class="code" href="classFullO3CPU_1_1IcachePort.html#ab905fcd26bb5e01f16795ab04c55f159">IcachePort</a>(<a class="code" href="classDefaultFetch.html">DefaultFetch&lt;Impl&gt;</a> *_fetch, <a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a>* _cpu)
+<a name="l00142"></a>00142             : <a class="code" href="classMasterPort.html">MasterPort</a>(_cpu-&gt;<a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>() + <span class="stringliteral">&quot;.icache_port&quot;</span>, _cpu), <a class="code" href="classFullO3CPU_1_1IcachePort.html#a10f1a41fdcff6e7574a83b020d3c1a91">fetch</a>(_fetch)
+<a name="l00143"></a>00143         { }
+<a name="l00144"></a>00144 
+<a name="l00145"></a>00145       <span class="keyword">protected</span>:
+<a name="l00146"></a>00146 
+<a name="l00149"></a>00149         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU_1_1IcachePort.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00150"></a><a class="code" href="classFullO3CPU_1_1IcachePort.html#ae43c73eff109f907118829fcfa9e7096">00150</a>         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1IcachePort.html#ae43c73eff109f907118829fcfa9e7096">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) { }
+<a name="l00151"></a>00151 
+<a name="l00153"></a>00153         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1IcachePort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00154"></a>00154     };
+<a name="l00155"></a>00155 
+<a name="l00159"></a><a class="code" href="classFullO3CPU_1_1DcachePort.html">00159</a>     <span class="keyword">class </span><a class="code" href="classFullO3CPU_1_1DcachePort.html">DcachePort</a> : <span class="keyword">public</span> <a class="code" href="classMasterPort.html">MasterPort</a>
+<a name="l00160"></a>00160     {
+<a name="l00161"></a>00161       <span class="keyword">protected</span>:
+<a name="l00162"></a>00162 
+<a name="l00164"></a><a class="code" href="classFullO3CPU_1_1DcachePort.html#a031bbb555122076457987d89d34e8711">00164</a>         <a class="code" href="classLSQ.html">LSQ&lt;Impl&gt;</a> *<a class="code" href="classFullO3CPU_1_1DcachePort.html#a031bbb555122076457987d89d34e8711">lsq</a>;
+<a name="l00165"></a>00165 
+<a name="l00166"></a>00166       <span class="keyword">public</span>:
+<a name="l00168"></a><a class="code" href="classFullO3CPU_1_1DcachePort.html#a6129287aaec4d06e65661b6225e93a35">00168</a>         <a class="code" href="classFullO3CPU_1_1DcachePort.html#a6129287aaec4d06e65661b6225e93a35">DcachePort</a>(<a class="code" href="classLSQ.html">LSQ&lt;Impl&gt;</a> *_lsq, <a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a>* _cpu)
+<a name="l00169"></a>00169             : <a class="code" href="classMasterPort.html">MasterPort</a>(_cpu-&gt;<a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>() + <span class="stringliteral">&quot;.dcache_port&quot;</span>, _cpu), <a class="code" href="classFullO3CPU_1_1DcachePort.html#a031bbb555122076457987d89d34e8711">lsq</a>(_lsq)
+<a name="l00170"></a>00170         { }
+<a name="l00171"></a>00171 
+<a name="l00172"></a>00172       <span class="keyword">protected</span>:
+<a name="l00173"></a>00173 
+<a name="l00177"></a>00177         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU_1_1DcachePort.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00178"></a>00178         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1DcachePort.html#aff3031c56fc4947a19695c868bb8233e">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00179"></a>00179 
+<a name="l00180"></a><a class="code" href="classFullO3CPU_1_1DcachePort.html#af5b15bc08781cf0ba6190efc37d5b67e">00180</a>         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1DcachePort.html#af5b15bc08781cf0ba6190efc37d5b67e">recvFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00181"></a>00181         {
+<a name="l00182"></a>00182             <span class="comment">// @todo: Is there a need for potential invalidation here?</span>
+<a name="l00183"></a>00183         }
+<a name="l00184"></a>00184 
+<a name="l00186"></a>00186         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1DcachePort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00187"></a>00187 
+<a name="l00194"></a><a class="code" href="classFullO3CPU_1_1DcachePort.html#a32602a6a3c3d66a639455036d6c08dd6">00194</a>         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU_1_1DcachePort.html#a32602a6a3c3d66a639455036d6c08dd6">isSnooping</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00195"></a>00195     };
+<a name="l00196"></a>00196 
+<a name="l00197"></a><a class="code" href="classFullO3CPU_1_1TickEvent.html">00197</a>     <span class="keyword">class </span><a class="code" href="classFullO3CPU_1_1TickEvent.html">TickEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00198"></a>00198     {
+<a name="l00199"></a>00199       <span class="keyword">private</span>:
+<a name="l00201"></a><a class="code" href="classFullO3CPU_1_1TickEvent.html#a3a3767255bcefd2ce55f94976ab8eb99">00201</a>         <a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a> *<a class="code" href="classFullO3CPU_1_1TickEvent.html#a3a3767255bcefd2ce55f94976ab8eb99">cpu</a>;
+<a name="l00202"></a>00202 
+<a name="l00203"></a>00203       <span class="keyword">public</span>:
+<a name="l00205"></a>00205         <a class="code" href="classFullO3CPU_1_1TickEvent.html#ac68e05215075fac41ae8e454d9dfd97a">TickEvent</a>(<a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a> *<a class="code" href="namespaceArmISA.html#a29b9f05234a93d5391014a3cfc5658b1">c</a>);
+<a name="l00206"></a>00206 
+<a name="l00208"></a>00208         <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1TickEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00210"></a>00210         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classFullO3CPU_1_1TickEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00211"></a>00211     };
+<a name="l00212"></a>00212 
+<a name="l00214"></a><a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">00214</a>     TickEvent <a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>;
+<a name="l00215"></a>00215 
+<a name="l00217"></a><a class="code" href="classFullO3CPU.html#a71eb9ea7b25032de341033111b946dfc">00217</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a71eb9ea7b25032de341033111b946dfc">scheduleTickEvent</a>(<a class="code" href="classCycles.html">Cycles</a> delay)
+<a name="l00218"></a>00218     {
+<a name="l00219"></a>00219         <span class="keywordflow">if</span> (<a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>.<a class="code" href="classEvent.html#af355b62f22559090d6e3047bdf83f24f" title="Check whether the event is squashed.">squashed</a>())
+<a name="l00220"></a>00220             reschedule(<a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>, clockEdge(delay));
+<a name="l00221"></a>00221         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!<a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>.<a class="code" href="classEvent.html#a9cd69a6b10cb037550943f177a0da688" title="Determine if the current event is scheduled.">scheduled</a>())
+<a name="l00222"></a>00222             schedule(<a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>, clockEdge(delay));
+<a name="l00223"></a>00223     }
+<a name="l00224"></a>00224 
+<a name="l00226"></a><a class="code" href="classFullO3CPU.html#ad819e7898bd94721d107a35fde764390">00226</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ad819e7898bd94721d107a35fde764390">unscheduleTickEvent</a>()
+<a name="l00227"></a>00227     {
+<a name="l00228"></a>00228         <span class="keywordflow">if</span> (<a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>.<a class="code" href="classEvent.html#a9cd69a6b10cb037550943f177a0da688" title="Determine if the current event is scheduled.">scheduled</a>())
+<a name="l00229"></a>00229             <a class="code" href="classFullO3CPU.html#aa36b8e894416f0ec98f701ab08f2ac22">tickEvent</a>.<a class="code" href="classEvent.html#a3c68c455d9207edd23ae3bcb7971e653" title="Squash the current event.">squash</a>();
+<a name="l00230"></a>00230     }
+<a name="l00231"></a>00231 
+<a name="l00232"></a><a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html">00232</a>     <span class="keyword">class </span><a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html">ActivateThreadEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00233"></a>00233     {
+<a name="l00234"></a>00234       <span class="keyword">private</span>:
+<a name="l00236"></a><a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#aa508770268ee4ceaf16054b9e0be0e17">00236</a>         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#aa508770268ee4ceaf16054b9e0be0e17">tid</a>;
+<a name="l00237"></a>00237 
+<a name="l00239"></a><a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#a3a3767255bcefd2ce55f94976ab8eb99">00239</a>         <a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a> *<a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#a3a3767255bcefd2ce55f94976ab8eb99">cpu</a>;
+<a name="l00240"></a>00240 
+<a name="l00241"></a>00241       <span class="keyword">public</span>:
+<a name="l00243"></a>00243         <a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#a9ce281f466d06de2e43efe49b6918c14">ActivateThreadEvent</a>();
+<a name="l00244"></a>00244 
+<a name="l00246"></a>00246         <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#a0938c51f296f212d5f6f05d174558612">init</a>(<span class="keywordtype">int</span> thread_num, <a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a> *thread_cpu);
+<a name="l00247"></a>00247 
+<a name="l00249"></a>00249         <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00250"></a>00250 
+<a name="l00252"></a>00252         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classFullO3CPU_1_1ActivateThreadEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00253"></a>00253     };
+<a name="l00254"></a>00254 
+<a name="l00256"></a>00256     <span class="keywordtype">void</span>
+<a name="l00257"></a><a class="code" href="classFullO3CPU.html#a20e502f38206c8cd988064e7bed53bb5">00257</a>     <a class="code" href="classFullO3CPU.html#a20e502f38206c8cd988064e7bed53bb5">scheduleActivateThreadEvent</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid, <a class="code" href="classCycles.html">Cycles</a> delay)
+<a name="l00258"></a>00258     {
+<a name="l00259"></a>00259         <span class="comment">// Schedule thread to activate, regardless of its current state.</span>
+<a name="l00260"></a>00260         <span class="keywordflow">if</span> (<a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">activateThreadEvent</a>[tid].squashed())
+<a name="l00261"></a>00261             reschedule(<a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">activateThreadEvent</a>[tid],
+<a name="l00262"></a>00262                        clockEdge(delay));
+<a name="l00263"></a>00263         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!<a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">activateThreadEvent</a>[tid].scheduled()) {
+<a name="l00264"></a>00264             <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when = clockEdge(delay);
+<a name="l00265"></a>00265 
+<a name="l00266"></a>00266             <span class="comment">// Check if the deallocateEvent is also scheduled, and make</span>
+<a name="l00267"></a>00267             <span class="comment">// sure they do not happen at same time causing a sleep that</span>
+<a name="l00268"></a>00268             <span class="comment">// is never woken from.</span>
+<a name="l00269"></a>00269             <span class="keywordflow">if</span> (<a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid].scheduled() &amp;&amp;
+<a name="l00270"></a>00270                 <a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid].when() == when) {
+<a name="l00271"></a>00271                 when++;
+<a name="l00272"></a>00272             }
+<a name="l00273"></a>00273 
+<a name="l00274"></a>00274             schedule(<a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">activateThreadEvent</a>[tid], when);
+<a name="l00275"></a>00275         }
+<a name="l00276"></a>00276     }
+<a name="l00277"></a>00277 
+<a name="l00279"></a>00279     <span class="keywordtype">void</span>
+<a name="l00280"></a><a class="code" href="classFullO3CPU.html#ae0bacbe9552a4b3a03f2748d2d58b3a2">00280</a>     <a class="code" href="classFullO3CPU.html#ae0bacbe9552a4b3a03f2748d2d58b3a2">unscheduleActivateThreadEvent</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00281"></a>00281     {
+<a name="l00282"></a>00282         <span class="keywordflow">if</span> (<a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">activateThreadEvent</a>[tid].scheduled())
+<a name="l00283"></a>00283             <a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">activateThreadEvent</a>[tid].<a class="code" href="classEvent.html#a3c68c455d9207edd23ae3bcb7971e653" title="Squash the current event.">squash</a>();
+<a name="l00284"></a>00284     }
+<a name="l00285"></a>00285 
+<a name="l00287"></a><a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">00287</a>     ActivateThreadEvent <a class="code" href="classFullO3CPU.html#a2cc2815b59781367286d6a31fc45e9d3">activateThreadEvent</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00288"></a>00288 
+<a name="l00289"></a><a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html">00289</a>     <span class="keyword">class </span><a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html">DeallocateContextEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00290"></a>00290     {
+<a name="l00291"></a>00291       <span class="keyword">private</span>:
+<a name="l00293"></a><a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#aa508770268ee4ceaf16054b9e0be0e17">00293</a>         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#aa508770268ee4ceaf16054b9e0be0e17">tid</a>;
+<a name="l00294"></a>00294 
+<a name="l00296"></a><a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#a85e26bd0985e6b9f842e0f195beccb6c">00296</a>         <span class="keywordtype">bool</span> <span class="keyword">remove</span>;
+<a name="l00297"></a>00297 
+<a name="l00299"></a><a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#a3a3767255bcefd2ce55f94976ab8eb99">00299</a>         <a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a> *<a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#a3a3767255bcefd2ce55f94976ab8eb99">cpu</a>;
+<a name="l00300"></a>00300 
+<a name="l00301"></a>00301       <span class="keyword">public</span>:
+<a name="l00303"></a>00303         <a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#aae8f83c8487667ebbcfe7aef32c7468f">DeallocateContextEvent</a>();
+<a name="l00304"></a>00304 
+<a name="l00306"></a>00306         <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#a0938c51f296f212d5f6f05d174558612">init</a>(<span class="keywordtype">int</span> thread_num, <a class="code" href="classFullO3CPU.html">FullO3CPU&lt;Impl&gt;</a> *thread_cpu);
+<a name="l00307"></a>00307 
+<a name="l00309"></a>00309         <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00310"></a>00310 
+<a name="l00312"></a><a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#afcccb6b285c8de11c79413e7d2d33928">00312</a>         <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#afcccb6b285c8de11c79413e7d2d33928">setRemove</a>(<span class="keywordtype">bool</span> _remove) { <span class="keyword">remove</span> = _remove; }
+<a name="l00313"></a>00313 
+<a name="l00315"></a>00315         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classFullO3CPU_1_1DeallocateContextEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00316"></a>00316     };
+<a name="l00317"></a>00317 
+<a name="l00319"></a>00319     <span class="keywordtype">void</span>
+<a name="l00320"></a><a class="code" href="classFullO3CPU.html#a8c575b3dcfc822888003b64457ac9755">00320</a>     <a class="code" href="classFullO3CPU.html#a8c575b3dcfc822888003b64457ac9755">scheduleDeallocateContextEvent</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid, <span class="keywordtype">bool</span> <span class="keyword">remove</span>, <a class="code" href="classCycles.html">Cycles</a> delay)
+<a name="l00321"></a>00321     {
+<a name="l00322"></a>00322         <span class="comment">// Schedule thread to activate, regardless of its current state.</span>
+<a name="l00323"></a>00323         <span class="keywordflow">if</span> (<a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid].squashed())
+<a name="l00324"></a>00324             reschedule(<a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid],
+<a name="l00325"></a>00325                        clockEdge(delay));
+<a name="l00326"></a>00326         <span class="keywordflow">else</span> <span class="keywordflow">if</span> (!<a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid].scheduled())
+<a name="l00327"></a>00327             schedule(<a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid],
+<a name="l00328"></a>00328                      clockEdge(delay));
+<a name="l00329"></a>00329     }
+<a name="l00330"></a>00330 
+<a name="l00332"></a>00332     <span class="keywordtype">void</span>
+<a name="l00333"></a><a class="code" href="classFullO3CPU.html#adce69706fd17d1dca824e60ab0100e8b">00333</a>     <a class="code" href="classFullO3CPU.html#adce69706fd17d1dca824e60ab0100e8b">unscheduleDeallocateContextEvent</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00334"></a>00334     {
+<a name="l00335"></a>00335         <span class="keywordflow">if</span> (<a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid].scheduled())
+<a name="l00336"></a>00336             <a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[tid].<a class="code" href="classEvent.html#a3c68c455d9207edd23ae3bcb7971e653" title="Squash the current event.">squash</a>();
+<a name="l00337"></a>00337     }
+<a name="l00338"></a>00338 
+<a name="l00340"></a><a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">00340</a>     DeallocateContextEvent <a class="code" href="classFullO3CPU.html#aaf8ffd47de062d6900cb500a3caccdb5">deallocateContextEvent</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00341"></a>00341 
+<a name="l00353"></a>00353     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#a250ca18dfc0316e340eaa2ec45d73c3e">tryDrain</a>();
+<a name="l00354"></a>00354 
+<a name="l00364"></a>00364     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a0240eb42fa57fe5d3788093f62b77347">drainSanityCheck</a>() <span class="keyword">const</span>;
+<a name="l00365"></a>00365 
+<a name="l00367"></a>00367     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#adf5473c18a3d7c1e88c4a2072bce5526">isDrained</a>() <span class="keyword">const</span>;
+<a name="l00368"></a>00368 
+<a name="l00369"></a>00369   <span class="keyword">public</span>:
+<a name="l00371"></a>00371     <a class="code" href="classFullO3CPU.html#aa8d6265cca6a8e1449d64b99483b1ecc">FullO3CPU</a>(DerivO3CPUParams *params);
+<a name="l00373"></a>00373     <a class="code" href="classFullO3CPU.html#a6788b6adc1e142f49c6776ba4c85d824">~FullO3CPU</a>();
+<a name="l00374"></a>00374 
+<a name="l00376"></a>00376     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00377"></a>00377 
+<a name="l00378"></a><a class="code" href="classFullO3CPU.html#aa39ae53643b00bc644caa5967b8a428a">00378</a>     <a class="code" href="classProbePointArg.html">ProbePointArg&lt;PacketPtr&gt;</a> *<a class="code" href="classFullO3CPU.html#aa39ae53643b00bc644caa5967b8a428a">ppInstAccessComplete</a>;
+<a name="l00379"></a><a class="code" href="classFullO3CPU.html#a4cbcb5b1a3968d3e5229656571604ba5">00379</a>     <a class="code" href="classProbePointArg.html">ProbePointArg&lt;std::pair&lt;DynInstPtr, PacketPtr&gt;</a> &gt; *<a class="code" href="classFullO3CPU.html#a4cbcb5b1a3968d3e5229656571604ba5">ppDataAccessComplete</a>;
+<a name="l00380"></a>00380 
+<a name="l00382"></a>00382     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#aa2dab17a363fd4307274d579796adcf7">regProbePoints</a>();
+<a name="l00383"></a>00383 
+<a name="l00384"></a><a class="code" href="classFullO3CPU.html#a2d698ff909513b48a1263f8a5440e067">00384</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a2d698ff909513b48a1263f8a5440e067">demapPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00385"></a>00385     {
+<a name="l00386"></a>00386         this-&gt;<a class="code" href="classFullO3CPU.html#abcb37ddc11515555d8484702697bc4bb">itb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00387"></a>00387         this-&gt;<a class="code" href="classFullO3CPU.html#ad2fd039621f87592c4b344d4f8948e78" title="choose inline that I chose dtb,itb is Data and Instructino TLB.">dtb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00388"></a>00388     }
+<a name="l00389"></a>00389 
+<a name="l00390"></a><a class="code" href="classFullO3CPU.html#ac8a36d45a839b07f50b73f1eee119615">00390</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ac8a36d45a839b07f50b73f1eee119615">demapInstPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00391"></a>00391     {
+<a name="l00392"></a>00392         this-&gt;<a class="code" href="classFullO3CPU.html#abcb37ddc11515555d8484702697bc4bb">itb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00393"></a>00393     }
+<a name="l00394"></a>00394 
+<a name="l00395"></a><a class="code" href="classFullO3CPU.html#a26789603cc94992d18f8ddedfff96acf">00395</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a26789603cc94992d18f8ddedfff96acf">demapDataPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00396"></a>00396     {
+<a name="l00397"></a>00397         this-&gt;<a class="code" href="classFullO3CPU.html#ad2fd039621f87592c4b344d4f8948e78" title="choose inline that I chose dtb,itb is Data and Instructino TLB.">dtb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00398"></a>00398     }
+<a name="l00399"></a>00399 
+<a name="l00403"></a>00403     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00404"></a>00404 
+<a name="l00406"></a>00406     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00407"></a>00407 
+<a name="l00408"></a>00408     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#aecc7d8debf54990ffeaaed5bac7d7d81">startup</a>();
+<a name="l00409"></a>00409 
+<a name="l00411"></a><a class="code" href="classFullO3CPU.html#a2cf759e627e96ea55f7b91a72d437652">00411</a>     <span class="keywordtype">int</span> <a class="code" href="classFullO3CPU.html#a2cf759e627e96ea55f7b91a72d437652">numActiveThreads</a>()
+<a name="l00412"></a>00412     { <span class="keywordflow">return</span> <a class="code" href="classFullO3CPU.html#ae8939711cc7f6e9c795d16df91f9f258">activeThreads</a>.size(); }
+<a name="l00413"></a>00413 
+<a name="l00415"></a>00415     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a687aa4600423bb30ecf3bb1da6cd6000">activateThread</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00416"></a>00416 
+<a name="l00418"></a>00418     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ad11d9216ad92d9036ebf37844cf6e706">deactivateThread</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00419"></a>00419 
+<a name="l00421"></a>00421     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#abf4dca4fa0a9358ec4ac26ccbf17233b">insertThread</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00422"></a>00422 
+<a name="l00424"></a>00424     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a5fd824111bd328c70c3060d121ac5d49">removeThread</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00425"></a>00425 
+<a name="l00427"></a>00427     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classFullO3CPU.html#a7e01d94bb5a6e15fa8c94bcdf276115d">totalInsts</a>() <span class="keyword">const</span>;
+<a name="l00428"></a>00428 
+<a name="l00430"></a>00430     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classFullO3CPU.html#a76fa5df6827aaa8fc26deebad97d9e78">totalOps</a>() <span class="keyword">const</span>;
+<a name="l00431"></a>00431 
+<a name="l00433"></a>00433     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#aadedce642b14c1bde1b3281767df99d4">activateContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid, <a class="code" href="classCycles.html">Cycles</a> delay);
+<a name="l00434"></a>00434 
+<a name="l00436"></a>00436     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#aed2e2b9af515a66bdde61b85f150856a">suspendContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00437"></a>00437 
+<a name="l00441"></a>00441     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#a64179a936408228ff1718afd541e230b">scheduleDeallocateContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid, <span class="keywordtype">bool</span> <span class="keyword">remove</span>,
+<a name="l00442"></a>00442                                    <a class="code" href="classCycles.html">Cycles</a> delay = <a class="code" href="classCycles.html">Cycles</a>(1));
+<a name="l00443"></a>00443 
+<a name="l00447"></a>00447     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ac2156e0955d5e1ef6e06cd0e2ab218e4">haltContext</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00448"></a>00448 
+<a name="l00450"></a>00450     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a47befc2af24481200005f0b9cffab093">activateWhenReady</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00451"></a>00451 
+<a name="l00453"></a>00453     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#aa44d4f535cfaf67b335cab7e390a9257">doContextSwitch</a>();
+<a name="l00454"></a>00454 
+<a name="l00456"></a>00456     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a00247488696e6ff608a2a44673578094">updateThreadPriority</a>();
+<a name="l00457"></a>00457 
+<a name="l00459"></a><a class="code" href="classFullO3CPU.html#a8256d21571cb453f728d6b85e6fc6d15">00459</a>     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#a8256d21571cb453f728d6b85e6fc6d15">isDraining</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> getDrainState() == <a class="code" href="classDrainable.html#a5d74787dedbc4e11c1ab15bf487e61f8a929d17847bfad0d4689c9ab8540d5134">Drainable::Draining</a>; }
+<a name="l00460"></a>00460 
+<a name="l00461"></a>00461     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a688ca491f5419c29fb81f8235ba1dc13">serializeThread</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00462"></a>00462 
+<a name="l00463"></a>00463     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a5122e6d6fdbdb3cb9ba72ae970f00a9e">unserializeThread</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section,
+<a name="l00464"></a>00464                            <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00465"></a>00465 
+<a name="l00466"></a>00466   <span class="keyword">public</span>:
+<a name="l00470"></a>00470     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a2d6a2bbae85e604392f43b3418cdec97">syscall</a>(int64_t callnum, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00471"></a>00471 
+<a name="l00474"></a>00474     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classFullO3CPU.html#a4e932bfc8aa6dfb998b8496a0f04ace3">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *drain_manager);
+<a name="l00475"></a>00475 
+<a name="l00477"></a>00477     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00478"></a>00478 
+<a name="l00486"></a>00486     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a07a52466ac4d8d91cbfb73b9ceb42988">commitDrained</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00487"></a>00487 
+<a name="l00489"></a>00489     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a05f299b443f8cc73a93d61572edc0218">switchOut</a>();
+<a name="l00490"></a>00490 
+<a name="l00492"></a>00492     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ac82d2b8d331b2e8e6854a95d2917dfa2">takeOverFrom</a>(<a class="code" href="classBaseCPU.html">BaseCPU</a> *oldCPU);
+<a name="l00493"></a>00493 
+<a name="l00494"></a>00494     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ae2e1ccebe596a180f8105d57f9a93645">verifyMemoryMode</a>() <span class="keyword">const</span>;
+<a name="l00495"></a>00495 
+<a name="l00497"></a><a class="code" href="classFullO3CPU.html#ace86a0dff0fe9648b7221e3a98fb4533">00497</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classFullO3CPU.html#ace86a0dff0fe9648b7221e3a98fb4533">getAndIncrementInstSeq</a>()
+<a name="l00498"></a>00498     { <span class="keywordflow">return</span> <a class="code" href="classFullO3CPU.html#a5f72a799d8b189b4fccda3cde457145e">globalSeqNum</a>++; }
+<a name="l00499"></a>00499 
+<a name="l00501"></a>00501     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a23c9d89f64f4cfd6f48b106b99b119c4">trap</a>(<a class="code" href="classRefCountingPtr.html">Fault</a> fault, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid, <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst);
+<a name="l00502"></a>00502 
+<a name="l00504"></a>00504     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classFullO3CPU.html#a3820de4f7e76b56c6d795f27bf49c097">hwrei</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00505"></a>00505 
+<a name="l00506"></a>00506     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#a875eebdeba298f450fe84b0a05349afe">simPalCheck</a>(<span class="keywordtype">int</span> palFunc, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00507"></a>00507 
+<a name="l00509"></a>00509     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classFullO3CPU.html#aa2bbcc75bdfc0f2355cd06731e6f5d69">getInterrupts</a>();
+<a name="l00510"></a>00510 
+<a name="l00512"></a>00512     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ac3b13f31ae4a2de2b647e09c37a10822">processInterrupts</a>(<a class="code" href="classRefCountingPtr.html">Fault</a> interrupt);
+<a name="l00513"></a>00513 
+<a name="l00515"></a><a class="code" href="classFullO3CPU.html#ade0430439247877006d7df950f94918a">00515</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ade0430439247877006d7df950f94918a">halt</a>() { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Halt not implemented!\n&quot;</span>); }
+<a name="l00516"></a>00516 
+<a name="l00518"></a><a class="code" href="classFullO3CPU.html#af5f6a59bc2ed83b0cf9203ba8c63bf34">00518</a>     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#af5f6a59bc2ed83b0cf9203ba8c63bf34">validInstAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) { <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00519"></a>00519 
+<a name="l00521"></a><a class="code" href="classFullO3CPU.html#afe01e4cef8897b8a4ff99d575875c9db">00521</a>     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#afe01e4cef8897b8a4ff99d575875c9db">validDataAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) { <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00522"></a>00522 
+<a name="l00526"></a>00526     <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">TheISA::MiscReg</a> <a class="code" href="classFullO3CPU.html#adab97969b95d7b02e858364997dd7968">readMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00527"></a>00527 
+<a name="l00531"></a>00531     <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">TheISA::MiscReg</a> <a class="code" href="classFullO3CPU.html#ae9d0992c10f59b8dc47ea56b3a778c32">readMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00532"></a>00532 
+<a name="l00534"></a>00534     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#acd6f1f298148bb7eebfa8c800c4066e2">setMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">TheISA::MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>,
+<a name="l00535"></a>00535             <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00536"></a>00536 
+<a name="l00540"></a>00540     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a880c4c099ed7676fcbc9f76989e400b7">setMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">TheISA::MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>,
+<a name="l00541"></a>00541             <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00542"></a>00542 
+<a name="l00543"></a>00543     uint64_t <a class="code" href="classFullO3CPU.html#a21c850cd41ab977a2cf3450fe66ec25a">readIntReg</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00544"></a>00544 
+<a name="l00545"></a>00545     <a class="code" href="namespaceAlphaISA.html#a06fae4f187c7c94b8b0046dd6802be48">TheISA::FloatReg</a> <a class="code" href="classFullO3CPU.html#a2f97d83baef4fbda00b7f7f62779752f">readFloatReg</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00546"></a>00546 
+<a name="l00547"></a>00547     <a class="code" href="namespaceAlphaISA.html#a6905e424d12491fe126e1a22a9c8d655">TheISA::FloatRegBits</a> <a class="code" href="classFullO3CPU.html#a4998e6615f835676762af364eff198e3">readFloatRegBits</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00548"></a>00548 
+<a name="l00549"></a>00549     <a class="code" href="namespaceAlphaISA.html#a5834599c0196ce4accda8049e7320621">TheISA::CCReg</a> <a class="code" href="classFullO3CPU.html#ac3d147c535052bfb1f8e8fe0697168d7">readCCReg</a>(<span class="keywordtype">int</span> reg_idx);
+<a name="l00550"></a>00550 
+<a name="l00551"></a>00551     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#abc264e8ee37c6bd7d7b5759b97c34356">setIntReg</a>(<span class="keywordtype">int</span> reg_idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00552"></a>00552 
+<a name="l00553"></a>00553     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ab4fbd29dd25664125eb83aa0d1c45a96">setFloatReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="namespaceAlphaISA.html#a06fae4f187c7c94b8b0046dd6802be48">TheISA::FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00554"></a>00554 
+<a name="l00555"></a>00555     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ad25b1101e69d1987937252f44c48fb96">setFloatRegBits</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="namespaceAlphaISA.html#a6905e424d12491fe126e1a22a9c8d655">TheISA::FloatRegBits</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00556"></a>00556 
+<a name="l00557"></a>00557     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ab41bd7f1c28d09676694843602e180b6">setCCReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="namespaceAlphaISA.html#a5834599c0196ce4accda8049e7320621">TheISA::CCReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00558"></a>00558 
+<a name="l00559"></a>00559     uint64_t <a class="code" href="classFullO3CPU.html#a804e1580f078efbacee5689c6a922743">readArchIntReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00560"></a>00560 
+<a name="l00561"></a>00561     <span class="keywordtype">float</span> <a class="code" href="classFullO3CPU.html#adaf99a897128e25170e65323b1a5e342">readArchFloatReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00562"></a>00562 
+<a name="l00563"></a>00563     uint64_t <a class="code" href="classFullO3CPU.html#a60141decbd780846e6669adf59970db1">readArchFloatRegInt</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00564"></a>00564 
+<a name="l00565"></a>00565     <a class="code" href="namespaceAlphaISA.html#a5834599c0196ce4accda8049e7320621">TheISA::CCReg</a> <a class="code" href="classFullO3CPU.html#a58ef256fe449eed12535745bd734f4ef">readArchCCReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00566"></a>00566 
+<a name="l00572"></a>00572     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a09df95cc1f92c9002cd7c0506e2ba864">setArchIntReg</a>(<span class="keywordtype">int</span> reg_idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00573"></a>00573 
+<a name="l00574"></a>00574     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ac527b87a643907df19ca5f4600200382">setArchFloatReg</a>(<span class="keywordtype">int</span> reg_idx, <span class="keywordtype">float</span> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00575"></a>00575 
+<a name="l00576"></a>00576     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a1295e65a7841d7e83a5f3a3c44770c8f">setArchFloatRegInt</a>(<span class="keywordtype">int</span> reg_idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00577"></a>00577 
+<a name="l00578"></a>00578     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#aae7106b0574d000f60ebacc2f938fe62">setArchCCReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="namespaceAlphaISA.html#a5834599c0196ce4accda8049e7320621">TheISA::CCReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00579"></a>00579 
+<a name="l00581"></a>00581     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a3b836956ac0c48ddf740167753bded14">pcState</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;newPCState, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00582"></a>00582 
+<a name="l00584"></a>00584     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classFullO3CPU.html#a3b836956ac0c48ddf740167753bded14">pcState</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00585"></a>00585 
+<a name="l00587"></a>00587     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classFullO3CPU.html#afae6152cf4b3a51162d6e64247c1ac09">instAddr</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00588"></a>00588 
+<a name="l00590"></a>00590     <a class="code" href="base_2types_8hh.html#adfb4d8b20c5abc8be73dd367b16f2d57">MicroPC</a> <a class="code" href="classFullO3CPU.html#aa295441afc0fa8f449dc1a0cb7c7b994">microPC</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00591"></a>00591 
+<a name="l00593"></a>00593     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classFullO3CPU.html#af1caba1f04cf2802d742d1a16b961e79">nextInstAddr</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00594"></a>00594 
+<a name="l00599"></a>00599     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ac4c7a18be5c282d711310ffb7b6f82f7">squashFromTC</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00600"></a>00600 
+<a name="l00604"></a>00604     <a class="code" href="classFullO3CPU.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> <a class="code" href="classFullO3CPU.html#ac6e8e55d456fb0d761c64063087d298a">addInst</a>(<a class="code" href="classFullO3CPU.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00605"></a>00605 
+<a name="l00607"></a>00607     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a4edfd60ed9beaf439e83cfda0ba130e7">instDone</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid, <a class="code" href="classFullO3CPU.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00608"></a>00608 
+<a name="l00612"></a>00612     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a6f40adbce5903c52e6460ab8c17489ef">removeFrontInst</a>(<a class="code" href="classFullO3CPU.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00613"></a>00613 
+<a name="l00616"></a>00616     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a37bf3e194e9e98e4e7366e35fb6ebf49">removeInstsNotInROB</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00617"></a>00617 
+<a name="l00619"></a>00619     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a79f7e36d4bd89fe4528b665a949a0023">removeInstsUntil</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;seq_num, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00620"></a>00620 
+<a name="l00622"></a>00622     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a2b698a48b0c233f49e2994bc28dc0bbf">squashInstIt</a>(<span class="keyword">const</span> <a class="code" href="classFullO3CPU.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> &amp;instIt, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00623"></a>00623 
+<a name="l00625"></a>00625     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a7bc351a2a79efb6dc9f88f8a6a2ed33c">cleanUpRemovedInsts</a>();
+<a name="l00626"></a>00626 
+<a name="l00628"></a>00628     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a80587b4fe043bbe1995536cb3b361588">dumpInsts</a>();
+<a name="l00629"></a>00629 
+<a name="l00630"></a>00630   <span class="keyword">public</span>:
+<a name="l00631"></a>00631 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00632"></a>00632 <span class="preprocessor"></span>
+<a name="l00633"></a><a class="code" href="classFullO3CPU.html#a19e374b98940ff65bd4d9d17f198738c">00633</a>     <span class="keywordtype">int</span> <a class="code" href="classFullO3CPU.html#a19e374b98940ff65bd4d9d17f198738c">instcount</a>;
+<a name="l00634"></a>00634 <span class="preprocessor">#endif</span>
+<a name="l00635"></a>00635 <span class="preprocessor"></span>
+<a name="l00637"></a><a class="code" href="classFullO3CPU.html#ae10a391d02ce1ef67ee13cd82b7d46e5">00637</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classFullO3CPU.html#ae10a391d02ce1ef67ee13cd82b7d46e5">instList</a>;
+<a name="l00638"></a>00638 
+<a name="l00642"></a><a class="code" href="classFullO3CPU.html#a574cb1bed7660bb2bb6940365f6a3315">00642</a>     std::queue&lt;ListIt&gt; <a class="code" href="classFullO3CPU.html#a574cb1bed7660bb2bb6940365f6a3315">removeList</a>;
+<a name="l00643"></a>00643 
+<a name="l00644"></a>00644 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00645"></a>00645 <span class="preprocessor"></span>
+<a name="l00648"></a>00648     std::set&lt;InstSeqNum&gt; snList;
+<a name="l00649"></a>00649 <span class="preprocessor">#endif</span>
+<a name="l00650"></a>00650 <span class="preprocessor"></span>
+<a name="l00654"></a><a class="code" href="classFullO3CPU.html#a2825a91132fe292d64dca3c61fd07410">00654</a>     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#a2825a91132fe292d64dca3c61fd07410">removeInstsThisCycle</a>;
+<a name="l00655"></a>00655 
+<a name="l00656"></a>00656   <span class="keyword">protected</span>:
+<a name="l00658"></a><a class="code" href="classFullO3CPU.html#ac41165b4dc11673a5e8f6c8679717c1b">00658</a>     <span class="keyword">typename</span> <a class="code" href="classDefaultFetch.html">CPUPolicy::Fetch</a> <a class="code" href="classFullO3CPU.html#ac41165b4dc11673a5e8f6c8679717c1b">fetch</a>;
+<a name="l00659"></a>00659 
+<a name="l00661"></a><a class="code" href="classFullO3CPU.html#a21ddb57c5e4f70298cee97ee543e3bdb">00661</a>     <span class="keyword">typename</span> <a class="code" href="classDefaultDecode.html">CPUPolicy::Decode</a> <a class="code" href="classFullO3CPU.html#a21ddb57c5e4f70298cee97ee543e3bdb">decode</a>;
+<a name="l00662"></a>00662 
+<a name="l00664"></a><a class="code" href="classFullO3CPU.html#a39ad9a464eaaff03051506711d40fc5f">00664</a>     <span class="keyword">typename</span> <a class="code" href="classDefaultRename.html">CPUPolicy::Rename</a> <a class="code" href="classFullO3CPU.html#a39ad9a464eaaff03051506711d40fc5f">rename</a>;
+<a name="l00665"></a>00665 
+<a name="l00667"></a><a class="code" href="classFullO3CPU.html#afbb39e841c20e3affe28f4ca3e8c0992">00667</a>     <span class="keyword">typename</span> <a class="code" href="classDefaultIEW.html">CPUPolicy::IEW</a> <a class="code" href="classFullO3CPU.html#afbb39e841c20e3affe28f4ca3e8c0992">iew</a>;
+<a name="l00668"></a>00668 
+<a name="l00670"></a><a class="code" href="classFullO3CPU.html#a2cb9d36b31d8d38af97362bb47f6e930">00670</a>     <span class="keyword">typename</span> <a class="code" href="classDefaultCommit.html">CPUPolicy::Commit</a> <a class="code" href="classFullO3CPU.html#a2cb9d36b31d8d38af97362bb47f6e930">commit</a>;
+<a name="l00671"></a>00671 
+<a name="l00673"></a><a class="code" href="classFullO3CPU.html#aa760a1e4a392e8e5c1dd8ed85b9f56fe">00673</a>     <a class="code" href="classPhysRegFile.html">PhysRegFile</a> <a class="code" href="classFullO3CPU.html#aa760a1e4a392e8e5c1dd8ed85b9f56fe">regFile</a>;
+<a name="l00674"></a>00674 
+<a name="l00676"></a><a class="code" href="classFullO3CPU.html#ad5655f9bbf3c5b09877a612be7fc6b65">00676</a>     <span class="keyword">typename</span> <a class="code" href="classUnifiedFreeList.html">CPUPolicy::FreeList</a> <a class="code" href="classFullO3CPU.html#ad5655f9bbf3c5b09877a612be7fc6b65">freeList</a>;
+<a name="l00677"></a>00677 
+<a name="l00679"></a><a class="code" href="classFullO3CPU.html#a777805217a21e32ee39d1203bca3da53">00679</a>     <span class="keyword">typename</span> <a class="code" href="classUnifiedRenameMap.html">CPUPolicy::RenameMap</a> <a class="code" href="classFullO3CPU.html#a777805217a21e32ee39d1203bca3da53">renameMap</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00680"></a>00680 
+<a name="l00682"></a><a class="code" href="classFullO3CPU.html#a276327b80d93babf5512b90c6daae5e4">00682</a>     <span class="keyword">typename</span> <a class="code" href="classUnifiedRenameMap.html">CPUPolicy::RenameMap</a> <a class="code" href="classFullO3CPU.html#a276327b80d93babf5512b90c6daae5e4">commitRenameMap</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00683"></a>00683 
+<a name="l00685"></a><a class="code" href="classFullO3CPU.html#ad649787f87175a89806eeccaee4832e9">00685</a>     <span class="keyword">typename</span> <a class="code" href="classROB.html">CPUPolicy::ROB</a> <a class="code" href="classFullO3CPU.html#ad649787f87175a89806eeccaee4832e9">rob</a>;
+<a name="l00686"></a>00686 
+<a name="l00688"></a><a class="code" href="classFullO3CPU.html#ae8939711cc7f6e9c795d16df91f9f258">00688</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> <a class="code" href="classFullO3CPU.html#ae8939711cc7f6e9c795d16df91f9f258">activeThreads</a>;
+<a name="l00689"></a>00689 
+<a name="l00691"></a><a class="code" href="classFullO3CPU.html#a5e0ec8da05a369f0327b7b78c44faa36">00691</a>     <a class="code" href="classScoreboard.html">Scoreboard</a> <a class="code" href="classFullO3CPU.html#a5e0ec8da05a369f0327b7b78c44faa36">scoreboard</a>;
+<a name="l00692"></a>00692 
+<a name="l00693"></a><a class="code" href="classFullO3CPU.html#aa0d8dc5e214b94342d1f730e4e34ae82">00693</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;TheISA::ISA *&gt;</a> <a class="code" href="classFullO3CPU.html#aa0d8dc5e214b94342d1f730e4e34ae82">isa</a>;
+<a name="l00694"></a>00694 
+<a name="l00696"></a><a class="code" href="classFullO3CPU.html#a290723656a84b9cc90dfce377af9aad0">00696</a>     IcachePort <a class="code" href="classFullO3CPU.html#a290723656a84b9cc90dfce377af9aad0">icachePort</a>;
+<a name="l00697"></a>00697 
+<a name="l00699"></a><a class="code" href="classFullO3CPU.html#a38b03978ad7720fdc910ff6a8b44585f">00699</a>     DcachePort <a class="code" href="classFullO3CPU.html#a38b03978ad7720fdc910ff6a8b44585f">dcachePort</a>;
+<a name="l00700"></a>00700 
+<a name="l00701"></a>00701   <span class="keyword">public</span>:
+<a name="l00706"></a><a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353d">00706</a>     <span class="keyword">enum</span> <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353d">StageIdx</a> {
+<a name="l00707"></a><a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353da58acaf31e32cdcbea7664d3286a361f4">00707</a>         <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353da58acaf31e32cdcbea7664d3286a361f4">FetchIdx</a>,
+<a name="l00708"></a><a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353da103b4435764d4d2723ba580aa798e258">00708</a>         <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353da103b4435764d4d2723ba580aa798e258">DecodeIdx</a>,
+<a name="l00709"></a><a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353daa1e6e6121c69679ec31ba66d1e1397a4">00709</a>         <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353daa1e6e6121c69679ec31ba66d1e1397a4">RenameIdx</a>,
+<a name="l00710"></a><a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353dae8242e5f6fe07d4611f47d1908eb01ad">00710</a>         <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353dae8242e5f6fe07d4611f47d1908eb01ad">IEWIdx</a>,
+<a name="l00711"></a><a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353dab4e6ff6a24d7c325f21753fe2a827048">00711</a>         <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353dab4e6ff6a24d7c325f21753fe2a827048">CommitIdx</a>,
+<a name="l00712"></a><a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353dad4d98708d468a3805751e2e5d21b0fea">00712</a>         <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353dad4d98708d468a3805751e2e5d21b0fea">NumStages</a> };
+<a name="l00713"></a>00713 
+<a name="l00717"></a><a class="code" href="classFullO3CPU.html#aa6c328aeb664577b61817285d04f3631">00717</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="structTimeBufStruct.html">CPUPolicy::TimeStruct</a> <a class="code" href="structTimeBufStruct.html">TimeStruct</a>;
+<a name="l00718"></a>00718 
+<a name="l00719"></a><a class="code" href="classFullO3CPU.html#ae885ff43c757f445563029fd15cdf70c">00719</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="structDefaultFetchDefaultDecode.html">CPUPolicy::FetchStruct</a> <a class="code" href="structDefaultFetchDefaultDecode.html">FetchStruct</a>;
+<a name="l00720"></a>00720 
+<a name="l00721"></a><a class="code" href="classFullO3CPU.html#ae7f8b193f518ed524a498ef7ab564902">00721</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="structDefaultDecodeDefaultRename.html">CPUPolicy::DecodeStruct</a> <a class="code" href="structDefaultDecodeDefaultRename.html">DecodeStruct</a>;
+<a name="l00722"></a>00722 
+<a name="l00723"></a><a class="code" href="classFullO3CPU.html#a494521ebae1f8b01fe0ed16320494e6a">00723</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="structDefaultRenameDefaultIEW.html">CPUPolicy::RenameStruct</a> <a class="code" href="structDefaultRenameDefaultIEW.html">RenameStruct</a>;
+<a name="l00724"></a>00724 
+<a name="l00725"></a><a class="code" href="classFullO3CPU.html#a8ca44c33753253e21ca215123e8b5005">00725</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="structDefaultIEWDefaultCommit.html">CPUPolicy::IEWStruct</a> <a class="code" href="structDefaultIEWDefaultCommit.html">IEWStruct</a>;
+<a name="l00726"></a>00726 
+<a name="l00728"></a><a class="code" href="classFullO3CPU.html#ad72b6568a4a40f54d071c31bef16bf2e">00728</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> <a class="code" href="classFullO3CPU.html#ad72b6568a4a40f54d071c31bef16bf2e">timeBuffer</a>;
+<a name="l00729"></a>00729 
+<a name="l00731"></a><a class="code" href="classFullO3CPU.html#a0b4f1aa3830d6db3cb15a9a46c531cc2">00731</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;FetchStruct&gt;</a> <a class="code" href="classFullO3CPU.html#a0b4f1aa3830d6db3cb15a9a46c531cc2">fetchQueue</a>;
+<a name="l00732"></a>00732 
+<a name="l00734"></a><a class="code" href="classFullO3CPU.html#a8c674fbc9b0625a2231b669aceb0dd73">00734</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;DecodeStruct&gt;</a> <a class="code" href="classFullO3CPU.html#a8c674fbc9b0625a2231b669aceb0dd73">decodeQueue</a>;
+<a name="l00735"></a>00735 
+<a name="l00737"></a><a class="code" href="classFullO3CPU.html#ae590391fe7915c744cde571b7d15d893">00737</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;RenameStruct&gt;</a> <a class="code" href="classFullO3CPU.html#ae590391fe7915c744cde571b7d15d893">renameQueue</a>;
+<a name="l00738"></a>00738 
+<a name="l00740"></a><a class="code" href="classFullO3CPU.html#a9429710408b27da398dc15a2eb80b9fc">00740</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IEWStruct&gt;</a> <a class="code" href="classFullO3CPU.html#a9429710408b27da398dc15a2eb80b9fc">iewQueue</a>;
+<a name="l00741"></a>00741 
+<a name="l00742"></a>00742   <span class="keyword">private</span>:
+<a name="l00747"></a><a class="code" href="classFullO3CPU.html#ae5ad3ebe67382e7fbc7fddcf48ae9c6c">00747</a>     <a class="code" href="classActivityRecorder.html">ActivityRecorder</a> <a class="code" href="classFullO3CPU.html#ae5ad3ebe67382e7fbc7fddcf48ae9c6c">activityRec</a>;
+<a name="l00748"></a>00748 
+<a name="l00749"></a>00749   <span class="keyword">public</span>:
+<a name="l00751"></a><a class="code" href="classFullO3CPU.html#ad7e5c2506873e8dc8c71740ac6dabb23">00751</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ad7e5c2506873e8dc8c71740ac6dabb23">activityThisCycle</a>() { <a class="code" href="classFullO3CPU.html#ae5ad3ebe67382e7fbc7fddcf48ae9c6c">activityRec</a>.<a class="code" href="classActivityRecorder.html#a0ea760b87a5516ee794818d5eb8c243d">activity</a>(); }
+<a name="l00752"></a>00752 
+<a name="l00754"></a><a class="code" href="classFullO3CPU.html#a631f1fd5f15efc2953529efa22868bcd">00754</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a631f1fd5f15efc2953529efa22868bcd">activateStage</a>(<span class="keyword">const</span> <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353d">StageIdx</a> idx)
+<a name="l00755"></a>00755     { <a class="code" href="classFullO3CPU.html#ae5ad3ebe67382e7fbc7fddcf48ae9c6c">activityRec</a>.<a class="code" href="classActivityRecorder.html#a9039dad8d295c41b50eba0342e6c11c0">activateStage</a>(idx); }
+<a name="l00756"></a>00756 
+<a name="l00758"></a><a class="code" href="classFullO3CPU.html#a9ebbaf1718ed44d77051269c9734f6ae">00758</a>     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#a9ebbaf1718ed44d77051269c9734f6ae">deactivateStage</a>(<span class="keyword">const</span> <a class="code" href="classFullO3CPU.html#ad8ae6b222928fd7316fcf1f9f233353d">StageIdx</a> idx)
+<a name="l00759"></a>00759     { <a class="code" href="classFullO3CPU.html#ae5ad3ebe67382e7fbc7fddcf48ae9c6c">activityRec</a>.<a class="code" href="classActivityRecorder.html#a4d73bea02eaf6f93e267391592556fe7">deactivateStage</a>(idx); }
+<a name="l00760"></a>00760 
+<a name="l00762"></a>00762     <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#abce3a63b123f84972e4df7962f9b870e">wakeCPU</a>();
+<a name="l00763"></a>00763 
+<a name="l00764"></a>00764     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFullO3CPU.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>();
+<a name="l00765"></a>00765 
+<a name="l00767"></a>00767     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classFullO3CPU.html#a64117a0245250fc5be941e729bedcc03">getFreeTid</a>();
+<a name="l00768"></a>00768 
+<a name="l00769"></a>00769   <span class="keyword">public</span>:
+<a name="l00771"></a>00771     <a class="code" href="classThreadContext.html">ThreadContext</a> *
+<a name="l00772"></a><a class="code" href="classFullO3CPU.html#acaae0f849591d618f1c202e5ed29b4e4">00772</a>     <a class="code" href="classFullO3CPU.html#acaae0f849591d618f1c202e5ed29b4e4">tcBase</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00773"></a>00773     {
+<a name="l00774"></a>00774         <span class="keywordflow">return</span> <a class="code" href="classFullO3CPU.html#afe9da004c5a3f37cbb72fa3763d4c0d1">thread</a>[tid]-&gt;getTC();
+<a name="l00775"></a>00775     }
+<a name="l00776"></a>00776 
+<a name="l00778"></a><a class="code" href="classFullO3CPU.html#a5f72a799d8b189b4fccda3cde457145e">00778</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classFullO3CPU.html#a5f72a799d8b189b4fccda3cde457145e">globalSeqNum</a>;<span class="comment">//[Impl::MaxThreads];</span>
+<a name="l00779"></a>00779 
+<a name="l00784"></a><a class="code" href="classFullO3CPU.html#a85ab02c76c80bbfce7b3ce7981c55f68">00784</a>     <a class="code" href="classChecker.html">Checker&lt;Impl&gt;</a> *<a class="code" href="classFullO3CPU.html#a85ab02c76c80bbfce7b3ce7981c55f68">checker</a>;
+<a name="l00785"></a>00785 
+<a name="l00787"></a><a class="code" href="classFullO3CPU.html#af27ccd765f13a4b7bd119dc7579e2746">00787</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classFullO3CPU.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00788"></a>00788 
+<a name="l00790"></a><a class="code" href="classFullO3CPU.html#a329b71fb934a93312ca0aacbf5a3f982">00790</a>     <a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="classFullO3CPU.html#a329b71fb934a93312ca0aacbf5a3f982">drainManager</a>;
+<a name="l00791"></a>00791 
+<a name="l00793"></a><a class="code" href="classFullO3CPU.html#afe9da004c5a3f37cbb72fa3763d4c0d1">00793</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Thread *&gt;</a> <a class="code" href="classFullO3CPU.html#afe9da004c5a3f37cbb72fa3763d4c0d1">thread</a>;
+<a name="l00794"></a>00794 
+<a name="l00796"></a><a class="code" href="classFullO3CPU.html#a4fd841dc8d29605dc13a120cc5a9b438">00796</a>     <span class="keywordtype">bool</span> <a class="code" href="classFullO3CPU.html#a4fd841dc8d29605dc13a120cc5a9b438">contextSwitch</a>;
+<a name="l00797"></a>00797 
+<a name="l00799"></a><a class="code" href="classFullO3CPU.html#a11435331f730084ec731d6f88c255290">00799</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;int&gt;</a> <a class="code" href="classFullO3CPU.html#a11435331f730084ec731d6f88c255290">cpuWaitList</a>;
+<a name="l00800"></a>00800 
+<a name="l00802"></a><a class="code" href="classFullO3CPU.html#a88989147c1b0b4ccba38fa941722ce5d">00802</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classFullO3CPU.html#a88989147c1b0b4ccba38fa941722ce5d">lastRunningCycle</a>;
+<a name="l00803"></a>00803 
+<a name="l00805"></a><a class="code" href="classFullO3CPU.html#af81ed3d351dcefbd5ca122147676af22">00805</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classFullO3CPU.html#af81ed3d351dcefbd5ca122147676af22">lastActivatedCycle</a>;
+<a name="l00806"></a>00806 
+<a name="l00808"></a><a class="code" href="classFullO3CPU.html#a08db914bbe37a5fa8c008248fa9647f6">00808</a>     std::map&lt;ThreadID, unsigned&gt; <a class="code" href="classFullO3CPU.html#a08db914bbe37a5fa8c008248fa9647f6">threadMap</a>;
+<a name="l00809"></a>00809 
+<a name="l00811"></a><a class="code" href="classFullO3CPU.html#a457642e81692e24e601ec32c778042a2">00811</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;ThreadID&gt;</a> <a class="code" href="classFullO3CPU.html#a457642e81692e24e601ec32c778042a2">tids</a>;
+<a name="l00812"></a>00812 
+<a name="l00814"></a><a class="code" href="classFullO3CPU.html#a0bdeb74163a7a4d65b7773897ef8eb09">00814</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classFullO3CPU.html#a0bdeb74163a7a4d65b7773897ef8eb09">read</a>(<a class="code" href="classRequest.html">RequestPtr</a> &amp;req, <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqLow, <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqHigh,
+<a name="l00815"></a>00815                uint8_t *data, <span class="keywordtype">int</span> load_idx)
+<a name="l00816"></a>00816     {
+<a name="l00817"></a>00817         <span class="keywordflow">return</span> this-&gt;<a class="code" href="classFullO3CPU.html#afbb39e841c20e3affe28f4ca3e8c0992">iew</a>.<a class="code" href="classDefaultIEW.html#a9f2a7c471091519f7d05832eb48c2a9d">ldstQueue</a>.<a class="code" href="classLSQ.html#a206ad0283d431e78e6f38bb9b54b23ee">read</a>(req, sreqLow, sreqHigh,
+<a name="l00818"></a>00818                                         data, load_idx);
+<a name="l00819"></a>00819     }
+<a name="l00820"></a>00820 
+<a name="l00822"></a><a class="code" href="classFullO3CPU.html#a43e0f9eec34726914d8eb76f5d884cc8">00822</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classFullO3CPU.html#a43e0f9eec34726914d8eb76f5d884cc8">write</a>(<a class="code" href="classRequest.html">RequestPtr</a> &amp;req, <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqLow, <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqHigh,
+<a name="l00823"></a>00823                 uint8_t *data, <span class="keywordtype">int</span> store_idx)
+<a name="l00824"></a>00824     {
+<a name="l00825"></a>00825         <span class="keywordflow">return</span> this-&gt;<a class="code" href="classFullO3CPU.html#afbb39e841c20e3affe28f4ca3e8c0992">iew</a>.<a class="code" href="classDefaultIEW.html#a9f2a7c471091519f7d05832eb48c2a9d">ldstQueue</a>.<a class="code" href="classLSQ.html#a1be8f3ccb9b2787a2c92bfab3fda9675">write</a>(req, sreqLow, sreqHigh,
+<a name="l00826"></a>00826                                          data, store_idx);
+<a name="l00827"></a>00827     }
+<a name="l00828"></a>00828 
+<a name="l00830"></a><a class="code" href="classFullO3CPU.html#a40da530cb5dd380fd7fc0d786e94d5eb">00830</a>     <span class="keyword">virtual</span> <a class="code" href="classMasterPort.html">MasterPort</a> &amp;<a class="code" href="classFullO3CPU.html#a40da530cb5dd380fd7fc0d786e94d5eb">getInstPort</a>() { <span class="keywordflow">return</span> <a class="code" href="classFullO3CPU.html#a290723656a84b9cc90dfce377af9aad0">icachePort</a>; }
+<a name="l00831"></a>00831 
+<a name="l00833"></a><a class="code" href="classFullO3CPU.html#aeea6b55ae1c4be53c21dbee434b221d4">00833</a>     <span class="keyword">virtual</span> <a class="code" href="classMasterPort.html">MasterPort</a> &amp;<a class="code" href="classFullO3CPU.html#aeea6b55ae1c4be53c21dbee434b221d4">getDataPort</a>() { <span class="keywordflow">return</span> <a class="code" href="classFullO3CPU.html#a38b03978ad7720fdc910ff6a8b44585f">dcachePort</a>; }
+<a name="l00834"></a>00834 
+<a name="l00836"></a><a class="code" href="classFullO3CPU.html#a174dbfb3c7b892914a54cec44ed2eeaf">00836</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a174dbfb3c7b892914a54cec44ed2eeaf">timesIdled</a>;
+<a name="l00838"></a><a class="code" href="classFullO3CPU.html#a42e0f4c18fdb8ef7504f5c45d697fb14">00838</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a42e0f4c18fdb8ef7504f5c45d697fb14">idleCycles</a>;
+<a name="l00841"></a><a class="code" href="classFullO3CPU.html#abb746a633705067014bd46e175928a51">00841</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#abb746a633705067014bd46e175928a51">quiesceCycles</a>;
+<a name="l00843"></a><a class="code" href="classFullO3CPU.html#a45901e46dca5846ddd857aecbee16645">00843</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classFullO3CPU.html#a45901e46dca5846ddd857aecbee16645">committedInsts</a>;
+<a name="l00845"></a><a class="code" href="classFullO3CPU.html#a16789fd9e4f632e091d740c772094f80">00845</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classFullO3CPU.html#a16789fd9e4f632e091d740c772094f80">committedOps</a>;
+<a name="l00847"></a><a class="code" href="classFullO3CPU.html#af68d211cace2daa3df90471d7af93ad8">00847</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classFullO3CPU.html#af68d211cace2daa3df90471d7af93ad8">cpi</a>;
+<a name="l00849"></a><a class="code" href="classFullO3CPU.html#a5bd2f06c271dd03138cad92251716f5d">00849</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classFullO3CPU.html#a5bd2f06c271dd03138cad92251716f5d">totalCpi</a>;
+<a name="l00851"></a><a class="code" href="classFullO3CPU.html#a6f168a31ee4084b6167d6761a4124014">00851</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classFullO3CPU.html#a6f168a31ee4084b6167d6761a4124014">ipc</a>;
+<a name="l00853"></a><a class="code" href="classFullO3CPU.html#ae8551f10097f4b2e5ed3febf0d9417e3">00853</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classFullO3CPU.html#ae8551f10097f4b2e5ed3febf0d9417e3">totalIpc</a>;
+<a name="l00854"></a>00854 
+<a name="l00855"></a>00855     <span class="comment">//number of integer register file accesses</span>
+<a name="l00856"></a><a class="code" href="classFullO3CPU.html#a46ee31ba135b8a26d7544abb48c242ef">00856</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a46ee31ba135b8a26d7544abb48c242ef">intRegfileReads</a>;
+<a name="l00857"></a><a class="code" href="classFullO3CPU.html#a0539045bb3599b1c57886d55a19fa2d2">00857</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a0539045bb3599b1c57886d55a19fa2d2">intRegfileWrites</a>;
+<a name="l00858"></a>00858     <span class="comment">//number of float register file accesses</span>
+<a name="l00859"></a><a class="code" href="classFullO3CPU.html#a616c93341fb6b23449fcbbab249f2b41">00859</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a616c93341fb6b23449fcbbab249f2b41">fpRegfileReads</a>;
+<a name="l00860"></a><a class="code" href="classFullO3CPU.html#ad308a484dfaaaff1d57080527f19f3be">00860</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#ad308a484dfaaaff1d57080527f19f3be">fpRegfileWrites</a>;
+<a name="l00861"></a>00861     <span class="comment">//number of CC register file accesses</span>
+<a name="l00862"></a><a class="code" href="classFullO3CPU.html#a54d1bb817fb61f8ea36ad3b2063f27c6">00862</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a54d1bb817fb61f8ea36ad3b2063f27c6">ccRegfileReads</a>;
+<a name="l00863"></a><a class="code" href="classFullO3CPU.html#abd236585eb8f96cd37f7cea04204d456">00863</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#abd236585eb8f96cd37f7cea04204d456">ccRegfileWrites</a>;
+<a name="l00864"></a>00864     <span class="comment">//number of misc</span>
+<a name="l00865"></a><a class="code" href="classFullO3CPU.html#a587b32e057f5caad670d221c166bda5e">00865</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a587b32e057f5caad670d221c166bda5e">miscRegfileReads</a>;
+<a name="l00866"></a><a class="code" href="classFullO3CPU.html#a457c81c9e364d41871df8cb5f04ea1b4">00866</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classFullO3CPU.html#a457c81c9e364d41871df8cb5f04ea1b4">miscRegfileWrites</a>;
+<a name="l00867"></a>00867 };
+<a name="l00868"></a>00868 
+<a name="l00869"></a>00869 <span class="preprocessor">#endif // __CPU_O3_CPU_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

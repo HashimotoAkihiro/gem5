@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/thread_state.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/thread_state.hh</h1><a href="o3_2thread__state_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __CPU_O3_THREAD_STATE_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_THREAD_STATE_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="callback_8hh.html">base/callback.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="output_8hh.html">base/output.hh</a>&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="thread__context_8hh.html">cpu/thread_context.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="thread__state_8hh.html">cpu/thread_state.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="full__system_8hh.html">sim/full_system.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="sim__exit_8hh.html">sim/sim_exit.hh</a>&quot;</span>
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="keyword">class </span><a class="code" href="classEndQuiesceEvent.html">EndQuiesceEvent</a>;
+<a name="l00054"></a>00054 <span class="keyword">class </span><a class="code" href="classEvent.html">Event</a>;
+<a name="l00055"></a>00055 <span class="keyword">class </span>FunctionalMemory;
+<a name="l00056"></a>00056 <span class="keyword">class </span><a class="code" href="classFunctionProfile.html">FunctionProfile</a>;
+<a name="l00057"></a>00057 <span class="keyword">class </span><a class="code" href="classProcess.html">Process</a>;
+<a name="l00058"></a>00058 <span class="keyword">class </span><a class="code" href="classProfileNode.html">ProfileNode</a>;
+<a name="l00059"></a>00059 
+<a name="l00067"></a>00067 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00068"></a><a class="code" href="structO3ThreadState.html">00068</a> <span class="keyword">struct </span><a class="code" href="structO3ThreadState.html">O3ThreadState</a> : <span class="keyword">public</span> <a class="code" href="structThreadState.html">ThreadState</a> {
+<a name="l00069"></a><a class="code" href="structO3ThreadState.html#a3af29dcea6d2bbb0a1de56f02ec789f1">00069</a>     <span class="keyword">typedef</span> <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">ThreadContext::Status</a> <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a>;
+<a name="l00070"></a><a class="code" href="structO3ThreadState.html#a44622cf06940413482836cb62931ac3f">00070</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::O3CPU <a class="code" href="structO3ThreadState.html#a44622cf06940413482836cb62931ac3f">O3CPU</a>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072   <span class="keyword">private</span>:
+<a name="l00074"></a><a class="code" href="structO3ThreadState.html#a1379cf882a12ac6fc9eba5da7c84b18b">00074</a>     <a class="code" href="structO3ThreadState.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *<a class="code" href="structO3ThreadState.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>;
+<a name="l00075"></a>00075   <span class="keyword">public</span>:
+<a name="l00076"></a>00076     <span class="comment">/* This variable controls if writes to a thread context should cause a all</span>
+<a name="l00077"></a>00077 <span class="comment">     * dynamic/speculative state to be thrown away. Nominally this is the</span>
+<a name="l00078"></a>00078 <span class="comment">     * desired behavior because the external thread context write has updated</span>
+<a name="l00079"></a>00079 <span class="comment">     * some state that could be used by an inflight instruction, however there</span>
+<a name="l00080"></a>00080 <span class="comment">     * are some cases like in a fault/trap handler where this behavior would</span>
+<a name="l00081"></a>00081 <span class="comment">     * lead to successive restarts and forward progress couldn&apos;t be made. This</span>
+<a name="l00082"></a>00082 <span class="comment">     * variable controls if the squashing will occur.</span>
+<a name="l00083"></a>00083 <span class="comment">     */</span>
+<a name="l00084"></a><a class="code" href="structO3ThreadState.html#afdfc33b720511483d84f7098ab6ba075">00084</a>     <span class="keywordtype">bool</span> <a class="code" href="structO3ThreadState.html#afdfc33b720511483d84f7098ab6ba075">noSquashFromTC</a>;
+<a name="l00085"></a>00085 
+<a name="l00089"></a><a class="code" href="structO3ThreadState.html#aa9f948437524f88e51afd737df505200">00089</a>     <span class="keywordtype">bool</span> <a class="code" href="structO3ThreadState.html#aa9f948437524f88e51afd737df505200">trapPending</a>;
+<a name="l00090"></a>00090 
+<a name="l00091"></a><a class="code" href="structO3ThreadState.html#ac155052720ec3adfe617a0bc7d5be7a0">00091</a>     <a class="code" href="structO3ThreadState.html#ac155052720ec3adfe617a0bc7d5be7a0">O3ThreadState</a>(<a class="code" href="structO3ThreadState.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *_cpu, <span class="keywordtype">int</span> _thread_num, <a class="code" href="classProcess.html">Process</a> *_process)
+<a name="l00092"></a>00092         : <a class="code" href="structThreadState.html">ThreadState</a>(_cpu, _thread_num, _process),
+<a name="l00093"></a>00093           <a class="code" href="structO3ThreadState.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>(_cpu), <a class="code" href="structO3ThreadState.html#afdfc33b720511483d84f7098ab6ba075">noSquashFromTC</a>(false), <a class="code" href="structO3ThreadState.html#aa9f948437524f88e51afd737df505200">trapPending</a>(false)
+<a name="l00094"></a>00094     {
+<a name="l00095"></a>00095         <span class="keywordflow">if</span> (!<a class="code" href="full__system_8hh.html#af929576af6f85c8849704b66d04b8370">FullSystem</a>)
+<a name="l00096"></a>00096             <span class="keywordflow">return</span>;
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098         <span class="keywordflow">if</span> (<a class="code" href="structO3ThreadState.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>-&gt;params()-&gt;profile) {
+<a name="l00099"></a>00099             <a class="code" href="structThreadState.html#a57684045e6580be82debaf2ed1d038ff">profile</a> = <span class="keyword">new</span> <a class="code" href="classFunctionProfile.html">FunctionProfile</a>(
+<a name="l00100"></a>00100                     <a class="code" href="structO3ThreadState.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>-&gt;params()-&gt;system-&gt;kernelSymtab);
+<a name="l00101"></a>00101             <a class="code" href="classCallback.html">Callback</a> *cb =
+<a name="l00102"></a>00102                 <span class="keyword">new</span> <a class="code" href="classMakeCallback.html">MakeCallback</a>&lt;<a class="code" href="structO3ThreadState.html">O3ThreadState</a>,
+<a name="l00103"></a>00103                 &amp;<a class="code" href="structO3ThreadState.html#a13fa12d1779a94a1e0b968946a1367c7">O3ThreadState::dumpFuncProfile</a>&gt;(<span class="keyword">this</span>);
+<a name="l00104"></a>00104             <a class="code" href="core_8cc.html#acbc78ce26c7964097d562909c589d585">registerExitCallback</a>(cb);
+<a name="l00105"></a>00105         }
+<a name="l00106"></a>00106 
+<a name="l00107"></a>00107         <span class="comment">// let&apos;s fill with a dummy node for now so we don&apos;t get a segfault</span>
+<a name="l00108"></a>00108         <span class="comment">// on the first cycle when there&apos;s no node available.</span>
+<a name="l00109"></a>00109         <span class="keyword">static</span> <a class="code" href="classProfileNode.html">ProfileNode</a> dummyNode;
+<a name="l00110"></a>00110         <a class="code" href="structThreadState.html#a9e724ad49e865acc300eb316dcf2e9bd">profileNode</a> = &amp;dummyNode;
+<a name="l00111"></a>00111         <a class="code" href="structThreadState.html#a8d1675ee887ea4904e7b244eef19c922">profilePC</a> = 3;
+<a name="l00112"></a>00112     }
+<a name="l00113"></a>00113 
+<a name="l00114"></a><a class="code" href="structO3ThreadState.html#a53e036786d17361be4c7320d39c99b84">00114</a>     <span class="keywordtype">void</span> <a class="code" href="structO3ThreadState.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>)
+<a name="l00115"></a>00115     {
+<a name="l00116"></a>00116         <a class="code" href="structO3ThreadState.html#a53e036786d17361be4c7320d39c99b84">ThreadState::serialize</a>(os);
+<a name="l00117"></a>00117         <span class="comment">// Use the ThreadContext serialization helper to serialize the</span>
+<a name="l00118"></a>00118         <span class="comment">// TC.</span><a class="code" href="structO3ThreadState.html#a53e036786d17361be4c7320d39c99b84"></a>
+<a name="l00119"></a>00119 <a class="code" href="structO3ThreadState.html#a53e036786d17361be4c7320d39c99b84">        ::serialize</a>(*<a class="code" href="structO3ThreadState.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>, os);
+<a name="l00120"></a>00120     }
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="structO3ThreadState.html#af22e5d6d660b97db37003ac61ac4ee49">00122</a>     <span class="keywordtype">void</span> <a class="code" href="structO3ThreadState.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section)
+<a name="l00123"></a>00123     {
+<a name="l00124"></a>00124         <span class="comment">// Prevent squashing - we don&apos;t have any instructions in</span>
+<a name="l00125"></a>00125         <span class="comment">// flight that we need to squash since we just instantiated a</span>
+<a name="l00126"></a>00126         <span class="comment">// clean system.</span>
+<a name="l00127"></a>00127         <a class="code" href="structO3ThreadState.html#afdfc33b720511483d84f7098ab6ba075">noSquashFromTC</a> = <span class="keyword">true</span>;
+<a name="l00128"></a>00128         <a class="code" href="structO3ThreadState.html#af22e5d6d660b97db37003ac61ac4ee49">ThreadState::unserialize</a>(cp, section);
+<a name="l00129"></a>00129         <span class="comment">// Use the ThreadContext serialization helper to unserialize</span>
+<a name="l00130"></a>00130         <span class="comment">// the TC.</span><a class="code" href="structO3ThreadState.html#af22e5d6d660b97db37003ac61ac4ee49"></a>
+<a name="l00131"></a>00131 <a class="code" href="structO3ThreadState.html#af22e5d6d660b97db37003ac61ac4ee49">        ::unserialize</a>(*<a class="code" href="structO3ThreadState.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>, cp, section);
+<a name="l00132"></a>00132         <a class="code" href="structO3ThreadState.html#afdfc33b720511483d84f7098ab6ba075">noSquashFromTC</a> = <span class="keyword">false</span>;
+<a name="l00133"></a>00133     }
+<a name="l00134"></a>00134 
+<a name="l00136"></a><a class="code" href="structO3ThreadState.html#a4455a4759e69e5ebe68ae7298cbcc37d">00136</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="structO3ThreadState.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>;
+<a name="l00137"></a>00137 
+<a name="l00139"></a><a class="code" href="structO3ThreadState.html#a81894d15db5190d5364449a4915b76f5">00139</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="structO3ThreadState.html#a81894d15db5190d5364449a4915b76f5">getTC</a>() { <span class="keywordflow">return</span> <a class="code" href="structO3ThreadState.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>; }
+<a name="l00140"></a>00140 
+<a name="l00142"></a><a class="code" href="structO3ThreadState.html#a36e0b96120fcbbc2ee8699158f7be5c2">00142</a>     <span class="keywordtype">void</span> <a class="code" href="structO3ThreadState.html#a36e0b96120fcbbc2ee8699158f7be5c2">syscall</a>(int64_t callnum) { <a class="code" href="structThreadState.html#a075e3da8f2570b13cecbbffca7e30d1a">process</a>-&gt;<a class="code" href="classProcess.html#a0abb4f4856f531e5b48484f5114a5bf9">syscall</a>(callnum, <a class="code" href="structO3ThreadState.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>); }
+<a name="l00143"></a>00143 
+<a name="l00144"></a><a class="code" href="structO3ThreadState.html#a13fa12d1779a94a1e0b968946a1367c7">00144</a>     <span class="keywordtype">void</span> <a class="code" href="structO3ThreadState.html#a13fa12d1779a94a1e0b968946a1367c7">dumpFuncProfile</a>()
+<a name="l00145"></a>00145     {
+<a name="l00146"></a>00146         std::ostream *<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a> = <a class="code" href="output_8cc.html#a08819d32c217c58b155584845ddadd4a">simout</a>.<a class="code" href="classOutputDirectory.html#a22e4aa8ec29a265a1c299a1a009c85cc">create</a>(<a class="code" href="cprintf_8hh.html#ace22d1c39f2df58e593bc49d1613eca2">csprintf</a>(<span class="stringliteral">&quot;profile.%s.dat&quot;</span>, <a class="code" href="structO3ThreadState.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>-&gt;name()));
+<a name="l00147"></a>00147         <a class="code" href="structThreadState.html#a57684045e6580be82debaf2ed1d038ff">profile</a>-&gt;<a class="code" href="classFunctionProfile.html#a66ed13eccc3001d33ef51ab3852837e9">dump</a>(<a class="code" href="structO3ThreadState.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>, *os);
+<a name="l00148"></a>00148     }
+<a name="l00149"></a>00149 };
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151 <span class="preprocessor">#endif // __CPU_O3_THREAD_STATE_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

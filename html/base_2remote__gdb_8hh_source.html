@@ -1,0 +1,305 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: base/remote_gdb.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>base/remote_gdb.hh</h1><a href="base_2remote__gdb_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __REMOTE_GDB_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __REMOTE_GDB_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;sys/signal.h&gt;</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;map&gt;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="pollevent_8hh.html">base/pollevent.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="socket_8hh.html">base/socket.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="pc__event_8hh.html">cpu/pc_event.hh</a>&quot;</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="keyword">class </span><a class="code" href="classSystem.html">System</a>;
+<a name="l00044"></a>00044 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="keyword">class </span><a class="code" href="classGDBListener.html">GDBListener</a>;
+<a name="l00047"></a>00047 
+<a name="l00048"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497">00048</a> <span class="keyword">enum</span> <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497">GDBCommands</a>
+<a name="l00049"></a>00049 {
+<a name="l00050"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a9acb86313ec944166d9794e95485b9f3">00050</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a9acb86313ec944166d9794e95485b9f3">GDBSignal</a>              = <span class="charliteral">&apos;?&apos;</span>, <span class="comment">// last signal</span>
+<a name="l00051"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a32f6834a6d41a1b2cf93b990a8fb2802">00051</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a32f6834a6d41a1b2cf93b990a8fb2802">GDBSetBaud</a>             = <span class="charliteral">&apos;b&apos;</span>, <span class="comment">// set baud (depracated)</span>
+<a name="l00052"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497af183bccc532c34c0529414ed1a6d8d1d">00052</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497af183bccc532c34c0529414ed1a6d8d1d">GDBSetBreak</a>            = <span class="charliteral">&apos;B&apos;</span>, <span class="comment">// set breakpoint (depracated)</span>
+<a name="l00053"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a5116c6ce41f7f6cbed15e76f7850d9b8">00053</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a5116c6ce41f7f6cbed15e76f7850d9b8">GDBCont</a>                = <span class="charliteral">&apos;c&apos;</span>, <span class="comment">// resume</span>
+<a name="l00054"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a7f54d24132f309117d6df73a311401fc">00054</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a7f54d24132f309117d6df73a311401fc">GDBAsyncCont</a>           = <span class="charliteral">&apos;C&apos;</span>, <span class="comment">// continue with signal</span>
+<a name="l00055"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a06eaad120ec15dd5f663afff69ca4abf">00055</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a06eaad120ec15dd5f663afff69ca4abf">GDBDebug</a>               = <span class="charliteral">&apos;d&apos;</span>, <span class="comment">// toggle debug flags (deprecated)</span>
+<a name="l00056"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a4329d2707e2615ebf514324e22c9147e">00056</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a4329d2707e2615ebf514324e22c9147e">GDBDetach</a>              = <span class="charliteral">&apos;D&apos;</span>, <span class="comment">// detach remote gdb</span>
+<a name="l00057"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a27e3f55ab7507805b07214ffc5112caa">00057</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a27e3f55ab7507805b07214ffc5112caa">GDBRegR</a>                = <span class="charliteral">&apos;g&apos;</span>, <span class="comment">// read general registers</span>
+<a name="l00058"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497af3ff51a9620f66082f6698de0521b986">00058</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497af3ff51a9620f66082f6698de0521b986">GDBRegW</a>                = <span class="charliteral">&apos;G&apos;</span>, <span class="comment">// write general registers</span>
+<a name="l00059"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a719b61a9c713bbdcca7fc4148e899e7c">00059</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a719b61a9c713bbdcca7fc4148e899e7c">GDBSetThread</a>           = <span class="charliteral">&apos;H&apos;</span>, <span class="comment">// set thread</span>
+<a name="l00060"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a2a20298cc6295ee66556e733118b34e2">00060</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a2a20298cc6295ee66556e733118b34e2">GDBCycleStep</a>           = <span class="charliteral">&apos;i&apos;</span>, <span class="comment">// step a single cycle</span>
+<a name="l00061"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497af33260007323a31a14dca0b20579bb35">00061</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497af33260007323a31a14dca0b20579bb35">GDBSigCycleStep</a>        = <span class="charliteral">&apos;I&apos;</span>, <span class="comment">// signal then cycle step</span>
+<a name="l00062"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a2ae8dcdea0e90eb0980507158b6478ea">00062</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a2ae8dcdea0e90eb0980507158b6478ea">GDBKill</a>                = <span class="charliteral">&apos;k&apos;</span>, <span class="comment">// kill program</span>
+<a name="l00063"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497afbcb02edcc4cb7d0f7fb2c8a9a82a3d4">00063</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497afbcb02edcc4cb7d0f7fb2c8a9a82a3d4">GDBMemR</a>                = <span class="charliteral">&apos;m&apos;</span>, <span class="comment">// read memory</span>
+<a name="l00064"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a6694323b497f2acbd690bb030eb36b8b">00064</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a6694323b497f2acbd690bb030eb36b8b">GDBMemW</a>                = <span class="charliteral">&apos;M&apos;</span>, <span class="comment">// write memory</span>
+<a name="l00065"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a07fe6ffd98eb01494b115e860d52ade6">00065</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a07fe6ffd98eb01494b115e860d52ade6">GDBReadReg</a>             = <span class="charliteral">&apos;p&apos;</span>, <span class="comment">// read register</span>
+<a name="l00066"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a8a75153eb9b61ad50353ff07672f8453">00066</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a8a75153eb9b61ad50353ff07672f8453">GDBSetReg</a>              = <span class="charliteral">&apos;P&apos;</span>, <span class="comment">// write register</span>
+<a name="l00067"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497ab6d45fb94f09b488967f93999dcfd1f2">00067</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497ab6d45fb94f09b488967f93999dcfd1f2">GDBQueryVar</a>            = <span class="charliteral">&apos;q&apos;</span>, <span class="comment">// query variable</span>
+<a name="l00068"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497aecc7624d45fae28295d2f7f1bf0b470b">00068</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497aecc7624d45fae28295d2f7f1bf0b470b">GDBSetVar</a>              = <span class="charliteral">&apos;Q&apos;</span>, <span class="comment">// set variable</span>
+<a name="l00069"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a51f7b8c24bb63590754cd8c0d709a72e">00069</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a51f7b8c24bb63590754cd8c0d709a72e">GDBReset</a>               = <span class="charliteral">&apos;r&apos;</span>, <span class="comment">// reset system.  (Deprecated)</span>
+<a name="l00070"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a97f95c3ab542120d5e9dfec25c1e2d60">00070</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a97f95c3ab542120d5e9dfec25c1e2d60">GDBStep</a>                = <span class="charliteral">&apos;s&apos;</span>, <span class="comment">// step</span>
+<a name="l00071"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497acbc40326c7d502ea24fb2299ab1b94e3">00071</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497acbc40326c7d502ea24fb2299ab1b94e3">GDBAsyncStep</a>           = <span class="charliteral">&apos;S&apos;</span>, <span class="comment">// signal and step</span>
+<a name="l00072"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a02a96e461b322d3971cd6108d1e81b44">00072</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a02a96e461b322d3971cd6108d1e81b44">GDBThreadAlive</a>         = <span class="charliteral">&apos;T&apos;</span>, <span class="comment">// find out if the thread is alive</span>
+<a name="l00073"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497ac9269a79ec5c92381f58083823c0d4c2">00073</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497ac9269a79ec5c92381f58083823c0d4c2">GDBTargetExit</a>          = <span class="charliteral">&apos;W&apos;</span>, <span class="comment">// target exited</span>
+<a name="l00074"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a5f15d8ffbc4c5baa05f73b7d997d882c">00074</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a5f15d8ffbc4c5baa05f73b7d997d882c">GDBBinaryDload</a>         = <span class="charliteral">&apos;X&apos;</span>, <span class="comment">// write memory</span>
+<a name="l00075"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a81ee9db02e7aba80482f745540febfbc">00075</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497a81ee9db02e7aba80482f745540febfbc">GDBClrHwBkpt</a>           = <span class="charliteral">&apos;z&apos;</span>, <span class="comment">// remove breakpoint or watchpoint</span>
+<a name="l00076"></a><a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497abf939a1a586587f591156b2aeb4c268f">00076</a>     <a class="code" href="base_2remote__gdb_8hh.html#a5f3ce331fa8c2c19ed26b852847a3497abf939a1a586587f591156b2aeb4c268f">GDBSetHwBkpt</a>           = <span class="charliteral">&apos;Z&apos;</span>  <span class="comment">// insert breakpoint or watchpoint</span>
+<a name="l00077"></a>00077 };
+<a name="l00078"></a>00078 
+<a name="l00079"></a><a class="code" href="base_2remote__gdb_8hh.html#a05c13e29a32dcf8a9af97d1dcb81b170">00079</a> <span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code" href="base_2remote__gdb_8hh.html#a05c13e29a32dcf8a9af97d1dcb81b170">GDBStart</a> = <span class="charliteral">&apos;$&apos;</span>;
+<a name="l00080"></a><a class="code" href="base_2remote__gdb_8hh.html#a71e0b9ce6fd576fc3ce9dbb5989d5978">00080</a> <span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code" href="base_2remote__gdb_8hh.html#a71e0b9ce6fd576fc3ce9dbb5989d5978">GDBEnd</a> = <span class="charliteral">&apos;#&apos;</span>;
+<a name="l00081"></a><a class="code" href="base_2remote__gdb_8hh.html#aed92843772362fd32e1305e05ed1e0c5">00081</a> <span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code" href="base_2remote__gdb_8hh.html#aed92843772362fd32e1305e05ed1e0c5">GDBGoodP</a> = <span class="charliteral">&apos;+&apos;</span>;
+<a name="l00082"></a><a class="code" href="base_2remote__gdb_8hh.html#a5aef3fc10123b588700dba5c2ab9de24">00082</a> <span class="keyword">const</span> <span class="keywordtype">char</span> <a class="code" href="base_2remote__gdb_8hh.html#a5aef3fc10123b588700dba5c2ab9de24">GDBBadP</a> = <span class="charliteral">&apos;-&apos;</span>;
+<a name="l00083"></a>00083 
+<a name="l00084"></a><a class="code" href="base_2remote__gdb_8hh.html#a346de31138a53901e54429d682270d8e">00084</a> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="base_2remote__gdb_8hh.html#a346de31138a53901e54429d682270d8e">GDBPacketBufLen</a> = 1024;
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086 <span class="keyword">class </span><a class="code" href="classBaseRemoteGDB.html">BaseRemoteGDB</a>
+<a name="l00087"></a>00087 {
+<a name="l00088"></a>00088   <span class="keyword">private</span>:
+<a name="l00089"></a>00089     <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a19c86e0d31779f284e91d4d016448264">debugger</a>();
+<a name="l00090"></a><a class="code" href="classBaseRemoteGDB.html#a9759bc7ba80437d060e93ffb17361c55">00090</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classGDBListener.html">GDBListener</a>;
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092     <span class="comment">//Helper functions</span>
+<a name="l00093"></a>00093   <span class="keyword">protected</span>:
+<a name="l00094"></a>00094     <span class="keywordtype">int</span> <a class="code" href="classBaseRemoteGDB.html#a32f99cfc81ba23dc0b61a0e11373e1da">digit2i</a>(<span class="keywordtype">char</span>);
+<a name="l00095"></a>00095     <span class="keywordtype">char</span> <a class="code" href="classBaseRemoteGDB.html#a380e69e2af0b61c399efe68818bed2e2">i2digit</a>(<span class="keywordtype">int</span>);
+<a name="l00096"></a>00096     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseRemoteGDB.html#a9d71b1350a41827aa3c4e34409222bc4">hex2i</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> **);
+<a name="l00097"></a>00097     <span class="comment">//Address formats, break types, and gdb commands may change</span>
+<a name="l00098"></a>00098     <span class="comment">//between architectures, so they&apos;re defined as virtual</span>
+<a name="l00099"></a>00099     <span class="comment">//functions.</span>
+<a name="l00100"></a>00100     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#ae31bb2c456fc82307f7ab60a59d81e62">mem2hex</a>(<span class="keywordtype">void</span> *, <span class="keyword">const</span> <span class="keywordtype">void</span> *, <span class="keywordtype">int</span>);
+<a name="l00101"></a>00101     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="classBaseRemoteGDB.html#a1c09904ab1f0dfd53045815c8023ed99">hex2mem</a>(<span class="keywordtype">void</span> *, <span class="keyword">const</span> <span class="keywordtype">char</span> *, <span class="keywordtype">int</span>);
+<a name="l00102"></a>00102     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="classBaseRemoteGDB.html#a16c567d9c992eb13819358b18ab219b6">break_type</a>(<span class="keywordtype">char</span> <a class="code" href="namespaceArmISA.html#a29b9f05234a93d5391014a3cfc5658b1">c</a>);
+<a name="l00103"></a>00103     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="classBaseRemoteGDB.html#a7bbbec7a5e05f7f9ae638bbe1b72b1d8">gdb_command</a>(<span class="keywordtype">char</span> cmd);
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105   <span class="keyword">protected</span>:
+<a name="l00106"></a><a class="code" href="classBaseRemoteGDB_1_1Event.html">00106</a>     <span class="keyword">class </span><a class="code" href="classBaseRemoteGDB_1_1Event.html">Event</a> : <span class="keyword">public</span> <a class="code" href="classPollEvent.html">PollEvent</a>
+<a name="l00107"></a>00107     {
+<a name="l00108"></a>00108       <span class="keyword">protected</span>:
+<a name="l00109"></a><a class="code" href="classBaseRemoteGDB_1_1Event.html#abc7630d7a55d0751927fed9b12d7b202">00109</a>         <a class="code" href="classBaseRemoteGDB.html">BaseRemoteGDB</a> *<a class="code" href="classBaseRemoteGDB_1_1Event.html#abc7630d7a55d0751927fed9b12d7b202">gdb</a>;
+<a name="l00110"></a>00110 
+<a name="l00111"></a>00111       <span class="keyword">public</span>:
+<a name="l00112"></a>00112         <a class="code" href="classBaseRemoteGDB_1_1Event.html#a2d589f9147c437ef4e2aa278258c7465">Event</a>(<a class="code" href="classBaseRemoteGDB.html">BaseRemoteGDB</a> *<a class="code" href="namespaceMipsISA.html#adaa97a14cfbb88776805aa7e304aa2ce">g</a>, <span class="keywordtype">int</span> <a class="code" href="classBaseRemoteGDB.html#a6f8059414f0228f0256115e024eeed4b">fd</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a>);
+<a name="l00113"></a>00113         <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB_1_1Event.html#aedacbaeee0c89ceca526874c34f6b20b">process</a>(<span class="keywordtype">int</span> revent);
+<a name="l00114"></a>00114     };
+<a name="l00115"></a>00115 
+<a name="l00116"></a><a class="code" href="classBaseRemoteGDB.html#a3c7b3c89bf96f51e80a919b3a82a3915">00116</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classBaseRemoteGDB_1_1Event.html">Event</a>;
+<a name="l00117"></a><a class="code" href="classBaseRemoteGDB.html#a765488c8f26c7f8713d5245212dcae01">00117</a>     <a class="code" href="classBaseRemoteGDB_1_1Event.html">Event</a> *<a class="code" href="classBaseRemoteGDB.html#a765488c8f26c7f8713d5245212dcae01">event</a>;
+<a name="l00118"></a><a class="code" href="classBaseRemoteGDB.html#a70415b68fb0739613a991b92c4d127a5">00118</a>     <a class="code" href="classGDBListener.html">GDBListener</a> *<a class="code" href="classBaseRemoteGDB.html#a70415b68fb0739613a991b92c4d127a5">listener</a>;
+<a name="l00119"></a><a class="code" href="classBaseRemoteGDB.html#a7106e2abc437ad981830d14176d15f09">00119</a>     <span class="keywordtype">int</span> <a class="code" href="classBaseRemoteGDB.html#a7106e2abc437ad981830d14176d15f09">number</a>;
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121   <span class="keyword">protected</span>:
+<a name="l00122"></a>00122     <span class="comment">//The socket commands come in through</span>
+<a name="l00123"></a><a class="code" href="classBaseRemoteGDB.html#a6f8059414f0228f0256115e024eeed4b">00123</a>     <span class="keywordtype">int</span> <a class="code" href="classBaseRemoteGDB.html#a6f8059414f0228f0256115e024eeed4b">fd</a>;
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125   <span class="keyword">protected</span>:
+<a name="l00126"></a>00126 <span class="preprocessor">#ifdef notyet</span>
+<a name="l00127"></a>00127 <span class="preprocessor"></span>    label_t recover;
+<a name="l00128"></a>00128 <span class="preprocessor">#endif</span>
+<a name="l00129"></a><a class="code" href="classBaseRemoteGDB.html#a03c996f9fcf0e10baeb3e700be0c409a">00129</a> <span class="preprocessor"></span>    <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a03c996f9fcf0e10baeb3e700be0c409a">active</a>;
+<a name="l00130"></a><a class="code" href="classBaseRemoteGDB.html#a571d1b910d429b292be1f1c555733f62">00130</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a571d1b910d429b292be1f1c555733f62">attached</a>;
+<a name="l00131"></a>00131 
+<a name="l00132"></a><a class="code" href="classBaseRemoteGDB.html#af27ccd765f13a4b7bd119dc7579e2746">00132</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classBaseRemoteGDB.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00133"></a><a class="code" href="classBaseRemoteGDB.html#a9684dd9218c7836517670f8a0d8f3df7">00133</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classBaseRemoteGDB.html#a9684dd9218c7836517670f8a0d8f3df7">context</a>;
+<a name="l00134"></a>00134 
+<a name="l00135"></a>00135   <span class="keyword">protected</span>:
+<a name="l00136"></a><a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html">00136</a>     <span class="keyword">class </span><a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html">GdbRegCache</a>
+<a name="l00137"></a>00137     {
+<a name="l00138"></a>00138       <span class="keyword">public</span>:
+<a name="l00139"></a><a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a72ae38d6e98205849d615fb264039628">00139</a>         <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a72ae38d6e98205849d615fb264039628">GdbRegCache</a>(<span class="keywordtype">size_t</span> newSize) : <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#ac02cb30bb70aba580a68cd1e4f0df7ad">regs</a>(new uint64_t[newSize]), <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a854352f53b148adc24983a58a1866d66">size</a>(newSize)
+<a name="l00140"></a>00140         {}
+<a name="l00141"></a><a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a62fbac449c276f439b75391b0068fd77">00141</a>         <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a62fbac449c276f439b75391b0068fd77">~GdbRegCache</a>()
+<a name="l00142"></a>00142         {
+<a name="l00143"></a>00143             <span class="keyword">delete</span> [] <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#ac02cb30bb70aba580a68cd1e4f0df7ad">regs</a>;
+<a name="l00144"></a>00144         }
+<a name="l00145"></a>00145 
+<a name="l00146"></a><a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#ac02cb30bb70aba580a68cd1e4f0df7ad">00146</a>         uint64_t * <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#ac02cb30bb70aba580a68cd1e4f0df7ad">regs</a>;
+<a name="l00147"></a><a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a854352f53b148adc24983a58a1866d66">00147</a>         <span class="keywordtype">size_t</span> <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a854352f53b148adc24983a58a1866d66">size</a>;
+<a name="l00148"></a><a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#af5dc21741defa890c1d21c1071c7ea72">00148</a>         <span class="keywordtype">size_t</span> <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#af5dc21741defa890c1d21c1071c7ea72">bytes</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html#a854352f53b148adc24983a58a1866d66">size</a> * <span class="keyword">sizeof</span>(uint64_t); }
+<a name="l00149"></a>00149     };
+<a name="l00150"></a>00150 
+<a name="l00151"></a><a class="code" href="classBaseRemoteGDB.html#a4dbf55c54f47727c96b2cb5d00ca7936">00151</a>     <a class="code" href="classBaseRemoteGDB_1_1GdbRegCache.html">GdbRegCache</a> <a class="code" href="classBaseRemoteGDB.html#a4dbf55c54f47727c96b2cb5d00ca7936">gdbregs</a>;
+<a name="l00152"></a>00152 
+<a name="l00153"></a>00153   <span class="keyword">protected</span>:
+<a name="l00154"></a>00154     uint8_t <a class="code" href="classBaseRemoteGDB.html#a605a0b1dc1ef87abf31b307291475efd">getbyte</a>();
+<a name="l00155"></a>00155     <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#af81af327543d8feab2b0bcc83170d68c">putbyte</a>(uint8_t <a class="code" href="namespaceArmISA.html#aa4c45773b9b358324d349233bf954418">b</a>);
+<a name="l00156"></a>00156 
+<a name="l00157"></a>00157     <span class="keywordtype">int</span> <a class="code" href="classBaseRemoteGDB.html#ad39aca9b61a4b34960108fd7c70a40ef">recv</a>(<span class="keywordtype">char</span> *data, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00158"></a>00158     <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#ab5ecea9b4516973a35d89b23c4b7961f">send</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *data);
+<a name="l00159"></a>00159 
+<a name="l00160"></a>00160   <span class="keyword">protected</span>:
+<a name="l00161"></a>00161     <span class="comment">// Machine memory</span>
+<a name="l00162"></a>00162     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a08b012fff4ed4c4cd0f91b482551c75c">read</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">size_t</span> size, <span class="keywordtype">char</span> *data);
+<a name="l00163"></a>00163     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#afbada55bb9d0e9c8c26bb48cb5890111">write</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">size_t</span> size, <span class="keyword">const</span> <span class="keywordtype">char</span> *data);
+<a name="l00164"></a>00164 
+<a name="l00165"></a>00165     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt; T <a class="code" href="classBaseRemoteGDB.html#a08b012fff4ed4c4cd0f91b482551c75c">read</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00166"></a>00166     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt; <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#afbada55bb9d0e9c8c26bb48cb5890111">write</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, T data);
+<a name="l00167"></a>00167 
+<a name="l00168"></a>00168   <span class="keyword">public</span>:
+<a name="l00169"></a>00169     <a class="code" href="classBaseRemoteGDB.html#a4adca95cc66bef1431e337cc867edf2d">BaseRemoteGDB</a>(<a class="code" href="classSystem.html">System</a> *<a class="code" href="classBaseRemoteGDB.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classBaseRemoteGDB.html#a9684dd9218c7836517670f8a0d8f3df7">context</a>, <span class="keywordtype">size_t</span> cacheSize);
+<a name="l00170"></a>00170     <span class="keyword">virtual</span> <a class="code" href="classBaseRemoteGDB.html#a04bcb8fd2ed15acbabc951b9a2714870">~BaseRemoteGDB</a>();
+<a name="l00171"></a>00171 
+<a name="l00172"></a><a class="code" href="classBaseRemoteGDB.html#a36909ca9ba5d0978fe30241da42a0e10">00172</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a36909ca9ba5d0978fe30241da42a0e10">replaceThreadContext</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) { <a class="code" href="classBaseRemoteGDB.html#a9684dd9218c7836517670f8a0d8f3df7">context</a> = tc; }
+<a name="l00173"></a>00173 
+<a name="l00174"></a>00174     <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a9b8a915c2058dbc784c223ff9b93f1a5">attach</a>(<span class="keywordtype">int</span> <a class="code" href="classBaseRemoteGDB.html#a6f8059414f0228f0256115e024eeed4b">fd</a>);
+<a name="l00175"></a>00175     <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#ac295bade8aee589f6718dfa79edc2a34">detach</a>();
+<a name="l00176"></a>00176     <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#ab1d071ce59a596e7db67b12d384469cc">isattached</a>();
+<a name="l00177"></a>00177 
+<a name="l00178"></a>00178     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#ac0968a34e271b194ce3e808a2252d6a3">acc</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>) = 0;
+<a name="l00179"></a>00179     <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a24d0c1ce5672f7476a707b0cef30386d">trap</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#ad805db903f6899f960fd9a982272096a">type</a>);
+<a name="l00180"></a><a class="code" href="classBaseRemoteGDB.html#aa9fdfc3926a9047bc0fb3d7b13030064">00180</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#ae59ed2201db88c0668ca26040f6a3ad0">breakpoint</a>()
+<a name="l00181"></a>00181     {
+<a name="l00182"></a>00182         <span class="keywordflow">return</span> <a class="code" href="classBaseRemoteGDB.html#a24d0c1ce5672f7476a707b0cef30386d">trap</a>(SIGTRAP);
+<a name="l00183"></a>00183     }
+<a name="l00184"></a>00184 
+<a name="l00185"></a>00185   <span class="keyword">protected</span>:
+<a name="l00186"></a>00186     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#aca04756a764f2ef2add9ee91be012659">getregs</a>() = 0;
+<a name="l00187"></a>00187     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a6b0b51dc196f12756cc0ec49a3ae6a6a">setregs</a>() = 0;
+<a name="l00188"></a>00188 
+<a name="l00189"></a>00189     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a69f1887d1310ab6f19cf5bbcdf9d7a1e">clearSingleStep</a>() = 0;
+<a name="l00190"></a>00190     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a253d4b1107e84fe80036d1826067741a">setSingleStep</a>() = 0;
+<a name="l00191"></a>00191 
+<a name="l00192"></a>00192     <a class="code" href="classPCEventQueue.html">PCEventQueue</a> *<a class="code" href="classBaseRemoteGDB.html#ac57b158f05697ff67c069696646db0b2">getPcEventQueue</a>();
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194   <span class="keyword">protected</span>:
+<a name="l00195"></a><a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html">00195</a>     <span class="keyword">class </span><a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html">HardBreakpoint</a> : <span class="keyword">public</span> <a class="code" href="classPCEvent.html">PCEvent</a>
+<a name="l00196"></a>00196     {
+<a name="l00197"></a>00197       <span class="keyword">private</span>:
+<a name="l00198"></a><a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#abc7630d7a55d0751927fed9b12d7b202">00198</a>         <a class="code" href="classBaseRemoteGDB.html">BaseRemoteGDB</a> *<a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#abc7630d7a55d0751927fed9b12d7b202">gdb</a>;
+<a name="l00199"></a>00199 
+<a name="l00200"></a>00200       <span class="keyword">public</span>:
+<a name="l00201"></a><a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#a6022c8a609170c7365fb96e83cb2df48">00201</a>         <span class="keywordtype">int</span> <a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#a6022c8a609170c7365fb96e83cb2df48">refcount</a>;
+<a name="l00202"></a>00202 
+<a name="l00203"></a>00203       <span class="keyword">public</span>:
+<a name="l00204"></a>00204         <a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#aa377dd693f72123285321aa65568be3d">HardBreakpoint</a>(<a class="code" href="classBaseRemoteGDB.html">BaseRemoteGDB</a> *_gdb, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00205"></a><a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#a6490f765a824ced1cc94979609fe7e07">00205</a>         <span class="keyword">const</span> std::string <a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#a6490f765a824ced1cc94979609fe7e07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#abc7630d7a55d0751927fed9b12d7b202">gdb</a>-&gt;<a class="code" href="classBaseRemoteGDB.html#aa62b508d2c0e7d9cec12924965276eb5">name</a>() + <span class="stringliteral">&quot;.hwbkpt&quot;</span>; }
+<a name="l00206"></a>00206 
+<a name="l00207"></a>00207         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html#ad66a9d5ec7cfe597b848a17c0df5cc28">process</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00208"></a>00208     };
+<a name="l00209"></a><a class="code" href="classBaseRemoteGDB.html#ad185c0396aa4b55d7f1fbb3749759247">00209</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classBaseRemoteGDB_1_1HardBreakpoint.html">HardBreakpoint</a>;
+<a name="l00210"></a>00210 
+<a name="l00211"></a><a class="code" href="classBaseRemoteGDB.html#a1d52d0c05b8ee640ddcd82fe5ec33593">00211</a>     <span class="keyword">typedef</span> std::map&lt;Addr, HardBreakpoint *&gt; <a class="code" href="classBaseRemoteGDB.html#a1d52d0c05b8ee640ddcd82fe5ec33593">break_map_t</a>;
+<a name="l00212"></a><a class="code" href="classBaseRemoteGDB.html#aa4f6467b8be2918c47e0db3c90948fa2">00212</a>     <span class="keyword">typedef</span> break_map_t::iterator <a class="code" href="classBaseRemoteGDB.html#aa4f6467b8be2918c47e0db3c90948fa2">break_iter_t</a>;
+<a name="l00213"></a><a class="code" href="classBaseRemoteGDB.html#a9786e8b1280562520a5041f18dd59b21">00213</a>     <a class="code" href="classBaseRemoteGDB.html#a1d52d0c05b8ee640ddcd82fe5ec33593">break_map_t</a> <a class="code" href="classBaseRemoteGDB.html#a9786e8b1280562520a5041f18dd59b21">hardBreakMap</a>;
+<a name="l00214"></a>00214 
+<a name="l00215"></a>00215     <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a1b9e575ee171c687b3ae8516ae5f8b06">insertSoftBreak</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00216"></a>00216     <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a0ea4682895df85b1eba96a7050194393">removeSoftBreak</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00217"></a>00217     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a6a65f23f1e316fc2362cced431fa2335">insertHardBreak</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00218"></a>00218     <span class="keywordtype">bool</span> <a class="code" href="classBaseRemoteGDB.html#a4c7eed355fe612b660050cbea42fb722">removeHardBreak</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00219"></a>00219 
+<a name="l00220"></a>00220   <span class="keyword">protected</span>:
+<a name="l00221"></a>00221     <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a93ff11d3bfcc225314165f7b416ec0eb">clearTempBreakpoint</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;bkpt);
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classBaseRemoteGDB.html#a4d9f487f6c58b020861024b478729865">setTempBreakpoint</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> bkpt);
+<a name="l00223"></a>00223 
+<a name="l00224"></a>00224   <span class="keyword">public</span>:
+<a name="l00225"></a>00225     std::string <a class="code" href="classBaseRemoteGDB.html#aa62b508d2c0e7d9cec12924965276eb5">name</a>();
+<a name="l00226"></a>00226 };
+<a name="l00227"></a>00227 
+<a name="l00228"></a>00228 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00229"></a>00229 <span class="keyword">inline</span> T
+<a name="l00230"></a><a class="code" href="classBaseRemoteGDB.html#a3bfd45e5030624d2d72405e15a25d961">00230</a> <a class="code" href="classBaseRemoteGDB.html#a08b012fff4ed4c4cd0f91b482551c75c">BaseRemoteGDB::read</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>)
+<a name="l00231"></a>00231 {
+<a name="l00232"></a>00232     T temp;
+<a name="l00233"></a>00233     <a class="code" href="classBaseRemoteGDB.html#a08b012fff4ed4c4cd0f91b482551c75c">read</a>(addr, <span class="keyword">sizeof</span>(T), (<span class="keywordtype">char</span> *)&amp;temp);
+<a name="l00234"></a>00234     <span class="keywordflow">return</span> temp;
+<a name="l00235"></a>00235 }
+<a name="l00236"></a>00236 
+<a name="l00237"></a>00237 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00238"></a>00238 <span class="keyword">inline</span> <span class="keywordtype">void</span>
+<a name="l00239"></a><a class="code" href="classBaseRemoteGDB.html#a45f7320d5f3976e7a792619ba1fb0798">00239</a> <a class="code" href="classBaseRemoteGDB.html#afbada55bb9d0e9c8c26bb48cb5890111">BaseRemoteGDB::write</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, T data)
+<a name="l00240"></a>00240 { <a class="code" href="classBaseRemoteGDB.html#afbada55bb9d0e9c8c26bb48cb5890111">write</a>(addr, <span class="keyword">sizeof</span>(T), (<span class="keyword">const</span> <span class="keywordtype">char</span> *)&amp;data); }
+<a name="l00241"></a>00241 
+<a name="l00242"></a><a class="code" href="classGDBListener.html">00242</a> <span class="keyword">class </span><a class="code" href="classGDBListener.html">GDBListener</a>
+<a name="l00243"></a>00243 {
+<a name="l00244"></a>00244   <span class="keyword">protected</span>:
+<a name="l00245"></a><a class="code" href="classGDBListener_1_1Event.html">00245</a>     <span class="keyword">class </span><a class="code" href="classGDBListener_1_1Event.html">Event</a> : <span class="keyword">public</span> <a class="code" href="classPollEvent.html">PollEvent</a>
+<a name="l00246"></a>00246     {
+<a name="l00247"></a>00247       <span class="keyword">protected</span>:
+<a name="l00248"></a><a class="code" href="classGDBListener_1_1Event.html#a70415b68fb0739613a991b92c4d127a5">00248</a>         <a class="code" href="classGDBListener.html">GDBListener</a> *<a class="code" href="classGDBListener_1_1Event.html#a70415b68fb0739613a991b92c4d127a5">listener</a>;
+<a name="l00249"></a>00249 
+<a name="l00250"></a>00250       <span class="keyword">public</span>:
+<a name="l00251"></a>00251         <a class="code" href="classGDBListener_1_1Event.html#af30bf3e6535a28eda4e610d484fd8f5b">Event</a>(<a class="code" href="classGDBListener.html">GDBListener</a> *<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a87001e8063b8b1b5dc88f5a4b43b2a5a">fd</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a>);
+<a name="l00252"></a>00252         <span class="keywordtype">void</span> <a class="code" href="classGDBListener_1_1Event.html#aedacbaeee0c89ceca526874c34f6b20b">process</a>(<span class="keywordtype">int</span> revent);
+<a name="l00253"></a>00253     };
+<a name="l00254"></a>00254 
+<a name="l00255"></a><a class="code" href="classGDBListener.html#a3c7b3c89bf96f51e80a919b3a82a3915">00255</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classGDBListener_1_1Event.html">Event</a>;
+<a name="l00256"></a><a class="code" href="classGDBListener.html#a765488c8f26c7f8713d5245212dcae01">00256</a>     <a class="code" href="classGDBListener_1_1Event.html">Event</a> *<a class="code" href="classGDBListener.html#a765488c8f26c7f8713d5245212dcae01">event</a>;
+<a name="l00257"></a>00257 
+<a name="l00258"></a>00258   <span class="keyword">protected</span>:
+<a name="l00259"></a><a class="code" href="classGDBListener.html#acf9ea448b26a541b4a197f1ca92f700b">00259</a>     <a class="code" href="classListenSocket.html">ListenSocket</a> <a class="code" href="classGDBListener.html#acf9ea448b26a541b4a197f1ca92f700b">listener</a>;
+<a name="l00260"></a><a class="code" href="classGDBListener.html#abc7630d7a55d0751927fed9b12d7b202">00260</a>     <a class="code" href="classBaseRemoteGDB.html">BaseRemoteGDB</a> *<a class="code" href="classGDBListener.html#abc7630d7a55d0751927fed9b12d7b202">gdb</a>;
+<a name="l00261"></a><a class="code" href="classGDBListener.html#a63c89c04d1feae07ca35558055155ffb">00261</a>     <span class="keywordtype">int</span> <a class="code" href="classGDBListener.html#a63c89c04d1feae07ca35558055155ffb">port</a>;
+<a name="l00262"></a>00262 
+<a name="l00263"></a>00263   <span class="keyword">public</span>:
+<a name="l00264"></a>00264     <a class="code" href="classGDBListener.html#aa8b3c682f637e2fe4d93e2623219ee37">GDBListener</a>(<a class="code" href="classBaseRemoteGDB.html">BaseRemoteGDB</a> *<a class="code" href="namespaceMipsISA.html#adaa97a14cfbb88776805aa7e304aa2ce">g</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00265"></a>00265     <a class="code" href="classGDBListener.html#afe14217db64403242d45b6e321a389a6">~GDBListener</a>();
+<a name="l00266"></a>00266 
+<a name="l00267"></a>00267     <span class="keywordtype">void</span> <a class="code" href="classGDBListener.html#aadb9f3b844fb4cf98288cd3c60a3af91">accept</a>();
+<a name="l00268"></a>00268     <span class="keywordtype">void</span> <a class="code" href="classGDBListener.html#a458bbe4cf81360301586b2e62a7f9dd2">listen</a>();
+<a name="l00269"></a>00269     std::string <a class="code" href="classGDBListener.html#aa62b508d2c0e7d9cec12924965276eb5">name</a>();
+<a name="l00270"></a>00270 };
+<a name="l00271"></a>00271 
+<a name="l00272"></a>00272 <span class="preprocessor">#endif </span><span class="comment">/* __REMOTE_GDB_H__ */</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

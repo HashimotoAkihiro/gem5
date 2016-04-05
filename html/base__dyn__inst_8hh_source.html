@@ -1,0 +1,916 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/base_dyn_inst.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/base_dyn_inst.hh</h1><a href="base__dyn__inst_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011,2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00007"></a>00007 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00008"></a>00008 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00009"></a>00009 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00010"></a>00010 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00011"></a>00011 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00012"></a>00012 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00013"></a>00013 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00014"></a>00014 <span class="comment"> *</span>
+<a name="l00015"></a>00015 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00016"></a>00016 <span class="comment"> * Copyright (c) 2009 The University of Edinburgh</span>
+<a name="l00017"></a>00017 <span class="comment"> * All rights reserved.</span>
+<a name="l00018"></a>00018 <span class="comment"> *</span>
+<a name="l00019"></a>00019 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00020"></a>00020 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00021"></a>00021 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00023"></a>00023 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00024"></a>00024 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00025"></a>00025 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00026"></a>00026 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00027"></a>00027 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00028"></a>00028 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00029"></a>00029 <span class="comment"> *</span>
+<a name="l00030"></a>00030 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00031"></a>00031 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00032"></a>00032 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00033"></a>00033 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00034"></a>00034 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00035"></a>00035 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00036"></a>00036 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00037"></a>00037 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00038"></a>00038 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00039"></a>00039 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00040"></a>00040 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00041"></a>00041 <span class="comment"> *</span>
+<a name="l00042"></a>00042 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00043"></a>00043 <span class="comment"> *          Timothy M. Jones</span>
+<a name="l00044"></a>00044 <span class="comment"> */</span>
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="preprocessor">#ifndef __CPU_BASE_DYN_INST_HH__</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_BASE_DYN_INST_HH__</span>
+<a name="l00048"></a>00048 <span class="preprocessor"></span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &lt;bitset&gt;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;arch/utility.hh&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="trace_8hh.html">base/trace.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;<a class="code" href="checker_2cpu_8hh.html">cpu/checker/cpu.hh</a>&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="o3_2comm_8hh.html">cpu/o3/comm.hh</a>&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;<a class="code" href="exetrace_8hh.html">cpu/exetrace.hh</a>&quot;</span>
+<a name="l00060"></a>00060 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00061"></a>00061 <span class="preprocessor">#include &quot;<a class="code" href="op__class_8hh.html">cpu/op_class.hh</a>&quot;</span>
+<a name="l00062"></a>00062 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2static__inst_8hh.html">cpu/static_inst.hh</a>&quot;</span>
+<a name="l00063"></a>00063 <span class="preprocessor">#include &quot;<a class="code" href="translation_8hh.html">cpu/translation.hh</a>&quot;</span>
+<a name="l00064"></a>00064 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00065"></a>00065 <span class="preprocessor">#include &quot;<a class="code" href="byteswap_8hh.html">sim/byteswap.hh</a>&quot;</span>
+<a name="l00066"></a>00066 <span class="preprocessor">#include &quot;<a class="code" href="fault__fwd_8hh.html">sim/fault_fwd.hh</a>&quot;</span>
+<a name="l00067"></a>00067 <span class="preprocessor">#include &quot;<a class="code" href="sim_2system_8hh.html">sim/system.hh</a>&quot;</span>
+<a name="l00068"></a>00068 <span class="preprocessor">#include &quot;<a class="code" href="sim_2tlb_8hh.html">sim/tlb.hh</a>&quot;</span>
+<a name="l00069"></a>00069 
+<a name="l00075"></a>00075 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00076"></a><a class="code" href="classBaseDynInst.html">00076</a> <span class="keyword">class </span><a class="code" href="classBaseDynInst.html">BaseDynInst</a> : <span class="keyword">public</span> <a class="code" href="classRefCounted.html">RefCounted</a>
+<a name="l00077"></a>00077 {
+<a name="l00078"></a>00078   <span class="keyword">public</span>:
+<a name="l00079"></a>00079     <span class="comment">// Typedef for the CPU.</span>
+<a name="l00080"></a><a class="code" href="classBaseDynInst.html#a9792f311b2805cbefb8cb15c1c4a4cf5">00080</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUType <a class="code" href="classOzoneCPU.html">ImplCPU</a>;
+<a name="l00081"></a><a class="code" href="classBaseDynInst.html#a767a9d57347239b1c904738bbd7796fa">00081</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="structOzoneThreadState.html">ImplCPU::ImplState</a> <a class="code" href="structOzoneThreadState.html">ImplState</a>;
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083     <span class="comment">// Logical register index type.</span>
+<a name="l00084"></a><a class="code" href="classBaseDynInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">00084</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> <a class="code" href="classBaseDynInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a>;
+<a name="l00085"></a>00085     <span class="comment">// Integer register type.</span>
+<a name="l00086"></a><a class="code" href="classBaseDynInst.html#a1355cb78d031430d4d70eb5080267604">00086</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a0e080577527fb3e9685399f75b5caf15">TheISA::IntReg</a> <a class="code" href="classBaseDynInst.html#a1355cb78d031430d4d70eb5080267604">IntReg</a>;
+<a name="l00087"></a>00087     <span class="comment">// Floating point register type.</span>
+<a name="l00088"></a><a class="code" href="classBaseDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">00088</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a06fae4f187c7c94b8b0046dd6802be48">TheISA::FloatReg</a> <a class="code" href="classBaseDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a>;
+<a name="l00089"></a>00089     <span class="comment">//@@@add simd register</span>
+<a name="l00090"></a>00090 
+<a name="l00091"></a>00091     <span class="comment">// The DynInstPtr type.</span>
+<a name="l00092"></a><a class="code" href="classBaseDynInst.html#a028ce10889c5f6450239d9e9a7347976">00092</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classRefCountingPtr.html">DynInstPtr</a>;
+<a name="l00093"></a><a class="code" href="classBaseDynInst.html#ab1bbb895c1fee69912972ee66ed93c18">00093</a>     <span class="keyword">typedef</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;BaseDynInst&lt;Impl&gt;</a> &gt; <a class="code" href="classRefCountingPtr.html">BaseDynInstPtr</a>;
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095     <span class="comment">// The list of instructions iterator type.</span>
+<a name="l00096"></a><a class="code" href="classBaseDynInst.html#a184cb829e22cc656acb41864f68f51ea">00096</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classBaseDynInst.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a>;
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098     <span class="keyword">enum</span> {
+<a name="l00099"></a><a class="code" href="classBaseDynInst.html#ae4d5251432e1a9e6803c0240cc492e18a17b78fe104e3bf28fca535a040514084">00099</a>         <a class="code" href="classBaseDynInst.html#ae4d5251432e1a9e6803c0240cc492e18a17b78fe104e3bf28fca535a040514084">MaxInstSrcRegs</a> = <a class="code" href="namespaceArmISA.html#a520799fb7436e81cf66cbad7b420b833">TheISA::MaxInstSrcRegs</a>,        
+<a name="l00100"></a><a class="code" href="classBaseDynInst.html#ae4d5251432e1a9e6803c0240cc492e18a6a2e9b17a83d01eb4ee6bbdd739be9eb">00100</a>         <a class="code" href="classBaseDynInst.html#ae4d5251432e1a9e6803c0240cc492e18a6a2e9b17a83d01eb4ee6bbdd739be9eb" title="Max source regs.">MaxInstDestRegs</a> = TheISA::MaxInstDestRegs       
+<a name="l00101"></a>00101     };
+<a name="l00102"></a>00102 
+<a name="l00103"></a><a class="code" href="unionBaseDynInst_1_1Result.html">00103</a>     <span class="keyword">union </span><a class="code" href="unionBaseDynInst_1_1Result.html">Result</a> {
+<a name="l00104"></a><a class="code" href="unionBaseDynInst_1_1Result.html#a88f9f5e1216d6aaa43434facecd25bc4">00104</a>         uint64_t <a class="code" href="unionBaseDynInst_1_1Result.html#a88f9f5e1216d6aaa43434facecd25bc4">integer</a>;
+<a name="l00105"></a><a class="code" href="unionBaseDynInst_1_1Result.html#a57291299e530453fdec37a931c728239">00105</a>         <span class="keywordtype">double</span> <a class="code" href="unionBaseDynInst_1_1Result.html#a57291299e530453fdec37a931c728239">dbl</a>;
+<a name="l00106"></a><a class="code" href="unionBaseDynInst_1_1Result.html#a30a5b4d2249237f50ab1a3d705ed91ed">00106</a>         <span class="keywordtype">void</span> <span class="keyword">set</span>(uint64_t <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) { <a class="code" href="unionBaseDynInst_1_1Result.html#a88f9f5e1216d6aaa43434facecd25bc4">integer</a> = <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>; }
+<a name="l00107"></a><a class="code" href="unionBaseDynInst_1_1Result.html#ae0ede19c410ba9c2044cd103cdc8c6c5">00107</a>         <span class="keywordtype">void</span> <span class="keyword">set</span>(<span class="keywordtype">double</span> <a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>) { <a class="code" href="unionBaseDynInst_1_1Result.html#a57291299e530453fdec37a931c728239">dbl</a> = <a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>; }
+<a name="l00108"></a><a class="code" href="unionBaseDynInst_1_1Result.html#a48451357be4a53c83f1bdd243df37d2a">00108</a>         <span class="keywordtype">void</span> <span class="keyword">get</span>(uint64_t&amp; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) { <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = <a class="code" href="unionBaseDynInst_1_1Result.html#a88f9f5e1216d6aaa43434facecd25bc4">integer</a>; }
+<a name="l00109"></a><a class="code" href="unionBaseDynInst_1_1Result.html#a47bb6359bb9f1642a6bf2b64725658ae">00109</a>         <span class="keywordtype">void</span> <span class="keyword">get</span>(<span class="keywordtype">double</span>&amp; <a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>) { <a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a> = <a class="code" href="unionBaseDynInst_1_1Result.html#a57291299e530453fdec37a931c728239">dbl</a>; }
+<a name="l00110"></a>00110     };
+<a name="l00111"></a>00111 
+<a name="l00112"></a>00112   <span class="keyword">protected</span>:
+<a name="l00113"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">00113</a>     <span class="keyword">enum</span> <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> {
+<a name="l00114"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba033d0b5f3300c89e5a30cc93340ac374">00114</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba033d0b5f3300c89e5a30cc93340ac374">IqEntry</a>,                 
+<a name="l00115"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70babff9c146554fea1156e224a3f1a41b78">00115</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70babff9c146554fea1156e224a3f1a41b78" title="Instruction is in the IQ.">RobEntry</a>,                
+<a name="l00116"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba910a740b0dabb8ab7b61f540d4efc7ef">00116</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba910a740b0dabb8ab7b61f540d4efc7ef" title="Instruction is in the ROB.">LsqEntry</a>,                
+<a name="l00117"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baf47f90c31ee3cdaa28b81ecf57b72ce9">00117</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baf47f90c31ee3cdaa28b81ecf57b72ce9" title="Instruction is in the LSQ.">Completed</a>,               
+<a name="l00118"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1317b2302eefb284e81392ff97d7fbfc">00118</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1317b2302eefb284e81392ff97d7fbfc" title="Instruction has completed.">ResultReady</a>,             
+<a name="l00119"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5920c582de2a56a0934db60ae9f17f90">00119</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5920c582de2a56a0934db60ae9f17f90" title="Instruction has its result.">CanIssue</a>,                
+<a name="l00120"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9857002704a7c967f40ad09425a609fb">00120</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9857002704a7c967f40ad09425a609fb" title="Instruction can issue and execute.">Issued</a>,                  
+<a name="l00121"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba64ac477648aa4bfdfdcfb81b9232e073">00121</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba64ac477648aa4bfdfdcfb81b9232e073" title="Instruction has issued.">Executed</a>,                
+<a name="l00122"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba3f73dd3b188316a28f6f49a756dd0f08">00122</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba3f73dd3b188316a28f6f49a756dd0f08" title="Instruction has executed.">CanCommit</a>,               
+<a name="l00123"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba98db15e644d921e4619fa954c33440db">00123</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba98db15e644d921e4619fa954c33440db" title="Instruction can commit.">AtCommit</a>,                
+<a name="l00124"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baa2fbad5a13016997291f98c11c254035">00124</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baa2fbad5a13016997291f98c11c254035" title="Instruction has reached commit.">Committed</a>,               
+<a name="l00125"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba173c3733642a8b921708ca664a078c6b">00125</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba173c3733642a8b921708ca664a078c6b" title="Instruction has committed.">Squashed</a>,                
+<a name="l00126"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba80733653b968f232fdf73b8eab7fff86">00126</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba80733653b968f232fdf73b8eab7fff86" title="Instruction is squashed.">SquashedInIQ</a>,            
+<a name="l00127"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad72c434c6c580a5f20e5f3b659de09d6">00127</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad72c434c6c580a5f20e5f3b659de09d6" title="Instruction is squashed in the IQ.">SquashedInLSQ</a>,           
+<a name="l00128"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad76f955270c2e46b6df438a043fc84cc">00128</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad76f955270c2e46b6df438a043fc84cc" title="Instruction is squashed in the LSQ.">SquashedInROB</a>,           
+<a name="l00129"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9c362affef98d47542b10870213f38b0">00129</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9c362affef98d47542b10870213f38b0" title="Instruction is squashed in the ROB.">RecoverInst</a>,             
+<a name="l00130"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70babe0a1c80170ca464e1ffe07cf27c8790">00130</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70babe0a1c80170ca464e1ffe07cf27c8790" title="Is a recover instruction.">BlockingInst</a>,            
+<a name="l00131"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baa4ae9ccc1d686d1f743d77664c209c7c">00131</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baa4ae9ccc1d686d1f743d77664c209c7c" title="Is a blocking instruction.">ThreadsyncWait</a>,          
+<a name="l00132"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba6fccc334c05c6f43f90dc60238f6c39e">00132</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba6fccc334c05c6f43f90dc60238f6c39e" title="Is a thread synchronization instruction.">SerializeBefore</a>,         
+<a name="l00133"></a>00133 
+<a name="l00134"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab11834485756e0e9b84886d7d014a08f">00134</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab11834485756e0e9b84886d7d014a08f">SerializeAfter</a>,          
+<a name="l00135"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5dcfe61e192f9f6a72bc7ff9c5cd8a2b">00135</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5dcfe61e192f9f6a72bc7ff9c5cd8a2b" title="Needs to serialize instructions behind it.">SerializeHandled</a>,        
+<a name="l00136"></a><a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab37ed3bea9670ef9797b74ea37aed2f3">00136</a>         <a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab37ed3bea9670ef9797b74ea37aed2f3" title="Serialization has been handled.">NumStatus</a>
+<a name="l00137"></a>00137     };
+<a name="l00138"></a>00138 
+<a name="l00139"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295f">00139</a>     <span class="keyword">enum</span> <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295f">Flags</a> {
+<a name="l00140"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa7422b78b8b761d2a5b4e0a89009557dc">00140</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa7422b78b8b761d2a5b4e0a89009557dc">TranslationStarted</a>,
+<a name="l00141"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa52194c718e80ba78894183e950d2fe66">00141</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa52194c718e80ba78894183e950d2fe66">TranslationCompleted</a>,
+<a name="l00142"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa69b40810eb73b6324c949f37e6083131">00142</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa69b40810eb73b6324c949f37e6083131">PossibleLoadViolation</a>,
+<a name="l00143"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa914c83de922f543f7fc36c7a57a7254c">00143</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa914c83de922f543f7fc36c7a57a7254c">HitExternalSnoop</a>,
+<a name="l00144"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa18215c6f3e211fc0797fc8319a3b7dba">00144</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa18215c6f3e211fc0797fc8319a3b7dba">EffAddrValid</a>,
+<a name="l00145"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa5a7ffa46df69da4492bfa380bb56eba6">00145</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa5a7ffa46df69da4492bfa380bb56eba6">RecordResult</a>,
+<a name="l00146"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faf3f0ec77fa58b6268327a87170b3b204">00146</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faf3f0ec77fa58b6268327a87170b3b204">Predicate</a>,
+<a name="l00147"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa598c9294d31a04169908391fe1e3f8f7">00147</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa598c9294d31a04169908391fe1e3f8f7">PredTaken</a>,
+<a name="l00151"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fab6d9bd536d2399d9e48ceac11630df4d">00151</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fab6d9bd536d2399d9e48ceac11630df4d">EACalcDone</a>,
+<a name="l00152"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa935a229fd307ffc1a80933386891c427">00152</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa935a229fd307ffc1a80933386891c427">IsUncacheable</a>,
+<a name="l00153"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa451547c16dc99e77c8e8a0aeb05c9447">00153</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa451547c16dc99e77c8e8a0aeb05c9447">ReqMade</a>,
+<a name="l00154"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faba7f7685e9e9b5a2d0ea9c18b8ac47ae">00154</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faba7f7685e9e9b5a2d0ea9c18b8ac47ae">MemOpDone</a>,
+<a name="l00155"></a><a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fafbf407084a11db7294b9f44e44fe7bb8">00155</a>         <a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fafbf407084a11db7294b9f44e44fe7bb8">MaxFlags</a>
+<a name="l00156"></a>00156     };
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158   <span class="keyword">public</span>:
+<a name="l00160"></a><a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">00160</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classBaseDynInst.html#af9da73f56d2d0e7fd5009b70c4cf3542">seqNum</a>;
+<a name="l00161"></a>00161 
+<a name="l00163"></a><a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">00163</a>     <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>;
+<a name="l00164"></a>00164 
+<a name="l00166"></a><a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">00166</a>     <a class="code" href="classOzoneCPU.html">ImplCPU</a> *<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>;
+<a name="l00167"></a>00167 
+<a name="l00168"></a><a class="code" href="classBaseDynInst.html#a4f35ce7d5cb2ec57504bc2c2bc03c879">00168</a>     <a class="code" href="classBaseCPU.html">BaseCPU</a> *<a class="code" href="classBaseDynInst.html#a4f35ce7d5cb2ec57504bc2c2bc03c879">getCpuPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>; }
+<a name="l00169"></a>00169 
+<a name="l00171"></a><a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">00171</a>     <a class="code" href="structOzoneThreadState.html">ImplState</a> *<a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>;
+<a name="l00172"></a>00172 
+<a name="l00174"></a><a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">00174</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a>;
+<a name="l00175"></a>00175 
+<a name="l00177"></a><a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">00177</a>     <a class="code" href="classTrace_1_1InstRecord.html">Trace::InstRecord</a> *<a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>;
+<a name="l00178"></a>00178 
+<a name="l00179"></a>00179   <span class="keyword">protected</span>:
+<a name="l00183"></a><a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">00183</a>     std::queue&lt;Result&gt; <a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>;
+<a name="l00184"></a>00184 
+<a name="l00186"></a><a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">00186</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>;
+<a name="l00187"></a>00187 
+<a name="l00188"></a>00188     <span class="comment">/* An amalgamation of a lot of boolean values into one */</span>
+<a name="l00189"></a><a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">00189</a>     std::bitset&lt;MaxFlags&gt; <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>;
+<a name="l00190"></a>00190 
+<a name="l00192"></a><a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">00192</a>     std::bitset&lt;NumStatus&gt; <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>;
+<a name="l00193"></a>00193 
+<a name="l00197"></a><a class="code" href="classBaseDynInst.html#a78a797b8c24ad873d0cbe5f52487b02f">00197</a>     std::bitset&lt;MaxInstSrcRegs&gt; <a class="code" href="classBaseDynInst.html#a78a797b8c24ad873d0cbe5f52487b02f">_readySrcRegIdx</a>;
+<a name="l00198"></a>00198 
+<a name="l00199"></a>00199   <span class="keyword">public</span>:
+<a name="l00201"></a><a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">00201</a>     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">threadNumber</a>;
+<a name="l00202"></a>00202 
+<a name="l00204"></a><a class="code" href="classBaseDynInst.html#ae774064514a3dc6a8d932c1fb975d37f">00204</a>     <a class="code" href="classBaseDynInst.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> <a class="code" href="classBaseDynInst.html#ae774064514a3dc6a8d932c1fb975d37f">instListIt</a>;
+<a name="l00205"></a>00205 
+<a name="l00207"></a>00207 
+<a name="l00208"></a><a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">00208</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a>;
+<a name="l00209"></a>00209 
+<a name="l00211"></a><a class="code" href="classBaseDynInst.html#a239d33ed2aa6ba1b897533642aa107a2">00211</a>     <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classBaseDynInst.html#a239d33ed2aa6ba1b897533642aa107a2">macroop</a>;
+<a name="l00212"></a>00212 
+<a name="l00214"></a><a class="code" href="classBaseDynInst.html#a98d0c5a64298b2b2d1bb8e99124b0963">00214</a>     uint8_t <a class="code" href="classBaseDynInst.html#a98d0c5a64298b2b2d1bb8e99124b0963">readyRegs</a>;
+<a name="l00215"></a>00215 
+<a name="l00216"></a>00216   <span class="keyword">public</span>:
+<a name="l00218"></a>00218 
+<a name="l00219"></a><a class="code" href="classBaseDynInst.html#a1097c58b547d58e4544cbf31fa68a390">00219</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#a1097c58b547d58e4544cbf31fa68a390">effAddr</a>;
+<a name="l00220"></a>00220 
+<a name="l00222"></a><a class="code" href="classBaseDynInst.html#a159ce173047bae421effda8028f07d68">00222</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#a159ce173047bae421effda8028f07d68">physEffAddr</a>;
+<a name="l00223"></a>00223 
+<a name="l00225"></a><a class="code" href="classBaseDynInst.html#aba29e5174ccb47ac17cc2ff228a8e2af">00225</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classBaseDynInst.html#aba29e5174ccb47ac17cc2ff228a8e2af">memReqFlags</a>;
+<a name="l00226"></a>00226 
+<a name="l00228"></a><a class="code" href="classBaseDynInst.html#a03f3e3cd7500e78001075b53eab05a53">00228</a>     <span class="keywordtype">short</span> <a class="code" href="classBaseDynInst.html#a03f3e3cd7500e78001075b53eab05a53">asid</a>;
+<a name="l00229"></a>00229 
+<a name="l00231"></a><a class="code" href="classBaseDynInst.html#ad52a4366d1b850793e6d979a7459cab4">00231</a>     uint8_t <a class="code" href="classBaseDynInst.html#ad52a4366d1b850793e6d979a7459cab4">effSize</a>;
+<a name="l00232"></a>00232 
+<a name="l00234"></a><a class="code" href="classBaseDynInst.html#a9c9a186aff5eddf449916952b8398116">00234</a>     uint8_t *<a class="code" href="classBaseDynInst.html#a9c9a186aff5eddf449916952b8398116">memData</a>;
+<a name="l00235"></a>00235 
+<a name="l00237"></a><a class="code" href="classBaseDynInst.html#a543896e8c656ce7cce978a1ec4d29afe">00237</a>     int16_t <a class="code" href="classBaseDynInst.html#a543896e8c656ce7cce978a1ec4d29afe">lqIdx</a>;
+<a name="l00238"></a>00238 
+<a name="l00240"></a><a class="code" href="classBaseDynInst.html#a9f5a94c5a008c1580f89d38e425a6528">00240</a>     int16_t <a class="code" href="classBaseDynInst.html#a9f5a94c5a008c1580f89d38e425a6528">sqIdx</a>;
+<a name="l00241"></a>00241 
+<a name="l00242"></a>00242 
+<a name="l00244"></a>00244 
+<a name="l00248"></a><a class="code" href="classBaseDynInst.html#a59b330383a8be2eaba12ac79b9d28dc2">00248</a>     <a class="code" href="classRequest.html">RequestPtr</a> <a class="code" href="classBaseDynInst.html#a59b330383a8be2eaba12ac79b9d28dc2">savedReq</a>;
+<a name="l00249"></a><a class="code" href="classBaseDynInst.html#a092c24fc1b01745b4611ef36265f778a">00249</a>     <a class="code" href="classRequest.html">RequestPtr</a> <a class="code" href="classBaseDynInst.html#a092c24fc1b01745b4611ef36265f778a">savedSreqLow</a>;
+<a name="l00250"></a><a class="code" href="classBaseDynInst.html#a0e8cac1ccea0f0428cb39947673bc31c">00250</a>     <a class="code" href="classRequest.html">RequestPtr</a> <a class="code" href="classBaseDynInst.html#a0e8cac1ccea0f0428cb39947673bc31c">savedSreqHigh</a>;
+<a name="l00251"></a>00251 
+<a name="l00253"></a>00253     <span class="comment">// Need a copy of main request pointer to verify on writes.</span>
+<a name="l00254"></a><a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">00254</a>     <a class="code" href="classRequest.html">RequestPtr</a> <a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a>;
+<a name="l00255"></a>00255 
+<a name="l00256"></a>00256   <span class="keyword">private</span>:
+<a name="l00260"></a><a class="code" href="classBaseDynInst.html#aaa54d2440fad0984a0a8edbcade8c26f">00260</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#aaa54d2440fad0984a0a8edbcade8c26f">instEffAddr</a>;
+<a name="l00261"></a>00261 
+<a name="l00262"></a>00262   <span class="keyword">protected</span>:
+<a name="l00266"></a><a class="code" href="classBaseDynInst.html#a44085d1f8566ca30fef0c6787999c79b">00266</a>     <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> <a class="code" href="classBaseDynInst.html#a44085d1f8566ca30fef0c6787999c79b">_flatDestRegIdx</a>[TheISA::MaxInstDestRegs];
+<a name="l00267"></a>00267 
+<a name="l00271"></a><a class="code" href="classBaseDynInst.html#a1536987a8d6f8490fc850b9cc95a9eb9">00271</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classBaseDynInst.html#a1536987a8d6f8490fc850b9cc95a9eb9">_destRegIdx</a>[TheISA::MaxInstDestRegs];
+<a name="l00272"></a>00272 
+<a name="l00276"></a><a class="code" href="classBaseDynInst.html#a648b3ab7be47d79ef8eb06b5f5238e92">00276</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classBaseDynInst.html#a648b3ab7be47d79ef8eb06b5f5238e92">_srcRegIdx</a>[<a class="code" href="namespaceArmISA.html#a520799fb7436e81cf66cbad7b420b833">TheISA::MaxInstSrcRegs</a>];
+<a name="l00277"></a>00277 
+<a name="l00281"></a><a class="code" href="classBaseDynInst.html#a32bf6cb0ac0bfb27a8b60945ca3c3603">00281</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classBaseDynInst.html#a32bf6cb0ac0bfb27a8b60945ca3c3603">_prevDestRegIdx</a>[TheISA::MaxInstDestRegs];
+<a name="l00282"></a>00282 
+<a name="l00283"></a>00283 
+<a name="l00284"></a>00284   <span class="keyword">public</span>:
+<a name="l00286"></a><a class="code" href="classBaseDynInst.html#a2873e4a3f13a6eced648f00776dde834">00286</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a2873e4a3f13a6eced648f00776dde834">recordResult</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>) { <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa5a7ffa46df69da4492bfa380bb56eba6">RecordResult</a>] = f; }
+<a name="l00287"></a>00287 
+<a name="l00289"></a><a class="code" href="classBaseDynInst.html#a3e8dc2f81466d2399695ce78aba506da">00289</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a3e8dc2f81466d2399695ce78aba506da">effAddrValid</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa18215c6f3e211fc0797fc8319a3b7dba">EffAddrValid</a>]; }
+<a name="l00290"></a>00290 
+<a name="l00292"></a><a class="code" href="classBaseDynInst.html#ab5d452060f2b5236af48329f3b21b250">00292</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ab5d452060f2b5236af48329f3b21b250">memOpDone</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faba7f7685e9e9b5a2d0ea9c18b8ac47ae">MemOpDone</a>]; }
+<a name="l00293"></a><a class="code" href="classBaseDynInst.html#a8febf5a926e063e10aed0215d0a0fcaf">00293</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a8febf5a926e063e10aed0215d0a0fcaf">memOpDone</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>) { <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faba7f7685e9e9b5a2d0ea9c18b8ac47ae">MemOpDone</a>] = f; }
+<a name="l00294"></a>00294 
+<a name="l00295"></a>00295 
+<a name="l00297"></a>00297     <span class="comment">//</span>
+<a name="l00298"></a>00298     <span class="comment">// INSTRUCTION EXECUTION</span>
+<a name="l00299"></a>00299     <span class="comment">//</span>
+<a name="l00301"></a>00301 <span class="comment"></span>
+<a name="l00302"></a><a class="code" href="classBaseDynInst.html#a2d698ff909513b48a1263f8a5440e067">00302</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a2d698ff909513b48a1263f8a5440e067">demapPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00303"></a>00303     {
+<a name="l00304"></a>00304         <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;<a class="code" href="classOzoneCPU.html#a2d698ff909513b48a1263f8a5440e067">demapPage</a>(vaddr, asn);
+<a name="l00305"></a>00305     }
+<a name="l00306"></a><a class="code" href="classBaseDynInst.html#ac8a36d45a839b07f50b73f1eee119615">00306</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ac8a36d45a839b07f50b73f1eee119615">demapInstPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00307"></a>00307     {
+<a name="l00308"></a>00308         <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;<a class="code" href="classOzoneCPU.html#a2d698ff909513b48a1263f8a5440e067">demapPage</a>(vaddr, asn);
+<a name="l00309"></a>00309     }
+<a name="l00310"></a><a class="code" href="classBaseDynInst.html#a26789603cc94992d18f8ddedfff96acf">00310</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a26789603cc94992d18f8ddedfff96acf">demapDataPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00311"></a>00311     {
+<a name="l00312"></a>00312         <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;<a class="code" href="classOzoneCPU.html#a2d698ff909513b48a1263f8a5440e067">demapPage</a>(vaddr, asn);
+<a name="l00313"></a>00313     }
+<a name="l00314"></a>00314 
+<a name="l00315"></a>00315   <span class="comment">/*@@@change*/</span>
+<a name="l00316"></a>00316     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classBaseDynInst.html#a66191b2d8a45050b7df3c3efa7bb07c6">readMem</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, uint8_t *data, <span class="keywordtype">unsigned</span> size, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>);
+<a name="l00317"></a>00317 
+<a name="l00318"></a>00318     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classBaseDynInst.html#ad46c5edeb1ee9b60445f3e26364e2c5e">writeMem</a>(uint8_t *data, <span class="keywordtype">unsigned</span> size,
+<a name="l00319"></a>00319                    <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>, uint64_t *res);
+<a name="l00320"></a>00320 
+<a name="l00322"></a>00322     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#aa1b0c0798d6520eb2c1bf3334cee01c5">splitRequest</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqLow,
+<a name="l00323"></a>00323                       <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqHigh);
+<a name="l00324"></a>00324 
+<a name="l00326"></a>00326     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ae5c08b83b54ab954feb02df3e206c1f0">initiateTranslation</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classRequest.html">RequestPtr</a> sreqLow,
+<a name="l00327"></a>00327                              <a class="code" href="classRequest.html">RequestPtr</a> sreqHigh, uint64_t *res,
+<a name="l00328"></a>00328                              <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">BaseTLB::Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>);
+<a name="l00329"></a>00329 
+<a name="l00331"></a>00331     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a36c2a28eca3086b67fc7168a37367e98">finishTranslation</a>(<a class="code" href="classWholeTranslationState.html">WholeTranslationState</a> *state);
+<a name="l00332"></a>00332 
+<a name="l00334"></a><a class="code" href="classBaseDynInst.html#ac97dc97e71471789910132e3a3ce0949">00334</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ac97dc97e71471789910132e3a3ce0949">translationStarted</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa7422b78b8b761d2a5b4e0a89009557dc">TranslationStarted</a>]; }
+<a name="l00335"></a><a class="code" href="classBaseDynInst.html#a68a56d88dcbcb5d039c94d7891edcbf7">00335</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a68a56d88dcbcb5d039c94d7891edcbf7">translationStarted</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>) { <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa7422b78b8b761d2a5b4e0a89009557dc">TranslationStarted</a>] = f; }
+<a name="l00336"></a>00336 
+<a name="l00338"></a><a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">00338</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">translationCompleted</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa52194c718e80ba78894183e950d2fe66">TranslationCompleted</a>]; }
+<a name="l00339"></a><a class="code" href="classBaseDynInst.html#a650f554d6709582f30768a90e1b665cb">00339</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a650f554d6709582f30768a90e1b665cb">translationCompleted</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>) { <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa52194c718e80ba78894183e950d2fe66">TranslationCompleted</a>] = f; }
+<a name="l00340"></a>00340 
+<a name="l00346"></a><a class="code" href="classBaseDynInst.html#afa40abf76b073fc08641ac2b8a9f96cd">00346</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#afa40abf76b073fc08641ac2b8a9f96cd">possibleLoadViolation</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa69b40810eb73b6324c949f37e6083131">PossibleLoadViolation</a>]; }
+<a name="l00347"></a><a class="code" href="classBaseDynInst.html#a7734c4cb05e0d0855b9cc931cfbf0166">00347</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a7734c4cb05e0d0855b9cc931cfbf0166">possibleLoadViolation</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>) { <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa69b40810eb73b6324c949f37e6083131">PossibleLoadViolation</a>] = f; }
+<a name="l00348"></a>00348 
+<a name="l00353"></a><a class="code" href="classBaseDynInst.html#a58f775b4d0db28ea4537417ee746ba89">00353</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a58f775b4d0db28ea4537417ee746ba89">hitExternalSnoop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa914c83de922f543f7fc36c7a57a7254c">HitExternalSnoop</a>]; }
+<a name="l00354"></a><a class="code" href="classBaseDynInst.html#a75605c294a03028c695549f020222b2e">00354</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a75605c294a03028c695549f020222b2e">hitExternalSnoop</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>) { <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa914c83de922f543f7fc36c7a57a7254c">HitExternalSnoop</a>] = f; }
+<a name="l00355"></a>00355 
+<a name="l00360"></a><a class="code" href="classBaseDynInst.html#a7fd0fd6367bf06758cdba245730318a4">00360</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a7fd0fd6367bf06758cdba245730318a4">isTranslationDelayed</a>()<span class="keyword"> const</span>
+<a name="l00361"></a>00361 <span class="keyword">    </span>{
+<a name="l00362"></a>00362         <span class="keywordflow">return</span> (<a class="code" href="classBaseDynInst.html#ac97dc97e71471789910132e3a3ce0949">translationStarted</a>() &amp;&amp; !<a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">translationCompleted</a>());
+<a name="l00363"></a>00363     }
+<a name="l00364"></a>00364 
+<a name="l00365"></a>00365   <span class="keyword">public</span>:
+<a name="l00366"></a>00366 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00367"></a>00367 <span class="preprocessor"></span>    <span class="keywordtype">void</span> dumpSNList();
+<a name="l00368"></a>00368 <span class="preprocessor">#endif</span>
+<a name="l00369"></a>00369 <span class="preprocessor"></span>
+<a name="l00373"></a><a class="code" href="classBaseDynInst.html#ab7e10290401d7350e965a28388ad29d8">00373</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classBaseDynInst.html#ab7e10290401d7350e965a28388ad29d8">renamedDestRegIdx</a>(<span class="keywordtype">int</span> idx)<span class="keyword"> const</span>
+<a name="l00374"></a>00374 <span class="keyword">    </span>{
+<a name="l00375"></a>00375         <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a1536987a8d6f8490fc850b9cc95a9eb9">_destRegIdx</a>[idx];
+<a name="l00376"></a>00376     }
+<a name="l00377"></a>00377 
+<a name="l00379"></a><a class="code" href="classBaseDynInst.html#a77110024c396fae8eb7cc90446c05100">00379</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classBaseDynInst.html#a77110024c396fae8eb7cc90446c05100">renamedSrcRegIdx</a>(<span class="keywordtype">int</span> idx)<span class="keyword"> const</span>
+<a name="l00380"></a>00380 <span class="keyword">    </span>{
+<a name="l00381"></a>00381         assert(<a class="code" href="namespaceArmISA.html#a520799fb7436e81cf66cbad7b420b833">TheISA::MaxInstSrcRegs</a> &gt; idx);
+<a name="l00382"></a>00382         <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a648b3ab7be47d79ef8eb06b5f5238e92">_srcRegIdx</a>[idx];
+<a name="l00383"></a>00383     }
+<a name="l00384"></a>00384 
+<a name="l00388"></a><a class="code" href="classBaseDynInst.html#ae669db55c176447543f27f35c1cd3ae5">00388</a>     <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> <a class="code" href="classBaseDynInst.html#ae669db55c176447543f27f35c1cd3ae5">flattenedDestRegIdx</a>(<span class="keywordtype">int</span> idx)<span class="keyword"> const</span>
+<a name="l00389"></a>00389 <span class="keyword">    </span>{
+<a name="l00390"></a>00390         <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a44085d1f8566ca30fef0c6787999c79b">_flatDestRegIdx</a>[idx];
+<a name="l00391"></a>00391     }
+<a name="l00392"></a>00392 
+<a name="l00396"></a><a class="code" href="classBaseDynInst.html#a0e34129e87398c9ff1f764e577b7b79f">00396</a>     <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> <a class="code" href="classBaseDynInst.html#a0e34129e87398c9ff1f764e577b7b79f">prevDestRegIdx</a>(<span class="keywordtype">int</span> idx)<span class="keyword"> const</span>
+<a name="l00397"></a>00397 <span class="keyword">    </span>{
+<a name="l00398"></a>00398         <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a32bf6cb0ac0bfb27a8b60945ca3c3603">_prevDestRegIdx</a>[idx];
+<a name="l00399"></a>00399     }
+<a name="l00400"></a>00400 
+<a name="l00404"></a><a class="code" href="classBaseDynInst.html#a9ae02d3c598d15a5c835ab7d4e647ce1">00404</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a9ae02d3c598d15a5c835ab7d4e647ce1">renameDestReg</a>(<span class="keywordtype">int</span> idx,
+<a name="l00405"></a>00405                        <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> renamed_dest,
+<a name="l00406"></a>00406                        <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> previous_rename)
+<a name="l00407"></a>00407     {
+<a name="l00408"></a>00408         <a class="code" href="classBaseDynInst.html#a1536987a8d6f8490fc850b9cc95a9eb9">_destRegIdx</a>[idx] = renamed_dest;
+<a name="l00409"></a>00409         <a class="code" href="classBaseDynInst.html#a32bf6cb0ac0bfb27a8b60945ca3c3603">_prevDestRegIdx</a>[idx] = previous_rename;
+<a name="l00410"></a>00410     }
+<a name="l00411"></a>00411 
+<a name="l00416"></a><a class="code" href="classBaseDynInst.html#af3d4e52aa8ea0b526cd9f78f67127f36">00416</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#af3d4e52aa8ea0b526cd9f78f67127f36">renameSrcReg</a>(<span class="keywordtype">int</span> idx, <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a> renamed_src)
+<a name="l00417"></a>00417     {
+<a name="l00418"></a>00418         <a class="code" href="classBaseDynInst.html#a648b3ab7be47d79ef8eb06b5f5238e92">_srcRegIdx</a>[idx] = renamed_src;
+<a name="l00419"></a>00419     }
+<a name="l00420"></a>00420 
+<a name="l00424"></a><a class="code" href="classBaseDynInst.html#aa63107f986e5c741f58413c6643298fb">00424</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#aa63107f986e5c741f58413c6643298fb">flattenDestReg</a>(<span class="keywordtype">int</span> idx, <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> flattened_dest)
+<a name="l00425"></a>00425     {
+<a name="l00426"></a>00426         <a class="code" href="classBaseDynInst.html#a44085d1f8566ca30fef0c6787999c79b">_flatDestRegIdx</a>[idx] = flattened_dest;
+<a name="l00427"></a>00427     }
+<a name="l00435"></a>00435     <a class="code" href="classBaseDynInst.html#a840565bb821f30293af92f0db4ddb28a">BaseDynInst</a>(<a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>, <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classBaseDynInst.html#a239d33ed2aa6ba1b897533642aa107a2">macroop</a>,
+<a name="l00436"></a>00436                 <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>, <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a>,
+<a name="l00437"></a>00437                 <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> seq_num, <a class="code" href="classBaseDynInst.html#a9792f311b2805cbefb8cb15c1c4a4cf5">ImplCPU</a> *<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>);
+<a name="l00438"></a>00438 
+<a name="l00442"></a>00442     <a class="code" href="classBaseDynInst.html#a840565bb821f30293af92f0db4ddb28a">BaseDynInst</a>(<a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>, <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classBaseDynInst.html#a239d33ed2aa6ba1b897533642aa107a2">macroop</a>);
+<a name="l00443"></a>00443 
+<a name="l00445"></a>00445     <a class="code" href="classBaseDynInst.html#af446a3befb983b87ef04566ad283c371">~BaseDynInst</a>();
+<a name="l00446"></a>00446 
+<a name="l00447"></a>00447   <span class="keyword">private</span>:
+<a name="l00449"></a>00449     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a1b19937d8cca25bf52a51ae7de67ea94">initVars</a>();
+<a name="l00450"></a>00450 
+<a name="l00451"></a>00451   <span class="keyword">public</span>:
+<a name="l00453"></a>00453     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#accd2600060dbaee3a3b41aed4034c63c">dump</a>();
+<a name="l00454"></a>00454 
+<a name="l00456"></a>00456     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#accd2600060dbaee3a3b41aed4034c63c">dump</a>(std::string &amp;outstring);
+<a name="l00457"></a>00457 
+<a name="l00459"></a><a class="code" href="classBaseDynInst.html#a1e2d18ebf4e21f2416c21a8b072e2c7b">00459</a>     <span class="keywordtype">int</span> <a class="code" href="classBaseDynInst.html#a1e2d18ebf4e21f2416c21a8b072e2c7b">cpuId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;cpuId(); }
+<a name="l00460"></a>00460 
+<a name="l00462"></a><a class="code" href="classBaseDynInst.html#a1ff97b43199001357718671a4d922d12">00462</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classBaseDynInst.html#a1ff97b43199001357718671a4d922d12">socketId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;socketId(); }
+<a name="l00463"></a>00463 
+<a name="l00465"></a><a class="code" href="classBaseDynInst.html#aef8c47228ab905833941bc0e1918c871">00465</a>     <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> <a class="code" href="classBaseDynInst.html#aef8c47228ab905833941bc0e1918c871">masterId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;dataMasterId(); }
+<a name="l00466"></a>00466 
+<a name="l00468"></a><a class="code" href="classBaseDynInst.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">00468</a>     <span class="keywordtype">int</span> <a class="code" href="classBaseDynInst.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">contextId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;<a class="code" href="structThreadState.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">contextId</a>(); }
+<a name="l00469"></a>00469 
+<a name="l00471"></a><a class="code" href="classBaseDynInst.html#a1ac977937b0a3cf64e58ba7141e4cc11">00471</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classBaseDynInst.html#a1ac977937b0a3cf64e58ba7141e4cc11">getFault</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a>; }
+<a name="l00472"></a>00472 
+<a name="l00478"></a><a class="code" href="classBaseDynInst.html#a9a56f3bdfd0d5b331356265c62556516">00478</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a9a56f3bdfd0d5b331356265c62556516">doneTargCalc</a>() { <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00479"></a>00479 
+<a name="l00481"></a><a class="code" href="classBaseDynInst.html#af3e113981ea1684fcf025086404d5f01">00481</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#af3e113981ea1684fcf025086404d5f01">setPredTarg</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;_predPC)
+<a name="l00482"></a>00482     {
+<a name="l00483"></a>00483         <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a> = _predPC;
+<a name="l00484"></a>00484     }
+<a name="l00485"></a>00485 
+<a name="l00486"></a><a class="code" href="classBaseDynInst.html#a88bba628e3f9c53e98e85412e59e44fe">00486</a>     <span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="classBaseDynInst.html#a88bba628e3f9c53e98e85412e59e44fe">readPredTarg</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a>; }
+<a name="l00487"></a>00487 
+<a name="l00489"></a><a class="code" href="classBaseDynInst.html#aaf7104129d287861faf7fe235f4116e7">00489</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#aaf7104129d287861faf7fe235f4116e7">predInstAddr</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a>.instAddr(); }
+<a name="l00490"></a>00490 
+<a name="l00492"></a><a class="code" href="classBaseDynInst.html#aabf159b9ae9ff5a404a04ef091d1f2d1">00492</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#aabf159b9ae9ff5a404a04ef091d1f2d1">predNextInstAddr</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a>.nextInstAddr(); }
+<a name="l00493"></a>00493 
+<a name="l00495"></a><a class="code" href="classBaseDynInst.html#acc3cf1eeb9bc53f3e6660fbceea961ee">00495</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#acc3cf1eeb9bc53f3e6660fbceea961ee">predMicroPC</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a>.microPC(); }
+<a name="l00496"></a>00496 
+<a name="l00498"></a><a class="code" href="classBaseDynInst.html#acb2c4a00f6648221dac645d267f5e766">00498</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#acb2c4a00f6648221dac645d267f5e766">readPredTaken</a>()
+<a name="l00499"></a>00499     {
+<a name="l00500"></a>00500         <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa598c9294d31a04169908391fe1e3f8f7">PredTaken</a>];
+<a name="l00501"></a>00501     }
+<a name="l00502"></a>00502 
+<a name="l00503"></a><a class="code" href="classBaseDynInst.html#a62ee27d8bfd75838ea10c9dc8f97babc">00503</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a62ee27d8bfd75838ea10c9dc8f97babc">setPredTaken</a>(<span class="keywordtype">bool</span> predicted_taken)
+<a name="l00504"></a>00504     {
+<a name="l00505"></a>00505         <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa598c9294d31a04169908391fe1e3f8f7">PredTaken</a>] = predicted_taken;
+<a name="l00506"></a>00506     }
+<a name="l00507"></a>00507 
+<a name="l00509"></a><a class="code" href="classBaseDynInst.html#a821a18b4aa4e70533b1df605037062cd">00509</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a821a18b4aa4e70533b1df605037062cd">mispredicted</a>()
+<a name="l00510"></a>00510     {
+<a name="l00511"></a>00511         <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> tempPC = <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>;
+<a name="l00512"></a>00512         <a class="code" href="namespaceAlphaISA.html#add1b209af0281827d9ac0a67747a3bf7">TheISA::advancePC</a>(tempPC, <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>);
+<a name="l00513"></a>00513         <span class="keywordflow">return</span> !(tempPC == <a class="code" href="classBaseDynInst.html#aebd0b135745958ac2bdfe9deeeb60d9f">predPC</a>);
+<a name="l00514"></a>00514     }
+<a name="l00515"></a>00515 
+<a name="l00516"></a>00516     <span class="comment">//</span>
+<a name="l00517"></a>00517     <span class="comment">//  Instruction types.  Forward checks to StaticInst object.</span>
+<a name="l00518"></a>00518     <span class="comment">//</span>
+<a name="l00519"></a><a class="code" href="classBaseDynInst.html#a45dbb9ace4c729e7bb701ce535fb1667">00519</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a45dbb9ace4c729e7bb701ce535fb1667">isNop</a>()<span class="keyword">          const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isNop(); }
+<a name="l00520"></a><a class="code" href="classBaseDynInst.html#a9b0f2cd082a656c4b5f369b5362c2f5b">00520</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a9b0f2cd082a656c4b5f369b5362c2f5b">isMemRef</a>()<span class="keyword">       const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isMemRef(); }
+<a name="l00521"></a><a class="code" href="classBaseDynInst.html#afef57d32aae2e0d962889f6e0537bf31">00521</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#afef57d32aae2e0d962889f6e0537bf31">isLoad</a>()<span class="keyword">         const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isLoad(); }
+<a name="l00522"></a><a class="code" href="classBaseDynInst.html#a75d02c30242181ed8a68f61087c2242d">00522</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a75d02c30242181ed8a68f61087c2242d">isStore</a>()<span class="keyword">        const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isStore(); }
+<a name="l00523"></a><a class="code" href="classBaseDynInst.html#a7023ade89206ed967e6af7397cb744f8">00523</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a7023ade89206ed967e6af7397cb744f8">isStoreConditional</a>()<span class="keyword"> const</span>
+<a name="l00524"></a>00524 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isStoreConditional(); }
+<a name="l00525"></a><a class="code" href="classBaseDynInst.html#ab7deedfb63be4690f506acd0444dde3a">00525</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ab7deedfb63be4690f506acd0444dde3a">isInstPrefetch</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isInstPrefetch(); }
+<a name="l00526"></a><a class="code" href="classBaseDynInst.html#abe301c4b09b8eb65bc2203905b1abf53">00526</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#abe301c4b09b8eb65bc2203905b1abf53">isDataPrefetch</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isDataPrefetch(); }
+<a name="l00527"></a><a class="code" href="classBaseDynInst.html#a06625615adfaf28305767ac42b1ef0a4">00527</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a06625615adfaf28305767ac42b1ef0a4">isInteger</a>()<span class="keyword">      const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isInteger(); }
+<a name="l00528"></a><a class="code" href="classBaseDynInst.html#a58024ee3f69c53c47ec5b315b78a7302">00528</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a58024ee3f69c53c47ec5b315b78a7302">isFloating</a>()<span class="keyword">     const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isFloating(); }
+<a name="l00529"></a><a class="code" href="classBaseDynInst.html#a2ff117edfab9c8486802c441ac331086">00529</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a2ff117edfab9c8486802c441ac331086">isControl</a>()<span class="keyword">      const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isControl(); }
+<a name="l00530"></a><a class="code" href="classBaseDynInst.html#aa2317a020504e552097abb001847f74c">00530</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#aa2317a020504e552097abb001847f74c">isCall</a>()<span class="keyword">         const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isCall(); }
+<a name="l00531"></a><a class="code" href="classBaseDynInst.html#a56f87bc75115f1dcea77803b01f40d2c">00531</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a56f87bc75115f1dcea77803b01f40d2c">isReturn</a>()<span class="keyword">       const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isReturn(); }
+<a name="l00532"></a><a class="code" href="classBaseDynInst.html#ac218ba4230a8cd92999948288a54e14f">00532</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ac218ba4230a8cd92999948288a54e14f">isDirectCtrl</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isDirectCtrl(); }
+<a name="l00533"></a><a class="code" href="classBaseDynInst.html#a5dfa427a48589c4c910416a67808510f">00533</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a5dfa427a48589c4c910416a67808510f">isIndirectCtrl</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isIndirectCtrl(); }
+<a name="l00534"></a><a class="code" href="classBaseDynInst.html#a941920262acf4437e241c7600b3007ff">00534</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a941920262acf4437e241c7600b3007ff">isCondCtrl</a>()<span class="keyword">     const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isCondCtrl(); }
+<a name="l00535"></a><a class="code" href="classBaseDynInst.html#af53002b2f11733681e8552aa6805a706">00535</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#af53002b2f11733681e8552aa6805a706">isUncondCtrl</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isUncondCtrl(); }
+<a name="l00536"></a><a class="code" href="classBaseDynInst.html#a50a12c82ee75e53f92c0852ae3ea71e8">00536</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a50a12c82ee75e53f92c0852ae3ea71e8">isCondDelaySlot</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isCondDelaySlot(); }
+<a name="l00537"></a><a class="code" href="classBaseDynInst.html#ae1376a5b7bbe66f8bcf8b3517802c85f">00537</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ae1376a5b7bbe66f8bcf8b3517802c85f">isThreadSync</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isThreadSync(); }
+<a name="l00538"></a><a class="code" href="classBaseDynInst.html#a0b876c794e1ed62f664670215da8793f">00538</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a0b876c794e1ed62f664670215da8793f">isSerializing</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isSerializing(); }
+<a name="l00539"></a><a class="code" href="classBaseDynInst.html#aa350b74ea660b6821bd37cd139bd917b">00539</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#aa350b74ea660b6821bd37cd139bd917b">isSerializeBefore</a>()<span class="keyword"> const</span>
+<a name="l00540"></a>00540 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isSerializeBefore() || <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba6fccc334c05c6f43f90dc60238f6c39e" title="Is a thread synchronization instruction.">SerializeBefore</a>]; }
+<a name="l00541"></a><a class="code" href="classBaseDynInst.html#a4d1c24871e03e495a1841ea16d11a68f">00541</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a4d1c24871e03e495a1841ea16d11a68f">isSerializeAfter</a>()<span class="keyword"> const</span>
+<a name="l00542"></a>00542 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isSerializeAfter() || <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab11834485756e0e9b84886d7d014a08f">SerializeAfter</a>]; }
+<a name="l00543"></a><a class="code" href="classBaseDynInst.html#a11c92e1c9e4b69f9cb64a9794f1fef4c">00543</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a11c92e1c9e4b69f9cb64a9794f1fef4c">isSquashAfter</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isSquashAfter(); }
+<a name="l00544"></a><a class="code" href="classBaseDynInst.html#a8bcffaf6f3c61001c56f6199a3221221">00544</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a8bcffaf6f3c61001c56f6199a3221221">isMemBarrier</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isMemBarrier(); }
+<a name="l00545"></a><a class="code" href="classBaseDynInst.html#aadc753a9e3a0d5bb33b6551fb3ad5f7e">00545</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#aadc753a9e3a0d5bb33b6551fb3ad5f7e">isWriteBarrier</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isWriteBarrier(); }
+<a name="l00546"></a><a class="code" href="classBaseDynInst.html#af032774c8da8aea2d9d84d5f3f211a7f">00546</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#af032774c8da8aea2d9d84d5f3f211a7f">isNonSpeculative</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isNonSpeculative(); }
+<a name="l00547"></a><a class="code" href="classBaseDynInst.html#adc9467e7b34e8dff3964c85b66bb1b93">00547</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#adc9467e7b34e8dff3964c85b66bb1b93">isQuiesce</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isQuiesce(); }
+<a name="l00548"></a><a class="code" href="classBaseDynInst.html#aa201775c9e5befb0bf84cdd7b24519b3">00548</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#aa201775c9e5befb0bf84cdd7b24519b3">isIprAccess</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isIprAccess(); }
+<a name="l00549"></a><a class="code" href="classBaseDynInst.html#ae9cbcc655cf8d63153d0c3f8bbf59841">00549</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ae9cbcc655cf8d63153d0c3f8bbf59841">isUnverifiable</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isUnverifiable(); }
+<a name="l00550"></a><a class="code" href="classBaseDynInst.html#afa3ec9c6fc7c50b26c6811c3bf1bb5f0">00550</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#afa3ec9c6fc7c50b26c6811c3bf1bb5f0">isSyscall</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isSyscall(); }
+<a name="l00551"></a><a class="code" href="classBaseDynInst.html#a1f7c99c1d36381c9aff41f00261d06df">00551</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a1f7c99c1d36381c9aff41f00261d06df">isMacroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isMacroop(); }
+<a name="l00552"></a><a class="code" href="classBaseDynInst.html#a19f74cdac8afa870418c056c72645187">00552</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a19f74cdac8afa870418c056c72645187">isMicroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isMicroop(); }
+<a name="l00553"></a><a class="code" href="classBaseDynInst.html#aebb2ebf9a7a910fcd247833ab88843b3">00553</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#aebb2ebf9a7a910fcd247833ab88843b3">isDelayedCommit</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isDelayedCommit(); }
+<a name="l00554"></a><a class="code" href="classBaseDynInst.html#ac600348c1afe65d9299c9635d6ea5773">00554</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ac600348c1afe65d9299c9635d6ea5773">isLastMicroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isLastMicroop(); }
+<a name="l00555"></a><a class="code" href="classBaseDynInst.html#a937b23736e22f67d6b168c0c029deec4">00555</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a937b23736e22f67d6b168c0c029deec4">isFirstMicroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isFirstMicroop(); }
+<a name="l00556"></a><a class="code" href="classBaseDynInst.html#a369f5792a76744815dbb1bcba6e25618">00556</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a369f5792a76744815dbb1bcba6e25618">isMicroBranch</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;isMicroBranch(); }
+<a name="l00557"></a>00557 
+<a name="l00559"></a><a class="code" href="classBaseDynInst.html#a820fdb5f79e789fc8efffb15f1995695">00559</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a820fdb5f79e789fc8efffb15f1995695">setSerializeBefore</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba6fccc334c05c6f43f90dc60238f6c39e" title="Is a thread synchronization instruction.">SerializeBefore</a>); }
+<a name="l00560"></a>00560 
+<a name="l00562"></a><a class="code" href="classBaseDynInst.html#a09b692cf6e7b00c1160248452fa24d4b">00562</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a09b692cf6e7b00c1160248452fa24d4b">clearSerializeBefore</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba6fccc334c05c6f43f90dc60238f6c39e" title="Is a thread synchronization instruction.">SerializeBefore</a>); }
+<a name="l00563"></a>00563 
+<a name="l00565"></a><a class="code" href="classBaseDynInst.html#a4df2bcaf5414d6db99fb8a5b0aba708a">00565</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a4df2bcaf5414d6db99fb8a5b0aba708a">isTempSerializeBefore</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba6fccc334c05c6f43f90dc60238f6c39e" title="Is a thread synchronization instruction.">SerializeBefore</a>]; }
+<a name="l00566"></a>00566 
+<a name="l00568"></a><a class="code" href="classBaseDynInst.html#a3e4776abfedcc80df8c826a7f3c3efd3">00568</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a3e4776abfedcc80df8c826a7f3c3efd3">setSerializeAfter</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab11834485756e0e9b84886d7d014a08f">SerializeAfter</a>); }
+<a name="l00569"></a>00569 
+<a name="l00571"></a><a class="code" href="classBaseDynInst.html#abe42baa87e7660df60248deec78f8d5a">00571</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#abe42baa87e7660df60248deec78f8d5a">clearSerializeAfter</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab11834485756e0e9b84886d7d014a08f">SerializeAfter</a>); }
+<a name="l00572"></a>00572 
+<a name="l00574"></a><a class="code" href="classBaseDynInst.html#a8d1ad9904dbbde344554070bfaaab86f">00574</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a8d1ad9904dbbde344554070bfaaab86f">isTempSerializeAfter</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bab11834485756e0e9b84886d7d014a08f">SerializeAfter</a>]; }
+<a name="l00575"></a>00575 
+<a name="l00577"></a><a class="code" href="classBaseDynInst.html#ad115419b3ec6552a9db93ba349c73285">00577</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ad115419b3ec6552a9db93ba349c73285">setSerializeHandled</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5dcfe61e192f9f6a72bc7ff9c5cd8a2b" title="Needs to serialize instructions behind it.">SerializeHandled</a>); }
+<a name="l00578"></a>00578 
+<a name="l00584"></a><a class="code" href="classBaseDynInst.html#a33db384950219c3c71206fbb2c7d8025">00584</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a33db384950219c3c71206fbb2c7d8025">isSerializeHandled</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5dcfe61e192f9f6a72bc7ff9c5cd8a2b" title="Needs to serialize instructions behind it.">SerializeHandled</a>]; }
+<a name="l00585"></a>00585 
+<a name="l00586"></a>00586 
+<a name="l00587"></a>00587   <span class="comment">/*@@@change*/</span>
+<a name="l00589"></a><a class="code" href="classBaseDynInst.html#aa4919f97cae20d4d82391c1fc6d5fda6">00589</a>     OpClass <a class="code" href="classBaseDynInst.html#aa4919f97cae20d4d82391c1fc6d5fda6">opClass</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;opClass(); }
+<a name="l00590"></a>00590 
+<a name="l00592"></a><a class="code" href="classBaseDynInst.html#a066dfcf24b065ae319cc2d27aa4eb09c">00592</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classBaseDynInst.html#a066dfcf24b065ae319cc2d27aa4eb09c">branchTarget</a>()<span class="keyword"> const</span>
+<a name="l00593"></a>00593 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;branchTarget(<a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>); }
+<a name="l00594"></a>00594 
+<a name="l00596"></a><a class="code" href="classBaseDynInst.html#a3902ecc708a6f28e94ee9aa975692915">00596</a>     int8_t <a class="code" href="classBaseDynInst.html#a3902ecc708a6f28e94ee9aa975692915">numSrcRegs</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;numSrcRegs(); }
+<a name="l00597"></a>00597 
+<a name="l00599"></a><a class="code" href="classBaseDynInst.html#ab7e23352b3d45a982dfeb799030f87d0">00599</a>     int8_t <a class="code" href="classBaseDynInst.html#ab7e23352b3d45a982dfeb799030f87d0">numDestRegs</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;numDestRegs(); }
+<a name="l00600"></a>00600 
+<a name="l00601"></a>00601     <span class="comment">// the following are used to track physical register usage</span>
+<a name="l00602"></a>00602     <span class="comment">// for machines with separate int &amp; FP reg files</span>
+<a name="l00603"></a><a class="code" href="classBaseDynInst.html#a7ec0ad00d322ae83bc5fae443ef04323">00603</a>     int8_t <a class="code" href="classBaseDynInst.html#a7ec0ad00d322ae83bc5fae443ef04323">numFPDestRegs</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;numFPDestRegs(); }
+<a name="l00604"></a><a class="code" href="classBaseDynInst.html#a3935410f8201e0afd0f8e459f838b463">00604</a>     int8_t <a class="code" href="classBaseDynInst.html#a3935410f8201e0afd0f8e459f838b463">numIntDestRegs</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;numIntDestRegs(); }
+<a name="l00605"></a>00605 
+<a name="l00607"></a><a class="code" href="classBaseDynInst.html#ae5a1a6d72f40f715253b91e32b3caad2">00607</a>     <a class="code" href="classBaseDynInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> <a class="code" href="classBaseDynInst.html#ae5a1a6d72f40f715253b91e32b3caad2">destRegIdx</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;destRegIdx(i); }
+<a name="l00608"></a>00608 
+<a name="l00610"></a><a class="code" href="classBaseDynInst.html#a9353aea3dfe673b88a4a96163d58759f">00610</a>     <a class="code" href="classBaseDynInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> <a class="code" href="classBaseDynInst.html#a9353aea3dfe673b88a4a96163d58759f">srcRegIdx</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;srcRegIdx(i); }
+<a name="l00611"></a>00611 
+<a name="l00613"></a>00613     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00614"></a><a class="code" href="classBaseDynInst.html#a8d4a144e868da0550434bd5ec9969982">00614</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a8d4a144e868da0550434bd5ec9969982">popResult</a>(T&amp; <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00615"></a>00615     {
+<a name="l00616"></a>00616         <span class="keywordflow">if</span> (!<a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>.empty()) {
+<a name="l00617"></a>00617             <a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>.front().get(t);
+<a name="l00618"></a>00618             <a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>.pop();
+<a name="l00619"></a>00619         }
+<a name="l00620"></a>00620     }
+<a name="l00621"></a>00621 
+<a name="l00623"></a>00623     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00624"></a><a class="code" href="classBaseDynInst.html#a87e2b2758379a95a212458692938e787">00624</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a87e2b2758379a95a212458692938e787">readResult</a>(T&amp; <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00625"></a>00625     {
+<a name="l00626"></a>00626         <a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>.back().get(t);
+<a name="l00627"></a>00627     }
+<a name="l00628"></a>00628 
+<a name="l00630"></a>00630     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00631"></a><a class="code" href="classBaseDynInst.html#accfdfc918ee73975e86b08cf8a528479">00631</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#accfdfc918ee73975e86b08cf8a528479">setResult</a>(T <a class="code" href="namespaceArmISA.html#af5dfd7e551f8c5b461816e813dab252f">t</a>)
+<a name="l00632"></a>00632     {
+<a name="l00633"></a>00633         <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa5a7ffa46df69da4492bfa380bb56eba6">RecordResult</a>]) {
+<a name="l00634"></a>00634             <a class="code" href="namespaceStats.html#ad874d2cfd4b4a29ebd480bb2e67f20ae">Result</a> instRes;
+<a name="l00635"></a>00635             instRes.set(t);
+<a name="l00636"></a>00636             <a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>.push(instRes);
+<a name="l00637"></a>00637         }
+<a name="l00638"></a>00638     }
+<a name="l00639"></a>00639 
+<a name="l00641"></a><a class="code" href="classBaseDynInst.html#a654e99f2be7cd298378462ce9651bb44">00641</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a654e99f2be7cd298378462ce9651bb44">setIntRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00642"></a>00642     {
+<a name="l00643"></a>00643         setResult&lt;uint64_t&gt;(val);
+<a name="l00644"></a>00644     }
+<a name="l00645"></a>00645 
+<a name="l00647"></a><a class="code" href="classBaseDynInst.html#afeb2b876cf6b29215cf9d6d56ba8863b">00647</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#afeb2b876cf6b29215cf9d6d56ba8863b">setCCRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00648"></a>00648     {
+<a name="l00649"></a>00649         setResult&lt;uint64_t&gt;(val);
+<a name="l00650"></a>00650     }
+<a name="l00651"></a>00651 
+<a name="l00653"></a><a class="code" href="classBaseDynInst.html#a2cce6f570bd24e9b78535c5f3bf3746f">00653</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a2cce6f570bd24e9b78535c5f3bf3746f">setFloatRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, <a class="code" href="classBaseDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>,
+<a name="l00654"></a>00654                             <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a0da89c280130b84ae26405a901396428">width</a>)
+<a name="l00655"></a>00655     {
+<a name="l00656"></a>00656         <span class="keywordflow">if</span> (width == 32 || width == 64) {
+<a name="l00657"></a>00657             setResult&lt;double&gt;(val);
+<a name="l00658"></a>00658         } <span class="keywordflow">else</span> {
+<a name="l00659"></a>00659             <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Unsupported width!&quot;</span>);
+<a name="l00660"></a>00660         }
+<a name="l00661"></a>00661     }
+<a name="l00662"></a>00662 
+<a name="l00664"></a><a class="code" href="classBaseDynInst.html#addc8b4b6511725bf8ff48bd09ef22892">00664</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a2cce6f570bd24e9b78535c5f3bf3746f">setFloatRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, <a class="code" href="classBaseDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00665"></a>00665     {
+<a name="l00666"></a>00666         setResult&lt;double&gt;(val);
+<a name="l00667"></a>00667     }
+<a name="l00668"></a>00668 
+<a name="l00670"></a><a class="code" href="classBaseDynInst.html#ad3fddac379ba976d902adbf2786afbda">00670</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ad3fddac379ba976d902adbf2786afbda">setFloatRegOperandBits</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>,
+<a name="l00671"></a>00671                                 <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a0da89c280130b84ae26405a901396428">width</a>)
+<a name="l00672"></a>00672     {
+<a name="l00673"></a>00673         setResult&lt;uint64_t&gt;(val);
+<a name="l00674"></a>00674     }
+<a name="l00675"></a>00675 
+<a name="l00677"></a><a class="code" href="classBaseDynInst.html#acede5db0b5bbd5e03f6fb096c7ccf1b6">00677</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ad3fddac379ba976d902adbf2786afbda">setFloatRegOperandBits</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00678"></a>00678     {
+<a name="l00679"></a>00679         setResult&lt;uint64_t&gt;(val);
+<a name="l00680"></a>00680     }
+<a name="l00681"></a>00681 
+<a name="l00683"></a>00683     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#acd6444fdff2557922a35895eccab2d0f">markSrcRegReady</a>();
+<a name="l00684"></a>00684 
+<a name="l00686"></a>00686     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#acd6444fdff2557922a35895eccab2d0f">markSrcRegReady</a>(<a class="code" href="classBaseDynInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">RegIndex</a> src_idx);
+<a name="l00687"></a>00687 
+<a name="l00689"></a><a class="code" href="classBaseDynInst.html#ad09a59cb16b4b96a42398b3bcd23cd2b">00689</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ad09a59cb16b4b96a42398b3bcd23cd2b">isReadySrcRegIdx</a>(<span class="keywordtype">int</span> idx)<span class="keyword"> const</span>
+<a name="l00690"></a>00690 <span class="keyword">    </span>{
+<a name="l00691"></a>00691         <span class="keywordflow">return</span> this-&gt;<a class="code" href="classBaseDynInst.html#a78a797b8c24ad873d0cbe5f52487b02f">_readySrcRegIdx</a>[idx];
+<a name="l00692"></a>00692     }
+<a name="l00693"></a>00693 
+<a name="l00695"></a><a class="code" href="classBaseDynInst.html#a3241c8bad3d5ddb517721b999a4e3670">00695</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a3241c8bad3d5ddb517721b999a4e3670">setCompleted</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baf47f90c31ee3cdaa28b81ecf57b72ce9" title="Instruction is in the LSQ.">Completed</a>); }
+<a name="l00696"></a>00696 
+<a name="l00698"></a><a class="code" href="classBaseDynInst.html#a9065f06f69273b51a799acff12d2c4c7">00698</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a9065f06f69273b51a799acff12d2c4c7">isCompleted</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baf47f90c31ee3cdaa28b81ecf57b72ce9" title="Instruction is in the LSQ.">Completed</a>]; }
+<a name="l00699"></a>00699 
+<a name="l00701"></a><a class="code" href="classBaseDynInst.html#a142437d4d0962c5b61960661f5141891">00701</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a142437d4d0962c5b61960661f5141891">setResultReady</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1317b2302eefb284e81392ff97d7fbfc" title="Instruction has completed.">ResultReady</a>); }
+<a name="l00702"></a>00702 
+<a name="l00704"></a><a class="code" href="classBaseDynInst.html#aa494f3355348eb3a97ce809b6361e195">00704</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#aa494f3355348eb3a97ce809b6361e195">isResultReady</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1317b2302eefb284e81392ff97d7fbfc" title="Instruction has completed.">ResultReady</a>]; }
+<a name="l00705"></a>00705 
+<a name="l00707"></a><a class="code" href="classBaseDynInst.html#a2531049d5481976af68c8586015f0047">00707</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a2531049d5481976af68c8586015f0047">setCanIssue</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5920c582de2a56a0934db60ae9f17f90" title="Instruction has its result.">CanIssue</a>); }
+<a name="l00708"></a>00708 
+<a name="l00710"></a><a class="code" href="classBaseDynInst.html#a29fcc55658982386428d8035e438589f">00710</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a29fcc55658982386428d8035e438589f">readyToIssue</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5920c582de2a56a0934db60ae9f17f90" title="Instruction has its result.">CanIssue</a>]; }
+<a name="l00711"></a>00711 
+<a name="l00713"></a><a class="code" href="classBaseDynInst.html#aad2d885accd9c810610076b4837a1d49">00713</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#aad2d885accd9c810610076b4837a1d49">clearCanIssue</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba5920c582de2a56a0934db60ae9f17f90" title="Instruction has its result.">CanIssue</a>); }
+<a name="l00714"></a>00714 
+<a name="l00716"></a><a class="code" href="classBaseDynInst.html#a04eb3fc23b5c2e74dc6d12afc25f0198">00716</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a04eb3fc23b5c2e74dc6d12afc25f0198">setIssued</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9857002704a7c967f40ad09425a609fb" title="Instruction can issue and execute.">Issued</a>); }
+<a name="l00717"></a>00717 
+<a name="l00719"></a><a class="code" href="classBaseDynInst.html#a1b4092ba688a1efd54c934a31dd1fd3e">00719</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a1b4092ba688a1efd54c934a31dd1fd3e">isIssued</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9857002704a7c967f40ad09425a609fb" title="Instruction can issue and execute.">Issued</a>]; }
+<a name="l00720"></a>00720 
+<a name="l00722"></a><a class="code" href="classBaseDynInst.html#ae6e7d08fe9e92022d54514af18b5b36a">00722</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ae6e7d08fe9e92022d54514af18b5b36a">clearIssued</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9857002704a7c967f40ad09425a609fb" title="Instruction can issue and execute.">Issued</a>); }
+<a name="l00723"></a>00723 
+<a name="l00725"></a><a class="code" href="classBaseDynInst.html#a22145fd061c0a41a9b7d3c8b499269a9">00725</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a22145fd061c0a41a9b7d3c8b499269a9">setExecuted</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba64ac477648aa4bfdfdcfb81b9232e073" title="Instruction has issued.">Executed</a>); }
+<a name="l00726"></a>00726 
+<a name="l00728"></a><a class="code" href="classBaseDynInst.html#a25d5f6d24c54820fbd19eb0e4e59dcac">00728</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a25d5f6d24c54820fbd19eb0e4e59dcac">isExecuted</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba64ac477648aa4bfdfdcfb81b9232e073" title="Instruction has issued.">Executed</a>]; }
+<a name="l00729"></a>00729 
+<a name="l00731"></a><a class="code" href="classBaseDynInst.html#a0cbc886f9978503b587b4d7a7e3db728">00731</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a0cbc886f9978503b587b4d7a7e3db728">setCanCommit</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba3f73dd3b188316a28f6f49a756dd0f08" title="Instruction has executed.">CanCommit</a>); }
+<a name="l00732"></a>00732 
+<a name="l00734"></a><a class="code" href="classBaseDynInst.html#ad22bc2d91297685b76dc15215666883d">00734</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ad22bc2d91297685b76dc15215666883d">clearCanCommit</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba3f73dd3b188316a28f6f49a756dd0f08" title="Instruction has executed.">CanCommit</a>); }
+<a name="l00735"></a>00735 
+<a name="l00737"></a><a class="code" href="classBaseDynInst.html#a0bfca6b2400cf8496f4e685668839861">00737</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a0bfca6b2400cf8496f4e685668839861">readyToCommit</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba3f73dd3b188316a28f6f49a756dd0f08" title="Instruction has executed.">CanCommit</a>]; }
+<a name="l00738"></a>00738 
+<a name="l00739"></a><a class="code" href="classBaseDynInst.html#adef575a8b55171e005db4954a44e5caf">00739</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#adef575a8b55171e005db4954a44e5caf">setAtCommit</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba98db15e644d921e4619fa954c33440db" title="Instruction can commit.">AtCommit</a>); }
+<a name="l00740"></a>00740 
+<a name="l00741"></a><a class="code" href="classBaseDynInst.html#a8b514343a000efa2bf568c4f964cb8b1">00741</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a8b514343a000efa2bf568c4f964cb8b1">isAtCommit</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba98db15e644d921e4619fa954c33440db" title="Instruction can commit.">AtCommit</a>]; }
+<a name="l00742"></a>00742 
+<a name="l00744"></a><a class="code" href="classBaseDynInst.html#a101a00eca65e94adc1377989d88a3c99">00744</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a101a00eca65e94adc1377989d88a3c99">setCommitted</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baa2fbad5a13016997291f98c11c254035" title="Instruction has reached commit.">Committed</a>); }
+<a name="l00745"></a>00745 
+<a name="l00747"></a><a class="code" href="classBaseDynInst.html#a9cc760f9838c39bfb3112cdbfb468cf3">00747</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a9cc760f9838c39bfb3112cdbfb468cf3">isCommitted</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70baa2fbad5a13016997291f98c11c254035" title="Instruction has reached commit.">Committed</a>]; }
+<a name="l00748"></a>00748 
+<a name="l00750"></a><a class="code" href="classBaseDynInst.html#abfa7b30b342b5ef70b7e060b305a2f94">00750</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#abfa7b30b342b5ef70b7e060b305a2f94">setSquashed</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba173c3733642a8b921708ca664a078c6b" title="Instruction has committed.">Squashed</a>); }
+<a name="l00751"></a>00751 
+<a name="l00753"></a><a class="code" href="classBaseDynInst.html#add8df091bd836cf92c6987990d130b83">00753</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#add8df091bd836cf92c6987990d130b83">isSquashed</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba173c3733642a8b921708ca664a078c6b" title="Instruction has committed.">Squashed</a>]; }
+<a name="l00754"></a>00754 
+<a name="l00755"></a>00755     <span class="comment">//Instruction Queue Entry</span>
+<a name="l00756"></a>00756     <span class="comment">//-----------------------</span>
+<a name="l00758"></a><a class="code" href="classBaseDynInst.html#a453f140409e14d608c78d1ed1e72fef7">00758</a> <span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a453f140409e14d608c78d1ed1e72fef7">setInIQ</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba033d0b5f3300c89e5a30cc93340ac374">IqEntry</a>); }
+<a name="l00759"></a>00759 
+<a name="l00761"></a><a class="code" href="classBaseDynInst.html#a0a7b38cc3c0a8ae3147bfbf3e29838ee">00761</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a0a7b38cc3c0a8ae3147bfbf3e29838ee">clearInIQ</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba033d0b5f3300c89e5a30cc93340ac374">IqEntry</a>); }
+<a name="l00762"></a>00762 
+<a name="l00764"></a><a class="code" href="classBaseDynInst.html#a2edaf88f1e5d97e6785e1f17819bed40">00764</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a2edaf88f1e5d97e6785e1f17819bed40">isInIQ</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba033d0b5f3300c89e5a30cc93340ac374">IqEntry</a>]; }
+<a name="l00765"></a>00765 
+<a name="l00767"></a><a class="code" href="classBaseDynInst.html#ac9182e42b15715aae67ae9997da25082">00767</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ac9182e42b15715aae67ae9997da25082">setSquashedInIQ</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba80733653b968f232fdf73b8eab7fff86" title="Instruction is squashed.">SquashedInIQ</a>); <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba173c3733642a8b921708ca664a078c6b" title="Instruction has committed.">Squashed</a>);}
+<a name="l00768"></a>00768 
+<a name="l00770"></a><a class="code" href="classBaseDynInst.html#aa2983ad327b9f2045350cc639d6e23bd">00770</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#aa2983ad327b9f2045350cc639d6e23bd">isSquashedInIQ</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba80733653b968f232fdf73b8eab7fff86" title="Instruction is squashed.">SquashedInIQ</a>]; }
+<a name="l00771"></a>00771 
+<a name="l00772"></a>00772 
+<a name="l00773"></a>00773     <span class="comment">//Load / Store Queue Functions</span>
+<a name="l00774"></a>00774     <span class="comment">//-----------------------</span>
+<a name="l00776"></a><a class="code" href="classBaseDynInst.html#adba79e6ab3a1d6a3cc4157241830b086">00776</a> <span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#adba79e6ab3a1d6a3cc4157241830b086">setInLSQ</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba910a740b0dabb8ab7b61f540d4efc7ef" title="Instruction is in the ROB.">LsqEntry</a>); }
+<a name="l00777"></a>00777 
+<a name="l00779"></a><a class="code" href="classBaseDynInst.html#a464c336cf798d9eec1f4bd8daf601fa5">00779</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a464c336cf798d9eec1f4bd8daf601fa5">removeInLSQ</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba910a740b0dabb8ab7b61f540d4efc7ef" title="Instruction is in the ROB.">LsqEntry</a>); }
+<a name="l00780"></a>00780 
+<a name="l00782"></a><a class="code" href="classBaseDynInst.html#ab1c7907423921c684177bb65bde913c2">00782</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ab1c7907423921c684177bb65bde913c2">isInLSQ</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba910a740b0dabb8ab7b61f540d4efc7ef" title="Instruction is in the ROB.">LsqEntry</a>]; }
+<a name="l00783"></a>00783 
+<a name="l00785"></a><a class="code" href="classBaseDynInst.html#a1d30846da1d1b390304ec1092751c8e0">00785</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a1d30846da1d1b390304ec1092751c8e0">setSquashedInLSQ</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad72c434c6c580a5f20e5f3b659de09d6" title="Instruction is squashed in the IQ.">SquashedInLSQ</a>);}
+<a name="l00786"></a>00786 
+<a name="l00788"></a><a class="code" href="classBaseDynInst.html#a103500ce68cd17d86796ff2d6ecf1445">00788</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a103500ce68cd17d86796ff2d6ecf1445">isSquashedInLSQ</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad72c434c6c580a5f20e5f3b659de09d6" title="Instruction is squashed in the IQ.">SquashedInLSQ</a>]; }
+<a name="l00789"></a>00789 
+<a name="l00790"></a>00790 
+<a name="l00791"></a>00791     <span class="comment">//Reorder Buffer Functions</span>
+<a name="l00792"></a>00792     <span class="comment">//-----------------------</span>
+<a name="l00794"></a><a class="code" href="classBaseDynInst.html#a530dfc5f62fd422d1f4cc0e66074504e">00794</a> <span class="comment"></span>    <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a530dfc5f62fd422d1f4cc0e66074504e">setInROB</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70babff9c146554fea1156e224a3f1a41b78" title="Instruction is in the IQ.">RobEntry</a>); }
+<a name="l00795"></a>00795 
+<a name="l00797"></a><a class="code" href="classBaseDynInst.html#a41c8d6d7d42f2e72d1ffc2f1e731cae3">00797</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a41c8d6d7d42f2e72d1ffc2f1e731cae3">clearInROB</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.reset(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70babff9c146554fea1156e224a3f1a41b78" title="Instruction is in the IQ.">RobEntry</a>); }
+<a name="l00798"></a>00798 
+<a name="l00800"></a><a class="code" href="classBaseDynInst.html#adc220257dd64e1af706d033eb74c9150">00800</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#adc220257dd64e1af706d033eb74c9150">isInROB</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70babff9c146554fea1156e224a3f1a41b78" title="Instruction is in the IQ.">RobEntry</a>]; }
+<a name="l00801"></a>00801 
+<a name="l00803"></a><a class="code" href="classBaseDynInst.html#a27471486b9fc6c5983f728e15c3dd6c9">00803</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a27471486b9fc6c5983f728e15c3dd6c9">setSquashedInROB</a>() { <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>.set(<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad76f955270c2e46b6df438a043fc84cc" title="Instruction is squashed in the LSQ.">SquashedInROB</a>); }
+<a name="l00804"></a>00804 
+<a name="l00806"></a><a class="code" href="classBaseDynInst.html#a3409062a85a322689611ea0f77b0532e">00806</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a3409062a85a322689611ea0f77b0532e">isSquashedInROB</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aa3a3e4b13899ec096589e2e0c76f25bc">status</a>[<a class="code" href="classBaseDynInst.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad76f955270c2e46b6df438a043fc84cc" title="Instruction is squashed in the LSQ.">SquashedInROB</a>]; }
+<a name="l00807"></a>00807 
+<a name="l00809"></a><a class="code" href="classBaseDynInst.html#a50cdfb6f4ba5ad01abb9ae5b777d7182">00809</a>     <span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classBaseDynInst.html#a50cdfb6f4ba5ad01abb9ae5b777d7182">pcState</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>; }
+<a name="l00810"></a>00810 
+<a name="l00812"></a><a class="code" href="classBaseDynInst.html#af074e0233f7b4c7bb80ca26182833bf6">00812</a>     <span class="keyword">const</span> <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#af074e0233f7b4c7bb80ca26182833bf6">pcState</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) { <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a> = val; }
+<a name="l00813"></a>00813 
+<a name="l00815"></a><a class="code" href="classBaseDynInst.html#a85879d46d0c22de560215747a6d083af">00815</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#a85879d46d0c22de560215747a6d083af">instAddr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.instAddr(); }
+<a name="l00816"></a>00816 
+<a name="l00818"></a><a class="code" href="classBaseDynInst.html#ab8d2b7c268f277488b0f62e209e93f36">00818</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#ab8d2b7c268f277488b0f62e209e93f36">nextInstAddr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.nextInstAddr(); }
+<a name="l00819"></a>00819 
+<a name="l00821"></a><a class="code" href="classBaseDynInst.html#a2a36b9c5ead1c8f50bde6b401d18b1b3">00821</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classBaseDynInst.html#a2a36b9c5ead1c8f50bde6b401d18b1b3">microPC</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.microPC(); }
+<a name="l00822"></a>00822 
+<a name="l00823"></a><a class="code" href="classBaseDynInst.html#a254cecc48d457ea298b08a8bb009f9cf">00823</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a254cecc48d457ea298b08a8bb009f9cf">readPredicate</a>()
+<a name="l00824"></a>00824     {
+<a name="l00825"></a>00825         <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faf3f0ec77fa58b6268327a87170b3b204">Predicate</a>];
+<a name="l00826"></a>00826     }
+<a name="l00827"></a>00827 
+<a name="l00828"></a><a class="code" href="classBaseDynInst.html#a137a8c6cced89c2ff8387900439436b4">00828</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a137a8c6cced89c2ff8387900439436b4">setPredicate</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00829"></a>00829     {
+<a name="l00830"></a>00830         <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295faf3f0ec77fa58b6268327a87170b3b204">Predicate</a>] = val;
+<a name="l00831"></a>00831 
+<a name="l00832"></a>00832         <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>) {
+<a name="l00833"></a>00833             <a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>-&gt;<a class="code" href="classTrace_1_1InstRecord.html#a137a8c6cced89c2ff8387900439436b4">setPredicate</a>(val);
+<a name="l00834"></a>00834         }
+<a name="l00835"></a>00835     }
+<a name="l00836"></a>00836 
+<a name="l00838"></a><a class="code" href="classBaseDynInst.html#a0038e061ac1af4a45f8d301673483cd0">00838</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a0038e061ac1af4a45f8d301673483cd0">setASID</a>(<span class="keywordtype">short</span> addr_space_id) { <a class="code" href="classBaseDynInst.html#a03f3e3cd7500e78001075b53eab05a53">asid</a> = addr_space_id; }
+<a name="l00839"></a>00839 
+<a name="l00841"></a><a class="code" href="classBaseDynInst.html#ad1c2ae5b668e7024fd2b0f956aefaa4e">00841</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#ad1c2ae5b668e7024fd2b0f956aefaa4e">setTid</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid) { <a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">threadNumber</a> = tid; }
+<a name="l00842"></a>00842 
+<a name="l00844"></a><a class="code" href="classBaseDynInst.html#a65bbd70cc4e254a52befad10cc6a6f9a">00844</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#a65bbd70cc4e254a52befad10cc6a6f9a">setThreadState</a>(<a class="code" href="structOzoneThreadState.html">ImplState</a> *state) { <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a> = state; }
+<a name="l00845"></a>00845 
+<a name="l00847"></a><a class="code" href="classBaseDynInst.html#ad33756f3e96ee445dca8d69b1dd8709c">00847</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classBaseDynInst.html#ad33756f3e96ee445dca8d69b1dd8709c">tcBase</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;<a class="code" href="structOzoneThreadState.html#a81894d15db5190d5364449a4915b76f5">getTC</a>(); }
+<a name="l00848"></a>00848 
+<a name="l00849"></a>00849   <span class="keyword">public</span>:
+<a name="l00851"></a><a class="code" href="classBaseDynInst.html#addd147868ea9ed46b5c943b0eaa57544">00851</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#addd147868ea9ed46b5c943b0eaa57544">setEA</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;<a class="code" href="namespaceArmISA.html#a0a78b1e6387f72b53868e01d764dc355">ea</a>) { <a class="code" href="classBaseDynInst.html#aaa54d2440fad0984a0a8edbcade8c26f">instEffAddr</a> = ea; <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fab6d9bd536d2399d9e48ceac11630df4d">EACalcDone</a>] = <span class="keyword">true</span>; }
+<a name="l00852"></a>00852 
+<a name="l00854"></a><a class="code" href="classBaseDynInst.html#a6fd9d852d5780eb802b4d2520e58747b">00854</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;<a class="code" href="classBaseDynInst.html#a6fd9d852d5780eb802b4d2520e58747b">getEA</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#aaa54d2440fad0984a0a8edbcade8c26f">instEffAddr</a>; }
+<a name="l00855"></a>00855 
+<a name="l00857"></a><a class="code" href="classBaseDynInst.html#a2f1c9119ee950f8afc730ea9d6e92d84">00857</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a2f1c9119ee950f8afc730ea9d6e92d84">doneEACalc</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fab6d9bd536d2399d9e48ceac11630df4d">EACalcDone</a>]; }
+<a name="l00858"></a>00858 
+<a name="l00860"></a>00860     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ae3a07556a5b5d8248cbfb1c99561340d">eaSrcsReady</a>();
+<a name="l00861"></a>00861 
+<a name="l00863"></a><a class="code" href="classBaseDynInst.html#a21fc1eb6d0621763c50b19a1c0d25ca1">00863</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#a21fc1eb6d0621763c50b19a1c0d25ca1">uncacheable</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa935a229fd307ffc1a80933386891c427">IsUncacheable</a>]; }
+<a name="l00864"></a>00864 
+<a name="l00866"></a><a class="code" href="classBaseDynInst.html#ad04e6525dc209abe51106ce7fde57576">00866</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseDynInst.html#ad04e6525dc209abe51106ce7fde57576">hasRequest</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa451547c16dc99e77c8e8a0aeb05c9447">ReqMade</a>]; }
+<a name="l00867"></a>00867 
+<a name="l00869"></a><a class="code" href="classBaseDynInst.html#a3dc054e66fce6c154e88f4c1ecc868d2">00869</a>     <a class="code" href="classBaseDynInst.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> &amp;<a class="code" href="classBaseDynInst.html#a3dc054e66fce6c154e88f4c1ecc868d2">getInstListIt</a>() { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#ae774064514a3dc6a8d932c1fb975d37f">instListIt</a>; }
+<a name="l00870"></a>00870 
+<a name="l00872"></a><a class="code" href="classBaseDynInst.html#aeb6ae2640509c7f45f53c03d92f8f920">00872</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#aeb6ae2640509c7f45f53c03d92f8f920">setInstListIt</a>(<a class="code" href="classBaseDynInst.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> _instListIt) { <a class="code" href="classBaseDynInst.html#ae774064514a3dc6a8d932c1fb975d37f">instListIt</a> = _instListIt; }
+<a name="l00873"></a>00873 
+<a name="l00874"></a>00874   <span class="keyword">public</span>:
+<a name="l00876"></a><a class="code" href="classBaseDynInst.html#a25b995a791e41965e088d8bf3f2bf859">00876</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classBaseDynInst.html#a25b995a791e41965e088d8bf3f2bf859">readStCondFailures</a>()
+<a name="l00877"></a>00877     { <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;<a class="code" href="structThreadState.html#af112e3f6e9a9305596d19209d67354fb">storeCondFailures</a>; }
+<a name="l00878"></a>00878 
+<a name="l00880"></a><a class="code" href="classBaseDynInst.html#abbe779fa43c72cd485ddb736ab17ff61">00880</a>     <span class="keywordtype">void</span> <a class="code" href="classBaseDynInst.html#abbe779fa43c72cd485ddb736ab17ff61">setStCondFailures</a>(<span class="keywordtype">unsigned</span> sc_failures)
+<a name="l00881"></a>00881     { <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;<a class="code" href="structThreadState.html#af112e3f6e9a9305596d19209d67354fb">storeCondFailures</a> = sc_failures; }
+<a name="l00882"></a>00882 };
+<a name="l00883"></a>00883 
+<a name="l00884"></a>00884 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00885"></a>00885 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00886"></a><a class="code" href="classBaseDynInst.html#a66191b2d8a45050b7df3c3efa7bb07c6">00886</a> <a class="code" href="classBaseDynInst.html#a66191b2d8a45050b7df3c3efa7bb07c6">BaseDynInst&lt;Impl&gt;::readMem</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, uint8_t *data,
+<a name="l00887"></a>00887                            <span class="keywordtype">unsigned</span> size, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>)
+<a name="l00888"></a>00888 {
+<a name="l00889"></a>00889     <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa451547c16dc99e77c8e8a0aeb05c9447">ReqMade</a>] = <span class="keyword">true</span>;
+<a name="l00890"></a>00890     <a class="code" href="classRequest.html">Request</a> *req = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00891"></a>00891     <a class="code" href="classRequest.html">Request</a> *sreqLow = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00892"></a>00892     <a class="code" href="classRequest.html">Request</a> *sreqHigh = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00893"></a>00893 
+<a name="l00894"></a>00894     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa451547c16dc99e77c8e8a0aeb05c9447">ReqMade</a>] &amp;&amp; <a class="code" href="classBaseDynInst.html#ac97dc97e71471789910132e3a3ce0949">translationStarted</a>()) {
+<a name="l00895"></a>00895         req = <a class="code" href="classBaseDynInst.html#a59b330383a8be2eaba12ac79b9d28dc2">savedReq</a>;
+<a name="l00896"></a>00896         sreqLow = <a class="code" href="classBaseDynInst.html#a092c24fc1b01745b4611ef36265f778a">savedSreqLow</a>;
+<a name="l00897"></a>00897         sreqHigh = <a class="code" href="classBaseDynInst.html#a0e8cac1ccea0f0428cb39947673bc31c">savedSreqHigh</a>;
+<a name="l00898"></a>00898     } <span class="keywordflow">else</span> {
+<a name="l00899"></a>00899         req = <span class="keyword">new</span> <a class="code" href="classRequest.html">Request</a>(<a class="code" href="classBaseDynInst.html#a03f3e3cd7500e78001075b53eab05a53">asid</a>, addr, size, flags, <a class="code" href="classBaseDynInst.html#aef8c47228ab905833941bc0e1918c871">masterId</a>(), this-&gt;<a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.instAddr(),
+<a name="l00900"></a>00900                           <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;contextId(), <a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">threadNumber</a>);
+<a name="l00901"></a>00901 
+<a name="l00902"></a>00902         req-&gt;<a class="code" href="classRequest.html#a7abf15d67b3fbd53236fde58eecb3f34">taskId</a>(<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;taskId());
+<a name="l00903"></a>00903 
+<a name="l00904"></a>00904         <span class="comment">// Only split the request if the ISA supports unaligned accesses.</span>
+<a name="l00905"></a>00905         <span class="keywordflow">if</span> (<a class="code" href="namespaceAlphaISA.html#a1c3adbc67ce574fe545e332d3bc677be">TheISA::HasUnalignedMemAcc</a>) {
+<a name="l00906"></a>00906             <a class="code" href="classBaseDynInst.html#aa1b0c0798d6520eb2c1bf3334cee01c5">splitRequest</a>(req, sreqLow, sreqHigh);
+<a name="l00907"></a>00907         }
+<a name="l00908"></a>00908         <a class="code" href="classBaseDynInst.html#ae5c08b83b54ab954feb02df3e206c1f0">initiateTranslation</a>(req, sreqLow, sreqHigh, <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911a809abe96853e69894bbf8e5730b31348">BaseTLB::Read</a>);
+<a name="l00909"></a>00909     }
+<a name="l00910"></a>00910 
+<a name="l00911"></a>00911     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">translationCompleted</a>()) {
+<a name="l00912"></a>00912         <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> == <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>) {
+<a name="l00913"></a>00913             <a class="code" href="classBaseDynInst.html#a1097c58b547d58e4544cbf31fa68a390">effAddr</a> = req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>();
+<a name="l00914"></a>00914             <a class="code" href="classBaseDynInst.html#ad52a4366d1b850793e6d979a7459cab4">effSize</a> = size;
+<a name="l00915"></a>00915             <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa18215c6f3e211fc0797fc8319a3b7dba">EffAddrValid</a>] = <span class="keyword">true</span>;
+<a name="l00916"></a>00916 
+<a name="l00917"></a>00917             <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;checker) {
+<a name="l00918"></a>00918                 <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a> != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) {
+<a name="l00919"></a>00919                     <span class="keyword">delete</span> <a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a>;
+<a name="l00920"></a>00920                 }
+<a name="l00921"></a>00921                 <a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a> = <span class="keyword">new</span> <a class="code" href="classRequest.html">Request</a>(*req);
+<a name="l00922"></a>00922             }
+<a name="l00923"></a>00923             <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> = <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;read(req, sreqLow, sreqHigh, data, <a class="code" href="classBaseDynInst.html#a543896e8c656ce7cce978a1ec4d29afe">lqIdx</a>);
+<a name="l00924"></a>00924         } <span class="keywordflow">else</span> {
+<a name="l00925"></a>00925             <span class="comment">// Commit will have to clean up whatever happened.  Set this</span>
+<a name="l00926"></a>00926             <span class="comment">// instruction as executed.</span>
+<a name="l00927"></a>00927             this-&gt;<a class="code" href="classBaseDynInst.html#a22145fd061c0a41a9b7d3c8b499269a9">setExecuted</a>();
+<a name="l00928"></a>00928         }
+<a name="l00929"></a>00929 
+<a name="l00930"></a>00930         <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> != <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>) {
+<a name="l00931"></a>00931             <span class="comment">// Return a fixed value to keep simulation deterministic even</span>
+<a name="l00932"></a>00932             <span class="comment">// along misspeculated paths.</span>
+<a name="l00933"></a>00933             <span class="keywordflow">if</span> (data)
+<a name="l00934"></a>00934                 bzero(data, size);
+<a name="l00935"></a>00935         }
+<a name="l00936"></a>00936     }
+<a name="l00937"></a>00937 
+<a name="l00938"></a>00938     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>) {
+<a name="l00939"></a>00939         <a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>-&gt;<a class="code" href="classTrace_1_1InstRecord.html#a0086c298c7423d3f7e571e9f63a1c09f">setAddr</a>(addr);
+<a name="l00940"></a>00940     }
+<a name="l00941"></a>00941 
+<a name="l00942"></a>00942     <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a>;
+<a name="l00943"></a>00943 }
+<a name="l00944"></a>00944 
+<a name="l00945"></a>00945 <span class="comment">//@@@change</span>
+<a name="l00946"></a>00946 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00947"></a>00947 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00948"></a><a class="code" href="classBaseDynInst.html#ad46c5edeb1ee9b60445f3e26364e2c5e">00948</a> <a class="code" href="classBaseDynInst.html#ad46c5edeb1ee9b60445f3e26364e2c5e">BaseDynInst&lt;Impl&gt;::writeMem</a>(uint8_t *data, <span class="keywordtype">unsigned</span> size,
+<a name="l00949"></a>00949                             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>, uint64_t *res)
+<a name="l00950"></a>00950 {
+<a name="l00951"></a>00951     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>) {
+<a name="l00952"></a>00952         <a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>-&gt;<a class="code" href="classTrace_1_1InstRecord.html#a0086c298c7423d3f7e571e9f63a1c09f">setAddr</a>(addr);
+<a name="l00953"></a>00953     }
+<a name="l00954"></a>00954 
+<a name="l00955"></a>00955     <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa451547c16dc99e77c8e8a0aeb05c9447">ReqMade</a>] = <span class="keyword">true</span>;
+<a name="l00956"></a>00956     <a class="code" href="classRequest.html">Request</a> *req = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00957"></a>00957     <a class="code" href="classRequest.html">Request</a> *sreqLow = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00958"></a>00958     <a class="code" href="classRequest.html">Request</a> *sreqHigh = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00959"></a>00959 
+<a name="l00960"></a>00960     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa451547c16dc99e77c8e8a0aeb05c9447">ReqMade</a>] &amp;&amp; <a class="code" href="classBaseDynInst.html#ac97dc97e71471789910132e3a3ce0949">translationStarted</a>()) {
+<a name="l00961"></a>00961         req = <a class="code" href="classBaseDynInst.html#a59b330383a8be2eaba12ac79b9d28dc2">savedReq</a>;
+<a name="l00962"></a>00962         sreqLow = <a class="code" href="classBaseDynInst.html#a092c24fc1b01745b4611ef36265f778a">savedSreqLow</a>;
+<a name="l00963"></a>00963         sreqHigh = <a class="code" href="classBaseDynInst.html#a0e8cac1ccea0f0428cb39947673bc31c">savedSreqHigh</a>;
+<a name="l00964"></a>00964     } <span class="keywordflow">else</span> {
+<a name="l00965"></a>00965         req = <span class="keyword">new</span> <a class="code" href="classRequest.html">Request</a>(<a class="code" href="classBaseDynInst.html#a03f3e3cd7500e78001075b53eab05a53">asid</a>, addr, size, flags, <a class="code" href="classBaseDynInst.html#aef8c47228ab905833941bc0e1918c871">masterId</a>(), this-&gt;<a class="code" href="classBaseDynInst.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>.instAddr(),
+<a name="l00966"></a>00966                           <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;contextId(), <a class="code" href="classBaseDynInst.html#a892bd80aa2abe0b9cbfdf510d2111772">threadNumber</a>);
+<a name="l00967"></a>00967 
+<a name="l00968"></a>00968         req-&gt;<a class="code" href="classRequest.html#a7abf15d67b3fbd53236fde58eecb3f34">taskId</a>(<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;taskId());
+<a name="l00969"></a>00969 
+<a name="l00970"></a>00970         <span class="comment">// Only split the request if the ISA supports unaligned accesses.</span>
+<a name="l00971"></a>00971         <span class="keywordflow">if</span> (<a class="code" href="namespaceAlphaISA.html#a1c3adbc67ce574fe545e332d3bc677be">TheISA::HasUnalignedMemAcc</a>) {
+<a name="l00972"></a>00972             <a class="code" href="classBaseDynInst.html#aa1b0c0798d6520eb2c1bf3334cee01c5">splitRequest</a>(req, sreqLow, sreqHigh);
+<a name="l00973"></a>00973         }
+<a name="l00974"></a>00974         <a class="code" href="classBaseDynInst.html#ae5c08b83b54ab954feb02df3e206c1f0">initiateTranslation</a>(req, sreqLow, sreqHigh, res, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911aa56670174817e3fed92bfd8182d7c0d1">BaseTLB::Write</a>);
+<a name="l00975"></a>00975     }
+<a name="l00976"></a>00976 
+<a name="l00977"></a>00977     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> == <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a> &amp;&amp; <a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">translationCompleted</a>()) {
+<a name="l00978"></a>00978         <a class="code" href="classBaseDynInst.html#a1097c58b547d58e4544cbf31fa68a390">effAddr</a> = req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>();
+<a name="l00979"></a>00979         <a class="code" href="classBaseDynInst.html#ad52a4366d1b850793e6d979a7459cab4">effSize</a> = size;
+<a name="l00980"></a>00980         <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa18215c6f3e211fc0797fc8319a3b7dba">EffAddrValid</a>] = <span class="keyword">true</span>;
+<a name="l00981"></a>00981 
+<a name="l00982"></a>00982         <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;checker) {
+<a name="l00983"></a>00983             <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a> != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) {
+<a name="l00984"></a>00984                 <span class="keyword">delete</span> <a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a>;
+<a name="l00985"></a>00985             }
+<a name="l00986"></a>00986             <a class="code" href="classBaseDynInst.html#a7a7e19d3ca6f10eed7c88a377c4cb971">reqToVerify</a> = <span class="keyword">new</span> <a class="code" href="classRequest.html">Request</a>(*req);
+<a name="l00987"></a>00987         }
+<a name="l00988"></a>00988         <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> = <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;write(req, sreqLow, sreqHigh, data, <a class="code" href="classBaseDynInst.html#a9f5a94c5a008c1580f89d38e425a6528">sqIdx</a>);
+<a name="l00989"></a>00989     }
+<a name="l00990"></a>00990 
+<a name="l00991"></a>00991     <span class="keywordflow">return</span> <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a>;
+<a name="l00992"></a>00992 }
+<a name="l00993"></a>00993 
+<a name="l00994"></a>00994 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00995"></a>00995 <span class="keyword">inline</span> <span class="keywordtype">void</span>
+<a name="l00996"></a><a class="code" href="classBaseDynInst.html#aa1b0c0798d6520eb2c1bf3334cee01c5">00996</a> <a class="code" href="classBaseDynInst.html#aa1b0c0798d6520eb2c1bf3334cee01c5">BaseDynInst&lt;Impl&gt;::splitRequest</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqLow,
+<a name="l00997"></a>00997                                 <a class="code" href="classRequest.html">RequestPtr</a> &amp;sreqHigh)
+<a name="l00998"></a>00998 {
+<a name="l00999"></a>00999     <span class="comment">// Check to see if the request crosses the next level block boundary.</span>
+<a name="l01000"></a>01000     <span class="keywordtype">unsigned</span> block_size = <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;cacheLineSize();
+<a name="l01001"></a>01001     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a> = req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>();
+<a name="l01002"></a>01002     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> split_addr = <a class="code" href="intmath_8hh.html#a343c19b0ae885d5f3c7960987096e9d5">roundDown</a>(addr + req-&gt;<a class="code" href="classRequest.html#a3c4029b904a61a9873e6d12785ce19a1">getSize</a>() - 1, block_size);
+<a name="l01003"></a>01003     assert(split_addr &lt;= addr || split_addr - addr &lt; block_size);
+<a name="l01004"></a>01004 
+<a name="l01005"></a>01005     <span class="comment">// Spans two blocks.</span>
+<a name="l01006"></a>01006     <span class="keywordflow">if</span> (split_addr &gt; addr) {
+<a name="l01007"></a>01007         req-&gt;<a class="code" href="classRequest.html#ae170370b8e735017a61a913b767f0d9d">splitOnVaddr</a>(split_addr, sreqLow, sreqHigh);
+<a name="l01008"></a>01008     }
+<a name="l01009"></a>01009 }
+<a name="l01010"></a>01010 
+<a name="l01011"></a>01011 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l01012"></a>01012 <span class="keyword">inline</span> <span class="keywordtype">void</span>
+<a name="l01013"></a><a class="code" href="classBaseDynInst.html#ae5c08b83b54ab954feb02df3e206c1f0">01013</a> <a class="code" href="classBaseDynInst.html#ae5c08b83b54ab954feb02df3e206c1f0">BaseDynInst&lt;Impl&gt;::initiateTranslation</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classRequest.html">RequestPtr</a> sreqLow,
+<a name="l01014"></a>01014                                        <a class="code" href="classRequest.html">RequestPtr</a> sreqHigh, uint64_t *res,
+<a name="l01015"></a>01015                                        <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">BaseTLB::Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>)
+<a name="l01016"></a>01016 {
+<a name="l01017"></a>01017     <a class="code" href="classBaseDynInst.html#ac97dc97e71471789910132e3a3ce0949">translationStarted</a>(<span class="keyword">true</span>);
+<a name="l01018"></a>01018 
+<a name="l01019"></a>01019     <span class="keywordflow">if</span> (!<a class="code" href="namespaceAlphaISA.html#a1c3adbc67ce574fe545e332d3bc677be">TheISA::HasUnalignedMemAcc</a> || sreqLow == <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) {
+<a name="l01020"></a>01020         <a class="code" href="classWholeTranslationState.html">WholeTranslationState</a> *state =
+<a name="l01021"></a>01021             <span class="keyword">new</span> <a class="code" href="classWholeTranslationState.html">WholeTranslationState</a>(req, <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>, res, mode);
+<a name="l01022"></a>01022 
+<a name="l01023"></a>01023         <span class="comment">// One translation if the request isn&apos;t split.</span>
+<a name="l01024"></a>01024         <a class="code" href="classDataTranslation.html">DataTranslation&lt;BaseDynInstPtr&gt;</a> *trans =
+<a name="l01025"></a>01025             <span class="keyword">new</span> <a class="code" href="classDataTranslation.html">DataTranslation&lt;BaseDynInstPtr&gt;</a>(<span class="keyword">this</span>, state);
+<a name="l01026"></a>01026 
+<a name="l01027"></a>01027         <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;dtb-&gt;translateTiming(req, <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;getTC(), trans, mode);
+<a name="l01028"></a>01028 
+<a name="l01029"></a>01029         <span class="keywordflow">if</span> (!<a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">translationCompleted</a>()) {
+<a name="l01030"></a>01030             <span class="comment">// The translation isn&apos;t yet complete, so we can&apos;t possibly have a</span>
+<a name="l01031"></a>01031             <span class="comment">// fault. Overwrite any existing fault we might have from a previous</span>
+<a name="l01032"></a>01032             <span class="comment">// execution of this instruction (e.g. an uncachable load that</span>
+<a name="l01033"></a>01033             <span class="comment">// couldn&apos;t execute because it wasn&apos;t at the head of the ROB).</span>
+<a name="l01034"></a>01034             <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> = <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l01035"></a>01035 
+<a name="l01036"></a>01036             <span class="comment">// Save memory requests.</span>
+<a name="l01037"></a>01037             <a class="code" href="classBaseDynInst.html#a59b330383a8be2eaba12ac79b9d28dc2">savedReq</a> = state-&gt;<a class="code" href="classWholeTranslationState.html#ae9cdcf9160e22de981af332c3f02a209">mainReq</a>;
+<a name="l01038"></a>01038             <a class="code" href="classBaseDynInst.html#a092c24fc1b01745b4611ef36265f778a">savedSreqLow</a> = state-&gt;<a class="code" href="classWholeTranslationState.html#a8c06ecd03202f5de1fc60cf6194ff285">sreqLow</a>;
+<a name="l01039"></a>01039             <a class="code" href="classBaseDynInst.html#a0e8cac1ccea0f0428cb39947673bc31c">savedSreqHigh</a> = state-&gt;<a class="code" href="classWholeTranslationState.html#a1464e1dd7de6d5752d05938f0b3bc171">sreqHigh</a>;
+<a name="l01040"></a>01040         }
+<a name="l01041"></a>01041     } <span class="keywordflow">else</span> {
+<a name="l01042"></a>01042         <a class="code" href="classWholeTranslationState.html">WholeTranslationState</a> *state =
+<a name="l01043"></a>01043             <span class="keyword">new</span> <a class="code" href="classWholeTranslationState.html">WholeTranslationState</a>(req, sreqLow, sreqHigh, <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>, res, mode);
+<a name="l01044"></a>01044 
+<a name="l01045"></a>01045         <span class="comment">// Two translations when the request is split.</span>
+<a name="l01046"></a>01046         <a class="code" href="classDataTranslation.html">DataTranslation&lt;BaseDynInstPtr&gt;</a> *stransLow =
+<a name="l01047"></a>01047             <span class="keyword">new</span> <a class="code" href="classDataTranslation.html">DataTranslation&lt;BaseDynInstPtr&gt;</a>(<span class="keyword">this</span>, state, 0);
+<a name="l01048"></a>01048         <a class="code" href="classDataTranslation.html">DataTranslation&lt;BaseDynInstPtr&gt;</a> *stransHigh =
+<a name="l01049"></a>01049             <span class="keyword">new</span> <a class="code" href="classDataTranslation.html">DataTranslation&lt;BaseDynInstPtr&gt;</a>(<span class="keyword">this</span>, state, 1);
+<a name="l01050"></a>01050 
+<a name="l01051"></a>01051         <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;dtb-&gt;translateTiming(sreqLow, <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;getTC(), stransLow, mode);
+<a name="l01052"></a>01052         <a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>-&gt;dtb-&gt;translateTiming(sreqHigh, <a class="code" href="classBaseDynInst.html#a56eb59d7a0af96e35683462934d6d13e">thread</a>-&gt;getTC(), stransHigh, mode);
+<a name="l01053"></a>01053 
+<a name="l01054"></a>01054         <span class="keywordflow">if</span> (!<a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">translationCompleted</a>()) {
+<a name="l01055"></a>01055             <span class="comment">// The translation isn&apos;t yet complete, so we can&apos;t possibly have a</span>
+<a name="l01056"></a>01056             <span class="comment">// fault. Overwrite any existing fault we might have from a previous</span>
+<a name="l01057"></a>01057             <span class="comment">// execution of this instruction (e.g. an uncachable load that</span>
+<a name="l01058"></a>01058             <span class="comment">// couldn&apos;t execute because it wasn&apos;t at the head of the ROB).</span>
+<a name="l01059"></a>01059             <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> = <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l01060"></a>01060 
+<a name="l01061"></a>01061             <span class="comment">// Save memory requests.</span>
+<a name="l01062"></a>01062             <a class="code" href="classBaseDynInst.html#a59b330383a8be2eaba12ac79b9d28dc2">savedReq</a> = state-&gt;mainReq;
+<a name="l01063"></a>01063             <a class="code" href="classBaseDynInst.html#a092c24fc1b01745b4611ef36265f778a">savedSreqLow</a> = state-&gt;sreqLow;
+<a name="l01064"></a>01064             <a class="code" href="classBaseDynInst.html#a0e8cac1ccea0f0428cb39947673bc31c">savedSreqHigh</a> = state-&gt;sreqHigh;
+<a name="l01065"></a>01065         }
+<a name="l01066"></a>01066     }
+<a name="l01067"></a>01067 }
+<a name="l01068"></a>01068 
+<a name="l01069"></a>01069 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l01070"></a>01070 <span class="keyword">inline</span> <span class="keywordtype">void</span>
+<a name="l01071"></a><a class="code" href="classBaseDynInst.html#a36c2a28eca3086b67fc7168a37367e98">01071</a> <a class="code" href="classBaseDynInst.html#a36c2a28eca3086b67fc7168a37367e98">BaseDynInst&lt;Impl&gt;::finishTranslation</a>(<a class="code" href="classWholeTranslationState.html">WholeTranslationState</a> *state)
+<a name="l01072"></a>01072 {
+<a name="l01073"></a>01073     <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> = state-&gt;<a class="code" href="classWholeTranslationState.html#a1ac977937b0a3cf64e58ba7141e4cc11">getFault</a>();
+<a name="l01074"></a>01074 
+<a name="l01075"></a>01075     <a class="code" href="classBaseDynInst.html#a4bc909cbac3face1caf422952afdd400">instFlags</a>[<a class="code" href="classBaseDynInst.html#aa705cf7e79a21c2352b00ffe20cd295fa935a229fd307ffc1a80933386891c427">IsUncacheable</a>] = state-&gt;<a class="code" href="classWholeTranslationState.html#a70c74b2809417ea8701dd6ba9e34312d">isUncacheable</a>();
+<a name="l01076"></a>01076 
+<a name="l01077"></a>01077     <span class="keywordflow">if</span> (<a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a> == <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>) {
+<a name="l01078"></a>01078         <a class="code" href="classBaseDynInst.html#a159ce173047bae421effda8028f07d68">physEffAddr</a> = state-&gt;<a class="code" href="classWholeTranslationState.html#ad988a42a876d1cbc56556e1317e0f107">getPaddr</a>();
+<a name="l01079"></a>01079         <a class="code" href="classBaseDynInst.html#aba29e5174ccb47ac17cc2ff228a8e2af">memReqFlags</a> = state-&gt;<a class="code" href="classWholeTranslationState.html#a009220068577b6979aeae8fe951bd63d">getFlags</a>();
+<a name="l01080"></a>01080 
+<a name="l01081"></a>01081         <span class="keywordflow">if</span> (state-&gt;<a class="code" href="classWholeTranslationState.html#ae9cdcf9160e22de981af332c3f02a209">mainReq</a>-&gt;<a class="code" href="classRequest.html#a086ef1e55d60089d0aa0232ff797eaef">isCondSwap</a>()) {
+<a name="l01082"></a>01082             assert(state-&gt;<a class="code" href="classWholeTranslationState.html#afd8a8bcfa588184183684cc5a1deeb5a">res</a>);
+<a name="l01083"></a>01083             state-&gt;<a class="code" href="classWholeTranslationState.html#ae9cdcf9160e22de981af332c3f02a209">mainReq</a>-&gt;<a class="code" href="classRequest.html#ac73800a0bae4776befb9d416e95ea6d9">setExtraData</a>(*state-&gt;<a class="code" href="classWholeTranslationState.html#afd8a8bcfa588184183684cc5a1deeb5a">res</a>);
+<a name="l01084"></a>01084         }
+<a name="l01085"></a>01085 
+<a name="l01086"></a>01086     } <span class="keywordflow">else</span> {
+<a name="l01087"></a>01087         state-&gt;<a class="code" href="classWholeTranslationState.html#a6dc2cbc61a85f942f081c1a136dd3585">deleteReqs</a>();
+<a name="l01088"></a>01088     }
+<a name="l01089"></a>01089     <span class="keyword">delete</span> state;
+<a name="l01090"></a>01090 
+<a name="l01091"></a>01091     <a class="code" href="classBaseDynInst.html#acb5aa3bab9bbe5a26aeaab77f3abe4be">translationCompleted</a>(<span class="keyword">true</span>);
+<a name="l01092"></a>01092 }
+<a name="l01093"></a>01093 
+<a name="l01094"></a>01094 <span class="preprocessor">#endif // __CPU_BASE_DYN_INST_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

@@ -1,0 +1,177 @@
+\hypertarget{classTru64AlphaSystem}{
+\section{クラス Tru64AlphaSystem}
+\label{classTru64AlphaSystem}\index{Tru64AlphaSystem@{Tru64AlphaSystem}}
+}
+
+
+{\ttfamily \#include $<$system.hh$>$}Tru64AlphaSystemに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classTru64AlphaSystem}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef Tru64AlphaSystemParams \hyperlink{classTru64AlphaSystem_a653e3d38e55079cc093cc4945c1ac3d1}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTru64AlphaSystem_a5b0ae66b648ea464fceae312db22bb1a}{Tru64AlphaSystem} (\hyperlink{classTru64AlphaSystem_a653e3d38e55079cc093cc4945c1ac3d1}{Params} $\ast$p)
+\item 
+\hyperlink{classTru64AlphaSystem_af9fd4c006ca0b7da440766328643c6e8}{$\sim$Tru64AlphaSystem} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classTru64AlphaSystem_a7aab4d733bbaec993b9eab18250f028d}{Printf} (AlphaArguments args)
+\item 
+static void \hyperlink{classTru64AlphaSystem_a8728dd911bd0f85267192970b5141f67}{DumpMbuf} (AlphaArguments args)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBadAddrEvent}{BadAddrEvent} $\ast$ \hyperlink{classTru64AlphaSystem_a37f3e64c0283c4b56e4ac9f84703a383}{badaddrEvent}
+\item 
+\hyperlink{classSkipFuncEvent}{SkipFuncEvent} $\ast$ \hyperlink{classTru64AlphaSystem_a407a966423a15e11460e80306a4f83f5}{skipPowerStateEvent}
+\item 
+\hyperlink{classSkipFuncEvent}{SkipFuncEvent} $\ast$ \hyperlink{classTru64AlphaSystem_a33f06e57e60ec95b342c46ce08e2f701}{skipScavengeBootEvent}
+\item 
+\hyperlink{classPrintfEvent}{PrintfEvent} $\ast$ \hyperlink{classTru64AlphaSystem_a8be1f28bfc8ec71e81ee00d98c940a3a}{printfEvent}
+\item 
+\hyperlink{classDebugPrintfEvent}{DebugPrintfEvent} $\ast$ \hyperlink{classTru64AlphaSystem_af8fd2e4dd39197b0e5a01f8f2502cbf6}{debugPrintfEvent}
+\item 
+\hyperlink{classDebugPrintfrEvent}{DebugPrintfrEvent} $\ast$ \hyperlink{classTru64AlphaSystem_a7b780886f04c6ba2135c73494e54c61b}{debugPrintfrEvent}
+\item 
+\hyperlink{classDumpMbufEvent}{DumpMbufEvent} $\ast$ \hyperlink{classTru64AlphaSystem_abcfe13a24a681930f77680a961dc75ca}{dumpMbufEvent}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classTru64AlphaSystem_a653e3d38e55079cc093cc4945c1ac3d1}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!Params@{Params}}
+\index{Params@{Params}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef Tru64AlphaSystemParams {\bf Params}}}
+\label{classTru64AlphaSystem_a653e3d38e55079cc093cc4945c1ac3d1}
+
+
+\hyperlink{classAlphaSystem_a2af24d7a564ee2ca81332fb46406cbe5}{AlphaSystem}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTru64AlphaSystem_a5b0ae66b648ea464fceae312db22bb1a}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{Tru64AlphaSystem}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tru64AlphaSystem} ({\bf Tru64AlphaSystem::Params} $\ast$ {\em p})}}
+\label{classTru64AlphaSystem_a5b0ae66b648ea464fceae312db22bb1a}
+
+
+
+\begin{DoxyCode}
+46     : AlphaSystem(p)
+47 {
+48     Addr addr = 0;
+49     if (kernelSymtab->findAddress("enable_async_printf", addr)) {
+50         virtProxy.write(addr, (uint32_t)0);
+51     }
+52 
+53 #ifdef DEBUG
+54     kernelPanicEvent = addKernelFuncEventOrPanic<BreakPCEvent>("panic");
+55 #endif
+56 
+57     badaddrEvent = addKernelFuncEventOrPanic<BadAddrEvent>("badaddr");
+58 
+59     skipPowerStateEvent =
+60         addKernelFuncEvent<SkipFuncEvent>("tl_v48_capture_power_state");
+61     skipScavengeBootEvent =
+62         addKernelFuncEvent<SkipFuncEvent>("pmap_scavenge_boot");
+63 
+64 #if TRACING_ON
+65     printfEvent = addKernelFuncEvent<PrintfEvent>("printf");
+66     debugPrintfEvent = addKernelFuncEvent<DebugPrintfEvent>("m5printf");
+67     debugPrintfrEvent = addKernelFuncEvent<DebugPrintfrEvent>("m5printfr");
+68     dumpMbufEvent = addKernelFuncEvent<DumpMbufEvent>("m5_dump_mbuf");
+69 #endif
+70 }
+\end{DoxyCode}
+\hypertarget{classTru64AlphaSystem_af9fd4c006ca0b7da440766328643c6e8}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!$\sim$Tru64AlphaSystem@{$\sim$Tru64AlphaSystem}}
+\index{$\sim$Tru64AlphaSystem@{$\sim$Tru64AlphaSystem}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{$\sim$Tru64AlphaSystem}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf Tru64AlphaSystem} ()}}
+\label{classTru64AlphaSystem_af9fd4c006ca0b7da440766328643c6e8}
+
+
+
+\begin{DoxyCode}
+73 {
+74 #ifdef DEBUG
+75     delete kernelPanicEvent;
+76 #endif
+77     delete badaddrEvent;
+78     delete skipPowerStateEvent;
+79     delete skipScavengeBootEvent;
+80 #if TRACING_ON
+81     delete printfEvent;
+82     delete debugPrintfEvent;
+83     delete debugPrintfrEvent;
+84     delete dumpMbufEvent;
+85 #endif
+86 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTru64AlphaSystem_a8728dd911bd0f85267192970b5141f67}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!DumpMbuf@{DumpMbuf}}
+\index{DumpMbuf@{DumpMbuf}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{DumpMbuf}]{\setlength{\rightskip}{0pt plus 5cm}static void DumpMbuf (AlphaArguments {\em args})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classTru64AlphaSystem_a8728dd911bd0f85267192970b5141f67}
+\hypertarget{classTru64AlphaSystem_a7aab4d733bbaec993b9eab18250f028d}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!Printf@{Printf}}
+\index{Printf@{Printf}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{Printf}]{\setlength{\rightskip}{0pt plus 5cm}static void Printf (AlphaArguments {\em args})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classTru64AlphaSystem_a7aab4d733bbaec993b9eab18250f028d}
+
+
+\subsection{変数}
+\hypertarget{classTru64AlphaSystem_a37f3e64c0283c4b56e4ac9f84703a383}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!badaddrEvent@{badaddrEvent}}
+\index{badaddrEvent@{badaddrEvent}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{badaddrEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BadAddrEvent}$\ast$ {\bf badaddrEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTru64AlphaSystem_a37f3e64c0283c4b56e4ac9f84703a383}
+\hypertarget{classTru64AlphaSystem_af8fd2e4dd39197b0e5a01f8f2502cbf6}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!debugPrintfEvent@{debugPrintfEvent}}
+\index{debugPrintfEvent@{debugPrintfEvent}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{debugPrintfEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DebugPrintfEvent}$\ast$ {\bf debugPrintfEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTru64AlphaSystem_af8fd2e4dd39197b0e5a01f8f2502cbf6}
+\hypertarget{classTru64AlphaSystem_a7b780886f04c6ba2135c73494e54c61b}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!debugPrintfrEvent@{debugPrintfrEvent}}
+\index{debugPrintfrEvent@{debugPrintfrEvent}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{debugPrintfrEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DebugPrintfrEvent}$\ast$ {\bf debugPrintfrEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTru64AlphaSystem_a7b780886f04c6ba2135c73494e54c61b}
+\hypertarget{classTru64AlphaSystem_abcfe13a24a681930f77680a961dc75ca}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!dumpMbufEvent@{dumpMbufEvent}}
+\index{dumpMbufEvent@{dumpMbufEvent}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{dumpMbufEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DumpMbufEvent}$\ast$ {\bf dumpMbufEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTru64AlphaSystem_abcfe13a24a681930f77680a961dc75ca}
+\hypertarget{classTru64AlphaSystem_a8be1f28bfc8ec71e81ee00d98c940a3a}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!printfEvent@{printfEvent}}
+\index{printfEvent@{printfEvent}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{printfEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PrintfEvent}$\ast$ {\bf printfEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTru64AlphaSystem_a8be1f28bfc8ec71e81ee00d98c940a3a}
+\hypertarget{classTru64AlphaSystem_a407a966423a15e11460e80306a4f83f5}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!skipPowerStateEvent@{skipPowerStateEvent}}
+\index{skipPowerStateEvent@{skipPowerStateEvent}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{skipPowerStateEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SkipFuncEvent}$\ast$ {\bf skipPowerStateEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTru64AlphaSystem_a407a966423a15e11460e80306a4f83f5}
+\hypertarget{classTru64AlphaSystem_a33f06e57e60ec95b342c46ce08e2f701}{
+\index{Tru64AlphaSystem@{Tru64AlphaSystem}!skipScavengeBootEvent@{skipScavengeBootEvent}}
+\index{skipScavengeBootEvent@{skipScavengeBootEvent}!Tru64AlphaSystem@{Tru64AlphaSystem}}
+\subsubsection[{skipScavengeBootEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SkipFuncEvent}$\ast$ {\bf skipScavengeBootEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classTru64AlphaSystem_a33f06e57e60ec95b342c46ce08e2f701}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/alpha/tru64/\hyperlink{arch_2alpha_2tru64_2system_8hh}{system.hh}\item 
+arch/alpha/tru64/\hyperlink{arch_2alpha_2tru64_2system_8cc}{system.cc}\end{DoxyCompactItemize}

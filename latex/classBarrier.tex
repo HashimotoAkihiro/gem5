@@ -1,0 +1,111 @@
+\hypertarget{classBarrier}{
+\section{クラス Barrier}
+\label{classBarrier}\index{Barrier@{Barrier}}
+}
+
+
+{\ttfamily \#include $<$barrier.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBarrier_ab11eb47d1338adc267b8ccb093d33197}{Barrier} (unsigned \_\-numWaiting)
+\item 
+bool \hyperlink{classBarrier_ab86f338cf229c8dd15d854493ff43ff6}{wait} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+std::mutex \hyperlink{classBarrier_a40dd1fa204ad5ba9ae7880f21ba810e1}{bMutex}
+\begin{DoxyCompactList}\small\item\em Mutex to protect access to numLeft and generation. \item\end{DoxyCompactList}\item 
+std::condition\_\-variable \hyperlink{classBarrier_ae060431453d3ba5ae5334759419545a1}{bCond}
+\begin{DoxyCompactList}\small\item\em Condition variable for waiting on barrier. \item\end{DoxyCompactList}\item 
+unsigned \hyperlink{classBarrier_a2fc1e8c1c5053f7cd70d3797d8ddbb1f}{numWaiting}
+\begin{DoxyCompactList}\small\item\em Number of threads we should be waiting for before completing the barrier. \item\end{DoxyCompactList}\item 
+unsigned \hyperlink{classBarrier_a9db7eb9a8410fd508ad6dc871cdc8a47}{generation}
+\begin{DoxyCompactList}\small\item\em Generation of this barrier. \item\end{DoxyCompactList}\item 
+unsigned \hyperlink{classBarrier_a29f3fa2b3a19d46d1524bfaa351ceeab}{numLeft}
+\begin{DoxyCompactList}\small\item\em Number of threads remaining for the current generation. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classBarrier_ab11eb47d1338adc267b8ccb093d33197}{
+\index{Barrier@{Barrier}!Barrier@{Barrier}}
+\index{Barrier@{Barrier}!Barrier@{Barrier}}
+\subsubsection[{Barrier}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Barrier} (unsigned {\em \_\-numWaiting})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classBarrier_ab11eb47d1338adc267b8ccb093d33197}
+
+
+
+\begin{DoxyCode}
+61         : numWaiting(_numWaiting), generation(0), numLeft(_numWaiting)
+62     {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classBarrier_ab86f338cf229c8dd15d854493ff43ff6}{
+\index{Barrier@{Barrier}!wait@{wait}}
+\index{wait@{wait}!Barrier@{Barrier}}
+\subsubsection[{wait}]{\setlength{\rightskip}{0pt plus 5cm}bool wait ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classBarrier_ab86f338cf229c8dd15d854493ff43ff6}
+
+
+
+\begin{DoxyCode}
+66     {
+67         std::unique_lock<std::mutex> lock(bMutex);
+68         unsigned int gen = generation;
+69 
+70         if (--numLeft == 0) {
+71             generation++;
+72             numLeft = numWaiting;
+73             bCond.notify_all();
+74             return true;
+75         }
+76         while (gen == generation)
+77             bCond.wait(lock);
+78         return false;
+79     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classBarrier_ae060431453d3ba5ae5334759419545a1}{
+\index{Barrier@{Barrier}!bCond@{bCond}}
+\index{bCond@{bCond}!Barrier@{Barrier}}
+\subsubsection[{bCond}]{\setlength{\rightskip}{0pt plus 5cm}std::condition\_\-variable {\bf bCond}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBarrier_ae060431453d3ba5ae5334759419545a1}
+
+
+Condition variable for waiting on barrier. \hypertarget{classBarrier_a40dd1fa204ad5ba9ae7880f21ba810e1}{
+\index{Barrier@{Barrier}!bMutex@{bMutex}}
+\index{bMutex@{bMutex}!Barrier@{Barrier}}
+\subsubsection[{bMutex}]{\setlength{\rightskip}{0pt plus 5cm}std::mutex {\bf bMutex}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBarrier_a40dd1fa204ad5ba9ae7880f21ba810e1}
+
+
+Mutex to protect access to numLeft and generation. \hypertarget{classBarrier_a9db7eb9a8410fd508ad6dc871cdc8a47}{
+\index{Barrier@{Barrier}!generation@{generation}}
+\index{generation@{generation}!Barrier@{Barrier}}
+\subsubsection[{generation}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf generation}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBarrier_a9db7eb9a8410fd508ad6dc871cdc8a47}
+
+
+Generation of this barrier. \hypertarget{classBarrier_a29f3fa2b3a19d46d1524bfaa351ceeab}{
+\index{Barrier@{Barrier}!numLeft@{numLeft}}
+\index{numLeft@{numLeft}!Barrier@{Barrier}}
+\subsubsection[{numLeft}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf numLeft}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBarrier_a29f3fa2b3a19d46d1524bfaa351ceeab}
+
+
+Number of threads remaining for the current generation. \hypertarget{classBarrier_a2fc1e8c1c5053f7cd70d3797d8ddbb1f}{
+\index{Barrier@{Barrier}!numWaiting@{numWaiting}}
+\index{numWaiting@{numWaiting}!Barrier@{Barrier}}
+\subsubsection[{numWaiting}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf numWaiting}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBarrier_a2fc1e8c1c5053f7cd70d3797d8ddbb1f}
+
+
+Number of threads we should be waiting for before completing the barrier. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{barrier_8hh}{barrier.hh}\end{DoxyCompactItemize}

@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/copy_engine.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/copy_engine.hh</h1><a href="copy__engine_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2008 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="comment">/* @file</span>
+<a name="l00044"></a>00044 <span class="comment"> * Device model for Intel&apos;s I/O Acceleration Technology (I/OAT).</span>
+<a name="l00045"></a>00045 <span class="comment"> * A DMA asyncronous copy engine</span>
+<a name="l00046"></a>00046 <span class="comment"> */</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="preprocessor">#ifndef __DEV_COPY_ENGINE_HH__</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_COPY_ENGINE_HH__</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="cp__annotate_8hh.html">base/cp_annotate.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="copy__engine__defs_8hh.html">dev/copy_engine_defs.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="pcidev_8hh.html">dev/pcidev.hh</a>&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;params/CopyEngine.hh&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="drain_8hh.html">sim/drain.hh</a>&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="classCopyEngine.html">00061</a> <span class="keyword">class </span><a class="code" href="classCopyEngine_1_1CopyEngine.html">CopyEngine</a> : <span class="keyword">public</span> <a class="code" href="classPciDevice.html">PciDevice</a>
+<a name="l00062"></a>00062 {
+<a name="l00063"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html">00063</a>     <span class="keyword">class </span><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html">CopyEngineChannel</a> : <span class="keyword">public</span> <a class="code" href="classDrainable.html">Drainable</a>
+<a name="l00064"></a>00064     {
+<a name="l00065"></a>00065       <span class="keyword">private</span>:
+<a name="l00066"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af65ef939be20997afb5d546cbe2fa253">00066</a>         <a class="code" href="classDmaPort.html">DmaPort</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af65ef939be20997afb5d546cbe2fa253">cePort</a>;
+<a name="l00067"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">00067</a>         <a class="code" href="classCopyEngine_1_1CopyEngine.html">CopyEngine</a> *<a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>;
+<a name="l00068"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af1b40caebc370f0d226cb1a52483ddfc">00068</a>         <a class="code" href="structCopyEngineReg_1_1ChanRegs.html">CopyEngineReg::ChanRegs</a>  <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af1b40caebc370f0d226cb1a52483ddfc">cr</a>;
+<a name="l00069"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">00069</a>         <span class="keywordtype">int</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>;
+<a name="l00070"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af8c0eaac54803b25f0dfdbb89600093b">00070</a>         <a class="code" href="structCopyEngineReg_1_1DmaDesc.html">CopyEngineReg::DmaDesc</a> *<a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af8c0eaac54803b25f0dfdbb89600093b">curDmaDesc</a>;
+<a name="l00071"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#afbda594180f4eaeac0026b69add1ca2f">00071</a>         uint8_t *<a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#afbda594180f4eaeac0026b69add1ca2f">copyBuffer</a>;
+<a name="l00072"></a>00072 
+<a name="l00073"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#abbe792bb2cf67584b86443440a194f46">00073</a>         <span class="keywordtype">bool</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#abbe792bb2cf67584b86443440a194f46">busy</a>;
+<a name="l00074"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a667d5cc444aa1980eba330fa927415d5">00074</a>         <span class="keywordtype">bool</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a667d5cc444aa1980eba330fa927415d5">underReset</a>;
+<a name="l00075"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#abfea5a69e8c7ebdb60f68225310d7c6e">00075</a>         <span class="keywordtype">bool</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#abfea5a69e8c7ebdb60f68225310d7c6e">refreshNext</a>;
+<a name="l00076"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#adc111744ad979f12ef5d0f7afd26c69d">00076</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#adc111744ad979f12ef5d0f7afd26c69d">lastDescriptorAddr</a>;
+<a name="l00077"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a5eeb3d755d58eb24d74f92245bf18d2a">00077</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a5eeb3d755d58eb24d74f92245bf18d2a">fetchAddress</a>;
+<a name="l00078"></a>00078 
+<a name="l00079"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a34a95aa4b855102c3be97544c155e75a">00079</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a34a95aa4b855102c3be97544c155e75a">latBeforeBegin</a>;
+<a name="l00080"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aa97db4f2f9c86194366807cd2bd05ae8">00080</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aa97db4f2f9c86194366807cd2bd05ae8">latAfterCompletion</a>;
+<a name="l00081"></a>00081 
+<a name="l00082"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a939f73db208ee37ef7d262c44123d65a">00082</a>         uint64_t <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a939f73db208ee37ef7d262c44123d65a">completionDataReg</a>;
+<a name="l00083"></a>00083 
+<a name="l00084"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73">00084</a>         <span class="keyword">enum</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73">ChannelState</a> {
+<a name="l00085"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73ad3fa9ae9431d6cb1772f9d9df48cab19">00085</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73ad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00086"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a9f5a96909ad4740fa07395d9482859b0">00086</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a9f5a96909ad4740fa07395d9482859b0">AddressFetch</a>,
+<a name="l00087"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a2e5e9f9afcc849fb4b26d2dc676713f6">00087</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a2e5e9f9afcc849fb4b26d2dc676713f6">DescriptorFetch</a>,
+<a name="l00088"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a625468fb1b5afee8d3524833e1511286">00088</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a625468fb1b5afee8d3524833e1511286">DMARead</a>,
+<a name="l00089"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a95a1c91ff83ac2d556d87cc16d23924e">00089</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73a95a1c91ff83ac2d556d87cc16d23924e">DMAWrite</a>,
+<a name="l00090"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73ab1dcef87eab1fcd5ea4a9e215aa45f25">00090</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73ab1dcef87eab1fcd5ea4a9e215aa45f25">CompletionWrite</a>
+<a name="l00091"></a>00091         };
+<a name="l00092"></a>00092 
+<a name="l00093"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ab24b7ded83b7736b1f4f707b95109e5d">00093</a>         <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac41ef28e0083b7345bf0f53f33934a73">ChannelState</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ab24b7ded83b7736b1f4f707b95109e5d">nextState</a>;
+<a name="l00094"></a>00094 
+<a name="l00095"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a329b71fb934a93312ca0aacbf5a3f982">00095</a>         <a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a329b71fb934a93312ca0aacbf5a3f982">drainManager</a>;
+<a name="l00096"></a>00096       <span class="keyword">public</span>:
+<a name="l00097"></a>00097         <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a407c12791405657ab18510c2141828fe">CopyEngineChannel</a>(<a class="code" href="classCopyEngine_1_1CopyEngine.html">CopyEngine</a> *_ce, <span class="keywordtype">int</span> cid);
+<a name="l00098"></a>00098         <span class="keyword">virtual</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a9d13764944deaf17eb431f30157545ca">~CopyEngineChannel</a>();
+<a name="l00099"></a>00099         <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a> &amp;<a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a4e826c60c407af047c6cfdcba5f79467">getMasterPort</a>();
+<a name="l00100"></a>00100 
+<a name="l00101"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af1801e31af6399bccce114ab12575168">00101</a>         std::string <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af1801e31af6399bccce114ab12575168">name</a>() { assert(<a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>); <span class="keywordflow">return</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>-&gt;<a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>() + <a class="code" href="cprintf_8hh.html#ace22d1c39f2df58e593bc49d1613eca2">csprintf</a>(<span class="stringliteral">&quot;-chan%d&quot;</span>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>); }
+<a name="l00102"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a3848226950f14efe17b2b251384cde95">00102</a>         <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a3848226950f14efe17b2b251384cde95">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00103"></a>00103                         { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;CopyEngineChannel has no I/O access\n&quot;</span>);}
+<a name="l00104"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aeda092863c7ed5e4523d9b705d0d8c15">00104</a>         <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aeda092863c7ed5e4523d9b705d0d8c15">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00105"></a>00105                         { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;CopyEngineChannel has no I/O access\n&quot;</span>); }
+<a name="l00106"></a>00106 
+<a name="l00107"></a>00107         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a0d7e053ca25cc1b216632397c95161b7">channelRead</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr, <span class="keywordtype">int</span> size);
+<a name="l00108"></a>00108         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ba2036c031e913ac61e918218159eaa">channelWrite</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr, <span class="keywordtype">int</span> size);
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a6bf479c521c7c3eb473822d953275b26">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *drainManger);
+<a name="l00111"></a>00111         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00114"></a>00114         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116       <span class="keyword">private</span>:
+<a name="l00117"></a>00117         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ade0b28ef4d83eab52f66f236473fb486">fetchDescriptor</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> address);
+<a name="l00118"></a>00118         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a603f8a373e26c50ac5daa350afde3355">fetchDescComplete</a>();
+<a name="l00119"></a>00119         <a class="code" href="classEventWrapper.html">EventWrapper&lt;CopyEngineChannel, &amp;CopyEngineChannel::fetchDescComplete&gt;</a>
+<a name="l00120"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a1534deeb56a4db6a811c7c5b42c192ca">00120</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a1534deeb56a4db6a811c7c5b42c192ca">fetchCompleteEvent</a>;
+<a name="l00121"></a>00121 
+<a name="l00122"></a>00122         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2569cf33044109a5a992ef1452cf7a7c">fetchNextAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> address);
+<a name="l00123"></a>00123         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a35f044598c449411508cd2592e06ff8e">fetchAddrComplete</a>();
+<a name="l00124"></a>00124         <a class="code" href="classEventWrapper.html">EventWrapper&lt;CopyEngineChannel, &amp;CopyEngineChannel::fetchAddrComplete&gt;</a>
+<a name="l00125"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a8d993ab6d140cbb64e18dd8e6e24fcc2">00125</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a8d993ab6d140cbb64e18dd8e6e24fcc2">addrCompleteEvent</a>;
+<a name="l00126"></a>00126 
+<a name="l00127"></a>00127         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a366c54487857e85b17043ef81def74ee">readCopyBytes</a>();
+<a name="l00128"></a>00128         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a9bb5ef45f6e13dccc565640d1ccb8cdd">readCopyBytesComplete</a>();
+<a name="l00129"></a>00129         <a class="code" href="classEventWrapper.html">EventWrapper&lt;CopyEngineChannel, &amp;CopyEngineChannel::readCopyBytesComplete&gt;</a>
+<a name="l00130"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aa23ca1b4c066edc88d3770f275f1b250">00130</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aa23ca1b4c066edc88d3770f275f1b250">readCompleteEvent</a>;
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aa538c330f51ea59fafe7a1d37a776111">writeCopyBytes</a>();
+<a name="l00133"></a>00133         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a34b0271502a103b28409e1796b16b95b">writeCopyBytesComplete</a>();
+<a name="l00134"></a>00134         <a class="code" href="classEventWrapper.html">EventWrapper &lt;CopyEngineChannel, &amp;CopyEngineChannel::writeCopyBytesComplete&gt;</a>
+<a name="l00135"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a1008f08d5b6c9e1e72e6736909f23bbb">00135</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a1008f08d5b6c9e1e72e6736909f23bbb">writeCompleteEvent</a>;
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ad307f71461c646a5e9cd24579611f827">writeCompletionStatus</a>();
+<a name="l00138"></a>00138         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#abbbcfb2dd0fad92c68dfda56b4b334b8">writeStatusComplete</a>();
+<a name="l00139"></a>00139         <a class="code" href="classEventWrapper.html">EventWrapper &lt;CopyEngineChannel, &amp;CopyEngineChannel::writeStatusComplete&gt;</a>
+<a name="l00140"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a311433f834e73820b65afccaadc60cf3">00140</a>             <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a311433f834e73820b65afccaadc60cf3">statusCompleteEvent</a>;
+<a name="l00141"></a>00141 
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ac8396f8f0fe67599f56c870c45cd4bf7">continueProcessing</a>();
+<a name="l00144"></a>00144         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a29f4846167c0833db565e7848de4c3a2">recvCommand</a>();
+<a name="l00145"></a>00145         <span class="keywordtype">bool</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae377b3f8babf5878cbeded1e190a4893">inDrain</a>();
+<a name="l00146"></a>00146         <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a9504930bccd8ae4e8593d3aefaba7548">restartStateMachine</a>();
+<a name="l00147"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a8000b4835a66b0ff75fa7f5512f727a2">00147</a>         <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a8000b4835a66b0ff75fa7f5512f727a2">anBegin</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="namespaceArmISA.html#afaeb18e17f862d8fcb76dfb68a18854f">s</a>)
+<a name="l00148"></a>00148         {
+<a name="l00149"></a>00149             <a class="code" href="classCPA.html#af57eb8a9bcb0a342b03eaa0bc6255684">CPA::cpa</a>()-&gt;<a class="code" href="classCPA.html#adaf891d4f8327c0311472739f4a2235b">hwBegin</a>(<a class="code" href="classCPA.html#ab6b306ef981f5e21bb41ea2c2dbe8cd9a96f120298159c9334e174bf9f286f63b">CPA::FL_NONE</a>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>-&gt;<a class="code" href="classPioDevice.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>,
+<a name="l00150"></a>00150                          <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>, <span class="stringliteral">&quot;CopyEngine&quot;</span>, s);
+<a name="l00151"></a>00151         }
+<a name="l00152"></a>00152 
+<a name="l00153"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a34885371096072728525cff5eaae0c8c">00153</a>         <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a34885371096072728525cff5eaae0c8c">anWait</a>()
+<a name="l00154"></a>00154         {
+<a name="l00155"></a>00155             <a class="code" href="classCPA.html#af57eb8a9bcb0a342b03eaa0bc6255684">CPA::cpa</a>()-&gt;<a class="code" href="classCPA.html#a5b3ce310c0911ec7bca22bc32f243cb9">hwWe</a>(<a class="code" href="classCPA.html#ab6b306ef981f5e21bb41ea2c2dbe8cd9a96f120298159c9334e174bf9f286f63b">CPA::FL_NONE</a>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>-&gt;<a class="code" href="classPioDevice.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>,
+<a name="l00156"></a>00156                      <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>, <span class="stringliteral">&quot;CopyEngine&quot;</span>, <span class="stringliteral">&quot;DMAUnusedDescQ&quot;</span>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>);
+<a name="l00157"></a>00157         }
+<a name="l00158"></a>00158 
+<a name="l00159"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a6d48da71893149c635dac1dfb9db7cc9">00159</a>         <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a6d48da71893149c635dac1dfb9db7cc9">anDq</a>()
+<a name="l00160"></a>00160         {
+<a name="l00161"></a>00161             <a class="code" href="classCPA.html#af57eb8a9bcb0a342b03eaa0bc6255684">CPA::cpa</a>()-&gt;<a class="code" href="classCPA.html#ac6ac43bd87dec93efd50230427086a92">hwDq</a>(<a class="code" href="classCPA.html#ab6b306ef981f5e21bb41ea2c2dbe8cd9a96f120298159c9334e174bf9f286f63b">CPA::FL_NONE</a>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>-&gt;<a class="code" href="classPioDevice.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>,
+<a name="l00162"></a>00162                       <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>, <span class="stringliteral">&quot;CopyEngine&quot;</span>, <span class="stringliteral">&quot;DMAUnusedDescQ&quot;</span>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>);
+<a name="l00163"></a>00163         }
+<a name="l00164"></a>00164 
+<a name="l00165"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a404a8353a35bc56b38afd5a5f6733bee">00165</a>         <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a404a8353a35bc56b38afd5a5f6733bee">anPq</a>()
+<a name="l00166"></a>00166         {
+<a name="l00167"></a>00167             <a class="code" href="classCPA.html#af57eb8a9bcb0a342b03eaa0bc6255684">CPA::cpa</a>()-&gt;<a class="code" href="classCPA.html#ac6ac43bd87dec93efd50230427086a92">hwDq</a>(<a class="code" href="classCPA.html#ab6b306ef981f5e21bb41ea2c2dbe8cd9a96f120298159c9334e174bf9f286f63b">CPA::FL_NONE</a>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>-&gt;<a class="code" href="classPioDevice.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>,
+<a name="l00168"></a>00168                       <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>, <span class="stringliteral">&quot;CopyEngine&quot;</span>, <span class="stringliteral">&quot;DMAUnusedDescQ&quot;</span>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>);
+<a name="l00169"></a>00169         }
+<a name="l00170"></a>00170 
+<a name="l00171"></a><a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aa754a1b36810cef759e3c709a3d941e3">00171</a>         <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#aa754a1b36810cef759e3c709a3d941e3">anQ</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="namespaceArmISA.html#afaeb18e17f862d8fcb76dfb68a18854f">s</a>, uint64_t <span class="keywordtype">id</span>, <span class="keywordtype">int</span> size = 1)
+<a name="l00172"></a>00172         {
+<a name="l00173"></a>00173             <a class="code" href="classCPA.html#af57eb8a9bcb0a342b03eaa0bc6255684">CPA::cpa</a>()-&gt;<a class="code" href="classCPA.html#a31614725ede04f43ff983d5dedb56590">hwQ</a>(<a class="code" href="classCPA.html#ab6b306ef981f5e21bb41ea2c2dbe8cd9a96f120298159c9334e174bf9f286f63b">CPA::FL_NONE</a>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#ae925c50266b3cf6452dc9726999e1adc">ce</a>-&gt;<a class="code" href="classPioDevice.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>, <a class="code" href="classCopyEngine_1_1CopyEngineChannel.html#a2ee325435cb56082296ff4412aede290">channelId</a>,
+<a name="l00174"></a>00174                     <span class="stringliteral">&quot;CopyEngine&quot;</span>, s, <span class="keywordtype">id</span>, <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>, size);
+<a name="l00175"></a>00175         }
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177     };
+<a name="l00178"></a>00178 
+<a name="l00179"></a>00179   <span class="keyword">private</span>:
+<a name="l00180"></a>00180 
+<a name="l00181"></a><a class="code" href="classCopyEngine.html#a25b7da20ae9cf014c7806abf1bf929b3">00181</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classCopyEngine.html#a25b7da20ae9cf014c7806abf1bf929b3">bytesCopied</a>;
+<a name="l00182"></a><a class="code" href="classCopyEngine.html#a2c7c96445b0cb37f72b61dae4d2c541d">00182</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classCopyEngine.html#a2c7c96445b0cb37f72b61dae4d2c541d">copiesProcessed</a>;
+<a name="l00183"></a>00183 
+<a name="l00184"></a>00184     <span class="comment">// device registers</span>
+<a name="l00185"></a><a class="code" href="classCopyEngine.html#ac3a32787c71b25fdee473de0804efa29">00185</a>     <a class="code" href="structCopyEngineReg_1_1Regs.html">CopyEngineReg::Regs</a> <a class="code" href="classCopyEngine.html#ac3a32787c71b25fdee473de0804efa29">regs</a>;
+<a name="l00186"></a>00186 
+<a name="l00187"></a>00187     <span class="comment">// Array of channels each one with regs/dma port/etc</span>
+<a name="l00188"></a><a class="code" href="classCopyEngine.html#a2fa0132c83d16e1e404f54278dcf94c4">00188</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;CopyEngineChannel*&gt;</a> <a class="code" href="classCopyEngine.html#a2fa0132c83d16e1e404f54278dcf94c4">chan</a>;
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190   <span class="keyword">public</span>:
+<a name="l00191"></a><a class="code" href="classCopyEngine.html#a0b0580d58d6a0384646682653aefb97a">00191</a>     <span class="keyword">typedef</span> CopyEngineParams <a class="code" href="classCopyEngine.html#a0b0580d58d6a0384646682653aefb97a">Params</a>;
+<a name="l00192"></a>00192     <span class="keyword">const</span> <a class="code" href="classCopyEngine.html#a0b0580d58d6a0384646682653aefb97a">Params</a> *
+<a name="l00193"></a><a class="code" href="classCopyEngine.html#acd3c3feb78ae7a8f88fe0f110a718dff">00193</a>     <a class="code" href="classCopyEngine.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00194"></a>00194 <span class="keyword">    </span>{
+<a name="l00195"></a>00195         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classCopyEngine.html#a0b0580d58d6a0384646682653aefb97a">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00196"></a>00196     }
+<a name="l00197"></a>00197     <a class="code" href="classCopyEngine.html#a7042a20ebc60002d8be8c1dd2cc77d24">CopyEngine</a>(<span class="keyword">const</span> <a class="code" href="classCopyEngine.html#a0b0580d58d6a0384646682653aefb97a">Params</a> *<a class="code" href="classCopyEngine.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>);
+<a name="l00198"></a>00198     <a class="code" href="classCopyEngine.html#a1e9353806b1e8062eac347916ca32ac7">~CopyEngine</a>();
+<a name="l00199"></a>00199 
+<a name="l00200"></a>00200     <span class="keywordtype">void</span> <a class="code" href="classCopyEngine.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202     <span class="keyword">virtual</span> <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a> &amp;<a class="code" href="classCopyEngine.html#adc4e675e51defbdd1e354dac729d0703">getMasterPort</a>(<span class="keyword">const</span> std::string &amp;if_name,
+<a name="l00203"></a>00203                                           <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> idx = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00204"></a>00204 
+<a name="l00205"></a>00205     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCopyEngine.html#a613ec7d5e1ec64f8d21fec78ae8e568e">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00206"></a>00206     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCopyEngine.html#a4cefab464e72b5dd42c003a0a4341802">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00207"></a>00207 
+<a name="l00208"></a>00208     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCopyEngine.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00209"></a>00209     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCopyEngine.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00210"></a>00210 
+<a name="l00211"></a>00211     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classCopyEngine.html#a6bf479c521c7c3eb473822d953275b26">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *drainManger);
+<a name="l00212"></a>00212     <span class="keywordtype">void</span> <a class="code" href="classCopyEngine.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00213"></a>00213 };
+<a name="l00214"></a>00214 
+<a name="l00215"></a>00215 <span class="preprocessor">#endif //__DEV_COPY_ENGINE_HH__</span>
+<a name="l00216"></a>00216 <span class="preprocessor"></span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

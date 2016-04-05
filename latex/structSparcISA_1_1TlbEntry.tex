@@ -1,0 +1,184 @@
+\hypertarget{structSparcISA_1_1TlbEntry}{
+\section{構造体 TlbEntry}
+\label{structSparcISA_1_1TlbEntry}\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+}
+
+
+{\ttfamily \#include $<$pagetable.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structSparcISA_1_1TlbEntry_ad069716fb78ffaa2d9bfba679a8eac9a}{TlbEntry} ()
+\item 
+\hyperlink{structSparcISA_1_1TlbEntry_a69a4824fbe38adbd1517dda05272617d}{TlbEntry} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} asn, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} vaddr, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} paddr)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{structSparcISA_1_1TlbEntry_a4f87fae41ff4bd27577a41dba3cf2b90}{pageStart} ()
+\item 
+void \hyperlink{structSparcISA_1_1TlbEntry_a5b72666b92ee0adbe9a7d218a0343754}{updateVaddr} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} new\_\-vaddr)
+\item 
+void \hyperlink{structSparcISA_1_1TlbEntry_a53e036786d17361be4c7320d39c99b84}{serialize} (std::ostream \&os)
+\item 
+void \hyperlink{structSparcISA_1_1TlbEntry_af22e5d6d660b97db37003ac61ac4ee49}{unserialize} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const std::string \&section)
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structSparcISA_1_1TlbRange}{TlbRange} \hyperlink{structSparcISA_1_1TlbEntry_a11b43184b3c2df2015fefa5beb543d55}{range}
+\item 
+\hyperlink{classSparcISA_1_1PageTableEntry}{PageTableEntry} \hyperlink{structSparcISA_1_1TlbEntry_a97776a0e0f255c02dcb71ea59ea2c551}{pte}
+\item 
+bool \hyperlink{structSparcISA_1_1TlbEntry_accd366cbfd7b8a1b904ca4177a894f95}{used}
+\item 
+bool \hyperlink{structSparcISA_1_1TlbEntry_a28e3c179a86f337095088b3ca02a2b2a}{valid}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{structSparcISA_1_1TlbEntry_ad069716fb78ffaa2d9bfba679a8eac9a}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!TlbEntry@{TlbEntry}}
+\index{TlbEntry@{TlbEntry}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{TlbEntry}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TlbEntry} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structSparcISA_1_1TlbEntry_ad069716fb78ffaa2d9bfba679a8eac9a}
+
+
+
+\begin{DoxyCode}
+231     {}
+\end{DoxyCode}
+\hypertarget{structSparcISA_1_1TlbEntry_a69a4824fbe38adbd1517dda05272617d}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!TlbEntry@{TlbEntry}}
+\index{TlbEntry@{TlbEntry}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{TlbEntry}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TlbEntry} ({\bf Addr} {\em asn}, \/  {\bf Addr} {\em vaddr}, \/  {\bf Addr} {\em paddr})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structSparcISA_1_1TlbEntry_a69a4824fbe38adbd1517dda05272617d}
+
+
+
+\begin{DoxyCode}
+234     {
+235         uint64_t entry = 0;
+236         entry |= 1ULL << 1; // Writable
+237         entry |= 0ULL << 2; // Available in nonpriveleged mode
+238         entry |= 0ULL << 3; // No side effects
+239         entry |= 1ULL << 4; // Virtually cachable
+240         entry |= 1ULL << 5; // Physically cachable
+241         entry |= 0ULL << 6; // Not locked
+242         entry |= mbits(paddr, 39, 13); // Physical address
+243         entry |= 0ULL << 48; // size = 8k
+244         entry |= 0uLL << 59; // Endianness not inverted
+245         entry |= 0ULL << 60; // Not no fault only
+246         entry |= 0ULL << 61; // size = 8k
+247         entry |= 1ULL << 63; // valid
+248         pte = PageTableEntry(entry);
+249 
+250         range.va = vaddr;
+251         range.size = 8*(1<<10);
+252         range.contextId = asn;
+253         range.partitionId = 0;
+254         range.real = false;
+255 
+256         valid = true;
+257     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{structSparcISA_1_1TlbEntry_a4f87fae41ff4bd27577a41dba3cf2b90}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!pageStart@{pageStart}}
+\index{pageStart@{pageStart}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{pageStart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} pageStart ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structSparcISA_1_1TlbEntry_a4f87fae41ff4bd27577a41dba3cf2b90}
+
+
+
+\begin{DoxyCode}
+266     {
+267         return pte.paddr();
+268     }
+\end{DoxyCode}
+\hypertarget{structSparcISA_1_1TlbEntry_a53e036786d17361be4c7320d39c99b84}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!serialize@{serialize}}
+\index{serialize@{serialize}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize (std::ostream \& {\em os})}}
+\label{structSparcISA_1_1TlbEntry_a53e036786d17361be4c7320d39c99b84}
+
+
+
+\begin{DoxyCode}
+39 {
+40     SERIALIZE_SCALAR(range.va);
+41     SERIALIZE_SCALAR(range.size);
+42     SERIALIZE_SCALAR(range.contextId);
+43     SERIALIZE_SCALAR(range.partitionId);
+44     SERIALIZE_SCALAR(range.real);
+45     uint64_t entry4u = 0;
+46     if (valid)
+47         entry4u = pte();
+48     SERIALIZE_SCALAR(entry4u);
+49     SERIALIZE_SCALAR(used);
+50     SERIALIZE_SCALAR(valid);
+51 }
+\end{DoxyCode}
+\hypertarget{structSparcISA_1_1TlbEntry_af22e5d6d660b97db37003ac61ac4ee49}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}void unserialize ({\bf Checkpoint} $\ast$ {\em cp}, \/  const std::string \& {\em section})}}
+\label{structSparcISA_1_1TlbEntry_af22e5d6d660b97db37003ac61ac4ee49}
+
+
+
+\begin{DoxyCode}
+56 {
+57     UNSERIALIZE_SCALAR(range.va);
+58     UNSERIALIZE_SCALAR(range.size);
+59     UNSERIALIZE_SCALAR(range.contextId);
+60     UNSERIALIZE_SCALAR(range.partitionId);
+61     UNSERIALIZE_SCALAR(range.real);
+62     uint64_t entry4u;
+63     UNSERIALIZE_SCALAR(entry4u);
+64     if (entry4u)
+65         pte.populate(entry4u);
+66     UNSERIALIZE_SCALAR(used);
+67     UNSERIALIZE_SCALAR(valid);
+68 }
+\end{DoxyCode}
+\hypertarget{structSparcISA_1_1TlbEntry_a5b72666b92ee0adbe9a7d218a0343754}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!updateVaddr@{updateVaddr}}
+\index{updateVaddr@{updateVaddr}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{updateVaddr}]{\setlength{\rightskip}{0pt plus 5cm}void updateVaddr ({\bf Addr} {\em new\_\-vaddr})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structSparcISA_1_1TlbEntry_a5b72666b92ee0adbe9a7d218a0343754}
+
+
+
+\begin{DoxyCode}
+272     {
+273         range.va = new_vaddr;
+274     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{structSparcISA_1_1TlbEntry_a97776a0e0f255c02dcb71ea59ea2c551}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!pte@{pte}}
+\index{pte@{pte}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{pte}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PageTableEntry} {\bf pte}}}
+\label{structSparcISA_1_1TlbEntry_a97776a0e0f255c02dcb71ea59ea2c551}
+\hypertarget{structSparcISA_1_1TlbEntry_a11b43184b3c2df2015fefa5beb543d55}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!range@{range}}
+\index{range@{range}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{range}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TlbRange} {\bf range}}}
+\label{structSparcISA_1_1TlbEntry_a11b43184b3c2df2015fefa5beb543d55}
+\hypertarget{structSparcISA_1_1TlbEntry_accd366cbfd7b8a1b904ca4177a894f95}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!used@{used}}
+\index{used@{used}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{used}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf used}}}
+\label{structSparcISA_1_1TlbEntry_accd366cbfd7b8a1b904ca4177a894f95}
+\hypertarget{structSparcISA_1_1TlbEntry_a28e3c179a86f337095088b3ca02a2b2a}{
+\index{SparcISA::TlbEntry@{SparcISA::TlbEntry}!valid@{valid}}
+\index{valid@{valid}!SparcISA::TlbEntry@{SparcISA::TlbEntry}}
+\subsubsection[{valid}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf valid}}}
+\label{structSparcISA_1_1TlbEntry_a28e3c179a86f337095088b3ca02a2b2a}
+
+
+この構造体の説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/sparc/\hyperlink{sparc_2pagetable_8hh}{pagetable.hh}\item 
+arch/sparc/\hyperlink{sparc_2pagetable_8cc}{pagetable.cc}\end{DoxyCompactItemize}

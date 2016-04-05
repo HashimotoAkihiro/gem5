@@ -1,0 +1,288 @@
+\hypertarget{classAlphaISA_1_1RemoteGDB}{
+\section{クラス RemoteGDB}
+\label{classAlphaISA_1_1RemoteGDB}\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+}
+
+
+{\ttfamily \#include $<$remote\_\-gdb.hh$>$}RemoteGDBに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classAlphaISA_1_1RemoteGDB}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classAlphaISA_1_1RemoteGDB_a7d97c5a4edd8630299b2b0521ae32d98}{RemoteGDB} (\hyperlink{classSystem}{System} $\ast$\hyperlink{classBaseRemoteGDB_af27ccd765f13a4b7bd119dc7579e2746}{system}, \hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{classBaseRemoteGDB_a9684dd9218c7836517670f8a0d8f3df7}{context})
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classAlphaISA_1_1RemoteGDB_a62bc8adc5a48f1cbb5eb9bb64301d38d}{getregs} ()
+\item 
+void \hyperlink{classAlphaISA_1_1RemoteGDB_a2051121b6bc93c8ca3856bbeeca7bdc1}{setregs} ()
+\item 
+void \hyperlink{classAlphaISA_1_1RemoteGDB_afd89268069d9026378b06b08c97f65f8}{clearSingleStep} ()
+\item 
+void \hyperlink{classAlphaISA_1_1RemoteGDB_a40d5da340fdb741de8cd3ffbc69708fe}{setSingleStep} ()
+\item 
+bool \hyperlink{classAlphaISA_1_1RemoteGDB_ac4c7be164f087f2f53d137d9768809a7}{acc} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} addr, size\_\-t len)
+\item 
+bool \hyperlink{classAlphaISA_1_1RemoteGDB_afbada55bb9d0e9c8c26bb48cb5890111}{write} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} addr, size\_\-t size, const char $\ast$data)
+\item 
+virtual bool \hyperlink{classAlphaISA_1_1RemoteGDB_a6a65f23f1e316fc2362cced431fa2335}{insertHardBreak} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} addr, size\_\-t len)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classm5_1_1params_1_1Addr}{Addr} \hyperlink{classAlphaISA_1_1RemoteGDB_ae1a0a563a724aaffa8ae5b4095957aa4}{notTakenBkpt}
+\item 
+\hyperlink{classm5_1_1params_1_1Addr}{Addr} \hyperlink{classAlphaISA_1_1RemoteGDB_abfdbe67e311a613bbbe39b730279f3e1}{takenBkpt}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classAlphaISA_1_1RemoteGDB_a7d97c5a4edd8630299b2b0521ae32d98}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!RemoteGDB@{RemoteGDB}}
+\index{RemoteGDB@{RemoteGDB}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{RemoteGDB}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RemoteGDB} ({\bf System} $\ast$ {\em system}, \/  {\bf ThreadContext} $\ast$ {\em context})}}
+\label{classAlphaISA_1_1RemoteGDB_a7d97c5a4edd8630299b2b0521ae32d98}
+
+
+
+\begin{DoxyCode}
+148     : BaseRemoteGDB(_system, tc, KGDB_NUMREGS)
+149 {
+150     memset(gdbregs.regs, 0, gdbregs.bytes());
+151 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classAlphaISA_1_1RemoteGDB_ac4c7be164f087f2f53d137d9768809a7}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!acc@{acc}}
+\index{acc@{acc}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{acc}]{\setlength{\rightskip}{0pt plus 5cm}bool acc ({\bf Addr} {\em addr}, \/  size\_\-t {\em len})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_ac4c7be164f087f2f53d137d9768809a7}
+
+
+This code says that all accesses to palcode (instruction and data) are valid since there isn't a va-\/$>$pa mapping because palcode is accessed physically. At some point this should probably be cleaned up but there is no easy way to do it.
+
+
+\begin{DoxyCode}
+158 {
+159     if (!FullSystem)
+160         panic("acc function needs to be rewritten for SE mode\n");
+161 
+162     Addr last_va;
+163 
+164     va = TruncPage(va);
+165     last_va = RoundPage(va + len);
+166 
+167     do  {
+168         if (IsK0Seg(va)) {
+169             if (va < (K0SegBase + system->memSize())) {
+170                 DPRINTF(GDBAcc, "acc:   Mapping is valid  K0SEG <= "
+171                         "%#x < K0SEG + size\n", va);
+172                 return true;
+173             } else {
+174                 DPRINTF(GDBAcc, "acc:   Mapping invalid %#x "
+175                         "> K0SEG + size\n", va);
+176                 return false;
+177             }
+178         }
+179 
+188         if (PcPAL(va) || va < 0x10000)
+189             return true;
+190 
+191         Addr ptbr = context->readMiscRegNoEffect(IPR_PALtemp20);
+192         PageTableEntry pte =
+193             kernel_pte_lookup(context->getPhysProxy(), ptbr, va);
+194         if (!pte.valid()) {
+195             DPRINTF(GDBAcc, "acc:   %#x pte is invalid\n", va);
+196             return false;
+197         }
+198         va += PageBytes;
+199     } while (va < last_va);
+200 
+201     DPRINTF(GDBAcc, "acc:   %#x mapping is valid\n", va);
+202     return true;
+203 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1RemoteGDB_afd89268069d9026378b06b08c97f65f8}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!clearSingleStep@{clearSingleStep}}
+\index{clearSingleStep@{clearSingleStep}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{clearSingleStep}]{\setlength{\rightskip}{0pt plus 5cm}void clearSingleStep ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_afd89268069d9026378b06b08c97f65f8}
+
+
+\hyperlink{classBaseRemoteGDB_a69f1887d1310ab6f19cf5bbcdf9d7a1e}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+262 {
+263     DPRINTF(GDBMisc, "clearSingleStep bt_addr=%#x nt_addr=%#x\n",
+264             takenBkpt, notTakenBkpt);
+265 
+266     if (takenBkpt != 0)
+267         clearTempBreakpoint(takenBkpt);
+268 
+269     if (notTakenBkpt != 0)
+270         clearTempBreakpoint(notTakenBkpt);
+271 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1RemoteGDB_a62bc8adc5a48f1cbb5eb9bb64301d38d}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!getregs@{getregs}}
+\index{getregs@{getregs}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{getregs}]{\setlength{\rightskip}{0pt plus 5cm}void getregs ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_a62bc8adc5a48f1cbb5eb9bb64301d38d}
+
+
+\hyperlink{classBaseRemoteGDB_aca04756a764f2ef2add9ee91be012659}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+211 {
+212     memset(gdbregs.regs, 0, gdbregs.bytes());
+213 
+214     gdbregs.regs[KGDB_REG_PC] = context->pcState().pc();
+215 
+216     // @todo: Currently this is very Alpha specific.
+217     if (PcPAL(gdbregs.regs[KGDB_REG_PC])) {
+218         for (int i = 0; i < NumIntArchRegs; ++i) {
+219             gdbregs.regs[i] = context->readIntReg(reg_redir[i]);
+220         }
+221     } else {
+222         for (int i = 0; i < NumIntArchRegs; ++i) {
+223             gdbregs.regs[i] = context->readIntReg(i);
+224         }
+225     }
+226 
+227 #ifdef KGDB_FP_REGS
+228     for (int i = 0; i < NumFloatArchRegs; ++i) {
+229         gdbregs.regs[i + KGDB_REG_F0] = context->readFloatRegBits(i);
+230     }
+231 #endif
+232 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1RemoteGDB_a6a65f23f1e316fc2362cced431fa2335}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!insertHardBreak@{insertHardBreak}}
+\index{insertHardBreak@{insertHardBreak}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{insertHardBreak}]{\setlength{\rightskip}{0pt plus 5cm}bool insertHardBreak ({\bf Addr} {\em addr}, \/  size\_\-t {\em len})\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_a6a65f23f1e316fc2362cced431fa2335}
+
+
+
+\begin{DoxyCode}
+317 {
+318     warn_once("Breakpoints do not work in Alpha PAL mode.\n"
+319               "      See PCEventQueue::doService() in cpu/pc_event.cc.\n");
+320     return BaseRemoteGDB::insertHardBreak(addr, len);
+321 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1RemoteGDB_a2051121b6bc93c8ca3856bbeeca7bdc1}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!setregs@{setregs}}
+\index{setregs@{setregs}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{setregs}]{\setlength{\rightskip}{0pt plus 5cm}void setregs ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_a2051121b6bc93c8ca3856bbeeca7bdc1}
+
+
+\hyperlink{classBaseRemoteGDB_a6b0b51dc196f12756cc0ec49a3ae6a6a}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+240 {
+241     // @todo: Currently this is very Alpha specific.
+242     if (PcPAL(gdbregs.regs[KGDB_REG_PC])) {
+243         for (int i = 0; i < NumIntArchRegs; ++i) {
+244             context->setIntReg(reg_redir[i], gdbregs.regs[i]);
+245         }
+246     } else {
+247         for (int i = 0; i < NumIntArchRegs; ++i) {
+248             context->setIntReg(i, gdbregs.regs[i]);
+249         }
+250     }
+251 
+252 #ifdef KGDB_FP_REGS
+253     for (int i = 0; i < NumFloatArchRegs; ++i) {
+254         context->setFloatRegBits(i, gdbregs.regs[i + KGDB_REG_F0]);
+255     }
+256 #endif
+257     context->pcState(gdbregs.regs[KGDB_REG_PC]);
+258 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1RemoteGDB_a40d5da340fdb741de8cd3ffbc69708fe}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!setSingleStep@{setSingleStep}}
+\index{setSingleStep@{setSingleStep}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{setSingleStep}]{\setlength{\rightskip}{0pt plus 5cm}void setSingleStep ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_a40d5da340fdb741de8cd3ffbc69708fe}
+
+
+\hyperlink{classBaseRemoteGDB_a253d4b1107e84fe80036d1826067741a}{BaseRemoteGDB}を実装しています。
+
+
+\begin{DoxyCode}
+275 {
+276     PCState pc = context->pcState();
+277     PCState bpc;
+278     bool set_bt = false;
+279 
+280     // User was stopped at pc, e.g. the instruction at pc was not
+281     // executed.
+282     MachInst inst = read<MachInst>(pc.pc());
+283     StaticInstPtr si = context->getDecoderPtr()->decode(inst, pc.pc());
+284     if (si->hasBranchTarget(pc, context, bpc)) {
+285         // Don't bother setting a breakpoint on the taken branch if it
+286         // is the same as the next pc
+287         if (bpc.pc() != pc.npc())
+288             set_bt = true;
+289     }
+290 
+291     DPRINTF(GDBMisc, "setSingleStep bt_addr=%#x nt_addr=%#x\n",
+292             takenBkpt, notTakenBkpt);
+293 
+294     setTempBreakpoint(notTakenBkpt = pc.npc());
+295 
+296     if (set_bt)
+297         setTempBreakpoint(takenBkpt = bpc.pc());
+298 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1RemoteGDB_afbada55bb9d0e9c8c26bb48cb5890111}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!write@{write}}
+\index{write@{write}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}bool write ({\bf Addr} {\em addr}, \/  size\_\-t {\em size}, \/  const char $\ast$ {\em data})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_afbada55bb9d0e9c8c26bb48cb5890111}
+
+
+
+\begin{DoxyCode}
+303 {
+304     if (BaseRemoteGDB::write(vaddr, size, data)) {
+305 #ifdef IMB
+306         alpha_pal_imb();
+307 #endif
+308         return true;
+309     } else {
+310         return false;
+311     }
+312 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classAlphaISA_1_1RemoteGDB_ae1a0a563a724aaffa8ae5b4095957aa4}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!notTakenBkpt@{notTakenBkpt}}
+\index{notTakenBkpt@{notTakenBkpt}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{notTakenBkpt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf notTakenBkpt}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_ae1a0a563a724aaffa8ae5b4095957aa4}
+\hypertarget{classAlphaISA_1_1RemoteGDB_abfdbe67e311a613bbbe39b730279f3e1}{
+\index{AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}!takenBkpt@{takenBkpt}}
+\index{takenBkpt@{takenBkpt}!AlphaISA::RemoteGDB@{AlphaISA::RemoteGDB}}
+\subsubsection[{takenBkpt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf takenBkpt}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classAlphaISA_1_1RemoteGDB_abfdbe67e311a613bbbe39b730279f3e1}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/alpha/\hyperlink{arch_2alpha_2remote__gdb_8hh}{remote\_\-gdb.hh}\item 
+arch/alpha/\hyperlink{arch_2alpha_2remote__gdb_8cc}{remote\_\-gdb.cc}\end{DoxyCompactItemize}

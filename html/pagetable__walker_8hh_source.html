@@ -1,0 +1,245 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/x86/pagetable_walker.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/x86/pagetable_walker.hh</h1><a href="pagetable__walker_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2007 The Hewlett-Packard Development Company</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __ARCH_X86_PAGE_TABLE_WALKER_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_X86_PAGE_TABLE_WALKER_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="x86_2pagetable_8hh.html">arch/x86/pagetable.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="arch_2x86_2tlb_8hh.html">arch/x86/tlb.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="mem__object_8hh.html">mem/mem_object.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;params/X86PagetableWalker.hh&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="sim_2system_8hh.html">sim/system.hh</a>&quot;</span>
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056 <span class="keyword">namespace </span>X86ISA
+<a name="l00057"></a>00057 {
+<a name="l00058"></a><a class="code" href="classX86ISA_1_1Walker.html">00058</a>     <span class="keyword">class </span><a class="code" href="classX86ISA_1_1Walker.html">Walker</a> : <span class="keyword">public</span> <a class="code" href="classMemObject.html">MemObject</a>
+<a name="l00059"></a>00059     {
+<a name="l00060"></a>00060       <span class="keyword">protected</span>:
+<a name="l00061"></a>00061         <span class="comment">// Port for accessing memory</span>
+<a name="l00062"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html">00062</a>         <span class="keyword">class </span><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html">WalkerPort</a> : <span class="keyword">public</span> <a class="code" href="classMasterPort.html">MasterPort</a>
+<a name="l00063"></a>00063         {
+<a name="l00064"></a>00064           <span class="keyword">public</span>:
+<a name="l00065"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#ab7603032aae051924e96f62a91a4e42d">00065</a>             <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#ab7603032aae051924e96f62a91a4e42d">WalkerPort</a>(<span class="keyword">const</span> std::string &amp;_name, <a class="code" href="classX86ISA_1_1Walker.html">Walker</a> * _walker) :
+<a name="l00066"></a>00066                   <a class="code" href="classMasterPort.html">MasterPort</a>(_name, _walker), <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a54537e5fcbe2d6f609ca4c90a48a06a8">walker</a>(_walker)
+<a name="l00067"></a>00067             {}
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069           <span class="keyword">protected</span>:
+<a name="l00070"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a54537e5fcbe2d6f609ca4c90a48a06a8">00070</a>             <a class="code" href="classX86ISA_1_1Walker.html">Walker</a> *<a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a54537e5fcbe2d6f609ca4c90a48a06a8">walker</a>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00073"></a>00073 
+<a name="l00077"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#aff3031c56fc4947a19695c868bb8233e">00077</a>             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#aff3031c56fc4947a19695c868bb8233e">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) { }
+<a name="l00078"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a886d584c81ee4e398ff8069907f6e1a5">00078</a>             <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a886d584c81ee4e398ff8069907f6e1a5">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) { <span class="keywordflow">return</span> 0; }
+<a name="l00079"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a284dfb90c168233c9d416bc07de8fefe">00079</a>             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a284dfb90c168233c9d416bc07de8fefe">recvFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) { }
+<a name="l00080"></a>00080             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00081"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a5ce11b7a254d3cb756d94568f7cbc25d">00081</a>             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html#a5ce11b7a254d3cb756d94568f7cbc25d">isSnooping</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00082"></a>00082         };
+<a name="l00083"></a>00083 
+<a name="l00084"></a><a class="code" href="classX86ISA_1_1Walker.html#a707eeb53fafd90cd7776b08a7acf6214">00084</a>         <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html">WalkerPort</a>;
+<a name="l00085"></a><a class="code" href="classX86ISA_1_1Walker.html#a5934d4dbd0362d5d5d65c63ff6f247b0">00085</a>         <a class="code" href="classX86ISA_1_1Walker_1_1WalkerPort.html">WalkerPort</a> <a class="code" href="classX86ISA_1_1Walker.html#a5934d4dbd0362d5d5d65c63ff6f247b0">port</a>;
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087         <span class="comment">// State to track each walk of the page table</span>
+<a name="l00088"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html">00088</a>         <span class="keyword">class </span><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html">WalkerState</a>
+<a name="l00089"></a>00089         {
+<a name="l00090"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a561951adc2bae72717df4b975c66f02f">00090</a>           <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1Walker.html">Walker</a>;
+<a name="l00091"></a>00091           <span class="keyword">private</span>:
+<a name="l00092"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8">00092</a>             <span class="keyword">enum</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> {
+<a name="l00093"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a0e73e048b83849a411148a8dddc6dfcb">00093</a>                 <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a0e73e048b83849a411148a8dddc6dfcb">Ready</a>,
+<a name="l00094"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a7ac9ab6c2e98f6df96b82b175d42747a">00094</a>                 <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a7ac9ab6c2e98f6df96b82b175d42747a">Waiting</a>,
+<a name="l00095"></a>00095                 <span class="comment">// Long mode</span>
+<a name="l00096"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a58432ecaf212ab0040a78de1c8a4f841">00096</a>                 <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8ad66948e28eb00ddced813f3f0f6e5bc4">LongPML4</a>, <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a1b653b02c627354760be6c72a4e55d29">LongPDP</a>, <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a829c2535d4b5c90636af37735c39052e">LongPD</a>, <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a58432ecaf212ab0040a78de1c8a4f841">LongPTE</a>,
+<a name="l00097"></a>00097                 <span class="comment">// PAE legacy mode</span>
+<a name="l00098"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a65af6bc5b50578ce5e2e0ccfe7ff5ff6">00098</a>                 <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8ac7b0f8bb2fb252cf3ebaa9bc0b020157">PAEPDP</a>, <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a680c46f2b38a2799316fdb6fd399e9de">PAEPD</a>, <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a65af6bc5b50578ce5e2e0ccfe7ff5ff6">PAEPTE</a>,
+<a name="l00099"></a>00099                 <span class="comment">// Non PAE legacy mode with and without PSE</span>
+<a name="l00100"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a788b556d960eb5a1c7dc8cf2e058c010">00100</a>                 <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a933f57294495f648d2d4d572f7123df7">PSEPD</a>, <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8aefbc069e0ac4cd293f3ba527bec2befe">PD</a>, <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a788b556d960eb5a1c7dc8cf2e058c010">PTE</a>
+<a name="l00101"></a>00101             };
+<a name="l00102"></a>00102 
+<a name="l00103"></a>00103           <span class="keyword">protected</span>:
+<a name="l00104"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a54537e5fcbe2d6f609ca4c90a48a06a8">00104</a>             <a class="code" href="classX86ISA_1_1Walker.html">Walker</a> *<a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a54537e5fcbe2d6f609ca4c90a48a06a8">walker</a>;
+<a name="l00105"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a4455a4759e69e5ebe68ae7298cbcc37d">00105</a>             <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>;
+<a name="l00106"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a956cd41d82347558b9c0a5b0474903f2">00106</a>             <a class="code" href="classRequest.html">RequestPtr</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a956cd41d82347558b9c0a5b0474903f2">req</a>;
+<a name="l00107"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a876b486d3a5241a126bd5751c5f70f79">00107</a>             <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a876b486d3a5241a126bd5751c5f70f79">state</a>;
+<a name="l00108"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a02eca985bd74ea3c516fd47e6f1a7a0d">00108</a>             <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a02eca985bd74ea3c516fd47e6f1a7a0d">nextState</a>;
+<a name="l00109"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a8c8e474bb8d2c6f7162455416b488e50">00109</a>             <span class="keywordtype">int</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a8c8e474bb8d2c6f7162455416b488e50">dataSize</a>;
+<a name="l00110"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a9a6fe7947a40e784ed47a05da0678825">00110</a>             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a9a6fe7947a40e784ed47a05da0678825">enableNX</a>;
+<a name="l00111"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a9e6c5c16902269a9053480d064cacb9c">00111</a>             <span class="keywordtype">unsigned</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a9e6c5c16902269a9053480d064cacb9c">inflight</a>;
+<a name="l00112"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a67e11800589d9e3f891debb46889da99">00112</a>             TlbEntry <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a67e11800589d9e3f891debb46889da99">entry</a>;
+<a name="l00113"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a80c062ee2cb2c5ef258a0bcf0d35ef19">00113</a>             <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a80c062ee2cb2c5ef258a0bcf0d35ef19">read</a>;
+<a name="l00114"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ad878e24435696fc6f83c7b321d1cfb37">00114</a>             <a class="code" href="classstd_1_1vector.html">std::vector&lt;PacketPtr&gt;</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ad878e24435696fc6f83c7b321d1cfb37">writes</a>;
+<a name="l00115"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ad64dd28e7be7f7f688e78a39d4c7d051">00115</a>             <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ad64dd28e7be7f7f688e78a39d4c7d051">timingFault</a>;
+<a name="l00116"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#af4dc79732f6962bb42c1d73da32ee926">00116</a>             <a class="code" href="classBaseTLB_1_1Translation.html">TLB::Translation</a> * <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#af4dc79732f6962bb42c1d73da32ee926">translation</a>;
+<a name="l00117"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ae9b5adf8be89a72128708c7e621e7211">00117</a>             <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">BaseTLB::Mode</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ae9b5adf8be89a72128708c7e621e7211">mode</a>;
+<a name="l00118"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a4f60754b74e2d1584c06199ae5b75f21">00118</a>             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a4f60754b74e2d1584c06199ae5b75f21">functional</a>;
+<a name="l00119"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a20f65ad56869382ed8681b9dd1aa85d6">00119</a>             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a20f65ad56869382ed8681b9dd1aa85d6">timing</a>;
+<a name="l00120"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a69b34155de7bb405026219ea3725b695">00120</a>             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a69b34155de7bb405026219ea3725b695">retrying</a>;
+<a name="l00121"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a43c08d193d555a2b2a61c53d2a4e5a63">00121</a>             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a43c08d193d555a2b2a61c53d2a4e5a63">started</a>;
+<a name="l00122"></a>00122           <span class="keyword">public</span>:
+<a name="l00123"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ac84e175444e79eb369ed3d6debdb601f">00123</a>             <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ac84e175444e79eb369ed3d6debdb601f">WalkerState</a>(<a class="code" href="classX86ISA_1_1Walker.html">Walker</a> * _walker, <a class="code" href="classBaseTLB_1_1Translation.html">BaseTLB::Translation</a> *_translation,
+<a name="l00124"></a>00124                     <a class="code" href="classRequest.html">RequestPtr</a> _req, <span class="keywordtype">bool</span> _isFunctional = <span class="keyword">false</span>) :
+<a name="l00125"></a>00125                         <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a54537e5fcbe2d6f609ca4c90a48a06a8">walker</a>(_walker), <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a956cd41d82347558b9c0a5b0474903f2">req</a>(_req), <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a876b486d3a5241a126bd5751c5f70f79">state</a>(<a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a0e73e048b83849a411148a8dddc6dfcb">Ready</a>),
+<a name="l00126"></a>00126                         <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a02eca985bd74ea3c516fd47e6f1a7a0d">nextState</a>(<a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5d74787dedbc4e11c1ab15bf487e61f8a0e73e048b83849a411148a8dddc6dfcb">Ready</a>), <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a9e6c5c16902269a9053480d064cacb9c">inflight</a>(0),
+<a name="l00127"></a>00127                         <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#af4dc79732f6962bb42c1d73da32ee926">translation</a>(_translation),
+<a name="l00128"></a>00128                         <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a4f60754b74e2d1584c06199ae5b75f21">functional</a>(_isFunctional), <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a20f65ad56869382ed8681b9dd1aa85d6">timing</a>(false),
+<a name="l00129"></a>00129                         <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a69b34155de7bb405026219ea3725b695">retrying</a>(false), <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a43c08d193d555a2b2a61c53d2a4e5a63">started</a>(false)
+<a name="l00130"></a>00130             {
+<a name="l00131"></a>00131             }
+<a name="l00132"></a>00132             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a92aeb88528be9893c2e8fe61629fc942">initState</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * _tc, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">BaseTLB::Mode</a> _mode,
+<a name="l00133"></a>00133                            <span class="keywordtype">bool</span> _isTiming = <span class="keyword">false</span>);
+<a name="l00134"></a>00134             <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#abe41f563c4251c8a075c343d770369ac">startWalk</a>();
+<a name="l00135"></a>00135             <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ac1af47bc545fc273626009cb651d3b39">startFunctional</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;<a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">unsigned</span> &amp;logBytes);
+<a name="l00136"></a>00136             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#ac6c4ea75aa4bd19a760aca940fad8876">recvPacket</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00137"></a>00137             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a46197e29b4fb481e9f1a932fbbf44586">isRetrying</a>();
+<a name="l00138"></a>00138             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a0335da57d5042e3a3dcfb9635cd3d1ca">wasStarted</a>();
+<a name="l00139"></a>00139             <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a9dc00933e3ae5f8801363f2288084154">isTiming</a>();
+<a name="l00140"></a>00140             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a549fc33ae3e5c345795b8384a91fb544">retry</a>();
+<a name="l00141"></a><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00141</a>             std::string <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a54537e5fcbe2d6f609ca4c90a48a06a8">walker</a>-&gt;<a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>();}
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143           <span class="keyword">private</span>:
+<a name="l00144"></a>00144             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a002ceab720d63ad3e2b3786c1d2285cc">setupWalk</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>);
+<a name="l00145"></a>00145             <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a5c46b5cda98378cdb854f6810ee91f8a">stepWalk</a>(<a class="code" href="classPacket.html">PacketPtr</a> &amp;write);
+<a name="l00146"></a>00146             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#aa1322bdadbe5c9c04e2151a8317ab35d">sendPackets</a>();
+<a name="l00147"></a>00147             <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#a040477c57c479fb61edb65bd58ca19d9">endWalk</a>();
+<a name="l00148"></a>00148             <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html#aea73109ca1147453cb802d6102c1074a">pageFault</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceX86ISA.html#a2c4bc7438a48bd4bbdd7ed9b629a6ec6">present</a>);
+<a name="l00149"></a>00149         };
+<a name="l00150"></a>00150 
+<a name="l00151"></a><a class="code" href="classX86ISA_1_1Walker.html#ade52153fce1d8cac346d2287dc441289">00151</a>         <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html">WalkerState</a>;
+<a name="l00152"></a>00152         <span class="comment">// State for timing and atomic accesses (need multiple per walker in</span>
+<a name="l00153"></a>00153         <span class="comment">// the case of multiple outstanding requests in timing mode)</span>
+<a name="l00154"></a><a class="code" href="classX86ISA_1_1Walker.html#a5d2384e533dcdc7ac9570b89d6f39807">00154</a>         <a class="code" href="classstd_1_1list.html">std::list&lt;WalkerState *&gt;</a> <a class="code" href="classX86ISA_1_1Walker.html#a5d2384e533dcdc7ac9570b89d6f39807">currStates</a>;
+<a name="l00155"></a>00155         <span class="comment">// State for functional accesses (only need one of these per walker)</span>
+<a name="l00156"></a><a class="code" href="classX86ISA_1_1Walker.html#a5d3b5c10c016916fae2a38d5affcb907">00156</a>         <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html">WalkerState</a> <a class="code" href="classX86ISA_1_1Walker.html#a5d3b5c10c016916fae2a38d5affcb907">funcState</a>;
+<a name="l00157"></a>00157 
+<a name="l00158"></a><a class="code" href="structX86ISA_1_1Walker_1_1WalkerSenderState.html">00158</a>         <span class="keyword">struct </span><a class="code" href="structX86ISA_1_1Walker_1_1WalkerSenderState.html">WalkerSenderState</a> : <span class="keyword">public</span> <a class="code" href="classPacket.html">Packet</a>::<a class="code" href="structRubyTester_1_1SenderState.html">SenderState</a>
+<a name="l00159"></a>00159         {
+<a name="l00160"></a><a class="code" href="structX86ISA_1_1Walker_1_1WalkerSenderState.html#a36cdab45ce488c7978f72c6b8cc1d2ad">00160</a>             <a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html">WalkerState</a> * <a class="code" href="structX86ISA_1_1Walker_1_1WalkerSenderState.html#a36cdab45ce488c7978f72c6b8cc1d2ad">senderWalk</a>;
+<a name="l00161"></a><a class="code" href="structX86ISA_1_1Walker_1_1WalkerSenderState.html#a17040bf5cbdee594f6c126a957689616">00161</a>             <a class="code" href="structX86ISA_1_1Walker_1_1WalkerSenderState.html#a17040bf5cbdee594f6c126a957689616">WalkerSenderState</a>(<a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html">WalkerState</a> * _senderWalk) :
+<a name="l00162"></a>00162                 <a class="code" href="structX86ISA_1_1Walker_1_1WalkerSenderState.html#a36cdab45ce488c7978f72c6b8cc1d2ad">senderWalk</a>(_senderWalk) {}
+<a name="l00163"></a>00163         };
+<a name="l00164"></a>00164 
+<a name="l00165"></a>00165       <span class="keyword">public</span>:
+<a name="l00166"></a>00166         <span class="comment">// Kick off the state machine.</span>
+<a name="l00167"></a>00167         <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classX86ISA_1_1Walker.html#af431777dfd02888658d8bf01cc7ee789">start</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * _tc, <a class="code" href="classBaseTLB_1_1Translation.html">BaseTLB::Translation</a> *translation,
+<a name="l00168"></a>00168                 <a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">BaseTLB::Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>);
+<a name="l00169"></a>00169         <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classX86ISA_1_1Walker.html#ad0337e2c2472a149328d21cd4310165f">startFunctional</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * _tc, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;<a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>,
+<a name="l00170"></a>00170                 <span class="keywordtype">unsigned</span> &amp;logBytes, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">BaseTLB::Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>);
+<a name="l00171"></a>00171         <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a> &amp;<a class="code" href="classX86ISA_1_1Walker.html#adc4e675e51defbdd1e354dac729d0703">getMasterPort</a>(<span class="keyword">const</span> std::string &amp;if_name,
+<a name="l00172"></a>00172                                       <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> idx = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00173"></a>00173 
+<a name="l00174"></a>00174       <span class="keyword">protected</span>:
+<a name="l00175"></a>00175         <span class="comment">// The TLB we&apos;re supposed to load.</span>
+<a name="l00176"></a><a class="code" href="classX86ISA_1_1Walker.html#a9f0e11329a702fd34819769c899e4bd3">00176</a>         <a class="code" href="classX86ISA_1_1TLB.html">TLB</a> * <a class="code" href="classX86ISA_1_1Walker.html#a9f0e11329a702fd34819769c899e4bd3">tlb</a>;
+<a name="l00177"></a><a class="code" href="classX86ISA_1_1Walker.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">00177</a>         <a class="code" href="classSystem.html">System</a> * <a class="code" href="classX86ISA_1_1Walker.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>;
+<a name="l00178"></a><a class="code" href="classX86ISA_1_1Walker.html#a96ec6a422ac492d05f8b3edc5b58532b">00178</a>         <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> <a class="code" href="classX86ISA_1_1Walker.html#a96ec6a422ac492d05f8b3edc5b58532b">masterId</a>;
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180         <span class="comment">// The number of outstanding walks that can be squashed per cycle.</span>
+<a name="l00181"></a><a class="code" href="classX86ISA_1_1Walker.html#acd34c708c5a97f4ce631bb3b00404045">00181</a>         <span class="keywordtype">unsigned</span> <a class="code" href="classX86ISA_1_1Walker.html#acd34c708c5a97f4ce631bb3b00404045">numSquashable</a>;
+<a name="l00182"></a>00182 
+<a name="l00183"></a>00183         <span class="comment">// Wrapper for checking for squashes before starting a translation.</span>
+<a name="l00184"></a>00184         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker.html#a5cbf57f9ccdc6270d898ddca6d54905a">startWalkWrapper</a>();
+<a name="l00185"></a>00185 
+<a name="l00186"></a>00186         <span class="comment">// Functions for dealing with packets.</span>
+<a name="l00187"></a>00187         <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker.html#a482dba5588f4bee43e498875a61e5e0b">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00188"></a>00188         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00189"></a>00189         <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Walker.html#ad26bf3182653f73846811f045dcaafb6">sendTiming</a>(<a class="code" href="classX86ISA_1_1Walker_1_1WalkerState.html">WalkerState</a> * sendingState, <a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00190"></a>00190 
+<a name="l00191"></a>00191       <span class="keyword">public</span>:
+<a name="l00192"></a>00192 
+<a name="l00193"></a><a class="code" href="classX86ISA_1_1Walker.html#a57c4132ed7eb199686bbcfb0de7722ac">00193</a>         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Walker.html#a57c4132ed7eb199686bbcfb0de7722ac">setTLB</a>(<a class="code" href="classX86ISA_1_1TLB.html">TLB</a> * _tlb)
+<a name="l00194"></a>00194         {
+<a name="l00195"></a>00195             <a class="code" href="classX86ISA_1_1Walker.html#a9f0e11329a702fd34819769c899e4bd3">tlb</a> = _tlb;
+<a name="l00196"></a>00196         }
+<a name="l00197"></a>00197 
+<a name="l00198"></a><a class="code" href="classX86ISA_1_1Walker.html#a55ceaa41cdace6176b677cc22eb01bf6">00198</a>         <span class="keyword">typedef</span> X86PagetableWalkerParams <a class="code" href="classX86ISA_1_1Walker.html#a55ceaa41cdace6176b677cc22eb01bf6">Params</a>;
+<a name="l00199"></a>00199 
+<a name="l00200"></a>00200         <span class="keyword">const</span> <a class="code" href="classX86ISA_1_1Walker.html#a55ceaa41cdace6176b677cc22eb01bf6">Params</a> *
+<a name="l00201"></a><a class="code" href="classX86ISA_1_1Walker.html#acd3c3feb78ae7a8f88fe0f110a718dff">00201</a>         <a class="code" href="classX86ISA_1_1Walker.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00202"></a>00202 <span class="keyword">        </span>{
+<a name="l00203"></a>00203             <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><span class="keyword">const </span><a class="code" href="classX86ISA_1_1Walker.html#a55ceaa41cdace6176b677cc22eb01bf6">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00204"></a>00204         }
+<a name="l00205"></a>00205 
+<a name="l00206"></a><a class="code" href="classX86ISA_1_1Walker.html#a9a124fc3abef67f86629216ab6699ec0">00206</a>         <a class="code" href="classX86ISA_1_1Walker.html#a9a124fc3abef67f86629216ab6699ec0">Walker</a>(<span class="keyword">const</span> <a class="code" href="classX86ISA_1_1Walker.html#a55ceaa41cdace6176b677cc22eb01bf6">Params</a> *<a class="code" href="classX86ISA_1_1Walker.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>) :
+<a name="l00207"></a>00207             <a class="code" href="classMemObject.html">MemObject</a>(params), <a class="code" href="classX86ISA_1_1Walker.html#a5934d4dbd0362d5d5d65c63ff6f247b0">port</a>(<a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>() + <span class="stringliteral">&quot;.port&quot;</span>, this),
+<a name="l00208"></a>00208             <a class="code" href="classX86ISA_1_1Walker.html#a5d3b5c10c016916fae2a38d5affcb907">funcState</a>(this, <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>, <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>, true), <a class="code" href="classX86ISA_1_1Walker.html#a9f0e11329a702fd34819769c899e4bd3">tlb</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), <a class="code" href="classX86ISA_1_1Walker.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>(params-&gt;<a class="code" href="namespaceX86ISA.html#a400778a664a4822401bb6677e1cef9c3">system</a>),
+<a name="l00209"></a>00209             <a class="code" href="classX86ISA_1_1Walker.html#a96ec6a422ac492d05f8b3edc5b58532b">masterId</a>(<a class="code" href="classX86ISA_1_1Walker.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>-&gt;getMasterId(<a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>())),
+<a name="l00210"></a>00210             <a class="code" href="classX86ISA_1_1Walker.html#acd34c708c5a97f4ce631bb3b00404045">numSquashable</a>(params-&gt;num_squash_per_cycle)
+<a name="l00211"></a>00211         {
+<a name="l00212"></a>00212         }
+<a name="l00213"></a>00213     };
+<a name="l00214"></a>00214 }
+<a name="l00215"></a>00215 <span class="preprocessor">#endif // __ARCH_X86_PAGE_TABLE_WALKER_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

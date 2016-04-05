@@ -1,0 +1,173 @@
+\hypertarget{classHexFile}{
+\section{クラス HexFile}
+\label{classHexFile}\index{HexFile@{HexFile}}
+}
+
+
+{\ttfamily \#include $<$hex\_\-file.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classHexFile_a33e7f7c56c9fb712309be679983e06a4}{HexFile} (const std::string \_\-filename)
+\item 
+virtual \hyperlink{classHexFile_af446931b55a207b6e7e8f0b1795ee2a3}{$\sim$HexFile} ()
+\item 
+void \hyperlink{classHexFile_a5ae591df94fc66ccb85cbb6565368bca}{close} ()
+\item 
+bool \hyperlink{classHexFile_a767f217f0e08a42dbda4b40f1c827c61}{loadSections} (\hyperlink{classPortProxy}{PortProxy} \&memProxy)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classHexFile_a391ff17c7683a3c9967247e7550897c9}{parseLine} (char $\ast$, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} $\ast$, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} $\ast$)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+const std::string \hyperlink{classHexFile_a42a21beb8018ac623f4d09db1343b9cf}{filename}
+\item 
+FILE $\ast$ \hyperlink{classHexFile_aa065f30aa9f5f9a42132c82c787ee70b}{fp}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classHexFile_a33e7f7c56c9fb712309be679983e06a4}{
+\index{HexFile@{HexFile}!HexFile@{HexFile}}
+\index{HexFile@{HexFile}!HexFile@{HexFile}}
+\subsubsection[{HexFile}]{\setlength{\rightskip}{0pt plus 5cm}{\bf HexFile} (const std::string {\em \_\-filename})}}
+\label{classHexFile_a33e7f7c56c9fb712309be679983e06a4}
+\hypertarget{classHexFile_af446931b55a207b6e7e8f0b1795ee2a3}{
+\index{HexFile@{HexFile}!$\sim$HexFile@{$\sim$HexFile}}
+\index{$\sim$HexFile@{$\sim$HexFile}!HexFile@{HexFile}}
+\subsubsection[{$\sim$HexFile}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf HexFile} ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classHexFile_af446931b55a207b6e7e8f0b1795ee2a3}
+
+
+
+\begin{DoxyCode}
+58 {
+59     if (fp != NULL)
+60         fclose(fp);
+61 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classHexFile_a5ae591df94fc66ccb85cbb6565368bca}{
+\index{HexFile@{HexFile}!close@{close}}
+\index{close@{close}!HexFile@{HexFile}}
+\subsubsection[{close}]{\setlength{\rightskip}{0pt plus 5cm}void close ()}}
+\label{classHexFile_a5ae591df94fc66ccb85cbb6565368bca}
+
+
+
+\begin{DoxyCode}
+138 {
+139     fclose(fp);
+140 }
+\end{DoxyCode}
+\hypertarget{classHexFile_a767f217f0e08a42dbda4b40f1c827c61}{
+\index{HexFile@{HexFile}!loadSections@{loadSections}}
+\index{loadSections@{loadSections}!HexFile@{HexFile}}
+\subsubsection[{loadSections}]{\setlength{\rightskip}{0pt plus 5cm}bool loadSections ({\bf PortProxy} \& {\em memProxy})}}
+\label{classHexFile_a767f217f0e08a42dbda4b40f1c827c61}
+
+
+
+\begin{DoxyCode}
+65 {
+66     char Line[64];
+67     Addr MemAddr;
+68     uint32_t Data;
+69     while (!feof(fp)) {
+70         char *ret = fgets(Line, sizeof(Line), fp);
+71         if (!ret)
+72             panic("malformed file");
+73         parseLine(Line, &MemAddr, &Data);
+74         if (MemAddr != 0) {
+75             // Now, write to memory
+76             memProxy.writeBlob(MemAddr << 2, (uint8_t *)&Data, sizeof(Data));
+77         }
+78     }
+79     return true;
+80 }
+\end{DoxyCode}
+\hypertarget{classHexFile_a391ff17c7683a3c9967247e7550897c9}{
+\index{HexFile@{HexFile}!parseLine@{parseLine}}
+\index{parseLine@{parseLine}!HexFile@{HexFile}}
+\subsubsection[{parseLine}]{\setlength{\rightskip}{0pt plus 5cm}void parseLine (char $\ast$ {\em Str}, \/  {\bf Addr} $\ast$ {\em A}, \/  {\bf uint32\_\-t} $\ast$ {\em D})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classHexFile_a391ff17c7683a3c9967247e7550897c9}
+
+
+
+\begin{DoxyCode}
+84 {
+85     int i = 0;
+86     bool Flag = false;
+87     *A = 0;
+88     *D = 0;
+89     int Digit = 0;
+90     unsigned Number = 0;
+91 
+92     /* Skip white spaces */
+93     while (Str[i] != '\0' && Str[i]==' ')
+94         i++;
+95 
+96     /* Ok, we're at some character...process things */
+97     while (Str[i] != '\0') {
+98         if (Str[i] >= '0' && Str[i] <= '9') {
+99             Digit = Str[i] - '0';
+100         } else if (Str[i] >= 'a' && Str[i] <= 'f') {
+101             Digit = Str[i] - 'a' + 10;
+102         } else if (Str[i] >= 'A' && Str[i] <= 'F') {
+103           Digit=Str[i]-'A'+10;
+104         } else if (Str[i] == ' ' || Str[i] == '\n') {
+105             if (Number == 0)
+106                 return;
+107             if (!Flag) {
+108                 *A = Number;
+109                 Number = 0;
+110                 Flag = true;
+111             } else {
+112                 *D = Number;
+113                 return;
+114             }
+115         } else {
+116             // Ok, we've encountered a non-hex character, cannot be a
+117             // valid line, skip and return 0's
+118             *A = 0;
+119             *D = 0;
+120             return;
+121         }
+122 
+123         Number <<= 4;
+124         Number += Digit;
+125         i++;
+126     }
+127 
+128     if (!Flag) {
+129         *A = 0;
+130         *D = 0;
+131     } else {
+132         *D = Number;
+133     }
+134 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classHexFile_a42a21beb8018ac623f4d09db1343b9cf}{
+\index{HexFile@{HexFile}!filename@{filename}}
+\index{filename@{filename}!HexFile@{HexFile}}
+\subsubsection[{filename}]{\setlength{\rightskip}{0pt plus 5cm}const std::string {\bf filename}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classHexFile_a42a21beb8018ac623f4d09db1343b9cf}
+\hypertarget{classHexFile_aa065f30aa9f5f9a42132c82c787ee70b}{
+\index{HexFile@{HexFile}!fp@{fp}}
+\index{fp@{fp}!HexFile@{HexFile}}
+\subsubsection[{fp}]{\setlength{\rightskip}{0pt plus 5cm}FILE$\ast$ {\bf fp}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classHexFile_aa065f30aa9f5f9a42132c82c787ee70b}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/loader/\hyperlink{hex__file_8hh}{hex\_\-file.hh}\item 
+base/loader/\hyperlink{hex__file_8cc}{hex\_\-file.cc}\end{DoxyCompactItemize}

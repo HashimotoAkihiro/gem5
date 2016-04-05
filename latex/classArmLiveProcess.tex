@@ -1,0 +1,325 @@
+\hypertarget{classArmLiveProcess}{
+\section{クラス ArmLiveProcess}
+\label{classArmLiveProcess}\index{ArmLiveProcess@{ArmLiveProcess}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}ArmLiveProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classArmLiveProcess}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmLiveProcess_a905a4ab86fb0bcc4d972b63b79939dad}{ArmLiveProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile}, \hyperlink{classObjectFile_a0ac03ab06a859320a9072002bdf3aa0f}{ObjectFile::Arch} \_\-arch)
+\item 
+{\footnotesize template$<$class IntType $>$ }\\void \hyperlink{classArmLiveProcess_a5dfec1d2426044bb04b75e1d2ba37b71}{argsInit} (int pageSize, \hyperlink{namespaceArmISA_ae64680ba9fb526106829d6bf92fc791b}{ArmISA::IntRegIndex} spIndex)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classObjectFile_a0ac03ab06a859320a9072002bdf3aa0f}{ObjectFile::Arch} \hyperlink{classArmLiveProcess_abf93aa1dd69df35e2a50f63d5a5d4c40}{arch}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmLiveProcess_a905a4ab86fb0bcc4d972b63b79939dad}{
+\index{ArmLiveProcess@{ArmLiveProcess}!ArmLiveProcess@{ArmLiveProcess}}
+\index{ArmLiveProcess@{ArmLiveProcess}!ArmLiveProcess@{ArmLiveProcess}}
+\subsubsection[{ArmLiveProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ArmLiveProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile}, \/  {\bf ObjectFile::Arch} {\em \_\-arch})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmLiveProcess_a905a4ab86fb0bcc4d972b63b79939dad}
+
+
+
+\begin{DoxyCode}
+62     : LiveProcess(params, objFile), arch(_arch)
+63 {
+64 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classArmLiveProcess_a5dfec1d2426044bb04b75e1d2ba37b71}{
+\index{ArmLiveProcess@{ArmLiveProcess}!argsInit@{argsInit}}
+\index{argsInit@{argsInit}!ArmLiveProcess@{ArmLiveProcess}}
+\subsubsection[{argsInit}]{\setlength{\rightskip}{0pt plus 5cm}void argsInit (int {\em pageSize}, \/  {\bf ArmISA::IntRegIndex} {\em spIndex})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classArmLiveProcess_a5dfec1d2426044bb04b75e1d2ba37b71}
+
+
+
+\begin{DoxyCode}
+144 {
+145     int intSize = sizeof(IntType);
+146 
+147     typedef AuxVector<IntType> auxv_t;
+148     std::vector<auxv_t> auxv;
+149 
+150     string filename;
+151     if (argv.size() < 1)
+152         filename = "";
+153     else
+154         filename = argv[0];
+155 
+156     //We want 16 byte alignment
+157     uint64_t align = 16;
+158 
+159     // load object file into target memory
+160     objFile->loadSections(initVirtMem);
+161 
+162     enum ArmCpuFeature {
+163         Arm_Swp = 1 << 0,
+164         Arm_Half = 1 << 1,
+165         Arm_Thumb = 1 << 2,
+166         Arm_26Bit = 1 << 3,
+167         Arm_FastMult = 1 << 4,
+168         Arm_Fpa = 1 << 5,
+169         Arm_Vfp = 1 << 6,
+170         Arm_Edsp = 1 << 7,
+171         Arm_Java = 1 << 8,
+172         Arm_Iwmmxt = 1 << 9,
+173         Arm_Crunch = 1 << 10,
+174         Arm_ThumbEE = 1 << 11,
+175         Arm_Neon = 1 << 12,
+176         Arm_Vfpv3 = 1 << 13,
+177         Arm_Vfpv3d16 = 1 << 14
+178     };
+179 
+180     //Setup the auxilliary vectors. These will already have endian conversion.
+181     //Auxilliary vectors are loaded only for elf formatted executables.
+182     ElfObject * elfObject = dynamic_cast<ElfObject *>(objFile);
+183     if (elfObject) {
+184         IntType features =
+185             Arm_Swp |
+186             Arm_Half |
+187             Arm_Thumb |
+188 //            Arm_26Bit |
+189             Arm_FastMult |
+190 //            Arm_Fpa |
+191             Arm_Vfp |
+192             Arm_Edsp |
+193 //            Arm_Java |
+194 //            Arm_Iwmmxt |
+195 //            Arm_Crunch |
+196             Arm_ThumbEE |
+197             Arm_Neon |
+198             Arm_Vfpv3 |
+199             Arm_Vfpv3d16 |
+200             0;
+201 
+202         //Bits which describe the system hardware capabilities
+203         //XXX Figure out what these should be
+204         auxv.push_back(auxv_t(M5_AT_HWCAP, features));
+205         //The system page size
+206         auxv.push_back(auxv_t(M5_AT_PAGESZ, ArmISA::VMPageSize));
+207         //Frequency at which times() increments
+208         auxv.push_back(auxv_t(M5_AT_CLKTCK, 0x64));
+209         // For statically linked executables, this is the virtual address of the
+210         // program header tables if they appear in the executable image
+211         auxv.push_back(auxv_t(M5_AT_PHDR, elfObject->programHeaderTable()));
+212         // This is the size of a program header entry from the elf file.
+213         auxv.push_back(auxv_t(M5_AT_PHENT, elfObject->programHeaderSize()));
+214         // This is the number of program headers from the original elf file.
+215         auxv.push_back(auxv_t(M5_AT_PHNUM, elfObject->programHeaderCount()));
+216         //This is the address of the elf "interpreter", It should be set
+217         //to 0 for regular executables. It should be something else
+218         //(not sure what) for dynamic libraries.
+219         auxv.push_back(auxv_t(M5_AT_BASE, 0));
+220 
+221         //XXX Figure out what this should be.
+222         auxv.push_back(auxv_t(M5_AT_FLAGS, 0));
+223         //The entry point to the program
+224         auxv.push_back(auxv_t(M5_AT_ENTRY, objFile->entryPoint()));
+225         //Different user and group IDs
+226         auxv.push_back(auxv_t(M5_AT_UID, uid()));
+227         auxv.push_back(auxv_t(M5_AT_EUID, euid()));
+228         auxv.push_back(auxv_t(M5_AT_GID, gid()));
+229         auxv.push_back(auxv_t(M5_AT_EGID, egid()));
+230         //Whether to enable "secure mode" in the executable
+231         auxv.push_back(auxv_t(M5_AT_SECURE, 0));
+232 
+233         // Pointer to 16 bytes of random data
+234         auxv.push_back(auxv_t(M5_AT_RANDOM, 0));
+235 
+236         //The filename of the program
+237         auxv.push_back(auxv_t(M5_AT_EXECFN, 0));
+238         //The string "v71" -- ARM v7 architecture
+239         auxv.push_back(auxv_t(M5_AT_PLATFORM, 0));
+240     }
+241 
+242     //Figure out how big the initial stack nedes to be
+243 
+244     // A sentry NULL void pointer at the top of the stack.
+245     int sentry_size = intSize;
+246 
+247     string platform = "v71";
+248     int platform_size = platform.size() + 1;
+249 
+250     // Bytes for AT_RANDOM above, we'll just keep them 0
+251     int aux_random_size = 16; // as per the specification
+252 
+253     // The aux vectors are put on the stack in two groups. The first group are
+254     // the vectors that are generated as the elf is loaded. The second group
+255     // are the ones that were computed ahead of time and include the platform
+256     // string.
+257     int aux_data_size = filename.size() + 1;
+258 
+259     int env_data_size = 0;
+260     for (int i = 0; i < envp.size(); ++i) {
+261         env_data_size += envp[i].size() + 1;
+262     }
+263     int arg_data_size = 0;
+264     for (int i = 0; i < argv.size(); ++i) {
+265         arg_data_size += argv[i].size() + 1;
+266     }
+267 
+268     int info_block_size =
+269         sentry_size + env_data_size + arg_data_size +
+270         aux_data_size + platform_size + aux_random_size;
+271 
+272     //Each auxilliary vector is two 4 byte words
+273     int aux_array_size = intSize * 2 * (auxv.size() + 1);
+274 
+275     int envp_array_size = intSize * (envp.size() + 1);
+276     int argv_array_size = intSize * (argv.size() + 1);
+277 
+278     int argc_size = intSize;
+279 
+280     //Figure out the size of the contents of the actual initial frame
+281     int frame_size =
+282         info_block_size +
+283         aux_array_size +
+284         envp_array_size +
+285         argv_array_size +
+286         argc_size;
+287 
+288     //There needs to be padding after the auxiliary vector data so that the
+289     //very bottom of the stack is aligned properly.
+290     int partial_size = frame_size;
+291     int aligned_partial_size = roundUp(partial_size, align);
+292     int aux_padding = aligned_partial_size - partial_size;
+293 
+294     int space_needed = frame_size + aux_padding;
+295 
+296     stack_min = stack_base - space_needed;
+297     stack_min = roundDown(stack_min, align);
+298     stack_size = stack_base - stack_min;
+299 
+300     // map memory
+301     allocateMem(roundDown(stack_min, pageSize), roundUp(stack_size, pageSize));
+302 
+303     // map out initial stack contents
+304     IntType sentry_base = stack_base - sentry_size;
+305     IntType aux_data_base = sentry_base - aux_data_size;
+306     IntType env_data_base = aux_data_base - env_data_size;
+307     IntType arg_data_base = env_data_base - arg_data_size;
+308     IntType platform_base = arg_data_base - platform_size;
+309     IntType aux_random_base = platform_base - aux_random_size;
+310     IntType auxv_array_base = aux_random_base - aux_array_size - aux_padding;
+311     IntType envp_array_base = auxv_array_base - envp_array_size;
+312     IntType argv_array_base = envp_array_base - argv_array_size;
+313     IntType argc_base = argv_array_base - argc_size;
+314 
+315     DPRINTF(Stack, "The addresses of items on the initial stack:\n");
+316     DPRINTF(Stack, "0x%x - aux data\n", aux_data_base);
+317     DPRINTF(Stack, "0x%x - env data\n", env_data_base);
+318     DPRINTF(Stack, "0x%x - arg data\n", arg_data_base);
+319     DPRINTF(Stack, "0x%x - random data\n", aux_random_base);
+320     DPRINTF(Stack, "0x%x - platform base\n", platform_base);
+321     DPRINTF(Stack, "0x%x - auxv array\n", auxv_array_base);
+322     DPRINTF(Stack, "0x%x - envp array\n", envp_array_base);
+323     DPRINTF(Stack, "0x%x - argv array\n", argv_array_base);
+324     DPRINTF(Stack, "0x%x - argc \n", argc_base);
+325     DPRINTF(Stack, "0x%x - stack min\n", stack_min);
+326 
+327     // write contents to stack
+328 
+329     // figure out argc
+330     IntType argc = argv.size();
+331     IntType guestArgc = ArmISA::htog(argc);
+332 
+333     //Write out the sentry void *
+334     IntType sentry_NULL = 0;
+335     initVirtMem.writeBlob(sentry_base,
+336             (uint8_t*)&sentry_NULL, sentry_size);
+337 
+338     //Fix up the aux vectors which point to other data
+339     for (int i = auxv.size() - 1; i >= 0; i--) {
+340         if (auxv[i].a_type == M5_AT_PLATFORM) {
+341             auxv[i].a_val = platform_base;
+342             initVirtMem.writeString(platform_base, platform.c_str());
+343         } else if (auxv[i].a_type == M5_AT_EXECFN) {
+344             auxv[i].a_val = aux_data_base;
+345             initVirtMem.writeString(aux_data_base, filename.c_str());
+346         } else if (auxv[i].a_type == M5_AT_RANDOM) {
+347             auxv[i].a_val = aux_random_base;
+348             // Just leave the value 0, we don't want randomness
+349         }
+350     }
+351 
+352     //Copy the aux stuff
+353     for (int x = 0; x < auxv.size(); x++) {
+354         initVirtMem.writeBlob(auxv_array_base + x * 2 * intSize,
+355                 (uint8_t*)&(auxv[x].a_type), intSize);
+356         initVirtMem.writeBlob(auxv_array_base + (x * 2 + 1) * intSize,
+357                 (uint8_t*)&(auxv[x].a_val), intSize);
+358     }
+359     //Write out the terminating zeroed auxilliary vector
+360     const uint64_t zero = 0;
+361     initVirtMem.writeBlob(auxv_array_base + 2 * intSize * auxv.size(),
+362             (uint8_t*)&zero, 2 * intSize);
+363 
+364     copyStringArray(envp, envp_array_base, env_data_base, initVirtMem);
+365     copyStringArray(argv, argv_array_base, arg_data_base, initVirtMem);
+366 
+367     initVirtMem.writeBlob(argc_base, (uint8_t*)&guestArgc, intSize);
+368 
+369     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+370     //Set the stack pointer register
+371     tc->setIntReg(spIndex, stack_min);
+372     //A pointer to a function to run when the program exits. We'll set this
+373     //to zero explicitly to make sure this isn't used.
+374     tc->setIntReg(ArgumentReg0, 0);
+375     //Set argument regs 1 and 2 to argv[0] and envp[0] respectively
+376     if (argv.size() > 0) {
+377         tc->setIntReg(ArgumentReg1, arg_data_base + arg_data_size -
+378                                     argv[argv.size() - 1].size() - 1);
+379     } else {
+380         tc->setIntReg(ArgumentReg1, 0);
+381     }
+382     if (envp.size() > 0) {
+383         tc->setIntReg(ArgumentReg2, env_data_base + env_data_size -
+384                                     envp[envp.size() - 1].size() - 1);
+385     } else {
+386         tc->setIntReg(ArgumentReg2, 0);
+387     }
+388 
+389     PCState pc;
+390     pc.thumb(arch == ObjectFile::Thumb);
+391     pc.nextThumb(pc.thumb());
+392     pc.aarch64(arch == ObjectFile::Arm64);
+393     pc.nextAArch64(pc.aarch64());
+394     pc.set(objFile->entryPoint() & ~mask(1));
+395     tc->pcState(pc);
+396 
+397     //Align the "stack_min" to a page boundary.
+398     stack_min = roundDown(stack_min, pageSize);
+399 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classArmLiveProcess_abf93aa1dd69df35e2a50f63d5a5d4c40}{
+\index{ArmLiveProcess@{ArmLiveProcess}!arch@{arch}}
+\index{arch@{arch}!ArmLiveProcess@{ArmLiveProcess}}
+\subsubsection[{arch}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ObjectFile::Arch} {\bf arch}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmLiveProcess_abf93aa1dd69df35e2a50f63d5a5d4c40}
+
+
+\hyperlink{classArmLiveProcess32_abf93aa1dd69df35e2a50f63d5a5d4c40}{ArmLiveProcess32}, と \hyperlink{classArmLiveProcess64_abf93aa1dd69df35e2a50f63d5a5d4c40}{ArmLiveProcess64}で再定義されています。
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2process_8hh}{process.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2process_8cc}{process.cc}\end{DoxyCompactItemize}

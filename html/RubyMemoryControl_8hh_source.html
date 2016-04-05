@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/system/RubyMemoryControl.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/system/RubyMemoryControl.hh</h1><a href="RubyMemoryControl_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 1999-2008 Mark D. Hill and David A. Wood</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2012 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00007"></a>00007 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00008"></a>00008 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00009"></a>00009 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00010"></a>00010 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00011"></a>00011 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00012"></a>00012 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00013"></a>00013 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00014"></a>00014 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00015"></a>00015 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00018"></a>00018 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00019"></a>00019 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00020"></a>00020 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00021"></a>00021 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00022"></a>00022 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00023"></a>00023 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00024"></a>00024 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00025"></a>00025 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00026"></a>00026 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00027"></a>00027 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00028"></a>00028 <span class="comment"> */</span>
+<a name="l00029"></a>00029 
+<a name="l00030"></a>00030 <span class="preprocessor">#ifndef __MEM_RUBY_SYSTEM_MEMORY_CONTROL_HH__</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_SYSTEM_MEMORY_CONTROL_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;mem/protocol/MemoryMsg.hh&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="Address_8hh.html">mem/ruby/common/Address.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="Consumer_8hh.html">mem/ruby/common/Consumer.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="Global_8hh.html">mem/ruby/common/Global.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="MemCntrlProfiler_8hh.html">mem/ruby/profiler/MemCntrlProfiler.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="Message_8hh.html">mem/ruby/slicc_interface/Message.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="MemoryControl_8hh.html">mem/ruby/system/MemoryControl.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="MemoryNode_8hh.html">mem/ruby/system/MemoryNode.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="System_8hh.html">mem/ruby/system/System.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;params/RubyMemoryControl.hh&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049 <span class="comment">// This constant is part of the definition of tFAW; see</span>
+<a name="l00050"></a>00050 <span class="comment">// the comments in header to RubyMemoryControl.cc</span>
+<a name="l00051"></a><a class="code" href="RubyMemoryControl_8hh.html#a783700b32287aaa8e56e1b63a611a927">00051</a> <span class="preprocessor">#define ACTIVATE_PER_TFAW 4</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a><a class="code" href="classRubyMemoryControl.html">00055</a> <span class="keyword">class </span><a class="code" href="classRubyMemoryControl_1_1RubyMemoryControl.html">RubyMemoryControl</a> : <span class="keyword">public</span> <a class="code" href="classMemoryControl_1_1MemoryControl.html">MemoryControl</a>
+<a name="l00056"></a>00056 {
+<a name="l00057"></a>00057   <span class="keyword">public</span>:
+<a name="l00058"></a><a class="code" href="classRubyMemoryControl.html#af43d4e91847a2856227bcb75a70a9a86">00058</a>     <span class="keyword">typedef</span> RubyMemoryControlParams <a class="code" href="classRubyMemoryControl.html#af43d4e91847a2856227bcb75a70a9a86">Params</a>;
+<a name="l00059"></a>00059     <a class="code" href="classRubyMemoryControl.html#a4f3e4d7624fbb425e553c4e36cadcba9">RubyMemoryControl</a>(<span class="keyword">const</span> <a class="code" href="classRubyMemoryControl.html#af43d4e91847a2856227bcb75a70a9a86">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00060"></a>00060     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00061"></a>00061     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#ad20897c5c8bd47f5d4005989bead0e55">reset</a>();
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063     <a class="code" href="classRubyMemoryControl.html#ac811a91e31835fa2b05aec4314ca6870">~RubyMemoryControl</a>();
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#aa8a18d230dba7a674ac8a0b4f35bc36a">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="namespaceMipsISA.html#a2575c29e7f4617b6076486f340b6fe19">dm</a>);
+<a name="l00066"></a>00066 
+<a name="l00067"></a>00067     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>();
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a8487c37680239f103e21ada9acf1726d">setConsumer</a>(<a class="code" href="classConsumer.html">Consumer</a>* consumer_ptr);
+<a name="l00070"></a><a class="code" href="classRubyMemoryControl.html#a2417fc7252a612b5c976ceaa2d1be4f7">00070</a>     <a class="code" href="classConsumer.html">Consumer</a>* <a class="code" href="classRubyMemoryControl.html#a2417fc7252a612b5c976ceaa2d1be4f7">getConsumer</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubyMemoryControl.html#a83dd1dc8eef330b0c0d184a4167b26b4">m_consumer_ptr</a>; };
+<a name="l00071"></a><a class="code" href="classRubyMemoryControl.html#a9cdbe64eebafb111a124edec55ed2340">00071</a>     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a9cdbe64eebafb111a124edec55ed2340">setDescription</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>) { <a class="code" href="classRubyMemoryControl.html#ad50eef5f7fcfa30f62e14f0fac2a4f6e">m_description</a> = name; };
+<a name="l00072"></a><a class="code" href="classRubyMemoryControl.html#a73da75c3e5ec30855a02eae2ba824e38">00072</a>     std::string <a class="code" href="classRubyMemoryControl.html#a73da75c3e5ec30855a02eae2ba824e38">getDescription</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubyMemoryControl.html#ad50eef5f7fcfa30f62e14f0fac2a4f6e">m_description</a>; };
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074     <span class="comment">// Called from the directory:</span>
+<a name="l00075"></a>00075     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a068a03cd419d33592fd584ec5877bb64">enqueue</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">MsgPtr</a>&amp; message, <a class="code" href="classCycles.html">Cycles</a> latency);
+<a name="l00076"></a>00076     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#aadad7bc8b989cfe93247844131735f70">enqueueMemRef</a>(<a class="code" href="classMemoryNode.html">MemoryNode</a> *memRef);
+<a name="l00077"></a>00077     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a851b6644e3e336c07f8e6fe77234b97f">dequeue</a>();
+<a name="l00078"></a>00078     <span class="keyword">const</span> <a class="code" href="classMessage.html">Message</a>* <a class="code" href="classRubyMemoryControl.html#ab635dc32ebecf260c15d8fbbbb9b21e0">peek</a>();
+<a name="l00079"></a>00079     <a class="code" href="classMemoryNode.html">MemoryNode</a> *<a class="code" href="classRubyMemoryControl.html#a8ffbfb520369710755a1260b8451de3d">peekNode</a>();
+<a name="l00080"></a>00080     <span class="keywordtype">bool</span> <a class="code" href="classRubyMemoryControl.html#acbed040576a7a18e2d9c46b2f15e0162">isReady</a>();
+<a name="l00081"></a><a class="code" href="classRubyMemoryControl.html#a99a0d76f7266570912e6b0901cfaf9cf">00081</a>     <span class="keywordtype">bool</span> <a class="code" href="classRubyMemoryControl.html#a99a0d76f7266570912e6b0901cfaf9cf">areNSlotsAvailable</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aeab71244afb687f16d8c4f5ee9d6ef0e">n</a>) { <span class="keywordflow">return</span> <span class="keyword">true</span>; };  <span class="comment">// infinite queue length</span>
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#ac55fe386a101fbae38c716067c9966a0">print</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00084"></a>00084     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a26f571eb9a81a077295b54c2ed398aea">getBank</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span>;
+<a name="l00087"></a>00087     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#af8c39d7c9853a48fd242bda859e76222">getRank</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span>;
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089     <span class="comment">// not used in Ruby memory controller</span>
+<a name="l00090"></a>00090     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a08f255b8eb3b262916a47fa8f7c12e63">getChannel</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span>;
+<a name="l00091"></a>00091     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a65314c26cf3c85d8c911524ede56456c">getRow</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span>;
+<a name="l00092"></a>00092 
+<a name="l00093"></a>00093     <span class="comment">//added by SS</span>
+<a name="l00094"></a><a class="code" href="classRubyMemoryControl.html#aba6f6d5c066193ae70ee43153051055b">00094</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#aba6f6d5c066193ae70ee43153051055b">getBanksPerRank</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubyMemoryControl.html#af5a8b76f5c8fdb638e49a8c11c61f492">m_banks_per_rank</a>; };
+<a name="l00095"></a><a class="code" href="classRubyMemoryControl.html#a6dff017ebfbd9d5b021b86437ff67acc">00095</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a6dff017ebfbd9d5b021b86437ff67acc">getRanksPerDimm</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubyMemoryControl.html#a734869c8bd10780ed7f61eadb638f30c">m_ranks_per_dimm</a>; };
+<a name="l00096"></a><a class="code" href="classRubyMemoryControl.html#a5a9c0e20c20d0171bb8d8a96cb22576f">00096</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a5a9c0e20c20d0171bb8d8a96cb22576f">getDimmsPerChannel</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubyMemoryControl.html#acf7c3dd8c1a61ce9fe7ca2e026150caf">m_dimms_per_channel</a>; }
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098     <span class="keywordtype">bool</span> <a class="code" href="classRubyMemoryControl.html#a898941f27bcf3a1c0383de5988406650">functionalReadBuffers</a>(<a class="code" href="classPacket.html">Packet</a> *pkt);
+<a name="l00099"></a>00099     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRubyMemoryControl.html#a08f04f912fb872935cb2d40f8570c340">functionalWriteBuffers</a>(<a class="code" href="classPacket.html">Packet</a> *pkt);
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101   <span class="keyword">private</span>:
+<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a5ad0e6ec636d4094ee1b89c121d37dd9">enqueueToDirectory</a>(<a class="code" href="classMemoryNode.html">MemoryNode</a> *req, <a class="code" href="classCycles.html">Cycles</a> latency);
+<a name="l00103"></a>00103     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#af8c39d7c9853a48fd242bda859e76222">getRank</a>(<span class="keywordtype">int</span> bank) <span class="keyword">const</span>;
+<a name="l00104"></a>00104     <span class="keywordtype">bool</span> <a class="code" href="classRubyMemoryControl.html#a839c1841354bab0a9007a04ba303ae2c">queueReady</a>(<span class="keywordtype">int</span> bank);
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a9dbeedd7a40a225736f517e46ef9915e">issueRequest</a>(<span class="keywordtype">int</span> bank);
+<a name="l00106"></a>00106     <span class="keywordtype">bool</span> <a class="code" href="classRubyMemoryControl.html#a3907d2ad8de317b5d9488e567b8c29de">issueRefresh</a>(<span class="keywordtype">int</span> bank);
+<a name="l00107"></a>00107     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#a8fb7d0c7e12bbd524e3bcd193e66426c">markTfaw</a>(<span class="keywordtype">int</span> rank);
+<a name="l00108"></a>00108     <span class="keywordtype">void</span> <a class="code" href="classRubyMemoryControl.html#ac776b02b70a3c6795e0823d77bf74c73">executeCycle</a>();
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110     <span class="comment">// Private copy constructor and assignment operator</span>
+<a name="l00111"></a>00111     <a class="code" href="classRubyMemoryControl.html#a4f3e4d7624fbb425e553c4e36cadcba9">RubyMemoryControl</a> (<span class="keyword">const</span> <a class="code" href="classRubyMemoryControl.html">RubyMemoryControl</a>&amp; obj);
+<a name="l00112"></a>00112     <a class="code" href="classRubyMemoryControl.html">RubyMemoryControl</a>&amp; <a class="code" href="classRubyMemoryControl.html#a625dea61d2ea0f477b1310e9307a33d6">operator=</a>(<span class="keyword">const</span> <a class="code" href="classRubyMemoryControl.html">RubyMemoryControl</a>&amp; obj);
+<a name="l00113"></a>00113 
+<a name="l00114"></a>00114     <span class="comment">// data members</span>
+<a name="l00115"></a><a class="code" href="classRubyMemoryControl.html#a83dd1dc8eef330b0c0d184a4167b26b4">00115</a>     <a class="code" href="classConsumer.html">Consumer</a>* <a class="code" href="classRubyMemoryControl.html#a83dd1dc8eef330b0c0d184a4167b26b4">m_consumer_ptr</a>;  <span class="comment">// Consumer to signal a wakeup()</span>
+<a name="l00116"></a><a class="code" href="classRubyMemoryControl.html#ad50eef5f7fcfa30f62e14f0fac2a4f6e">00116</a>     std::string <a class="code" href="classRubyMemoryControl.html#ad50eef5f7fcfa30f62e14f0fac2a4f6e">m_description</a>;
+<a name="l00117"></a><a class="code" href="classRubyMemoryControl.html#acfac131e63985feff04ed11cbaf0d221">00117</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#acfac131e63985feff04ed11cbaf0d221">m_msg_counter</a>;
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classRubyMemoryControl.html#af5a8b76f5c8fdb638e49a8c11c61f492">00119</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#af5a8b76f5c8fdb638e49a8c11c61f492">m_banks_per_rank</a>;
+<a name="l00120"></a><a class="code" href="classRubyMemoryControl.html#a734869c8bd10780ed7f61eadb638f30c">00120</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a734869c8bd10780ed7f61eadb638f30c">m_ranks_per_dimm</a>;
+<a name="l00121"></a><a class="code" href="classRubyMemoryControl.html#acf7c3dd8c1a61ce9fe7ca2e026150caf">00121</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#acf7c3dd8c1a61ce9fe7ca2e026150caf">m_dimms_per_channel</a>;
+<a name="l00122"></a><a class="code" href="classRubyMemoryControl.html#a767e3298a0e794bb0c8f422021e6b67d">00122</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a767e3298a0e794bb0c8f422021e6b67d">m_bank_bit_0</a>;
+<a name="l00123"></a><a class="code" href="classRubyMemoryControl.html#a2262efb9776ae0e8119e999c6efed38b">00123</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a2262efb9776ae0e8119e999c6efed38b">m_rank_bit_0</a>;
+<a name="l00124"></a><a class="code" href="classRubyMemoryControl.html#a9d9676a8a7c87644cefbe758f0ef719c">00124</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a9d9676a8a7c87644cefbe758f0ef719c">m_dimm_bit_0</a>;
+<a name="l00125"></a><a class="code" href="classRubyMemoryControl.html#a6cbe212586b315223f76b124953ea4b2">00125</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a6cbe212586b315223f76b124953ea4b2">m_bank_queue_size</a>;
+<a name="l00126"></a><a class="code" href="classRubyMemoryControl.html#ab11322175e2e2ec5d6ebef835774bc1a">00126</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#ab11322175e2e2ec5d6ebef835774bc1a">m_bank_busy_time</a>;
+<a name="l00127"></a><a class="code" href="classRubyMemoryControl.html#a88f33889677c076f1e5fdd8ce7cabc4d">00127</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a88f33889677c076f1e5fdd8ce7cabc4d">m_rank_rank_delay</a>;
+<a name="l00128"></a><a class="code" href="classRubyMemoryControl.html#a469ba8ed68dfdab637a67909cd7f494f">00128</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a469ba8ed68dfdab637a67909cd7f494f">m_read_write_delay</a>;
+<a name="l00129"></a><a class="code" href="classRubyMemoryControl.html#a0537255983f6c88ed3389efd814780e5">00129</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a0537255983f6c88ed3389efd814780e5">m_basic_bus_busy_time</a>;
+<a name="l00130"></a><a class="code" href="classRubyMemoryControl.html#aaf9472c80a44349fbb83ec29ce2de7ad">00130</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classRubyMemoryControl.html#aaf9472c80a44349fbb83ec29ce2de7ad">m_mem_ctl_latency</a>;
+<a name="l00131"></a><a class="code" href="classRubyMemoryControl.html#ab046d0568e576a3fd3e751aae694aa6c">00131</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#ab046d0568e576a3fd3e751aae694aa6c">m_refresh_period</a>;
+<a name="l00132"></a><a class="code" href="classRubyMemoryControl.html#a84dc4df49177ba4931742af171541561">00132</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a84dc4df49177ba4931742af171541561">m_mem_random_arbitrate</a>;
+<a name="l00133"></a><a class="code" href="classRubyMemoryControl.html#a278ccfdcd299cca636085e30b57bd77b">00133</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a278ccfdcd299cca636085e30b57bd77b">m_tFaw</a>;
+<a name="l00134"></a><a class="code" href="classRubyMemoryControl.html#add64256c91bc7722347f3a8dfe94d375">00134</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classRubyMemoryControl.html#add64256c91bc7722347f3a8dfe94d375">m_mem_fixed_delay</a>;
+<a name="l00135"></a>00135 
+<a name="l00136"></a><a class="code" href="classRubyMemoryControl.html#ad36478de555240b1cd80c5b0aa4b00cc">00136</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#ad36478de555240b1cd80c5b0aa4b00cc">m_total_banks</a>;
+<a name="l00137"></a><a class="code" href="classRubyMemoryControl.html#ae56d0b2636a76e0d08eb304c9845540c">00137</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#ae56d0b2636a76e0d08eb304c9845540c">m_total_ranks</a>;
+<a name="l00138"></a><a class="code" href="classRubyMemoryControl.html#ac226affdfdce1041cdc1adcea108d2d9">00138</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#ac226affdfdce1041cdc1adcea108d2d9">m_refresh_period_system</a>;
+<a name="l00139"></a>00139 
+<a name="l00140"></a>00140     <span class="comment">// queues where memory requests live</span>
+<a name="l00141"></a><a class="code" href="classRubyMemoryControl.html#a6ff73bc35f01b71460125c8973fdcf7f">00141</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;MemoryNode *&gt;</a> <a class="code" href="classRubyMemoryControl.html#a6ff73bc35f01b71460125c8973fdcf7f">m_response_queue</a>;
+<a name="l00142"></a><a class="code" href="classRubyMemoryControl.html#ad59ead9befd4b8ed53d20e31025cc5f2">00142</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;MemoryNode *&gt;</a> <a class="code" href="classRubyMemoryControl.html#ad59ead9befd4b8ed53d20e31025cc5f2">m_input_queue</a>;
+<a name="l00143"></a><a class="code" href="classRubyMemoryControl.html#a66d0e61e247049647c7e205d7898f593">00143</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;MemoryNode *&gt;</a>* <a class="code" href="classRubyMemoryControl.html#a66d0e61e247049647c7e205d7898f593">m_bankQueues</a>;
+<a name="l00144"></a>00144 
+<a name="l00145"></a>00145     <span class="comment">// Each entry indicates number of address-bus cycles until bank</span>
+<a name="l00146"></a>00146     <span class="comment">// is reschedulable:</span>
+<a name="l00147"></a><a class="code" href="classRubyMemoryControl.html#a258db92f2ca2cd3335e798fbe1cea189">00147</a>     <span class="keywordtype">int</span>* <a class="code" href="classRubyMemoryControl.html#a258db92f2ca2cd3335e798fbe1cea189">m_bankBusyCounter</a>;
+<a name="l00148"></a><a class="code" href="classRubyMemoryControl.html#a546d324998c9280e60ad0d3bdc33b660">00148</a>     <span class="keywordtype">int</span>* <a class="code" href="classRubyMemoryControl.html#a546d324998c9280e60ad0d3bdc33b660">m_oldRequest</a>;
+<a name="l00149"></a>00149 
+<a name="l00150"></a><a class="code" href="classRubyMemoryControl.html#a9dd1941af4ea267b9f8e05a54c70d713">00150</a>     <a class="code" href="TypeDefines_8hh.html#a29940ae63ec06c9998bba873e25407ad">uint64</a>* <a class="code" href="classRubyMemoryControl.html#a9dd1941af4ea267b9f8e05a54c70d713">m_tfaw_shift</a>;
+<a name="l00151"></a><a class="code" href="classRubyMemoryControl.html#a8399af800996db69e2cb64997f0123f4">00151</a>     <span class="keywordtype">int</span>* <a class="code" href="classRubyMemoryControl.html#a8399af800996db69e2cb64997f0123f4">m_tfaw_count</a>;
+<a name="l00152"></a>00152 
+<a name="l00153"></a>00153     <span class="comment">// Each of these indicates number of address-bus cycles until</span>
+<a name="l00154"></a>00154     <span class="comment">// we can issue a new request of the corresponding type:</span>
+<a name="l00155"></a><a class="code" href="classRubyMemoryControl.html#a4c6490a8d96034781b7f019c9875637d">00155</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a4c6490a8d96034781b7f019c9875637d">m_busBusyCounter_Write</a>;
+<a name="l00156"></a><a class="code" href="classRubyMemoryControl.html#a9396a0f34b9eb0d3c51bedc04de53b10">00156</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a9396a0f34b9eb0d3c51bedc04de53b10">m_busBusyCounter_ReadNewRank</a>;
+<a name="l00157"></a><a class="code" href="classRubyMemoryControl.html#a9622fd6ccdf6aaac725dd5b199651e1f">00157</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a9622fd6ccdf6aaac725dd5b199651e1f">m_busBusyCounter_Basic</a>;
+<a name="l00158"></a>00158 
+<a name="l00159"></a><a class="code" href="classRubyMemoryControl.html#a0889f6b503357c0dee9ca27b3a777a61">00159</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a0889f6b503357c0dee9ca27b3a777a61">m_busBusy_WhichRank</a>;  <span class="comment">// which rank last granted</span>
+<a name="l00160"></a><a class="code" href="classRubyMemoryControl.html#ae91016ac7543fa2d2e4fc5ba9748a134">00160</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#ae91016ac7543fa2d2e4fc5ba9748a134">m_roundRobin</a>;         <span class="comment">// which bank queue was last granted</span>
+<a name="l00161"></a><a class="code" href="classRubyMemoryControl.html#a11c845239e7ec76861ae230df7a575b2">00161</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a11c845239e7ec76861ae230df7a575b2">m_refresh_count</a>;      <span class="comment">// cycles until next refresh</span>
+<a name="l00162"></a><a class="code" href="classRubyMemoryControl.html#a81b8cb5d4100808f5d49ebb9e7f878bd">00162</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a81b8cb5d4100808f5d49ebb9e7f878bd">m_need_refresh</a>;       <span class="comment">// set whenever m_refresh_count goes to zero</span>
+<a name="l00163"></a><a class="code" href="classRubyMemoryControl.html#a93843e73be2e39683d2b6ce21c8a6298">00163</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a93843e73be2e39683d2b6ce21c8a6298">m_refresh_bank</a>;       <span class="comment">// which bank to refresh next</span>
+<a name="l00164"></a><a class="code" href="classRubyMemoryControl.html#aba1d5e3376d7d3bed53b2bafcd056c64">00164</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#aba1d5e3376d7d3bed53b2bafcd056c64">m_ageCounter</a>;         <span class="comment">// age of old requests; to detect starvation</span>
+<a name="l00165"></a><a class="code" href="classRubyMemoryControl.html#a1b496ca0cf94387967ed0539a43fb126">00165</a>     <span class="keywordtype">int</span> <a class="code" href="classRubyMemoryControl.html#a1b496ca0cf94387967ed0539a43fb126">m_idleCount</a>;          <span class="comment">// watchdog timer for shutting down</span>
+<a name="l00166"></a>00166 
+<a name="l00167"></a><a class="code" href="classRubyMemoryControl.html#a1f70f7199575ca8bd58b685a72c37f84">00167</a>     <a class="code" href="classMemCntrlProfiler.html">MemCntrlProfiler</a>* <a class="code" href="classRubyMemoryControl.html#a1f70f7199575ca8bd58b685a72c37f84">m_profiler_ptr</a>;
+<a name="l00168"></a>00168 };
+<a name="l00169"></a>00169 
+<a name="l00170"></a>00170 std::ostream&amp; <a class="code" href="namespaceGenericISA.html#a960fce0270870fc775ac34cc401036ba">operator&lt;&lt;</a>(std::ostream&amp; out, <span class="keyword">const</span> <a class="code" href="classRubyMemoryControl.html">RubyMemoryControl</a>&amp; obj);
+<a name="l00171"></a>00171 
+<a name="l00172"></a>00172 <span class="preprocessor">#endif // __MEM_RUBY_SYSTEM_MEMORY_CONTROL_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

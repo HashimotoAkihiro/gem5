@@ -1,0 +1,91 @@
+\hypertarget{classTrace_1_1SparcNativeTrace}{
+\section{クラス SparcNativeTrace}
+\label{classTrace_1_1SparcNativeTrace}\index{Trace::SparcNativeTrace@{Trace::SparcNativeTrace}}
+}
+
+
+{\ttfamily \#include $<$nativetrace.hh$>$}SparcNativeTraceに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classTrace_1_1SparcNativeTrace}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTrace_1_1SparcNativeTrace_ac3c0f8a99d00d21a4a82dbffa8fe0ebb}{SparcNativeTrace} (const \hyperlink{classTrace_1_1ExeTracer_a6680098765037131737b022c9fa9252e}{Params} $\ast$p)
+\item 
+void \hyperlink{classTrace_1_1SparcNativeTrace_a826e1279dfa7dd9ce6760a2e6efe4116}{check} (\hyperlink{classTrace_1_1NativeTraceRecord}{NativeTraceRecord} $\ast$record)
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTrace_1_1SparcNativeTrace_ac3c0f8a99d00d21a4a82dbffa8fe0ebb}{
+\index{Trace::SparcNativeTrace@{Trace::SparcNativeTrace}!SparcNativeTrace@{SparcNativeTrace}}
+\index{SparcNativeTrace@{SparcNativeTrace}!Trace::SparcNativeTrace@{Trace::SparcNativeTrace}}
+\subsubsection[{SparcNativeTrace}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SparcNativeTrace} (const {\bf Params} $\ast$ {\em p})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrace_1_1SparcNativeTrace_ac3c0f8a99d00d21a4a82dbffa8fe0ebb}
+
+
+
+\begin{DoxyCode}
+44                                       : NativeTrace(p)
+45     {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTrace_1_1SparcNativeTrace_a826e1279dfa7dd9ce6760a2e6efe4116}{
+\index{Trace::SparcNativeTrace@{Trace::SparcNativeTrace}!check@{check}}
+\index{check@{check}!Trace::SparcNativeTrace@{Trace::SparcNativeTrace}}
+\subsubsection[{check}]{\setlength{\rightskip}{0pt plus 5cm}void check ({\bf NativeTraceRecord} $\ast$ {\em record})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTrace_1_1SparcNativeTrace_a826e1279dfa7dd9ce6760a2e6efe4116}
+
+
+\hyperlink{classTrace_1_1NativeTrace_adb484644aa43b4370d31b6a7286b0dd1}{NativeTrace}を実装しています。
+
+
+\begin{DoxyCode}
+53 {
+54     ThreadContext *tc = record->getThread();
+55 
+56     uint64_t regVal, realRegVal;
+57 
+58     // Integer registers
+59 
+60     // I doubt a real SPARC will describe more integer registers than this.
+61     assert(SparcISA::NumIntArchRegs == 32);
+62     const char **regName = intRegNames;
+63     for (int i = 0; i < SparcISA::NumIntArchRegs; i++) {
+64         regVal = tc->readIntReg(i);
+65         read(&realRegVal, sizeof(realRegVal));
+66         realRegVal = SparcISA::gtoh(realRegVal);
+67         checkReg(*(regName++), regVal, realRegVal);
+68     }
+69 
+70     SparcISA::PCState pc = tc->pcState();
+71     // PC
+72     read(&realRegVal, sizeof(realRegVal));
+73     realRegVal = SparcISA::gtoh(realRegVal);
+74     regVal = pc.npc();
+75     checkReg("pc", regVal, realRegVal);
+76 
+77     // NPC
+78     read(&realRegVal, sizeof(realRegVal));
+79     realRegVal = SparcISA::gtoh(realRegVal);
+80     pc.nnpc();
+81     checkReg("npc", regVal, realRegVal);
+82 
+83     // CCR
+84     read(&realRegVal, sizeof(realRegVal));
+85     realRegVal = SparcISA::gtoh(realRegVal);
+86     regVal = tc->readIntReg(SparcISA::NumIntArchRegs + 2);
+87     checkReg("ccr", regVal, realRegVal);
+88 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/sparc/\hyperlink{arch_2sparc_2nativetrace_8hh}{nativetrace.hh}\item 
+arch/sparc/\hyperlink{arch_2sparc_2nativetrace_8cc}{nativetrace.cc}\end{DoxyCompactItemize}

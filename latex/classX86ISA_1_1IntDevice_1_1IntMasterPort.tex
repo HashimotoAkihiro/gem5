@@ -1,0 +1,111 @@
+\hypertarget{classX86ISA_1_1IntDevice_1_1IntMasterPort}{
+\section{クラス IntMasterPort}
+\label{classX86ISA_1_1IntDevice_1_1IntMasterPort}\index{X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}}
+}
+
+
+{\ttfamily \#include $<$intdev.hh$>$}IntMasterPortに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classX86ISA_1_1IntDevice_1_1IntMasterPort}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1IntDevice_1_1IntMasterPort_afa923acbe92fee643145777cd0d319ec}{IntMasterPort} (const std::string \&\_\-name, \hyperlink{classMemObject}{MemObject} $\ast$\_\-parent, \hyperlink{classX86ISA_1_1IntDevice}{IntDevice} $\ast$dev, \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \_\-latency)
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classX86ISA_1_1IntDevice_1_1IntMasterPort_a96d1a00beed669f9145d55bc3675d99c}{recvResponse} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+void \hyperlink{classX86ISA_1_1IntDevice_1_1IntMasterPort_aa8849259721c2101686b45b59b587253}{sendMessage} (\hyperlink{classstd_1_1list}{ApicList} apics, TriggerIntMessage message, bool timing)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1IntDevice}{IntDevice} $\ast$ \hyperlink{classX86ISA_1_1IntDevice_1_1IntMasterPort_a213401fbaf58b821f38f6e274ddafadc}{device}
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classX86ISA_1_1IntDevice_1_1IntMasterPort_ac8d8966078cc047949fd1bca8feb21b6}{latency}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classX86ISA_1_1IntDevice_1_1IntMasterPort_afa923acbe92fee643145777cd0d319ec}{
+\index{X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}!IntMasterPort@{IntMasterPort}}
+\index{IntMasterPort@{IntMasterPort}!X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}}
+\subsubsection[{IntMasterPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf IntMasterPort} (const std::string \& {\em \_\-name}, \/  {\bf MemObject} $\ast$ {\em \_\-parent}, \/  {\bf IntDevice} $\ast$ {\em dev}, \/  {\bf Tick} {\em \_\-latency})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classX86ISA_1_1IntDevice_1_1IntMasterPort_afa923acbe92fee643145777cd0d319ec}
+
+
+
+\begin{DoxyCode}
+96                                                      :
+97             MessageMasterPort(_name, _parent), device(dev), latency(_latency)
+98         {
+99         }
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classX86ISA_1_1IntDevice_1_1IntMasterPort_a96d1a00beed669f9145d55bc3675d99c}{
+\index{X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}!recvResponse@{recvResponse}}
+\index{recvResponse@{recvResponse}!X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}}
+\subsubsection[{recvResponse}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} recvResponse ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classX86ISA_1_1IntDevice_1_1IntMasterPort_a96d1a00beed669f9145d55bc3675d99c}
+
+
+\hyperlink{classMessageMasterPort_ae473b2a0c55e73359b9643810869ca81}{MessageMasterPort}を再定義しています。
+
+
+\begin{DoxyCode}
+102         {
+103             return device->recvResponse(pkt);
+104         }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1IntDevice_1_1IntMasterPort_aa8849259721c2101686b45b59b587253}{
+\index{X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}!sendMessage@{sendMessage}}
+\index{sendMessage@{sendMessage}!X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}}
+\subsubsection[{sendMessage}]{\setlength{\rightskip}{0pt plus 5cm}void sendMessage ({\bf ApicList} {\em apics}, \/  TriggerIntMessage {\em message}, \/  bool {\em timing})}}
+\label{classX86ISA_1_1IntDevice_1_1IntMasterPort_aa8849259721c2101686b45b59b587253}
+
+
+
+\begin{DoxyCode}
+49 {
+50     ApicList::iterator apicIt;
+51     for (apicIt = apics.begin(); apicIt != apics.end(); apicIt++) {
+52         PacketPtr pkt = buildIntRequest(*apicIt, message);
+53         if (timing) {
+54             schedTimingReq(pkt, curTick() + latency);
+55             // The target handles cleaning up the packet in timing mode.
+56         } else {
+57             // ignore the latency involved in the atomic transaction
+58             sendAtomic(pkt);
+59             assert(pkt->isResponse());
+60             // also ignore the latency in handling the response
+61             recvResponse(pkt);
+62             delete pkt->req;
+63             delete pkt;
+64         }
+65     }
+66 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classX86ISA_1_1IntDevice_1_1IntMasterPort_a213401fbaf58b821f38f6e274ddafadc}{
+\index{X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}!device@{device}}
+\index{device@{device}!X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}}
+\subsubsection[{device}]{\setlength{\rightskip}{0pt plus 5cm}{\bf IntDevice}$\ast$ {\bf device}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1IntDevice_1_1IntMasterPort_a213401fbaf58b821f38f6e274ddafadc}
+\hypertarget{classX86ISA_1_1IntDevice_1_1IntMasterPort_ac8d8966078cc047949fd1bca8feb21b6}{
+\index{X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}!latency@{latency}}
+\index{latency@{latency}!X86ISA::IntDevice::IntMasterPort@{X86ISA::IntDevice::IntMasterPort}}
+\subsubsection[{latency}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} {\bf latency}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classX86ISA_1_1IntDevice_1_1IntMasterPort_ac8d8966078cc047949fd1bca8feb21b6}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/x86/\hyperlink{intdev_8hh}{intdev.hh}\item 
+dev/x86/\hyperlink{intdev_8cc}{intdev.cc}\end{DoxyCompactItemize}

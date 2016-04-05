@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/ide_ctrl.cc</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>dev/ide_ctrl.cc</h1><code>#include &lt;string&gt;</code><br/>
+<code>#include &quot;<a class="el" href="intr__control_8hh_source.html">cpu/intr_control.hh</a>&quot;</code><br/>
+<code>#include &quot;debug/IdeCtrl.hh&quot;</code><br/>
+<code>#include &quot;<a class="el" href="ide__ctrl_8hh_source.html">dev/ide_ctrl.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="ide__disk_8hh_source.html">dev/ide_disk.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="packet_8hh_source.html">mem/packet.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="packet__access_8hh_source.html">mem/packet_access.hh</a>&quot;</code><br/>
+<code>#include &quot;params/IdeController.hh&quot;</code><br/>
+<code>#include &quot;<a class="el" href="byteswap_8hh_source.html">sim/byteswap.hh</a>&quot;</code><br/>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2"><h2>列挙型</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23">BMIRegOffset</a> { <a class="el" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23a7b9dfc449c8bc180eee6acfba112eb6e">BMICommand</a> =  0x0, 
+<a class="el" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23a715c28ef1ec0b38f1e10d88f29a285ba">BMIStatus</a> =  0x2, 
+<a class="el" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23a5904338541e98dca861ecb7644bd679f">BMIDescTablePtr</a> =  0x4
+ }</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">enum &nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69">ConfRegOffset</a> { <br/>
+&nbsp;&nbsp;<a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a13648b6901e0ef9780d3ea8939a1f640">PrimaryTiming</a> =  0x40, 
+<a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a8528d9287e5a6be33190e5a94cc72e90">SecondaryTiming</a> =  0x42, 
+<a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a2acd625ee9a59db71bc12c51c73e8588">DeviceTiming</a> =  0x44, 
+<a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a2981a78154dae937924f201c57c0f8b2">UDMAControl</a> =  0x48, 
+<br/>
+&nbsp;&nbsp;<a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69aac1c8b5119fd75e1550280150107ae28">UDMATiming</a> =  0x4A, 
+<a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a39d236ee400cec38b0088a16a25e1f7b">IDEConfig</a> =  0x54
+<br/>
+ }</td></tr>
+<tr><td colspan="2"><h2>変数</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static const uint16_t&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="ide__ctrl_8cc.html#a40a789747f8cd778ba7049a3e11839d3">timeRegWithDecodeEn</a> = 0x8000</td></tr>
+</table>
+<hr/><h2>列挙型</h2>
+<a class="anchor" id="a398bbec1e7aa62b425c21e173dc8ff23"></a><!-- doxytag: member="ide_ctrl.cc::BMIRegOffset" ref="a398bbec1e7aa62b425c21e173dc8ff23" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23">BMIRegOffset</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<dl><dt><b>列挙型の値: </b></dt><dd><table border="0" cellspacing="2" cellpadding="0">
+<tr><td valign="top"><em><a class="anchor" id="a398bbec1e7aa62b425c21e173dc8ff23a7b9dfc449c8bc180eee6acfba112eb6e"></a><!-- doxytag: member="BMICommand" ref="a398bbec1e7aa62b425c21e173dc8ff23a7b9dfc449c8bc180eee6acfba112eb6e" args="" -->BMICommand</em>&nbsp;</td><td>
+</td></tr>
+<tr><td valign="top"><em><a class="anchor" id="a398bbec1e7aa62b425c21e173dc8ff23a715c28ef1ec0b38f1e10d88f29a285ba"></a><!-- doxytag: member="BMIStatus" ref="a398bbec1e7aa62b425c21e173dc8ff23a715c28ef1ec0b38f1e10d88f29a285ba" args="" -->BMIStatus</em>&nbsp;</td><td>
+</td></tr>
+<tr><td valign="top"><em><a class="anchor" id="a398bbec1e7aa62b425c21e173dc8ff23a5904338541e98dca861ecb7644bd679f"></a><!-- doxytag: member="BMIDescTablePtr" ref="a398bbec1e7aa62b425c21e173dc8ff23a5904338541e98dca861ecb7644bd679f" args="" -->BMIDescTablePtr</em>&nbsp;</td><td>
+</td></tr>
+</table>
+</dd>
+</dl>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00061"></a>00061                   {
+<a name="l00062"></a>00062     <a class="code" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23a7b9dfc449c8bc180eee6acfba112eb6e">BMICommand</a> = 0x0,
+<a name="l00063"></a>00063     <a class="code" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23a715c28ef1ec0b38f1e10d88f29a285ba">BMIStatus</a> = 0x2,
+<a name="l00064"></a>00064     <a class="code" href="ide__ctrl_8cc.html#a398bbec1e7aa62b425c21e173dc8ff23a5904338541e98dca861ecb7644bd679f">BMIDescTablePtr</a> = 0x4
+<a name="l00065"></a>00065 };
+</pre></div></p>
+
+</div>
+</div>
+<a class="anchor" id="abd2ac73a2ca82e37ae68e8a034f44b69"></a><!-- doxytag: member="ide_ctrl.cc::ConfRegOffset" ref="abd2ac73a2ca82e37ae68e8a034f44b69" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">enum <a class="el" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69">ConfRegOffset</a></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<dl><dt><b>列挙型の値: </b></dt><dd><table border="0" cellspacing="2" cellpadding="0">
+<tr><td valign="top"><em><a class="anchor" id="abd2ac73a2ca82e37ae68e8a034f44b69a13648b6901e0ef9780d3ea8939a1f640"></a><!-- doxytag: member="PrimaryTiming" ref="abd2ac73a2ca82e37ae68e8a034f44b69a13648b6901e0ef9780d3ea8939a1f640" args="" -->PrimaryTiming</em>&nbsp;</td><td>
+</td></tr>
+<tr><td valign="top"><em><a class="anchor" id="abd2ac73a2ca82e37ae68e8a034f44b69a8528d9287e5a6be33190e5a94cc72e90"></a><!-- doxytag: member="SecondaryTiming" ref="abd2ac73a2ca82e37ae68e8a034f44b69a8528d9287e5a6be33190e5a94cc72e90" args="" -->SecondaryTiming</em>&nbsp;</td><td>
+</td></tr>
+<tr><td valign="top"><em><a class="anchor" id="abd2ac73a2ca82e37ae68e8a034f44b69a2acd625ee9a59db71bc12c51c73e8588"></a><!-- doxytag: member="DeviceTiming" ref="abd2ac73a2ca82e37ae68e8a034f44b69a2acd625ee9a59db71bc12c51c73e8588" args="" -->DeviceTiming</em>&nbsp;</td><td>
+</td></tr>
+<tr><td valign="top"><em><a class="anchor" id="abd2ac73a2ca82e37ae68e8a034f44b69a2981a78154dae937924f201c57c0f8b2"></a><!-- doxytag: member="UDMAControl" ref="abd2ac73a2ca82e37ae68e8a034f44b69a2981a78154dae937924f201c57c0f8b2" args="" -->UDMAControl</em>&nbsp;</td><td>
+</td></tr>
+<tr><td valign="top"><em><a class="anchor" id="abd2ac73a2ca82e37ae68e8a034f44b69aac1c8b5119fd75e1550280150107ae28"></a><!-- doxytag: member="UDMATiming" ref="abd2ac73a2ca82e37ae68e8a034f44b69aac1c8b5119fd75e1550280150107ae28" args="" -->UDMATiming</em>&nbsp;</td><td>
+</td></tr>
+<tr><td valign="top"><em><a class="anchor" id="abd2ac73a2ca82e37ae68e8a034f44b69a39d236ee400cec38b0088a16a25e1f7b"></a><!-- doxytag: member="IDEConfig" ref="abd2ac73a2ca82e37ae68e8a034f44b69a39d236ee400cec38b0088a16a25e1f7b" args="" -->IDEConfig</em>&nbsp;</td><td>
+</td></tr>
+</table>
+</dd>
+</dl>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00068"></a>00068                    {
+<a name="l00069"></a>00069     <a class="code" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a13648b6901e0ef9780d3ea8939a1f640">PrimaryTiming</a> = 0x40,
+<a name="l00070"></a>00070     <a class="code" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a8528d9287e5a6be33190e5a94cc72e90">SecondaryTiming</a> = 0x42,
+<a name="l00071"></a>00071     <a class="code" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a2acd625ee9a59db71bc12c51c73e8588">DeviceTiming</a> = 0x44,
+<a name="l00072"></a>00072     <a class="code" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a2981a78154dae937924f201c57c0f8b2">UDMAControl</a> = 0x48,
+<a name="l00073"></a>00073     <a class="code" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69aac1c8b5119fd75e1550280150107ae28">UDMATiming</a> = 0x4A,
+<a name="l00074"></a>00074     <a class="code" href="ide__ctrl_8cc.html#abd2ac73a2ca82e37ae68e8a034f44b69a39d236ee400cec38b0088a16a25e1f7b">IDEConfig</a> = 0x54
+<a name="l00075"></a>00075 };
+</pre></div></p>
+
+</div>
+</div>
+<hr/><h2>変数</h2>
+<a class="anchor" id="a40a789747f8cd778ba7049a3e11839d3"></a><!-- doxytag: member="ide_ctrl.cc::timeRegWithDecodeEn" ref="a40a789747f8cd778ba7049a3e11839d3" args="" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">const uint16_t <a class="el" href="ide__ctrl_8cc.html#a40a789747f8cd778ba7049a3e11839d3">timeRegWithDecodeEn</a> = 0x8000<code> [static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+</div>
+</div>
+</div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

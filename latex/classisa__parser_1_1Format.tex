@@ -1,0 +1,111 @@
+\hypertarget{classisa__parser_1_1Format}{
+\section{クラス Format}
+\label{classisa__parser_1_1Format}\index{isa\_\-parser::Format@{isa\_\-parser::Format}}
+}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classisa__parser_1_1Format_ac775ee34451fdfa742b318538164070e}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classisa__parser_1_1Format_a3e5cbc15d52ce2de63894dbe9e35135f}{defineInst}
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classisa__parser_1_1Format_acf2488b95c97e0378c9bf49de3b50f28}{id}
+\item 
+\hyperlink{classisa__parser_1_1Format_a41000f175dc0115080e2a682cc06dbe9}{params}
+\item 
+\hyperlink{classisa__parser_1_1Format_ab87f5ecf4c175818c347fc4998a62d23}{user\_\-code}
+\item 
+\hyperlink{classisa__parser_1_1Format_a3699148440db7bdde6e95e16092363d1}{func}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classisa__parser_1_1Format_ac775ee34451fdfa742b318538164070e}{
+\index{isa\_\-parser::Format@{isa\_\-parser::Format}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!isa_parser::Format@{isa\_\-parser::Format}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em id}, \/   {\em params}, \/   {\em code})}}
+\label{classisa__parser_1_1Format_ac775ee34451fdfa742b318538164070e}
+
+
+
+\begin{DoxyCode}
+248                                         :
+249         self.id = id
+250         self.params = params
+251         label = 'def format ' + id
+252         self.user_code = compile(fixPythonIndentation(code), label, 'exec')
+253         param_list = string.join(params, ", ")
+254         f = '''def defInst(_code, _context, %s):
+255                 my_locals = vars().copy()
+256                 exec _code in _context, my_locals
+257                 return my_locals\n''' % param_list
+258         c = compile(f, label + ' wrapper', 'exec')
+259         exec c
+260         self.func = defInst
+261 
+    def defineInst(self, parser, name, args, lineno):
+\end{DoxyCode}
+\hypertarget{classisa__parser_1_1Format_a3e5cbc15d52ce2de63894dbe9e35135f}{
+\index{isa\_\-parser::Format@{isa\_\-parser::Format}!defineInst@{defineInst}}
+\index{defineInst@{defineInst}!isa_parser::Format@{isa\_\-parser::Format}}
+\subsubsection[{defineInst}]{\setlength{\rightskip}{0pt plus 5cm}def defineInst ( {\em self}, \/   {\em parser}, \/   {\em name}, \/   {\em args}, \/   {\em lineno})}}
+\label{classisa__parser_1_1Format_a3e5cbc15d52ce2de63894dbe9e35135f}
+
+
+
+\begin{DoxyCode}
+262                                                     :
+263         parser.updateExportContext()
+264         context = parser.exportContext.copy()
+265         if len(name):
+266             Name = name[0].upper()
+267             if len(name) > 1:
+268                 Name += name[1:]
+269         context.update({ 'name' : name, 'Name' : Name })
+270         try:
+271             vars = self.func(self.user_code, context, *args[0], **args[1])
+272         except Exception, exc:
+273             if debug:
+274                 raise
+275             error(lineno, 'error defining "%s": %s.' % (name, exc))
+276         for k in vars.keys():
+277             if k not in ('header_output', 'decoder_output',
+278                          'exec_output', 'decode_block'):
+279                 del vars[k]
+280         return GenCode(parser, **vars)
+281 
+282 # Special null format to catch an implicit-format instruction
+283 # definition outside of any format block.
+class NoFormat(object):
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classisa__parser_1_1Format_a3699148440db7bdde6e95e16092363d1}{
+\index{isa\_\-parser::Format@{isa\_\-parser::Format}!func@{func}}
+\index{func@{func}!isa_parser::Format@{isa\_\-parser::Format}}
+\subsubsection[{func}]{\setlength{\rightskip}{0pt plus 5cm}{\bf func}}}
+\label{classisa__parser_1_1Format_a3699148440db7bdde6e95e16092363d1}
+\hypertarget{classisa__parser_1_1Format_acf2488b95c97e0378c9bf49de3b50f28}{
+\index{isa\_\-parser::Format@{isa\_\-parser::Format}!id@{id}}
+\index{id@{id}!isa_parser::Format@{isa\_\-parser::Format}}
+\subsubsection[{id}]{\setlength{\rightskip}{0pt plus 5cm}{\bf id}}}
+\label{classisa__parser_1_1Format_acf2488b95c97e0378c9bf49de3b50f28}
+\hypertarget{classisa__parser_1_1Format_a41000f175dc0115080e2a682cc06dbe9}{
+\index{isa\_\-parser::Format@{isa\_\-parser::Format}!params@{params}}
+\index{params@{params}!isa_parser::Format@{isa\_\-parser::Format}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}{\bf params}}}
+\label{classisa__parser_1_1Format_a41000f175dc0115080e2a682cc06dbe9}
+\hypertarget{classisa__parser_1_1Format_ab87f5ecf4c175818c347fc4998a62d23}{
+\index{isa\_\-parser::Format@{isa\_\-parser::Format}!user\_\-code@{user\_\-code}}
+\index{user\_\-code@{user\_\-code}!isa_parser::Format@{isa\_\-parser::Format}}
+\subsubsection[{user\_\-code}]{\setlength{\rightskip}{0pt plus 5cm}{\bf user\_\-code}}}
+\label{classisa__parser_1_1Format_ab87f5ecf4c175818c347fc4998a62d23}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/\hyperlink{isa__parser_8py}{isa\_\-parser.py}\end{DoxyCompactItemize}

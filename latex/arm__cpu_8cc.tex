@@ -1,0 +1,293 @@
+\hypertarget{arm__cpu_8cc}{
+\section{cpu/kvm/arm\_\-cpu.cc}
+\label{arm__cpu_8cc}\index{cpu/kvm/arm\_\-cpu.cc@{cpu/kvm/arm\_\-cpu.cc}}
+}
+{\ttfamily \#include $<$linux/kvm.h$>$}\par
+{\ttfamily \#include $<$algorithm$>$}\par
+{\ttfamily \#include $<$cerrno$>$}\par
+{\ttfamily \#include $<$memory$>$}\par
+{\ttfamily \#include \char`\"{}arch/registers.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/kvm/arm\_\-cpu.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/kvm/base.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/Kvm.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/KvmContext.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/KvmInt.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/pseudo\_\-inst.hh\char`\"{}}\par
+\subsection*{マクロ定義}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{arm__cpu_8cc_a4acf47805b45442b26e8b6e79d605c15}{EXTRACT\_\-FIELD}(val, mask, shift)~(((val) \& (mask)) $>$$>$ (shift))
+\item 
+\#define \hyperlink{arm__cpu_8cc_a08258a20944d79f2fb268bf6f7beeb95}{REG\_\-IS\_\-ARM}(id)~(((id) \& KVM\_\-REG\_\-ARCH\_\-MASK) == KVM\_\-REG\_\-ARM)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a3e0331d7bf1a744b32d3191075254941}{REG\_\-IS\_\-32BIT}(id)~(((id) \& KVM\_\-REG\_\-SIZE\_\-MASK) == KVM\_\-REG\_\-SIZE\_\-U32)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a1097c18e780d75ac054db8c1e53a2657}{REG\_\-IS\_\-64BIT}(id)~(((id) \& KVM\_\-REG\_\-SIZE\_\-MASK) == KVM\_\-REG\_\-SIZE\_\-U64)
+\item 
+\#define \hyperlink{arm__cpu_8cc_aeb2d9af20e7a2ced42f5d2f19c5d83d7}{REG\_\-IS\_\-CP}(id, cp)~(((id) \& KVM\_\-REG\_\-ARM\_\-COPROC\_\-MASK) == (cp))
+\item 
+\#define \hyperlink{arm__cpu_8cc_aa7e91b5148acf5a351d7815e16fa0bf8}{REG\_\-IS\_\-CORE}(id)~REG\_\-IS\_\-CP((id), KVM\_\-REG\_\-ARM\_\-CORE)
+\item 
+\#define \hyperlink{arm__cpu_8cc_ad490fb85e238f89a54598782cd4bf50b}{REG\_\-IS\_\-VFP}(id)~REG\_\-IS\_\-CP((id), KVM\_\-REG\_\-ARM\_\-VFP)
+\item 
+\#define \hyperlink{arm__cpu_8cc_ade126f32c8fb662a0d3e2c7bdac569af}{REG\_\-VFP\_\-REG}(id)~((id) \& KVM\_\-REG\_\-ARM\_\-VFP\_\-MASK)
+\item 
+\#define \hyperlink{arm__cpu_8cc_ad051e025a8bffa78ab27e6b465abeaac}{REG\_\-IS\_\-VFP\_\-REG}(id)~(REG\_\-VFP\_\-REG(id) $<$ 0x100)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a7cda932ae135eadc13a1c81c511b0822}{REG\_\-IS\_\-VFP\_\-CTRL}(id)~(REG\_\-VFP\_\-REG(id) $>$= 0x100)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a0b799263d3f1d2edd5f83db512267cfe}{REG\_\-IS\_\-DEMUX}(id)~REG\_\-IS\_\-CP((id), KVM\_\-REG\_\-ARM\_\-DEMUX)
+\item 
+\#define \hyperlink{arm__cpu_8cc_af2e1f8ce1df474e8b1d865da220f4c07}{REG\_\-CORE\_\-IDX}(id)~($\sim$(KVM\_\-REG\_\-ARCH\_\-MASK $|$ KVM\_\-REG\_\-SIZE\_\-MASK $|$ KVM\_\-REG\_\-ARM\_\-CORE))
+\item 
+\#define \hyperlink{arm__cpu_8cc_ab7db84b63493d5c92fcc91122d06c34c}{REG\_\-CP}(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-COPROC\_\-MASK, KVM\_\-REG\_\-ARM\_\-COPROC\_\-SHIFT)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a22e520b9dc551177ebb8e775c09973f7}{REG\_\-CRN}(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-32\_\-CRN\_\-MASK, KVM\_\-REG\_\-ARM\_\-32\_\-CRN\_\-SHIFT)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a7e86f0389e3f4d6f4bd368453c99504e}{REG\_\-OPC1}(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-OPC1\_\-MASK, KVM\_\-REG\_\-ARM\_\-OPC1\_\-SHIFT)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a99640ed19db5d6085479a4e89d3080f9}{REG\_\-CRM}(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-CRM\_\-MASK, KVM\_\-REG\_\-ARM\_\-CRM\_\-SHIFT)
+\item 
+\#define \hyperlink{arm__cpu_8cc_add2f600d92539677b81e95eb878799c2}{REG\_\-OPC2}(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-32\_\-OPC2\_\-MASK, KVM\_\-REG\_\-ARM\_\-32\_\-OPC2\_\-SHIFT)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a46d32c284cc85217eadebd0e4764d6a3}{REG\_\-CP32}(cpnum, crn, opc1, crm, opc2)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a14b7efd1f3242eea73409c64890dfe7c}{REG\_\-CP64}(cpnum, opc1, crm)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a8282a39ad86cc69038c3962b8ddbeaf1}{REG\_\-CORE32}(kname)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a1a94ba00c7e4f2bd1298fccd66681d9e}{REG\_\-VFP32}(regno)
+\item 
+\#define \hyperlink{arm__cpu_8cc_afca2bf33da9ae937eaf6ec22cd126fc7}{REG\_\-VFP64}(regno)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a20e00a65ad1a7642efc77a242085090d}{REG\_\-DEMUX32}(dmxid, val)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a6b12b6e57bcd2b0d7a9a8be3ee7483c5}{INTERRUPT\_\-ID}(type, vcpu, irq)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a4ba9838d143c2908d0df30aee7538146}{INTERRUPT\_\-VCPU\_\-IRQ}(vcpu)~INTERRUPT\_\-ID(KVM\_\-ARM\_\-IRQ\_\-TYPE\_\-CPU, vcpu, KVM\_\-ARM\_\-IRQ\_\-CPU\_\-IRQ)
+\item 
+\#define \hyperlink{arm__cpu_8cc_a6f3141c5d3bd5102d152524db35d1ff1}{INTERRUPT\_\-VCPU\_\-FIQ}(vcpu)~INTERRUPT\_\-ID(KVM\_\-ARM\_\-IRQ\_\-TYPE\_\-CPU, vcpu, KVM\_\-ARM\_\-IRQ\_\-CPU\_\-FIQ)
+\item 
+\#define \hyperlink{arm__cpu_8cc_aecdc8a0dd59d63d8ad1522d43651840a}{COUNT\_\-OF}(l)~(sizeof(l) / sizeof($\ast$l))
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+static const uint64\_\-t \hyperlink{arm__cpu_8cc_add9a7764c265a8eb64db9707d7fe52e3}{KVM\_\-REG64\_\-TTBR0} (REG\_\-CP64(15, 0, 2))
+\item 
+static const uint64\_\-t \hyperlink{arm__cpu_8cc_aca634800fd8c8189f4cb5577c3f59f6e}{KVM\_\-REG64\_\-TTBR1} (REG\_\-CP64(15, 1, 2))
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+static uint64\_\-t \hyperlink{arm__cpu_8cc_aec8c4ed7ddab02f63296ee3431d1583c}{invariant\_\-reg\_\-vector} \mbox{[}$\,$\mbox{]}
+\end{DoxyCompactItemize}
+
+
+\subsection{マクロ定義}
+\hypertarget{arm__cpu_8cc_aecdc8a0dd59d63d8ad1522d43651840a}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!COUNT\_\-OF@{COUNT\_\-OF}}
+\index{COUNT\_\-OF@{COUNT\_\-OF}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{COUNT\_\-OF}]{\setlength{\rightskip}{0pt plus 5cm}\#define COUNT\_\-OF(l)~(sizeof(l) / sizeof($\ast$l))}}
+\label{arm__cpu_8cc_aecdc8a0dd59d63d8ad1522d43651840a}
+\hypertarget{arm__cpu_8cc_a4acf47805b45442b26e8b6e79d605c15}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!EXTRACT\_\-FIELD@{EXTRACT\_\-FIELD}}
+\index{EXTRACT\_\-FIELD@{EXTRACT\_\-FIELD}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{EXTRACT\_\-FIELD}]{\setlength{\rightskip}{0pt plus 5cm}\#define EXTRACT\_\-FIELD(val, \/  mask, \/  shift)~(((val) \& (mask)) $>$$>$ (shift))}}
+\label{arm__cpu_8cc_a4acf47805b45442b26e8b6e79d605c15}
+\hypertarget{arm__cpu_8cc_a6b12b6e57bcd2b0d7a9a8be3ee7483c5}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!INTERRUPT\_\-ID@{INTERRUPT\_\-ID}}
+\index{INTERRUPT\_\-ID@{INTERRUPT\_\-ID}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{INTERRUPT\_\-ID}]{\setlength{\rightskip}{0pt plus 5cm}\#define INTERRUPT\_\-ID(type, \/  vcpu, \/  irq)}}
+\label{arm__cpu_8cc_a6b12b6e57bcd2b0d7a9a8be3ee7483c5}
+{\bfseries 値:}
+\begin{DoxyCode}
+(                    \
+        ((type) << KVM_ARM_IRQ_TYPE_SHIFT) |               \
+        ((vcpu) << KVM_ARM_IRQ_VCPU_SHIFT) |               \
+        ((irq) << KVM_ARM_IRQ_NUM_SHIFT))
+\end{DoxyCode}
+\hypertarget{arm__cpu_8cc_a6f3141c5d3bd5102d152524db35d1ff1}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!INTERRUPT\_\-VCPU\_\-FIQ@{INTERRUPT\_\-VCPU\_\-FIQ}}
+\index{INTERRUPT\_\-VCPU\_\-FIQ@{INTERRUPT\_\-VCPU\_\-FIQ}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{INTERRUPT\_\-VCPU\_\-FIQ}]{\setlength{\rightskip}{0pt plus 5cm}\#define INTERRUPT\_\-VCPU\_\-FIQ(vcpu)~INTERRUPT\_\-ID(KVM\_\-ARM\_\-IRQ\_\-TYPE\_\-CPU, vcpu, KVM\_\-ARM\_\-IRQ\_\-CPU\_\-FIQ)}}
+\label{arm__cpu_8cc_a6f3141c5d3bd5102d152524db35d1ff1}
+\hypertarget{arm__cpu_8cc_a4ba9838d143c2908d0df30aee7538146}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!INTERRUPT\_\-VCPU\_\-IRQ@{INTERRUPT\_\-VCPU\_\-IRQ}}
+\index{INTERRUPT\_\-VCPU\_\-IRQ@{INTERRUPT\_\-VCPU\_\-IRQ}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{INTERRUPT\_\-VCPU\_\-IRQ}]{\setlength{\rightskip}{0pt plus 5cm}\#define INTERRUPT\_\-VCPU\_\-IRQ(vcpu)~INTERRUPT\_\-ID(KVM\_\-ARM\_\-IRQ\_\-TYPE\_\-CPU, vcpu, KVM\_\-ARM\_\-IRQ\_\-CPU\_\-IRQ)}}
+\label{arm__cpu_8cc_a4ba9838d143c2908d0df30aee7538146}
+\hypertarget{arm__cpu_8cc_a8282a39ad86cc69038c3962b8ddbeaf1}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-CORE32@{REG\_\-CORE32}}
+\index{REG\_\-CORE32@{REG\_\-CORE32}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-CORE32}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-CORE32(kname)}}
+\label{arm__cpu_8cc_a8282a39ad86cc69038c3962b8ddbeaf1}
+{\bfseries 値:}
+\begin{DoxyCode}
+(                     \
+        (KVM_REG_ARM | KVM_REG_SIZE_U32) |      \
+        (KVM_REG_ARM_CORE) |                    \
+        (KVM_REG_ARM_CORE_REG(kname)))
+\end{DoxyCode}
+\hypertarget{arm__cpu_8cc_af2e1f8ce1df474e8b1d865da220f4c07}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-CORE\_\-IDX@{REG\_\-CORE\_\-IDX}}
+\index{REG\_\-CORE\_\-IDX@{REG\_\-CORE\_\-IDX}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-CORE\_\-IDX}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-CORE\_\-IDX(id)~($\sim$(KVM\_\-REG\_\-ARCH\_\-MASK $|$ KVM\_\-REG\_\-SIZE\_\-MASK $|$ KVM\_\-REG\_\-ARM\_\-CORE))}}
+\label{arm__cpu_8cc_af2e1f8ce1df474e8b1d865da220f4c07}
+\hypertarget{arm__cpu_8cc_ab7db84b63493d5c92fcc91122d06c34c}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-CP@{REG\_\-CP}}
+\index{REG\_\-CP@{REG\_\-CP}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-CP}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-CP(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-COPROC\_\-MASK, KVM\_\-REG\_\-ARM\_\-COPROC\_\-SHIFT)}}
+\label{arm__cpu_8cc_ab7db84b63493d5c92fcc91122d06c34c}
+\hypertarget{arm__cpu_8cc_a46d32c284cc85217eadebd0e4764d6a3}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-CP32@{REG\_\-CP32}}
+\index{REG\_\-CP32@{REG\_\-CP32}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-CP32}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-CP32(cpnum, \/  crn, \/  opc1, \/  crm, \/  opc2)}}
+\label{arm__cpu_8cc_a46d32c284cc85217eadebd0e4764d6a3}
+{\bfseries 値:}
+\begin{DoxyCode}
+( \
+        (KVM_REG_ARM | KVM_REG_SIZE_U32) |      \
+        ((cpnum) << KVM_REG_ARM_COPROC_SHIFT) | \
+        ((crn) << KVM_REG_ARM_32_CRN_SHIFT) |   \
+        ((opc1) << KVM_REG_ARM_OPC1_SHIFT) |    \
+        ((crm) << KVM_REG_ARM_CRM_SHIFT) |      \
+        ((opc2) << KVM_REG_ARM_32_OPC2_SHIFT))
+\end{DoxyCode}
+\hypertarget{arm__cpu_8cc_a14b7efd1f3242eea73409c64890dfe7c}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-CP64@{REG\_\-CP64}}
+\index{REG\_\-CP64@{REG\_\-CP64}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-CP64}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-CP64(cpnum, \/  opc1, \/  crm)}}
+\label{arm__cpu_8cc_a14b7efd1f3242eea73409c64890dfe7c}
+{\bfseries 値:}
+\begin{DoxyCode}
+(            \
+        (KVM_REG_ARM | KVM_REG_SIZE_U64) |      \
+        ((cpnum) << KVM_REG_ARM_COPROC_SHIFT) | \
+        ((opc1) << KVM_REG_ARM_OPC1_SHIFT) |    \
+        ((crm) << KVM_REG_ARM_CRM_SHIFT))
+\end{DoxyCode}
+\hypertarget{arm__cpu_8cc_a99640ed19db5d6085479a4e89d3080f9}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-CRM@{REG\_\-CRM}}
+\index{REG\_\-CRM@{REG\_\-CRM}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-CRM}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-CRM(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-CRM\_\-MASK, KVM\_\-REG\_\-ARM\_\-CRM\_\-SHIFT)}}
+\label{arm__cpu_8cc_a99640ed19db5d6085479a4e89d3080f9}
+\hypertarget{arm__cpu_8cc_a22e520b9dc551177ebb8e775c09973f7}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-CRN@{REG\_\-CRN}}
+\index{REG\_\-CRN@{REG\_\-CRN}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-CRN}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-CRN(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-32\_\-CRN\_\-MASK, KVM\_\-REG\_\-ARM\_\-32\_\-CRN\_\-SHIFT)}}
+\label{arm__cpu_8cc_a22e520b9dc551177ebb8e775c09973f7}
+\hypertarget{arm__cpu_8cc_a20e00a65ad1a7642efc77a242085090d}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-DEMUX32@{REG\_\-DEMUX32}}
+\index{REG\_\-DEMUX32@{REG\_\-DEMUX32}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-DEMUX32}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-DEMUX32(dmxid, \/  val)}}
+\label{arm__cpu_8cc_a20e00a65ad1a7642efc77a242085090d}
+{\bfseries 値:}
+\begin{DoxyCode}
+(               \
+        (KVM_REG_ARM | KVM_REG_SIZE_U32) |      \
+        (dmxid) | (val))
+\end{DoxyCode}
+\hypertarget{arm__cpu_8cc_a3e0331d7bf1a744b32d3191075254941}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-32BIT@{REG\_\-IS\_\-32BIT}}
+\index{REG\_\-IS\_\-32BIT@{REG\_\-IS\_\-32BIT}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-32BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-32BIT(id)~(((id) \& KVM\_\-REG\_\-SIZE\_\-MASK) == KVM\_\-REG\_\-SIZE\_\-U32)}}
+\label{arm__cpu_8cc_a3e0331d7bf1a744b32d3191075254941}
+\hypertarget{arm__cpu_8cc_a1097c18e780d75ac054db8c1e53a2657}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-64BIT@{REG\_\-IS\_\-64BIT}}
+\index{REG\_\-IS\_\-64BIT@{REG\_\-IS\_\-64BIT}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-64BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-64BIT(id)~(((id) \& KVM\_\-REG\_\-SIZE\_\-MASK) == KVM\_\-REG\_\-SIZE\_\-U64)}}
+\label{arm__cpu_8cc_a1097c18e780d75ac054db8c1e53a2657}
+\hypertarget{arm__cpu_8cc_a08258a20944d79f2fb268bf6f7beeb95}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-ARM@{REG\_\-IS\_\-ARM}}
+\index{REG\_\-IS\_\-ARM@{REG\_\-IS\_\-ARM}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-ARM}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-ARM(id)~(((id) \& KVM\_\-REG\_\-ARCH\_\-MASK) == KVM\_\-REG\_\-ARM)}}
+\label{arm__cpu_8cc_a08258a20944d79f2fb268bf6f7beeb95}
+\hypertarget{arm__cpu_8cc_aa7e91b5148acf5a351d7815e16fa0bf8}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-CORE@{REG\_\-IS\_\-CORE}}
+\index{REG\_\-IS\_\-CORE@{REG\_\-IS\_\-CORE}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-CORE}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-CORE(id)~REG\_\-IS\_\-CP((id), KVM\_\-REG\_\-ARM\_\-CORE)}}
+\label{arm__cpu_8cc_aa7e91b5148acf5a351d7815e16fa0bf8}
+\hypertarget{arm__cpu_8cc_aeb2d9af20e7a2ced42f5d2f19c5d83d7}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-CP@{REG\_\-IS\_\-CP}}
+\index{REG\_\-IS\_\-CP@{REG\_\-IS\_\-CP}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-CP}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-CP(id, \/  cp)~(((id) \& KVM\_\-REG\_\-ARM\_\-COPROC\_\-MASK) == (cp))}}
+\label{arm__cpu_8cc_aeb2d9af20e7a2ced42f5d2f19c5d83d7}
+\hypertarget{arm__cpu_8cc_a0b799263d3f1d2edd5f83db512267cfe}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-DEMUX@{REG\_\-IS\_\-DEMUX}}
+\index{REG\_\-IS\_\-DEMUX@{REG\_\-IS\_\-DEMUX}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-DEMUX}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-DEMUX(id)~REG\_\-IS\_\-CP((id), KVM\_\-REG\_\-ARM\_\-DEMUX)}}
+\label{arm__cpu_8cc_a0b799263d3f1d2edd5f83db512267cfe}
+\hypertarget{arm__cpu_8cc_ad490fb85e238f89a54598782cd4bf50b}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-VFP@{REG\_\-IS\_\-VFP}}
+\index{REG\_\-IS\_\-VFP@{REG\_\-IS\_\-VFP}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-VFP}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-VFP(id)~REG\_\-IS\_\-CP((id), KVM\_\-REG\_\-ARM\_\-VFP)}}
+\label{arm__cpu_8cc_ad490fb85e238f89a54598782cd4bf50b}
+\hypertarget{arm__cpu_8cc_a7cda932ae135eadc13a1c81c511b0822}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-VFP\_\-CTRL@{REG\_\-IS\_\-VFP\_\-CTRL}}
+\index{REG\_\-IS\_\-VFP\_\-CTRL@{REG\_\-IS\_\-VFP\_\-CTRL}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-VFP\_\-CTRL}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-VFP\_\-CTRL(id)~(REG\_\-VFP\_\-REG(id) $>$= 0x100)}}
+\label{arm__cpu_8cc_a7cda932ae135eadc13a1c81c511b0822}
+\hypertarget{arm__cpu_8cc_ad051e025a8bffa78ab27e6b465abeaac}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-IS\_\-VFP\_\-REG@{REG\_\-IS\_\-VFP\_\-REG}}
+\index{REG\_\-IS\_\-VFP\_\-REG@{REG\_\-IS\_\-VFP\_\-REG}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-IS\_\-VFP\_\-REG}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-IS\_\-VFP\_\-REG(id)~(REG\_\-VFP\_\-REG(id) $<$ 0x100)}}
+\label{arm__cpu_8cc_ad051e025a8bffa78ab27e6b465abeaac}
+\hypertarget{arm__cpu_8cc_a7e86f0389e3f4d6f4bd368453c99504e}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-OPC1@{REG\_\-OPC1}}
+\index{REG\_\-OPC1@{REG\_\-OPC1}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-OPC1}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-OPC1(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-OPC1\_\-MASK, KVM\_\-REG\_\-ARM\_\-OPC1\_\-SHIFT)}}
+\label{arm__cpu_8cc_a7e86f0389e3f4d6f4bd368453c99504e}
+\hypertarget{arm__cpu_8cc_add2f600d92539677b81e95eb878799c2}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-OPC2@{REG\_\-OPC2}}
+\index{REG\_\-OPC2@{REG\_\-OPC2}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-OPC2}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-OPC2(id)~EXTRACT\_\-FIELD(id, KVM\_\-REG\_\-ARM\_\-32\_\-OPC2\_\-MASK, KVM\_\-REG\_\-ARM\_\-32\_\-OPC2\_\-SHIFT)}}
+\label{arm__cpu_8cc_add2f600d92539677b81e95eb878799c2}
+\hypertarget{arm__cpu_8cc_a1a94ba00c7e4f2bd1298fccd66681d9e}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-VFP32@{REG\_\-VFP32}}
+\index{REG\_\-VFP32@{REG\_\-VFP32}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-VFP32}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-VFP32(regno)}}
+\label{arm__cpu_8cc_a1a94ba00c7e4f2bd1298fccd66681d9e}
+{\bfseries 値:}
+\begin{DoxyCode}
+(                      \
+        (KVM_REG_ARM | KVM_REG_SIZE_U32) |      \
+        KVM_REG_ARM_VFP | (regno))
+\end{DoxyCode}
+\hypertarget{arm__cpu_8cc_afca2bf33da9ae937eaf6ec22cd126fc7}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-VFP64@{REG\_\-VFP64}}
+\index{REG\_\-VFP64@{REG\_\-VFP64}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-VFP64}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-VFP64(regno)}}
+\label{arm__cpu_8cc_afca2bf33da9ae937eaf6ec22cd126fc7}
+{\bfseries 値:}
+\begin{DoxyCode}
+(                      \
+        (KVM_REG_ARM | KVM_REG_SIZE_U64) |      \
+        KVM_REG_ARM_VFP | (regno))
+\end{DoxyCode}
+\hypertarget{arm__cpu_8cc_ade126f32c8fb662a0d3e2c7bdac569af}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!REG\_\-VFP\_\-REG@{REG\_\-VFP\_\-REG}}
+\index{REG\_\-VFP\_\-REG@{REG\_\-VFP\_\-REG}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{REG\_\-VFP\_\-REG}]{\setlength{\rightskip}{0pt plus 5cm}\#define REG\_\-VFP\_\-REG(id)~((id) \& KVM\_\-REG\_\-ARM\_\-VFP\_\-MASK)}}
+\label{arm__cpu_8cc_ade126f32c8fb662a0d3e2c7bdac569af}
+
+
+\subsection{関数}
+\hypertarget{arm__cpu_8cc_add9a7764c265a8eb64db9707d7fe52e3}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!KVM\_\-REG64\_\-TTBR0@{KVM\_\-REG64\_\-TTBR0}}
+\index{KVM\_\-REG64\_\-TTBR0@{KVM\_\-REG64\_\-TTBR0}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{KVM\_\-REG64\_\-TTBR0}]{\setlength{\rightskip}{0pt plus 5cm}static const uint64\_\-t KVM\_\-REG64\_\-TTBR0 (REG\_\-CP64(15, 0, 2))\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arm__cpu_8cc_add9a7764c265a8eb64db9707d7fe52e3}
+\hypertarget{arm__cpu_8cc_aca634800fd8c8189f4cb5577c3f59f6e}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!KVM\_\-REG64\_\-TTBR1@{KVM\_\-REG64\_\-TTBR1}}
+\index{KVM\_\-REG64\_\-TTBR1@{KVM\_\-REG64\_\-TTBR1}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{KVM\_\-REG64\_\-TTBR1}]{\setlength{\rightskip}{0pt plus 5cm}static const uint64\_\-t KVM\_\-REG64\_\-TTBR1 (REG\_\-CP64(15, 1, 2))\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arm__cpu_8cc_aca634800fd8c8189f4cb5577c3f59f6e}
+
+
+\subsection{変数}
+\hypertarget{arm__cpu_8cc_aec8c4ed7ddab02f63296ee3431d1583c}{
+\index{arm\_\-cpu.cc@{arm\_\-cpu.cc}!invariant\_\-reg\_\-vector@{invariant\_\-reg\_\-vector}}
+\index{invariant\_\-reg\_\-vector@{invariant\_\-reg\_\-vector}!arm_cpu.cc@{arm\_\-cpu.cc}}
+\subsubsection[{invariant\_\-reg\_\-vector}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf invariant\_\-reg\_\-vector}\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arm__cpu_8cc_aec8c4ed7ddab02f63296ee3431d1583c}

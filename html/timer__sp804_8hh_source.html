@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/arm/timer_sp804.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/arm/timer_sp804.hh</h1><a href="timer__sp804_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __DEV_ARM_SP804_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_ARM_SP804_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="amba__device_8hh.html">dev/arm/amba_device.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;params/Sp804.hh&quot;</span>
+<a name="l00045"></a>00045 
+<a name="l00050"></a>00050 <span class="keyword">class </span><a class="code" href="classBaseGic.html">BaseGic</a>;
+<a name="l00051"></a>00051 
+<a name="l00052"></a><a class="code" href="classSp804.html">00052</a> <span class="keyword">class </span><a class="code" href="classSp804.html">Sp804</a> : <span class="keyword">public</span> <a class="code" href="classAmbaPioDevice.html">AmbaPioDevice</a>
+<a name="l00053"></a>00053 {
+<a name="l00054"></a>00054   <span class="keyword">protected</span>:
+<a name="l00055"></a><a class="code" href="classSp804_1_1Timer.html">00055</a>     <span class="keyword">class </span><a class="code" href="classSp804_1_1Timer.html">Timer</a>
+<a name="l00056"></a>00056     {
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058       <span class="keyword">public</span>:
+<a name="l00059"></a>00059         <span class="keyword">enum</span> {
+<a name="l00060"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89af1b4cf2000c66476aa951689a85d5843">00060</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89af1b4cf2000c66476aa951689a85d5843">LoadReg</a>    = 0x00,
+<a name="l00061"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a2a0562a793d401c2e65bcd4ea5bf7aab">00061</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a2a0562a793d401c2e65bcd4ea5bf7aab">CurrentReg</a> = 0x04,
+<a name="l00062"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a794a3f84717e8b4e7c8af89cbe9f7441">00062</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a794a3f84717e8b4e7c8af89cbe9f7441">ControlReg</a> = 0x08,
+<a name="l00063"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89adba6b9695c70b08e0a47bf9b1c0eaeab">00063</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89adba6b9695c70b08e0a47bf9b1c0eaeab">IntClear</a>   = 0x0C,
+<a name="l00064"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89abd636a57d30c6af5f7a2eabb4e4258cd">00064</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89abd636a57d30c6af5f7a2eabb4e4258cd">RawISR</a>     = 0x10,
+<a name="l00065"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a84e908ced233cc8a35eabafa2c2acf93">00065</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a84e908ced233cc8a35eabafa2c2acf93">MaskedISR</a>  = 0x14,
+<a name="l00066"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a880658e75f8f318562e66aca33089115">00066</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89a880658e75f8f318562e66aca33089115">BGLoad</a>     = 0x18,
+<a name="l00067"></a><a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89aff9abf2b1a689f70a77a18da50c01d9f">00067</a>             <a class="code" href="classSp804_1_1Timer.html#a84627a72058502328269676b81780f89aff9abf2b1a689f70a77a18da50c01d9f">Size</a>       = 0x20
+<a name="l00068"></a>00068         };
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070         <a class="code" href="classSp804_1_1Timer.html#a106b41739bf22df3a12501935d39b9f8">BitUnion32</a>(CTRL)
+<a name="l00071"></a>00071             Bitfield&lt;0&gt;   oneShot;
+<a name="l00072"></a><a class="code" href="classSp804_1_1Timer.html#a3952efcfdef8f7aa15b0ebcdbbe4bdd3">00072</a>             Bitfield&lt;1&gt;   <a class="code" href="classSp804_1_1Timer.html#a3952efcfdef8f7aa15b0ebcdbbe4bdd3">timerSize</a>;
+<a name="l00073"></a><a class="code" href="classSp804_1_1Timer.html#afd859e1d86a57cb7711f17ab63ad4646">00073</a>             Bitfield&lt;3,2&gt; <a class="code" href="classSp804_1_1Timer.html#afd859e1d86a57cb7711f17ab63ad4646">timerPrescale</a>;
+<a name="l00074"></a><a class="code" href="classSp804_1_1Timer.html#aa5de02b5e99e1f995e2f01bf8336e224">00074</a>             Bitfield&lt;5&gt;   <a class="code" href="classSp804_1_1Timer.html#aa5de02b5e99e1f995e2f01bf8336e224">intEnable</a>;
+<a name="l00075"></a><a class="code" href="classSp804_1_1Timer.html#aa71cecfa28f348244319827543df9e18">00075</a>             Bitfield&lt;6&gt;   <a class="code" href="classSp804_1_1Timer.html#aa71cecfa28f348244319827543df9e18">timerMode</a>;
+<a name="l00076"></a><a class="code" href="classSp804_1_1Timer.html#ab193f92c9325928a8fbfe941540db1a0">00076</a>             Bitfield&lt;7&gt;   <a class="code" href="classSp804_1_1Timer.html#ab193f92c9325928a8fbfe941540db1a0">timerEnable</a>;
+<a name="l00077"></a><a class="code" href="classSp804_1_1Timer.html#a0e5173aee1e61e68810b199b498223b8">00077</a>         <a class="code" href="bitunion_8hh.html#a2b65fb4c081b1e4853eac07e606060e5">EndBitUnion</a>(CTRL)
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079       protected:
+<a name="l00080"></a>00080         std::<span class="keywordtype">string</span> _name;
+<a name="l00081"></a>00081 
+<a name="l00083"></a>00083         <a class="code" href="classSp804.html">Sp804</a> *<a class="code" href="classSp804_1_1Timer.html#a0e5173aee1e61e68810b199b498223b8">parent</a>;
+<a name="l00084"></a>00084 
+<a name="l00086"></a><a class="code" href="classSp804_1_1Timer.html#a4685f3f9289d179d8e500f7ad5ad20ed">00086</a>         const <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSp804_1_1Timer.html#a4685f3f9289d179d8e500f7ad5ad20ed">intNum</a>;
+<a name="l00087"></a>00087 
+<a name="l00089"></a><a class="code" href="classSp804_1_1Timer.html#a9461588ed360796ba2408cc9e90e0ab8">00089</a>         const <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSp804_1_1Timer.html#a9461588ed360796ba2408cc9e90e0ab8">clock</a>;
+<a name="l00090"></a>00090 
+<a name="l00092"></a><a class="code" href="classSp804_1_1Timer.html#a8e8d336fe93a134873147e3282e103fb">00092</a>         CTRL <a class="code" href="classSp804_1_1Timer.html#a8e8d336fe93a134873147e3282e103fb">control</a>;
+<a name="l00093"></a>00093 
+<a name="l00096"></a><a class="code" href="classSp804_1_1Timer.html#a5f9476d82d9f414dccd9b49558d459bc">00096</a>         <span class="keywordtype">bool</span> <a class="code" href="classSp804_1_1Timer.html#a5f9476d82d9f414dccd9b49558d459bc">rawInt</a>;
+<a name="l00097"></a>00097 
+<a name="l00100"></a><a class="code" href="classSp804_1_1Timer.html#af3f4acf42e0f2210078e61204edbab91">00100</a>         <span class="keywordtype">bool</span> <a class="code" href="classSp804_1_1Timer.html#af3f4acf42e0f2210078e61204edbab91">pendingInt</a>;
+<a name="l00101"></a>00101 
+<a name="l00103"></a><a class="code" href="classSp804_1_1Timer.html#a21dfc3b5f848baeba0be506b5b289485">00103</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSp804_1_1Timer.html#a21dfc3b5f848baeba0be506b5b289485">loadValue</a>;
+<a name="l00104"></a>00104 
+<a name="l00106"></a>00106         <span class="keywordtype">void</span> <a class="code" href="classSp804_1_1Timer.html#ab3116a726a55ac899fa28951b13d7453">counterAtZero</a>();
+<a name="l00107"></a><a class="code" href="classSp804_1_1Timer.html#adc49d182c815493be0b95fda604da5da">00107</a>         <a class="code" href="classEventWrapper.html">EventWrapper</a>&lt;<a class="code" href="classSp804_1_1Timer.html">Timer</a>, &amp;Timer::counterAtZero&gt; <a class="code" href="classSp804_1_1Timer.html#adc49d182c815493be0b95fda604da5da">zeroEvent</a>;
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109       public:
+<a name="l00112"></a>00112         <span class="keywordtype">void</span> <a class="code" href="classSp804_1_1Timer.html#a5e2d72e72192a57c6d3f61a22d1790cc">restartCounter</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00113"></a>00113 
+<a name="l00114"></a>00114         Timer(std::<span class="keywordtype">string</span> __name, <a class="code" href="classSp804.html">Sp804</a> *parent, <span class="keywordtype">int</span> int_num, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> clock);
+<a name="l00115"></a>00115 
+<a name="l00116"></a><a class="code" href="classSp804_1_1Timer.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00116</a>         std::<span class="keywordtype">string</span> <a class="code" href="classSp804_1_1Timer.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _name; }
+<a name="l00117"></a>00117 
+<a name="l00119"></a>00119         <span class="keywordtype">void</span> <a class="code" href="classSp804_1_1Timer.html#a6ecbcc960e1c0cd0a0f4c64e7ae58d14">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr);
+<a name="l00120"></a>00120 
+<a name="l00122"></a>00122         <span class="keywordtype">void</span> <a class="code" href="classSp804_1_1Timer.html#a26d6a1d80de386690a8ad73932f83d96">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr);
+<a name="l00123"></a>00123 
+<a name="l00124"></a>00124         <span class="keywordtype">void</span> <a class="code" href="classSp804_1_1Timer.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00125"></a>00125         <span class="keywordtype">void</span> <a class="code" href="classSp804_1_1Timer.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00126"></a>00126 
+<a name="l00127"></a>00127     };
+<a name="l00128"></a>00128 
+<a name="l00130"></a><a class="code" href="classSp804.html#a2e2266dca56928f63667e994933169ee">00130</a>     <a class="code" href="classBaseGic.html">BaseGic</a> *<a class="code" href="classSp804.html#a2e2266dca56928f63667e994933169ee">gic</a>;
+<a name="l00131"></a>00131 
+<a name="l00133"></a><a class="code" href="classSp804.html#a5a3102d67b545393f0fe81b35f27ee5b">00133</a>     <a class="code" href="classSp804_1_1Timer.html">Timer</a> <a class="code" href="classSp804.html#a5a3102d67b545393f0fe81b35f27ee5b">timer0</a>;
+<a name="l00134"></a><a class="code" href="classSp804.html#aac7d019e29140bad89a32896ddaf7c8d">00134</a>     <a class="code" href="classSp804_1_1Timer.html">Timer</a> <a class="code" href="classSp804.html#aac7d019e29140bad89a32896ddaf7c8d">timer1</a>;
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136   <span class="keyword">public</span>:
+<a name="l00137"></a><a class="code" href="classSp804.html#af822827c8c9baefc6aafbdc713bc2b8d">00137</a>     <span class="keyword">typedef</span> Sp804Params <a class="code" href="classSp804.html#af822827c8c9baefc6aafbdc713bc2b8d">Params</a>;
+<a name="l00138"></a>00138     <span class="keyword">const</span> <a class="code" href="classSp804.html#af822827c8c9baefc6aafbdc713bc2b8d">Params</a> *
+<a name="l00139"></a><a class="code" href="classSp804.html#acd3c3feb78ae7a8f88fe0f110a718dff">00139</a>     <a class="code" href="classSp804.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00140"></a>00140 <span class="keyword">    </span>{
+<a name="l00141"></a>00141         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classSp804.html#af822827c8c9baefc6aafbdc713bc2b8d">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00142"></a>00142     }
+<a name="l00147"></a>00147     <a class="code" href="classSp804.html#a51a53318988df11f161ff4849813bcdd">Sp804</a>(<a class="code" href="classSp804.html#af822827c8c9baefc6aafbdc713bc2b8d">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00148"></a>00148 
+<a name="l00154"></a>00154     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSp804.html#a613ec7d5e1ec64f8d21fec78ae8e568e">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00155"></a>00155 
+<a name="l00161"></a>00161     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSp804.html#a4cefab464e72b5dd42c003a0a4341802">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00162"></a>00162 
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSp804.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00165"></a>00165     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSp804.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00166"></a>00166 };
+<a name="l00167"></a>00167 
+<a name="l00168"></a>00168 
+<a name="l00169"></a>00169 <span class="preprocessor">#endif // __DEV_ARM_SP804_HH__</span>
+<a name="l00170"></a>00170 <span class="preprocessor"></span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

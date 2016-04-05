@@ -1,0 +1,228 @@
+\hypertarget{classInvalidateGenerator}{
+\section{クラス InvalidateGenerator}
+\label{classInvalidateGenerator}\index{InvalidateGenerator@{InvalidateGenerator}}
+}
+
+
+{\ttfamily \#include $<$InvalidateGenerator.hh$>$}InvalidateGeneratorに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classInvalidateGenerator}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef InvalidateGeneratorParams \hyperlink{classInvalidateGenerator_ad11a79a813ce545d94f4464bebc395eb}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classInvalidateGenerator_a84e8459852f9bb78ad76461064c5478c}{InvalidateGenerator} (const \hyperlink{classInvalidateGenerator_ad11a79a813ce545d94f4464bebc395eb}{Params} $\ast$p)
+\item 
+\hyperlink{classInvalidateGenerator_ab35dfa6480e5b8341f6d117e8153f398}{$\sim$InvalidateGenerator} ()
+\item 
+bool \hyperlink{classInvalidateGenerator_a4f5ee6a9e0c2962dfc0b4bb1978e6d28}{initiate} ()
+\item 
+void \hyperlink{classInvalidateGenerator_a8c30329193052bf044bac8ee3e075475}{performCallback} (\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} proc, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} address)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+InvalidateGeneratorStatus \hyperlink{classInvalidateGenerator_a81c972f519d92e29514aaf7c760f38c5}{m\_\-status}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classInvalidateGenerator_aae7af981b728cf3cdda1dd5cf218711a}{m\_\-address}
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classInvalidateGenerator_a7d86dfe779b84de4ee0d62fb99dcb366}{m\_\-active\_\-read\_\-node}
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classInvalidateGenerator_a70d8bdfd0b821d91d725107146f989ad}{m\_\-active\_\-inv\_\-node}
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classInvalidateGenerator_a5953e604e2b5ee3378b20744144b9fda}{m\_\-addr\_\-increment\_\-size}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classInvalidateGenerator_ad11a79a813ce545d94f4464bebc395eb}{
+\index{InvalidateGenerator@{InvalidateGenerator}!Params@{Params}}
+\index{Params@{Params}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef InvalidateGeneratorParams {\bf Params}}}
+\label{classInvalidateGenerator_ad11a79a813ce545d94f4464bebc395eb}
+
+
+\hyperlink{classDirectedGenerator_ac723463fca65df4ca9fb4e67caddf417}{DirectedGenerator}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classInvalidateGenerator_a84e8459852f9bb78ad76461064c5478c}{
+\index{InvalidateGenerator@{InvalidateGenerator}!InvalidateGenerator@{InvalidateGenerator}}
+\index{InvalidateGenerator@{InvalidateGenerator}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{InvalidateGenerator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InvalidateGenerator} (const {\bf Params} $\ast$ {\em p})}}
+\label{classInvalidateGenerator_a84e8459852f9bb78ad76461064c5478c}
+
+
+
+\begin{DoxyCode}
+36     : DirectedGenerator(p)
+37 {
+38     //
+39     // First, issue loads to bring the block into S state
+40     //
+41     m_status = InvalidateGeneratorStatus_Load_Waiting;
+42     m_active_read_node = 0;
+43     m_active_inv_node = 0;
+44     m_address = 0x0;
+45     m_addr_increment_size = p->addr_increment_size;
+46 }
+\end{DoxyCode}
+\hypertarget{classInvalidateGenerator_ab35dfa6480e5b8341f6d117e8153f398}{
+\index{InvalidateGenerator@{InvalidateGenerator}!$\sim$InvalidateGenerator@{$\sim$InvalidateGenerator}}
+\index{$\sim$InvalidateGenerator@{$\sim$InvalidateGenerator}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{$\sim$InvalidateGenerator}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf InvalidateGenerator} ()}}
+\label{classInvalidateGenerator_ab35dfa6480e5b8341f6d117e8153f398}
+
+
+
+\begin{DoxyCode}
+49 {
+50 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classInvalidateGenerator_a4f5ee6a9e0c2962dfc0b4bb1978e6d28}{
+\index{InvalidateGenerator@{InvalidateGenerator}!initiate@{initiate}}
+\index{initiate@{initiate}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{initiate}]{\setlength{\rightskip}{0pt plus 5cm}bool initiate ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classInvalidateGenerator_a4f5ee6a9e0c2962dfc0b4bb1978e6d28}
+
+
+\hyperlink{classDirectedGenerator_a1c6f0032904b7bd7035a5cb7c88a8354}{DirectedGenerator}を実装しています。
+
+
+\begin{DoxyCode}
+54 {
+55     MasterPort* port;
+56     Request::Flags flags;
+57     PacketPtr pkt;
+58     Packet::Command cmd;
+59 
+60     // For simplicity, requests are assumed to be 1 byte-sized
+61     Request *req = new Request(m_address, 1, flags, masterId);
+62 
+63     //
+64     // Based on the current state, issue a load or a store
+65     //
+66     if (m_status == InvalidateGeneratorStatus_Load_Waiting) {
+67         DPRINTF(DirectedTest, "initiating read\n");
+68         cmd = MemCmd::ReadReq;
+69         port = m_directed_tester->getCpuPort(m_active_read_node);
+70         pkt = new Packet(req, cmd);
+71     } else if (m_status == InvalidateGeneratorStatus_Inv_Waiting) {
+72         DPRINTF(DirectedTest, "initiating invalidating write\n");
+73         cmd = MemCmd::WriteReq;
+74         port = m_directed_tester->getCpuPort(m_active_inv_node);
+75         pkt = new Packet(req, cmd);
+76     } else {
+77         panic("initiate was unexpectedly called\n");
+78     }
+79     uint8_t* dummyData = new uint8_t;
+80     *dummyData = 0;
+81     pkt->dataDynamic(dummyData);
+82 
+83     if (port->sendTimingReq(pkt)) {
+84         DPRINTF(DirectedTest, "initiating request - successful\n");
+85         if (m_status == InvalidateGeneratorStatus_Load_Waiting) {
+86             m_status = InvalidateGeneratorStatus_Load_Pending;
+87         } else {
+88             m_status = InvalidateGeneratorStatus_Inv_Pending;
+89         }
+90         return true;
+91     } else {
+92         // If the packet did not issue, must delete
+93         // Note: No need to delete the data, the packet destructor
+94         // will delete it
+95         delete pkt->req;
+96         delete pkt;
+97 
+98         DPRINTF(DirectedTest, "failed to issue request - sequencer not ready\n");
+      
+99         return false;
+100     }
+101 }
+\end{DoxyCode}
+\hypertarget{classInvalidateGenerator_a8c30329193052bf044bac8ee3e075475}{
+\index{InvalidateGenerator@{InvalidateGenerator}!performCallback@{performCallback}}
+\index{performCallback@{performCallback}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{performCallback}]{\setlength{\rightskip}{0pt plus 5cm}void performCallback ({\bf uint32\_\-t} {\em proc}, \/  {\bf Addr} {\em address})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classInvalidateGenerator_a8c30329193052bf044bac8ee3e075475}
+
+
+\hyperlink{classDirectedGenerator_a5aad2098d3cbda728f41beff10faea99}{DirectedGenerator}を実装しています。
+
+
+\begin{DoxyCode}
+105 {
+106     assert(m_address == address);  
+107 
+108     if (m_status == InvalidateGeneratorStatus_Load_Pending) {
+109         assert(m_active_read_node == proc);
+110         m_active_read_node++;
+111         //
+112         // Once all cpus have the block in S state, issue the invalidate
+113         //
+114         if (m_active_read_node == m_num_cpus) {
+115             m_status = InvalidateGeneratorStatus_Inv_Waiting;
+116             m_active_read_node = 0;
+117         } else {
+118             m_status = InvalidateGeneratorStatus_Load_Waiting;
+119         }
+120     } else if (m_status == InvalidateGeneratorStatus_Inv_Pending) {
+121         assert(m_active_inv_node == proc);
+122         m_active_inv_node++;
+123         if (m_active_inv_node == m_num_cpus) {
+124             m_address += m_addr_increment_size;
+125             m_active_inv_node = 0;
+126         }
+127         //
+128         // Invalidate completed, send that info to the tester and restart
+129         // the cycle
+130         //
+131         m_directed_tester->incrementCycleCompletions();
+132         m_status = InvalidateGeneratorStatus_Load_Waiting;
+133     } 
+134     
+135 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classInvalidateGenerator_a70d8bdfd0b821d91d725107146f989ad}{
+\index{InvalidateGenerator@{InvalidateGenerator}!m\_\-active\_\-inv\_\-node@{m\_\-active\_\-inv\_\-node}}
+\index{m\_\-active\_\-inv\_\-node@{m\_\-active\_\-inv\_\-node}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{m\_\-active\_\-inv\_\-node}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} {\bf m\_\-active\_\-inv\_\-node}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInvalidateGenerator_a70d8bdfd0b821d91d725107146f989ad}
+\hypertarget{classInvalidateGenerator_a7d86dfe779b84de4ee0d62fb99dcb366}{
+\index{InvalidateGenerator@{InvalidateGenerator}!m\_\-active\_\-read\_\-node@{m\_\-active\_\-read\_\-node}}
+\index{m\_\-active\_\-read\_\-node@{m\_\-active\_\-read\_\-node}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{m\_\-active\_\-read\_\-node}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} {\bf m\_\-active\_\-read\_\-node}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInvalidateGenerator_a7d86dfe779b84de4ee0d62fb99dcb366}
+\hypertarget{classInvalidateGenerator_a5953e604e2b5ee3378b20744144b9fda}{
+\index{InvalidateGenerator@{InvalidateGenerator}!m\_\-addr\_\-increment\_\-size@{m\_\-addr\_\-increment\_\-size}}
+\index{m\_\-addr\_\-increment\_\-size@{m\_\-addr\_\-increment\_\-size}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{m\_\-addr\_\-increment\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} {\bf m\_\-addr\_\-increment\_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInvalidateGenerator_a5953e604e2b5ee3378b20744144b9fda}
+\hypertarget{classInvalidateGenerator_aae7af981b728cf3cdda1dd5cf218711a}{
+\index{InvalidateGenerator@{InvalidateGenerator}!m\_\-address@{m\_\-address}}
+\index{m\_\-address@{m\_\-address}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{m\_\-address}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf m\_\-address}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInvalidateGenerator_aae7af981b728cf3cdda1dd5cf218711a}
+\hypertarget{classInvalidateGenerator_a81c972f519d92e29514aaf7c760f38c5}{
+\index{InvalidateGenerator@{InvalidateGenerator}!m\_\-status@{m\_\-status}}
+\index{m\_\-status@{m\_\-status}!InvalidateGenerator@{InvalidateGenerator}}
+\subsubsection[{m\_\-status}]{\setlength{\rightskip}{0pt plus 5cm}InvalidateGeneratorStatus {\bf m\_\-status}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInvalidateGenerator_a81c972f519d92e29514aaf7c760f38c5}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/testers/directedtest/\hyperlink{InvalidateGenerator_8hh}{InvalidateGenerator.hh}\item 
+cpu/testers/directedtest/\hyperlink{InvalidateGenerator_8cc}{InvalidateGenerator.cc}\end{DoxyCompactItemize}

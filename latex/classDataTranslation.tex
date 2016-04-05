@@ -1,0 +1,148 @@
+\hypertarget{classDataTranslation}{
+\section{クラス テンプレート DataTranslation$<$ ExecContextPtr $>$}
+\label{classDataTranslation}\index{DataTranslation@{DataTranslation}}
+}
+
+
+{\ttfamily \#include $<$translation.hh$>$}DataTranslation$<$ ExecContextPtr $>$に対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classDataTranslation}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDataTranslation_aa814ed9c851686410c9efd4a3d8c2d53}{DataTranslation} (ExecContextPtr \_\-xc, \hyperlink{classWholeTranslationState}{WholeTranslationState} $\ast$\_\-state)
+\item 
+\hyperlink{classDataTranslation_ae8650a15b755aa7c69728323de568c2c}{DataTranslation} (ExecContextPtr \_\-xc, \hyperlink{classWholeTranslationState}{WholeTranslationState} $\ast$\_\-state, int \_\-index)
+\item 
+void \hyperlink{classDataTranslation_ad1fd11d1e352cfc4b329d29b46a19fc4}{markDelayed} ()
+\item 
+void \hyperlink{classDataTranslation_a01e7d945def8d2e5df87a169954fa89f}{finish} (\hyperlink{classRefCountingPtr}{Fault} fault, \hyperlink{classRequest}{RequestPtr} req, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classBaseTLB_a46c8a310cf4c094f8c80e1cb8dc1f911}{BaseTLB::Mode} mode)
+\item 
+bool \hyperlink{classDataTranslation_af355b62f22559090d6e3047bdf83f24f}{squashed} () const 
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+ExecContextPtr \hyperlink{classDataTranslation_a5a1319d106e664e08fe03cc819c9354d}{xc}
+\item 
+\hyperlink{classWholeTranslationState}{WholeTranslationState} $\ast$ \hyperlink{classDataTranslation_a70366c1ef6f173eb70265992cf6495bf}{state}
+\item 
+int \hyperlink{classDataTranslation_a750b5d744c39a06bfb13e6eb010e35d0}{index}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\subsubsection*{template$<$class ExecContextPtr$>$ class DataTranslation$<$ ExecContextPtr $>$}
+
+This class represents part of a data address translation. All state for the translation is held in \hyperlink{classWholeTranslationState}{WholeTranslationState} (above). Therefore this class does not need to know whether the translation is split or not. The index variable determines this but is simply passed on to the state class. When this part of the translation is completed, finish is called. If the translation state class indicate that the whole translation is complete then the execution context is informed. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classDataTranslation_aa814ed9c851686410c9efd4a3d8c2d53}{
+\index{DataTranslation@{DataTranslation}!DataTranslation@{DataTranslation}}
+\index{DataTranslation@{DataTranslation}!DataTranslation@{DataTranslation}}
+\subsubsection[{DataTranslation}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DataTranslation} (ExecContextPtr {\em \_\-xc}, \/  {\bf WholeTranslationState} $\ast$ {\em \_\-state})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classDataTranslation_aa814ed9c851686410c9efd4a3d8c2d53}
+
+
+
+\begin{DoxyCode}
+227         : xc(_xc), state(_state), index(0)
+228     {
+229     }
+\end{DoxyCode}
+\hypertarget{classDataTranslation_ae8650a15b755aa7c69728323de568c2c}{
+\index{DataTranslation@{DataTranslation}!DataTranslation@{DataTranslation}}
+\index{DataTranslation@{DataTranslation}!DataTranslation@{DataTranslation}}
+\subsubsection[{DataTranslation}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DataTranslation} (ExecContextPtr {\em \_\-xc}, \/  {\bf WholeTranslationState} $\ast$ {\em \_\-state}, \/  int {\em \_\-index})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classDataTranslation_ae8650a15b755aa7c69728323de568c2c}
+
+
+
+\begin{DoxyCode}
+233         : xc(_xc), state(_state), index(_index)
+234     {
+235     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classDataTranslation_a01e7d945def8d2e5df87a169954fa89f}{
+\index{DataTranslation@{DataTranslation}!finish@{finish}}
+\index{finish@{finish}!DataTranslation@{DataTranslation}}
+\subsubsection[{finish}]{\setlength{\rightskip}{0pt plus 5cm}void finish ({\bf Fault} {\em fault}, \/  {\bf RequestPtr} {\em req}, \/  {\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf BaseTLB::Mode} {\em mode})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classDataTranslation_a01e7d945def8d2e5df87a169954fa89f}
+Finish this part of the translation and indicate that the whole translation is complete if the state says so. 
+
+\hyperlink{classBaseTLB_1_1Translation_a5698e0a932f298729d10355d4384e565}{Translation}を実装しています。
+
+
+\begin{DoxyCode}
+254     {
+255         assert(state);
+256         assert(mode == state->mode);
+257         if (state->finish(fault, index)) {
+258             if (state->getFault() == NoFault) {
+259                 // Don't access the request if faulted (due to squash)
+260                 req->setTranslateLatency();
+261             }
+262             xc->finishTranslation(state);
+263         }
+264         delete this;
+265     }
+\end{DoxyCode}
+\hypertarget{classDataTranslation_ad1fd11d1e352cfc4b329d29b46a19fc4}{
+\index{DataTranslation@{DataTranslation}!markDelayed@{markDelayed}}
+\index{markDelayed@{markDelayed}!DataTranslation@{DataTranslation}}
+\subsubsection[{markDelayed}]{\setlength{\rightskip}{0pt plus 5cm}void markDelayed ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classDataTranslation_ad1fd11d1e352cfc4b329d29b46a19fc4}
+Signal the translation state that the translation has been delayed due to a hw page table walk. Split requests are transparently handled. 
+
+\hyperlink{classBaseTLB_1_1Translation_ab88d5e1938190b55d7859d5cc4d10446}{Translation}を実装しています。
+
+
+\begin{DoxyCode}
+243     {
+244         state->delay = true;
+245     }
+\end{DoxyCode}
+\hypertarget{classDataTranslation_af355b62f22559090d6e3047bdf83f24f}{
+\index{DataTranslation@{DataTranslation}!squashed@{squashed}}
+\index{squashed@{squashed}!DataTranslation@{DataTranslation}}
+\subsubsection[{squashed}]{\setlength{\rightskip}{0pt plus 5cm}bool squashed () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classDataTranslation_af355b62f22559090d6e3047bdf83f24f}
+This function is used by the page table walker to determine if it should translate the a pending request or if the underlying request has been squashed. @ return Is the instruction that requested this translation squashed? 
+
+\hyperlink{classBaseTLB_1_1Translation_a1c71e1db7a83ffde808111e2b1cec6c6}{Translation}を再定義しています。
+
+
+\begin{DoxyCode}
+269     {
+270         return xc->isSquashed();
+271     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classDataTranslation_a750b5d744c39a06bfb13e6eb010e35d0}{
+\index{DataTranslation@{DataTranslation}!index@{index}}
+\index{index@{index}!DataTranslation@{DataTranslation}}
+\subsubsection[{index}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf index}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classDataTranslation_a750b5d744c39a06bfb13e6eb010e35d0}
+\hypertarget{classDataTranslation_a70366c1ef6f173eb70265992cf6495bf}{
+\index{DataTranslation@{DataTranslation}!state@{state}}
+\index{state@{state}!DataTranslation@{DataTranslation}}
+\subsubsection[{state}]{\setlength{\rightskip}{0pt plus 5cm}{\bf WholeTranslationState}$\ast$ {\bf state}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classDataTranslation_a70366c1ef6f173eb70265992cf6495bf}
+\hypertarget{classDataTranslation_a5a1319d106e664e08fe03cc819c9354d}{
+\index{DataTranslation@{DataTranslation}!xc@{xc}}
+\index{xc@{xc}!DataTranslation@{DataTranslation}}
+\subsubsection[{xc}]{\setlength{\rightskip}{0pt plus 5cm}ExecContextPtr {\bf xc}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classDataTranslation_a5a1319d106e664e08fe03cc819c9354d}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/\hyperlink{translation_8hh}{translation.hh}\end{DoxyCompactItemize}

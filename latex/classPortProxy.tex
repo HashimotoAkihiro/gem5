@@ -1,0 +1,201 @@
+\hypertarget{classPortProxy}{
+\section{クラス PortProxy}
+\label{classPortProxy}\index{PortProxy@{PortProxy}}
+}
+
+
+{\ttfamily \#include $<$port\_\-proxy.hh$>$}PortProxyに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classPortProxy}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPortProxy_a832d66d0a463df34b58086c504afe729}{PortProxy} (\hyperlink{classMasterPort}{MasterPort} \&port, unsigned int cacheLineSize)
+\item 
+virtual \hyperlink{classPortProxy_a6c560a846e834d2c908fb390eecf420d}{$\sim$PortProxy} ()
+\item 
+virtual void \hyperlink{classPortProxy_ad63586ad1fa7fd707ea7e03665c25502}{readBlob} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, uint8\_\-t $\ast$p, int size) const 
+\item 
+virtual void \hyperlink{classPortProxy_af68c0d93cdb9ff9c4df789c4c9029709}{writeBlob} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, uint8\_\-t $\ast$p, int size) const 
+\item 
+virtual void \hyperlink{classPortProxy_ad68c64ee0acd471129b53bbfd59a2f9a}{memsetBlob} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, uint8\_\-t v, int size) const 
+\item 
+{\footnotesize template$<$typename T $>$ }\\T \hyperlink{classPortProxy_adf1f83afbd5cc115dfb7b36d85c6c0f4}{read} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} address) const 
+\item 
+{\footnotesize template$<$typename T $>$ }\\void \hyperlink{classPortProxy_ab308283d9164c7743ad1cb192a3f2e14}{write} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} address, T data) const 
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classPortProxy_af1e843344eae366925dc9e05757a901d}{blobHelper} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, uint8\_\-t $\ast$p, int size, \hyperlink{classMemCmd}{MemCmd} cmd) const 
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classMasterPort}{MasterPort} \& \hyperlink{classPortProxy_a670fb48d4e7284a258fb4ab405d2fba3}{\_\-port}
+\item 
+const unsigned int \hyperlink{classPortProxy_a6e1b97389f603fc046fbb42ba91136e2}{\_\-cacheLineSize}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+This object is a proxy for a structural port, to be used for debug accesses.
+
+This proxy object is used when non structural entities (e.g. thread contexts, object file loaders) need access to the memory system. It calls the corresponding functions on the underlying structural port, and provides templatized convenience access functions.
+
+The addresses are interpreted as physical addresses.
+
+\begin{DoxySeeAlso}{参照}
+SETranslatingProxy 
+
+FSTranslatingProxy 
+\end{DoxySeeAlso}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPortProxy_a832d66d0a463df34b58086c504afe729}{
+\index{PortProxy@{PortProxy}!PortProxy@{PortProxy}}
+\index{PortProxy@{PortProxy}!PortProxy@{PortProxy}}
+\subsubsection[{PortProxy}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PortProxy} ({\bf MasterPort} \& {\em port}, \/  unsigned int {\em cacheLineSize})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPortProxy_a832d66d0a463df34b58086c504afe729}
+
+
+
+\begin{DoxyCode}
+97                                                             :
+98         _port(port), _cacheLineSize(cacheLineSize) { }
+    virtual ~PortProxy() { }
+\end{DoxyCode}
+\hypertarget{classPortProxy_a6c560a846e834d2c908fb390eecf420d}{
+\index{PortProxy@{PortProxy}!$\sim$PortProxy@{$\sim$PortProxy}}
+\index{$\sim$PortProxy@{$\sim$PortProxy}!PortProxy@{PortProxy}}
+\subsubsection[{$\sim$PortProxy}]{\setlength{\rightskip}{0pt plus 5cm}virtual $\sim${\bf PortProxy} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classPortProxy_a6c560a846e834d2c908fb390eecf420d}
+
+
+
+\begin{DoxyCode}
+99 { }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPortProxy_af1e843344eae366925dc9e05757a901d}{
+\index{PortProxy@{PortProxy}!blobHelper@{blobHelper}}
+\index{blobHelper@{blobHelper}!PortProxy@{PortProxy}}
+\subsubsection[{blobHelper}]{\setlength{\rightskip}{0pt plus 5cm}void blobHelper ({\bf Addr} {\em addr}, \/  uint8\_\-t $\ast$ {\em p}, \/  int {\em size}, \/  {\bf MemCmd} {\em cmd}) const\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPortProxy_af1e843344eae366925dc9e05757a901d}
+
+
+
+\begin{DoxyCode}
+45 {
+46     Request req;
+47 
+48     for (ChunkGenerator gen(addr, size, _cacheLineSize);
+49          !gen.done(); gen.next()) {
+50         req.setPhys(gen.addr(), gen.size(), 0, Request::funcMasterId);
+51         Packet pkt(&req, cmd);
+52         pkt.dataStatic(p);
+53         _port.sendFunctional(&pkt);
+54         p += gen.size();
+55     }
+56 }
+\end{DoxyCode}
+\hypertarget{classPortProxy_ad68c64ee0acd471129b53bbfd59a2f9a}{
+\index{PortProxy@{PortProxy}!memsetBlob@{memsetBlob}}
+\index{memsetBlob@{memsetBlob}!PortProxy@{PortProxy}}
+\subsubsection[{memsetBlob}]{\setlength{\rightskip}{0pt plus 5cm}void memsetBlob ({\bf Addr} {\em addr}, \/  uint8\_\-t {\em v}, \/  int {\em size}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPortProxy_ad68c64ee0acd471129b53bbfd59a2f9a}
+Fill size bytes starting at addr with byte value val. 
+
+\hyperlink{classFSTranslatingPortProxy_aaaf1f49b0b6f48f1af72af03caf7fef7}{FSTranslatingPortProxy}, と \hyperlink{classSETranslatingPortProxy_ab8c719f72992ac0e0b2b9a2c464a1456}{SETranslatingPortProxy}で再定義されています。
+
+
+\begin{DoxyCode}
+60 {
+61     // quick and dirty...
+62     uint8_t *buf = new uint8_t[size];
+63 
+64     std::memset(buf, v, size);
+65     blobHelper(addr, buf, size, MemCmd::WriteReq);
+66 
+67     delete [] buf;
+68 }
+\end{DoxyCode}
+\hypertarget{classPortProxy_adf1f83afbd5cc115dfb7b36d85c6c0f4}{
+\index{PortProxy@{PortProxy}!read@{read}}
+\index{read@{read}!PortProxy@{PortProxy}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}T read ({\bf Addr} {\em address}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPortProxy_adf1f83afbd5cc115dfb7b36d85c6c0f4}
+Read sizeof(T) bytes from address and return as object T. 
+
+
+\begin{DoxyCode}
+151 {
+152     T data;
+153     readBlob(address, (uint8_t*)&data, sizeof(T));
+154     return data;
+155 }
+\end{DoxyCode}
+\hypertarget{classPortProxy_ad63586ad1fa7fd707ea7e03665c25502}{
+\index{PortProxy@{PortProxy}!readBlob@{readBlob}}
+\index{readBlob@{readBlob}!PortProxy@{PortProxy}}
+\subsubsection[{readBlob}]{\setlength{\rightskip}{0pt plus 5cm}virtual void readBlob ({\bf Addr} {\em addr}, \/  uint8\_\-t $\ast$ {\em p}, \/  int {\em size}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classPortProxy_ad63586ad1fa7fd707ea7e03665c25502}
+Read size bytes memory at address and store in p. 
+
+\hyperlink{classFSTranslatingPortProxy_a5580fe869fe8ffcffe2660eaa2c6276a}{FSTranslatingPortProxy}, と \hyperlink{classSETranslatingPortProxy_a5580fe869fe8ffcffe2660eaa2c6276a}{SETranslatingPortProxy}で再定義されています。
+
+
+\begin{DoxyCode}
+105     { blobHelper(addr, p, size, MemCmd::ReadReq); }
+\end{DoxyCode}
+\hypertarget{classPortProxy_ab308283d9164c7743ad1cb192a3f2e14}{
+\index{PortProxy@{PortProxy}!write@{write}}
+\index{write@{write}!PortProxy@{PortProxy}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}void write ({\bf Addr} {\em address}, \/  T {\em data}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPortProxy_ab308283d9164c7743ad1cb192a3f2e14}
+Write object T to address. Writes sizeof(T) bytes. 
+
+
+\begin{DoxyCode}
+160 {
+161     writeBlob(address, (uint8_t*)&data, sizeof(T));
+162 }
+\end{DoxyCode}
+\hypertarget{classPortProxy_af68c0d93cdb9ff9c4df789c4c9029709}{
+\index{PortProxy@{PortProxy}!writeBlob@{writeBlob}}
+\index{writeBlob@{writeBlob}!PortProxy@{PortProxy}}
+\subsubsection[{writeBlob}]{\setlength{\rightskip}{0pt plus 5cm}virtual void writeBlob ({\bf Addr} {\em addr}, \/  uint8\_\-t $\ast$ {\em p}, \/  int {\em size}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classPortProxy_af68c0d93cdb9ff9c4df789c4c9029709}
+Write size bytes from p to address. 
+
+\hyperlink{classFSTranslatingPortProxy_ad2a72c978fca534c6afc8b0f6ac2fe19}{FSTranslatingPortProxy}, と \hyperlink{classSETranslatingPortProxy_ad2a72c978fca534c6afc8b0f6ac2fe19}{SETranslatingPortProxy}で再定義されています。
+
+
+\begin{DoxyCode}
+111     { blobHelper(addr, p, size, MemCmd::WriteReq); }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPortProxy_a6e1b97389f603fc046fbb42ba91136e2}{
+\index{PortProxy@{PortProxy}!\_\-cacheLineSize@{\_\-cacheLineSize}}
+\index{\_\-cacheLineSize@{\_\-cacheLineSize}!PortProxy@{PortProxy}}
+\subsubsection[{\_\-cacheLineSize}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned int {\bf \_\-cacheLineSize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPortProxy_a6e1b97389f603fc046fbb42ba91136e2}
+Granularity of any transactions issued through this proxy. \hypertarget{classPortProxy_a670fb48d4e7284a258fb4ab405d2fba3}{
+\index{PortProxy@{PortProxy}!\_\-port@{\_\-port}}
+\index{\_\-port@{\_\-port}!PortProxy@{PortProxy}}
+\subsubsection[{\_\-port}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MasterPort}\& {\bf \_\-port}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPortProxy_a670fb48d4e7284a258fb4ab405d2fba3}
+The actual physical port used by this proxy. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/\hyperlink{port__proxy_8hh}{port\_\-proxy.hh}\item 
+mem/\hyperlink{port__proxy_8cc}{port\_\-proxy.cc}\end{DoxyCompactItemize}

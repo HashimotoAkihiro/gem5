@@ -1,0 +1,107 @@
+\hypertarget{eventq_8cc}{
+\section{sim/eventq.cc}
+\label{eventq_8cc}\index{sim/eventq.cc@{sim/eventq.cc}}
+}
+{\ttfamily \#include $<$cassert$>$}\par
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include \char`\"{}base/hashmap.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/smt.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/Config.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/core.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/eventq\_\-impl.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classEventQueue}{EventQueue} $\ast$ \hyperlink{eventq_8cc_a5b4fbd623a1babda7d35802241f5f6cf}{getEventQueue} (\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} index)
+\item 
+void \hyperlink{eventq_8cc_afa9cf950f7afca6dc9b1fc2328df2d43}{dumpMainQueue} ()
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{eventq_8cc_a1184f025d31220089a3af9dfc6eeb4d4}{simQuantum} = 0
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{eventq_8cc_a0cb37c490e14c37cdcc040c2392feda1}{numMainEventQueues} = 0
+\begin{DoxyCompactList}\small\item\em Current number of allocated main event queues. \item\end{DoxyCompactList}\item 
+\hyperlink{classstd_1_1vector}{vector}$<$ \hyperlink{classEventQueue}{EventQueue} $\ast$ $>$ \hyperlink{eventq_8cc_a304cfaba7d9f7d70b0f766f8a28267db}{mainEventQueue}
+\begin{DoxyCompactList}\small\item\em Array for main event queues. \item\end{DoxyCompactList}\item 
+\_\-\_\-thread \hyperlink{classEventQueue}{EventQueue} $\ast$ \hyperlink{eventq_8cc_a2a77d1fcaf54c702b80ae9c02d588333}{\_\-curEventQueue} = NULL
+\item 
+bool \hyperlink{eventq_8cc_a1a48f421470ff3e6db2b119ab1286b96}{inParallelMode} = false
+\begin{DoxyCompactList}\small\item\em Current mode of execution: parallel / serial. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{eventq_8cc_afa9cf950f7afca6dc9b1fc2328df2d43}{
+\index{eventq.cc@{eventq.cc}!dumpMainQueue@{dumpMainQueue}}
+\index{dumpMainQueue@{dumpMainQueue}!eventq.cc@{eventq.cc}}
+\subsubsection[{dumpMainQueue}]{\setlength{\rightskip}{0pt plus 5cm}void dumpMainQueue ()}}
+\label{eventq_8cc_afa9cf950f7afca6dc9b1fc2328df2d43}
+
+
+
+\begin{DoxyCode}
+416 {
+417     for (uint32_t i = 0; i < numMainEventQueues; ++i) {
+418         mainEventQueue[i]->dump();
+419     }
+420 }
+\end{DoxyCode}
+\hypertarget{eventq_8cc_a5b4fbd623a1babda7d35802241f5f6cf}{
+\index{eventq.cc@{eventq.cc}!getEventQueue@{getEventQueue}}
+\index{getEventQueue@{getEventQueue}!eventq.cc@{eventq.cc}}
+\subsubsection[{getEventQueue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EventQueue}$\ast$ getEventQueue ({\bf uint32\_\-t} {\em index})}}
+\label{eventq_8cc_a5b4fbd623a1babda7d35802241f5f6cf}
+Function for returning eventq queue for the provided index. The function allocates a new queue in case one does not exist for the index, provided that the index is with in bounds. 
+
+
+\begin{DoxyCode}
+65 {
+66     while (numMainEventQueues <= index) {
+67         numMainEventQueues++;
+68         mainEventQueue.push_back(
+69             new EventQueue(csprintf("MainEventQueue-%d", index)));
+70     }
+71 
+72     return mainEventQueue[index];
+73 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{eventq_8cc_a2a77d1fcaf54c702b80ae9c02d588333}{
+\index{eventq.cc@{eventq.cc}!\_\-curEventQueue@{\_\-curEventQueue}}
+\index{\_\-curEventQueue@{\_\-curEventQueue}!eventq.cc@{eventq.cc}}
+\subsubsection[{\_\-curEventQueue}]{\setlength{\rightskip}{0pt plus 5cm}\_\-\_\-thread {\bf EventQueue}$\ast$ {\bf \_\-curEventQueue} = NULL}}
+\label{eventq_8cc_a2a77d1fcaf54c702b80ae9c02d588333}
+The current event queue for the running thread. Access to this queue does not require any locking from the thread. \hypertarget{eventq_8cc_a1a48f421470ff3e6db2b119ab1286b96}{
+\index{eventq.cc@{eventq.cc}!inParallelMode@{inParallelMode}}
+\index{inParallelMode@{inParallelMode}!eventq.cc@{eventq.cc}}
+\subsubsection[{inParallelMode}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf inParallelMode} = false}}
+\label{eventq_8cc_a1a48f421470ff3e6db2b119ab1286b96}
+
+
+Current mode of execution: parallel / serial. \hypertarget{eventq_8cc_a304cfaba7d9f7d70b0f766f8a28267db}{
+\index{eventq.cc@{eventq.cc}!mainEventQueue@{mainEventQueue}}
+\index{mainEventQueue@{mainEventQueue}!eventq.cc@{eventq.cc}}
+\subsubsection[{mainEventQueue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf vector}$<${\bf EventQueue} $\ast$$>$ {\bf mainEventQueue}}}
+\label{eventq_8cc_a304cfaba7d9f7d70b0f766f8a28267db}
+
+
+Array for main event queues. \hypertarget{eventq_8cc_a0cb37c490e14c37cdcc040c2392feda1}{
+\index{eventq.cc@{eventq.cc}!numMainEventQueues@{numMainEventQueues}}
+\index{numMainEventQueues@{numMainEventQueues}!eventq.cc@{eventq.cc}}
+\subsubsection[{numMainEventQueues}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} {\bf numMainEventQueues} = 0}}
+\label{eventq_8cc_a0cb37c490e14c37cdcc040c2392feda1}
+
+
+Current number of allocated main event queues. \hypertarget{eventq_8cc_a1184f025d31220089a3af9dfc6eeb4d4}{
+\index{eventq.cc@{eventq.cc}!simQuantum@{simQuantum}}
+\index{simQuantum@{simQuantum}!eventq.cc@{eventq.cc}}
+\subsubsection[{simQuantum}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} {\bf simQuantum} = 0}}
+\label{eventq_8cc_a1184f025d31220089a3af9dfc6eeb4d4}
+Simulation Quantum for multiple eventq simulation. The quantum value is the period length after which the queues synchronize themselves with each other. This means that any event to scheduled on Queue A which is generated by an event on Queue B should be at least simQuantum ticks away in future. 

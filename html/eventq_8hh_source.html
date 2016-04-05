@@ -1,0 +1,588 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: sim/eventq.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>sim/eventq.hh</h1><a href="eventq_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2000-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * Copyright (c) 2013 Mark D. Hill and David A. Wood</span>
+<a name="l00005"></a>00005 <span class="comment"> * All rights reserved.</span>
+<a name="l00006"></a>00006 <span class="comment"> *</span>
+<a name="l00007"></a>00007 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00008"></a>00008 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00009"></a>00009 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00011"></a>00011 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00012"></a>00012 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00013"></a>00013 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00014"></a>00014 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00015"></a>00015 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00016"></a>00016 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00017"></a>00017 <span class="comment"> *</span>
+<a name="l00018"></a>00018 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00019"></a>00019 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00020"></a>00020 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00021"></a>00021 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00022"></a>00022 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00023"></a>00023 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00024"></a>00024 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00025"></a>00025 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00026"></a>00026 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00027"></a>00027 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00028"></a>00028 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00029"></a>00029 <span class="comment"> *</span>
+<a name="l00030"></a>00030 <span class="comment"> * Authors: Steve Reinhardt</span>
+<a name="l00031"></a>00031 <span class="comment"> *          Nathan Binkert</span>
+<a name="l00032"></a>00032 <span class="comment"> */</span>
+<a name="l00033"></a>00033 
+<a name="l00034"></a>00034 <span class="comment">/* @file</span>
+<a name="l00035"></a>00035 <span class="comment"> * EventQueue interfaces</span>
+<a name="l00036"></a>00036 <span class="comment"> */</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#ifndef __SIM_EVENTQ_HH__</span>
+<a name="l00039"></a>00039 <span class="preprocessor"></span><span class="preprocessor">#define __SIM_EVENTQ_HH__</span>
+<a name="l00040"></a>00040 <span class="preprocessor"></span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &lt;algorithm&gt;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &lt;cassert&gt;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &lt;climits&gt;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &lt;iosfwd&gt;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &lt;mutex&gt;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="flags_8hh.html">base/flags.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="base_2misc_8hh.html">base/misc.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;debug/Event.hh&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="serialize_8hh.html">sim/serialize.hh</a>&quot;</span>
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="keyword">class </span><a class="code" href="classEventQueue.html">EventQueue</a>;       <span class="comment">// forward declaration</span>
+<a name="l00055"></a>00055 <span class="keyword">class </span><a class="code" href="classBaseGlobalEvent.html">BaseGlobalEvent</a>;
+<a name="l00056"></a>00056 
+<a name="l00062"></a>00062 <span class="keyword">extern</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="eventq_8cc.html#a1184f025d31220089a3af9dfc6eeb4d4">simQuantum</a>;
+<a name="l00063"></a>00063 
+<a name="l00065"></a>00065 <span class="keyword">extern</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="eventq_8cc.html#a0cb37c490e14c37cdcc040c2392feda1" title="Current number of allocated main event queues.">numMainEventQueues</a>;
+<a name="l00066"></a>00066 
+<a name="l00068"></a>00068 <span class="keyword">extern</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;EventQueue *&gt;</a> <a class="code" href="eventq_8cc.html#a304cfaba7d9f7d70b0f766f8a28267db" title="Array for main event queues.">mainEventQueue</a>;
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070 <span class="preprocessor">#ifndef SWIG</span>
+<a name="l00073"></a>00073 <span class="preprocessor"></span>
+<a name="l00074"></a>00074 <span class="preprocessor"></span><span class="keyword">extern</span> __thread <a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="eventq_8cc.html#a2a77d1fcaf54c702b80ae9c02d588333">_curEventQueue</a>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076 <span class="preprocessor">#endif</span>
+<a name="l00077"></a>00077 <span class="preprocessor"></span>
+<a name="l00079"></a>00079 <span class="keyword">extern</span> <span class="keywordtype">bool</span> <a class="code" href="eventq_8cc.html#a1a48f421470ff3e6db2b119ab1286b96" title="Current mode of execution: parallel / serial.">inParallelMode</a>;
+<a name="l00080"></a>00080 
+<a name="l00085"></a>00085 <a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="namespacem5_1_1event.html#ad99027ec643e20cbd3364b65c1ad8604">getEventQueue</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>);
+<a name="l00086"></a>00086 
+<a name="l00087"></a><a class="code" href="eventq_8hh.html#a64a8603a1af7020a19d30c54152fdcb2">00087</a> <span class="keyword">inline</span> <a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="eventq_8hh.html#a64a8603a1af7020a19d30c54152fdcb2">curEventQueue</a>() { <span class="keywordflow">return</span> <a class="code" href="eventq_8cc.html#a2a77d1fcaf54c702b80ae9c02d588333">_curEventQueue</a>; }
+<a name="l00088"></a><a class="code" href="eventq_8hh.html#aa002a8d75c873915e60d96ac255f9df7">00088</a> <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="eventq_8hh.html#a64a8603a1af7020a19d30c54152fdcb2">curEventQueue</a>(<a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="namespaceArmISA.html#a853401ad1c480843ad53caaa0198fd05">q</a>) { <a class="code" href="eventq_8cc.html#a2a77d1fcaf54c702b80ae9c02d588333">_curEventQueue</a> = q; }
+<a name="l00089"></a>00089 
+<a name="l00095"></a><a class="code" href="classEventBase.html">00095</a> <span class="keyword">class </span><a class="code" href="classEventBase.html">EventBase</a>
+<a name="l00096"></a>00096 {
+<a name="l00097"></a>00097   <span class="keyword">protected</span>:   
+<a name="l00098"></a><a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">00098</a>     <span class="keyword">typedef</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a>;
+<a name="l00099"></a><a class="code" href="classEventBase.html#ad6cda6b0b8d7ddfbf8e769082577b482">00099</a>     typedef ::Flags&lt;FlagsType&gt; <a class="code" href="classFlags.html">Flags</a>;
+<a name="l00100"></a>00100 
+<a name="l00101"></a><a class="code" href="classEventBase.html#a7e97bb94f1684b43dd97c646cfdeefd7">00101</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#a7e97bb94f1684b43dd97c646cfdeefd7">PublicRead</a>    = 0x003f; <span class="comment">// public readable flags</span>
+<a name="l00102"></a><a class="code" href="classEventBase.html#afabddde79b1b676b2e1738700aaf08af">00102</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#afabddde79b1b676b2e1738700aaf08af">PublicWrite</a>   = 0x001d; <span class="comment">// public writable flags</span>
+<a name="l00103"></a><a class="code" href="classEventBase.html#aa538a6b12172092ac14b1c53ed0b5623">00103</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#aa538a6b12172092ac14b1c53ed0b5623">Squashed</a>      = 0x0001; <span class="comment">// has been squashed</span>
+<a name="l00104"></a><a class="code" href="classEventBase.html#ac1b50e524ba5bdbd010654eae3ef982b">00104</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#ac1b50e524ba5bdbd010654eae3ef982b">Scheduled</a>     = 0x0002; <span class="comment">// has been scheduled</span>
+<a name="l00105"></a><a class="code" href="classEventBase.html#a54ba74dbb445f08c349fc85154f58b97">00105</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#a54ba74dbb445f08c349fc85154f58b97">AutoDelete</a>    = 0x0004; <span class="comment">// delete after dispatch</span>
+<a name="l00106"></a><a class="code" href="classEventBase.html#ab0020d618271fa7867d0cf1373b325a9">00106</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#ab0020d618271fa7867d0cf1373b325a9">AutoSerialize</a> = 0x0008; <span class="comment">// must be serialized</span>
+<a name="l00107"></a><a class="code" href="classEventBase.html#a9d51d37203d97fcdc8bc0141dfc00886">00107</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#a9d51d37203d97fcdc8bc0141dfc00886">IsExitEvent</a>   = 0x0010; <span class="comment">// special exit event</span>
+<a name="l00108"></a><a class="code" href="classEventBase.html#a3ab0ae5852588928a5c60a6543a3db49">00108</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#a3ab0ae5852588928a5c60a6543a3db49">IsMainQueue</a>   = 0x0020; <span class="comment">// on main event queue</span>
+<a name="l00109"></a><a class="code" href="classEventBase.html#a611b43eb08ae22242d90519aead42966">00109</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#a611b43eb08ae22242d90519aead42966">Initialized</a>   = 0x7a40; <span class="comment">// somewhat random bits</span>
+<a name="l00110"></a><a class="code" href="classEventBase.html#aafaad8a39b48a0343a743d9ce8a1f977">00110</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#ad01d22e048b90a29dcd44109f5fc4c5e">FlagsType</a> <a class="code" href="classEventBase.html#aafaad8a39b48a0343a743d9ce8a1f977">InitMask</a>      = 0xffc0; <span class="comment">// mask for init bits</span>
+<a name="l00111"></a>00111 
+<a name="l00112"></a>00112   <span class="keyword">public</span>:
+<a name="l00113"></a><a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">00113</a>     <span class="keyword">typedef</span> int8_t <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a>;
+<a name="l00114"></a>00114 
+<a name="l00119"></a>00119 
+<a name="l00121"></a><a class="code" href="classEventBase.html#a3a053d2c68a342c1eac8399a161e388f">00121</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a3a053d2c68a342c1eac8399a161e388f" title="Minimum priority.">Minimum_Pri</a> =          SCHAR_MIN;
+<a name="l00122"></a>00122 
+<a name="l00126"></a><a class="code" href="classEventBase.html#a55b52d71f23a2cf65f4ebfbfe09fef1e">00126</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a55b52d71f23a2cf65f4ebfbfe09fef1e">Debug_Enable_Pri</a> =          -101;
+<a name="l00127"></a>00127 
+<a name="l00131"></a><a class="code" href="classEventBase.html#a79f47bb016cd59600d9ed498208e1b07">00131</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a79f47bb016cd59600d9ed498208e1b07">Debug_Break_Pri</a> =           -100;
+<a name="l00132"></a>00132 
+<a name="l00137"></a><a class="code" href="classEventBase.html#abd37284b13fd2e86cae48001c8d7b691">00137</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#abd37284b13fd2e86cae48001c8d7b691">CPU_Switch_Pri</a> =             -31;
+<a name="l00138"></a>00138 
+<a name="l00142"></a><a class="code" href="classEventBase.html#a9b156fe27a90876b63eead4020c64b10">00142</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a9b156fe27a90876b63eead4020c64b10">Delayed_Writeback_Pri</a> =       -1;
+<a name="l00143"></a>00143 
+<a name="l00145"></a><a class="code" href="classEventBase.html#a6bd0fef0ad63ee49ad5ece92a9dd5f8f">00145</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a6bd0fef0ad63ee49ad5ece92a9dd5f8f" title="Default is zero for historical reasons.">Default_Pri</a> =                  0;
+<a name="l00146"></a>00146 
+<a name="l00150"></a><a class="code" href="classEventBase.html#aa7968ced91b59b9d8614064d742fb17d">00150</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#aa7968ced91b59b9d8614064d742fb17d">Serialize_Pri</a> =               32;
+<a name="l00151"></a>00151 
+<a name="l00154"></a><a class="code" href="classEventBase.html#a654adc14d3292be01ccfcfc16cda2e88">00154</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a654adc14d3292be01ccfcfc16cda2e88">CPU_Tick_Pri</a> =                50;
+<a name="l00155"></a>00155 
+<a name="l00158"></a><a class="code" href="classEventBase.html#aa2e7a615a821276480098db993be1fdd">00158</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#aa2e7a615a821276480098db993be1fdd">Stat_Event_Pri</a> =              90;
+<a name="l00159"></a>00159 
+<a name="l00161"></a><a class="code" href="classEventBase.html#a9bf11ac679214b1615b6280f5e4d2bd9">00161</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a9bf11ac679214b1615b6280f5e4d2bd9" title="Progress events come at the end.">Progress_Event_Pri</a> =          95;
+<a name="l00162"></a>00162 
+<a name="l00165"></a><a class="code" href="classEventBase.html#a0e91729fc98f99e73e3d13cb18cb123f">00165</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a0e91729fc98f99e73e3d13cb18cb123f">Sim_Exit_Pri</a> =               100;
+<a name="l00166"></a>00166 
+<a name="l00168"></a><a class="code" href="classEventBase.html#a3cc4c3d1f4018e493e84809438c598b4">00168</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEventBase.html#a3cc4c3d1f4018e493e84809438c598b4" title="Maximum priority.">Maximum_Pri</a> =          SCHAR_MAX;
+<a name="l00169"></a>00169 };
+<a name="l00170"></a>00170 
+<a name="l00171"></a>00171 <span class="comment">/*</span>
+<a name="l00172"></a>00172 <span class="comment"> * An item on an event queue.  The action caused by a given</span>
+<a name="l00173"></a>00173 <span class="comment"> * event is specified by deriving a subclass and overriding the</span>
+<a name="l00174"></a>00174 <span class="comment"> * process() member function.</span>
+<a name="l00175"></a>00175 <span class="comment"> *</span>
+<a name="l00176"></a>00176 <span class="comment"> * Caution, the order of members is chosen to maximize data packing.</span>
+<a name="l00177"></a>00177 <span class="comment"> */</span>
+<a name="l00178"></a><a class="code" href="classEvent.html">00178</a> <span class="keyword">class </span><a class="code" href="classEvent.html">Event</a> : <span class="keyword">public</span> <a class="code" href="classEventBase.html">EventBase</a>, <span class="keyword">public</span> <a class="code" href="classSerializable.html">Serializable</a>
+<a name="l00179"></a>00179 {
+<a name="l00180"></a><a class="code" href="classEvent.html#a3b1787a64e5e97ce075c05a58303d58c">00180</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classEventQueue.html">EventQueue</a>;
+<a name="l00181"></a>00181 
+<a name="l00182"></a>00182   <span class="keyword">private</span>:
+<a name="l00183"></a>00183     <span class="comment">// The event queue is now a linked list of linked lists.  The</span>
+<a name="l00184"></a>00184     <span class="comment">// &apos;nextBin&apos; pointer is to find the bin, where a bin is defined as</span>
+<a name="l00185"></a>00185     <span class="comment">// when+priority.  All events in the same bin will be stored in a</span>
+<a name="l00186"></a>00186     <span class="comment">// second linked list (a stack) maintained by the &apos;nextInBin&apos;</span>
+<a name="l00187"></a>00187     <span class="comment">// pointer.  The list will be accessed in LIFO order.  The end</span>
+<a name="l00188"></a>00188     <span class="comment">// result is that the insert/removal in &apos;nextBin&apos; is</span>
+<a name="l00189"></a>00189     <span class="comment">// linear/constant, and the lookup/removal in &apos;nextInBin&apos; is</span>
+<a name="l00190"></a>00190     <span class="comment">// constant/constant.  Hopefully this is a significant improvement</span>
+<a name="l00191"></a>00191     <span class="comment">// over the current fully linear insertion.</span>
+<a name="l00192"></a><a class="code" href="classEvent.html#a31312157f348cb35f2532b4caa29f7f1">00192</a>     <a class="code" href="classEvent.html">Event</a> *<a class="code" href="classEvent.html#a31312157f348cb35f2532b4caa29f7f1">nextBin</a>;
+<a name="l00193"></a><a class="code" href="classEvent.html#a825f3555ba76a30dca432425e0901143">00193</a>     <a class="code" href="classEvent.html">Event</a> *<a class="code" href="classEvent.html#a825f3555ba76a30dca432425e0901143">nextInBin</a>;
+<a name="l00194"></a>00194 
+<a name="l00195"></a>00195     <span class="keyword">static</span> <a class="code" href="classEvent.html">Event</a> *<a class="code" href="classEvent.html#a67dc02b0253a9a268380268612a74b2c">insertBefore</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="classEvent.html">Event</a> *curr);
+<a name="l00196"></a>00196     <span class="keyword">static</span> <a class="code" href="classEvent.html">Event</a> *<a class="code" href="classEvent.html#a3b97c26403aff54eb1a4e05de0124ea5">removeItem</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="classEvent.html">Event</a> *last);
+<a name="l00197"></a>00197 
+<a name="l00198"></a><a class="code" href="classEvent.html#a252ba7479c9d9519c6879cd5c297d54c">00198</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEvent.html#a252ba7479c9d9519c6879cd5c297d54c" title="timestamp when event should be processed">_when</a>;         
+<a name="l00199"></a><a class="code" href="classEvent.html#a4c36d25baa2cdb3ae10202e51702b93d">00199</a>     <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEvent.html#a4c36d25baa2cdb3ae10202e51702b93d" title="event priority">_priority</a>; 
+<a name="l00200"></a><a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">00200</a>     <a class="code" href="classFlags.html">Flags</a> <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>;
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00204"></a><a class="code" href="classEvent.html#adffdf007f19587d7dd80ff0a81bef600">00204</a> <span class="preprocessor">    static Counter instanceCounter;</span>
+<a name="l00205"></a>00205 <span class="preprocessor"></span>
+<a name="l00210"></a><a class="code" href="classEvent.html#a4e89167460bd110a598d62294485718b">00210</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classEvent.html#a4e89167460bd110a598d62294485718b">instance</a>;
+<a name="l00211"></a>00211 
+<a name="l00214"></a><a class="code" href="classEvent.html#a4c802add2830eb8f234f8dd788b4a588">00214</a>     <a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="classEvent.html#a4c802add2830eb8f234f8dd788b4a588">queue</a>;
+<a name="l00215"></a>00215 <span class="preprocessor">#endif</span>
+<a name="l00216"></a>00216 <span class="preprocessor"></span>
+<a name="l00217"></a>00217 <span class="preprocessor">#ifdef EVENTQ_DEBUG</span>
+<a name="l00218"></a>00218 <span class="preprocessor"></span>    <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> whenCreated;   
+<a name="l00219"></a>00219     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> whenScheduled; 
+<a name="l00220"></a>00220 <span class="preprocessor">#endif</span>
+<a name="l00221"></a>00221 <span class="preprocessor"></span>
+<a name="l00222"></a>00222     <span class="keywordtype">void</span>
+<a name="l00223"></a><a class="code" href="classEvent.html#a55b61692e3efd22af1598cb1c721d70b">00223</a>     <a class="code" href="classEvent.html#a55b61692e3efd22af1598cb1c721d70b">setWhen</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>, <a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="namespaceArmISA.html#a853401ad1c480843ad53caaa0198fd05">q</a>)
+<a name="l00224"></a>00224     {
+<a name="l00225"></a>00225         <a class="code" href="classEvent.html#a252ba7479c9d9519c6879cd5c297d54c" title="timestamp when event should be processed">_when</a> = when;
+<a name="l00226"></a>00226 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00227"></a>00227 <span class="preprocessor"></span>        <a class="code" href="classEvent.html#a4c802add2830eb8f234f8dd788b4a588">queue</a> = q;
+<a name="l00228"></a>00228 <span class="preprocessor">#endif</span>
+<a name="l00229"></a>00229 <span class="preprocessor"></span><span class="preprocessor">#ifdef EVENTQ_DEBUG</span>
+<a name="l00230"></a>00230 <span class="preprocessor"></span>        whenScheduled = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00231"></a>00231 <span class="preprocessor">#endif</span>
+<a name="l00232"></a>00232 <span class="preprocessor"></span>    }
+<a name="l00233"></a>00233 
+<a name="l00234"></a>00234     <span class="keywordtype">bool</span>
+<a name="l00235"></a><a class="code" href="classEvent.html#aa2a7557ebf105cff8a91f2af1511adf0">00235</a>     <a class="code" href="classEvent.html#aa2a7557ebf105cff8a91f2af1511adf0">initialized</a>()<span class="keyword"> const</span>
+<a name="l00236"></a>00236 <span class="keyword">    </span>{
+<a name="l00237"></a>00237         <span class="keywordflow">return</span> <span class="keyword">this</span> &amp;&amp; (<a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a> &amp; <a class="code" href="classEventBase.html#aafaad8a39b48a0343a743d9ce8a1f977">InitMask</a>) == <a class="code" href="classEventBase.html#a611b43eb08ae22242d90519aead42966">Initialized</a>;
+<a name="l00238"></a>00238     }
+<a name="l00239"></a>00239 
+<a name="l00240"></a>00240   <span class="keyword">protected</span>:
+<a name="l00242"></a>00242     <a class="code" href="classFlags.html">Flags</a>
+<a name="l00243"></a><a class="code" href="classEvent.html#acb0e52e5c94b8d10cbd9418ec342e01f">00243</a>     <a class="code" href="classEvent.html#acb0e52e5c94b8d10cbd9418ec342e01f" title="Accessor for flags.">getFlags</a>()<span class="keyword"> const</span>
+<a name="l00244"></a>00244 <span class="keyword">    </span>{
+<a name="l00245"></a>00245         <span class="keywordflow">return</span> <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a> &amp; <a class="code" href="classEventBase.html#a7e97bb94f1684b43dd97c646cfdeefd7">PublicRead</a>;
+<a name="l00246"></a>00246     }
+<a name="l00247"></a>00247 
+<a name="l00248"></a>00248     <span class="keywordtype">bool</span>
+<a name="l00249"></a><a class="code" href="classEvent.html#ac51cd4574b80bff5304e33fbc28db177">00249</a>     <a class="code" href="classEvent.html#ac51cd4574b80bff5304e33fbc28db177">isFlagSet</a>(<a class="code" href="classFlags.html">Flags</a> _flags)<span class="keyword"> const</span>
+<a name="l00250"></a>00250 <span class="keyword">    </span>{
+<a name="l00251"></a>00251         assert(_flags.<a class="code" href="classFlags.html#af3d473e1675288811ae75089c45bdced">noneSet</a>(~<a class="code" href="classEventBase.html#a7e97bb94f1684b43dd97c646cfdeefd7">PublicRead</a>));
+<a name="l00252"></a>00252         <span class="keywordflow">return</span> <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#ac976964169b81aaba1d4cbb422f559ca">isSet</a>(_flags);
+<a name="l00253"></a>00253     }
+<a name="l00254"></a>00254 
+<a name="l00256"></a>00256     <span class="keywordtype">void</span>
+<a name="l00257"></a><a class="code" href="classEvent.html#a5e0b0810720dd9a6badbf966c410f723">00257</a>     <a class="code" href="classEvent.html#a5e0b0810720dd9a6badbf966c410f723" title="Accessor for flags.">setFlags</a>(<a class="code" href="classFlags.html">Flags</a> _flags)
+<a name="l00258"></a>00258     {
+<a name="l00259"></a>00259         assert(_flags.<a class="code" href="classFlags.html#af3d473e1675288811ae75089c45bdced">noneSet</a>(~<a class="code" href="classEventBase.html#afabddde79b1b676b2e1738700aaf08af">PublicWrite</a>));
+<a name="l00260"></a>00260         <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#a8bf75cf89ee252c33f05dd2e8e06d351">set</a>(_flags);
+<a name="l00261"></a>00261     }
+<a name="l00262"></a>00262 
+<a name="l00263"></a>00263     <span class="keywordtype">void</span>
+<a name="l00264"></a><a class="code" href="classEvent.html#a3d05c8ddda9348a05704f89a90bb6169">00264</a>     <a class="code" href="classEvent.html#a97d5bfe661fa4e01c6895533d668d2d1">clearFlags</a>(<a class="code" href="classFlags.html">Flags</a> _flags)
+<a name="l00265"></a>00265     {
+<a name="l00266"></a>00266         assert(_flags.<a class="code" href="classFlags.html#af3d473e1675288811ae75089c45bdced">noneSet</a>(~<a class="code" href="classEventBase.html#afabddde79b1b676b2e1738700aaf08af">PublicWrite</a>));
+<a name="l00267"></a>00267         <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#ac8bb3912a3ce86b15842e79d0b421204">clear</a>(_flags);
+<a name="l00268"></a>00268     }
+<a name="l00269"></a>00269 
+<a name="l00270"></a>00270     <span class="keywordtype">void</span>
+<a name="l00271"></a><a class="code" href="classEvent.html#a97d5bfe661fa4e01c6895533d668d2d1">00271</a>     <a class="code" href="classEvent.html#a97d5bfe661fa4e01c6895533d668d2d1">clearFlags</a>()
+<a name="l00272"></a>00272     {
+<a name="l00273"></a>00273         <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#ac8bb3912a3ce86b15842e79d0b421204">clear</a>(<a class="code" href="classEventBase.html#afabddde79b1b676b2e1738700aaf08af">PublicWrite</a>);
+<a name="l00274"></a>00274     }
+<a name="l00275"></a>00275 
+<a name="l00276"></a>00276     <span class="comment">// This function isn&apos;t really useful if TRACING_ON is not defined</span>
+<a name="l00277"></a>00277     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEvent.html#ac7983455be765710922308f521703584" title="trace event activity">trace</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *action);     
+<a name="l00278"></a>00278 
+<a name="l00279"></a>00279   <span class="keyword">public</span>:
+<a name="l00280"></a>00280 
+<a name="l00281"></a>00281     <span class="comment">/*</span>
+<a name="l00282"></a>00282 <span class="comment">     * Event constructor</span>
+<a name="l00283"></a>00283 <span class="comment">     * @param queue that the event gets scheduled on</span>
+<a name="l00284"></a>00284 <span class="comment">     */</span>
+<a name="l00285"></a><a class="code" href="classEvent.html#a750c02bcebb85221176ec641dd7b669b">00285</a>     <a class="code" href="classEvent.html#a750c02bcebb85221176ec641dd7b669b">Event</a>(<a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a> = <a class="code" href="classEventBase.html#a6bd0fef0ad63ee49ad5ece92a9dd5f8f" title="Default is zero for historical reasons.">Default_Pri</a>, <a class="code" href="classFlags.html">Flags</a> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a> = 0)
+<a name="l00286"></a>00286         : <a class="code" href="classEvent.html#a31312157f348cb35f2532b4caa29f7f1">nextBin</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), <a class="code" href="classEvent.html#a825f3555ba76a30dca432425e0901143">nextInBin</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), <a class="code" href="classEvent.html#a4c36d25baa2cdb3ae10202e51702b93d" title="event priority">_priority</a>(<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>),
+<a name="l00287"></a>00287           <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>(<a class="code" href="classEventBase.html#a611b43eb08ae22242d90519aead42966">Initialized</a> | <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>)
+<a name="l00288"></a>00288     {
+<a name="l00289"></a>00289         assert(<a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>.noneSet(~<a class="code" href="classEventBase.html#afabddde79b1b676b2e1738700aaf08af">PublicWrite</a>));
+<a name="l00290"></a>00290 <span class="preprocessor">#ifndef NDEBUG</span>
+<a name="l00291"></a>00291 <span class="preprocessor"></span>        <a class="code" href="classEvent.html#a4e89167460bd110a598d62294485718b">instance</a> = ++<a class="code" href="classEvent.html#adffdf007f19587d7dd80ff0a81bef600" title="Global counter to generate unique IDs for Event instances.">instanceCounter</a>;
+<a name="l00292"></a>00292         <a class="code" href="classEvent.html#a4c802add2830eb8f234f8dd788b4a588">queue</a> = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00293"></a>00293 <span class="preprocessor">#endif</span>
+<a name="l00294"></a>00294 <span class="preprocessor"></span><span class="preprocessor">#ifdef EVENTQ_DEBUG</span>
+<a name="l00295"></a>00295 <span class="preprocessor"></span>        whenCreated = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00296"></a>00296         whenScheduled = 0;
+<a name="l00297"></a>00297 <span class="preprocessor">#endif</span>
+<a name="l00298"></a>00298 <span class="preprocessor"></span>    }
+<a name="l00299"></a>00299 
+<a name="l00300"></a>00300     <span class="keyword">virtual</span> <a class="code" href="classEvent.html#aa28124883bfb17601f85db7e635094b1">~Event</a>();
+<a name="l00301"></a>00301     <span class="keyword">virtual</span> <span class="keyword">const</span> std::string <a class="code" href="classEvent.html#adbcff144e5e199d332a1352af1798148">name</a>() <span class="keyword">const</span>;
+<a name="l00302"></a>00302 
+<a name="l00306"></a>00306     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classEvent.html#a130ddddf003422b413e2e891b1b80e8f">description</a>() <span class="keyword">const</span>;
+<a name="l00307"></a>00307 
+<a name="l00309"></a>00309     <span class="keywordtype">void</span> <a class="code" href="classEvent.html#a4a4fecb6d7cd9d0b8eb6579eee183af8" title="Dump the current event data.">dump</a>() <span class="keyword">const</span>;
+<a name="l00310"></a>00310 
+<a name="l00311"></a>00311   <span class="keyword">public</span>:
+<a name="l00312"></a>00312     <span class="comment">/*</span>
+<a name="l00313"></a>00313 <span class="comment">     * This member function is invoked when the event is processed</span>
+<a name="l00314"></a>00314 <span class="comment">     * (occurs).  There is no default implementation; each subclass</span>
+<a name="l00315"></a>00315 <span class="comment">     * must provide its own implementation.  The event is not</span>
+<a name="l00316"></a>00316 <span class="comment">     * automatically deleted after it is processed (to allow for</span>
+<a name="l00317"></a>00317 <span class="comment">     * statically allocated event objects).</span>
+<a name="l00318"></a>00318 <span class="comment">     *</span>
+<a name="l00319"></a>00319 <span class="comment">     * If the AutoDestroy flag is set, the object is deleted once it</span>
+<a name="l00320"></a>00320 <span class="comment">     * is processed.</span>
+<a name="l00321"></a>00321 <span class="comment">     */</span>
+<a name="l00322"></a>00322     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEvent.html#a142b75b68a6291400e20fb0dd905b1c8">process</a>() = 0;
+<a name="l00323"></a>00323 
+<a name="l00325"></a><a class="code" href="classEvent.html#a9cd69a6b10cb037550943f177a0da688">00325</a>     <span class="keywordtype">bool</span> <a class="code" href="classEvent.html#a9cd69a6b10cb037550943f177a0da688" title="Determine if the current event is scheduled.">scheduled</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#ac976964169b81aaba1d4cbb422f559ca">isSet</a>(<a class="code" href="classEventBase.html#ac1b50e524ba5bdbd010654eae3ef982b">Scheduled</a>); }
+<a name="l00326"></a>00326 
+<a name="l00328"></a><a class="code" href="classEvent.html#a3c68c455d9207edd23ae3bcb7971e653">00328</a>     <span class="keywordtype">void</span> <a class="code" href="classEvent.html#a3c68c455d9207edd23ae3bcb7971e653" title="Squash the current event.">squash</a>() { <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#a8bf75cf89ee252c33f05dd2e8e06d351">set</a>(<a class="code" href="classEventBase.html#aa538a6b12172092ac14b1c53ed0b5623">Squashed</a>); }
+<a name="l00329"></a>00329 
+<a name="l00331"></a><a class="code" href="classEvent.html#af355b62f22559090d6e3047bdf83f24f">00331</a>     <span class="keywordtype">bool</span> <a class="code" href="classEvent.html#af355b62f22559090d6e3047bdf83f24f" title="Check whether the event is squashed.">squashed</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#ac976964169b81aaba1d4cbb422f559ca">isSet</a>(<a class="code" href="classEventBase.html#aa538a6b12172092ac14b1c53ed0b5623">Squashed</a>); }
+<a name="l00332"></a>00332 
+<a name="l00334"></a><a class="code" href="classEvent.html#a6035963416c1279143194a9bcd88b314">00334</a>     <span class="keywordtype">bool</span> <a class="code" href="classEvent.html#a6035963416c1279143194a9bcd88b314" title="See if this is a SimExitEvent (without resorting to RTTI).">isExitEvent</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEvent.html#aa991e2b209ef26272bf4fd920777bcda">flags</a>.<a class="code" href="classFlags.html#ac976964169b81aaba1d4cbb422f559ca">isSet</a>(<a class="code" href="classEventBase.html#a9d51d37203d97fcdc8bc0141dfc00886">IsExitEvent</a>); }
+<a name="l00335"></a>00335 
+<a name="l00337"></a><a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc">00337</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEvent.html#a252ba7479c9d9519c6879cd5c297d54c" title="timestamp when event should be processed">_when</a>; }
+<a name="l00338"></a>00338 
+<a name="l00340"></a><a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3">00340</a>     <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEvent.html#a4c36d25baa2cdb3ae10202e51702b93d" title="event priority">_priority</a>; }
+<a name="l00341"></a>00341 
+<a name="l00345"></a><a class="code" href="classEvent.html#a22afab66586c2982ac7548fba9e6835b">00345</a>     <span class="keyword">virtual</span> <a class="code" href="classBaseGlobalEvent.html">BaseGlobalEvent</a> *<a class="code" href="classEvent.html#a22afab66586c2982ac7548fba9e6835b">globalEvent</a>() { <span class="keywordflow">return</span> <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>; }
+<a name="l00346"></a>00346 
+<a name="l00347"></a>00347 <span class="preprocessor">#ifndef SWIG</span>
+<a name="l00348"></a>00348 <span class="preprocessor"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEvent.html#ad6272f80ae37e8331e3969b3f072a801">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00349"></a>00349     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEvent.html#af100c4e9feabf3cd918619c88c718387">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00350"></a>00350 
+<a name="l00355"></a>00355     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEvent.html#af100c4e9feabf3cd918619c88c718387">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section,
+<a name="l00356"></a>00356                      <a class="code" href="classEventQueue.html">EventQueue</a> *eventq);
+<a name="l00357"></a>00357 <span class="preprocessor">#endif</span>
+<a name="l00358"></a>00358 <span class="preprocessor"></span>};
+<a name="l00359"></a>00359 
+<a name="l00360"></a>00360 <span class="preprocessor">#ifndef SWIG</span>
+<a name="l00361"></a>00361 <span class="preprocessor"></span><span class="keyword">inline</span> <span class="keywordtype">bool</span>
+<a name="l00362"></a><a class="code" href="eventq_8hh.html#a3c178da5a2521e397a938853b0381cfe">00362</a> <a class="code" href="mod__num_8hh.html#a84830aa30009cb5c8024c1de6f771316">operator&lt;</a>(<span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00363"></a>00363 {
+<a name="l00364"></a>00364     <span class="keywordflow">return</span> l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &lt; r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() ||
+<a name="l00365"></a>00365         (l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() == r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &amp;&amp; l.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>() &lt; r.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>());
+<a name="l00366"></a>00366 }
+<a name="l00367"></a>00367 
+<a name="l00368"></a>00368 <span class="keyword">inline</span> <span class="keywordtype">bool</span>
+<a name="l00369"></a><a class="code" href="eventq_8hh.html#a4bec4ae1c2599b058e50d02e0bb08962">00369</a> <a class="code" href="mod__num_8hh.html#a5783f552d52471d44933cc6970fc5618">operator&gt;</a>(<span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00370"></a>00370 {
+<a name="l00371"></a>00371     <span class="keywordflow">return</span> l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &gt; r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() ||
+<a name="l00372"></a>00372         (l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() == r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &amp;&amp; l.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>() &gt; r.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>());
+<a name="l00373"></a>00373 }
+<a name="l00374"></a>00374 
+<a name="l00375"></a>00375 <span class="keyword">inline</span> <span class="keywordtype">bool</span>
+<a name="l00376"></a><a class="code" href="eventq_8hh.html#a321ab1717492451522fed22375ae8363">00376</a> <a class="code" href="mod__num_8hh.html#a6eb41d5269e96df1206fe6a2eab3e656">operator&lt;=</a>(<span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00377"></a>00377 {
+<a name="l00378"></a>00378     <span class="keywordflow">return</span> l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &lt; r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() ||
+<a name="l00379"></a>00379         (l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() == r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &amp;&amp; l.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>() &lt;= r.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>());
+<a name="l00380"></a>00380 }
+<a name="l00381"></a>00381 <span class="keyword">inline</span> <span class="keywordtype">bool</span>
+<a name="l00382"></a><a class="code" href="eventq_8hh.html#a53cd3371f557c2fce6b6a65fc06d4d4e">00382</a> <a class="code" href="mod__num_8hh.html#aaa8d528ed5d144f66b188d80feef0c09">operator&gt;=</a>(<span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00383"></a>00383 {
+<a name="l00384"></a>00384     <span class="keywordflow">return</span> l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &gt; r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() ||
+<a name="l00385"></a>00385         (l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() == r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &amp;&amp; l.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>() &gt;= r.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>());
+<a name="l00386"></a>00386 }
+<a name="l00387"></a>00387 
+<a name="l00388"></a>00388 <span class="keyword">inline</span> <span class="keywordtype">bool</span>
+<a name="l00389"></a><a class="code" href="eventq_8hh.html#aa242d3b194771eaf0fd66a3c7b646816">00389</a> <a class="code" href="namespaceX86ISA.html#abe769e58d28aff27ee71564bb6f6b0c0">operator==</a>(<span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00390"></a>00390 {
+<a name="l00391"></a>00391     <span class="keywordflow">return</span> l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() == r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() &amp;&amp; l.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>() == r.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>();
+<a name="l00392"></a>00392 }
+<a name="l00393"></a>00393 
+<a name="l00394"></a>00394 <span class="keyword">inline</span> <span class="keywordtype">bool</span>
+<a name="l00395"></a><a class="code" href="eventq_8hh.html#a88186b54fd68bd48fb160ba30c0242ee">00395</a> <a class="code" href="refcnt_8hh.html#a096e1231a0265dde049419eeb46b8055" title="Check for inequality of two reference counting pointers.">operator!=</a>(<span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00396"></a>00396 {
+<a name="l00397"></a>00397     <span class="keywordflow">return</span> l.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() != r.<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>() || l.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>() != r.<a class="code" href="classEvent.html#af295b292a101253257e5c9bea7ca67e3" title="Get the event priority.">priority</a>();
+<a name="l00398"></a>00398 }
+<a name="l00399"></a>00399 <span class="preprocessor">#endif</span>
+<a name="l00400"></a>00400 <span class="preprocessor"></span>
+<a name="l00439"></a><a class="code" href="classEventQueue.html">00439</a> <span class="keyword">class </span><a class="code" href="classEventQueue.html">EventQueue</a> : <span class="keyword">public</span> <a class="code" href="classSerializable.html">Serializable</a>
+<a name="l00440"></a>00440 {
+<a name="l00441"></a>00441   <span class="keyword">private</span>:
+<a name="l00442"></a><a class="code" href="classEventQueue.html#acdd07b78b47375ca2a51a7a956b1697f">00442</a>     std::string <a class="code" href="classEventQueue.html#acdd07b78b47375ca2a51a7a956b1697f">objName</a>;
+<a name="l00443"></a><a class="code" href="classEventQueue.html#a08321f57dbffd90b5b365a6d53bb2933">00443</a>     <a class="code" href="classEvent.html">Event</a> *<a class="code" href="classEventQueue.html#a08321f57dbffd90b5b365a6d53bb2933">head</a>;
+<a name="l00444"></a><a class="code" href="classEventQueue.html#a09b29d670564770f8cde7490c4fa4ebb">00444</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEventQueue.html#a09b29d670564770f8cde7490c4fa4ebb">_curTick</a>;
+<a name="l00445"></a>00445 
+<a name="l00447"></a><a class="code" href="classEventQueue.html#a7d6bb496422e204e32492a7012a44b66">00447</a>     std::mutex *<a class="code" href="classEventQueue.html#a7d6bb496422e204e32492a7012a44b66" title="Mutex to protect async queue.">async_queue_mutex</a>;
+<a name="l00448"></a>00448 
+<a name="l00450"></a><a class="code" href="classEventQueue.html#a9c9b5322e34950b9d27abca2b8207ca9">00450</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;Event*&gt;</a> <a class="code" href="classEventQueue.html#a9c9b5322e34950b9d27abca2b8207ca9" title="List of events added by other threads to this event queue.">async_queue</a>;
+<a name="l00451"></a>00451 
+<a name="l00472"></a><a class="code" href="classEventQueue.html#acfc3095049c7deadb02a9eee0ec54a13">00472</a>     std::mutex <a class="code" href="classEventQueue.html#acfc3095049c7deadb02a9eee0ec54a13">service_mutex</a>;
+<a name="l00473"></a>00473 
+<a name="l00476"></a>00476     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#ad8e469f292d876af9e2ec380e8e7e51e">insert</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>);
+<a name="l00477"></a>00477     <span class="keywordtype">void</span> <span class="keyword">remove</span>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>);
+<a name="l00478"></a>00478 
+<a name="l00482"></a>00482     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#aadb31d9952f03cb2a934f93cac304153">asyncInsert</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>);
+<a name="l00483"></a>00483 
+<a name="l00484"></a>00484     <a class="code" href="classEventQueue.html#aac902b23c2f4ad571d6229b56ea09d0b">EventQueue</a>(<span class="keyword">const</span> <a class="code" href="classEventQueue.html">EventQueue</a> &amp;);
+<a name="l00485"></a>00485 
+<a name="l00486"></a>00486   <span class="keyword">public</span>:
+<a name="l00487"></a>00487 <span class="preprocessor">#ifndef SWIG</span>
+<a name="l00488"></a>00488 <span class="preprocessor"></span>
+<a name="l00498"></a><a class="code" href="classEventQueue_1_1ScopedMigration.html">00498</a>     <span class="keyword">class </span><a class="code" href="classEventQueue_1_1ScopedMigration.html">ScopedMigration</a>
+<a name="l00499"></a>00499     {
+<a name="l00500"></a>00500       <span class="keyword">public</span>:
+<a name="l00501"></a><a class="code" href="classEventQueue_1_1ScopedMigration.html#a278034a612e4c2bcdff92e4ddb95298c">00501</a>         <a class="code" href="classEventQueue_1_1ScopedMigration.html#a278034a612e4c2bcdff92e4ddb95298c">ScopedMigration</a>(<a class="code" href="classEventQueue.html">EventQueue</a> *_new_eq)
+<a name="l00502"></a>00502             :  <a class="code" href="classEventQueue_1_1ScopedMigration.html#acffe9fa404c2dfbf6b44e3878126d16e">new_eq</a>(*_new_eq), <a class="code" href="classEventQueue_1_1ScopedMigration.html#a02c314e5863bbb391a274dbf23923154">old_eq</a>(*<a class="code" href="eventq_8hh.html#a64a8603a1af7020a19d30c54152fdcb2">curEventQueue</a>())
+<a name="l00503"></a>00503         {
+<a name="l00504"></a>00504             <a class="code" href="classEventQueue_1_1ScopedMigration.html#a02c314e5863bbb391a274dbf23923154">old_eq</a>.<a class="code" href="classEventQueue.html#a9278be8203e1c42e2619179882ae4403">unlock</a>();
+<a name="l00505"></a>00505             <a class="code" href="classEventQueue_1_1ScopedMigration.html#acffe9fa404c2dfbf6b44e3878126d16e">new_eq</a>.<a class="code" href="classEventQueue.html#aa81aed607133209dade63a226818224d">lock</a>();
+<a name="l00506"></a>00506             <a class="code" href="eventq_8hh.html#a64a8603a1af7020a19d30c54152fdcb2">curEventQueue</a>(&amp;<a class="code" href="classEventQueue_1_1ScopedMigration.html#acffe9fa404c2dfbf6b44e3878126d16e">new_eq</a>);
+<a name="l00507"></a>00507         }
+<a name="l00508"></a>00508 
+<a name="l00509"></a><a class="code" href="classEventQueue_1_1ScopedMigration.html#a567f267a37582fed196677493d6eb9fc">00509</a>         <a class="code" href="classEventQueue_1_1ScopedMigration.html#a567f267a37582fed196677493d6eb9fc">~ScopedMigration</a>()
+<a name="l00510"></a>00510         {
+<a name="l00511"></a>00511             <a class="code" href="classEventQueue_1_1ScopedMigration.html#acffe9fa404c2dfbf6b44e3878126d16e">new_eq</a>.<a class="code" href="classEventQueue.html#a9278be8203e1c42e2619179882ae4403">unlock</a>();
+<a name="l00512"></a>00512             <a class="code" href="classEventQueue_1_1ScopedMigration.html#a02c314e5863bbb391a274dbf23923154">old_eq</a>.<a class="code" href="classEventQueue.html#aa81aed607133209dade63a226818224d">lock</a>();
+<a name="l00513"></a>00513             <a class="code" href="eventq_8hh.html#a64a8603a1af7020a19d30c54152fdcb2">curEventQueue</a>(&amp;<a class="code" href="classEventQueue_1_1ScopedMigration.html#a02c314e5863bbb391a274dbf23923154">old_eq</a>);
+<a name="l00514"></a>00514         }
+<a name="l00515"></a>00515 
+<a name="l00516"></a>00516       <span class="keyword">private</span>:
+<a name="l00517"></a><a class="code" href="classEventQueue_1_1ScopedMigration.html#acffe9fa404c2dfbf6b44e3878126d16e">00517</a>         <a class="code" href="classEventQueue.html">EventQueue</a> &amp;<a class="code" href="classEventQueue_1_1ScopedMigration.html#acffe9fa404c2dfbf6b44e3878126d16e">new_eq</a>;
+<a name="l00518"></a><a class="code" href="classEventQueue_1_1ScopedMigration.html#a02c314e5863bbb391a274dbf23923154">00518</a>         <a class="code" href="classEventQueue.html">EventQueue</a> &amp;<a class="code" href="classEventQueue_1_1ScopedMigration.html#a02c314e5863bbb391a274dbf23923154">old_eq</a>;
+<a name="l00519"></a>00519     };
+<a name="l00520"></a>00520 
+<a name="l00530"></a><a class="code" href="classEventQueue_1_1ScopedRelease.html">00530</a>     <span class="keyword">class </span><a class="code" href="classEventQueue_1_1ScopedRelease.html">ScopedRelease</a>
+<a name="l00531"></a>00531     {
+<a name="l00532"></a>00532       <span class="keyword">public</span>:
+<a name="l00533"></a><a class="code" href="classEventQueue_1_1ScopedRelease.html#aee141e4508959e15b2f7608ce966272c">00533</a>         <a class="code" href="classEventQueue_1_1ScopedRelease.html#aee141e4508959e15b2f7608ce966272c">ScopedRelease</a>(<a class="code" href="classEventQueue.html">EventQueue</a> *_eq)
+<a name="l00534"></a>00534             :  <a class="code" href="classEventQueue_1_1ScopedRelease.html#a56da388e27fa241c2f0d42fa4188f2a1">eq</a>(*_eq)
+<a name="l00535"></a>00535         {
+<a name="l00536"></a>00536             <a class="code" href="classEventQueue_1_1ScopedRelease.html#a56da388e27fa241c2f0d42fa4188f2a1">eq</a>.<a class="code" href="classEventQueue.html#a9278be8203e1c42e2619179882ae4403">unlock</a>();
+<a name="l00537"></a>00537         }
+<a name="l00538"></a>00538 
+<a name="l00539"></a><a class="code" href="classEventQueue_1_1ScopedRelease.html#a571948d69fe8efeacfa5d8a6c7322287">00539</a>         <a class="code" href="classEventQueue_1_1ScopedRelease.html#a571948d69fe8efeacfa5d8a6c7322287">~ScopedRelease</a>()
+<a name="l00540"></a>00540         {
+<a name="l00541"></a>00541             <a class="code" href="classEventQueue_1_1ScopedRelease.html#a56da388e27fa241c2f0d42fa4188f2a1">eq</a>.<a class="code" href="classEventQueue.html#aa81aed607133209dade63a226818224d">lock</a>();
+<a name="l00542"></a>00542         }
+<a name="l00543"></a>00543 
+<a name="l00544"></a>00544       <span class="keyword">private</span>:
+<a name="l00545"></a><a class="code" href="classEventQueue_1_1ScopedRelease.html#a56da388e27fa241c2f0d42fa4188f2a1">00545</a>         <a class="code" href="classEventQueue.html">EventQueue</a> &amp;<a class="code" href="classEventQueue_1_1ScopedRelease.html#a56da388e27fa241c2f0d42fa4188f2a1">eq</a>;
+<a name="l00546"></a>00546     };
+<a name="l00547"></a>00547 <span class="preprocessor">#endif</span>
+<a name="l00548"></a>00548 <span class="preprocessor"></span>
+<a name="l00549"></a>00549     <a class="code" href="classEventQueue.html#aac902b23c2f4ad571d6229b56ea09d0b">EventQueue</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceArmISA.html#aeab71244afb687f16d8c4f5ee9d6ef0e">n</a>);
+<a name="l00550"></a>00550 
+<a name="l00551"></a><a class="code" href="classEventQueue.html#adbcff144e5e199d332a1352af1798148">00551</a>     <span class="keyword">virtual</span> <span class="keyword">const</span> std::string <a class="code" href="classEventQueue.html#adbcff144e5e199d332a1352af1798148">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEventQueue.html#acdd07b78b47375ca2a51a7a956b1697f">objName</a>; }
+<a name="l00552"></a><a class="code" href="classEventQueue.html#a413b79e026328fa4210d327d1958bd12">00552</a>     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#a413b79e026328fa4210d327d1958bd12">name</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceArmISA.html#ae9ccb60923e03f5112b726ef11e2d299">st</a>) { <a class="code" href="classEventQueue.html#acdd07b78b47375ca2a51a7a956b1697f">objName</a> = st; }
+<a name="l00553"></a>00553 
+<a name="l00556"></a>00556     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#a6e13c0d68fbc26df6eff27313813b8a4">schedule</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when, <span class="keywordtype">bool</span> global = <span class="keyword">false</span>);
+<a name="l00557"></a>00557 
+<a name="l00560"></a>00560     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#ab1b8fc2b2605fdc1d88bf07a86e1fe07">deschedule</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>);
+<a name="l00561"></a>00561 
+<a name="l00564"></a>00564     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#a676294f5f01031f3dfdf956185390db8">reschedule</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when, <span class="keywordtype">bool</span> always = <span class="keyword">false</span>);
+<a name="l00565"></a>00565 
+<a name="l00566"></a><a class="code" href="classEventQueue.html#ac7fc06f25478db3060a43a096e023243">00566</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEventQueue.html#ac7fc06f25478db3060a43a096e023243">nextTick</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEventQueue.html#a08321f57dbffd90b5b365a6d53bb2933">head</a>-&gt;<a class="code" href="classEvent.html#a1883243a0117678c5695f2435dcabbdc" title="Get the time that the event is scheduled.">when</a>(); }
+<a name="l00567"></a><a class="code" href="classEventQueue.html#abc2f41fbb4828612a2637268ab8ce640">00567</a>     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#abc2f41fbb4828612a2637268ab8ce640">setCurTick</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> newVal) { <a class="code" href="classEventQueue.html#a09b29d670564770f8cde7490c4fa4ebb">_curTick</a> = newVal; }
+<a name="l00568"></a><a class="code" href="classEventQueue.html#ab9e4d6c1f3218aee0ff70854de959a6c">00568</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEventQueue.html#ab9e4d6c1f3218aee0ff70854de959a6c">getCurTick</a>() { <span class="keywordflow">return</span> <a class="code" href="classEventQueue.html#a09b29d670564770f8cde7490c4fa4ebb">_curTick</a>; }
+<a name="l00569"></a>00569 
+<a name="l00570"></a>00570     <a class="code" href="classEvent.html">Event</a> *<a class="code" href="classEventQueue.html#a95b9c78d6fb18e716e5d13362b609798">serviceOne</a>();
+<a name="l00571"></a>00571 
+<a name="l00572"></a>00572     <span class="comment">// process all events up to the given timestamp.  we inline a</span>
+<a name="l00573"></a>00573     <span class="comment">// quick test to see if there are any events to process; if so,</span>
+<a name="l00574"></a>00574     <span class="comment">// call the internal out-of-line version to process them all.</span>
+<a name="l00575"></a>00575     <span class="keywordtype">void</span>
+<a name="l00576"></a><a class="code" href="classEventQueue.html#adc925eabe90846085072915cc6c544c2">00576</a>     <a class="code" href="classEventQueue.html#adc925eabe90846085072915cc6c544c2">serviceEvents</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when)
+<a name="l00577"></a>00577     {
+<a name="l00578"></a>00578         <span class="keywordflow">while</span> (!<a class="code" href="classEventQueue.html#ac6e61de369e994009e36f344f99c15ad">empty</a>()) {
+<a name="l00579"></a>00579             <span class="keywordflow">if</span> (<a class="code" href="classEventQueue.html#ac7fc06f25478db3060a43a096e023243">nextTick</a>() &gt; when)
+<a name="l00580"></a>00580                 <span class="keywordflow">break</span>;
+<a name="l00581"></a>00581 
+<a name="l00586"></a>00586             <span class="comment">//assert(head-&gt;when() &gt;= when &amp;&amp; &quot;event scheduled in the past&quot;);</span>
+<a name="l00587"></a>00587             <a class="code" href="classEventQueue.html#a95b9c78d6fb18e716e5d13362b609798">serviceOne</a>();
+<a name="l00588"></a>00588         }
+<a name="l00589"></a>00589 
+<a name="l00590"></a>00590         <a class="code" href="classEventQueue.html#abc2f41fbb4828612a2637268ab8ce640">setCurTick</a>(when);
+<a name="l00591"></a>00591     }
+<a name="l00592"></a>00592 
+<a name="l00593"></a>00593     <span class="comment">// return true if no events are queued</span>
+<a name="l00594"></a><a class="code" href="classEventQueue.html#ac6e61de369e994009e36f344f99c15ad">00594</a>     <span class="keywordtype">bool</span> <a class="code" href="classEventQueue.html#ac6e61de369e994009e36f344f99c15ad">empty</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEventQueue.html#a08321f57dbffd90b5b365a6d53bb2933">head</a> == <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>; }
+<a name="l00595"></a>00595 
+<a name="l00596"></a>00596     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#a4a4fecb6d7cd9d0b8eb6579eee183af8">dump</a>() <span class="keyword">const</span>;
+<a name="l00597"></a>00597 
+<a name="l00598"></a>00598     <span class="keywordtype">bool</span> <a class="code" href="classEventQueue.html#a66392764e022762d90e80efbee0500b2">debugVerify</a>() <span class="keyword">const</span>;
+<a name="l00599"></a>00599 
+<a name="l00601"></a>00601     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#a2f9d0ed8258183804bc764aa3b859f70" title="Function for moving events from the async_queue to the main queue.">handleAsyncInsertions</a>();
+<a name="l00602"></a>00602 
+<a name="l00611"></a>00611     <a class="code" href="classEvent.html">Event</a>* <a class="code" href="classEventQueue.html#a1c4b36385e86f178f625f84d95cb6778">replaceHead</a>(<a class="code" href="classEvent.html">Event</a>* <a class="code" href="namespaceArmISA.html#afaeb18e17f862d8fcb76dfb68a18854f">s</a>);
+<a name="l00612"></a>00612 
+<a name="l00625"></a><a class="code" href="classEventQueue.html#aa81aed607133209dade63a226818224d">00625</a>     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#aa81aed607133209dade63a226818224d">lock</a>() { <a class="code" href="classEventQueue.html#acfc3095049c7deadb02a9eee0ec54a13">service_mutex</a>.lock(); }
+<a name="l00626"></a><a class="code" href="classEventQueue.html#a9278be8203e1c42e2619179882ae4403">00626</a>     <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#a9278be8203e1c42e2619179882ae4403">unlock</a>() { <a class="code" href="classEventQueue.html#acfc3095049c7deadb02a9eee0ec54a13">service_mutex</a>.unlock(); }
+<a name="l00629"></a>00629 <span class="preprocessor">#ifndef SWIG</span>
+<a name="l00630"></a>00630 <span class="preprocessor"></span>    <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#ad6272f80ae37e8331e3969b3f072a801">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00631"></a>00631     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEventQueue.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00632"></a>00632 <span class="preprocessor">#endif</span>
+<a name="l00633"></a>00633 <span class="preprocessor"></span>};
+<a name="l00634"></a>00634 
+<a name="l00635"></a>00635 <span class="keywordtype">void</span> <a class="code" href="eventq_8cc.html#afa9cf950f7afca6dc9b1fc2328df2d43">dumpMainQueue</a>();
+<a name="l00636"></a>00636 
+<a name="l00637"></a>00637 <span class="preprocessor">#ifndef SWIG</span>
+<a name="l00638"></a><a class="code" href="classEventManager.html">00638</a> <span class="preprocessor"></span><span class="keyword">class </span><a class="code" href="classEventManager.html">EventManager</a>
+<a name="l00639"></a>00639 {
+<a name="l00640"></a>00640   <span class="keyword">protected</span>:
+<a name="l00642"></a><a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">00642</a>     <a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>;
+<a name="l00643"></a>00643 
+<a name="l00644"></a>00644   <span class="keyword">public</span>:
+<a name="l00645"></a><a class="code" href="classEventManager.html#a311f2d5c8b94bea825c05571dc4ca2e2">00645</a>     <a class="code" href="classEventManager.html#a311f2d5c8b94bea825c05571dc4ca2e2">EventManager</a>(<a class="code" href="classEventManager.html">EventManager</a> &amp;<a class="code" href="namespaceX86ISA.html#acee3b5ece28581fdc0421d3ba9075206">em</a>) : <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>(em.<a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>) {}
+<a name="l00646"></a><a class="code" href="classEventManager.html#a4aafa6652fafd95a60dd7e1a75393cd8">00646</a>     <a class="code" href="classEventManager.html#a4aafa6652fafd95a60dd7e1a75393cd8">EventManager</a>(<a class="code" href="classEventManager.html">EventManager</a> *<a class="code" href="namespaceX86ISA.html#acee3b5ece28581fdc0421d3ba9075206">em</a>) : <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>(em-&gt;<a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>) {}
+<a name="l00647"></a><a class="code" href="classEventManager.html#ada835c7c11d268771405122be1ef29f0">00647</a>     <a class="code" href="classEventManager.html#ada835c7c11d268771405122be1ef29f0">EventManager</a>(<a class="code" href="classEventQueue.html">EventQueue</a> *<a class="code" href="namespacePowerISA.html#a9d2b59e69f0498a5cc37a71ba578920c">eq</a>) : <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>(eq) {}
+<a name="l00648"></a>00648 
+<a name="l00649"></a>00649     <a class="code" href="classEventQueue.html">EventQueue</a> *
+<a name="l00650"></a><a class="code" href="classEventManager.html#ad6e91e91036b003cf3661959078e677f">00650</a>     <a class="code" href="classEventManager.html#ad6e91e91036b003cf3661959078e677f">eventQueue</a>()<span class="keyword"> const</span>
+<a name="l00651"></a>00651 <span class="keyword">    </span>{
+<a name="l00652"></a>00652         <span class="keywordflow">return</span> <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>;
+<a name="l00653"></a>00653     }
+<a name="l00654"></a>00654 
+<a name="l00655"></a>00655     <span class="keywordtype">void</span>
+<a name="l00656"></a><a class="code" href="classEventManager.html#a4ddebbfe9a12b95be6fb993ce892dcd3">00656</a>     <a class="code" href="classEventManager.html#a4ddebbfe9a12b95be6fb993ce892dcd3">schedule</a>(<a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when)
+<a name="l00657"></a>00657     {
+<a name="l00658"></a>00658         <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#a6e13c0d68fbc26df6eff27313813b8a4">schedule</a>(&amp;event, when);
+<a name="l00659"></a>00659     }
+<a name="l00660"></a>00660 
+<a name="l00661"></a>00661     <span class="keywordtype">void</span>
+<a name="l00662"></a><a class="code" href="classEventManager.html#a720e34da4db679fb3f30b20e55c23605">00662</a>     <a class="code" href="classEventManager.html#a720e34da4db679fb3f30b20e55c23605">deschedule</a>(<a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>)
+<a name="l00663"></a>00663     {
+<a name="l00664"></a>00664         <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#ab1b8fc2b2605fdc1d88bf07a86e1fe07">deschedule</a>(&amp;event);
+<a name="l00665"></a>00665     }
+<a name="l00666"></a>00666 
+<a name="l00667"></a>00667     <span class="keywordtype">void</span>
+<a name="l00668"></a><a class="code" href="classEventManager.html#a83fe8e2d06cd7c6e36743e5beb07298f">00668</a>     <a class="code" href="classEventManager.html#a83fe8e2d06cd7c6e36743e5beb07298f">reschedule</a>(<a class="code" href="classEvent.html">Event</a> &amp;<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when, <span class="keywordtype">bool</span> always = <span class="keyword">false</span>)
+<a name="l00669"></a>00669     {
+<a name="l00670"></a>00670         <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#a676294f5f01031f3dfdf956185390db8">reschedule</a>(&amp;event, when, always);
+<a name="l00671"></a>00671     }
+<a name="l00672"></a>00672 
+<a name="l00673"></a>00673     <span class="keywordtype">void</span>
+<a name="l00674"></a><a class="code" href="classEventManager.html#a3abda7ed04856f4f98b31ceacdc78562">00674</a>     <a class="code" href="classEventManager.html#a4ddebbfe9a12b95be6fb993ce892dcd3">schedule</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when)
+<a name="l00675"></a>00675     {
+<a name="l00676"></a>00676         <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#a6e13c0d68fbc26df6eff27313813b8a4">schedule</a>(event, when);
+<a name="l00677"></a>00677     }
+<a name="l00678"></a>00678 
+<a name="l00679"></a>00679     <span class="keywordtype">void</span>
+<a name="l00680"></a><a class="code" href="classEventManager.html#ab1b8fc2b2605fdc1d88bf07a86e1fe07">00680</a>     <a class="code" href="classEventManager.html#a720e34da4db679fb3f30b20e55c23605">deschedule</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>)
+<a name="l00681"></a>00681     {
+<a name="l00682"></a>00682         <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#ab1b8fc2b2605fdc1d88bf07a86e1fe07">deschedule</a>(event);
+<a name="l00683"></a>00683     }
+<a name="l00684"></a>00684 
+<a name="l00685"></a>00685     <span class="keywordtype">void</span>
+<a name="l00686"></a><a class="code" href="classEventManager.html#a676294f5f01031f3dfdf956185390db8">00686</a>     <a class="code" href="classEventManager.html#a83fe8e2d06cd7c6e36743e5beb07298f">reschedule</a>(<a class="code" href="classEvent.html">Event</a> *<a class="code" href="namespaceMipsISA.html#aa3b803f4777161a2825178dabfb154f0">event</a>, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when, <span class="keywordtype">bool</span> always = <span class="keyword">false</span>)
+<a name="l00687"></a>00687     {
+<a name="l00688"></a>00688         <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#a676294f5f01031f3dfdf956185390db8">reschedule</a>(event, when, always);
+<a name="l00689"></a>00689     }
+<a name="l00690"></a>00690 
+<a name="l00691"></a><a class="code" href="classEventManager.html#abc2f41fbb4828612a2637268ab8ce640">00691</a>     <span class="keywordtype">void</span> <a class="code" href="classEventManager.html#abc2f41fbb4828612a2637268ab8ce640">setCurTick</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> newVal) { <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#abc2f41fbb4828612a2637268ab8ce640">setCurTick</a>(newVal); }
+<a name="l00692"></a>00692 };
+<a name="l00693"></a>00693 
+<a name="l00694"></a>00694 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keywordtype">void</span> (T::* F)()&gt;
+<a name="l00695"></a>00695 <span class="keywordtype">void</span>
+<a name="l00696"></a><a class="code" href="eventq_8hh.html#a9992bd1a54709fbb3d7e0e8ab62702c0">00696</a> <a class="code" href="eventq_8hh.html#a9992bd1a54709fbb3d7e0e8ab62702c0">DelayFunction</a>(<a class="code" href="classEventQueue.html">EventQueue</a> *eventq, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when, T *<span class="keywordtype">object</span>)
+<a name="l00697"></a>00697 {
+<a name="l00698"></a>00698     <span class="keyword">class </span>DelayEvent : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00699"></a>00699     {
+<a name="l00700"></a>00700       <span class="keyword">private</span>:
+<a name="l00701"></a>00701         T *object;
+<a name="l00702"></a>00702 
+<a name="l00703"></a>00703       <span class="keyword">public</span>:
+<a name="l00704"></a>00704         DelayEvent(T *o)
+<a name="l00705"></a>00705             : <a class="code" href="classEvent.html#a750c02bcebb85221176ec641dd7b669b">Event</a>(Default_Pri, AutoDelete), object(o)
+<a name="l00706"></a>00706         { }
+<a name="l00707"></a>00707         <span class="keywordtype">void</span> <a class="code" href="classEvent.html#a142b75b68a6291400e20fb0dd905b1c8">process</a>() { (<span class="keywordtype">object</span>-&gt;*F)(); }
+<a name="l00708"></a>00708         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classEvent.html#a130ddddf003422b413e2e891b1b80e8f">description</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="stringliteral">&quot;delay&quot;</span>; }
+<a name="l00709"></a>00709     };
+<a name="l00710"></a>00710 
+<a name="l00711"></a>00711     eventq-&gt;<a class="code" href="classEventQueue.html#a6e13c0d68fbc26df6eff27313813b8a4">schedule</a>(<span class="keyword">new</span> DelayEvent(<span class="keywordtype">object</span>), when);
+<a name="l00712"></a>00712 }
+<a name="l00713"></a>00713 
+<a name="l00714"></a>00714 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T, <span class="keywordtype">void</span> (T::* F)()&gt;
+<a name="l00715"></a><a class="code" href="classEventWrapper.html">00715</a> <span class="keyword">class </span><a class="code" href="classEventWrapper.html">EventWrapper</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00716"></a>00716 {
+<a name="l00717"></a>00717   <span class="keyword">private</span>:
+<a name="l00718"></a><a class="code" href="classEventWrapper.html#acd5a12b9b1a75e37fd605accfe038a03">00718</a>     T *<a class="code" href="classEventWrapper.html#acd5a12b9b1a75e37fd605accfe038a03">object</a>;
+<a name="l00719"></a>00719 
+<a name="l00720"></a>00720   <span class="keyword">public</span>:
+<a name="l00721"></a><a class="code" href="classEventWrapper.html#a3d9e3a20f104924988d16bcb11016d3d">00721</a>     <a class="code" href="classEventWrapper.html#a3d9e3a20f104924988d16bcb11016d3d">EventWrapper</a>(T *obj, <span class="keywordtype">bool</span> del = <span class="keyword">false</span>, <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a> = <a class="code" href="classEventBase.html#a6bd0fef0ad63ee49ad5ece92a9dd5f8f" title="Default is zero for historical reasons.">Default_Pri</a>)
+<a name="l00722"></a>00722         : <a class="code" href="classEvent.html">Event</a>(<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>), <a class="code" href="classEventWrapper.html#acd5a12b9b1a75e37fd605accfe038a03">object</a>(obj)
+<a name="l00723"></a>00723     {
+<a name="l00724"></a>00724         <span class="keywordflow">if</span> (del)
+<a name="l00725"></a>00725             <a class="code" href="classEvent.html#a5e0b0810720dd9a6badbf966c410f723" title="Accessor for flags.">setFlags</a>(<a class="code" href="classEventBase.html#a54ba74dbb445f08c349fc85154f58b97">AutoDelete</a>);
+<a name="l00726"></a>00726     }
+<a name="l00727"></a>00727 
+<a name="l00728"></a><a class="code" href="classEventWrapper.html#a77b6c62cc5484c5f144960b7f6a74fe3">00728</a>     <a class="code" href="classEventWrapper.html#a3d9e3a20f104924988d16bcb11016d3d">EventWrapper</a>(T &amp;obj, <span class="keywordtype">bool</span> del = <span class="keyword">false</span>, <a class="code" href="classEventBase.html#a6d92f7ee8144a5911ed46d85a89a4934">Priority</a> <a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a> = <a class="code" href="classEventBase.html#a6bd0fef0ad63ee49ad5ece92a9dd5f8f" title="Default is zero for historical reasons.">Default_Pri</a>)
+<a name="l00729"></a>00729         : <a class="code" href="classEvent.html">Event</a>(<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>), <a class="code" href="classEventWrapper.html#acd5a12b9b1a75e37fd605accfe038a03">object</a>(&amp;obj)
+<a name="l00730"></a>00730     {
+<a name="l00731"></a>00731         <span class="keywordflow">if</span> (del)
+<a name="l00732"></a>00732             <a class="code" href="classEvent.html#a5e0b0810720dd9a6badbf966c410f723" title="Accessor for flags.">setFlags</a>(<a class="code" href="classEventBase.html#a54ba74dbb445f08c349fc85154f58b97">AutoDelete</a>);
+<a name="l00733"></a>00733     }
+<a name="l00734"></a>00734 
+<a name="l00735"></a><a class="code" href="classEventWrapper.html#a2e9c5136d19b1a95fc427e0852deab5c">00735</a>     <span class="keywordtype">void</span> <a class="code" href="classEventWrapper.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>() { (<span class="keywordtype">object</span>-&gt;*F)(); }
+<a name="l00736"></a>00736 
+<a name="l00737"></a>00737     <span class="keyword">const</span> std::string
+<a name="l00738"></a><a class="code" href="classEventWrapper.html#a6490f765a824ced1cc94979609fe7e07">00738</a>     <a class="code" href="classEventWrapper.html#a6490f765a824ced1cc94979609fe7e07">name</a>()<span class="keyword"> const</span>
+<a name="l00739"></a>00739 <span class="keyword">    </span>{
+<a name="l00740"></a>00740         <span class="keywordflow">return</span> <span class="keywordtype">object</span>-&gt;name() + <span class="stringliteral">&quot;.wrapped_event&quot;</span>;
+<a name="l00741"></a>00741     }
+<a name="l00742"></a>00742 
+<a name="l00743"></a><a class="code" href="classEventWrapper.html#a2bd90422eece9190794479e08092a252">00743</a>     <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classEventWrapper.html#a2bd90422eece9190794479e08092a252">description</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="stringliteral">&quot;EventWrapped&quot;</span>; }
+<a name="l00744"></a>00744 };
+<a name="l00745"></a>00745 <span class="preprocessor">#endif</span>
+<a name="l00746"></a>00746 <span class="preprocessor"></span>
+<a name="l00747"></a>00747 <span class="preprocessor">#endif // __SIM_EVENTQ_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

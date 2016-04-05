@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/bus.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/bus.hh</h1><a href="bus_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Ron Dreslinski</span>
+<a name="l00041"></a>00041 <span class="comment"> *          Ali Saidi</span>
+<a name="l00042"></a>00042 <span class="comment"> *          Andreas Hansson</span>
+<a name="l00043"></a>00043 <span class="comment"> *          William Wang</span>
+<a name="l00044"></a>00044 <span class="comment"> */</span>
+<a name="l00045"></a>00045 
+<a name="l00051"></a>00051 <span class="preprocessor">#ifndef __MEM_BUS_HH__</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_BUS_HH__</span>
+<a name="l00053"></a>00053 <span class="preprocessor"></span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &lt;deque&gt;</span>
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="addr__range__map_8hh.html">base/addr_range_map.hh</a>&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="mem__object_8hh.html">mem/mem_object.hh</a>&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;params/BaseBus.hh&quot;</span>
+<a name="l00060"></a>00060 <span class="preprocessor">#include &quot;<a class="code" href="stats_8hh.html">sim/stats.hh</a>&quot;</span>
+<a name="l00061"></a>00061 
+<a name="l00071"></a><a class="code" href="classBaseBus.html">00071</a> <span class="keyword">class </span><a class="code" href="classBaseBus.html">BaseBus</a> : <span class="keyword">public</span> <a class="code" href="classMemObject_1_1MemObject.html">MemObject</a>
+<a name="l00072"></a>00072 {
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074   <span class="keyword">protected</span>:
+<a name="l00075"></a>00075 
+<a name="l00096"></a>00096     <span class="keyword">template</span> &lt;<span class="keyword">typename</span> SrcType, <span class="keyword">typename</span> DstType&gt;
+<a name="l00097"></a><a class="code" href="classBaseBus_1_1Layer.html">00097</a>     <span class="keyword">class </span><a class="code" href="classBaseBus_1_1Layer.html">Layer</a> : <span class="keyword">public</span> <a class="code" href="classDrainable.html">Drainable</a>
+<a name="l00098"></a>00098     {
+<a name="l00099"></a>00099 
+<a name="l00100"></a>00100       <span class="keyword">public</span>:
+<a name="l00101"></a>00101 
+<a name="l00110"></a>00110         <a class="code" href="classBaseBus_1_1Layer.html#a1206f14a8687ddf9256407d185fed584">Layer</a>(DstType&amp; _port, <a class="code" href="classBaseBus.html">BaseBus</a>&amp; _bus, <span class="keyword">const</span> std::string&amp; <a class="code" href="classBaseBus_1_1Layer.html#aaf2ed934b37cbbd236fdd1b01a5f5005">_name</a>);
+<a name="l00111"></a>00111 
+<a name="l00121"></a>00121         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classBaseBus_1_1Layer.html#aa8a18d230dba7a674ac8a0b4f35bc36a">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="namespaceMipsISA.html#a2575c29e7f4617b6076486f340b6fe19">dm</a>);
+<a name="l00122"></a>00122 
+<a name="l00126"></a><a class="code" href="classBaseBus_1_1Layer.html#a6490f765a824ced1cc94979609fe7e07">00126</a>         <span class="keyword">const</span> std::string <a class="code" href="classBaseBus_1_1Layer.html#a6490f765a824ced1cc94979609fe7e07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseBus_1_1Layer.html#ad7d5bc8ce3d9e2ce16633178b4feb387">bus</a>.<a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>() + _name; }
+<a name="l00127"></a>00127 
+<a name="l00128"></a>00128 
+<a name="l00139"></a>00139         <span class="keywordtype">bool</span> <a class="code" href="classBaseBus_1_1Layer.html#a903a48e7e621bc5add3149fdce906bc7">tryTiming</a>(SrcType* src_port);
+<a name="l00140"></a>00140 
+<a name="l00148"></a>00148         <span class="keywordtype">void</span> <a class="code" href="classBaseBus_1_1Layer.html#a63792ad682fd60a25e2896f83452e877">succeededTiming</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> busy_time);
+<a name="l00149"></a>00149 
+<a name="l00159"></a>00159         <span class="keywordtype">void</span> <a class="code" href="classBaseBus_1_1Layer.html#a024ba069e31ed6c6b68dc003c9613bc2">failedTiming</a>(SrcType* src_port, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> busy_time);
+<a name="l00160"></a>00160 
+<a name="l00162"></a>00162         <span class="keywordtype">void</span> <a class="code" href="classBaseBus_1_1Layer.html#aa31a4364e1cce5c7aee0703fa8e289eb">occupyLayer</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> until);
+<a name="l00163"></a>00163 
+<a name="l00168"></a>00168         <span class="keywordtype">void</span> <a class="code" href="classBaseBus_1_1Layer.html#ae589ae2847102aa65e86ebc70414fea3">retryWaiting</a>();
+<a name="l00169"></a>00169 
+<a name="l00175"></a>00175         <span class="keywordtype">void</span> <a class="code" href="classBaseBus_1_1Layer.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00176"></a>00176 
+<a name="l00180"></a>00180         <span class="keywordtype">void</span> <a class="code" href="classBaseBus_1_1Layer.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00181"></a>00181 
+<a name="l00182"></a>00182       <span class="keyword">private</span>:
+<a name="l00183"></a>00183 
+<a name="l00185"></a><a class="code" href="classBaseBus_1_1Layer.html#afb40502d9466732dadd57056e653d8f9">00185</a>         DstType&amp; <a class="code" href="classBaseBus_1_1Layer.html#afb40502d9466732dadd57056e653d8f9">port</a>;
+<a name="l00186"></a>00186 
+<a name="l00188"></a><a class="code" href="classBaseBus_1_1Layer.html#ad7d5bc8ce3d9e2ce16633178b4feb387">00188</a>         <a class="code" href="classBaseBus.html">BaseBus</a>&amp; <a class="code" href="classBaseBus_1_1Layer.html#ad7d5bc8ce3d9e2ce16633178b4feb387">bus</a>;
+<a name="l00189"></a>00189 
+<a name="l00191"></a><a class="code" href="classBaseBus_1_1Layer.html#aaf2ed934b37cbbd236fdd1b01a5f5005">00191</a>         std::string _name;
+<a name="l00192"></a>00192 
+<a name="l00209"></a><a class="code" href="classBaseBus_1_1Layer.html#a5d74787dedbc4e11c1ab15bf487e61f8">00209</a>         <span class="keyword">enum</span> <a class="code" href="classBaseBus_1_1Layer.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> { <a class="code" href="classBaseBus_1_1Layer.html#a5d74787dedbc4e11c1ab15bf487e61f8afd6a0e4343048b10646dd2976cc5ad18">IDLE</a>, <a class="code" href="classBaseBus_1_1Layer.html#a5d74787dedbc4e11c1ab15bf487e61f8aa6e504d57ec9777faa0185fbd3b93b97">BUSY</a>, <a class="code" href="classBaseBus_1_1Layer.html#a5d74787dedbc4e11c1ab15bf487e61f8a76d44342c42b85edbde0cae33f14c5de">RETRY</a> };
+<a name="l00210"></a>00210 
+<a name="l00212"></a><a class="code" href="classBaseBus_1_1Layer.html#a876b486d3a5241a126bd5751c5f70f79">00212</a>         <a class="code" href="classBaseBus_1_1Layer.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classBaseBus_1_1Layer.html#a876b486d3a5241a126bd5751c5f70f79">state</a>;
+<a name="l00213"></a>00213 
+<a name="l00215"></a><a class="code" href="classBaseBus_1_1Layer.html#a329b71fb934a93312ca0aacbf5a3f982">00215</a>         <a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="classBaseBus_1_1Layer.html#a329b71fb934a93312ca0aacbf5a3f982">drainManager</a>;
+<a name="l00216"></a>00216 
+<a name="l00221"></a><a class="code" href="classBaseBus_1_1Layer.html#a8db23e62d084ba779ff42aacec39065d">00221</a>         <a class="code" href="classstd_1_1deque.html">std::deque&lt;SrcType*&gt;</a> <a class="code" href="classBaseBus_1_1Layer.html#a8db23e62d084ba779ff42aacec39065d">waitingForLayer</a>;
+<a name="l00222"></a>00222 
+<a name="l00229"></a><a class="code" href="classBaseBus_1_1Layer.html#a982a229cbb75d7774cb62aebcec3ee9f">00229</a>         SrcType* <a class="code" href="classBaseBus_1_1Layer.html#a982a229cbb75d7774cb62aebcec3ee9f">retryingPort</a>;
+<a name="l00230"></a>00230 
+<a name="l00235"></a><a class="code" href="classBaseBus_1_1Layer.html#ab8ea7bd13cb34352f935d08c989ab5e8">00235</a>         SrcType* <a class="code" href="classBaseBus_1_1Layer.html#ab8ea7bd13cb34352f935d08c989ab5e8">waitingForPeer</a>;
+<a name="l00236"></a>00236 
+<a name="l00242"></a>00242         <span class="keywordtype">void</span> <a class="code" href="classBaseBus_1_1Layer.html#a8f18de03b5e7510ac8a47a698bd673e3">releaseLayer</a>();
+<a name="l00243"></a>00243 
+<a name="l00245"></a><a class="code" href="classBaseBus_1_1Layer.html#a69eab40ac3f909ccc29d20e8dbdc022e">00245</a>         <a class="code" href="classEventWrapper.html">EventWrapper&lt;Layer, &amp;Layer::releaseLayer&gt;</a> <a class="code" href="classBaseBus_1_1Layer.html#a69eab40ac3f909ccc29d20e8dbdc022e">releaseEvent</a>;
+<a name="l00246"></a>00246 
+<a name="l00252"></a><a class="code" href="classBaseBus_1_1Layer.html#a4bdb9e419f12a845feff7f1c7923a75f">00252</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classBaseBus_1_1Layer.html#a4bdb9e419f12a845feff7f1c7923a75f">occupancy</a>;
+<a name="l00253"></a><a class="code" href="classBaseBus_1_1Layer.html#a04353589e0e920909d3ceb8e73abb7ac">00253</a>         <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classBaseBus_1_1Layer.html#a04353589e0e920909d3ceb8e73abb7ac">utilization</a>;
+<a name="l00254"></a>00254 
+<a name="l00255"></a>00255     };
+<a name="l00256"></a>00256 
+<a name="l00258"></a><a class="code" href="classBaseBus.html#ab9c87c91aa592a3542152117cdb99c9b">00258</a>     <span class="keyword">const</span> <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classBaseBus.html#ab9c87c91aa592a3542152117cdb99c9b">headerCycles</a>;
+<a name="l00260"></a><a class="code" href="classBaseBus.html#a4c2292bdfd51cf112bcde1ad3fa55ac4">00260</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classBaseBus.html#a4c2292bdfd51cf112bcde1ad3fa55ac4">width</a>;
+<a name="l00261"></a>00261 
+<a name="l00262"></a><a class="code" href="classBaseBus.html#adedf751dd92daa01137db6149c004ea7">00262</a>     <span class="keyword">typedef</span> <a class="code" href="classAddrRangeMap.html">AddrRangeMap&lt;PortID&gt;::iterator</a> <a class="code" href="classBaseBus.html#adedf751dd92daa01137db6149c004ea7">PortMapIter</a>;
+<a name="l00263"></a><a class="code" href="classBaseBus.html#ad31cae2c5a87fd020ee036a5d94c7420">00263</a>     <span class="keyword">typedef</span> <a class="code" href="classAddrRangeMap.html">AddrRangeMap&lt;PortID&gt;::const_iterator</a> <a class="code" href="classBaseBus.html#ad31cae2c5a87fd020ee036a5d94c7420">PortMapConstIter</a>;
+<a name="l00264"></a><a class="code" href="classBaseBus.html#a81c901d8c13bd997dee7a12453bb29e9">00264</a>     <a class="code" href="classAddrRangeMap.html">AddrRangeMap&lt;PortID&gt;</a> <a class="code" href="classBaseBus.html#a81c901d8c13bd997dee7a12453bb29e9">portMap</a>;
+<a name="l00265"></a>00265 
+<a name="l00267"></a><a class="code" href="classBaseBus.html#ae980bda7663fbe15e79dd75a91d8448c">00267</a>     <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classBaseBus.html#ae980bda7663fbe15e79dd75a91d8448c">busRanges</a>;
+<a name="l00268"></a>00268 
+<a name="l00269"></a><a class="code" href="classBaseBus.html#aacb632304c6d3351600303116de8870d">00269</a>     <a class="code" href="classAddrRange.html">AddrRange</a> <a class="code" href="classBaseBus.html#aacb632304c6d3351600303116de8870d">defaultRange</a>;
+<a name="l00270"></a>00270 
+<a name="l00276"></a>00276     <span class="keywordtype">void</span> <a class="code" href="classBaseBus.html#a85a99f51d8fef63034675b40df7eea7e">recvRangeChange</a>(<a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> master_port_id);
+<a name="l00277"></a>00277 
+<a name="l00283"></a>00283     <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <a class="code" href="classBaseBus.html#a16872a256ea6eae168abc47d498841cb">findPort</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00284"></a>00284 
+<a name="l00285"></a>00285     <span class="comment">// Cache for the findPort function storing recently used ports from portMap</span>
+<a name="l00286"></a><a class="code" href="structBaseBus_1_1PortCache.html">00286</a>     <span class="keyword">struct </span><a class="code" href="structBaseBus_1_1PortCache.html">PortCache</a> {
+<a name="l00287"></a><a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">00287</a>         <span class="keywordtype">bool</span> <a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a>;
+<a name="l00288"></a><a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">00288</a>         <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>;
+<a name="l00289"></a><a class="code" href="structBaseBus_1_1PortCache.html#a194876a072a83a9fd59dde82e5213f0d">00289</a>         <a class="code" href="classAddrRange.html">AddrRange</a> <a class="code" href="structBaseBus_1_1PortCache.html#a194876a072a83a9fd59dde82e5213f0d">range</a>;
+<a name="l00290"></a>00290     };
+<a name="l00291"></a>00291 
+<a name="l00292"></a><a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">00292</a>     <a class="code" href="structBaseBus_1_1PortCache.html">PortCache</a> <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[3];
+<a name="l00293"></a>00293 
+<a name="l00294"></a>00294     <span class="comment">// Checks the cache and returns the id of the port that has the requested</span>
+<a name="l00295"></a>00295     <span class="comment">// address within its range</span>
+<a name="l00296"></a><a class="code" href="classBaseBus.html#a3ec7557ff2dd8a9390bbf310b3352ce2">00296</a>     <span class="keyword">inline</span> <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <a class="code" href="classBaseBus.html#a3ec7557ff2dd8a9390bbf310b3352ce2">checkPortCache</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>)<span class="keyword"> const </span>{
+<a name="l00297"></a>00297         <span class="keywordflow">if</span> (<a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].valid &amp;&amp; <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].range.contains(addr)) {
+<a name="l00298"></a>00298             <span class="keywordflow">return</span> <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>;
+<a name="l00299"></a>00299         }
+<a name="l00300"></a>00300         <span class="keywordflow">if</span> (<a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].valid &amp;&amp; <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].range.contains(addr)) {
+<a name="l00301"></a>00301             <span class="keywordflow">return</span> <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>;
+<a name="l00302"></a>00302         }
+<a name="l00303"></a>00303         <span class="keywordflow">if</span> (<a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[2].valid &amp;&amp; <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[2].range.contains(addr)) {
+<a name="l00304"></a>00304             <span class="keywordflow">return</span> <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[2].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>;
+<a name="l00305"></a>00305         }
+<a name="l00306"></a>00306 
+<a name="l00307"></a>00307         <span class="keywordflow">return</span> <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>;
+<a name="l00308"></a>00308     }
+<a name="l00309"></a>00309 
+<a name="l00310"></a>00310     <span class="comment">// Clears the earliest entry of the cache and inserts a new port entry</span>
+<a name="l00311"></a><a class="code" href="classBaseBus.html#a3b429b2b5fe74236299bcb556d2308e7">00311</a>     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classBaseBus.html#a3b429b2b5fe74236299bcb556d2308e7">updatePortCache</a>(<span class="keywordtype">short</span> <span class="keywordtype">id</span>, <span class="keyword">const</span> <a class="code" href="classAddrRange.html">AddrRange</a>&amp; range) {
+<a name="l00312"></a>00312         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[2].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a>;
+<a name="l00313"></a>00313         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[2].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>    = <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>;
+<a name="l00314"></a>00314         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[2].<a class="code" href="structBaseBus_1_1PortCache.html#a194876a072a83a9fd59dde82e5213f0d">range</a> = <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a194876a072a83a9fd59dde82e5213f0d">range</a>;
+<a name="l00315"></a>00315 
+<a name="l00316"></a>00316         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a>;
+<a name="l00317"></a>00317         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>    = <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>;
+<a name="l00318"></a>00318         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a194876a072a83a9fd59dde82e5213f0d">range</a> = <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a194876a072a83a9fd59dde82e5213f0d">range</a>;
+<a name="l00319"></a>00319 
+<a name="l00320"></a>00320         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">true</span>;
+<a name="l00321"></a>00321         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a34ff492e343069602bcc51eb116a061f">id</a>    = id;
+<a name="l00322"></a>00322         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a194876a072a83a9fd59dde82e5213f0d">range</a> = range;
+<a name="l00323"></a>00323     }
+<a name="l00324"></a>00324 
+<a name="l00325"></a>00325     <span class="comment">// Clears the cache. Needs to be called in constructor.</span>
+<a name="l00326"></a><a class="code" href="classBaseBus.html#a2b259c34a080563d0e03d5a1fec2cd7a">00326</a>     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classBaseBus.html#a2b259c34a080563d0e03d5a1fec2cd7a">clearPortCache</a>() {
+<a name="l00327"></a>00327         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[2].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">false</span>;
+<a name="l00328"></a>00328         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[1].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">false</span>;
+<a name="l00329"></a>00329         <a class="code" href="classBaseBus.html#ab8fed472717f8738191c2977c81e530b">portCache</a>[0].<a class="code" href="structBaseBus_1_1PortCache.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">false</span>;
+<a name="l00330"></a>00330     }
+<a name="l00331"></a>00331 
+<a name="l00337"></a>00337     <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classBaseBus.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00338"></a>00338 
+<a name="l00345"></a>00345     <span class="keywordtype">void</span> <a class="code" href="classBaseBus.html#a0e69bf0fe1b87ac59689c3807a942ee7">calcPacketTiming</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00346"></a>00346 
+<a name="l00353"></a><a class="code" href="classBaseBus.html#ace0f90dcdbf1c53391c0971acc0269ec">00353</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;bool&gt;</a> <a class="code" href="classBaseBus.html#ace0f90dcdbf1c53391c0971acc0269ec">gotAddrRanges</a>;
+<a name="l00354"></a><a class="code" href="classBaseBus.html#a0c924502f5e6c095ac7dcbdaf3e177a4">00354</a>     <span class="keywordtype">bool</span> <a class="code" href="classBaseBus.html#a0c924502f5e6c095ac7dcbdaf3e177a4">gotAllAddrRanges</a>;
+<a name="l00355"></a>00355 
+<a name="l00357"></a><a class="code" href="classBaseBus.html#a9f084bf86a306772d84ad52e839cce97">00357</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;SlavePort*&gt;</a> <a class="code" href="classBaseBus.html#a9f084bf86a306772d84ad52e839cce97">slavePorts</a>;
+<a name="l00358"></a><a class="code" href="classBaseBus.html#a0f7b2e1619b03085b0a28bb3216cd562">00358</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;MasterPort*&gt;</a> <a class="code" href="classBaseBus.html#a0f7b2e1619b03085b0a28bb3216cd562">masterPorts</a>;
+<a name="l00359"></a>00359 
+<a name="l00361"></a><a class="code" href="classBaseBus.html#a2b00f9fc9ba7e236c9757ea764cda19d">00361</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;SlavePort*&gt;::iterator</a> <a class="code" href="classBaseBus.html#a2b00f9fc9ba7e236c9757ea764cda19d">SlavePortIter</a>;
+<a name="l00362"></a><a class="code" href="classBaseBus.html#a44e87d907bdab92a2169caddd28979f9">00362</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;MasterPort*&gt;::iterator</a> <a class="code" href="classBaseBus.html#a44e87d907bdab92a2169caddd28979f9">MasterPortIter</a>;
+<a name="l00363"></a><a class="code" href="classBaseBus.html#a4cfbb26aa06c3132b77227f45f39e224">00363</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;SlavePort*&gt;::const_iterator</a> <a class="code" href="classBaseBus.html#a4cfbb26aa06c3132b77227f45f39e224">SlavePortConstIter</a>;
+<a name="l00364"></a><a class="code" href="classBaseBus.html#a19db300fe0038b9addfe69a31ef83b3d">00364</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;MasterPort*&gt;::const_iterator</a> <a class="code" href="classBaseBus.html#a19db300fe0038b9addfe69a31ef83b3d">MasterPortConstIter</a>;
+<a name="l00365"></a>00365 
+<a name="l00367"></a><a class="code" href="classBaseBus.html#a769e7b27ddafebcc1228757f2c9ec1ba">00367</a>     <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <a class="code" href="classBaseBus.html#a769e7b27ddafebcc1228757f2c9ec1ba">defaultPortID</a>;
+<a name="l00368"></a>00368 
+<a name="l00373"></a><a class="code" href="classBaseBus.html#a1b0312e896847e0ef8bbad93fa73dc4c">00373</a>     <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classBaseBus.html#a1b0312e896847e0ef8bbad93fa73dc4c">useDefaultRange</a>;
+<a name="l00374"></a>00374 
+<a name="l00375"></a>00375     <a class="code" href="classBaseBus.html#aafbb881b411bf8ecd7696a6b6c9fbf5c">BaseBus</a>(<span class="keyword">const</span> BaseBusParams *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00376"></a>00376 
+<a name="l00377"></a>00377     <span class="keyword">virtual</span> <a class="code" href="classBaseBus.html#a4c37180f5639002a5c75b2c1ec3c3ab4">~BaseBus</a>();
+<a name="l00378"></a>00378 
+<a name="l00388"></a><a class="code" href="classBaseBus.html#ac7ddaff47c2ff8945ba85797af602673">00388</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classBaseBus.html#ac7ddaff47c2ff8945ba85797af602673">throughput</a>;
+<a name="l00389"></a><a class="code" href="classBaseBus.html#a3eb88cd36449bb56229422858d34194d">00389</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classBaseBus.html#a3eb88cd36449bb56229422858d34194d">transDist</a>;
+<a name="l00390"></a><a class="code" href="classBaseBus.html#a1444e1d672a8bfe518b9c3d05412985a">00390</a>     <a class="code" href="classStats_1_1Vector2d.html">Stats::Vector2d</a> <a class="code" href="classBaseBus.html#a1444e1d672a8bfe518b9c3d05412985a">pktCount</a>;
+<a name="l00391"></a><a class="code" href="classBaseBus.html#a1b2222f1cfbd8c191ad8d1099fd24848">00391</a>     <a class="code" href="classStats_1_1Vector2d.html">Stats::Vector2d</a> <a class="code" href="classBaseBus.html#a1b2222f1cfbd8c191ad8d1099fd24848">totPktSize</a>;
+<a name="l00392"></a>00392 
+<a name="l00393"></a>00393   <span class="keyword">public</span>:
+<a name="l00394"></a>00394 
+<a name="l00395"></a>00395     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseBus.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00396"></a>00396 
+<a name="l00398"></a>00398     <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a>&amp; <a class="code" href="classBaseBus.html#adc4e675e51defbdd1e354dac729d0703">getMasterPort</a>(<span class="keyword">const</span> std::string&amp; if_name,
+<a name="l00399"></a>00399                                   <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> idx = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00400"></a>00400     <a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>&amp; <a class="code" href="classBaseBus.html#ac918a145092d7514ebc6dbd952dceafb">getSlavePort</a>(<span class="keyword">const</span> std::string&amp; if_name,
+<a name="l00401"></a>00401                                 <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> idx = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00402"></a>00402 
+<a name="l00403"></a>00403     <span class="keyword">virtual</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classBaseBus.html#ac8c1510f7e1591e75a5c79b4b873f6b4">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="namespaceMipsISA.html#a2575c29e7f4617b6076486f340b6fe19">dm</a>) = 0;
+<a name="l00404"></a>00404 
+<a name="l00405"></a>00405     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseBus.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00406"></a>00406 
+<a name="l00407"></a>00407 };
+<a name="l00408"></a>00408 
+<a name="l00409"></a>00409 <span class="preprocessor">#endif //__MEM_BUS_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

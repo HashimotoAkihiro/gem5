@@ -1,0 +1,127 @@
+\hypertarget{classDerivedClockDomain}{
+\section{クラス DerivedClockDomain}
+\label{classDerivedClockDomain}\index{DerivedClockDomain@{DerivedClockDomain}}
+}
+
+
+{\ttfamily \#include $<$clock\_\-domain.hh$>$}DerivedClockDomainに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classDerivedClockDomain}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef DerivedClockDomainParams \hyperlink{classDerivedClockDomain_a10c51f81ae9968953f7d5c0ee20546c6}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDerivedClockDomain_a816eac6a1295742a75f85f70e144ac18}{DerivedClockDomain} (const \hyperlink{classDerivedClockDomain_a10c51f81ae9968953f7d5c0ee20546c6}{Params} $\ast$p)
+\item 
+void \hyperlink{classDerivedClockDomain_a0629a73fecc22f407351ee5630e8a2f9}{updateClockPeriod} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classClockDomain_1_1ClockDomain}{ClockDomain} \& \hyperlink{classDerivedClockDomain_a95cdc68e9450163b78382463aa16ec33}{parent}
+\item 
+const uint64\_\-t \hyperlink{classDerivedClockDomain_ae50eb75652dfa3720bbfefdf17308e0f}{clockDivider}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+The derived clock domains provides the notion of a clock domain that is connected to a parent clock domain that can either be a source clock domain or a derived clock domain. It maintains the clock divider and provides methods for getting the clock. 
+
+\subsection{型定義}
+\hypertarget{classDerivedClockDomain_a10c51f81ae9968953f7d5c0ee20546c6}{
+\index{DerivedClockDomain@{DerivedClockDomain}!Params@{Params}}
+\index{Params@{Params}!DerivedClockDomain@{DerivedClockDomain}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef DerivedClockDomainParams {\bf Params}}}
+\label{classDerivedClockDomain_a10c51f81ae9968953f7d5c0ee20546c6}
+
+
+\hyperlink{classClockDomain_a38704c6bd51f0677b46da34c8fe16a38}{ClockDomain}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classDerivedClockDomain_a816eac6a1295742a75f85f70e144ac18}{
+\index{DerivedClockDomain@{DerivedClockDomain}!DerivedClockDomain@{DerivedClockDomain}}
+\index{DerivedClockDomain@{DerivedClockDomain}!DerivedClockDomain@{DerivedClockDomain}}
+\subsubsection[{DerivedClockDomain}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DerivedClockDomain} (const {\bf Params} $\ast$ {\em p})}}
+\label{classDerivedClockDomain_a816eac6a1295742a75f85f70e144ac18}
+
+
+
+\begin{DoxyCode}
+108                                                       :
+109     ClockDomain(p, p->clk_domain->voltageDomain()),
+110     parent(*p->clk_domain),
+111     clockDivider(p->clk_divider)
+112 {
+113     // Ensure that clock divider setting works as frequency divider and never
+114     // work as frequency multiplier
+115     if (clockDivider < 1) {
+116        fatal("Clock divider param cannot be less than 1");
+117     }
+118 
+119     // let the parent keep track of this derived domain so that it can
+120     // propagate changes
+121     parent.addDerivedDomain(this);
+122 
+123     // update our clock period based on the parents clock
+124     updateClockPeriod();
+125 }
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classDerivedClockDomain_a0629a73fecc22f407351ee5630e8a2f9}{
+\index{DerivedClockDomain@{DerivedClockDomain}!updateClockPeriod@{updateClockPeriod}}
+\index{updateClockPeriod@{updateClockPeriod}!DerivedClockDomain@{DerivedClockDomain}}
+\subsubsection[{updateClockPeriod}]{\setlength{\rightskip}{0pt plus 5cm}void updateClockPeriod ()}}
+\label{classDerivedClockDomain_a0629a73fecc22f407351ee5630e8a2f9}
+Called by the parent clock domain to propagate changes. This also involves propagating the change further to any children of the derived domain itself. 
+
+
+\begin{DoxyCode}
+129 {
+130     // Align all members to the current tick
+131     for (auto m = members.begin(); m != members.end(); ++m) {
+132         (*m)->updateClockPeriod();
+133     }
+134 
+135     // recalculate the clock period, relying on the fact that changes
+136     // propagate downwards in the tree
+137     _clockPeriod = parent.clockPeriod() * clockDivider;
+138 
+139     DPRINTF(ClockDomain,
+140             "Setting clock period to %d ticks for derived clock %s\n",
+141             _clockPeriod, name());
+142 
+143     // inform any derived clocks
+144     for (auto c = children.begin(); c != children.end(); ++c) {
+145         (*c)->updateClockPeriod();
+146     }
+147 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classDerivedClockDomain_ae50eb75652dfa3720bbfefdf17308e0f}{
+\index{DerivedClockDomain@{DerivedClockDomain}!clockDivider@{clockDivider}}
+\index{clockDivider@{clockDivider}!DerivedClockDomain@{DerivedClockDomain}}
+\subsubsection[{clockDivider}]{\setlength{\rightskip}{0pt plus 5cm}const uint64\_\-t {\bf clockDivider}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDerivedClockDomain_ae50eb75652dfa3720bbfefdf17308e0f}
+Local clock divider of the domain \hypertarget{classDerivedClockDomain_a95cdc68e9450163b78382463aa16ec33}{
+\index{DerivedClockDomain@{DerivedClockDomain}!parent@{parent}}
+\index{parent@{parent}!DerivedClockDomain@{DerivedClockDomain}}
+\subsubsection[{parent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ClockDomain}\& {\bf parent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDerivedClockDomain_a95cdc68e9450163b78382463aa16ec33}
+Reference to the parent clock domain this clock domain derives its clock period from 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+sim/\hyperlink{clock__domain_8hh}{clock\_\-domain.hh}\item 
+sim/\hyperlink{clock__domain_8cc}{clock\_\-domain.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,367 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/commit.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/commit.hh</h1><a href="commit_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010-2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00041"></a>00041 <span class="comment"> *          Korey Sewell</span>
+<a name="l00042"></a>00042 <span class="comment"> */</span>
+<a name="l00043"></a>00043 
+<a name="l00044"></a>00044 <span class="preprocessor">#ifndef __CPU_O3_COMMIT_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_COMMIT_HH__</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="exetrace_8hh.html">cpu/exetrace.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="timebuf_8hh.html">cpu/timebuf.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="probe_8hh.html">sim/probe/probe.hh</a>&quot;</span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055 <span class="keyword">struct </span>DerivO3CPUParams;
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057 <span class="keyword">template</span> &lt;<span class="keyword">class</span>&gt;
+<a name="l00058"></a>00058 <span class="keyword">struct </span><a class="code" href="structO3ThreadState.html">O3ThreadState</a>;
+<a name="l00059"></a>00059 
+<a name="l00082"></a>00082 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00083"></a><a class="code" href="classDefaultCommit.html">00083</a> <span class="keyword">class </span><a class="code" href="classDefaultCommit.html">DefaultCommit</a>
+<a name="l00084"></a>00084 {
+<a name="l00085"></a>00085   <span class="keyword">public</span>:
+<a name="l00086"></a>00086     <span class="comment">// Typedefs from the Impl.</span>
+<a name="l00087"></a><a class="code" href="classDefaultCommit.html#a44622cf06940413482836cb62931ac3f">00087</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::O3CPU <a class="code" href="classDefaultCommit.html#a44622cf06940413482836cb62931ac3f">O3CPU</a>;
+<a name="l00088"></a><a class="code" href="classDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">00088</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00089"></a><a class="code" href="classDefaultCommit.html#a87d662eaeb9eab249d671b63cb4ba11a">00089</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUPol <a class="code" href="classDefaultCommit.html#a87d662eaeb9eab249d671b63cb4ba11a">CPUPol</a>;
+<a name="l00090"></a>00090 
+<a name="l00091"></a><a class="code" href="classDefaultCommit.html#a341963bcea1928476182a17e357f98e3">00091</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::RenameMap <a class="code" href="classDefaultCommit.html#a341963bcea1928476182a17e357f98e3">RenameMap</a>;
+<a name="l00092"></a><a class="code" href="classDefaultCommit.html#aa480e463fb139d9966f38e3895a8b326">00092</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::ROB <a class="code" href="classROB.html">ROB</a>;
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classDefaultCommit.html#ab7dd3632ef639702a5c6e7c2c3a2f82a">00094</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::TimeStruct <a class="code" href="structTimeStruct.html">TimeStruct</a>;
+<a name="l00095"></a><a class="code" href="classDefaultCommit.html#a3aac8607069f16898ef53cfaa2d97aeb">00095</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::FetchStruct <a class="code" href="classDefaultCommit.html#a3aac8607069f16898ef53cfaa2d97aeb">FetchStruct</a>;
+<a name="l00096"></a><a class="code" href="classDefaultCommit.html#a7cf3f052f760b3a8a18623f792c10910">00096</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::IEWStruct <a class="code" href="classDefaultCommit.html#a7cf3f052f760b3a8a18623f792c10910">IEWStruct</a>;
+<a name="l00097"></a><a class="code" href="classDefaultCommit.html#a0c2a89ad2edad9ad605d0461f9b132a5">00097</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::RenameStruct <a class="code" href="classDefaultCommit.html#a0c2a89ad2edad9ad605d0461f9b132a5">RenameStruct</a>;
+<a name="l00098"></a>00098 
+<a name="l00099"></a><a class="code" href="classDefaultCommit.html#aea27de1f675f508e1eb618ac115ce05c">00099</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::Fetch <a class="code" href="classDefaultCommit.html#aea27de1f675f508e1eb618ac115ce05c">Fetch</a>;
+<a name="l00100"></a><a class="code" href="classDefaultCommit.html#a2e298f790f528754f0e0ffa0cb8088f6">00100</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> CPUPol::IEW <a class="code" href="classDefaultCommit.html#a2e298f790f528754f0e0ffa0cb8088f6">IEW</a>;
+<a name="l00101"></a>00101 
+<a name="l00102"></a><a class="code" href="classDefaultCommit.html#ad5e0f9b655492f45720f8d756f11d3b5">00102</a>     <span class="keyword">typedef</span> <a class="code" href="structO3ThreadState.html">O3ThreadState&lt;Impl&gt;</a> <a class="code" href="structO3ThreadState.html">Thread</a>;
+<a name="l00103"></a>00103 
+<a name="l00107"></a><a class="code" href="classDefaultCommit_1_1TrapEvent.html">00107</a>     <span class="keyword">class </span><a class="code" href="classDefaultCommit_1_1TrapEvent.html">TrapEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a> {
+<a name="l00108"></a>00108       <span class="keyword">private</span>:
+<a name="l00109"></a><a class="code" href="classDefaultCommit_1_1TrapEvent.html#a9a5f97f5a2b65d6ebf11addf277241aa">00109</a>         <a class="code" href="classDefaultCommit.html">DefaultCommit&lt;Impl&gt;</a> *<a class="code" href="classDefaultCommit_1_1TrapEvent.html#a9a5f97f5a2b65d6ebf11addf277241aa">commit</a>;
+<a name="l00110"></a><a class="code" href="classDefaultCommit_1_1TrapEvent.html#aa508770268ee4ceaf16054b9e0be0e17">00110</a>         <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classDefaultCommit_1_1TrapEvent.html#aa508770268ee4ceaf16054b9e0be0e17">tid</a>;
+<a name="l00111"></a>00111 
+<a name="l00112"></a>00112       <span class="keyword">public</span>:
+<a name="l00113"></a>00113         <a class="code" href="classDefaultCommit_1_1TrapEvent.html#aac9789c38c08cd80f1a477b319c3ca6e">TrapEvent</a>(<a class="code" href="classDefaultCommit.html">DefaultCommit&lt;Impl&gt;</a> *_commit, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> _tid);
+<a name="l00114"></a>00114 
+<a name="l00115"></a>00115         <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit_1_1TrapEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00116"></a>00116         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classDefaultCommit_1_1TrapEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00117"></a>00117     };
+<a name="l00118"></a>00118 
+<a name="l00122"></a><a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986">00122</a>     <span class="keyword">enum</span> <a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986">CommitStatus</a>{
+<a name="l00123"></a><a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986a26bd8444261cc58df7a86753c79d2520">00123</a>         <a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986a26bd8444261cc58df7a86753c79d2520">Active</a>,
+<a name="l00124"></a><a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986a969c924a722daf6334fca64346092ae6">00124</a>         <a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986a969c924a722daf6334fca64346092ae6">Inactive</a>
+<a name="l00125"></a>00125     };
+<a name="l00126"></a>00126 
+<a name="l00128"></a><a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173c">00128</a>     <span class="keyword">enum</span> <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173c">ThreadStatus</a> {
+<a name="l00129"></a><a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca2f5f2c4a8c4f4f0519d503dcdfbf55cb">00129</a>         <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca2f5f2c4a8c4f4f0519d503dcdfbf55cb">Running</a>,
+<a name="l00130"></a><a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173cad3fa9ae9431d6cb1772f9d9df48cab19">00130</a>         <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173cad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00131"></a><a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca55ceab70c6d1094de92189130c899d84">00131</a>         <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca55ceab70c6d1094de92189130c899d84">ROBSquashing</a>,
+<a name="l00132"></a><a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca8c49adf6da5f507150d403610c684877">00132</a>         <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca8c49adf6da5f507150d403610c684877">TrapPending</a>,
+<a name="l00133"></a><a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca757a5840686b21827966401ca2499141">00133</a>         <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca757a5840686b21827966401ca2499141">FetchTrapPending</a>,
+<a name="l00134"></a><a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca1f0e8d98cfb4db458b98f0b5e3f49466">00134</a>         <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173ca1f0e8d98cfb4db458b98f0b5e3f49466">SquashAfterPending</a>, <span class="comment">//&lt; Committing instructions before a squash.</span>
+<a name="l00135"></a>00135     };
+<a name="l00136"></a>00136 
+<a name="l00138"></a><a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05">00138</a>     <span class="keyword">enum</span> <a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05">CommitPolicy</a> {
+<a name="l00139"></a><a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05a227598607ef691b05c9eb1ea73a06a2f">00139</a>         <a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05a227598607ef691b05c9eb1ea73a06a2f">Aggressive</a>,
+<a name="l00140"></a><a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05a5c08841de48c15133dd26a4d9d740a11">00140</a>         <a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05a5c08841de48c15133dd26a4d9d740a11">RoundRobin</a>,
+<a name="l00141"></a><a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05a1ce7bd97138a7693d81bee46fa74a1cc">00141</a>         <a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05a1ce7bd97138a7693d81bee46fa74a1cc">OldestReady</a>
+<a name="l00142"></a>00142     };
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144   <span class="keyword">private</span>:
+<a name="l00146"></a><a class="code" href="classDefaultCommit.html#a0cf11ec4d376480eb733b779911f6446">00146</a>     <a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986">CommitStatus</a> <a class="code" href="classDefaultCommit.html#a0cf11ec4d376480eb733b779911f6446">_status</a>;
+<a name="l00148"></a><a class="code" href="classDefaultCommit.html#a96c6cf126a60fa550bd3e279b0f33838">00148</a>     <a class="code" href="classDefaultCommit.html#a40bce497731b29d1d0756af6c5e40986">CommitStatus</a> <a class="code" href="classDefaultCommit.html#a96c6cf126a60fa550bd3e279b0f33838">_nextStatus</a>;
+<a name="l00150"></a><a class="code" href="classDefaultCommit.html#ae7adb1afa143087a1e39aa65f3921185">00150</a>     <a class="code" href="classDefaultCommit.html#ae2739961013a00cede621d4d72f2173c">ThreadStatus</a> <a class="code" href="classDefaultCommit.html#ae7adb1afa143087a1e39aa65f3921185">commitStatus</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00152"></a><a class="code" href="classDefaultCommit.html#acbc18713699043ca78415e9f03712ce1">00152</a>     <a class="code" href="classDefaultCommit.html#a2b5cad948a22cc08e48fe1a2226c8d05">CommitPolicy</a> <a class="code" href="classDefaultCommit.html#acbc18713699043ca78415e9f03712ce1">commitPolicy</a>;
+<a name="l00153"></a>00153 
+<a name="l00155"></a><a class="code" href="classDefaultCommit.html#ae41ff03242cc6980c072e3ea824168ed">00155</a>     <a class="code" href="classProbePointArg.html">ProbePointArg&lt;DynInstPtr&gt;</a> *<a class="code" href="classDefaultCommit.html#ae41ff03242cc6980c072e3ea824168ed">ppCommit</a>;
+<a name="l00156"></a><a class="code" href="classDefaultCommit.html#a3c0bfd67f137dbd48bc31ade04a09cf0">00156</a>     <a class="code" href="classProbePointArg.html">ProbePointArg&lt;DynInstPtr&gt;</a> *<a class="code" href="classDefaultCommit.html#a3c0bfd67f137dbd48bc31ade04a09cf0">ppCommitStall</a>;
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158   <span class="keyword">public</span>:
+<a name="l00160"></a>00160     <a class="code" href="classDefaultCommit.html#ac5ef93cb7a09f9a537c03bb1d002f7a2">DefaultCommit</a>(<a class="code" href="classDefaultCommit.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *_cpu, DerivO3CPUParams *params);
+<a name="l00161"></a>00161 
+<a name="l00163"></a>00163     std::string <a class="code" href="classDefaultCommit.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>() <span class="keyword">const</span>;
+<a name="l00164"></a>00164 
+<a name="l00166"></a>00166     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00167"></a>00167 
+<a name="l00169"></a>00169     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#aa2dab17a363fd4307274d579796adcf7">regProbePoints</a>();
+<a name="l00170"></a>00170 
+<a name="l00172"></a>00172     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#aa8150d8ab62e6314eb07420a63aedce2">setThreads</a>(<a class="code" href="classstd_1_1vector.html">std::vector&lt;Thread *&gt;</a> &amp;threads);
+<a name="l00173"></a>00173 
+<a name="l00175"></a>00175     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a2b521ea5f191fff72265f60d4ed5187b">setTimeBuffer</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *tb_ptr);
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#ad1be90519aa7737ddf8e41de079a5ea9">setFetchQueue</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;FetchStruct&gt;</a> *fq_ptr);
+<a name="l00178"></a>00178 
+<a name="l00180"></a>00180     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a701624f92a819fe4205faede6e614d9f">setRenameQueue</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;RenameStruct&gt;</a> *rq_ptr);
+<a name="l00181"></a>00181 
+<a name="l00183"></a>00183     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a6b8bf7d75423c9bccd93d50470f7f935">setIEWQueue</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IEWStruct&gt;</a> *iq_ptr);
+<a name="l00184"></a>00184 
+<a name="l00186"></a>00186     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a4b6d8e4b2cf6249763ed2fc73eb1af47">setIEWStage</a>(<a class="code" href="classDefaultCommit.html#a2e298f790f528754f0e0ffa0cb8088f6">IEW</a> *iew_stage);
+<a name="l00187"></a>00187 
+<a name="l00189"></a><a class="code" href="classDefaultCommit.html#ab9508ede35e5a000089a1450342412be">00189</a>     std::queue&lt;DynInstPtr&gt; <a class="code" href="classDefaultCommit.html#ab9508ede35e5a000089a1450342412be">skidBuffer</a>;
+<a name="l00190"></a>00190 
+<a name="l00195"></a><a class="code" href="classDefaultCommit.html#a4e9ef25d8913b270d432be4bbfe4965c">00195</a>     <a class="code" href="classDefaultCommit.html#a2e298f790f528754f0e0ffa0cb8088f6">IEW</a> *<a class="code" href="classDefaultCommit.html#a4e9ef25d8913b270d432be4bbfe4965c">iewStage</a>;
+<a name="l00196"></a>00196 
+<a name="l00198"></a>00198     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#aab96bdacf8bd420402cbb543f994e054">setActiveThreads</a>(<a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> *at_ptr);
+<a name="l00199"></a>00199 
+<a name="l00201"></a>00201     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a6f0aaedb2c39d674ef86c25d0aeb4211">setRenameMap</a>(<a class="code" href="classDefaultCommit.html#a341963bcea1928476182a17e357f98e3">RenameMap</a> rm_ptr[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>]);
+<a name="l00202"></a>00202 
+<a name="l00204"></a>00204     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a46149ea78698ff6515a509c53d814193">setROB</a>(<a class="code" href="classROB.html">ROB</a> *rob_ptr);
+<a name="l00205"></a>00205 
+<a name="l00207"></a>00207     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a31d4cbdab16d4ff8d6bc7f84ece727da">startupStage</a>();
+<a name="l00208"></a>00208 
+<a name="l00210"></a>00210     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#af7d01b5776b9d8a0f218aec331ddaeb9">drain</a>();
+<a name="l00211"></a>00211 
+<a name="l00213"></a>00213     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00214"></a>00214 
+<a name="l00216"></a>00216     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a0240eb42fa57fe5d3788093f62b77347">drainSanityCheck</a>() <span class="keyword">const</span>;
+<a name="l00217"></a>00217 
+<a name="l00219"></a>00219     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#adf5473c18a3d7c1e88c4a2072bce5526">isDrained</a>() <span class="keyword">const</span>;
+<a name="l00220"></a>00220 
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a8674059ce345e23aac5086b2c3e24a43">takeOverFrom</a>();
+<a name="l00223"></a>00223 
+<a name="l00225"></a>00225     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00226"></a>00226 
+<a name="l00230"></a>00230     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#ad55316f5135cdae6aa6c5a763f6c3473">commit</a>();
+<a name="l00231"></a>00231 
+<a name="l00233"></a>00233     <span class="keywordtype">size_t</span> <a class="code" href="classDefaultCommit.html#a3c8eae00d4f0d15336eec11f879146c2">numROBFreeEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00234"></a>00234 
+<a name="l00236"></a>00236     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a7002d0f2beae1ce9a349218968ff97c3">generateTrapEvent</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00237"></a>00237 
+<a name="l00241"></a>00241     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a4adb99d6e22b7028a21e537331de6253">generateTCEvent</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00242"></a>00242 
+<a name="l00243"></a>00243   <span class="keyword">private</span>:
+<a name="l00247"></a>00247     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a4bb9486757ce225941aaaf759b357a57">updateStatus</a>();
+<a name="l00248"></a>00248 
+<a name="l00252"></a>00252     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a4c5106e8a165f2f63807122b80a4e580">setNextStatus</a>();
+<a name="l00253"></a>00253 
+<a name="l00257"></a>00257     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a6949aa47bdaf57471e048da5c5b7c14c">robDoneSquashing</a>();
+<a name="l00258"></a>00258 
+<a name="l00263"></a>00263     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#ac5a2190cdc184d1396bee3a6d99e34e7">changedROBEntries</a>();
+<a name="l00264"></a>00264 
+<a name="l00266"></a>00266     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a9aa66ed2ab2c61003cbbc4f0cbb53a13">squashAll</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00267"></a>00267 
+<a name="l00269"></a>00269     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a2f79a5e45c55f3cba92021d1a5ebaadf">squashFromTrap</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00270"></a>00270 
+<a name="l00272"></a>00272     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#ac4c7a18be5c282d711310ffb7b6f82f7">squashFromTC</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00273"></a>00273 
+<a name="l00275"></a>00275     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a05dbc60b1e537c4a85f4ab6dec6ca9a4">squashFromSquashAfter</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00276"></a>00276 
+<a name="l00305"></a>00305     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#ad47b387a7bbc4a2153b50f96b8fd2a51">squashAfter</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid, <a class="code" href="classDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;head_inst);
+<a name="l00306"></a>00306 
+<a name="l00308"></a>00308     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a1cb72a248a56b5dc2b2ed27db7560b90">handleInterrupt</a>();
+<a name="l00309"></a>00309 
+<a name="l00311"></a>00311     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#ab9d20a05498697dfc59478b80a0726fb">propagateInterrupt</a>();
+<a name="l00312"></a>00312 
+<a name="l00314"></a>00314     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#ac8b85fbfdf330d000c094a9d1886d264">commitInsts</a>();
+<a name="l00315"></a>00315 
+<a name="l00319"></a>00319     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a5beb5c9ae170034a8abe7a578e04e47a">commitHead</a>(<a class="code" href="classDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;head_inst, <span class="keywordtype">unsigned</span> inst_num);
+<a name="l00320"></a>00320 
+<a name="l00322"></a>00322     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a8d0c39182cb7719942e865bcaaff769b">getInsts</a>();
+<a name="l00323"></a>00323 
+<a name="l00325"></a>00325     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#affce029fbba116bb863eb2a3a7a5bb48">skidInsert</a>();
+<a name="l00326"></a>00326 
+<a name="l00328"></a>00328     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a035349a9fd8a12938e7997be5a76211e">markCompletedInsts</a>();
+<a name="l00329"></a>00329 
+<a name="l00331"></a>00331     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classDefaultCommit.html#ad313fd14604cfa26fec9c62dba3a7062">getCommittingThread</a>();
+<a name="l00332"></a>00332 
+<a name="l00334"></a>00334     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classDefaultCommit.html#a8aab9cacbc483081596b13ecd5192eb5">roundRobin</a>();
+<a name="l00335"></a>00335 
+<a name="l00337"></a>00337     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classDefaultCommit.html#a7b2c5e474b4fd5c54395b44f3b792d21">oldestReady</a>();
+<a name="l00338"></a>00338 
+<a name="l00339"></a>00339   <span class="keyword">public</span>:
+<a name="l00341"></a><a class="code" href="classDefaultCommit.html#af486ac7476906f63fc6696b3e76a411b">00341</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classDefaultCommit.html#af486ac7476906f63fc6696b3e76a411b">pcState</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid) { <span class="keywordflow">return</span> <a class="code" href="classDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">pc</a>[tid]; }
+<a name="l00342"></a>00342 
+<a name="l00344"></a><a class="code" href="classDefaultCommit.html#aaa8fbb79b13ce112b6d11f77bc3dd18f">00344</a>     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#af486ac7476906f63fc6696b3e76a411b">pcState</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid)
+<a name="l00345"></a>00345     { <a class="code" href="classDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">pc</a>[tid] = val; }
+<a name="l00346"></a>00346 
+<a name="l00348"></a><a class="code" href="classDefaultCommit.html#afae6152cf4b3a51162d6e64247c1ac09">00348</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classDefaultCommit.html#afae6152cf4b3a51162d6e64247c1ac09">instAddr</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid) { <span class="keywordflow">return</span> <a class="code" href="classDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">pc</a>[tid].instAddr(); }
+<a name="l00349"></a>00349 
+<a name="l00351"></a><a class="code" href="classDefaultCommit.html#af1caba1f04cf2802d742d1a16b961e79">00351</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classDefaultCommit.html#af1caba1f04cf2802d742d1a16b961e79">nextInstAddr</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid) { <span class="keywordflow">return</span> <a class="code" href="classDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">pc</a>[tid].nextInstAddr(); }
+<a name="l00352"></a>00352 
+<a name="l00354"></a><a class="code" href="classDefaultCommit.html#a697667536e687bd20e95084adc90d820">00354</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classDefaultCommit.html#a697667536e687bd20e95084adc90d820">microPC</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid) { <span class="keywordflow">return</span> <a class="code" href="classDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">pc</a>[tid].microPC(); }
+<a name="l00355"></a>00355 
+<a name="l00356"></a>00356   <span class="keyword">private</span>:
+<a name="l00358"></a><a class="code" href="classDefaultCommit.html#a83f9ee976e732665aeb08dbc19acfd45">00358</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *<a class="code" href="classDefaultCommit.html#a83f9ee976e732665aeb08dbc19acfd45">timeBuffer</a>;
+<a name="l00359"></a>00359 
+<a name="l00361"></a><a class="code" href="classDefaultCommit.html#a2877bfe6e25eb731f28c8c5a9ba55391">00361</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;::wire</a> <a class="code" href="classDefaultCommit.html#a2877bfe6e25eb731f28c8c5a9ba55391">toIEW</a>;
+<a name="l00362"></a>00362 
+<a name="l00364"></a><a class="code" href="classDefaultCommit.html#a2b90705fefdf84763685650c2420f184">00364</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;::wire</a> <a class="code" href="classDefaultCommit.html#a2b90705fefdf84763685650c2420f184">robInfoFromIEW</a>;
+<a name="l00365"></a>00365 
+<a name="l00366"></a><a class="code" href="classDefaultCommit.html#a9a2f350be647ebfb6567172812db491a">00366</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;FetchStruct&gt;</a> *<a class="code" href="classDefaultCommit.html#a9a2f350be647ebfb6567172812db491a">fetchQueue</a>;
+<a name="l00367"></a>00367 
+<a name="l00368"></a><a class="code" href="classDefaultCommit.html#a2e3dd009c447d077f19b303b53b52fab">00368</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;FetchStruct&gt;::wire</a> <a class="code" href="classDefaultCommit.html#a2e3dd009c447d077f19b303b53b52fab">fromFetch</a>;
+<a name="l00369"></a>00369 
+<a name="l00371"></a><a class="code" href="classDefaultCommit.html#a034b0868914c304e81c13c4e645d2616">00371</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IEWStruct&gt;</a> *<a class="code" href="classDefaultCommit.html#a034b0868914c304e81c13c4e645d2616">iewQueue</a>;
+<a name="l00372"></a>00372 
+<a name="l00374"></a><a class="code" href="classDefaultCommit.html#a7968756e9e478ff69e80117ffbea4e46">00374</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IEWStruct&gt;::wire</a> <a class="code" href="classDefaultCommit.html#a7968756e9e478ff69e80117ffbea4e46">fromIEW</a>;
+<a name="l00375"></a>00375 
+<a name="l00377"></a><a class="code" href="classDefaultCommit.html#ae9b536282159ba75153a223be77515ba">00377</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;RenameStruct&gt;</a> *<a class="code" href="classDefaultCommit.html#ae9b536282159ba75153a223be77515ba">renameQueue</a>;
+<a name="l00378"></a>00378 
+<a name="l00380"></a><a class="code" href="classDefaultCommit.html#a2b6b1d4785b92bd378f8a7abc5b7e6b9">00380</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;RenameStruct&gt;::wire</a> <a class="code" href="classDefaultCommit.html#a2b6b1d4785b92bd378f8a7abc5b7e6b9">fromRename</a>;
+<a name="l00381"></a>00381 
+<a name="l00382"></a>00382   <span class="keyword">public</span>:
+<a name="l00384"></a><a class="code" href="classDefaultCommit.html#a74983e0d923870864acf5b5477449d48">00384</a>     <a class="code" href="classROB.html">ROB</a> *<a class="code" href="classDefaultCommit.html#a74983e0d923870864acf5b5477449d48">rob</a>;
+<a name="l00385"></a>00385 
+<a name="l00386"></a>00386   <span class="keyword">private</span>:
+<a name="l00388"></a><a class="code" href="classDefaultCommit.html#a1379cf882a12ac6fc9eba5da7c84b18b">00388</a>     <a class="code" href="classDefaultCommit.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *<a class="code" href="classDefaultCommit.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>;
+<a name="l00389"></a>00389 
+<a name="l00391"></a><a class="code" href="classDefaultCommit.html#afe9da004c5a3f37cbb72fa3763d4c0d1">00391</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;Thread *&gt;</a> <a class="code" href="classDefaultCommit.html#afe9da004c5a3f37cbb72fa3763d4c0d1">thread</a>;
+<a name="l00392"></a>00392 
+<a name="l00396"></a><a class="code" href="classDefaultCommit.html#a2c7e870d4babdac0dc91fc7ffabd0f3d">00396</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a2c7e870d4babdac0dc91fc7ffabd0f3d">wroteToTimeBuffer</a>;
+<a name="l00397"></a>00397 
+<a name="l00401"></a><a class="code" href="classDefaultCommit.html#a0d55e69b2ac22e8956d569bcf49e374b">00401</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a0d55e69b2ac22e8956d569bcf49e374b">changedROBNumEntries</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00402"></a>00402 
+<a name="l00404"></a><a class="code" href="classDefaultCommit.html#a06341c2bebd8c862e411e474e01c9c1a">00404</a>     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classDefaultCommit.html#a06341c2bebd8c862e411e474e01c9c1a">squashCounter</a>;
+<a name="l00405"></a>00405 
+<a name="l00407"></a><a class="code" href="classDefaultCommit.html#af3547420a792f13034730b5f327a47ff">00407</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#af3547420a792f13034730b5f327a47ff">trapSquash</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00408"></a>00408 
+<a name="l00410"></a><a class="code" href="classDefaultCommit.html#a4fce523b7a931003efb9665605a87ca0">00410</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a4fce523b7a931003efb9665605a87ca0">tcSquash</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00411"></a>00411 
+<a name="l00419"></a><a class="code" href="classDefaultCommit.html#af0c3f70b9be736dfd854ea22a0131e1c">00419</a>     <a class="code" href="classDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classDefaultCommit.html#af0c3f70b9be736dfd854ea22a0131e1c">squashAfterInst</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00420"></a>00420 
+<a name="l00422"></a><a class="code" href="classDefaultCommit.html#a4d358db7156d04e20b3269a53334dd19">00422</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> <a class="code" href="classDefaultCommit.html#a4d358db7156d04e20b3269a53334dd19">priority_list</a>;
+<a name="l00423"></a>00423 
+<a name="l00425"></a><a class="code" href="classDefaultCommit.html#a29f74b65419ba8f0ae250d65e960202b">00425</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classDefaultCommit.html#a29f74b65419ba8f0ae250d65e960202b">iewToCommitDelay</a>;
+<a name="l00426"></a>00426 
+<a name="l00428"></a><a class="code" href="classDefaultCommit.html#a6b6fe1148ed7c40758e45f351c375552">00428</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classDefaultCommit.html#a6b6fe1148ed7c40758e45f351c375552">commitToIEWDelay</a>;
+<a name="l00429"></a>00429 
+<a name="l00431"></a><a class="code" href="classDefaultCommit.html#af699b6479037861b3c0e17d4bfab001d">00431</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classDefaultCommit.html#af699b6479037861b3c0e17d4bfab001d">renameToROBDelay</a>;
+<a name="l00432"></a>00432 
+<a name="l00433"></a><a class="code" href="classDefaultCommit.html#a345f75b8236aa4fbe4ae976f8eb41a4c">00433</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classDefaultCommit.html#a345f75b8236aa4fbe4ae976f8eb41a4c">fetchToCommitDelay</a>;
+<a name="l00434"></a>00434 
+<a name="l00438"></a><a class="code" href="classDefaultCommit.html#a4b41704382bddb6ee06b5ce97b47dd7b">00438</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultCommit.html#a4b41704382bddb6ee06b5ce97b47dd7b">renameWidth</a>;
+<a name="l00439"></a>00439 
+<a name="l00441"></a><a class="code" href="classDefaultCommit.html#aeab15260a0ccc0ea470bb74344b63d17">00441</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultCommit.html#aeab15260a0ccc0ea470bb74344b63d17">commitWidth</a>;
+<a name="l00442"></a>00442 
+<a name="l00444"></a><a class="code" href="classDefaultCommit.html#a35ee8ef405428b8d8595176ea6581681">00444</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classDefaultCommit.html#a35ee8ef405428b8d8595176ea6581681">numRobs</a>;
+<a name="l00445"></a>00445 
+<a name="l00447"></a><a class="code" href="classDefaultCommit.html#a88377f855dbf5adeeecb06b5bb821d35">00447</a>     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classDefaultCommit.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>;
+<a name="l00448"></a>00448 
+<a name="l00450"></a><a class="code" href="classDefaultCommit.html#a547316e5bf0dc6115209737cf68e9bb8">00450</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a547316e5bf0dc6115209737cf68e9bb8">drainPending</a>;
+<a name="l00451"></a>00451 
+<a name="l00455"></a><a class="code" href="classDefaultCommit.html#a0bfffaa2e5f9c7e79353e61146950a9a">00455</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classDefaultCommit.html#a0bfffaa2e5f9c7e79353e61146950a9a">trapLatency</a>;
+<a name="l00456"></a>00456 
+<a name="l00458"></a><a class="code" href="classDefaultCommit.html#a7387b2358d0f884ccd5c383e6199f035">00458</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classDefaultCommit.html#a7387b2358d0f884ccd5c383e6199f035">interrupt</a>;
+<a name="l00459"></a>00459 
+<a name="l00463"></a><a class="code" href="classDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">00463</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">pc</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00464"></a>00464 
+<a name="l00466"></a><a class="code" href="classDefaultCommit.html#a1d81dc5c05e15057c1985acc39285540">00466</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classDefaultCommit.html#a1d81dc5c05e15057c1985acc39285540">youngestSeqNum</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00467"></a>00467 
+<a name="l00469"></a><a class="code" href="classDefaultCommit.html#a4feaee1ef312dda13cff064de20dfbf3">00469</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classDefaultCommit.html#a4feaee1ef312dda13cff064de20dfbf3">lastCommitedSeqNum</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00470"></a>00470 
+<a name="l00472"></a><a class="code" href="classDefaultCommit.html#a4e366a325229901e41b68ff07e5f556a">00472</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a4e366a325229901e41b68ff07e5f556a">trapInFlight</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00473"></a>00473 
+<a name="l00475"></a><a class="code" href="classDefaultCommit.html#a0fd9fcb6eed99c11c7fa61c7218ecf49">00475</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a0fd9fcb6eed99c11c7fa61c7218ecf49">committedStores</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00476"></a>00476 
+<a name="l00479"></a><a class="code" href="classDefaultCommit.html#aa2d2d9b2eec88d804e25d1cb37aa6083">00479</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#aa2d2d9b2eec88d804e25d1cb37aa6083">checkEmptyROB</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00480"></a>00480 
+<a name="l00482"></a><a class="code" href="classDefaultCommit.html#af6eaea53db532812052f71bf0380dab5">00482</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> *<a class="code" href="classDefaultCommit.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>;
+<a name="l00483"></a>00483 
+<a name="l00485"></a><a class="code" href="classDefaultCommit.html#ac305c101c17d28451cc1f023b187b08b">00485</a>     <a class="code" href="classDefaultCommit.html#a341963bcea1928476182a17e357f98e3">RenameMap</a> *<a class="code" href="classDefaultCommit.html#ac305c101c17d28451cc1f023b187b08b">renameMap</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00486"></a>00486 
+<a name="l00488"></a><a class="code" href="classDefaultCommit.html#a893f45e65e8a47bca58661db7662cd9c">00488</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a893f45e65e8a47bca58661db7662cd9c">canHandleInterrupts</a>;
+<a name="l00489"></a>00489 
+<a name="l00494"></a><a class="code" href="classDefaultCommit.html#a7c6eee41dc1f18f1f485518f8b066033">00494</a>     <span class="keywordtype">bool</span> <a class="code" href="classDefaultCommit.html#a7c6eee41dc1f18f1f485518f8b066033">avoidQuiesceLiveLock</a>;
+<a name="l00495"></a>00495 
+<a name="l00497"></a>00497     <span class="keywordtype">void</span> <a class="code" href="classDefaultCommit.html#a5bbf266cb0cc97eed138c8fe0d2d76b6">updateComInstStats</a>(<a class="code" href="classDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00498"></a>00498 
+<a name="l00501"></a><a class="code" href="classDefaultCommit.html#a66220ac67b22e3faf86b642ecc217546">00501</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultCommit.html#a66220ac67b22e3faf86b642ecc217546">commitSquashedInsts</a>;
+<a name="l00505"></a><a class="code" href="classDefaultCommit.html#a89ef54d73dbded95395181561013b0b6">00505</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultCommit.html#a89ef54d73dbded95395181561013b0b6">commitSquashEvents</a>;
+<a name="l00509"></a><a class="code" href="classDefaultCommit.html#ab930685f4a43596f8a315d7dc9f5c2e4">00509</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultCommit.html#ab930685f4a43596f8a315d7dc9f5c2e4">commitNonSpecStalls</a>;
+<a name="l00511"></a><a class="code" href="classDefaultCommit.html#a9cbfa1c154e785e3c45699b02a94053d">00511</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultCommit.html#a9cbfa1c154e785e3c45699b02a94053d">branchMispredicts</a>;
+<a name="l00513"></a><a class="code" href="classDefaultCommit.html#ab1b6b40d7860fef5059f9bf1b843b366">00513</a>     <a class="code" href="classStats_1_1Distribution.html">Stats::Distribution</a> <a class="code" href="classDefaultCommit.html#ab1b6b40d7860fef5059f9bf1b843b366">numCommittedDist</a>;
+<a name="l00514"></a>00514 
+<a name="l00516"></a><a class="code" href="classDefaultCommit.html#a23714085cc19270c017a67c9a508601a">00516</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a23714085cc19270c017a67c9a508601a">instsCommitted</a>;
+<a name="l00518"></a><a class="code" href="classDefaultCommit.html#a1549eb9ffd1727a5c1937e7520a0bcc8">00518</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a1549eb9ffd1727a5c1937e7520a0bcc8">opsCommitted</a>;
+<a name="l00520"></a><a class="code" href="classDefaultCommit.html#a4cb385aa97530dd2621c74f376839e79">00520</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a4cb385aa97530dd2621c74f376839e79">statComSwp</a>;
+<a name="l00522"></a><a class="code" href="classDefaultCommit.html#afe174c4b8e70d840a2e91bf1ca3092ac">00522</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#afe174c4b8e70d840a2e91bf1ca3092ac">statComRefs</a>;
+<a name="l00524"></a><a class="code" href="classDefaultCommit.html#a91927819864b9dc9d1ac706dc55d5dce">00524</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a91927819864b9dc9d1ac706dc55d5dce">statComLoads</a>;
+<a name="l00526"></a><a class="code" href="classDefaultCommit.html#a9b029ac182d54199247dfa90ed86d368">00526</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a9b029ac182d54199247dfa90ed86d368">statComMembars</a>;
+<a name="l00528"></a><a class="code" href="classDefaultCommit.html#a39a7da0b20d1e83ccfe4b2f2b19d6e94">00528</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a39a7da0b20d1e83ccfe4b2f2b19d6e94">statComBranches</a>;
+<a name="l00530"></a><a class="code" href="classDefaultCommit.html#a2be26eb7dfa8b9e36d0c6fdcaea8d818">00530</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a2be26eb7dfa8b9e36d0c6fdcaea8d818">statComFloating</a>;
+<a name="l00532"></a><a class="code" href="classDefaultCommit.html#ae562968e75d903bd12352af65cc558b6">00532</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#ae562968e75d903bd12352af65cc558b6">statComInteger</a>;
+<a name="l00534"></a><a class="code" href="classDefaultCommit.html#acd1aba8c2f19771552212e9c2917ac6b">00534</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#acd1aba8c2f19771552212e9c2917ac6b">statComFunctionCalls</a>;
+<a name="l00536"></a><a class="code" href="classDefaultCommit.html#ad0d59ba553bc001d75aff706903e2f77">00536</a>     <a class="code" href="classStats_1_1Vector2d.html">Stats::Vector2d</a> <a class="code" href="classDefaultCommit.html#ad0d59ba553bc001d75aff706903e2f77">statCommittedInstType</a>;
+<a name="l00537"></a>00537 
+<a name="l00539"></a><a class="code" href="classDefaultCommit.html#a16d1a4bbb2cb87488fd876fbf6e7a518">00539</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDefaultCommit.html#a16d1a4bbb2cb87488fd876fbf6e7a518">commitEligibleSamples</a>;
+<a name="l00541"></a><a class="code" href="classDefaultCommit.html#a26f5138543e43cbaba9459036fc0b04c">00541</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDefaultCommit.html#a26f5138543e43cbaba9459036fc0b04c">commitEligible</a>;
+<a name="l00542"></a>00542 };
+<a name="l00543"></a>00543 
+<a name="l00544"></a>00544 <span class="preprocessor">#endif // __CPU_O3_COMMIT_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

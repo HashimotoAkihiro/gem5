@@ -1,0 +1,73 @@
+\hypertarget{classX86ISA_1_1StartupInterrupt}{
+\section{クラス StartupInterrupt}
+\label{classX86ISA_1_1StartupInterrupt}\index{X86ISA::StartupInterrupt@{X86ISA::StartupInterrupt}}
+}
+
+
+{\ttfamily \#include $<$faults.hh$>$}StartupInterruptに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classX86ISA_1_1StartupInterrupt}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1StartupInterrupt_a2fb69b1ab5482bd57f427ee5e1d435b1}{StartupInterrupt} (uint8\_\-t \_\-vector)
+\item 
+void \hyperlink{classX86ISA_1_1StartupInterrupt_a2bd783b42262278d41157d428e1f8d6f}{invoke} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classRefCountingPtr}{StaticInstPtr} inst=\hyperlink{classStaticInst_aa793d9793af735f09096369fb17567b6}{StaticInst::nullStaticInstPtr})
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classX86ISA_1_1StartupInterrupt_a2fb69b1ab5482bd57f427ee5e1d435b1}{
+\index{X86ISA::StartupInterrupt@{X86ISA::StartupInterrupt}!StartupInterrupt@{StartupInterrupt}}
+\index{StartupInterrupt@{StartupInterrupt}!X86ISA::StartupInterrupt@{X86ISA::StartupInterrupt}}
+\subsubsection[{StartupInterrupt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf StartupInterrupt} (uint8\_\-t {\em \_\-vector})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classX86ISA_1_1StartupInterrupt_a2fb69b1ab5482bd57f427ee5e1d435b1}
+
+
+
+\begin{DoxyCode}
+410                                           :
+411             X86Interrupt("Startup Interrupt", "#SIPI", _vector)
+412         {}
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classX86ISA_1_1StartupInterrupt_a2bd783b42262278d41157d428e1f8d6f}{
+\index{X86ISA::StartupInterrupt@{X86ISA::StartupInterrupt}!invoke@{invoke}}
+\index{invoke@{invoke}!X86ISA::StartupInterrupt@{X86ISA::StartupInterrupt}}
+\subsubsection[{invoke}]{\setlength{\rightskip}{0pt plus 5cm}void invoke ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf StaticInstPtr} {\em inst} = {\ttfamily {\bf StaticInst::nullStaticInstPtr}})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1StartupInterrupt_a2bd783b42262278d41157d428e1f8d6f}
+
+
+\hyperlink{classX86ISA_1_1X86FaultBase_a2bd783b42262278d41157d428e1f8d6f}{X86FaultBase}を再定義しています。
+
+
+\begin{DoxyCode}
+292     {
+293         DPRINTF(Faults, "Startup interrupt with vector %#x.\n", vector);
+294         HandyM5Reg m5Reg = tc->readMiscReg(MISCREG_M5_REG);
+295         if (m5Reg.mode != LegacyMode || m5Reg.submode != RealMode) {
+296             panic("Startup IPI recived outside of real mode. "
+297                     "Don't know what to do. %d, %d", m5Reg.mode, m5Reg.submode);
+298         }
+299 
+300         tc->setMiscReg(MISCREG_CS, vector << 8);
+301         tc->setMiscReg(MISCREG_CS_BASE, vector << 12);
+302         tc->setMiscReg(MISCREG_CS_EFF_BASE, vector << 12);
+303         // This has the base value pre-added.
+304         tc->setMiscReg(MISCREG_CS_LIMIT, 0xffff);
+305 
+306         tc->pcState(tc->readMiscReg(MISCREG_CS_BASE));
+307     }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/\hyperlink{arch_2x86_2faults_8hh}{faults.hh}\item 
+arch/x86/\hyperlink{arch_2x86_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

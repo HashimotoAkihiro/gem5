@@ -1,0 +1,267 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: base/vnc/vncserver.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>base/vnc/vncserver.hh</h1><a href="vncserver_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00038"></a>00038 <span class="comment"> *          William Wang</span>
+<a name="l00039"></a>00039 <span class="comment"> */</span>
+<a name="l00040"></a>00040 
+<a name="l00045"></a>00045 <span class="preprocessor">#ifndef __BASE_VNC_VNC_SERVER_HH__</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span><span class="preprocessor">#define __BASE_VNC_VNC_SERVER_HH__</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="convert_8hh.html">base/vnc/convert.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="vncinput_8hh.html">base/vnc/vncinput.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="bitmap_8hh.html">base/bitmap.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="circlebuf_8hh.html">base/circlebuf.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="pollevent_8hh.html">base/pollevent.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="socket_8hh.html">base/socket.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;params/VncServer.hh&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00058"></a>00058 
+<a name="l00063"></a><a class="code" href="classVncServer.html">00063</a> <span class="keyword">class </span><a class="code" href="classVncServer.html">VncServer</a> : <span class="keyword">public</span> <a class="code" href="classVncInput.html">VncInput</a>
+<a name="l00064"></a>00064 {
+<a name="l00065"></a>00065   <span class="keyword">public</span>:
+<a name="l00066"></a>00066 
+<a name="l00072"></a><a class="code" href="group__VncConstants.html#ga0adb6517a8a2c8403f7aff85bad3dfa5">00072</a>     <span class="keyword">const</span> <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="group__VncConstants.html#ga0adb6517a8a2c8403f7aff85bad3dfa5">AuthInvalid</a> = 0;
+<a name="l00073"></a><a class="code" href="group__VncConstants.html#gabc058a28bda6e015dbafe8bbfbddb821">00073</a>     <span class="keyword">const</span> <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="group__VncConstants.html#gabc058a28bda6e015dbafe8bbfbddb821">AuthNone</a>    = 1;
+<a name="l00074"></a>00074 
+<a name="l00076"></a><a class="code" href="group__VncConstants.html#ga6d4127ee4f24603d9a0c7e3257b04ca3">00076</a>     <span class="keyword">const</span> <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="group__VncConstants.html#ga6d4127ee4f24603d9a0c7e3257b04ca3">VncOK</a>   = 0;
+<a name="l00077"></a>00077 
+<a name="l00079"></a><a class="code" href="group__VncConstants.html#ga98f897c5a38e76e2cc7fea4d87083a84">00079</a>     <span class="keyword">enum</span> <a class="code" href="group__VncConstants.html#ga98f897c5a38e76e2cc7fea4d87083a84">ServerMessages</a> {
+<a name="l00080"></a><a class="code" href="group__VncConstants.html#gga98f897c5a38e76e2cc7fea4d87083a84afb5f87db0a4610309f486463de5388b7">00080</a>         <a class="code" href="group__VncConstants.html#gga98f897c5a38e76e2cc7fea4d87083a84afb5f87db0a4610309f486463de5388b7">ServerFrameBufferUpdate</a>     = 0,
+<a name="l00081"></a><a class="code" href="group__VncConstants.html#gga98f897c5a38e76e2cc7fea4d87083a84aba175e2ce5c7225c9945f1e133857c07">00081</a>         <a class="code" href="group__VncConstants.html#gga98f897c5a38e76e2cc7fea4d87083a84aba175e2ce5c7225c9945f1e133857c07">ServerSetColorMapEntries</a>    = 1,
+<a name="l00082"></a><a class="code" href="group__VncConstants.html#gga98f897c5a38e76e2cc7fea4d87083a84a32aadc1d2674e65c0f598a2727945b8d">00082</a>         <a class="code" href="group__VncConstants.html#gga98f897c5a38e76e2cc7fea4d87083a84a32aadc1d2674e65c0f598a2727945b8d">ServerBell</a>                  = 2,
+<a name="l00083"></a><a class="code" href="group__VncConstants.html#gga98f897c5a38e76e2cc7fea4d87083a84ad80502eb07cc53ade0e84460d0c39e7c">00083</a>         <a class="code" href="structVncServer_1_1ServerCutText.html">ServerCutText</a>               = 3
+<a name="l00084"></a>00084     };
+<a name="l00085"></a>00085 
+<a name="l00087"></a><a class="code" href="group__VncConstants.html#ga0b9039f87c8a2980c4a6ab14b511760a">00087</a>     <span class="keyword">enum</span> <a class="code" href="group__VncConstants.html#ga0b9039f87c8a2980c4a6ab14b511760a">EncodingTypes</a> {
+<a name="l00088"></a><a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aa2929e8976a78e5a5e8829beae2a7e69e">00088</a>         <a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aa2929e8976a78e5a5e8829beae2a7e69e">EncodingRaw</a>         = 0,
+<a name="l00089"></a><a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aac66141a54bb407b18d3ab26e779bc4a8">00089</a>         <a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aac66141a54bb407b18d3ab26e779bc4a8">EncodingCopyRect</a>    = 1,
+<a name="l00090"></a><a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aa2e2676a7c0aac5891c51c5d4325453f7">00090</a>         <a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aa2e2676a7c0aac5891c51c5d4325453f7">EncodingHextile</a>     = 5,
+<a name="l00091"></a><a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aa81cbe670fb7e962f4721e74d55bc66e5">00091</a>         <a class="code" href="group__VncConstants.html#gga0b9039f87c8a2980c4a6ab14b511760aa81cbe670fb7e962f4721e74d55bc66e5">EncodingDesktopSize</a> = -223
+<a name="l00092"></a>00092     };
+<a name="l00093"></a>00093 
+<a name="l00095"></a><a class="code" href="group__VncConstants.html#ga0aa77c5c19bd1f953c90f0cae8c61a9a">00095</a>     <span class="keyword">enum</span> <a class="code" href="group__VncConstants.html#ga0aa77c5c19bd1f953c90f0cae8c61a9a">MouseEvents</a> {
+<a name="l00096"></a><a class="code" href="group__VncConstants.html#gga0aa77c5c19bd1f953c90f0cae8c61a9aa13ee718768549ed254378457536bfd63">00096</a>         <a class="code" href="group__VncConstants.html#gga0aa77c5c19bd1f953c90f0cae8c61a9aa13ee718768549ed254378457536bfd63">MouseLeftButton</a>     = 0x1,
+<a name="l00097"></a><a class="code" href="group__VncConstants.html#gga0aa77c5c19bd1f953c90f0cae8c61a9aa9722dcc9b50f713f587a1b046e108b27">00097</a>         <a class="code" href="group__VncConstants.html#gga0aa77c5c19bd1f953c90f0cae8c61a9aa9722dcc9b50f713f587a1b046e108b27">MouseRightButton</a>    = 0x2,
+<a name="l00098"></a><a class="code" href="group__VncConstants.html#gga0aa77c5c19bd1f953c90f0cae8c61a9aaa93c27c34acd42cdc9e28a8f668d87dd">00098</a>         <a class="code" href="group__VncConstants.html#gga0aa77c5c19bd1f953c90f0cae8c61a9aaa93c27c34acd42cdc9e28a8f668d87dd">MouseMiddleButton</a>   = 0x4
+<a name="l00099"></a>00099     };
+<a name="l00100"></a>00100 
+<a name="l00101"></a><a class="code" href="group__VncConstants.html#ga36bab5b0163b272b816361d6214c3f14">00101</a>     <span class="keyword">const</span> <span class="keywordtype">char</span>* <a class="code" href="group__VncConstants.html#ga36bab5b0163b272b816361d6214c3f14">vncVersion</a>()<span class="keyword"> const</span>
+<a name="l00102"></a>00102 <span class="keyword">    </span>{
+<a name="l00103"></a>00103         <span class="keywordflow">return</span> <span class="stringliteral">&quot;RFB 003.008\n&quot;</span>;
+<a name="l00104"></a>00104     }
+<a name="l00105"></a>00105 
+<a name="l00106"></a><a class="code" href="group__VncConstants.html#gacdd867d72142510ce53521a63a062f9b">00106</a>     <span class="keyword">enum</span> <a class="code" href="group__VncConstants.html#gacdd867d72142510ce53521a63a062f9b">ConnectionState</a> {
+<a name="l00107"></a><a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba79cc83bc90b4f683fb2495d4487662ea">00107</a>         <a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba79cc83bc90b4f683fb2495d4487662ea">WaitForProtocolVersion</a>,
+<a name="l00108"></a><a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba198ea2412a93ac253bf8e4406a8fb06c">00108</a>         <a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba198ea2412a93ac253bf8e4406a8fb06c">WaitForSecurityResponse</a>,
+<a name="l00109"></a><a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba78e807adbaddb74b84dea34150fab20e">00109</a>         <a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba78e807adbaddb74b84dea34150fab20e">WaitForClientInit</a>,
+<a name="l00110"></a><a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9badd4438c090c589c90c368d163c4edbd9">00110</a>         <a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9badd4438c090c589c90c368d163c4edbd9">InitializationPhase</a>,
+<a name="l00111"></a><a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba6302b1455052baff1528e67e95db429a">00111</a>         <a class="code" href="group__VncConstants.html#ggacdd867d72142510ce53521a63a062f9ba6302b1455052baff1528e67e95db429a">NormalPhase</a>
+<a name="l00112"></a>00112     };
+<a name="l00113"></a>00113 
+<a name="l00114"></a><a class="code" href="structVncServer_1_1ServerInitMsg.html">00114</a>     <span class="keyword">struct </span><a class="code" href="structVncServer_1_1ServerInitMsg.html">ServerInitMsg</a> {
+<a name="l00115"></a><a class="code" href="structVncServer_1_1ServerInitMsg.html#acddb57186e2184c61efc8f0b3ff8cc0d">00115</a>         uint16_t <a class="code" href="structVncServer_1_1ServerInitMsg.html#acddb57186e2184c61efc8f0b3ff8cc0d">fbWidth</a>;
+<a name="l00116"></a><a class="code" href="structVncServer_1_1ServerInitMsg.html#ab6718ea70335e6a9b1bbe1d3ca47dfc9">00116</a>         uint16_t <a class="code" href="structVncServer_1_1ServerInitMsg.html#ab6718ea70335e6a9b1bbe1d3ca47dfc9">fbHeight</a>;
+<a name="l00117"></a><a class="code" href="structVncServer_1_1ServerInitMsg.html#a07ef974d3a4dd48ea4b0b1decc3732e2">00117</a>         <a class="code" href="structVncInput_1_1PixelFormat.html">PixelFormat</a> <a class="code" href="structVncServer_1_1ServerInitMsg.html#a07ef974d3a4dd48ea4b0b1decc3732e2">px</a>;
+<a name="l00118"></a><a class="code" href="structVncServer_1_1ServerInitMsg.html#a60a1b79d3f807e575fa2073abc688d7f">00118</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structVncServer_1_1ServerInitMsg.html#a60a1b79d3f807e575fa2073abc688d7f">namelen</a>;
+<a name="l00119"></a><a class="code" href="structVncServer_1_1ServerInitMsg.html#ab2726dd451e7676f553e96d5620bdfe3">00119</a>         <span class="keywordtype">char</span> <a class="code" href="structVncServer_1_1ServerInitMsg.html#ab2726dd451e7676f553e96d5620bdfe3">name</a>[2]; <span class="comment">// just to put M5 in here</span>
+<a name="l00120"></a>00120     } <a class="code" href="group__VncConstants.html#ga2f0a8a1f1c40593e1e01ce4b8087d792">M5_ATTR_PACKED</a>;
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="structVncServer_1_1FrameBufferUpdate.html">00122</a>     <span class="keyword">struct </span><a class="code" href="structVncServer_1_1FrameBufferUpdate.html">FrameBufferUpdate</a> {
+<a name="l00123"></a><a class="code" href="structVncServer_1_1FrameBufferUpdate.html#a1d127017fb298b889f4ba24752d08b8e">00123</a>         uint8_t <a class="code" href="structVncServer_1_1FrameBufferUpdate.html#a1d127017fb298b889f4ba24752d08b8e">type</a>;
+<a name="l00124"></a><a class="code" href="structVncServer_1_1FrameBufferUpdate.html#a78a52d3de83ec4d91a7746456627089f">00124</a>         uint8_t <a class="code" href="structVncServer_1_1FrameBufferUpdate.html#a78a52d3de83ec4d91a7746456627089f">padding</a>;
+<a name="l00125"></a><a class="code" href="structVncServer_1_1FrameBufferUpdate.html#adb65711ffe505542782e4b2eefab5466">00125</a>         uint16_t <a class="code" href="structVncServer_1_1FrameBufferUpdate.html#adb65711ffe505542782e4b2eefab5466">num_rects</a>;
+<a name="l00126"></a>00126     } <a class="code" href="group__VncConstants.html#ga2f0a8a1f1c40593e1e01ce4b8087d792">M5_ATTR_PACKED</a>;
+<a name="l00127"></a>00127 
+<a name="l00128"></a><a class="code" href="structVncServer_1_1FrameBufferRect.html">00128</a>     <span class="keyword">struct </span><a class="code" href="structVncServer_1_1FrameBufferRect.html">FrameBufferRect</a> {
+<a name="l00129"></a><a class="code" href="structVncServer_1_1FrameBufferRect.html#a4dde988b1b2adba65ae3efa69f65d960">00129</a>         uint16_t <a class="code" href="structVncServer_1_1FrameBufferRect.html#a4dde988b1b2adba65ae3efa69f65d960">x</a>;
+<a name="l00130"></a><a class="code" href="structVncServer_1_1FrameBufferRect.html#ab0580f504a7428539be299fa71565f30">00130</a>         uint16_t <a class="code" href="structVncServer_1_1FrameBufferRect.html#ab0580f504a7428539be299fa71565f30">y</a>;
+<a name="l00131"></a><a class="code" href="structVncServer_1_1FrameBufferRect.html#ad0eab1042455a2067c812ab8071d5376">00131</a>         uint16_t <a class="code" href="structVncServer_1_1FrameBufferRect.html#ad0eab1042455a2067c812ab8071d5376">width</a>;
+<a name="l00132"></a><a class="code" href="structVncServer_1_1FrameBufferRect.html#a81c9f8d0b8c3b49d770be14dbe9f0d37">00132</a>         uint16_t <a class="code" href="structVncServer_1_1FrameBufferRect.html#a81c9f8d0b8c3b49d770be14dbe9f0d37">height</a>;
+<a name="l00133"></a><a class="code" href="structVncServer_1_1FrameBufferRect.html#a18a7b605a2e8450803090da92cf2c034">00133</a>         int32_t <a class="code" href="structVncServer_1_1FrameBufferRect.html#a18a7b605a2e8450803090da92cf2c034">encoding</a>;
+<a name="l00134"></a>00134     } <a class="code" href="group__VncConstants.html#ga2f0a8a1f1c40593e1e01ce4b8087d792">M5_ATTR_PACKED</a>;
+<a name="l00135"></a>00135 
+<a name="l00136"></a><a class="code" href="structVncServer_1_1ServerCutText.html">00136</a>     <span class="keyword">struct </span><a class="code" href="structVncServer_1_1ServerCutText.html">ServerCutText</a> {
+<a name="l00137"></a><a class="code" href="structVncServer_1_1ServerCutText.html#a1d127017fb298b889f4ba24752d08b8e">00137</a>         uint8_t <a class="code" href="structVncServer_1_1ServerCutText.html#a1d127017fb298b889f4ba24752d08b8e">type</a>;
+<a name="l00138"></a><a class="code" href="structVncServer_1_1ServerCutText.html#a735ef00341a84c02ba561c66de3d20af">00138</a>         uint8_t <a class="code" href="structVncServer_1_1ServerCutText.html#a735ef00341a84c02ba561c66de3d20af">padding</a>[3];
+<a name="l00139"></a><a class="code" href="structVncServer_1_1ServerCutText.html#aebb70c2aab3407a9f05334c47131a43b">00139</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structVncServer_1_1ServerCutText.html#aebb70c2aab3407a9f05334c47131a43b">length</a>;
+<a name="l00140"></a>00140     } <a class="code" href="group__VncConstants.html#ga2f0a8a1f1c40593e1e01ce4b8087d792">M5_ATTR_PACKED</a>;
+<a name="l00141"></a>00141 
+<a name="l00144"></a>00144   <span class="keyword">protected</span>:
+<a name="l00146"></a><a class="code" href="classVncServer_1_1ListenEvent.html">00146</a>     <span class="keyword">class </span><a class="code" href="classVncServer_1_1ListenEvent.html">ListenEvent</a>: <span class="keyword">public</span> <a class="code" href="classPollEvent.html">PollEvent</a>
+<a name="l00147"></a>00147     {
+<a name="l00148"></a>00148       <span class="keyword">protected</span>:
+<a name="l00149"></a><a class="code" href="classVncServer_1_1ListenEvent.html#ac122859a241350f501e4f77da81b669f">00149</a>         <a class="code" href="classVncServer.html">VncServer</a> *<a class="code" href="classVncServer_1_1ListenEvent.html#ac122859a241350f501e4f77da81b669f">vncserver</a>;
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151       <span class="keyword">public</span>:
+<a name="l00152"></a>00152         <a class="code" href="classVncServer_1_1ListenEvent.html#a58e725539783734ac669d71572f522aa">ListenEvent</a>(<a class="code" href="classVncServer.html">VncServer</a> *<a class="code" href="namespaceMipsISA.html#a71505b3d754f8feffb75aa29ffce5018">vs</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a87001e8063b8b1b5dc88f5a4b43b2a5a">fd</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a>);
+<a name="l00153"></a>00153         <span class="keywordtype">void</span> <a class="code" href="classVncServer_1_1ListenEvent.html#aedacbaeee0c89ceca526874c34f6b20b">process</a>(<span class="keywordtype">int</span> revent);
+<a name="l00154"></a>00154     };
+<a name="l00155"></a>00155 
+<a name="l00156"></a><a class="code" href="classVncServer.html#a9465cdda0008b0e7b7f9ac919cd9cca6">00156</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classVncServer_1_1ListenEvent.html">ListenEvent</a>;
+<a name="l00157"></a><a class="code" href="classVncServer.html#ad7f258b1b869b6152bc5040c38b79d39">00157</a>     <a class="code" href="classVncServer_1_1ListenEvent.html">ListenEvent</a> *<a class="code" href="classVncServer.html#ad7f258b1b869b6152bc5040c38b79d39">listenEvent</a>;
+<a name="l00158"></a>00158 
+<a name="l00160"></a><a class="code" href="classVncServer_1_1DataEvent.html">00160</a>     <span class="keyword">class </span><a class="code" href="classVncServer_1_1DataEvent.html">DataEvent</a>: <span class="keyword">public</span> <a class="code" href="classPollEvent.html">PollEvent</a>
+<a name="l00161"></a>00161     {
+<a name="l00162"></a>00162       <span class="keyword">protected</span>:
+<a name="l00163"></a><a class="code" href="classVncServer_1_1DataEvent.html#ac122859a241350f501e4f77da81b669f">00163</a>         <a class="code" href="classVncServer.html">VncServer</a> *<a class="code" href="classVncServer_1_1DataEvent.html#ac122859a241350f501e4f77da81b669f">vncserver</a>;
+<a name="l00164"></a>00164 
+<a name="l00165"></a>00165       <span class="keyword">public</span>:
+<a name="l00166"></a>00166         <a class="code" href="classVncServer_1_1DataEvent.html#ab45459d895bfa96fe30716744b4f9121">DataEvent</a>(<a class="code" href="classVncServer.html">VncServer</a> *<a class="code" href="namespaceMipsISA.html#a71505b3d754f8feffb75aa29ffce5018">vs</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a87001e8063b8b1b5dc88f5a4b43b2a5a">fd</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a>);
+<a name="l00167"></a>00167         <span class="keywordtype">void</span> <a class="code" href="classVncServer_1_1DataEvent.html#aedacbaeee0c89ceca526874c34f6b20b">process</a>(<span class="keywordtype">int</span> revent);
+<a name="l00168"></a>00168     };
+<a name="l00169"></a>00169 
+<a name="l00170"></a><a class="code" href="classVncServer.html#a8a93830b802d4fc8562fa54ead43b1f9">00170</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classVncServer_1_1DataEvent.html">DataEvent</a>;
+<a name="l00171"></a><a class="code" href="classVncServer.html#a7a8501aba170bc353fe057e372612b93">00171</a>     <a class="code" href="classVncServer_1_1DataEvent.html">DataEvent</a> *<a class="code" href="classVncServer.html#a7a8501aba170bc353fe057e372612b93">dataEvent</a>;
+<a name="l00172"></a>00172 
+<a name="l00173"></a><a class="code" href="classVncServer.html#a7106e2abc437ad981830d14176d15f09">00173</a>     <span class="keywordtype">int</span> <a class="code" href="classVncServer.html#a7106e2abc437ad981830d14176d15f09">number</a>;
+<a name="l00174"></a><a class="code" href="classVncServer.html#ab9f945d843e004fbbb155b7709051470">00174</a>     <span class="keywordtype">int</span> <a class="code" href="classVncServer.html#ab9f945d843e004fbbb155b7709051470">dataFd</a>; <span class="comment">// data stream file describer</span>
+<a name="l00175"></a>00175 
+<a name="l00176"></a><a class="code" href="classVncServer.html#acf9ea448b26a541b4a197f1ca92f700b">00176</a>     <a class="code" href="classListenSocket.html">ListenSocket</a> <a class="code" href="classVncServer.html#acf9ea448b26a541b4a197f1ca92f700b">listener</a>;
+<a name="l00177"></a>00177 
+<a name="l00178"></a>00178     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#ac0c44c1417536740ffc2cf33117027cf">listen</a>(<span class="keywordtype">int</span> port);
+<a name="l00179"></a>00179     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#aadb9f3b844fb4cf98288cd3c60a3af91">accept</a>();
+<a name="l00180"></a>00180     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a6617ba3e856d8b24979a2a44e5417172">data</a>();
+<a name="l00181"></a>00181     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#ac295bade8aee589f6718dfa79edc2a34">detach</a>();
+<a name="l00182"></a>00182 
+<a name="l00183"></a>00183   <span class="keyword">public</span>:
+<a name="l00184"></a><a class="code" href="classVncServer.html#a9bc94e8c47d227e70719e2f0b14d23d8">00184</a>     <span class="keyword">typedef</span> VncServerParams <a class="code" href="classVncServer.html#a9bc94e8c47d227e70719e2f0b14d23d8">Params</a>;
+<a name="l00185"></a>00185     <a class="code" href="classVncServer.html#a0438267d56345e85e9422a89bea5c886">VncServer</a>(<span class="keyword">const</span> <a class="code" href="classVncServer.html#a9bc94e8c47d227e70719e2f0b14d23d8">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00186"></a>00186     <a class="code" href="classVncServer.html#a13ae0e928ec930d77353cb1bd42e36a1">~VncServer</a>();
+<a name="l00187"></a>00187 
+<a name="l00188"></a>00188     <span class="comment">// RFB</span>
+<a name="l00189"></a>00189   <span class="keyword">protected</span>:
+<a name="l00190"></a>00190 
+<a name="l00192"></a><a class="code" href="classVncServer.html#ad0bc1d6a87b76d47489ca919f3ae51ca">00192</a>     <a class="code" href="group__VncConstants.html#gacdd867d72142510ce53521a63a062f9b">ConnectionState</a> <a class="code" href="classVncServer.html#ad0bc1d6a87b76d47489ca919f3ae51ca">curState</a>;
+<a name="l00193"></a>00193 
+<a name="l00196"></a><a class="code" href="classVncServer.html#ab2b958eb553dde858c8737b57614e87d">00196</a>     <span class="keywordtype">bool</span> <a class="code" href="classVncServer.html#ab2b958eb553dde858c8737b57614e87d">sendUpdate</a>;
+<a name="l00197"></a>00197 
+<a name="l00199"></a><a class="code" href="classVncServer.html#a126e69cd1de897ecc9b84e858e4809c7">00199</a>     <a class="code" href="structVncInput_1_1PixelFormat.html">PixelFormat</a> <a class="code" href="classVncServer.html#a126e69cd1de897ecc9b84e858e4809c7">pixelFormat</a>;
+<a name="l00200"></a>00200 
+<a name="l00202"></a><a class="code" href="classVncServer.html#a1286ea1dbf0c332e14ccfc0267de405e">00202</a>     <span class="keywordtype">bool</span> <a class="code" href="classVncServer.html#a1286ea1dbf0c332e14ccfc0267de405e">supportsRawEnc</a>;
+<a name="l00203"></a>00203 
+<a name="l00205"></a><a class="code" href="classVncServer.html#a68ae35695f8a6dcd68d9ff80dee28736">00205</a>     <span class="keywordtype">bool</span> <a class="code" href="classVncServer.html#a68ae35695f8a6dcd68d9ff80dee28736">supportsResizeEnc</a>;
+<a name="l00206"></a>00206 
+<a name="l00207"></a>00207   <span class="keyword">protected</span>:
+<a name="l00215"></a>00215     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a3531045d065c2aa1aaf5a225e2337e80">sendError</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* error_msg);
+<a name="l00216"></a>00216 
+<a name="l00222"></a>00222     <span class="keywordtype">size_t</span> <a class="code" href="classVncServer.html#a9f8a094b410fa145da19663f83f241e3">read</a>(uint8_t *buf, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00223"></a>00223 
+<a name="l00232"></a>00232     <span class="keywordtype">size_t</span> <a class="code" href="classVncServer.html#ab265cdc9659b04aafe0b93e866024a6d">read1</a>(uint8_t *buf, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00233"></a>00233 
+<a name="l00234"></a>00234 
+<a name="l00239"></a>00239     <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keywordtype">size_t</span> <a class="code" href="classVncServer.html#a9f8a094b410fa145da19663f83f241e3">read</a>(T* <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00240"></a>00240 
+<a name="l00241"></a>00241 
+<a name="l00247"></a>00247     <span class="keywordtype">size_t</span> <a class="code" href="classVncServer.html#a215d71301eb6ae0ebffc5d2f8fe4a140">write</a>(<span class="keyword">const</span> uint8_t *buf, <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>);
+<a name="l00248"></a>00248 
+<a name="l00253"></a>00253     <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt; <span class="keywordtype">size_t</span> <a class="code" href="classVncServer.html#a215d71301eb6ae0ebffc5d2f8fe4a140">write</a>(T* <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00254"></a>00254 
+<a name="l00258"></a>00258     <span class="keywordtype">size_t</span> <a class="code" href="classVncServer.html#a215d71301eb6ae0ebffc5d2f8fe4a140">write</a>(<span class="keyword">const</span> <span class="keywordtype">char</span>* str);
+<a name="l00259"></a>00259 
+<a name="l00263"></a>00263     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#aee7430db7799cf4e0bac388671be878d">checkProtocolVersion</a>();
+<a name="l00264"></a>00264 
+<a name="l00267"></a>00267     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#ad4122a39071b5fd462e19418a432ed31">checkSecurity</a>();
+<a name="l00268"></a>00268 
+<a name="l00270"></a>00270     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a0d7d773b4b3948da49ae2ecd00f985d5">sendServerInit</a>();
+<a name="l00271"></a>00271 
+<a name="l00275"></a>00275     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a3531045d065c2aa1aaf5a225e2337e80">sendError</a>(std::string error_msg);
+<a name="l00276"></a>00276 
+<a name="l00280"></a>00280     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a12fdf8396c8fe33bb93e66d7491fb497">sendFrameBufferUpdate</a>();
+<a name="l00281"></a>00281 
+<a name="l00283"></a>00283     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#ad52ea030be3bb8b536f8a7f87b709319">setPixelFormat</a>();
+<a name="l00284"></a>00284 
+<a name="l00286"></a>00286     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a840599118004b7df093bd78b6a21e56b">setEncodings</a>();
+<a name="l00287"></a>00287 
+<a name="l00289"></a>00289     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a83f5ce82a666e5b948e2a14b430633ce">requestFbUpdate</a>();
+<a name="l00290"></a>00290 
+<a name="l00292"></a>00292     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#adce913e2d5283f60780d7becd1d3e44b">recvKeyboardInput</a>();
+<a name="l00293"></a>00293 
+<a name="l00295"></a>00295     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a95d4cde3a9b92bbac5871d8b475eedd3">recvPointerInput</a>();
+<a name="l00296"></a>00296 
+<a name="l00301"></a>00301     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a7ee4399f42b127e68135272ff77815c2">recvCutText</a>();
+<a name="l00302"></a>00302 
+<a name="l00306"></a>00306     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a046eae8a3566418d4f03a95de5d1af13">sendFrameBufferResized</a>();
+<a name="l00307"></a>00307 
+<a name="l00308"></a>00308   <span class="keyword">public</span>:
+<a name="l00313"></a>00313     <span class="keywordtype">void</span>
+<a name="l00314"></a><a class="code" href="classVncServer.html#a92a590790db6444ca7a79eaf5fbcb0d9">00314</a>     <a class="code" href="classVncServer.html#a92a590790db6444ca7a79eaf5fbcb0d9">setDirty</a>()
+<a name="l00315"></a>00315     {
+<a name="l00316"></a>00316         <a class="code" href="classVncServer.html#a92a590790db6444ca7a79eaf5fbcb0d9">VncInput::setDirty</a>();
+<a name="l00317"></a>00317         <a class="code" href="classVncServer.html#ab2b958eb553dde858c8737b57614e87d">sendUpdate</a> = <span class="keyword">true</span>;
+<a name="l00318"></a>00318         <a class="code" href="classVncServer.html#a12fdf8396c8fe33bb93e66d7491fb497">sendFrameBufferUpdate</a>();
+<a name="l00319"></a>00319     }
+<a name="l00320"></a>00320 
+<a name="l00324"></a>00324     <span class="keywordtype">void</span> <a class="code" href="classVncServer.html#a9abef13e07371ccf4a89883649f1bcc5">setFrameBufferParams</a>(<a class="code" href="classVideoConvert.html#a46c8a310cf4c094f8c80e1cb8dc1f911">VideoConvert::Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>, uint16_t <a class="code" href="namespaceArmISA.html#a0da89c280130b84ae26405a901396428">width</a>,
+<a name="l00325"></a>00325         uint16_t height);
+<a name="l00326"></a>00326 };
+<a name="l00327"></a>00327 
+<a name="l00328"></a>00328 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

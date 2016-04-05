@@ -1,0 +1,174 @@
+\hypertarget{classArmLiveProcess64}{
+\section{クラス ArmLiveProcess64}
+\label{classArmLiveProcess64}\index{ArmLiveProcess64@{ArmLiveProcess64}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}ArmLiveProcess64に対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classArmLiveProcess64}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{namespaceArmISA_a0e080577527fb3e9685399f75b5caf15}{ArmISA::IntReg} \hyperlink{classArmLiveProcess64_a52c7542cca5e7218361e5d1baf236cb2}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i, int width)
+\item 
+\hyperlink{namespaceArmISA_a0e080577527fb3e9685399f75b5caf15}{ArmISA::IntReg} \hyperlink{classArmLiveProcess64_acd6c1a25855e6ca42789dd97c86a17ac}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i)
+\item 
+void \hyperlink{classArmLiveProcess64_addce5483f248b617812cb55b7e58ffd0}{setSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int i, \hyperlink{namespaceArmISA_a0e080577527fb3e9685399f75b5caf15}{ArmISA::IntReg} val)
+\item 
+void \hyperlink{classArmLiveProcess64_aaefd02663c1eae206b851290d9276a5e}{setSyscallReturn} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classSyscallReturn}{SyscallReturn} return\_\-value)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmLiveProcess64_a0c3bab75fec600b830ee82eac964c03b}{ArmLiveProcess64} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile}, \hyperlink{classObjectFile_a0ac03ab06a859320a9072002bdf3aa0f}{ObjectFile::Arch} \_\-arch)
+\item 
+void \hyperlink{classArmLiveProcess64_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classObjectFile_a0ac03ab06a859320a9072002bdf3aa0f}{ObjectFile::Arch} \hyperlink{classArmLiveProcess64_abf93aa1dd69df35e2a50f63d5a5d4c40}{arch}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmLiveProcess64_a0c3bab75fec600b830ee82eac964c03b}{
+\index{ArmLiveProcess64@{ArmLiveProcess64}!ArmLiveProcess64@{ArmLiveProcess64}}
+\index{ArmLiveProcess64@{ArmLiveProcess64}!ArmLiveProcess64@{ArmLiveProcess64}}
+\subsubsection[{ArmLiveProcess64}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ArmLiveProcess64} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile}, \/  {\bf ObjectFile::Arch} {\em \_\-arch})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmLiveProcess64_a0c3bab75fec600b830ee82eac964c03b}
+
+
+
+\begin{DoxyCode}
+85     : ArmLiveProcess(params, objFile, _arch)
+86 {
+87     stack_base = 0x7fffff0000L;
+88 
+89     // Set pointer for next thread stack.  Reserve 8M for main stack.
+90     next_thread_stack_base = stack_base - (8 * 1024 * 1024);
+91 
+92     // Set up break point (Top of Heap)
+93     brk_point = objFile->dataBase() + objFile->dataSize() + objFile->bssSize();
+94     brk_point = roundUp(brk_point, VMPageSize);
+95 
+96     // Set up region for mmaps. For now, start at bottom of kuseg space.
+97     mmap_start = mmap_end = 0x4000000000L;
+98 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classArmLiveProcess64_acd6c1a25855e6ca42789dd97c86a17ac}{
+\index{ArmLiveProcess64@{ArmLiveProcess64}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!ArmLiveProcess64@{ArmLiveProcess64}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ArmISA::IntReg} getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmLiveProcess64_acd6c1a25855e6ca42789dd97c86a17ac}
+
+
+\hyperlink{classLiveProcess_aa001ff57ec460026facb89ba19c7bf96}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+410 {
+411     assert(i < 8);
+412     return tc->readIntReg(ArgumentReg0 + i++);
+413 }
+\end{DoxyCode}
+\hypertarget{classArmLiveProcess64_a52c7542cca5e7218361e5d1baf236cb2}{
+\index{ArmLiveProcess64@{ArmLiveProcess64}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!ArmLiveProcess64@{ArmLiveProcess64}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ArmISA::IntReg} getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i}, \/  int {\em width})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmLiveProcess64_a52c7542cca5e7218361e5d1baf236cb2}
+
+
+\hyperlink{classLiveProcess_a383f46521b8667b58a1275f2a3e2fda1}{LiveProcess}を再定義しています。
+
+
+\begin{DoxyCode}
+436 {
+437     return getSyscallArg(tc, i);
+438 }
+\end{DoxyCode}
+\hypertarget{classArmLiveProcess64_a3c34ea9b29f410748d4435a667484924}{
+\index{ArmLiveProcess64@{ArmLiveProcess64}!initState@{initState}}
+\index{initState@{initState}!ArmLiveProcess64@{ArmLiveProcess64}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classArmLiveProcess64_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classArmLiveProcess64_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classProcess_a3c34ea9b29f410748d4435a667484924}{Process}を再定義しています。
+
+\hyperlink{classArmLinuxProcess64_a3c34ea9b29f410748d4435a667484924}{ArmLinuxProcess64}で再定義されています。
+
+
+\begin{DoxyCode}
+121 {
+122     LiveProcess::initState();
+123     argsInit<uint64_t>(VMPageSize, INTREG_SP0);
+124     for (int i = 0; i < contextIds.size(); i++) {
+125         ThreadContext * tc = system->getThreadContext(contextIds[i]);
+126         CPSR cpsr = tc->readMiscReg(MISCREG_CPSR);
+127         cpsr.mode = MODE_EL0T;
+128         tc->setMiscReg(MISCREG_CPSR, cpsr);
+129         CPACR cpacr = tc->readMiscReg(MISCREG_CPACR_EL1);
+130         // Enable the floating point coprocessors.
+131         cpacr.cp10 = 0x3;
+132         cpacr.cp11 = 0x3;
+133         tc->setMiscReg(MISCREG_CPACR_EL1, cpacr);
+134         // Generically enable floating point support.
+135         FPEXC fpexc = tc->readMiscReg(MISCREG_FPEXC);
+136         fpexc.en = 1;
+137         tc->setMiscReg(MISCREG_FPEXC, fpexc);
+138     }
+139 }
+\end{DoxyCode}
+\hypertarget{classArmLiveProcess64_addce5483f248b617812cb55b7e58ffd0}{
+\index{ArmLiveProcess64@{ArmLiveProcess64}!setSyscallArg@{setSyscallArg}}
+\index{setSyscallArg@{setSyscallArg}!ArmLiveProcess64@{ArmLiveProcess64}}
+\subsubsection[{setSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em i}, \/  {\bf ArmISA::IntReg} {\em val})}}
+\label{classArmLiveProcess64_addce5483f248b617812cb55b7e58ffd0}
+
+
+
+\begin{DoxyCode}
+451 {
+452     assert(i < 8);
+453     tc->setIntReg(ArgumentReg0 + i, val);
+454 }
+\end{DoxyCode}
+\hypertarget{classArmLiveProcess64_aaefd02663c1eae206b851290d9276a5e}{
+\index{ArmLiveProcess64@{ArmLiveProcess64}!setSyscallReturn@{setSyscallReturn}}
+\index{setSyscallReturn@{setSyscallReturn}!ArmLiveProcess64@{ArmLiveProcess64}}
+\subsubsection[{setSyscallReturn}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallReturn ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf SyscallReturn} {\em return\_\-value})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmLiveProcess64_aaefd02663c1eae206b851290d9276a5e}
+
+
+\hyperlink{classLiveProcess_a5955e790542b86589b9fd75df24ec2d3}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+464 {
+465     tc->setIntReg(ReturnValueReg, sysret.encodedValue());
+466 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classArmLiveProcess64_abf93aa1dd69df35e2a50f63d5a5d4c40}{
+\index{ArmLiveProcess64@{ArmLiveProcess64}!arch@{arch}}
+\index{arch@{arch}!ArmLiveProcess64@{ArmLiveProcess64}}
+\subsubsection[{arch}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ObjectFile::Arch} {\bf arch}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmLiveProcess64_abf93aa1dd69df35e2a50f63d5a5d4c40}
+
+
+\hyperlink{classArmLiveProcess_abf93aa1dd69df35e2a50f63d5a5d4c40}{ArmLiveProcess}を再定義しています。
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2process_8hh}{process.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2process_8cc}{process.cc}\end{DoxyCompactItemize}

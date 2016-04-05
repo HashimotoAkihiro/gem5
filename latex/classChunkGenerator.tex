@@ -1,0 +1,206 @@
+\hypertarget{classChunkGenerator}{
+\section{クラス ChunkGenerator}
+\label{classChunkGenerator}\index{ChunkGenerator@{ChunkGenerator}}
+}
+
+
+{\ttfamily \#include $<$chunk\_\-generator.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classChunkGenerator_a9dda668a747384202dd80c58a86c9b6a}{ChunkGenerator} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \_\-startAddr, unsigned totalSize, unsigned \_\-chunkSize)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classChunkGenerator_a4e8648f42b38341a268850a18c86830d}{addr} () const 
+\item 
+unsigned \hyperlink{classChunkGenerator_acdb549c592f948a9d973d4d84b02ef87}{size} () const 
+\item 
+unsigned \hyperlink{classChunkGenerator_a63320000d91910d20f33799285652714}{complete} () const 
+\item 
+bool \hyperlink{classChunkGenerator_a6db83072bdb45ff66ab856903170c40d}{done} () const 
+\item 
+bool \hyperlink{classChunkGenerator_a80870c233d0237e3588a2d6f8d176916}{next} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classChunkGenerator_a791de8c75b67169bea9c7e9b56a294f7}{curAddr}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classChunkGenerator_a76968ef2ad8d208fe33cfb493986e85a}{nextAddr}
+\item 
+unsigned \hyperlink{classChunkGenerator_a33d0ca999186c72380a50c5e4b6e9880}{curSize}
+\item 
+unsigned \hyperlink{classChunkGenerator_ae4c879109cc558f8eb48b4f92662d550}{sizeLeft}
+\item 
+const \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classChunkGenerator_a6aeb968ddd05c079215ef147ed22708a}{startAddr}
+\item 
+const unsigned \hyperlink{classChunkGenerator_ac263b0783f6a47755de4c13fcd212c87}{chunkSize}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+This class takes an arbitrary memory region (address/length pair) and generates a series of appropriately (e.g. block-\/ or page-\/) aligned chunks covering the same region.
+
+Example usage:
+
+
+\begin{DoxyCode}
+    for (ChunkGenerator gen(addr, size, chunkSize); !gen.done(); gen.next()) {
+        doSomethingChunky(gen.addr(), gen.size());
+    }
+\end{DoxyCode}
+ 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classChunkGenerator_a9dda668a747384202dd80c58a86c9b6a}{
+\index{ChunkGenerator@{ChunkGenerator}!ChunkGenerator@{ChunkGenerator}}
+\index{ChunkGenerator@{ChunkGenerator}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{ChunkGenerator}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ChunkGenerator} ({\bf Addr} {\em \_\-startAddr}, \/  unsigned {\em totalSize}, \/  unsigned {\em \_\-chunkSize})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classChunkGenerator_a9dda668a747384202dd80c58a86c9b6a}
+Constructor. 
+\begin{DoxyParams}{引数}
+\item[{\em \_\-startAddr}]The starting address of the region. \item[{\em totalSize}]The total size of the region. \item[{\em \_\-chunkSize}]The size/alignment of chunks into which the region should be decomposed. \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+82         : startAddr(_startAddr), chunkSize(_chunkSize)
+83     {
+84         // chunkSize must be a power of two
+85         assert(chunkSize == 0 || isPowerOf2(chunkSize));
+86         assert(totalSize >= 0);
+87 
+88         // set up initial chunk.
+89         curAddr = startAddr;
+90 
+91         if (chunkSize == 0) //Special Case, if we see 0, assume no chuncking
+92         {
+93             nextAddr = startAddr + totalSize;
+94         }
+95         else
+96         {
+97             // nextAddr should be *next* chunk start
+98             nextAddr = roundUp(startAddr, chunkSize);
+99             if (curAddr == nextAddr) {
+100                 // ... even if startAddr is already chunk-aligned
+101                 nextAddr += chunkSize;
+102             }
+103         }
+104 
+105         // how many bytes are left between curAddr and the end of this chunk?
+106         unsigned left_in_chunk = nextAddr - curAddr;
+107         curSize = std::min(totalSize, left_in_chunk);
+108         sizeLeft = totalSize - curSize;
+109     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classChunkGenerator_a4e8648f42b38341a268850a18c86830d}{
+\index{ChunkGenerator@{ChunkGenerator}!addr@{addr}}
+\index{addr@{addr}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{addr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} addr () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classChunkGenerator_a4e8648f42b38341a268850a18c86830d}
+Return starting address of current chunk. 
+
+
+\begin{DoxyCode}
+112 { return curAddr; }
+\end{DoxyCode}
+\hypertarget{classChunkGenerator_a63320000d91910d20f33799285652714}{
+\index{ChunkGenerator@{ChunkGenerator}!complete@{complete}}
+\index{complete@{complete}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{complete}]{\setlength{\rightskip}{0pt plus 5cm}unsigned complete () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classChunkGenerator_a63320000d91910d20f33799285652714}
+Number of bytes we have already chunked up. 
+
+
+\begin{DoxyCode}
+117 { return curAddr - startAddr; }
+\end{DoxyCode}
+\hypertarget{classChunkGenerator_a6db83072bdb45ff66ab856903170c40d}{
+\index{ChunkGenerator@{ChunkGenerator}!done@{done}}
+\index{done@{done}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{done}]{\setlength{\rightskip}{0pt plus 5cm}bool done () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classChunkGenerator_a6db83072bdb45ff66ab856903170c40d}
+Are we done? That is, did the last call to \hyperlink{classChunkGenerator_a80870c233d0237e3588a2d6f8d176916}{next()} advance past the end of the region? \begin{DoxyReturn}{戻り値}
+True if yes, false if more to go. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+124 { return (curSize == 0); }
+\end{DoxyCode}
+\hypertarget{classChunkGenerator_a80870c233d0237e3588a2d6f8d176916}{
+\index{ChunkGenerator@{ChunkGenerator}!next@{next}}
+\index{next@{next}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{next}]{\setlength{\rightskip}{0pt plus 5cm}bool next ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classChunkGenerator_a80870c233d0237e3588a2d6f8d176916}
+Advance generator to next chunk. \begin{DoxyReturn}{戻り値}
+True if successful, false if unsuccessful (because we were at the last chunk). 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+133     {
+134         if (sizeLeft == 0) {
+135             curSize = 0;
+136             return false;
+137         }
+138 
+139         curAddr = nextAddr;
+140         curSize = std::min(sizeLeft, chunkSize);
+141         sizeLeft -= curSize;
+142         nextAddr += curSize;
+143         return true;
+144     }
+\end{DoxyCode}
+\hypertarget{classChunkGenerator_acdb549c592f948a9d973d4d84b02ef87}{
+\index{ChunkGenerator@{ChunkGenerator}!size@{size}}
+\index{size@{size}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{size}]{\setlength{\rightskip}{0pt plus 5cm}unsigned size () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classChunkGenerator_acdb549c592f948a9d973d4d84b02ef87}
+Return size in bytes of current chunk. 
+
+
+\begin{DoxyCode}
+114 { return curSize; }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classChunkGenerator_ac263b0783f6a47755de4c13fcd212c87}{
+\index{ChunkGenerator@{ChunkGenerator}!chunkSize@{chunkSize}}
+\index{chunkSize@{chunkSize}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{chunkSize}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned {\bf chunkSize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classChunkGenerator_ac263b0783f6a47755de4c13fcd212c87}
+The maximum chunk size, e.g., the cache block size or page size. \hypertarget{classChunkGenerator_a791de8c75b67169bea9c7e9b56a294f7}{
+\index{ChunkGenerator@{ChunkGenerator}!curAddr@{curAddr}}
+\index{curAddr@{curAddr}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{curAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf curAddr}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classChunkGenerator_a791de8c75b67169bea9c7e9b56a294f7}
+The starting address of the current chunk. \hypertarget{classChunkGenerator_a33d0ca999186c72380a50c5e4b6e9880}{
+\index{ChunkGenerator@{ChunkGenerator}!curSize@{curSize}}
+\index{curSize@{curSize}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{curSize}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf curSize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classChunkGenerator_a33d0ca999186c72380a50c5e4b6e9880}
+The size of the current chunk (in bytes). \hypertarget{classChunkGenerator_a76968ef2ad8d208fe33cfb493986e85a}{
+\index{ChunkGenerator@{ChunkGenerator}!nextAddr@{nextAddr}}
+\index{nextAddr@{nextAddr}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{nextAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf nextAddr}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classChunkGenerator_a76968ef2ad8d208fe33cfb493986e85a}
+The starting address of the next chunk (after the current one). \hypertarget{classChunkGenerator_ae4c879109cc558f8eb48b4f92662d550}{
+\index{ChunkGenerator@{ChunkGenerator}!sizeLeft@{sizeLeft}}
+\index{sizeLeft@{sizeLeft}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{sizeLeft}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf sizeLeft}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classChunkGenerator_ae4c879109cc558f8eb48b4f92662d550}
+The number of bytes remaining in the region after the current chunk. \hypertarget{classChunkGenerator_a6aeb968ddd05c079215ef147ed22708a}{
+\index{ChunkGenerator@{ChunkGenerator}!startAddr@{startAddr}}
+\index{startAddr@{startAddr}!ChunkGenerator@{ChunkGenerator}}
+\subsubsection[{startAddr}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Addr} {\bf startAddr}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classChunkGenerator_a6aeb968ddd05c079215ef147ed22708a}
+The start address so we can calculate offset in writing block. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{chunk__generator_8hh}{chunk\_\-generator.hh}\end{DoxyCompactItemize}

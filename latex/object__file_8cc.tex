@@ -1,0 +1,83 @@
+\hypertarget{object__file_8cc}{
+\section{base/loader/object\_\-file.cc}
+\label{object__file_8cc}\index{base/loader/object\_\-file.cc@{base/loader/object\_\-file.cc}}
+}
+{\ttfamily \#include $<$sys/mman.h$>$}\par
+{\ttfamily \#include $<$sys/types.h$>$}\par
+{\ttfamily \#include $<$fcntl.h$>$}\par
+{\ttfamily \#include $<$unistd.h$>$}\par
+{\ttfamily \#include $<$cstdio$>$}\par
+{\ttfamily \#include $<$list$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include \char`\"{}base/loader/aout\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/dtb\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/ecoff\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/elf\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/object\_\-file.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/raw\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/symtab.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/cprintf.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/port\_\-proxy.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classObjectFile}{ObjectFile} $\ast$ \hyperlink{object__file_8cc_af9c937baadd807efe7819a5214ca652f}{createObjectFile} (const string \&fname, bool raw)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{object__file_8cc_af9c937baadd807efe7819a5214ca652f}{
+\index{object\_\-file.cc@{object\_\-file.cc}!createObjectFile@{createObjectFile}}
+\index{createObjectFile@{createObjectFile}!object_file.cc@{object\_\-file.cc}}
+\subsubsection[{createObjectFile}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ObjectFile}$\ast$ createObjectFile (const string \& {\em fname}, \/  bool {\em raw})}}
+\label{object__file_8cc_af9c937baadd807efe7819a5214ca652f}
+
+
+
+\begin{DoxyCode}
+111 {
+112     // open the file
+113     int fd = open(fname.c_str(), O_RDONLY);
+114     if (fd < 0) {
+115         return NULL;
+116     }
+117 
+118     // find the length of the file by seeking to the end
+119     size_t len = (size_t)lseek(fd, 0, SEEK_END);
+120 
+121     // mmap the whole shebang
+122     uint8_t *fileData =
+123         (uint8_t *)mmap(NULL, len, PROT_READ, MAP_SHARED, fd, 0);
+124     if (fileData == MAP_FAILED) {
+125         close(fd);
+126         return NULL;
+127     }
+128 
+129     ObjectFile *fileObj = NULL;
+130 
+131     // figure out what we have here
+132     if ((fileObj = EcoffObject::tryFile(fname, fd, len, fileData)) != NULL) {
+133         return fileObj;
+134     }
+135 
+136     if ((fileObj = AoutObject::tryFile(fname, fd, len, fileData)) != NULL) {
+137         return fileObj;
+138     }
+139 
+140     if ((fileObj = ElfObject::tryFile(fname, fd, len, fileData)) != NULL) {
+141         return fileObj;
+142     }
+143 
+144     if ((fileObj = DtbObject::tryFile(fname, fd, len, fileData)) != NULL) {
+145         return fileObj;
+146     }
+147 
+148     if (raw)
+149         return RawObject::tryFile(fname, fd, len, fileData);
+150 
+151     // don't know what it is
+152     close(fd);
+153     munmap((char*)fileData, len);
+154     return NULL;
+155 }
+\end{DoxyCode}

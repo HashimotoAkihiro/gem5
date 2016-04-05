@@ -1,0 +1,562 @@
+\hypertarget{classCheck}{
+\section{クラス Check}
+\label{classCheck}\index{Check@{Check}}
+}
+
+
+{\ttfamily \#include $<$Check.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCheck_ac91bf1af0228e3ff24854600a2791d50}{Check} (const \hyperlink{classAddress}{Address} \&address, const \hyperlink{classAddress}{Address} \&pc, int \_\-num\_\-writers, int \_\-num\_\-readers, \hyperlink{classRubyTester}{RubyTester} $\ast$\_\-tester)
+\item 
+void \hyperlink{classCheck_ad0188ca8aaba0189f9efa4b14bb7940b}{initiate} ()
+\item 
+void \hyperlink{classCheck_aafaa6880b81bad24ff0ee650caf91bfc}{performCallback} (\hyperlink{TypeDefines_8hh_a83c14b4ae37e80071f6b3506a6c46151}{NodeID} proc, \hyperlink{classSubBlock}{SubBlock} $\ast$data, \hyperlink{classTime}{Time} curTime)
+\item 
+const \hyperlink{classAddress}{Address} \& \hyperlink{classCheck_adae095cd74f47f3f24ee267e18e87810}{getAddress} ()
+\item 
+void \hyperlink{classCheck_a3df4c3e039cf1557a32bd9b7ff9a84e4}{changeAddress} (const \hyperlink{classAddress}{Address} \&address)
+\item 
+void \hyperlink{classCheck_ac55fe386a101fbae38c716067c9966a0}{print} (std::ostream \&out) const 
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classCheck_aab414465afae8e0fde6717473b5e2dde}{initiateFlush} ()
+\item 
+void \hyperlink{classCheck_aed660435c2bb1a74006597a2816f9287}{initiatePrefetch} ()
+\item 
+void \hyperlink{classCheck_a1b2221f5b5047c8b42b6bb5407406a9a}{initiateAction} ()
+\item 
+void \hyperlink{classCheck_a1196917fe04545fcd2dc71127a41d8a6}{initiateCheck} ()
+\item 
+void \hyperlink{classCheck_a04d2727906355c9e4bdd78cf34436f41}{pickValue} ()
+\item 
+void \hyperlink{classCheck_ac935b7ff21b8b1f5dc3009785ec29e9b}{pickInitiatingNode} ()
+\item 
+void \hyperlink{classCheck_a653b559db67502e3171dca8f39cd7783}{debugPrint} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+TesterStatus \hyperlink{classCheck_a70259b2e0a9ded04ee46b786d423b50c}{m\_\-status}
+\item 
+uint8\_\-t \hyperlink{classCheck_a5307fc878e97122f4a7fc315f2329c08}{m\_\-value}
+\item 
+int \hyperlink{classCheck_ad10763fc3ed0f7ccb24a268ad25ccc7d}{m\_\-store\_\-count}
+\item 
+\hyperlink{TypeDefines_8hh_a83c14b4ae37e80071f6b3506a6c46151}{NodeID} \hyperlink{classCheck_a126a08ce5cd6fa00a0327f01957bd420}{m\_\-initiatingNode}
+\item 
+\hyperlink{classAddress}{Address} \hyperlink{classCheck_a9fc76d7db60d4f05200f8248a697ea28}{m\_\-address}
+\item 
+\hyperlink{classAddress}{Address} \hyperlink{classCheck_a054fda5975595c15c2cb078c5bc10888}{m\_\-pc}
+\item 
+RubyAccessMode \hyperlink{classCheck_a519d9b4ec6b00fb1f4cfc481ee37121e}{m\_\-access\_\-mode}
+\item 
+int \hyperlink{classCheck_aedeaccd67403213e1e43d99ff1c70f44}{m\_\-num\_\-writers}
+\item 
+int \hyperlink{classCheck_a7d224a04c5f0d1049dd6c6ab070884cb}{m\_\-num\_\-readers}
+\item 
+\hyperlink{classRubyTester}{RubyTester} $\ast$ \hyperlink{classCheck_aaff3af064462a4d4b7f986a4a2454ff0}{m\_\-tester\_\-ptr}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCheck_ac91bf1af0228e3ff24854600a2791d50}{
+\index{Check@{Check}!Check@{Check}}
+\index{Check@{Check}!Check@{Check}}
+\subsubsection[{Check}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Check} (const {\bf Address} \& {\em address}, \/  const {\bf Address} \& {\em pc}, \/  int {\em \_\-num\_\-writers}, \/  int {\em \_\-num\_\-readers}, \/  {\bf RubyTester} $\ast$ {\em \_\-tester})}}
+\label{classCheck_ac91bf1af0228e3ff24854600a2791d50}
+
+
+
+\begin{DoxyCode}
+40     : m_num_writers(_num_writers), m_num_readers(_num_readers),
+41       m_tester_ptr(_tester)
+42 {
+43     m_status = TesterStatus_Idle;
+44 
+45     pickValue();
+46     pickInitiatingNode();
+47     changeAddress(address);
+48     m_pc = pc;
+49     m_access_mode = RubyAccessMode(random() % RubyAccessMode_NUM);
+50     m_store_count = 0;
+51 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classCheck_a3df4c3e039cf1557a32bd9b7ff9a84e4}{
+\index{Check@{Check}!changeAddress@{changeAddress}}
+\index{changeAddress@{changeAddress}!Check@{Check}}
+\subsubsection[{changeAddress}]{\setlength{\rightskip}{0pt plus 5cm}void changeAddress (const {\bf Address} \& {\em address})}}
+\label{classCheck_a3df4c3e039cf1557a32bd9b7ff9a84e4}
+
+
+
+\begin{DoxyCode}
+330 {
+331     assert(m_status == TesterStatus_Idle || m_status == TesterStatus_Ready);
+332     m_status = TesterStatus_Idle;
+333     m_address = address;
+334     m_store_count = 0;
+335 }
+\end{DoxyCode}
+\hypertarget{classCheck_a653b559db67502e3171dca8f39cd7783}{
+\index{Check@{Check}!debugPrint@{debugPrint}}
+\index{debugPrint@{debugPrint}!Check@{Check}}
+\subsubsection[{debugPrint}]{\setlength{\rightskip}{0pt plus 5cm}void debugPrint ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a653b559db67502e3171dca8f39cd7783}
+
+
+
+\begin{DoxyCode}
+370 {
+371     DPRINTF(RubyTest,
+372         "[%#x, value: %d, status: %s, initiating node: %d, store_count: %d]\n",
+373         m_address.getAddress(), (int)m_value,
+374         TesterStatus_to_string(m_status).c_str(),
+375         m_initiatingNode, m_store_count);
+376 }
+\end{DoxyCode}
+\hypertarget{classCheck_adae095cd74f47f3f24ee267e18e87810}{
+\index{Check@{Check}!getAddress@{getAddress}}
+\index{getAddress@{getAddress}!Check@{Check}}
+\subsubsection[{getAddress}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Address}\& getAddress ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCheck_adae095cd74f47f3f24ee267e18e87810}
+
+
+
+\begin{DoxyCode}
+54 { return m_address; }
+\end{DoxyCode}
+\hypertarget{classCheck_ad0188ca8aaba0189f9efa4b14bb7940b}{
+\index{Check@{Check}!initiate@{initiate}}
+\index{initiate@{initiate}!Check@{Check}}
+\subsubsection[{initiate}]{\setlength{\rightskip}{0pt plus 5cm}void initiate ()}}
+\label{classCheck_ad0188ca8aaba0189f9efa4b14bb7940b}
+
+
+
+\begin{DoxyCode}
+55 {
+56     DPRINTF(RubyTest, "initiating\n");
+57     debugPrint();
+58 
+59     // currently no protocols support prefetches
+60     if (false && (random() & 0xf) == 0) {
+61         initiatePrefetch(); // Prefetch from random processor
+62     }
+63 
+64     if (m_tester_ptr->getCheckFlush() && (random() & 0xff) == 0) {
+65         initiateFlush(); // issue a Flush request from random processor
+66     }
+67 
+68     if (m_status == TesterStatus_Idle) {
+69         initiateAction();
+70     } else if (m_status == TesterStatus_Ready) {
+71         initiateCheck();
+72     } else {
+73         // Pending - do nothing
+74         DPRINTF(RubyTest,
+75                 "initiating action/check - failed: action/check is pending\n");
+76     }
+77 }
+\end{DoxyCode}
+\hypertarget{classCheck_a1b2221f5b5047c8b42b6bb5407406a9a}{
+\index{Check@{Check}!initiateAction@{initiateAction}}
+\index{initiateAction@{initiateAction}!Check@{Check}}
+\subsubsection[{initiateAction}]{\setlength{\rightskip}{0pt plus 5cm}void initiateAction ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a1b2221f5b5047c8b42b6bb5407406a9a}
+
+
+
+\begin{DoxyCode}
+160 {
+161     DPRINTF(RubyTest, "initiating Action\n");
+162     assert(m_status == TesterStatus_Idle);
+163 
+164     int index = random() % m_num_writers;
+165     MasterPort* port = m_tester_ptr->getWritableCpuPort(index);
+166 
+167     Request::Flags flags;
+168 
+169     // Create the particular address for the next byte to be written
+170     Address writeAddr(m_address.getAddress() + m_store_count);
+171 
+172     // Stores are assumed to be 1 byte-sized
+173     Request *req = new Request(writeAddr.getAddress(), 1, flags,
+174             m_tester_ptr->masterId(), curTick(),
+175                                m_pc.getAddress());
+176 
+177     req->setThreadContext(index, 0);
+178     Packet::Command cmd;
+179 
+180     // 1 out of 8 chance, issue an atomic rather than a write
+181     // if ((random() & 0x7) == 0) {
+182     //     cmd = MemCmd::SwapReq;
+183     // } else {
+184     cmd = MemCmd::WriteReq;
+185     // }
+186 
+187     PacketPtr pkt = new Packet(req, cmd);
+188     uint8_t *writeData = new uint8_t;
+189     *writeData = m_value + m_store_count;
+190     pkt->dataDynamic(writeData);
+191 
+192     DPRINTF(RubyTest, "data 0x%x check 0x%x\n",
+193             *(pkt->getPtr<uint8_t>()), *writeData);
+194 
+195     // push the subblock onto the sender state.  The sequencer will
+196     // update the subblock on the return
+197     pkt->senderState = new SenderState(writeAddr, req->getSize());
+198 
+199     if (port->sendTimingReq(pkt)) {
+200         DPRINTF(RubyTest, "initiating action - successful\n");
+201         DPRINTF(RubyTest, "status before action update: %s\n",
+202                 (TesterStatus_to_string(m_status)).c_str());
+203         m_status = TesterStatus_Action_Pending;
+204     } else {
+205         // If the packet did not issue, must delete
+206         // Note: No need to delete the data, the packet destructor
+207         // will delete it
+208         delete pkt->senderState;
+209         delete pkt->req;
+210         delete pkt;
+211 
+212         DPRINTF(RubyTest, "failed to initiate action - sequencer not ready\n");
+213     }
+214 
+215     DPRINTF(RubyTest, "status after action update: %s\n",
+216             (TesterStatus_to_string(m_status)).c_str());
+217 }
+\end{DoxyCode}
+\hypertarget{classCheck_a1196917fe04545fcd2dc71127a41d8a6}{
+\index{Check@{Check}!initiateCheck@{initiateCheck}}
+\index{initiateCheck@{initiateCheck}!Check@{Check}}
+\subsubsection[{initiateCheck}]{\setlength{\rightskip}{0pt plus 5cm}void initiateCheck ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a1196917fe04545fcd2dc71127a41d8a6}
+
+
+
+\begin{DoxyCode}
+221 {
+222     DPRINTF(RubyTest, "Initiating Check\n");
+223     assert(m_status == TesterStatus_Ready);
+224 
+225     int index = random() % m_num_readers;
+226     MasterPort* port = m_tester_ptr->getReadableCpuPort(index);
+227 
+228     Request::Flags flags;
+229 
+230     // If necessary, make the request an instruction fetch
+231     if (m_tester_ptr->isInstReadableCpuPort(index)) {
+232         flags.set(Request::INST_FETCH);
+233     }
+234 
+235     // Checks are sized depending on the number of bytes written
+236     Request *req = new Request(m_address.getAddress(), CHECK_SIZE, flags,
+237                                m_tester_ptr->masterId(), curTick(), m_pc.
+      getAddress());
+238 
+239     req->setThreadContext(index, 0);
+240     PacketPtr pkt = new Packet(req, MemCmd::ReadReq);
+241     uint8_t *dataArray = new uint8_t[CHECK_SIZE];
+242     pkt->dataDynamicArray(dataArray);
+243 
+244     // push the subblock onto the sender state.  The sequencer will
+245     // update the subblock on the return
+246     pkt->senderState = new SenderState(m_address, req->getSize());
+247 
+248     if (port->sendTimingReq(pkt)) {
+249         DPRINTF(RubyTest, "initiating check - successful\n");
+250         DPRINTF(RubyTest, "status before check update: %s\n",
+251                 TesterStatus_to_string(m_status).c_str());
+252         m_status = TesterStatus_Check_Pending;
+253     } else {
+254         // If the packet did not issue, must delete
+255         // Note: No need to delete the data, the packet destructor
+256         // will delete it
+257         delete pkt->senderState;
+258         delete pkt->req;
+259         delete pkt;
+260 
+261         DPRINTF(RubyTest, "failed to initiate check - cpu port not ready\n");
+262     }
+263 
+264     DPRINTF(RubyTest, "status after check update: %s\n",
+265             TesterStatus_to_string(m_status).c_str());
+266 }
+\end{DoxyCode}
+\hypertarget{classCheck_aab414465afae8e0fde6717473b5e2dde}{
+\index{Check@{Check}!initiateFlush@{initiateFlush}}
+\index{initiateFlush@{initiateFlush}!Check@{Check}}
+\subsubsection[{initiateFlush}]{\setlength{\rightskip}{0pt plus 5cm}void initiateFlush ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_aab414465afae8e0fde6717473b5e2dde}
+
+
+
+\begin{DoxyCode}
+131 {
+132 
+133     DPRINTF(RubyTest, "initiating Flush\n");
+134 
+135     int index = random() % m_num_writers;
+136     MasterPort* port = m_tester_ptr->getWritableCpuPort(index);
+137 
+138     Request::Flags flags;
+139 
+140     Request *req = new Request(m_address.getAddress(), CHECK_SIZE, flags,
+141             m_tester_ptr->masterId(), curTick(), m_pc.getAddress());
+142 
+143     Packet::Command cmd;
+144 
+145     cmd = MemCmd::FlushReq;
+146 
+147     PacketPtr pkt = new Packet(req, cmd);
+148 
+149     // push the subblock onto the sender state.  The sequencer will
+150     // update the subblock on the return
+151     pkt->senderState = new SenderState(m_address, req->getSize());
+152 
+153     if (port->sendTimingReq(pkt)) {
+154         DPRINTF(RubyTest, "initiating Flush - successful\n");
+155     }
+156 }
+\end{DoxyCode}
+\hypertarget{classCheck_aed660435c2bb1a74006597a2816f9287}{
+\index{Check@{Check}!initiatePrefetch@{initiatePrefetch}}
+\index{initiatePrefetch@{initiatePrefetch}!Check@{Check}}
+\subsubsection[{initiatePrefetch}]{\setlength{\rightskip}{0pt plus 5cm}void initiatePrefetch ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_aed660435c2bb1a74006597a2816f9287}
+
+
+
+\begin{DoxyCode}
+81 {
+82     DPRINTF(RubyTest, "initiating prefetch\n");
+83 
+84     int index = random() % m_num_readers;
+85     MasterPort* port = m_tester_ptr->getReadableCpuPort(index);
+86 
+87     Request::Flags flags;
+88     flags.set(Request::PREFETCH);
+89 
+90     Packet::Command cmd;
+91 
+92     // 1 in 8 chance this will be an exclusive prefetch
+93     if ((random() & 0x7) != 0) {
+94         cmd = MemCmd::ReadReq;
+95 
+96         // if necessary, make the request an instruction fetch
+97         if (m_tester_ptr->isInstReadableCpuPort(index)) {
+98             flags.set(Request::INST_FETCH);
+99         }
+100     } else {
+101         cmd = MemCmd::WriteReq;
+102         flags.set(Request::PF_EXCLUSIVE);
+103     }
+104 
+105     // Prefetches are assumed to be 0 sized
+106     Request *req = new Request(m_address.getAddress(), 0, flags,
+107             m_tester_ptr->masterId(), curTick(), m_pc.getAddress());
+108     req->setThreadContext(index, 0);
+109 
+110     PacketPtr pkt = new Packet(req, cmd);
+111 
+112     // push the subblock onto the sender state.  The sequencer will
+113     // update the subblock on the return
+114     pkt->senderState = new SenderState(m_address, req->getSize());
+115 
+116     if (port->sendTimingReq(pkt)) {
+117         DPRINTF(RubyTest, "successfully initiated prefetch.\n");
+118     } else {
+119         // If the packet did not issue, must delete
+120         delete pkt->senderState;
+121         delete pkt->req;
+122         delete pkt;
+123 
+124         DPRINTF(RubyTest,
+125                 "prefetch initiation failed because Port was busy.\n");
+126     }
+127 }
+\end{DoxyCode}
+\hypertarget{classCheck_aafaa6880b81bad24ff0ee650caf91bfc}{
+\index{Check@{Check}!performCallback@{performCallback}}
+\index{performCallback@{performCallback}!Check@{Check}}
+\subsubsection[{performCallback}]{\setlength{\rightskip}{0pt plus 5cm}void performCallback ({\bf NodeID} {\em proc}, \/  {\bf SubBlock} $\ast$ {\em data}, \/  {\bf Time} {\em curTime})}}
+\label{classCheck_aafaa6880b81bad24ff0ee650caf91bfc}
+
+
+
+\begin{DoxyCode}
+270 {
+271     Address address = data->getAddress();
+272 
+273     // This isn't exactly right since we now have multi-byte checks
+274     //  assert(getAddress() == address);
+275 
+276     assert(getAddress().getLineAddress() == address.getLineAddress());
+277     assert(data != NULL);
+278 
+279     DPRINTF(RubyTest, "RubyTester Callback\n");
+280     debugPrint();
+281 
+282     if (m_status == TesterStatus_Action_Pending) {
+283         DPRINTF(RubyTest, "Action callback write value: %d, currently %d\n",
+284                 (m_value + m_store_count), data->getByte(0));
+285         // Perform store one byte at a time
+286         data->setByte(0, (m_value + m_store_count));
+287         m_store_count++;
+288         if (m_store_count == CHECK_SIZE) {
+289             m_status = TesterStatus_Ready;
+290         } else {
+291             m_status = TesterStatus_Idle;
+292         }
+293         DPRINTF(RubyTest, "Action callback return data now %d\n",
+294                 data->getByte(0));
+295     } else if (m_status == TesterStatus_Check_Pending) {
+296         DPRINTF(RubyTest, "Check callback\n");
+297         // Perform load/check
+298         for (int byte_number=0; byte_number<CHECK_SIZE; byte_number++) {
+299             if (uint8_t(m_value + byte_number) != data->getByte(byte_number)) {
+300                 panic("Action/check failure: proc: %d address: %s data: %s "
+301                       "byte_number: %d m_value+byte_number: %d byte: %d %s"
+302                       "Time: %d\n",
+303                       proc, address, data, byte_number,
+304                       (int)m_value + byte_number,
+305                       (int)data->getByte(byte_number), *this, curTime);
+306             }
+307         }
+308         DPRINTF(RubyTest, "Action/check success\n");
+309         debugPrint();
+310 
+311         // successful check complete, increment complete
+312         m_tester_ptr->incrementCheckCompletions();
+313 
+314         m_status = TesterStatus_Idle;
+315         pickValue();
+316 
+317     } else {
+318         panic("Unexpected TesterStatus: %s proc: %d data: %s m_status: %s "
+319               "time: %d\n", *this, proc, data, m_status, curTime);
+320     }
+321 
+322     DPRINTF(RubyTest, "proc: %d, Address: 0x%x\n", proc,
+323             getAddress().getLineAddress());
+324     DPRINTF(RubyTest, "Callback done\n");
+325     debugPrint();
+326 }
+\end{DoxyCode}
+\hypertarget{classCheck_ac935b7ff21b8b1f5dc3009785ec29e9b}{
+\index{Check@{Check}!pickInitiatingNode@{pickInitiatingNode}}
+\index{pickInitiatingNode@{pickInitiatingNode}!Check@{Check}}
+\subsubsection[{pickInitiatingNode}]{\setlength{\rightskip}{0pt plus 5cm}void pickInitiatingNode ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_ac935b7ff21b8b1f5dc3009785ec29e9b}
+
+
+
+\begin{DoxyCode}
+348 {
+349     assert(m_status == TesterStatus_Idle || m_status == TesterStatus_Ready);
+350     m_status = TesterStatus_Idle;
+351     m_initiatingNode = (random() % m_num_writers);
+352     DPRINTF(RubyTest, "picked initiating node %d\n", m_initiatingNode);
+353     m_store_count = 0;
+354 }
+\end{DoxyCode}
+\hypertarget{classCheck_a04d2727906355c9e4bdd78cf34436f41}{
+\index{Check@{Check}!pickValue@{pickValue}}
+\index{pickValue@{pickValue}!Check@{Check}}
+\subsubsection[{pickValue}]{\setlength{\rightskip}{0pt plus 5cm}void pickValue ()\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a04d2727906355c9e4bdd78cf34436f41}
+
+
+
+\begin{DoxyCode}
+339 {
+340     assert(m_status == TesterStatus_Idle);
+341     m_status = TesterStatus_Idle;
+342     m_value = random() & 0xff; // One byte
+343     m_store_count = 0;
+344 }
+\end{DoxyCode}
+\hypertarget{classCheck_ac55fe386a101fbae38c716067c9966a0}{
+\index{Check@{Check}!print@{print}}
+\index{print@{print}!Check@{Check}}
+\subsubsection[{print}]{\setlength{\rightskip}{0pt plus 5cm}void print (std::ostream \& {\em out}) const}}
+\label{classCheck_ac55fe386a101fbae38c716067c9966a0}
+
+
+
+\begin{DoxyCode}
+358 {
+359     out << "["
+360         << m_address << ", value: "
+361         << (int)m_value << ", status: "
+362         << m_status << ", initiating node: "
+363         << m_initiatingNode << ", store_count: "
+364         << m_store_count
+365         << "]" << std::flush;
+366 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCheck_a519d9b4ec6b00fb1f4cfc481ee37121e}{
+\index{Check@{Check}!m\_\-access\_\-mode@{m\_\-access\_\-mode}}
+\index{m\_\-access\_\-mode@{m\_\-access\_\-mode}!Check@{Check}}
+\subsubsection[{m\_\-access\_\-mode}]{\setlength{\rightskip}{0pt plus 5cm}RubyAccessMode {\bf m\_\-access\_\-mode}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a519d9b4ec6b00fb1f4cfc481ee37121e}
+\hypertarget{classCheck_a9fc76d7db60d4f05200f8248a697ea28}{
+\index{Check@{Check}!m\_\-address@{m\_\-address}}
+\index{m\_\-address@{m\_\-address}!Check@{Check}}
+\subsubsection[{m\_\-address}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Address} {\bf m\_\-address}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a9fc76d7db60d4f05200f8248a697ea28}
+\hypertarget{classCheck_a126a08ce5cd6fa00a0327f01957bd420}{
+\index{Check@{Check}!m\_\-initiatingNode@{m\_\-initiatingNode}}
+\index{m\_\-initiatingNode@{m\_\-initiatingNode}!Check@{Check}}
+\subsubsection[{m\_\-initiatingNode}]{\setlength{\rightskip}{0pt plus 5cm}{\bf NodeID} {\bf m\_\-initiatingNode}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a126a08ce5cd6fa00a0327f01957bd420}
+\hypertarget{classCheck_a7d224a04c5f0d1049dd6c6ab070884cb}{
+\index{Check@{Check}!m\_\-num\_\-readers@{m\_\-num\_\-readers}}
+\index{m\_\-num\_\-readers@{m\_\-num\_\-readers}!Check@{Check}}
+\subsubsection[{m\_\-num\_\-readers}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-num\_\-readers}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a7d224a04c5f0d1049dd6c6ab070884cb}
+\hypertarget{classCheck_aedeaccd67403213e1e43d99ff1c70f44}{
+\index{Check@{Check}!m\_\-num\_\-writers@{m\_\-num\_\-writers}}
+\index{m\_\-num\_\-writers@{m\_\-num\_\-writers}!Check@{Check}}
+\subsubsection[{m\_\-num\_\-writers}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-num\_\-writers}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_aedeaccd67403213e1e43d99ff1c70f44}
+\hypertarget{classCheck_a054fda5975595c15c2cb078c5bc10888}{
+\index{Check@{Check}!m\_\-pc@{m\_\-pc}}
+\index{m\_\-pc@{m\_\-pc}!Check@{Check}}
+\subsubsection[{m\_\-pc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Address} {\bf m\_\-pc}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a054fda5975595c15c2cb078c5bc10888}
+\hypertarget{classCheck_a70259b2e0a9ded04ee46b786d423b50c}{
+\index{Check@{Check}!m\_\-status@{m\_\-status}}
+\index{m\_\-status@{m\_\-status}!Check@{Check}}
+\subsubsection[{m\_\-status}]{\setlength{\rightskip}{0pt plus 5cm}TesterStatus {\bf m\_\-status}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a70259b2e0a9ded04ee46b786d423b50c}
+\hypertarget{classCheck_ad10763fc3ed0f7ccb24a268ad25ccc7d}{
+\index{Check@{Check}!m\_\-store\_\-count@{m\_\-store\_\-count}}
+\index{m\_\-store\_\-count@{m\_\-store\_\-count}!Check@{Check}}
+\subsubsection[{m\_\-store\_\-count}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-store\_\-count}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_ad10763fc3ed0f7ccb24a268ad25ccc7d}
+\hypertarget{classCheck_aaff3af064462a4d4b7f986a4a2454ff0}{
+\index{Check@{Check}!m\_\-tester\_\-ptr@{m\_\-tester\_\-ptr}}
+\index{m\_\-tester\_\-ptr@{m\_\-tester\_\-ptr}!Check@{Check}}
+\subsubsection[{m\_\-tester\_\-ptr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RubyTester}$\ast$ {\bf m\_\-tester\_\-ptr}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_aaff3af064462a4d4b7f986a4a2454ff0}
+\hypertarget{classCheck_a5307fc878e97122f4a7fc315f2329c08}{
+\index{Check@{Check}!m\_\-value@{m\_\-value}}
+\index{m\_\-value@{m\_\-value}!Check@{Check}}
+\subsubsection[{m\_\-value}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t {\bf m\_\-value}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheck_a5307fc878e97122f4a7fc315f2329c08}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/testers/rubytest/\hyperlink{Check_8hh}{Check.hh}\item 
+cpu/testers/rubytest/\hyperlink{Check_8cc}{Check.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,350 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/x86/decoder.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/x86/decoder.hh</h1><a href="x86_2decoder_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 Google</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __ARCH_X86_DECODER_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_X86_DECODER_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;cassert&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="arch_2x86_2regs_2misc_8hh.html">arch/x86/regs/misc.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="arch_2x86_2types_8hh.html">arch/x86/types.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="bitfield_8hh.html">base/bitfield.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="base_2misc_8hh.html">base/misc.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="trace_8hh.html">base/trace.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2decode__cache_8hh.html">cpu/decode_cache.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2static__inst_8hh.html">cpu/static_inst.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;debug/Decoder.hh&quot;</span>
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="keyword">namespace </span>X86ISA
+<a name="l00048"></a>00048 {
+<a name="l00049"></a>00049 
+<a name="l00050"></a><a class="code" href="classX86ISA_1_1Decoder.html">00050</a> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1Decoder.html">Decoder</a>
+<a name="l00051"></a>00051 {
+<a name="l00052"></a>00052   <span class="keyword">private</span>:
+<a name="l00053"></a>00053     <span class="comment">//These are defined and documented in decoder_tables.cc</span>
+<a name="l00054"></a><a class="code" href="classX86ISA_1_1Decoder.html#a4790fc37f276d111825695679818d082">00054</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint8_t <a class="code" href="namespaceX86ISA.html#a9177933bdde69fdb102a2316ae38b2a3">Prefixes</a>[256];
+<a name="l00055"></a><a class="code" href="classX86ISA_1_1Decoder.html#a6e9f1359a8e815c5bdd0efc306f5bf32">00055</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#a6e9f1359a8e815c5bdd0efc306f5bf32">UsesModRM</a>[2][256];
+<a name="l00056"></a><a class="code" href="classX86ISA_1_1Decoder.html#a3f9cce9eaf915705c0fd4d90d9bcf8f8">00056</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#a3f9cce9eaf915705c0fd4d90d9bcf8f8">ImmediateType</a>[2][256];
+<a name="l00057"></a><a class="code" href="classX86ISA_1_1Decoder.html#a30eeeb2cd279f8cfcbafbd9873691d2f">00057</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#a30eeeb2cd279f8cfcbafbd9873691d2f">SizeTypeToSize</a>[3][10];
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059   <span class="keyword">protected</span>:
+<a name="l00060"></a><a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html">00060</a>     <span class="keyword">struct </span><a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html">InstBytes</a>
+<a name="l00061"></a>00061     {
+<a name="l00062"></a><a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#ab06cd255e6bbc9122ae8010deb227fcb">00062</a>         <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#ab06cd255e6bbc9122ae8010deb227fcb">si</a>;
+<a name="l00063"></a><a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#af7aeb5f9436fa23d13dae1008bace5bd">00063</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;MachInst&gt;</a> <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#af7aeb5f9436fa23d13dae1008bace5bd">chunks</a>;
+<a name="l00064"></a><a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#ab2cdbb4c6963b40aa0924277bea8f8bf">00064</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;MachInst&gt;</a> <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#ab2cdbb4c6963b40aa0924277bea8f8bf">masks</a>;
+<a name="l00065"></a><a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#a50e2e39cbf969a7838e50a0dc8ddf88d">00065</a>         <span class="keywordtype">int</span> <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#a50e2e39cbf969a7838e50a0dc8ddf88d">lastOffset</a>;
+<a name="l00066"></a>00066 
+<a name="l00067"></a><a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#aaefc6e59b3e007f1f23178b084018400">00067</a>         <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#aaefc6e59b3e007f1f23178b084018400">InstBytes</a>() : <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#a50e2e39cbf969a7838e50a0dc8ddf88d">lastOffset</a>(0)
+<a name="l00068"></a>00068         {}
+<a name="l00069"></a>00069     };
+<a name="l00070"></a>00070 
+<a name="l00071"></a><a class="code" href="classX86ISA_1_1Decoder.html#ab36b2d3338c466d225603823b5e4f9a4">00071</a>     <span class="keyword">static</span> <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html">InstBytes</a> <a class="code" href="classX86ISA_1_1Decoder.html#ab36b2d3338c466d225603823b5e4f9a4">dummy</a>;
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073     <span class="comment">//The bytes to be predecoded</span>
+<a name="l00074"></a><a class="code" href="classX86ISA_1_1Decoder.html#a273336b914b5b7edc5433d52385d932e">00074</a>     <a class="code" href="namespaceX86ISA.html#a7ceadb544bf9b4a10579b7466b0ac008">MachInst</a> <a class="code" href="classX86ISA_1_1Decoder.html#a273336b914b5b7edc5433d52385d932e">fetchChunk</a>;
+<a name="l00075"></a><a class="code" href="classX86ISA_1_1Decoder.html#a393f7387727acc3ec0188fe976c52ff3">00075</a>     <a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html">InstBytes</a> *<a class="code" href="classX86ISA_1_1Decoder.html#a393f7387727acc3ec0188fe976c52ff3">instBytes</a>;
+<a name="l00076"></a><a class="code" href="classX86ISA_1_1Decoder.html#a37ce03861bdaf0bdc992ddd28a8a08e0">00076</a>     <span class="keywordtype">int</span> <a class="code" href="classX86ISA_1_1Decoder.html#a37ce03861bdaf0bdc992ddd28a8a08e0">chunkIdx</a>;
+<a name="l00077"></a>00077     <span class="comment">//The pc of the start of fetchChunk</span>
+<a name="l00078"></a><a class="code" href="classX86ISA_1_1Decoder.html#a54317b5e28be49c4013e535159defb35">00078</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1Decoder.html#a54317b5e28be49c4013e535159defb35">basePC</a>;
+<a name="l00079"></a>00079     <span class="comment">//The pc the current instruction started at</span>
+<a name="l00080"></a><a class="code" href="classX86ISA_1_1Decoder.html#ad199f4799f06d6be603a02e3a05ea918">00080</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1Decoder.html#ad199f4799f06d6be603a02e3a05ea918">origPC</a>;
+<a name="l00081"></a>00081     <span class="comment">//The offset into fetchChunk of current processing</span>
+<a name="l00082"></a><a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">00082</a>     <span class="keywordtype">int</span> <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a>;
+<a name="l00083"></a>00083     <span class="comment">//The extended machine instruction being generated</span>
+<a name="l00084"></a><a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">00084</a>     <a class="code" href="structX86ISA_1_1ExtMachInst.html">ExtMachInst</a> <a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>;
+<a name="l00085"></a>00085     <span class="comment">//Predecoding state</span>
+<a name="l00086"></a><a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">00086</a>     X86Mode <a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a>;
+<a name="l00087"></a><a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">00087</a>     <a class="code" href="namespaceX86ISA.html#a88701044b173f3a3f9c0d8b09e63eb1b">X86SubMode</a> <a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a>;
+<a name="l00088"></a><a class="code" href="classX86ISA_1_1Decoder.html#ae1027509430cd109ced841df18ec4790">00088</a>     uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#ae1027509430cd109ced841df18ec4790">altOp</a>;
+<a name="l00089"></a><a class="code" href="classX86ISA_1_1Decoder.html#adf82151c683017bc9ab9fb7b70ff72fb">00089</a>     uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#adf82151c683017bc9ab9fb7b70ff72fb">defOp</a>;
+<a name="l00090"></a><a class="code" href="classX86ISA_1_1Decoder.html#a3f6baec3f8d9a651a37a3c5f9bfba2a4">00090</a>     uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#a3f6baec3f8d9a651a37a3c5f9bfba2a4">altAddr</a>;
+<a name="l00091"></a><a class="code" href="classX86ISA_1_1Decoder.html#a63bbec903362b7e01fbf028a0afbfeb1">00091</a>     uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#a63bbec903362b7e01fbf028a0afbfeb1">defAddr</a>;
+<a name="l00092"></a><a class="code" href="classX86ISA_1_1Decoder.html#aef01e995775f4a7ba2367414f311dc73">00092</a>     uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#aef01e995775f4a7ba2367414f311dc73">stack</a>;
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classX86ISA_1_1Decoder.html#a8f47335339a66b8928a59b6e450ba23e">00094</a>     uint8_t <a class="code" href="classX86ISA_1_1Decoder.html#a8f47335339a66b8928a59b6e450ba23e">getNextByte</a>()
+<a name="l00095"></a>00095     {
+<a name="l00096"></a>00096         <span class="keywordflow">return</span> ((uint8_t *)&amp;<a class="code" href="classX86ISA_1_1Decoder.html#a273336b914b5b7edc5433d52385d932e">fetchChunk</a>)[<a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a>];
+<a name="l00097"></a>00097     }
+<a name="l00098"></a>00098 
+<a name="l00099"></a><a class="code" href="classX86ISA_1_1Decoder.html#aca8cee2ca4f61924adea583f466e5c27">00099</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#aca8cee2ca4f61924adea583f466e5c27">getImmediate</a>(<span class="keywordtype">int</span> &amp;collected, uint64_t &amp;current, <span class="keywordtype">int</span> size)
+<a name="l00100"></a>00100     {
+<a name="l00101"></a>00101         <span class="comment">//Figure out how many bytes we still need to get for the</span>
+<a name="l00102"></a>00102         <span class="comment">//immediate.</span>
+<a name="l00103"></a>00103         <span class="keywordtype">int</span> toGet = size - collected;
+<a name="l00104"></a>00104         <span class="comment">//Figure out how many bytes are left in our &quot;buffer&quot;</span>
+<a name="l00105"></a>00105         <span class="keywordtype">int</span> remaining = <span class="keyword">sizeof</span>(<a class="code" href="namespaceX86ISA.html#a7ceadb544bf9b4a10579b7466b0ac008">MachInst</a>) - <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a>;
+<a name="l00106"></a>00106         <span class="comment">//Get as much as we need, up to the amount available.</span>
+<a name="l00107"></a>00107         toGet = toGet &gt; remaining ? remaining : toGet;
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109         <span class="comment">//Shift the bytes we want to be all the way to the right</span>
+<a name="l00110"></a>00110         uint64_t partialImm = <a class="code" href="classX86ISA_1_1Decoder.html#a273336b914b5b7edc5433d52385d932e">fetchChunk</a> &gt;&gt; (<a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a> * 8);
+<a name="l00111"></a>00111         <span class="comment">//Mask off what we don&apos;t want</span>
+<a name="l00112"></a>00112         partialImm &amp;= <a class="code" href="namespaceX86ISA.html#a5d76cc2129e79ba1941d2cc2f53b9e8e">mask</a>(toGet * 8);
+<a name="l00113"></a>00113         <span class="comment">//Shift it over to overlay with our displacement.</span>
+<a name="l00114"></a>00114         partialImm &lt;&lt;= (<a class="code" href="classX86ISA_1_1Decoder.html#a9923210a91a1b233397e87d09325cfac">immediateCollected</a> * 8);
+<a name="l00115"></a>00115         <span class="comment">//Put it into our displacement</span>
+<a name="l00116"></a>00116         current |= partialImm;
+<a name="l00117"></a>00117         <span class="comment">//Update how many bytes we&apos;ve collected.</span>
+<a name="l00118"></a>00118         collected += toGet;
+<a name="l00119"></a>00119         <a class="code" href="classX86ISA_1_1Decoder.html#a34f1e4d13220afca8ec5c23596daba7e">consumeBytes</a>(toGet);
+<a name="l00120"></a>00120     }
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="classX86ISA_1_1Decoder.html#a9b25276214b33147c8d3bf84e1aa778c">00122</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#a9b25276214b33147c8d3bf84e1aa778c">updateOffsetState</a>()
+<a name="l00123"></a>00123     {
+<a name="l00124"></a>00124         assert(<a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a> &lt;= <span class="keyword">sizeof</span>(<a class="code" href="namespaceX86ISA.html#a7ceadb544bf9b4a10579b7466b0ac008">MachInst</a>));
+<a name="l00125"></a>00125         <span class="keywordflow">if</span> (<a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a> == <span class="keyword">sizeof</span>(<a class="code" href="namespaceX86ISA.html#a7ceadb544bf9b4a10579b7466b0ac008">MachInst</a>)) {
+<a name="l00126"></a>00126             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classX86ISA_1_1Decoder.html">Decoder</a>, <span class="stringliteral">&quot;At the end of a chunk, idx = %d, chunks = %d.\n&quot;</span>,
+<a name="l00127"></a>00127                     <a class="code" href="classX86ISA_1_1Decoder.html#a37ce03861bdaf0bdc992ddd28a8a08e0">chunkIdx</a>, <a class="code" href="classX86ISA_1_1Decoder.html#a393f7387727acc3ec0188fe976c52ff3">instBytes</a>-&gt;<a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#af7aeb5f9436fa23d13dae1008bace5bd">chunks</a>.size());
+<a name="l00128"></a>00128             <a class="code" href="classX86ISA_1_1Decoder.html#a37ce03861bdaf0bdc992ddd28a8a08e0">chunkIdx</a>++;
+<a name="l00129"></a>00129             <span class="keywordflow">if</span> (chunkIdx == <a class="code" href="classX86ISA_1_1Decoder.html#a393f7387727acc3ec0188fe976c52ff3">instBytes</a>-&gt;<a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#af7aeb5f9436fa23d13dae1008bace5bd">chunks</a>.size()) {
+<a name="l00130"></a>00130                 <a class="code" href="classX86ISA_1_1Decoder.html#a281c9bc4944bdbf837d5432478d43273">outOfBytes</a> = <span class="keyword">true</span>;
+<a name="l00131"></a>00131             } <span class="keywordflow">else</span> {
+<a name="l00132"></a>00132                 <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a> = 0;
+<a name="l00133"></a>00133                 <a class="code" href="classX86ISA_1_1Decoder.html#a273336b914b5b7edc5433d52385d932e">fetchChunk</a> = <a class="code" href="classX86ISA_1_1Decoder.html#a393f7387727acc3ec0188fe976c52ff3">instBytes</a>-&gt;<a class="code" href="structX86ISA_1_1Decoder_1_1InstBytes.html#af7aeb5f9436fa23d13dae1008bace5bd">chunks</a>[chunkIdx];
+<a name="l00134"></a>00134                 <a class="code" href="classX86ISA_1_1Decoder.html#a54317b5e28be49c4013e535159defb35">basePC</a> += <span class="keyword">sizeof</span>(<a class="code" href="namespaceX86ISA.html#a7ceadb544bf9b4a10579b7466b0ac008">MachInst</a>);
+<a name="l00135"></a>00135             }
+<a name="l00136"></a>00136         }
+<a name="l00137"></a>00137     }
+<a name="l00138"></a>00138 
+<a name="l00139"></a><a class="code" href="classX86ISA_1_1Decoder.html#ac0b7514336823f27e26271bcad4563a8">00139</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#ac0b7514336823f27e26271bcad4563a8">consumeByte</a>()
+<a name="l00140"></a>00140     {
+<a name="l00141"></a>00141         <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a>++;
+<a name="l00142"></a>00142         <a class="code" href="classX86ISA_1_1Decoder.html#a9b25276214b33147c8d3bf84e1aa778c">updateOffsetState</a>();
+<a name="l00143"></a>00143     }
+<a name="l00144"></a>00144 
+<a name="l00145"></a><a class="code" href="classX86ISA_1_1Decoder.html#a34f1e4d13220afca8ec5c23596daba7e">00145</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#a34f1e4d13220afca8ec5c23596daba7e">consumeBytes</a>(<span class="keywordtype">int</span> numBytes)
+<a name="l00146"></a>00146     {
+<a name="l00147"></a>00147         <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a> += numBytes;
+<a name="l00148"></a>00148         <a class="code" href="classX86ISA_1_1Decoder.html#a9b25276214b33147c8d3bf84e1aa778c">updateOffsetState</a>();
+<a name="l00149"></a>00149     }
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151     <span class="comment">//State machine state</span>
+<a name="l00152"></a>00152   <span class="keyword">protected</span>:
+<a name="l00153"></a>00153     <span class="comment">//Whether or not we&apos;re out of bytes</span>
+<a name="l00154"></a><a class="code" href="classX86ISA_1_1Decoder.html#a281c9bc4944bdbf837d5432478d43273">00154</a>     <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Decoder.html#a281c9bc4944bdbf837d5432478d43273">outOfBytes</a>;
+<a name="l00155"></a>00155     <span class="comment">//Whether we&apos;ve completed generating an ExtMachInst</span>
+<a name="l00156"></a><a class="code" href="classX86ISA_1_1Decoder.html#a37c5d55785204b8fd00a8ebf62e1fc33">00156</a>     <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Decoder.html#a37c5d55785204b8fd00a8ebf62e1fc33">instDone</a>;
+<a name="l00157"></a>00157     <span class="comment">//The size of the displacement value</span>
+<a name="l00158"></a><a class="code" href="classX86ISA_1_1Decoder.html#a494ae21b1676198853f989b5003e0c06">00158</a>     <span class="keywordtype">int</span> <a class="code" href="classX86ISA_1_1Decoder.html#a494ae21b1676198853f989b5003e0c06">displacementSize</a>;
+<a name="l00159"></a>00159     <span class="comment">//The size of the immediate value</span>
+<a name="l00160"></a><a class="code" href="classX86ISA_1_1Decoder.html#a61f77f04393db6b7fe844adc3f78b644">00160</a>     <span class="keywordtype">int</span> <a class="code" href="classX86ISA_1_1Decoder.html#a61f77f04393db6b7fe844adc3f78b644">immediateSize</a>;
+<a name="l00161"></a>00161     <span class="comment">//This is how much of any immediate value we&apos;ve gotten. This is used</span>
+<a name="l00162"></a>00162     <span class="comment">//for both the actual immediate and the displacement.</span>
+<a name="l00163"></a><a class="code" href="classX86ISA_1_1Decoder.html#a9923210a91a1b233397e87d09325cfac">00163</a>     <span class="keywordtype">int</span> <a class="code" href="classX86ISA_1_1Decoder.html#a9923210a91a1b233397e87d09325cfac">immediateCollected</a>;
+<a name="l00164"></a>00164 
+<a name="l00165"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">00165</a>     <span class="keyword">enum</span> <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> {
+<a name="l00166"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8aff67699080f325de2a7ddc37e246c9a8">00166</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8aff67699080f325de2a7ddc37e246c9a8">ResetState</a>,
+<a name="l00167"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8abfa48baddbd48c27b1459423efa4bdd8">00167</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8abfa48baddbd48c27b1459423efa4bdd8">FromCacheState</a>,
+<a name="l00168"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a2991411af91f1d4a5045fff0a9a3be9f">00168</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a2991411af91f1d4a5045fff0a9a3be9f">PrefixState</a>,
+<a name="l00169"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a5dafe6854fcb6b0807bea9ce23744e64">00169</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a5dafe6854fcb6b0807bea9ce23744e64">OpcodeState</a>,
+<a name="l00170"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a1b1909a7067c96c6fa9205417b64bb29">00170</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a1b1909a7067c96c6fa9205417b64bb29">ModRMState</a>,
+<a name="l00171"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8add2ba2a6d04fb8829afac6fcb5a57283">00171</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8add2ba2a6d04fb8829afac6fcb5a57283">SIBState</a>,
+<a name="l00172"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a6914e5c19cf114014f9ab8d94169c880">00172</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8a6914e5c19cf114014f9ab8d94169c880">DisplacementState</a>,
+<a name="l00173"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8ae16af2d7c02e47eb62cd45a6fe42f48f">00173</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8ae16af2d7c02e47eb62cd45a6fe42f48f">ImmediateState</a>,
+<a name="l00174"></a>00174         <span class="comment">//We should never get to this state. Getting here is an error.</span>
+<a name="l00175"></a><a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8ade97a2665a1361faea090134062c17b4">00175</a>         <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8ade97a2665a1361faea090134062c17b4">ErrorState</a>
+<a name="l00176"></a>00176     };
+<a name="l00177"></a>00177 
+<a name="l00178"></a><a class="code" href="classX86ISA_1_1Decoder.html#a876b486d3a5241a126bd5751c5f70f79">00178</a>     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#a876b486d3a5241a126bd5751c5f70f79">state</a>;
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180     <span class="comment">//Functions to handle each of the states</span>
+<a name="l00181"></a>00181     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#a3e359a01a10d324b1a5f5931b6aafb41">doResetState</a>();
+<a name="l00182"></a>00182     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#a8db8642a115e086e090c7aabf61b8b8d">doFromCacheState</a>();
+<a name="l00183"></a>00183     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#a34e20e41a8a8172e08cbf7f09ef390a1">doPrefixState</a>(uint8_t);
+<a name="l00184"></a>00184     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#af4ad421adb9b081935801bf19bf0d563">doOpcodeState</a>(uint8_t);
+<a name="l00185"></a>00185     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#af92cd28d02e33555be9f257fa37e988b">doModRMState</a>(uint8_t);
+<a name="l00186"></a>00186     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#a429d36cbff305b40608c013c0c6a15b1">doSIBState</a>(uint8_t);
+<a name="l00187"></a>00187     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#a159a4726e8800be2876f6d3100193d4d">doDisplacementState</a>();
+<a name="l00188"></a>00188     <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8">State</a> <a class="code" href="classX86ISA_1_1Decoder.html#ad402df3f8c4d1f4fb2b7a29d72ba00ec">doImmediateState</a>();
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190   <span class="keyword">protected</span>:
+<a name="l00192"></a>00192 
+<a name="l00193"></a><a class="code" href="classX86ISA_1_1Decoder.html#af5cdf239a38ca71d83ddcf2b9a657cbe">00193</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceX86ISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="classX86ISA_1_1Decoder.html#af5cdf239a38ca71d83ddcf2b9a657cbe" title="Caching for decoded instruction objects.">CacheKey</a>;
+<a name="l00194"></a>00194 
+<a name="l00195"></a><a class="code" href="classX86ISA_1_1Decoder.html#aaeb98acb07222e8d393baae60333dd32">00195</a>     <span class="keyword">typedef</span> <a class="code" href="classDecodeCache_1_1AddrMap.html" title="A sparse map from an Addr to a Value, stored in page chunks.">DecodeCache::AddrMap&lt;Decoder::InstBytes&gt;</a> <a class="code" href="classDecodeCache_1_1AddrMap.html" title="A sparse map from an Addr to a Value, stored in page chunks.">DecodePages</a>;
+<a name="l00196"></a><a class="code" href="classX86ISA_1_1Decoder.html#a259ba942ab7ed4dcb7661396959966be">00196</a>     <a class="code" href="classDecodeCache_1_1AddrMap.html" title="A sparse map from an Addr to a Value, stored in page chunks.">DecodePages</a> *<a class="code" href="classX86ISA_1_1Decoder.html#a259ba942ab7ed4dcb7661396959966be">decodePages</a>;
+<a name="l00197"></a><a class="code" href="classX86ISA_1_1Decoder.html#a17e66c491b538e223da13acf9d77d5f2">00197</a>     <span class="keyword">typedef</span> m5::hash_map&lt;CacheKey, DecodePages *&gt; <a class="code" href="classX86ISA_1_1Decoder.html#a17e66c491b538e223da13acf9d77d5f2">AddrCacheMap</a>;
+<a name="l00198"></a><a class="code" href="classX86ISA_1_1Decoder.html#aa5687d2256dc3674692589549cd833da">00198</a>     <a class="code" href="classX86ISA_1_1Decoder.html#a17e66c491b538e223da13acf9d77d5f2">AddrCacheMap</a> <a class="code" href="classX86ISA_1_1Decoder.html#aa5687d2256dc3674692589549cd833da">addrCacheMap</a>;
+<a name="l00199"></a>00199 
+<a name="l00200"></a><a class="code" href="classX86ISA_1_1Decoder.html#a4c63c65e342dd96985ba874deb29db03">00200</a>     <a class="code" href="namespaceDecodeCache.html#ac4aa7140c72815d25936c8dcf04191f1" title="Hash for decoded instructions.">DecodeCache::InstMap</a> *<a class="code" href="classX86ISA_1_1Decoder.html#a4c63c65e342dd96985ba874deb29db03">instMap</a>;
+<a name="l00201"></a><a class="code" href="classX86ISA_1_1Decoder.html#accbfac5b46e737fd6326272fba1a8bb2">00201</a>     <span class="keyword">typedef</span> m5::hash_map&lt;CacheKey, DecodeCache::InstMap *&gt; <a class="code" href="classX86ISA_1_1Decoder.html#accbfac5b46e737fd6326272fba1a8bb2">InstCacheMap</a>;
+<a name="l00202"></a><a class="code" href="classX86ISA_1_1Decoder.html#a2f55fd436a83562102f84954df9f5ed0">00202</a>     <span class="keyword">static</span> <a class="code" href="classX86ISA_1_1Decoder.html#accbfac5b46e737fd6326272fba1a8bb2">InstCacheMap</a> <a class="code" href="classX86ISA_1_1Decoder.html#a2f55fd436a83562102f84954df9f5ed0">instCacheMap</a>;
+<a name="l00203"></a>00203 
+<a name="l00204"></a>00204   <span class="keyword">public</span>:
+<a name="l00205"></a><a class="code" href="classX86ISA_1_1Decoder.html#aedfa2b7d97ed17b14903ed75d6214c78">00205</a>     <a class="code" href="classX86ISA_1_1Decoder.html#aedfa2b7d97ed17b14903ed75d6214c78">Decoder</a>() : <a class="code" href="classX86ISA_1_1Decoder.html#a54317b5e28be49c4013e535159defb35">basePC</a>(0), <a class="code" href="classX86ISA_1_1Decoder.html#ad199f4799f06d6be603a02e3a05ea918">origPC</a>(0), <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a>(0),
+<a name="l00206"></a>00206         <a class="code" href="classX86ISA_1_1Decoder.html#a281c9bc4944bdbf837d5432478d43273">outOfBytes</a>(true), <a class="code" href="classX86ISA_1_1Decoder.html#a37c5d55785204b8fd00a8ebf62e1fc33">instDone</a>(false),
+<a name="l00207"></a>00207         <a class="code" href="classX86ISA_1_1Decoder.html#a876b486d3a5241a126bd5751c5f70f79">state</a>(<a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8aff67699080f325de2a7ddc37e246c9a8">ResetState</a>)
+<a name="l00208"></a>00208     {
+<a name="l00209"></a>00209         memset(&amp;<a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>, 0, <span class="keyword">sizeof</span>(<a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>));
+<a name="l00210"></a>00210         <a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a> = LongMode;
+<a name="l00211"></a>00211         <a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a> = <a class="code" href="namespaceX86ISA.html#a88701044b173f3a3f9c0d8b09e63eb1baf4b5a2e57762ba0a4b89a8f5dacbbf5b">SixtyFourBitMode</a>;
+<a name="l00212"></a>00212         <a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>.<a class="code" href="structX86ISA_1_1ExtMachInst.html#a176b95968dcffd49825129e0985c92af">mode</a>.mode = <a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a>;
+<a name="l00213"></a>00213         <a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>.<a class="code" href="structX86ISA_1_1ExtMachInst.html#a176b95968dcffd49825129e0985c92af">mode</a>.submode = <a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a>;
+<a name="l00214"></a>00214         <a class="code" href="classX86ISA_1_1Decoder.html#ae1027509430cd109ced841df18ec4790">altOp</a> = 0;
+<a name="l00215"></a>00215         <a class="code" href="classX86ISA_1_1Decoder.html#adf82151c683017bc9ab9fb7b70ff72fb">defOp</a> = 0;
+<a name="l00216"></a>00216         <a class="code" href="classX86ISA_1_1Decoder.html#a3f6baec3f8d9a651a37a3c5f9bfba2a4">altAddr</a> = 0;
+<a name="l00217"></a>00217         <a class="code" href="classX86ISA_1_1Decoder.html#a63bbec903362b7e01fbf028a0afbfeb1">defAddr</a> = 0;
+<a name="l00218"></a>00218         <a class="code" href="classX86ISA_1_1Decoder.html#aef01e995775f4a7ba2367414f311dc73">stack</a> = 0;
+<a name="l00219"></a>00219         <a class="code" href="classX86ISA_1_1Decoder.html#a393f7387727acc3ec0188fe976c52ff3">instBytes</a> = &amp;<a class="code" href="classX86ISA_1_1Decoder.html#ab36b2d3338c466d225603823b5e4f9a4">dummy</a>;
+<a name="l00220"></a>00220         <a class="code" href="classX86ISA_1_1Decoder.html#a259ba942ab7ed4dcb7661396959966be">decodePages</a> = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00221"></a>00221         <a class="code" href="classX86ISA_1_1Decoder.html#a4c63c65e342dd96985ba874deb29db03">instMap</a> = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00222"></a>00222     }
+<a name="l00223"></a>00223 
+<a name="l00224"></a><a class="code" href="classX86ISA_1_1Decoder.html#a9b8f4112d3bbb779584ef8aaee237b25">00224</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#a9b8f4112d3bbb779584ef8aaee237b25">setM5Reg</a>(HandyM5Reg m5Reg)
+<a name="l00225"></a>00225     {
+<a name="l00226"></a>00226         <a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a> = (X86Mode)(uint64_t)m5Reg.mode;
+<a name="l00227"></a>00227         <a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a> = (<a class="code" href="namespaceX86ISA.html#a88701044b173f3a3f9c0d8b09e63eb1b">X86SubMode</a>)(uint64_t)m5Reg.submode;
+<a name="l00228"></a>00228         <a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>.<a class="code" href="structX86ISA_1_1ExtMachInst.html#a176b95968dcffd49825129e0985c92af">mode</a>.mode = <a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a>;
+<a name="l00229"></a>00229         <a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>.<a class="code" href="structX86ISA_1_1ExtMachInst.html#a176b95968dcffd49825129e0985c92af">mode</a>.submode = <a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a>;
+<a name="l00230"></a>00230         <a class="code" href="classX86ISA_1_1Decoder.html#ae1027509430cd109ced841df18ec4790">altOp</a> = m5Reg.altOp;
+<a name="l00231"></a>00231         <a class="code" href="classX86ISA_1_1Decoder.html#adf82151c683017bc9ab9fb7b70ff72fb">defOp</a> = m5Reg.defOp;
+<a name="l00232"></a>00232         <a class="code" href="classX86ISA_1_1Decoder.html#a3f6baec3f8d9a651a37a3c5f9bfba2a4">altAddr</a> = m5Reg.altAddr;
+<a name="l00233"></a>00233         <a class="code" href="classX86ISA_1_1Decoder.html#a63bbec903362b7e01fbf028a0afbfeb1">defAddr</a> = m5Reg.defAddr;
+<a name="l00234"></a>00234         <a class="code" href="classX86ISA_1_1Decoder.html#aef01e995775f4a7ba2367414f311dc73">stack</a> = m5Reg.stack;
+<a name="l00235"></a>00235 
+<a name="l00236"></a>00236         AddrCacheMap::iterator amIter = <a class="code" href="classX86ISA_1_1Decoder.html#aa5687d2256dc3674692589549cd833da">addrCacheMap</a>.find(m5Reg);
+<a name="l00237"></a>00237         <span class="keywordflow">if</span> (amIter != <a class="code" href="classX86ISA_1_1Decoder.html#aa5687d2256dc3674692589549cd833da">addrCacheMap</a>.end()) {
+<a name="l00238"></a>00238             <a class="code" href="classX86ISA_1_1Decoder.html#a259ba942ab7ed4dcb7661396959966be">decodePages</a> = amIter-&gt;second;
+<a name="l00239"></a>00239         } <span class="keywordflow">else</span> {
+<a name="l00240"></a>00240             <a class="code" href="classX86ISA_1_1Decoder.html#a259ba942ab7ed4dcb7661396959966be">decodePages</a> = <span class="keyword">new</span> <a class="code" href="classDecodeCache_1_1AddrMap.html" title="A sparse map from an Addr to a Value, stored in page chunks.">DecodePages</a>;
+<a name="l00241"></a>00241             <a class="code" href="classX86ISA_1_1Decoder.html#aa5687d2256dc3674692589549cd833da">addrCacheMap</a>[m5Reg] = <a class="code" href="classX86ISA_1_1Decoder.html#a259ba942ab7ed4dcb7661396959966be">decodePages</a>;
+<a name="l00242"></a>00242         }
+<a name="l00243"></a>00243 
+<a name="l00244"></a>00244         InstCacheMap::iterator imIter = <a class="code" href="classX86ISA_1_1Decoder.html#a2f55fd436a83562102f84954df9f5ed0">instCacheMap</a>.find(m5Reg);
+<a name="l00245"></a>00245         <span class="keywordflow">if</span> (imIter != <a class="code" href="classX86ISA_1_1Decoder.html#a2f55fd436a83562102f84954df9f5ed0">instCacheMap</a>.end()) {
+<a name="l00246"></a>00246             <a class="code" href="classX86ISA_1_1Decoder.html#a4c63c65e342dd96985ba874deb29db03">instMap</a> = imIter-&gt;second;
+<a name="l00247"></a>00247         } <span class="keywordflow">else</span> {
+<a name="l00248"></a>00248             <a class="code" href="classX86ISA_1_1Decoder.html#a4c63c65e342dd96985ba874deb29db03">instMap</a> = <span class="keyword">new</span> <a class="code" href="namespaceDecodeCache.html#ac4aa7140c72815d25936c8dcf04191f1" title="Hash for decoded instructions.">DecodeCache::InstMap</a>;
+<a name="l00249"></a>00249             <a class="code" href="classX86ISA_1_1Decoder.html#a2f55fd436a83562102f84954df9f5ed0">instCacheMap</a>[m5Reg] = <a class="code" href="classX86ISA_1_1Decoder.html#a4c63c65e342dd96985ba874deb29db03">instMap</a>;
+<a name="l00250"></a>00250         }
+<a name="l00251"></a>00251     }
+<a name="l00252"></a>00252 
+<a name="l00253"></a><a class="code" href="classX86ISA_1_1Decoder.html#a83393f90e7cbd98eda9721ba6022d0e0">00253</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#a83393f90e7cbd98eda9721ba6022d0e0">takeOverFrom</a>(<a class="code" href="classX86ISA_1_1Decoder.html">Decoder</a> *old)
+<a name="l00254"></a>00254     {
+<a name="l00255"></a>00255         <a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a> = old-&gt;<a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a>;
+<a name="l00256"></a>00256         <a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a> = old-&gt;<a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a>;
+<a name="l00257"></a>00257         <a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>.<a class="code" href="structX86ISA_1_1ExtMachInst.html#a176b95968dcffd49825129e0985c92af">mode</a>.mode = <a class="code" href="classX86ISA_1_1Decoder.html#ab3eab3edfcd7cfbe98f3d00c7e75048b">mode</a>;
+<a name="l00258"></a>00258         <a class="code" href="classX86ISA_1_1Decoder.html#abf211faf305b89c9093b00b6b82b0bd1">emi</a>.<a class="code" href="structX86ISA_1_1ExtMachInst.html#a176b95968dcffd49825129e0985c92af">mode</a>.submode = <a class="code" href="classX86ISA_1_1Decoder.html#a476c8dbd8e30b9067e6c2f0b7274be73">submode</a>;
+<a name="l00259"></a>00259         <a class="code" href="classX86ISA_1_1Decoder.html#ae1027509430cd109ced841df18ec4790">altOp</a> = old-&gt;<a class="code" href="classX86ISA_1_1Decoder.html#ae1027509430cd109ced841df18ec4790">altOp</a>;
+<a name="l00260"></a>00260         <a class="code" href="classX86ISA_1_1Decoder.html#adf82151c683017bc9ab9fb7b70ff72fb">defOp</a> = old-&gt;<a class="code" href="classX86ISA_1_1Decoder.html#adf82151c683017bc9ab9fb7b70ff72fb">defOp</a>;
+<a name="l00261"></a>00261         <a class="code" href="classX86ISA_1_1Decoder.html#a3f6baec3f8d9a651a37a3c5f9bfba2a4">altAddr</a> = old-&gt;<a class="code" href="classX86ISA_1_1Decoder.html#a3f6baec3f8d9a651a37a3c5f9bfba2a4">altAddr</a>;
+<a name="l00262"></a>00262         <a class="code" href="classX86ISA_1_1Decoder.html#a63bbec903362b7e01fbf028a0afbfeb1">defAddr</a> = old-&gt;<a class="code" href="classX86ISA_1_1Decoder.html#a63bbec903362b7e01fbf028a0afbfeb1">defAddr</a>;
+<a name="l00263"></a>00263         <a class="code" href="classX86ISA_1_1Decoder.html#aef01e995775f4a7ba2367414f311dc73">stack</a> = old-&gt;<a class="code" href="classX86ISA_1_1Decoder.html#aef01e995775f4a7ba2367414f311dc73">stack</a>;
+<a name="l00264"></a>00264     }
+<a name="l00265"></a>00265 
+<a name="l00266"></a><a class="code" href="classX86ISA_1_1Decoder.html#ad20897c5c8bd47f5d4005989bead0e55">00266</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#ad20897c5c8bd47f5d4005989bead0e55">reset</a>()
+<a name="l00267"></a>00267     {
+<a name="l00268"></a>00268         <a class="code" href="classX86ISA_1_1Decoder.html#a876b486d3a5241a126bd5751c5f70f79">state</a> = <a class="code" href="classX86ISA_1_1Decoder.html#a5d74787dedbc4e11c1ab15bf487e61f8aff67699080f325de2a7ddc37e246c9a8">ResetState</a>;
+<a name="l00269"></a>00269     }
+<a name="l00270"></a>00270 
+<a name="l00271"></a>00271     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00272"></a>00272 
+<a name="l00273"></a>00273     <span class="comment">//Use this to give data to the decoder. This should be used</span>
+<a name="l00274"></a>00274     <span class="comment">//when there is control flow.</span>
+<a name="l00275"></a><a class="code" href="classX86ISA_1_1Decoder.html#a1345d078b309b7d115c57be1ed13ae38">00275</a>     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1Decoder.html#a1345d078b309b7d115c57be1ed13ae38">moreBytes</a>(<span class="keyword">const</span> <a class="code" href="classX86ISA_1_1PCState.html">PCState</a> &amp;<a class="code" href="namespaceX86ISA.html#aecb63c74e066ecd98e04d057e39028c9">pc</a>, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> fetchPC, <a class="code" href="namespaceX86ISA.html#a7ceadb544bf9b4a10579b7466b0ac008">MachInst</a> data)
+<a name="l00276"></a>00276     {
+<a name="l00277"></a>00277         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classX86ISA_1_1Decoder.html">Decoder</a>, <span class="stringliteral">&quot;Getting more bytes.\n&quot;</span>);
+<a name="l00278"></a>00278         <a class="code" href="classX86ISA_1_1Decoder.html#a54317b5e28be49c4013e535159defb35">basePC</a> = fetchPC;
+<a name="l00279"></a>00279         <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a> = (fetchPC &gt;= pc.<a class="code" href="classGenericISA_1_1PCStateBase.html#ae94f601fa23fcc26b8bbb57b896d10b5">instAddr</a>()) ? 0 : pc.<a class="code" href="classGenericISA_1_1PCStateBase.html#ae94f601fa23fcc26b8bbb57b896d10b5">instAddr</a>() - fetchPC;
+<a name="l00280"></a>00280         <a class="code" href="classX86ISA_1_1Decoder.html#a273336b914b5b7edc5433d52385d932e">fetchChunk</a> = data;
+<a name="l00281"></a>00281         <a class="code" href="classX86ISA_1_1Decoder.html#a281c9bc4944bdbf837d5432478d43273">outOfBytes</a> = <span class="keyword">false</span>;
+<a name="l00282"></a>00282         <a class="code" href="classX86ISA_1_1Decoder.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00283"></a>00283     }
+<a name="l00284"></a>00284 
+<a name="l00285"></a><a class="code" href="classX86ISA_1_1Decoder.html#a35631c47fc45b69ca30e6551f9f5d1d1">00285</a>     <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Decoder.html#a35631c47fc45b69ca30e6551f9f5d1d1">needMoreBytes</a>()
+<a name="l00286"></a>00286     {
+<a name="l00287"></a>00287         <span class="keywordflow">return</span> <a class="code" href="classX86ISA_1_1Decoder.html#a281c9bc4944bdbf837d5432478d43273">outOfBytes</a>;
+<a name="l00288"></a>00288     }
+<a name="l00289"></a>00289 
+<a name="l00290"></a><a class="code" href="classX86ISA_1_1Decoder.html#a9f6a0bc8946ca58d5d59a5dbc6a3181f">00290</a>     <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1Decoder.html#a9f6a0bc8946ca58d5d59a5dbc6a3181f">instReady</a>()
+<a name="l00291"></a>00291     {
+<a name="l00292"></a>00292         <span class="keywordflow">return</span> <a class="code" href="classX86ISA_1_1Decoder.html#a37c5d55785204b8fd00a8ebf62e1fc33">instDone</a>;
+<a name="l00293"></a>00293     }
+<a name="l00294"></a>00294 
+<a name="l00295"></a>00295     <span class="keywordtype">void</span>
+<a name="l00296"></a><a class="code" href="classX86ISA_1_1Decoder.html#aab3a5fb7c37867f52f6fa72cc56ceb5e">00296</a>     <a class="code" href="classX86ISA_1_1Decoder.html#aab3a5fb7c37867f52f6fa72cc56ceb5e">updateNPC</a>(<a class="code" href="classX86ISA_1_1PCState.html">X86ISA::PCState</a> &amp;nextPC)
+<a name="l00297"></a>00297     {
+<a name="l00298"></a>00298         <span class="keywordflow">if</span> (!nextPC.<a class="code" href="classX86ISA_1_1PCState.html#a9a3afed8ccfa04ad21f51926ad1dae6a">size</a>()) {
+<a name="l00299"></a>00299             <span class="keywordtype">int</span> size = <a class="code" href="classX86ISA_1_1Decoder.html#a54317b5e28be49c4013e535159defb35">basePC</a> + <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a> - <a class="code" href="classX86ISA_1_1Decoder.html#ad199f4799f06d6be603a02e3a05ea918">origPC</a>;
+<a name="l00300"></a>00300             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classX86ISA_1_1Decoder.html">Decoder</a>,
+<a name="l00301"></a>00301                     <span class="stringliteral">&quot;Calculating the instruction size: &quot;</span>
+<a name="l00302"></a>00302                     <span class="stringliteral">&quot;basePC: %#x offset: %#x origPC: %#x size: %d\n&quot;</span>,
+<a name="l00303"></a>00303                     <a class="code" href="classX86ISA_1_1Decoder.html#a54317b5e28be49c4013e535159defb35">basePC</a>, <a class="code" href="classX86ISA_1_1Decoder.html#aed7ea92f45bd273dde380a45ddced592">offset</a>, origPC, size);
+<a name="l00304"></a>00304             nextPC.<a class="code" href="classX86ISA_1_1PCState.html#a9a3afed8ccfa04ad21f51926ad1dae6a">size</a>(size);
+<a name="l00305"></a>00305             nextPC.<a class="code" href="classGenericISA_1_1SimplePCState.html#ae606c6164a927e305006d93c7fe0b0bd">npc</a>(nextPC.<a class="code" href="classGenericISA_1_1SimplePCState.html#a4012b666ba851e747ea4229c7cf55c5b">pc</a>() + size);
+<a name="l00306"></a>00306         }
+<a name="l00307"></a>00307     }
+<a name="l00308"></a>00308 
+<a name="l00309"></a>00309   <span class="keyword">public</span>:
+<a name="l00310"></a>00310     <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classX86ISA_1_1Decoder.html#a148768e0e9062eb41f604040d0ea86e6">decodeInst</a>(<a class="code" href="structX86ISA_1_1ExtMachInst.html">ExtMachInst</a> mach_inst);
+<a name="l00311"></a>00311 
+<a name="l00315"></a>00315     <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classX86ISA_1_1Decoder.html#a4ed948f8d08575cc2916fe32154ea69d">decode</a>(<a class="code" href="structX86ISA_1_1ExtMachInst.html">ExtMachInst</a> mach_inst, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00316"></a>00316     <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classX86ISA_1_1Decoder.html#a4ed948f8d08575cc2916fe32154ea69d">decode</a>(<a class="code" href="classX86ISA_1_1PCState.html">X86ISA::PCState</a> &amp;nextPC);
+<a name="l00317"></a>00317 };
+<a name="l00318"></a>00318 
+<a name="l00319"></a>00319 } <span class="comment">// namespace X86ISA</span>
+<a name="l00320"></a>00320 
+<a name="l00321"></a>00321 <span class="preprocessor">#endif // __ARCH_X86_DECODER_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

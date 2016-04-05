@@ -1,0 +1,248 @@
+\hypertarget{classSwitch__d}{
+\section{クラス Switch\_\-d}
+\label{classSwitch__d}\index{Switch\_\-d@{Switch\_\-d}}
+}
+
+
+{\ttfamily \#include $<$Switch\_\-d.hh$>$}Switch\_\-dに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classSwitch__d}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSwitch__d_a0e97dda09012c1510a1ccc7ec35472f6}{Switch\_\-d} (\hyperlink{classRouter__d}{Router\_\-d} $\ast$router)
+\item 
+\hyperlink{classSwitch__d_a299b8d72ed88cc460722fe8c461446cd}{$\sim$Switch\_\-d} ()
+\item 
+void \hyperlink{classSwitch__d_ae674290a26ecbd622c5160e38e8a4fe9}{wakeup} ()
+\item 
+void \hyperlink{classSwitch__d_a02fd73d861ef2e4aabb38c0c9ff82947}{init} ()
+\item 
+void \hyperlink{classSwitch__d_a3312235aad1a35d2eb8dfe6b3a93d880}{check\_\-for\_\-wakeup} ()
+\item 
+void \hyperlink{classSwitch__d_ac55fe386a101fbae38c716067c9966a0}{print} (std::ostream \&out) const 
+\item 
+void \hyperlink{classSwitch__d_ad498c35c5be2d1b524846119d5e2b254}{update\_\-sw\_\-winner} (int inport, \hyperlink{classflit__d}{flit\_\-d} $\ast$t\_\-flit)
+\item 
+double \hyperlink{classSwitch__d_a7ef2e2d58897abf8e58f4bff4d3d01bc}{get\_\-crossbar\_\-count} ()
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classSwitch__d_ad07b9def1d6f5e5f988a254c3a9d1ad9}{functionalWrite} (\hyperlink{classPacket}{Packet} $\ast$pkt)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{classSwitch__d_a2e1a9213321dfa0386cdedaf6fc22996}{m\_\-num\_\-vcs}
+\item 
+int \hyperlink{classSwitch__d_a260af5f608c447554a07e3d62bf6b9f7}{m\_\-num\_\-inports}
+\item 
+double \hyperlink{classSwitch__d_a071dcdc9a77462a1b3f8be023ced7fd7}{m\_\-crossbar\_\-activity}
+\item 
+\hyperlink{classRouter__d}{Router\_\-d} $\ast$ \hyperlink{classSwitch__d_a81d53a65b375007289068e764da769d8}{m\_\-router}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classflitBuffer__d}{flitBuffer\_\-d} $\ast$ $>$ \hyperlink{classSwitch__d_ac37e8b09e57f852adbe0ff4022c63930}{m\_\-switch\_\-buffer}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classOutputUnit__d}{OutputUnit\_\-d} $\ast$ $>$ \hyperlink{classSwitch__d_ab8b34c9f5479c61b8022de1aad185bae}{m\_\-output\_\-unit}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classSwitch__d_a0e97dda09012c1510a1ccc7ec35472f6}{
+\index{Switch\_\-d@{Switch\_\-d}!Switch\_\-d@{Switch\_\-d}}
+\index{Switch\_\-d@{Switch\_\-d}!Switch_d@{Switch\_\-d}}
+\subsubsection[{Switch\_\-d}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Switch\_\-d} ({\bf Router\_\-d} $\ast$ {\em router})}}
+\label{classSwitch__d_a0e97dda09012c1510a1ccc7ec35472f6}
+
+
+
+\begin{DoxyCode}
+40     : Consumer(router)
+41 {
+42     m_router = router;
+43     m_num_vcs = m_router->get_num_vcs();
+44     m_crossbar_activity = 0;
+45 }
+\end{DoxyCode}
+\hypertarget{classSwitch__d_a299b8d72ed88cc460722fe8c461446cd}{
+\index{Switch\_\-d@{Switch\_\-d}!$\sim$Switch\_\-d@{$\sim$Switch\_\-d}}
+\index{$\sim$Switch\_\-d@{$\sim$Switch\_\-d}!Switch_d@{Switch\_\-d}}
+\subsubsection[{$\sim$Switch\_\-d}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf Switch\_\-d} ()}}
+\label{classSwitch__d_a299b8d72ed88cc460722fe8c461446cd}
+
+
+
+\begin{DoxyCode}
+48 {
+49     deletePointers(m_switch_buffer);
+50 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classSwitch__d_a3312235aad1a35d2eb8dfe6b3a93d880}{
+\index{Switch\_\-d@{Switch\_\-d}!check\_\-for\_\-wakeup@{check\_\-for\_\-wakeup}}
+\index{check\_\-for\_\-wakeup@{check\_\-for\_\-wakeup}!Switch_d@{Switch\_\-d}}
+\subsubsection[{check\_\-for\_\-wakeup}]{\setlength{\rightskip}{0pt plus 5cm}void check\_\-for\_\-wakeup ()}}
+\label{classSwitch__d_a3312235aad1a35d2eb8dfe6b3a93d880}
+
+
+
+\begin{DoxyCode}
+90 {
+91     Cycles nextCycle = m_router->curCycle() + Cycles(1);
+92 
+93     for (int inport = 0; inport < m_num_inports; inport++) {
+94         if (m_switch_buffer[inport]->isReady(nextCycle)) {
+95             scheduleEvent(Cycles(1));
+96             break;
+97         }
+98     }
+99 }
+\end{DoxyCode}
+\hypertarget{classSwitch__d_ad07b9def1d6f5e5f988a254c3a9d1ad9}{
+\index{Switch\_\-d@{Switch\_\-d}!functionalWrite@{functionalWrite}}
+\index{functionalWrite@{functionalWrite}!Switch_d@{Switch\_\-d}}
+\subsubsection[{functionalWrite}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} functionalWrite ({\bf Packet} $\ast$ {\em pkt})}}
+\label{classSwitch__d_ad07b9def1d6f5e5f988a254c3a9d1ad9}
+
+
+
+\begin{DoxyCode}
+103 {
+104    uint32_t num_functional_writes = 0;
+105 
+106    for (uint32_t i = 0; i < m_switch_buffer.size(); ++i) {
+107        num_functional_writes += m_switch_buffer[i]->functionalWrite(pkt);
+108    }
+109 
+110    return num_functional_writes;
+111 }
+\end{DoxyCode}
+\hypertarget{classSwitch__d_a7ef2e2d58897abf8e58f4bff4d3d01bc}{
+\index{Switch\_\-d@{Switch\_\-d}!get\_\-crossbar\_\-count@{get\_\-crossbar\_\-count}}
+\index{get\_\-crossbar\_\-count@{get\_\-crossbar\_\-count}!Switch_d@{Switch\_\-d}}
+\subsubsection[{get\_\-crossbar\_\-count}]{\setlength{\rightskip}{0pt plus 5cm}double get\_\-crossbar\_\-count ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSwitch__d_a7ef2e2d58897abf8e58f4bff4d3d01bc}
+
+
+
+\begin{DoxyCode}
+57 { return m_crossbar_activity; }
+\end{DoxyCode}
+\hypertarget{classSwitch__d_a02fd73d861ef2e4aabb38c0c9ff82947}{
+\index{Switch\_\-d@{Switch\_\-d}!init@{init}}
+\index{init@{init}!Switch_d@{Switch\_\-d}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void init ()}}
+\label{classSwitch__d_a02fd73d861ef2e4aabb38c0c9ff82947}
+
+
+
+\begin{DoxyCode}
+54 {
+55     m_output_unit = m_router->get_outputUnit_ref();
+56 
+57     m_num_inports = m_router->get_num_inports();
+58     m_switch_buffer.resize(m_num_inports);
+59     for (int i = 0; i < m_num_inports; i++) {
+60         m_switch_buffer[i] = new flitBuffer_d();
+61     }
+62 }
+\end{DoxyCode}
+\hypertarget{classSwitch__d_ac55fe386a101fbae38c716067c9966a0}{
+\index{Switch\_\-d@{Switch\_\-d}!print@{print}}
+\index{print@{print}!Switch_d@{Switch\_\-d}}
+\subsubsection[{print}]{\setlength{\rightskip}{0pt plus 5cm}void print (std::ostream \& {\em out}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classSwitch__d_ac55fe386a101fbae38c716067c9966a0}
+
+
+\hyperlink{classConsumer_a3ea5f7af5db62cc24f4e40df9ea5c971}{Consumer}を実装しています。
+
+
+\begin{DoxyCode}
+52 {};
+\end{DoxyCode}
+\hypertarget{classSwitch__d_ad498c35c5be2d1b524846119d5e2b254}{
+\index{Switch\_\-d@{Switch\_\-d}!update\_\-sw\_\-winner@{update\_\-sw\_\-winner}}
+\index{update\_\-sw\_\-winner@{update\_\-sw\_\-winner}!Switch_d@{Switch\_\-d}}
+\subsubsection[{update\_\-sw\_\-winner}]{\setlength{\rightskip}{0pt plus 5cm}void update\_\-sw\_\-winner (int {\em inport}, \/  {\bf flit\_\-d} $\ast$ {\em t\_\-flit})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSwitch__d_ad498c35c5be2d1b524846119d5e2b254}
+
+
+
+\begin{DoxyCode}
+55     { m_switch_buffer[inport]->insert(t_flit); }
+\end{DoxyCode}
+\hypertarget{classSwitch__d_ae674290a26ecbd622c5160e38e8a4fe9}{
+\index{Switch\_\-d@{Switch\_\-d}!wakeup@{wakeup}}
+\index{wakeup@{wakeup}!Switch_d@{Switch\_\-d}}
+\subsubsection[{wakeup}]{\setlength{\rightskip}{0pt plus 5cm}void wakeup ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSwitch__d_ae674290a26ecbd622c5160e38e8a4fe9}
+
+
+\hyperlink{classConsumer_a623e3e7d1b1c725d70009f7b01a421b9}{Consumer}を実装しています。
+
+
+\begin{DoxyCode}
+66 {
+67     DPRINTF(RubyNetwork, "Switch woke up at time: %lld\n",
+68             m_router->curCycle());
+69 
+70     for (int inport = 0; inport < m_num_inports; inport++) {
+71         if (!m_switch_buffer[inport]->isReady(m_router->curCycle()))
+72             continue;
+73         flit_d *t_flit = m_switch_buffer[inport]->peekTopFlit();
+74         if (t_flit->is_stage(ST_, m_router->curCycle())) {
+75             int outport = t_flit->get_outport();
+76             t_flit->advance_stage(LT_, m_router->curCycle());
+77             t_flit->set_time(m_router->curCycle() + Cycles(1));
+78 
+79             // This will take care of waking up the Network Link
+80             m_output_unit[outport]->insert_flit(t_flit);
+81             m_switch_buffer[inport]->getTopFlit();
+82             m_crossbar_activity++;
+83         }
+84     }
+85     check_for_wakeup();
+86 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classSwitch__d_a071dcdc9a77462a1b3f8be023ced7fd7}{
+\index{Switch\_\-d@{Switch\_\-d}!m\_\-crossbar\_\-activity@{m\_\-crossbar\_\-activity}}
+\index{m\_\-crossbar\_\-activity@{m\_\-crossbar\_\-activity}!Switch_d@{Switch\_\-d}}
+\subsubsection[{m\_\-crossbar\_\-activity}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf m\_\-crossbar\_\-activity}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSwitch__d_a071dcdc9a77462a1b3f8be023ced7fd7}
+\hypertarget{classSwitch__d_a260af5f608c447554a07e3d62bf6b9f7}{
+\index{Switch\_\-d@{Switch\_\-d}!m\_\-num\_\-inports@{m\_\-num\_\-inports}}
+\index{m\_\-num\_\-inports@{m\_\-num\_\-inports}!Switch_d@{Switch\_\-d}}
+\subsubsection[{m\_\-num\_\-inports}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-num\_\-inports}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSwitch__d_a260af5f608c447554a07e3d62bf6b9f7}
+\hypertarget{classSwitch__d_a2e1a9213321dfa0386cdedaf6fc22996}{
+\index{Switch\_\-d@{Switch\_\-d}!m\_\-num\_\-vcs@{m\_\-num\_\-vcs}}
+\index{m\_\-num\_\-vcs@{m\_\-num\_\-vcs}!Switch_d@{Switch\_\-d}}
+\subsubsection[{m\_\-num\_\-vcs}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-num\_\-vcs}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSwitch__d_a2e1a9213321dfa0386cdedaf6fc22996}
+\hypertarget{classSwitch__d_ab8b34c9f5479c61b8022de1aad185bae}{
+\index{Switch\_\-d@{Switch\_\-d}!m\_\-output\_\-unit@{m\_\-output\_\-unit}}
+\index{m\_\-output\_\-unit@{m\_\-output\_\-unit}!Switch_d@{Switch\_\-d}}
+\subsubsection[{m\_\-output\_\-unit}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf OutputUnit\_\-d} $\ast$$>$ {\bf m\_\-output\_\-unit}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSwitch__d_ab8b34c9f5479c61b8022de1aad185bae}
+\hypertarget{classSwitch__d_a81d53a65b375007289068e764da769d8}{
+\index{Switch\_\-d@{Switch\_\-d}!m\_\-router@{m\_\-router}}
+\index{m\_\-router@{m\_\-router}!Switch_d@{Switch\_\-d}}
+\subsubsection[{m\_\-router}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Router\_\-d}$\ast$ {\bf m\_\-router}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSwitch__d_a81d53a65b375007289068e764da769d8}
+\hypertarget{classSwitch__d_ac37e8b09e57f852adbe0ff4022c63930}{
+\index{Switch\_\-d@{Switch\_\-d}!m\_\-switch\_\-buffer@{m\_\-switch\_\-buffer}}
+\index{m\_\-switch\_\-buffer@{m\_\-switch\_\-buffer}!Switch_d@{Switch\_\-d}}
+\subsubsection[{m\_\-switch\_\-buffer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf flitBuffer\_\-d} $\ast$$>$ {\bf m\_\-switch\_\-buffer}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSwitch__d_ac37e8b09e57f852adbe0ff4022c63930}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/network/garnet/fixed-\/pipeline/\hyperlink{Switch__d_8hh}{Switch\_\-d.hh}\item 
+mem/ruby/network/garnet/fixed-\/pipeline/\hyperlink{Switch__d_8cc}{Switch\_\-d.cc}\end{DoxyCompactItemize}

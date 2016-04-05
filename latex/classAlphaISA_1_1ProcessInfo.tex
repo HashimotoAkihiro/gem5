@@ -1,0 +1,179 @@
+\hypertarget{classAlphaISA_1_1ProcessInfo}{
+\section{クラス ProcessInfo}
+\label{classAlphaISA_1_1ProcessInfo}\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+}
+
+
+{\ttfamily \#include $<$stacktrace.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classAlphaISA_1_1ProcessInfo_a9c31978febe8b0cc8e9e76eb6791312b}{ProcessInfo} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\_\-tc)
+\item 
+\hyperlink{classm5_1_1params_1_1Addr}{Addr} \hyperlink{classAlphaISA_1_1ProcessInfo_a05de971c556b8e4418a60289f92dfba3}{task} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} ksp) const 
+\item 
+int \hyperlink{classAlphaISA_1_1ProcessInfo_a27d14b3fdb576a4081e5c58c55375042}{pid} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} ksp) const 
+\item 
+std::string \hyperlink{classAlphaISA_1_1ProcessInfo_ae39ec1168c2ea31862bebf2afeda34d8}{name} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} ksp) const 
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classThreadContext}{ThreadContext} $\ast$ \hyperlink{classAlphaISA_1_1ProcessInfo_a4455a4759e69e5ebe68ae7298cbcc37d}{tc}
+\item 
+int \hyperlink{classAlphaISA_1_1ProcessInfo_aa02520c2e86b94388e0d4f4a7b0873b3}{thread\_\-info\_\-size}
+\item 
+int \hyperlink{classAlphaISA_1_1ProcessInfo_a6bca839d8255baba5c53a5eace70d72e}{task\_\-struct\_\-size}
+\item 
+int \hyperlink{classAlphaISA_1_1ProcessInfo_ad17cb97383cfef8dd965eb3a7e66aae1}{task\_\-off}
+\item 
+int \hyperlink{classAlphaISA_1_1ProcessInfo_a8f4dbd24e9c86dd360c08e6e2e98cbcb}{pid\_\-off}
+\item 
+int \hyperlink{classAlphaISA_1_1ProcessInfo_aaffc7baa14183a2f0faa8d8d51d0889b}{name\_\-off}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classAlphaISA_1_1ProcessInfo_a9c31978febe8b0cc8e9e76eb6791312b}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!ProcessInfo@{ProcessInfo}}
+\index{ProcessInfo@{ProcessInfo}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{ProcessInfo}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ProcessInfo} ({\bf ThreadContext} $\ast$ {\em \_\-tc})}}
+\label{classAlphaISA_1_1ProcessInfo_a9c31978febe8b0cc8e9e76eb6791312b}
+
+
+
+\begin{DoxyCode}
+48     : tc(_tc)
+49 {
+50     Addr addr = 0;
+51     FSTranslatingPortProxy &vp = tc->getVirtProxy();
+52     SymbolTable *symtab = tc->getSystemPtr()->kernelSymtab;
+53 
+54     if (!symtab->findAddress("thread_info_size", addr))
+55         panic("thread info not compiled into kernel\n");
+56     thread_info_size = vp.readGtoH<int32_t>(addr);
+57 
+58     if (!symtab->findAddress("task_struct_size", addr))
+59         panic("thread info not compiled into kernel\n");
+60     task_struct_size = vp.readGtoH<int32_t>(addr);
+61 
+62     if (!symtab->findAddress("thread_info_task", addr))
+63         panic("thread info not compiled into kernel\n");
+64     task_off = vp.readGtoH<int32_t>(addr);
+65 
+66     if (!symtab->findAddress("task_struct_pid", addr))
+67         panic("thread info not compiled into kernel\n");
+68     pid_off = vp.readGtoH<int32_t>(addr);
+69 
+70     if (!symtab->findAddress("task_struct_comm", addr))
+71         panic("thread info not compiled into kernel\n");
+72     name_off = vp.readGtoH<int32_t>(addr);
+73 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classAlphaISA_1_1ProcessInfo_ae39ec1168c2ea31862bebf2afeda34d8}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!name@{name}}
+\index{name@{name}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}string name ({\bf Addr} {\em ksp}) const}}
+\label{classAlphaISA_1_1ProcessInfo_ae39ec1168c2ea31862bebf2afeda34d8}
+
+
+
+\begin{DoxyCode}
+107 {
+108     Addr task = this->task(ksp);
+109     if (!task)
+110         return "console";
+111 
+112     char comm[256];
+113     CopyStringOut(tc, comm, task + name_off, sizeof(comm));
+114     if (!comm[0])
+115         return "startup";
+116 
+117     return comm;
+118 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1ProcessInfo_a27d14b3fdb576a4081e5c58c55375042}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!pid@{pid}}
+\index{pid@{pid}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{pid}]{\setlength{\rightskip}{0pt plus 5cm}int pid ({\bf Addr} {\em ksp}) const}}
+\label{classAlphaISA_1_1ProcessInfo_a27d14b3fdb576a4081e5c58c55375042}
+
+
+
+\begin{DoxyCode}
+92 {
+93     Addr task = this->task(ksp);
+94     if (!task)
+95         return -1;
+96 
+97     uint16_t pd;
+98 
+99     FSTranslatingPortProxy &vp = tc->getVirtProxy();
+100     pd = vp.readGtoH<uint16_t>(task + pid_off);
+101 
+102     return pd;
+103 }
+\end{DoxyCode}
+\hypertarget{classAlphaISA_1_1ProcessInfo_a05de971c556b8e4418a60289f92dfba3}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!task@{task}}
+\index{task@{task}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{task}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} task ({\bf Addr} {\em ksp}) const}}
+\label{classAlphaISA_1_1ProcessInfo_a05de971c556b8e4418a60289f92dfba3}
+
+
+
+\begin{DoxyCode}
+77 {
+78     Addr base = ksp & ~0x3fff;
+79     if (base == ULL(0xfffffc0000000000))
+80         return 0;
+81 
+82     Addr tsk;
+83 
+84     FSTranslatingPortProxy &vp = tc->getVirtProxy();
+85     tsk = vp.readGtoH<Addr>(base + task_off);
+86 
+87     return tsk;
+88 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classAlphaISA_1_1ProcessInfo_aaffc7baa14183a2f0faa8d8d51d0889b}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!name\_\-off@{name\_\-off}}
+\index{name\_\-off@{name\_\-off}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{name\_\-off}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf name\_\-off}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classAlphaISA_1_1ProcessInfo_aaffc7baa14183a2f0faa8d8d51d0889b}
+\hypertarget{classAlphaISA_1_1ProcessInfo_a8f4dbd24e9c86dd360c08e6e2e98cbcb}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!pid\_\-off@{pid\_\-off}}
+\index{pid\_\-off@{pid\_\-off}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{pid\_\-off}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf pid\_\-off}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classAlphaISA_1_1ProcessInfo_a8f4dbd24e9c86dd360c08e6e2e98cbcb}
+\hypertarget{classAlphaISA_1_1ProcessInfo_ad17cb97383cfef8dd965eb3a7e66aae1}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!task\_\-off@{task\_\-off}}
+\index{task\_\-off@{task\_\-off}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{task\_\-off}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf task\_\-off}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classAlphaISA_1_1ProcessInfo_ad17cb97383cfef8dd965eb3a7e66aae1}
+\hypertarget{classAlphaISA_1_1ProcessInfo_a6bca839d8255baba5c53a5eace70d72e}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!task\_\-struct\_\-size@{task\_\-struct\_\-size}}
+\index{task\_\-struct\_\-size@{task\_\-struct\_\-size}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{task\_\-struct\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf task\_\-struct\_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classAlphaISA_1_1ProcessInfo_a6bca839d8255baba5c53a5eace70d72e}
+\hypertarget{classAlphaISA_1_1ProcessInfo_a4455a4759e69e5ebe68ae7298cbcc37d}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!tc@{tc}}
+\index{tc@{tc}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{tc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadContext}$\ast$ {\bf tc}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classAlphaISA_1_1ProcessInfo_a4455a4759e69e5ebe68ae7298cbcc37d}
+\hypertarget{classAlphaISA_1_1ProcessInfo_aa02520c2e86b94388e0d4f4a7b0873b3}{
+\index{AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}!thread\_\-info\_\-size@{thread\_\-info\_\-size}}
+\index{thread\_\-info\_\-size@{thread\_\-info\_\-size}!AlphaISA::ProcessInfo@{AlphaISA::ProcessInfo}}
+\subsubsection[{thread\_\-info\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf thread\_\-info\_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classAlphaISA_1_1ProcessInfo_aa02520c2e86b94388e0d4f4a7b0873b3}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/alpha/\hyperlink{alpha_2stacktrace_8hh}{stacktrace.hh}\item 
+arch/alpha/\hyperlink{alpha_2stacktrace_8cc}{stacktrace.cc}\end{DoxyCompactItemize}

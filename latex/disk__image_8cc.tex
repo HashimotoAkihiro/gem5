@@ -1,0 +1,141 @@
+\hypertarget{disk__image_8cc}{
+\section{dev/disk\_\-image.cc}
+\label{disk__image_8cc}\index{dev/disk\_\-image.cc@{dev/disk\_\-image.cc}}
+}
+{\ttfamily \#include $<$sys/types.h$>$}\par
+{\ttfamily \#include $<$sys/uio.h$>$}\par
+{\ttfamily \#include $<$unistd.h$>$}\par
+{\ttfamily \#include $<$cerrno$>$}\par
+{\ttfamily \#include $<$cstring$>$}\par
+{\ttfamily \#include $<$fstream$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include \char`\"{}base/callback.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/DiskImageRead.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/DiskImageWrite.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}dev/disk\_\-image.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/byteswap.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-exit.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classCowDiskCallback}{CowDiskCallback}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{disk__image_8cc_a5cde1327319f7b676cf869e316156888}{SafeRead} (ifstream \&stream, void $\ast$data, int count)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{disk__image_8cc_a65a4db23b6ca7ec7452a6829b421f428}{SafeRead} (ifstream \&stream, T \&data)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{disk__image_8cc_aa1326ddaffb837cff49e97a0c0b19b0b}{SafeReadSwap} (ifstream \&stream, T \&data)
+\item 
+void \hyperlink{disk__image_8cc_ae3755e074d71214704f5f67cacf88d34}{SafeWrite} (ofstream \&stream, const void $\ast$data, int count)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{disk__image_8cc_a8ef8e4739ae66fa43e5128539963ef2d}{SafeWrite} (ofstream \&stream, const T \&data)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{disk__image_8cc_a9f9baf7e7f0f98b44367cdf934652744}{SafeWriteSwap} (ofstream \&stream, const T \&data)
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Disk Image Definitions 
+
+\subsection{関数}
+\hypertarget{disk__image_8cc_a65a4db23b6ca7ec7452a6829b421f428}{
+\index{disk\_\-image.cc@{disk\_\-image.cc}!SafeRead@{SafeRead}}
+\index{SafeRead@{SafeRead}!disk_image.cc@{disk\_\-image.cc}}
+\subsubsection[{SafeRead}]{\setlength{\rightskip}{0pt plus 5cm}void SafeRead (ifstream \& {\em stream}, \/  T \& {\em data})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{disk__image_8cc_a65a4db23b6ca7ec7452a6829b421f428}
+
+
+
+\begin{DoxyCode}
+216 {
+217     SafeRead(stream, &data, sizeof(data));
+218 }
+\end{DoxyCode}
+\hypertarget{disk__image_8cc_a5cde1327319f7b676cf869e316156888}{
+\index{disk\_\-image.cc@{disk\_\-image.cc}!SafeRead@{SafeRead}}
+\index{SafeRead@{SafeRead}!disk_image.cc@{disk\_\-image.cc}}
+\subsubsection[{SafeRead}]{\setlength{\rightskip}{0pt plus 5cm}void SafeRead (ifstream \& {\em stream}, \/  void $\ast$ {\em data}, \/  int {\em count})}}
+\label{disk__image_8cc_a5cde1327319f7b676cf869e316156888}
+
+
+
+\begin{DoxyCode}
+201 {
+202     stream.read((char *)data, count);
+203     if (!stream.is_open())
+204         panic("file not open");
+205 
+206     if (stream.eof())
+207         panic("premature end-of-file");
+208 
+209     if (stream.bad() || stream.fail())
+210         panic("error reading cowdisk image");
+211 }
+\end{DoxyCode}
+\hypertarget{disk__image_8cc_aa1326ddaffb837cff49e97a0c0b19b0b}{
+\index{disk\_\-image.cc@{disk\_\-image.cc}!SafeReadSwap@{SafeReadSwap}}
+\index{SafeReadSwap@{SafeReadSwap}!disk_image.cc@{disk\_\-image.cc}}
+\subsubsection[{SafeReadSwap}]{\setlength{\rightskip}{0pt plus 5cm}void SafeReadSwap (ifstream \& {\em stream}, \/  T \& {\em data})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{disk__image_8cc_aa1326ddaffb837cff49e97a0c0b19b0b}
+
+
+
+\begin{DoxyCode}
+223 {
+224     SafeRead(stream, &data, sizeof(data));
+225     data = letoh(data); //is this the proper byte order conversion?
+226 }
+\end{DoxyCode}
+\hypertarget{disk__image_8cc_a8ef8e4739ae66fa43e5128539963ef2d}{
+\index{disk\_\-image.cc@{disk\_\-image.cc}!SafeWrite@{SafeWrite}}
+\index{SafeWrite@{SafeWrite}!disk_image.cc@{disk\_\-image.cc}}
+\subsubsection[{SafeWrite}]{\setlength{\rightskip}{0pt plus 5cm}void SafeWrite (ofstream \& {\em stream}, \/  const T \& {\em data})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{disk__image_8cc_a8ef8e4739ae66fa43e5128539963ef2d}
+
+
+
+\begin{DoxyCode}
+299 {
+300     SafeWrite(stream, &data, sizeof(data));
+301 }
+\end{DoxyCode}
+\hypertarget{disk__image_8cc_ae3755e074d71214704f5f67cacf88d34}{
+\index{disk\_\-image.cc@{disk\_\-image.cc}!SafeWrite@{SafeWrite}}
+\index{SafeWrite@{SafeWrite}!disk_image.cc@{disk\_\-image.cc}}
+\subsubsection[{SafeWrite}]{\setlength{\rightskip}{0pt plus 5cm}void SafeWrite (ofstream \& {\em stream}, \/  const void $\ast$ {\em data}, \/  int {\em count})}}
+\label{disk__image_8cc_ae3755e074d71214704f5f67cacf88d34}
+
+
+
+\begin{DoxyCode}
+284 {
+285     stream.write((const char *)data, count);
+286     if (!stream.is_open())
+287         panic("file not open");
+288 
+289     if (stream.eof())
+290         panic("premature end-of-file");
+291 
+292     if (stream.bad() || stream.fail())
+293         panic("error reading cowdisk image");
+294 }
+\end{DoxyCode}
+\hypertarget{disk__image_8cc_a9f9baf7e7f0f98b44367cdf934652744}{
+\index{disk\_\-image.cc@{disk\_\-image.cc}!SafeWriteSwap@{SafeWriteSwap}}
+\index{SafeWriteSwap@{SafeWriteSwap}!disk_image.cc@{disk\_\-image.cc}}
+\subsubsection[{SafeWriteSwap}]{\setlength{\rightskip}{0pt plus 5cm}void SafeWriteSwap (ofstream \& {\em stream}, \/  const T \& {\em data})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{disk__image_8cc_a9f9baf7e7f0f98b44367cdf934652744}
+
+
+
+\begin{DoxyCode}
+306 {
+307     T swappeddata = letoh(data); //is this the proper byte order conversion?
+308     SafeWrite(stream, &swappeddata, sizeof(data));
+309 }
+\end{DoxyCode}

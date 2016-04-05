@@ -1,0 +1,145 @@
+\hypertarget{classEtherDump}{
+\section{クラス EtherDump}
+\label{classEtherDump}\index{EtherDump@{EtherDump}}
+}
+
+
+{\ttfamily \#include $<$etherdump.hh$>$}EtherDumpに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classEtherDump}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef EtherDumpParams \hyperlink{classEtherDump_a1c09075a361c5596c4f4523d9b570438}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classEtherDump_aa69b0ba907f0f8cfcd7e311bd7da83ac}{EtherDump} (const \hyperlink{classEtherDump_a1c09075a361c5596c4f4523d9b570438}{Params} $\ast$p)
+\item 
+void \hyperlink{classEtherDump_a4fd2deacb5bb2820bdba7d369a17e72f}{dump} (\hyperlink{classRefCountingPtr}{EthPacketPtr} \&pkt)
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classEtherDump_a38068da876076f5fe0bdfd8f9b2a5290}{dumpPacket} (\hyperlink{classRefCountingPtr}{EthPacketPtr} \&packet)
+\item 
+void \hyperlink{classEtherDump_a02fd73d861ef2e4aabb38c0c9ff82947}{init} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+std::ostream $\ast$ \hyperlink{classEtherDump_adc3bdd1632f41d809c78a20c0733715c}{stream}
+\item 
+const unsigned \hyperlink{classEtherDump_a116bcd76790af971de65d742bdb8feac}{maxlen}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classEtherDump_a1c09075a361c5596c4f4523d9b570438}{
+\index{EtherDump@{EtherDump}!Params@{Params}}
+\index{Params@{Params}!EtherDump@{EtherDump}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef EtherDumpParams {\bf Params}}}
+\label{classEtherDump_a1c09075a361c5596c4f4523d9b570438}
+
+
+\hyperlink{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}{SimObject}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classEtherDump_aa69b0ba907f0f8cfcd7e311bd7da83ac}{
+\index{EtherDump@{EtherDump}!EtherDump@{EtherDump}}
+\index{EtherDump@{EtherDump}!EtherDump@{EtherDump}}
+\subsubsection[{EtherDump}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EtherDump} (const {\bf Params} $\ast$ {\em p})}}
+\label{classEtherDump_aa69b0ba907f0f8cfcd7e311bd7da83ac}
+
+
+
+\begin{DoxyCode}
+48     : SimObject(p), stream(simout.create(p->file, true)),
+49       maxlen(p->maxlen)
+50 {
+51 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classEtherDump_a4fd2deacb5bb2820bdba7d369a17e72f}{
+\index{EtherDump@{EtherDump}!dump@{dump}}
+\index{dump@{dump}!EtherDump@{EtherDump}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}void dump ({\bf EthPacketPtr} \& {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classEtherDump_a4fd2deacb5bb2820bdba7d369a17e72f}
+
+
+
+\begin{DoxyCode}
+59 { dumpPacket(pkt); }
+\end{DoxyCode}
+\hypertarget{classEtherDump_a38068da876076f5fe0bdfd8f9b2a5290}{
+\index{EtherDump@{EtherDump}!dumpPacket@{dumpPacket}}
+\index{dumpPacket@{dumpPacket}!EtherDump@{EtherDump}}
+\subsubsection[{dumpPacket}]{\setlength{\rightskip}{0pt plus 5cm}void dumpPacket ({\bf EthPacketPtr} \& {\em packet})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classEtherDump_a38068da876076f5fe0bdfd8f9b2a5290}
+
+
+
+\begin{DoxyCode}
+95 {
+96     pcap_pkthdr pkthdr;
+97     pkthdr.seconds = curTick() / SimClock::Int::s;
+98     pkthdr.microseconds = (curTick() / SimClock::Int::us) % ULL(1000000);
+99     pkthdr.caplen = std::min(packet->length, maxlen);
+100     pkthdr.len = packet->length;
+101     stream->write(reinterpret_cast<char *>(&pkthdr), sizeof(pkthdr));
+102     stream->write(reinterpret_cast<char *>(packet->data), pkthdr.caplen);
+103     stream->flush();
+104 }
+\end{DoxyCode}
+\hypertarget{classEtherDump_a02fd73d861ef2e4aabb38c0c9ff82947}{
+\index{EtherDump@{EtherDump}!init@{init}}
+\index{init@{init}!EtherDump@{EtherDump}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void init ()\hspace{0.3cm}{\ttfamily  \mbox{[}private, virtual\mbox{]}}}}
+\label{classEtherDump_a02fd73d861ef2e4aabb38c0c9ff82947}
+\hyperlink{classEtherDump_a02fd73d861ef2e4aabb38c0c9ff82947}{init()} is called after all C++ SimObjects have been created and all ports are connected. Initializations that are independent of unserialization but rely on a fully instantiated and connected \hyperlink{classSimObject}{SimObject} graph should be done here. 
+
+\hyperlink{classSimObject_a02fd73d861ef2e4aabb38c0c9ff82947}{SimObject}を再定義しています。
+
+
+\begin{DoxyCode}
+77 {
+78     struct pcap_file_header hdr;
+79     hdr.magic = TCPDUMP_MAGIC;
+80     hdr.version_major = PCAP_VERSION_MAJOR;
+81     hdr.version_minor = PCAP_VERSION_MINOR;
+82 
+83     hdr.thiszone = 0;
+84     hdr.snaplen = 1500;
+85     hdr.sigfigs = 0;
+86     hdr.linktype = DLT_EN10MB;
+87 
+88     stream->write(reinterpret_cast<char *>(&hdr), sizeof(hdr));
+89 
+90     stream->flush();
+91 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classEtherDump_a116bcd76790af971de65d742bdb8feac}{
+\index{EtherDump@{EtherDump}!maxlen@{maxlen}}
+\index{maxlen@{maxlen}!EtherDump@{EtherDump}}
+\subsubsection[{maxlen}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned {\bf maxlen}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classEtherDump_a116bcd76790af971de65d742bdb8feac}
+\hypertarget{classEtherDump_adc3bdd1632f41d809c78a20c0733715c}{
+\index{EtherDump@{EtherDump}!stream@{stream}}
+\index{stream@{stream}!EtherDump@{EtherDump}}
+\subsubsection[{stream}]{\setlength{\rightskip}{0pt plus 5cm}std::ostream$\ast$ {\bf stream}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classEtherDump_adc3bdd1632f41d809c78a20c0733715c}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/\hyperlink{etherdump_8hh}{etherdump.hh}\item 
+dev/\hyperlink{etherdump_8cc}{etherdump.cc}\end{DoxyCompactItemize}

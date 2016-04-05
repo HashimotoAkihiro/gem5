@@ -1,0 +1,351 @@
+\hypertarget{classActivityRecorder}{
+\section{クラス ActivityRecorder}
+\label{classActivityRecorder}\index{ActivityRecorder@{ActivityRecorder}}
+}
+
+
+{\ttfamily \#include $<$activity.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classActivityRecorder_aee994d49a31bd533aa152dfeb18c7b2d}{ActivityRecorder} (const std::string \&name, int num\_\-stages, int longest\_\-latency, int count)
+\item 
+\hyperlink{classActivityRecorder_a72527148fb233d9e5a0d887becb03458}{$\sim$ActivityRecorder} ()
+\item 
+void \hyperlink{classActivityRecorder_a0ea760b87a5516ee794818d5eb8c243d}{activity} ()
+\item 
+void \hyperlink{classActivityRecorder_a8903a4e9f3d5fb42d0faa9d53e21d85c}{advance} ()
+\item 
+void \hyperlink{classActivityRecorder_a9039dad8d295c41b50eba0342e6c11c0}{activateStage} (const int idx)
+\item 
+void \hyperlink{classActivityRecorder_a4d73bea02eaf6f93e267391592556fe7}{deactivateStage} (const int idx)
+\item 
+bool \hyperlink{classActivityRecorder_a918c8f58bd15e33d7d44a37109a868e4}{getStageActive} (const int idx) const 
+\item 
+int \hyperlink{classActivityRecorder_aabc85525e8d2526f4a909313fcb9bfa2}{getNumStages} () const 
+\item 
+int \hyperlink{classActivityRecorder_a24e9ead78b85428639a9e76329ecd0b7}{getActivityCount} () const 
+\item 
+void \hyperlink{classActivityRecorder_a562d654f23b8a293deda98e8d585973f}{setActivityCount} (int count)
+\item 
+bool \hyperlink{classActivityRecorder_a0cb3050c8a4f6bdb2c1f727eec8d9701}{active} ()
+\item 
+void \hyperlink{classActivityRecorder_ad20897c5c8bd47f5d4005989bead0e55}{reset} ()
+\item 
+void \hyperlink{classActivityRecorder_accd2600060dbaee3a3b41aed4034c63c}{dump} ()
+\item 
+void \hyperlink{classActivityRecorder_a41d45236c37b75848f4b1667a11fb50e}{validate} ()
+\item 
+const std::string \& \hyperlink{classActivityRecorder_a324e8c54c4c5161913681a1a52fef959}{name} () const 
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+std::string \hyperlink{classActivityRecorder_aaf2ed934b37cbbd236fdd1b01a5f5005}{\_\-name}
+\item 
+\hyperlink{classTimeBuffer}{TimeBuffer}$<$ bool $>$ \hyperlink{classActivityRecorder_a6c508a89a541285053c7b900bd730cc2}{activityBuffer}
+\item 
+int \hyperlink{classActivityRecorder_a20bd7fb0de8433f0f95dc50ed74bf620}{longestLatency}
+\item 
+int \hyperlink{classActivityRecorder_adf01a2f1e7e8ad0795ef04b3a4e6dfb6}{activityCount}
+\item 
+int \hyperlink{classActivityRecorder_aaf4f71ec3fd6f4e154d09cd71c2c331b}{numStages}
+\item 
+bool $\ast$ \hyperlink{classActivityRecorder_aebf0081a358874c1eedf8728e4a478a4}{stageActive}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\hyperlink{classActivityRecorder}{ActivityRecorder} helper class that informs the CPU if it can switch over to being idle or not. It works by having a time buffer as long as any time buffer in the CPU, and the CPU and all of its stages inform the \hyperlink{classActivityRecorder}{ActivityRecorder} when they write to any time buffer. The \hyperlink{classActivityRecorder}{ActivityRecorder} marks a 1 in the \char`\"{}0\char`\"{} slot of the time buffer any time a stage writes to a time buffer, and it advances its time buffer at the same time as all other stages. The \hyperlink{classActivityRecorder}{ActivityRecorder} also records if a stage has activity to do next cycle. The recorder keeps a count of these two. Thus any time the count is non-\/zero, there is either communication still in flight, or activity that still must be done, meaning that the CPU can not idle. If count is zero, then the CPU can safely idle as it has no more outstanding work to do. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classActivityRecorder_aee994d49a31bd533aa152dfeb18c7b2d}{
+\index{ActivityRecorder@{ActivityRecorder}!ActivityRecorder@{ActivityRecorder}}
+\index{ActivityRecorder@{ActivityRecorder}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{ActivityRecorder}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ActivityRecorder} (const std::string \& {\em name}, \/  int {\em num\_\-stages}, \/  int {\em longest\_\-latency}, \/  int {\em count})}}
+\label{classActivityRecorder_aee994d49a31bd533aa152dfeb18c7b2d}
+\hypertarget{classActivityRecorder_a72527148fb233d9e5a0d887becb03458}{
+\index{ActivityRecorder@{ActivityRecorder}!$\sim$ActivityRecorder@{$\sim$ActivityRecorder}}
+\index{$\sim$ActivityRecorder@{$\sim$ActivityRecorder}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{$\sim$ActivityRecorder}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf ActivityRecorder} ()}}
+\label{classActivityRecorder_a72527148fb233d9e5a0d887becb03458}
+
+
+
+\begin{DoxyCode}
+50 {
+51     delete[] stageActive;
+52 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classActivityRecorder_a9039dad8d295c41b50eba0342e6c11c0}{
+\index{ActivityRecorder@{ActivityRecorder}!activateStage@{activateStage}}
+\index{activateStage@{activateStage}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{activateStage}]{\setlength{\rightskip}{0pt plus 5cm}void activateStage (const int {\em idx})}}
+\label{classActivityRecorder_a9039dad8d295c41b50eba0342e6c11c0}
+Marks a stage as active. 
+
+
+\begin{DoxyCode}
+92 {
+93     // Increment the activity count if this stage wasn't already active.
+94     if (!stageActive[idx]) {
+95         ++activityCount;
+96 
+97         stageActive[idx] = true;
+98 
+99         DPRINTF(Activity, "Activity: %i\n", activityCount);
+100     } else {
+101         DPRINTF(Activity, "Stage %i already active.\n", idx);
+102     }
+103 
+104 //    assert(activityCount < longestLatency + numStages + 1);
+105 }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a0cb3050c8a4f6bdb2c1f727eec8d9701}{
+\index{ActivityRecorder@{ActivityRecorder}!active@{active}}
+\index{active@{active}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{active}]{\setlength{\rightskip}{0pt plus 5cm}bool active ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classActivityRecorder_a0cb3050c8a4f6bdb2c1f727eec8d9701}
+Returns if the CPU should be active. 
+
+
+\begin{DoxyCode}
+90 { return activityCount; }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a0ea760b87a5516ee794818d5eb8c243d}{
+\index{ActivityRecorder@{ActivityRecorder}!activity@{activity}}
+\index{activity@{activity}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{activity}]{\setlength{\rightskip}{0pt plus 5cm}void activity ()}}
+\label{classActivityRecorder_a0ea760b87a5516ee794818d5eb8c243d}
+Records that there is activity this cycle. 
+
+
+\begin{DoxyCode}
+56 {
+57     // If we've already recorded activity for this cycle, we don't
+58     // want to increment the count any more.
+59     if (activityBuffer[0]) {
+60         return;
+61     }
+62 
+63     activityBuffer[0] = true;
+64 
+65     ++activityCount;
+66 
+67     DPRINTF(Activity, "Activity: %i\n", activityCount);
+68 }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a8903a4e9f3d5fb42d0faa9d53e21d85c}{
+\index{ActivityRecorder@{ActivityRecorder}!advance@{advance}}
+\index{advance@{advance}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{advance}]{\setlength{\rightskip}{0pt plus 5cm}void advance ()}}
+\label{classActivityRecorder_a8903a4e9f3d5fb42d0faa9d53e21d85c}
+Advances the activity buffer, decrementing the activityCount if active communication just left the time buffer, and determining if there is no activity. 
+
+
+\begin{DoxyCode}
+72 {
+73     // If there's a 1 in the slot that is about to be erased once the
+74     // time buffer advances, then decrement the activityCount.
+75     if (activityBuffer[-longestLatency]) {
+76         --activityCount;
+77 
+78         assert(activityCount >= 0);
+79 
+80         DPRINTF(Activity, "Activity: %i\n", activityCount);
+81 
+82         if (activityCount == 0) {
+83             DPRINTF(Activity, "No activity left!\n");
+84         }
+85     }
+86 
+87     activityBuffer.advance();
+88 }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a4d73bea02eaf6f93e267391592556fe7}{
+\index{ActivityRecorder@{ActivityRecorder}!deactivateStage@{deactivateStage}}
+\index{deactivateStage@{deactivateStage}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{deactivateStage}]{\setlength{\rightskip}{0pt plus 5cm}void deactivateStage (const int {\em idx})}}
+\label{classActivityRecorder_a4d73bea02eaf6f93e267391592556fe7}
+Deactivates a stage. 
+
+
+\begin{DoxyCode}
+109 {
+110     // Decrement the activity count if this stage was active.
+111     if (stageActive[idx]) {
+112         --activityCount;
+113 
+114         stageActive[idx] = false;
+115 
+116         DPRINTF(Activity, "Activity: %i\n", activityCount);
+117     } else {
+118         DPRINTF(Activity, "Stage %i already inactive.\n", idx);
+119     }
+120 
+121     assert(activityCount >= 0);
+122 }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_accd2600060dbaee3a3b41aed4034c63c}{
+\index{ActivityRecorder@{ActivityRecorder}!dump@{dump}}
+\index{dump@{dump}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}void dump ()}}
+\label{classActivityRecorder_accd2600060dbaee3a3b41aed4034c63c}
+\hyperlink{namespaceDebug}{Debug} function to dump the contents of the time buffer. 
+
+
+\begin{DoxyCode}
+135 {
+136     for (int i = 0; i <= longestLatency; ++i) {
+137         cprintf("[Idx:%i %i] ", i, activityBuffer[-i]);
+138     }
+139 
+140     cprintf("\n");
+141 
+142     for (int i = 0; i < numStages; ++i) {
+143         cprintf("[Stage:%i %i]\n", i, stageActive[i]);
+144     }
+145 
+146     cprintf("\n");
+147 
+148     cprintf("Activity count: %i\n", activityCount);
+149 }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a24e9ead78b85428639a9e76329ecd0b7}{
+\index{ActivityRecorder@{ActivityRecorder}!getActivityCount@{getActivityCount}}
+\index{getActivityCount@{getActivityCount}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{getActivityCount}]{\setlength{\rightskip}{0pt plus 5cm}int getActivityCount () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classActivityRecorder_a24e9ead78b85428639a9e76329ecd0b7}
+Returns how many things are active within the recorder. 
+
+
+\begin{DoxyCode}
+81 { return activityCount; }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_aabc85525e8d2526f4a909313fcb9bfa2}{
+\index{ActivityRecorder@{ActivityRecorder}!getNumStages@{getNumStages}}
+\index{getNumStages@{getNumStages}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{getNumStages}]{\setlength{\rightskip}{0pt plus 5cm}int getNumStages () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classActivityRecorder_aabc85525e8d2526f4a909313fcb9bfa2}
+Returns the number of stages. 
+
+
+\begin{DoxyCode}
+78 { return numStages; }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a918c8f58bd15e33d7d44a37109a868e4}{
+\index{ActivityRecorder@{ActivityRecorder}!getStageActive@{getStageActive}}
+\index{getStageActive@{getStageActive}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{getStageActive}]{\setlength{\rightskip}{0pt plus 5cm}bool getStageActive (const int {\em idx}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classActivityRecorder_a918c8f58bd15e33d7d44a37109a868e4}
+Returns the activity status of a stage. 
+
+
+\begin{DoxyCode}
+75 { return stageActive[idx]; }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a324e8c54c4c5161913681a1a52fef959}{
+\index{ActivityRecorder@{ActivityRecorder}!name@{name}}
+\index{name@{name}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}const std::string\& name () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classActivityRecorder_a324e8c54c4c5161913681a1a52fef959}
+
+
+
+\begin{DoxyCode}
+103 { return _name; }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_ad20897c5c8bd47f5d4005989bead0e55}{
+\index{ActivityRecorder@{ActivityRecorder}!reset@{reset}}
+\index{reset@{reset}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}void reset ()}}
+\label{classActivityRecorder_ad20897c5c8bd47f5d4005989bead0e55}
+Clears the time buffer and the activity count. 
+
+
+\begin{DoxyCode}
+126 {
+127     activityCount = 0;
+128     std::memset(stageActive, 0, numStages);
+129     for (int i = 0; i < longestLatency + 1; ++i)
+130         activityBuffer.advance();
+131 }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a562d654f23b8a293deda98e8d585973f}{
+\index{ActivityRecorder@{ActivityRecorder}!setActivityCount@{setActivityCount}}
+\index{setActivityCount@{setActivityCount}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{setActivityCount}]{\setlength{\rightskip}{0pt plus 5cm}void setActivityCount (int {\em count})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classActivityRecorder_a562d654f23b8a293deda98e8d585973f}
+Sets the count to a starting value. Can be used to disable the idling option. 
+
+
+\begin{DoxyCode}
+87     { activityCount = count; }
+\end{DoxyCode}
+\hypertarget{classActivityRecorder_a41d45236c37b75848f4b1667a11fb50e}{
+\index{ActivityRecorder@{ActivityRecorder}!validate@{validate}}
+\index{validate@{validate}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{validate}]{\setlength{\rightskip}{0pt plus 5cm}void validate ()}}
+\label{classActivityRecorder_a41d45236c37b75848f4b1667a11fb50e}
+\hyperlink{namespaceDebug}{Debug} function to ensure that the activity count matches the contents of the time buffer. 
+
+
+\begin{DoxyCode}
+153 {
+154     int count = 0;
+155     for (int i = 0; i <= longestLatency; ++i) {
+156         if (activityBuffer[-i]) {
+157             count++;
+158         }
+159     }
+160 
+161     for (int i = 0; i < numStages; ++i) {
+162         if (stageActive[i]) {
+163             count++;
+164         }
+165     }
+166 
+167     assert(count == activityCount);
+168 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classActivityRecorder_aaf2ed934b37cbbd236fdd1b01a5f5005}{
+\index{ActivityRecorder@{ActivityRecorder}!\_\-name@{\_\-name}}
+\index{\_\-name@{\_\-name}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{\_\-name}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf \_\-name}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classActivityRecorder_aaf2ed934b37cbbd236fdd1b01a5f5005}
+\hypertarget{classActivityRecorder_a6c508a89a541285053c7b900bd730cc2}{
+\index{ActivityRecorder@{ActivityRecorder}!activityBuffer@{activityBuffer}}
+\index{activityBuffer@{activityBuffer}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{activityBuffer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TimeBuffer}$<$bool$>$ {\bf activityBuffer}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classActivityRecorder_a6c508a89a541285053c7b900bd730cc2}
+\hyperlink{classTime}{Time} buffer that tracks if any cycles has active communication in them. It should be as long as the longest communication latency in the system. Each time any time buffer is written, the activity buffer should also be written to. The activityBuffer is advanced along with all the other time buffers, so it should have a 1 somewhere in it only if there is active communication in a time buffer. \hypertarget{classActivityRecorder_adf01a2f1e7e8ad0795ef04b3a4e6dfb6}{
+\index{ActivityRecorder@{ActivityRecorder}!activityCount@{activityCount}}
+\index{activityCount@{activityCount}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{activityCount}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf activityCount}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classActivityRecorder_adf01a2f1e7e8ad0795ef04b3a4e6dfb6}
+Tracks how many stages and cycles of time buffer have activity. Stages increment this count when they switch to active, and decrement it when they switch to inactive. Whenever a cycle that previously had no information is written in the time buffer, this is incremented. When a cycle that had information exits the time buffer due to age, this count is decremented. When the count is 0, there is no activity in the CPU, and it can be descheduled. \hypertarget{classActivityRecorder_a20bd7fb0de8433f0f95dc50ed74bf620}{
+\index{ActivityRecorder@{ActivityRecorder}!longestLatency@{longestLatency}}
+\index{longestLatency@{longestLatency}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{longestLatency}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf longestLatency}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classActivityRecorder_a20bd7fb0de8433f0f95dc50ed74bf620}
+Longest latency time buffer in the CPU. \hypertarget{classActivityRecorder_aaf4f71ec3fd6f4e154d09cd71c2c331b}{
+\index{ActivityRecorder@{ActivityRecorder}!numStages@{numStages}}
+\index{numStages@{numStages}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{numStages}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf numStages}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classActivityRecorder_aaf4f71ec3fd6f4e154d09cd71c2c331b}
+Number of stages that can be marked as active or inactive. \hypertarget{classActivityRecorder_aebf0081a358874c1eedf8728e4a478a4}{
+\index{ActivityRecorder@{ActivityRecorder}!stageActive@{stageActive}}
+\index{stageActive@{stageActive}!ActivityRecorder@{ActivityRecorder}}
+\subsubsection[{stageActive}]{\setlength{\rightskip}{0pt plus 5cm}bool$\ast$ {\bf stageActive}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classActivityRecorder_aebf0081a358874c1eedf8728e4a478a4}
+Records which stages are active/inactive. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/\hyperlink{activity_8hh}{activity.hh}\item 
+cpu/\hyperlink{activity_8cc}{activity.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,172 @@
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState}{
+\section{構造体 ThreadState}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState}\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+}
+
+
+{\ttfamily \#include $<$nativetrace.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_a85ec503b4f5d7eeddd8cda17abf92e24}{update} (\hyperlink{classTrace_1_1NativeTrace}{NativeTrace} $\ast$parent)
+\item 
+void \hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_ace3d3d91c61ce60aa033e666444d2301}{update} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_ae7173394d697db6556eb202777688063}{ThreadState} ()
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_a6f3ddd660306f0af023be3dd6f59b3e8}{changed} \mbox{[}STATE\_\-NUMVALS\mbox{]}
+\item 
+uint64\_\-t \hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_ad15783a90caf5a0b3cda1f7eec3e9351}{state} \mbox{[}2\mbox{]}\mbox{[}STATE\_\-NUMVALS\mbox{]}
+\item 
+uint64\_\-t $\ast$ \hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_a64ef97177e1f16a7092ec9e357632722}{newState}
+\item 
+uint64\_\-t $\ast$ \hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_a8e4b1b6cea994cadfac0ff9b33148ed9}{oldState}
+\item 
+int \hyperlink{structTrace_1_1ArmNativeTrace_1_1ThreadState_ab04e2d55ea4a544f3575812582af7b51}{current}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_ae7173394d697db6556eb202777688063}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!ThreadState@{ThreadState}}
+\index{ThreadState@{ThreadState}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{ThreadState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadState} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_ae7173394d697db6556eb202777688063}
+
+
+
+\begin{DoxyCode}
+85         {
+86             for (int i = 0; i < STATE_NUMVALS; i++) {
+87                 changed[i] = false;
+88                 state[0][i] = state[1][i] = 0;
+89                 current = 0;
+90                 newState = state[0];
+91                 oldState = state[1];
+92             }
+93         }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_ace3d3d91c61ce60aa033e666444d2301}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!update@{update}}
+\index{update@{update}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{update}]{\setlength{\rightskip}{0pt plus 5cm}void update ({\bf ThreadContext} $\ast$ {\em tc})}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_ace3d3d91c61ce60aa033e666444d2301}
+
+
+
+\begin{DoxyCode}
+102 {
+103     oldState = state[current];
+104     current = (current + 1) % 2;
+105     newState = state[current];
+106 
+107     // Regular int regs
+108     for (int i = 0; i < 15; i++) {
+109         newState[i] = tc->readIntReg(i);
+110         changed[i] = (oldState[i] != newState[i]);
+111     }
+112 
+113     //R15, aliased with the PC
+114     newState[STATE_PC] = tc->pcState().npc();
+115     changed[STATE_PC] = (newState[STATE_PC] != oldState[STATE_PC]);
+116 
+117     //CPSR
+118     CPSR cpsr = tc->readMiscReg(MISCREG_CPSR);
+119     cpsr.nz = tc->readIntReg(INTREG_CONDCODES_NZ);
+120     cpsr.c = tc->readIntReg(INTREG_CONDCODES_C);
+121     cpsr.v = tc->readIntReg(INTREG_CONDCODES_V);
+122     cpsr.ge = tc->readIntReg(INTREG_CONDCODES_GE);
+123 
+124     newState[STATE_CPSR] = cpsr;
+125     changed[STATE_CPSR] = (newState[STATE_CPSR] != oldState[STATE_CPSR]);
+126 
+127     for (int i = 0; i < NumFloatV7ArchRegs; i += 2) {
+128         newState[STATE_F0 + (i >> 1)] =
+129             static_cast<uint64_t>(tc->readFloatRegBits(i + 1)) << 32 |
+130             tc->readFloatRegBits(i);
+131     }
+132     newState[STATE_FPSCR] = tc->readMiscRegNoEffect(MISCREG_FPSCR) |
+133                             tc->readIntReg(INTREG_FPCONDCODES);
+134 }
+\end{DoxyCode}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_a85ec503b4f5d7eeddd8cda17abf92e24}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!update@{update}}
+\index{update@{update}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{update}]{\setlength{\rightskip}{0pt plus 5cm}void update ({\bf NativeTrace} $\ast$ {\em parent})}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_a85ec503b4f5d7eeddd8cda17abf92e24}
+
+
+
+\begin{DoxyCode}
+67 {
+68     oldState = state[current];
+69     current = (current + 1) % 2;
+70     newState = state[current];
+71 
+72     memcpy(newState, oldState, sizeof(state[0]));
+73 
+74     uint64_t diffVector;
+75     parent->read(&diffVector, sizeof(diffVector));
+76     diffVector = ArmISA::gtoh(diffVector);
+77 
+78     int changes = 0;
+79     for (int i = 0; i < STATE_NUMVALS; i++) {
+80         if (diffVector & 0x1) {
+81             changed[i] = true;
+82             changes++;
+83         } else {
+84             changed[i] = false;
+85         }
+86         diffVector >>= 1;
+87     }
+88 
+89     uint64_t values[changes];
+90     parent->read(values, sizeof(values));
+91     int pos = 0;
+92     for (int i = 0; i < STATE_NUMVALS; i++) {
+93         if (changed[i]) {
+94             newState[i] = ArmISA::gtoh(values[pos++]);
+95             changed[i] = (newState[i] != oldState[i]);
+96         }
+97     }
+98 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_a6f3ddd660306f0af023be3dd6f59b3e8}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!changed@{changed}}
+\index{changed@{changed}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{changed}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf changed}\mbox{[}STATE\_\-NUMVALS\mbox{]}}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_a6f3ddd660306f0af023be3dd6f59b3e8}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_ab04e2d55ea4a544f3575812582af7b51}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!current@{current}}
+\index{current@{current}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{current}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf current}}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_ab04e2d55ea4a544f3575812582af7b51}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_a64ef97177e1f16a7092ec9e357632722}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!newState@{newState}}
+\index{newState@{newState}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{newState}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t$\ast$ {\bf newState}}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_a64ef97177e1f16a7092ec9e357632722}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_a8e4b1b6cea994cadfac0ff9b33148ed9}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!oldState@{oldState}}
+\index{oldState@{oldState}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{oldState}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t$\ast$ {\bf oldState}}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_a8e4b1b6cea994cadfac0ff9b33148ed9}
+\hypertarget{structTrace_1_1ArmNativeTrace_1_1ThreadState_ad15783a90caf5a0b3cda1f7eec3e9351}{
+\index{Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}!state@{state}}
+\index{state@{state}!Trace::ArmNativeTrace::ThreadState@{Trace::ArmNativeTrace::ThreadState}}
+\subsubsection[{state}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf state}\mbox{[}2\mbox{]}\mbox{[}STATE\_\-NUMVALS\mbox{]}}}
+\label{structTrace_1_1ArmNativeTrace_1_1ThreadState_ad15783a90caf5a0b3cda1f7eec3e9351}
+
+
+この構造体の説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2nativetrace_8hh}{nativetrace.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2nativetrace_8cc}{nativetrace.cc}\end{DoxyCompactItemize}

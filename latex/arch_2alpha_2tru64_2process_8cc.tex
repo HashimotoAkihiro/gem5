@@ -1,0 +1,216 @@
+\hypertarget{arch_2alpha_2tru64_2process_8cc}{
+\section{arch/alpha/tru64/process.cc}
+\label{arch_2alpha_2tru64_2process_8cc}\index{arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/alpha/tru64/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/alpha/tru64/tru64.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/alpha/isa\_\-traits.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/thread\_\-context.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}kern/tru64/tru64.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/byteswap.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/syscall\_\-emul.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2alpha_2tru64_2process_8cc_a9b3287e154144b39ade23cc40ad37808}{unameFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target uname() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2alpha_2tru64_2process_8cc_a8a94bcb1171ba9bfc36534223041792e}{getsysinfoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target getsysyinfo() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2alpha_2tru64_2process_8cc_a25d086a2a74808a33bc82eedad777184}{setsysinfoFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target setsysyinfo() handler. \item\end{DoxyCompactList}\item 
+static \hyperlink{classSyscallReturn}{SyscallReturn} \hyperlink{arch_2alpha_2tru64_2process_8cc_a93378dd3fbe219276336dde493c9fa26}{tableFunc} (\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$desc, int callnum, \hyperlink{classLiveProcess}{LiveProcess} $\ast$process, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\begin{DoxyCompactList}\small\item\em Target table() handler. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{arch_2alpha_2tru64_2process_8cc_a8a94bcb1171ba9bfc36534223041792e}{
+\index{arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}!getsysinfoFunc@{getsysinfoFunc}}
+\index{getsysinfoFunc@{getsysinfoFunc}!arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}}
+\subsubsection[{getsysinfoFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} getsysinfoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2alpha_2tru64_2process_8cc_a8a94bcb1171ba9bfc36534223041792e}
+
+
+Target getsysyinfo() handler. 
+
+
+\begin{DoxyCode}
+66 {
+67     int index = 0;
+68     unsigned op = process->getSyscallArg(tc, index);
+69     Addr bufPtr = process->getSyscallArg(tc, index);
+70     unsigned nbytes = process->getSyscallArg(tc, index);
+71 
+72     switch (op) {
+73 
+74       case AlphaTru64::GSI_MAX_CPU: {
+75           TypedBufferArg<uint32_t> max_cpu(bufPtr);
+76           *max_cpu = htog((uint32_t)process->numCpus());
+77           max_cpu.copyOut(tc->getMemProxy());
+78           return 1;
+79       }
+80 
+81       case AlphaTru64::GSI_CPUS_IN_BOX: {
+82           TypedBufferArg<uint32_t> cpus_in_box(bufPtr);
+83           *cpus_in_box = htog((uint32_t)process->numCpus());
+84           cpus_in_box.copyOut(tc->getMemProxy());
+85           return 1;
+86       }
+87 
+88       case AlphaTru64::GSI_PHYSMEM: {
+89           TypedBufferArg<uint64_t> physmem(bufPtr);
+90           *physmem = htog((uint64_t)1024 * 1024);  // physical memory in KB
+91           physmem.copyOut(tc->getMemProxy());
+92           return 1;
+93       }
+94 
+95       case AlphaTru64::GSI_CPU_INFO: {
+96           TypedBufferArg<AlphaTru64::cpu_info> infop(bufPtr);
+97 
+98           infop->current_cpu = htog(0);
+99           infop->cpus_in_box = htog(process->numCpus());
+100           infop->cpu_type = htog(57);
+101           infop->ncpus = htog(process->numCpus());
+102           uint64_t cpumask = (1 << process->numCpus()) - 1;
+103           infop->cpus_present = infop->cpus_running = htog(cpumask);
+104           infop->cpu_binding = htog(0);
+105           infop->cpu_ex_binding = htog(0);
+106           infop->mhz = htog(667);
+107 
+108           infop.copyOut(tc->getMemProxy());
+109           return 1;
+110       }
+111 
+112       case AlphaTru64::GSI_PROC_TYPE: {
+113           TypedBufferArg<uint64_t> proc_type(bufPtr);
+114           *proc_type = htog((uint64_t)11);
+115           proc_type.copyOut(tc->getMemProxy());
+116           return 1;
+117       }
+118 
+119       case AlphaTru64::GSI_PLATFORM_NAME: {
+120           BufferArg bufArg(bufPtr, nbytes);
+121           strncpy((char *)bufArg.bufferPtr(),
+122                   "COMPAQ Professional Workstation XP1000",
+123                   nbytes);
+124           bufArg.copyOut(tc->getMemProxy());
+125           return 1;
+126       }
+127 
+128       case AlphaTru64::GSI_CLK_TCK: {
+129           TypedBufferArg<uint64_t> clk_hz(bufPtr);
+130           *clk_hz = htog((uint64_t)1024);
+131           clk_hz.copyOut(tc->getMemProxy());
+132           return 1;
+133       }
+134 
+135       default:
+136         warn("getsysinfo: unknown op %d\n", op);
+137         break;
+138     }
+139 
+140     return 0;
+141 }
+\end{DoxyCode}
+\hypertarget{arch_2alpha_2tru64_2process_8cc_a25d086a2a74808a33bc82eedad777184}{
+\index{arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}!setsysinfoFunc@{setsysinfoFunc}}
+\index{setsysinfoFunc@{setsysinfoFunc}!arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}}
+\subsubsection[{setsysinfoFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} setsysinfoFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2alpha_2tru64_2process_8cc_a25d086a2a74808a33bc82eedad777184}
+
+
+Target setsysyinfo() handler. 
+
+
+\begin{DoxyCode}
+147 {
+148     int index = 0;
+149     unsigned op = process->getSyscallArg(tc, index);
+150 
+151     switch (op) {
+152       case AlphaTru64::SSI_IEEE_FP_CONTROL:
+153         warn("setsysinfo: ignoring ieee_set_fp_control() arg 0x%x\n",
+154              process->getSyscallArg(tc, index));
+155         break;
+156 
+157       default:
+158         warn("setsysinfo: unknown op %d\n", op);
+159         break;
+160     }
+161 
+162     return 0;
+163 }
+\end{DoxyCode}
+\hypertarget{arch_2alpha_2tru64_2process_8cc_a93378dd3fbe219276336dde493c9fa26}{
+\index{arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}!tableFunc@{tableFunc}}
+\index{tableFunc@{tableFunc}!arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}}
+\subsubsection[{tableFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} tableFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2alpha_2tru64_2process_8cc_a93378dd3fbe219276336dde493c9fa26}
+
+
+Target table() handler. 
+
+
+\begin{DoxyCode}
+169 {
+170     using namespace std;
+171 
+172     int argIndex = 0;
+173     int id = process->getSyscallArg(tc, argIndex);    // table ID
+174     int index = process->getSyscallArg(tc, argIndex); // index into table
+175     Addr bufPtr = process->getSyscallArg(tc, argIndex);
+176     // arg 2 is buffer pointer; type depends on table ID
+177     int nel = process->getSyscallArg(tc, argIndex);   // number of elements
+178     int lel = process->getSyscallArg(tc, argIndex);   // expected element size
+179 
+180     switch (id) {
+181       case AlphaTru64::TBL_SYSINFO: {
+182           if (index != 0 || nel != 1 || lel != sizeof(Tru64::tbl_sysinfo))
+183               return -EINVAL;
+184           TypedBufferArg<Tru64::tbl_sysinfo> elp(bufPtr);
+185 
+186           const int clk_hz = one_million;
+187           elp->si_user = htog(curTick() / (SimClock::Frequency / clk_hz));
+188           elp->si_nice = htog(0);
+189           elp->si_sys = htog(0);
+190           elp->si_idle = htog(0);
+191           elp->wait = htog(0);
+192           elp->si_hz = htog(clk_hz);
+193           elp->si_phz = htog(clk_hz);
+194           elp->si_boottime = htog(seconds_since_epoch); // seconds since epoch?
+195           elp->si_max_procs = htog(process->numCpus());
+196           elp.copyOut(tc->getMemProxy());
+197           return 0;
+198       }
+199 
+200       default:
+201         cerr << "table(): id " << id << " unknown." << endl;
+202         return -EINVAL;
+203     }
+204 }
+\end{DoxyCode}
+\hypertarget{arch_2alpha_2tru64_2process_8cc_a9b3287e154144b39ade23cc40ad37808}{
+\index{arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}!unameFunc@{unameFunc}}
+\index{unameFunc@{unameFunc}!arch/alpha/tru64/process.cc@{arch/alpha/tru64/process.cc}}
+\subsubsection[{unameFunc}]{\setlength{\rightskip}{0pt plus 5cm}static {\bf SyscallReturn} unameFunc ({\bf SyscallDesc} $\ast$ {\em desc}, \/  int {\em callnum}, \/  {\bf LiveProcess} $\ast$ {\em process}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2alpha_2tru64_2process_8cc_a9b3287e154144b39ade23cc40ad37808}
+
+
+Target uname() handler. 
+
+
+\begin{DoxyCode}
+48 {
+49     int index = 0;
+50     TypedBufferArg<AlphaTru64::utsname> name(process->getSyscallArg(tc, index));
+51 
+52     strcpy(name->sysname, "OSF1");
+53     strcpy(name->nodename, "m5.eecs.umich.edu");
+54     strcpy(name->release, "V5.1");
+55     strcpy(name->version, "732");
+56     strcpy(name->machine, "alpha");
+57 
+58     name.copyOut(tc->getMemProxy());
+59     return 0;
+60 }
+\end{DoxyCode}

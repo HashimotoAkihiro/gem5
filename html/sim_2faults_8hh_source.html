@@ -1,0 +1,139 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: sim/faults.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>sim/faults.hh</h1><a href="sim_2faults_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2003-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> *          Gabe Black</span>
+<a name="l00030"></a>00030 <span class="comment"> */</span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifndef __FAULTS_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define __FAULTS_HH__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;<a class="code" href="refcnt_8hh.html">base/refcnt.hh</a>&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2static__inst_8hh.html">cpu/static_inst.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="fault__fwd_8hh.html">sim/fault_fwd.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="stats_8hh.html">sim/stats.hh</a>&quot;</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a><a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">00041</a> <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="keyword">typedef</span> <span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a>;
+<a name="l00044"></a><a class="code" href="sim_2faults_8hh.html#afd21824d6eba50d78a4785991e6d122e">00044</a> <span class="keyword">typedef</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classStats_1_1Scalar.html">FaultStat</a>;
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="comment">// Each class has it&apos;s name statically define in _name,</span>
+<a name="l00047"></a>00047 <span class="comment">// and has a virtual function to access it&apos;s name.</span>
+<a name="l00048"></a>00048 <span class="comment">// The function is necessary because otherwise, all objects</span>
+<a name="l00049"></a>00049 <span class="comment">// which are being accessed cast as a FaultBase * (namely</span>
+<a name="l00050"></a>00050 <span class="comment">// all faults returned using the Fault type) will use the</span>
+<a name="l00051"></a>00051 <span class="comment">// generic FaultBase name.</span>
+<a name="l00052"></a>00052 
+<a name="l00053"></a><a class="code" href="classFaultBase.html">00053</a> <span class="keyword">class </span><a class="code" href="classFaultBase.html">FaultBase</a> : <span class="keyword">public</span> <a class="code" href="classRefCounted.html">RefCounted</a>
+<a name="l00054"></a>00054 {
+<a name="l00055"></a>00055   <span class="keyword">public</span>:
+<a name="l00056"></a>00056     <span class="keyword">virtual</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classFaultBase.html#aad960357563b8b969d2dffdcc6861de7">name</a>() <span class="keyword">const</span> = 0;
+<a name="l00057"></a>00057     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classFaultBase.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00058"></a>00058             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00059"></a>00059 };
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="classUnimpFault.html">00061</a> <span class="keyword">class </span><a class="code" href="classUnimpFault.html">UnimpFault</a> : <span class="keyword">public</span> <a class="code" href="classFaultBase.html">FaultBase</a>
+<a name="l00062"></a>00062 {
+<a name="l00063"></a>00063   <span class="keyword">private</span>:
+<a name="l00064"></a><a class="code" href="classUnimpFault.html#ada384d45bbfeffe352f997821b8f6d2b">00064</a>     std::string <a class="code" href="classUnimpFault.html#ada384d45bbfeffe352f997821b8f6d2b">panicStr</a>;
+<a name="l00065"></a>00065   <span class="keyword">public</span>:
+<a name="l00066"></a><a class="code" href="classUnimpFault.html#ab16b118e132981c95785f1b10a9d4775">00066</a>     <a class="code" href="classUnimpFault.html#ab16b118e132981c95785f1b10a9d4775">UnimpFault</a>(std::string _str)
+<a name="l00067"></a>00067         : <a class="code" href="classUnimpFault.html#ada384d45bbfeffe352f997821b8f6d2b">panicStr</a>(_str)
+<a name="l00068"></a>00068     { }
+<a name="l00069"></a>00069 
+<a name="l00070"></a><a class="code" href="classUnimpFault.html#a73adb23259baf912a81683a9790a303f">00070</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classUnimpFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <span class="stringliteral">&quot;Unimplemented simulator feature&quot;</span>;}
+<a name="l00071"></a>00071     <span class="keywordtype">void</span> <a class="code" href="classUnimpFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00072"></a>00072             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00073"></a>00073 };
+<a name="l00074"></a>00074 
+<a name="l00075"></a><a class="code" href="classReExec.html">00075</a> <span class="keyword">class </span><a class="code" href="classReExec.html">ReExec</a> : <span class="keyword">public</span> <a class="code" href="classFaultBase.html">FaultBase</a>
+<a name="l00076"></a>00076 {
+<a name="l00077"></a>00077   <span class="keyword">public</span>:
+<a name="l00078"></a><a class="code" href="classReExec.html#a127f8e4ea265460c26320765ce2a45c7">00078</a>     <span class="keyword">virtual</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classReExec.html#a127f8e4ea265460c26320765ce2a45c7">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="stringliteral">&quot;Re-execution fault&quot;</span>;}
+<a name="l00079"></a><a class="code" href="classReExec.html#a493976f206e617c1579710c1f021e47f">00079</a>     <a class="code" href="classReExec.html#a493976f206e617c1579710c1f021e47f">ReExec</a>() {}
+<a name="l00080"></a>00080     <span class="keywordtype">void</span> <a class="code" href="classReExec.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00081"></a>00081             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00082"></a>00082 };
+<a name="l00083"></a>00083 
+<a name="l00084"></a><a class="code" href="classGenericPageTableFault.html">00084</a> <span class="keyword">class </span><a class="code" href="classGenericPageTableFault.html">GenericPageTableFault</a> : <span class="keyword">public</span> <a class="code" href="classFaultBase.html">FaultBase</a>
+<a name="l00085"></a>00085 {
+<a name="l00086"></a>00086   <span class="keyword">private</span>:
+<a name="l00087"></a><a class="code" href="classGenericPageTableFault.html#a9f933b300ef63eea367ca82f8da31025">00087</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classGenericPageTableFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>;
+<a name="l00088"></a>00088   <span class="keyword">public</span>:
+<a name="l00089"></a><a class="code" href="classGenericPageTableFault.html#a73adb23259baf912a81683a9790a303f">00089</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classGenericPageTableFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <span class="stringliteral">&quot;Generic page table fault&quot;</span>;}
+<a name="l00090"></a><a class="code" href="classGenericPageTableFault.html#ab826e9f22292069df6ccf4b5d48874c2">00090</a>     <a class="code" href="classGenericPageTableFault.html#ab826e9f22292069df6ccf4b5d48874c2">GenericPageTableFault</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a441099e13f407fadb6bcb0447107de87">va</a>) : <a class="code" href="classGenericPageTableFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>(va) {}
+<a name="l00091"></a>00091     <span class="keywordtype">void</span> <a class="code" href="classGenericPageTableFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00092"></a>00092             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00093"></a>00093 };
+<a name="l00094"></a>00094 
+<a name="l00095"></a><a class="code" href="classGenericAlignmentFault.html">00095</a> <span class="keyword">class </span><a class="code" href="classGenericAlignmentFault.html">GenericAlignmentFault</a> : <span class="keyword">public</span> <a class="code" href="classFaultBase.html">FaultBase</a>
+<a name="l00096"></a>00096 {
+<a name="l00097"></a>00097   <span class="keyword">private</span>:
+<a name="l00098"></a><a class="code" href="classGenericAlignmentFault.html#a9f933b300ef63eea367ca82f8da31025">00098</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classGenericAlignmentFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>;
+<a name="l00099"></a>00099   <span class="keyword">public</span>:
+<a name="l00100"></a><a class="code" href="classGenericAlignmentFault.html#a73adb23259baf912a81683a9790a303f">00100</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classGenericAlignmentFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{<span class="keywordflow">return</span> <span class="stringliteral">&quot;Generic alignment fault&quot;</span>;}
+<a name="l00101"></a><a class="code" href="classGenericAlignmentFault.html#ae92105b81024d8f266cfb1b08fbbe35f">00101</a>     <a class="code" href="classGenericAlignmentFault.html#ae92105b81024d8f266cfb1b08fbbe35f">GenericAlignmentFault</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a441099e13f407fadb6bcb0447107de87">va</a>) : <a class="code" href="classGenericAlignmentFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>(va) {}
+<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classGenericAlignmentFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00103"></a>00103             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00104"></a>00104 };
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106 <span class="preprocessor">#endif // __FAULTS_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

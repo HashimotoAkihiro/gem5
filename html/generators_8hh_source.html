@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/testers/traffic_gen/generators.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/testers/traffic_gen/generators.hh</h1><a href="generators_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Thomas Grass</span>
+<a name="l00038"></a>00038 <span class="comment"> *          Andreas Hansson</span>
+<a name="l00039"></a>00039 <span class="comment"> *          Sascha Bischoff</span>
+<a name="l00040"></a>00040 <span class="comment"> *          Neha Agarwal</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00050"></a>00050 <span class="preprocessor">#ifndef __CPU_TRAFFIC_GEN_GENERATORS_HH__</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_TRAFFIC_GEN_GENERATORS_HH__</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="bitfield_8hh.html">base/bitfield.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="intmath_8hh.html">base/intmath.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="protoio_8hh.html">proto/protoio.hh</a>&quot;</span>
+<a name="l00057"></a>00057 
+<a name="l00063"></a><a class="code" href="classBaseGen.html">00063</a> <span class="keyword">class </span><a class="code" href="classBaseGen.html">BaseGen</a>
+<a name="l00064"></a>00064 {
+<a name="l00065"></a>00065 
+<a name="l00066"></a>00066   <span class="keyword">protected</span>:
+<a name="l00067"></a>00067 
+<a name="l00069"></a><a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">00069</a>     <span class="keyword">const</span> std::string <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>;
+<a name="l00070"></a>00070 
+<a name="l00072"></a><a class="code" href="classBaseGen.html#ac8d391dc05bee23af38946b9b3f80674">00072</a>     <span class="keyword">const</span> <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> <a class="code" href="classBaseGen.html#ac8d391dc05bee23af38946b9b3f80674">masterID</a>;
+<a name="l00073"></a>00073 
+<a name="l00082"></a>00082     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classBaseGen.html#ae4f945239fa7bde755f55122f661f467">getPacket</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">unsigned</span> size, <span class="keyword">const</span> <a class="code" href="classMemCmd.html">MemCmd</a>&amp; cmd,
+<a name="l00083"></a>00083                         <a class="code" href="classRequest.html#a2da503161d95c65aea559dbabcf570aa">Request::FlagsType</a> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a> = 0);
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085   <span class="keyword">public</span>:
+<a name="l00086"></a>00086 
+<a name="l00088"></a><a class="code" href="classBaseGen.html#a8868e82db2ec9f48892f03bd5c3ae0e1">00088</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseGen.html#a8868e82db2ec9f48892f03bd5c3ae0e1">duration</a>;
+<a name="l00089"></a>00089 
+<a name="l00097"></a>00097     <a class="code" href="classBaseGen.html#ac9104baf1e55a6b796dbe3d08d9b348c">BaseGen</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>, <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> master_id, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _duration);
+<a name="l00098"></a>00098 
+<a name="l00099"></a><a class="code" href="classBaseGen.html#a5b9bfeec43cf896304459480991317b4">00099</a>     <span class="keyword">virtual</span> <a class="code" href="classBaseGen.html#a5b9bfeec43cf896304459480991317b4">~BaseGen</a>() { }
+<a name="l00100"></a>00100 
+<a name="l00106"></a><a class="code" href="classBaseGen.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00106</a>     std::string <a class="code" href="classBaseGen.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>; }
+<a name="l00107"></a>00107 
+<a name="l00111"></a>00111     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseGen.html#ac51895063c53dfbc0f47a01940a3aa05">enter</a>() = 0;
+<a name="l00112"></a>00112 
+<a name="l00118"></a>00118     <span class="keyword">virtual</span> <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classBaseGen.html#a6cdb7c977e91dfc33aeea10a3dfcefed">getNextPacket</a>() = 0;
+<a name="l00119"></a>00119 
+<a name="l00123"></a><a class="code" href="classBaseGen.html#acbd8338aaa3340f10faecd6d2f759324">00123</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseGen.html#acbd8338aaa3340f10faecd6d2f759324">exit</a>() { };
+<a name="l00124"></a>00124 
+<a name="l00134"></a>00134     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classBaseGen.html#abee7e4d35054bbc37e9332bbd17f4a69">nextPacketTick</a>(<span class="keywordtype">bool</span> elastic, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> delay) <span class="keyword">const</span> = 0;
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136 };
+<a name="l00137"></a>00137 
+<a name="l00141"></a><a class="code" href="classIdleGen.html">00141</a> <span class="keyword">class </span><a class="code" href="classIdleGen.html">IdleGen</a> : <span class="keyword">public</span> <a class="code" href="classBaseGen.html">BaseGen</a>
+<a name="l00142"></a>00142 {
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144   <span class="keyword">public</span>:
+<a name="l00145"></a>00145 
+<a name="l00146"></a><a class="code" href="classIdleGen.html#a8893bb38ee827d1533e0b170728ed0a7">00146</a>     <a class="code" href="classIdleGen.html#a8893bb38ee827d1533e0b170728ed0a7">IdleGen</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>, <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> master_id, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _duration)
+<a name="l00147"></a>00147         : <a class="code" href="classBaseGen.html">BaseGen</a>(_name, master_id, _duration)
+<a name="l00148"></a>00148     { }
+<a name="l00149"></a>00149 
+<a name="l00150"></a><a class="code" href="classIdleGen.html#a2759dad6560aaf485b16356d7142d69d">00150</a>     <span class="keywordtype">void</span> <a class="code" href="classIdleGen.html#a2759dad6560aaf485b16356d7142d69d">enter</a>() { }
+<a name="l00151"></a>00151 
+<a name="l00152"></a><a class="code" href="classIdleGen.html#a938aa9841a9a62a776afbd0768af5379">00152</a>     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classIdleGen.html#a938aa9841a9a62a776afbd0768af5379">getNextPacket</a>() { <span class="keywordflow">return</span> <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>; }
+<a name="l00153"></a>00153 
+<a name="l00154"></a><a class="code" href="classIdleGen.html#a65f805b54c24ac3ce0a37716de3e8abc">00154</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classIdleGen.html#a65f805b54c24ac3ce0a37716de3e8abc">nextPacketTick</a>(<span class="keywordtype">bool</span> elastic, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> delay)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="base_2types_8hh.html#abe940b1b328825e234da719447e15ca5">MaxTick</a>; }
+<a name="l00155"></a>00155 };
+<a name="l00156"></a>00156 
+<a name="l00164"></a><a class="code" href="classLinearGen.html">00164</a> <span class="keyword">class </span><a class="code" href="classLinearGen.html">LinearGen</a> : <span class="keyword">public</span> <a class="code" href="classBaseGen.html">BaseGen</a>
+<a name="l00165"></a>00165 {
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167   <span class="keyword">public</span>:
+<a name="l00168"></a>00168 
+<a name="l00185"></a><a class="code" href="classLinearGen.html#a8b696a23a093c2b9afcdf1826af1966a">00185</a>     <a class="code" href="classLinearGen.html#a8b696a23a093c2b9afcdf1826af1966a">LinearGen</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>, <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> master_id, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _duration,
+<a name="l00186"></a>00186               <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> start_addr, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> end_addr, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> _blocksize,
+<a name="l00187"></a>00187               <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> min_period, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> max_period,
+<a name="l00188"></a>00188               uint8_t read_percent, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> data_limit)
+<a name="l00189"></a>00189         : <a class="code" href="classBaseGen.html">BaseGen</a>(_name, master_id, _duration),
+<a name="l00190"></a>00190           <a class="code" href="classLinearGen.html#a6aeb968ddd05c079215ef147ed22708a">startAddr</a>(start_addr), <a class="code" href="classLinearGen.html#a1f198116a3da3ee4d73abf4760f70815">endAddr</a>(end_addr),
+<a name="l00191"></a>00191           <a class="code" href="classLinearGen.html#aebddb11d20f173e7a5ec2c9f2f591171">blocksize</a>(_blocksize), <a class="code" href="classLinearGen.html#a4e49eae3c2467df5de83a296f8123619">minPeriod</a>(min_period),
+<a name="l00192"></a>00192           <a class="code" href="classLinearGen.html#a1c8c13cc371c24fa5cbb14c737c97f9d">maxPeriod</a>(max_period), <a class="code" href="classLinearGen.html#af72793641cb115852317a23ca19dc514">readPercent</a>(read_percent),
+<a name="l00193"></a>00193           <a class="code" href="classLinearGen.html#ad6ef2f2a9a6167b2d84c3246a2dd2e92">dataLimit</a>(data_limit)
+<a name="l00194"></a>00194     { }
+<a name="l00195"></a>00195 
+<a name="l00196"></a>00196     <span class="keywordtype">void</span> <a class="code" href="classLinearGen.html#a2759dad6560aaf485b16356d7142d69d">enter</a>();
+<a name="l00197"></a>00197 
+<a name="l00198"></a>00198     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classLinearGen.html#a938aa9841a9a62a776afbd0768af5379">getNextPacket</a>();
+<a name="l00199"></a>00199 
+<a name="l00200"></a>00200     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classLinearGen.html#a65f805b54c24ac3ce0a37716de3e8abc">nextPacketTick</a>(<span class="keywordtype">bool</span> elastic, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> delay) <span class="keyword">const</span>;
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202   <span class="keyword">private</span>:
+<a name="l00203"></a>00203 
+<a name="l00205"></a><a class="code" href="classLinearGen.html#a6aeb968ddd05c079215ef147ed22708a">00205</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLinearGen.html#a6aeb968ddd05c079215ef147ed22708a">startAddr</a>;
+<a name="l00206"></a>00206 
+<a name="l00208"></a><a class="code" href="classLinearGen.html#a1f198116a3da3ee4d73abf4760f70815">00208</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLinearGen.html#a1f198116a3da3ee4d73abf4760f70815">endAddr</a>;
+<a name="l00209"></a>00209 
+<a name="l00211"></a><a class="code" href="classLinearGen.html#aebddb11d20f173e7a5ec2c9f2f591171">00211</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLinearGen.html#aebddb11d20f173e7a5ec2c9f2f591171">blocksize</a>;
+<a name="l00212"></a>00212 
+<a name="l00214"></a><a class="code" href="classLinearGen.html#a4e49eae3c2467df5de83a296f8123619">00214</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classLinearGen.html#a4e49eae3c2467df5de83a296f8123619">minPeriod</a>;
+<a name="l00215"></a><a class="code" href="classLinearGen.html#a1c8c13cc371c24fa5cbb14c737c97f9d">00215</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classLinearGen.html#a1c8c13cc371c24fa5cbb14c737c97f9d">maxPeriod</a>;
+<a name="l00216"></a>00216 
+<a name="l00220"></a><a class="code" href="classLinearGen.html#af72793641cb115852317a23ca19dc514">00220</a>     <span class="keyword">const</span> uint8_t <a class="code" href="classLinearGen.html#af72793641cb115852317a23ca19dc514">readPercent</a>;
+<a name="l00221"></a>00221 
+<a name="l00223"></a><a class="code" href="classLinearGen.html#ad6ef2f2a9a6167b2d84c3246a2dd2e92">00223</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLinearGen.html#ad6ef2f2a9a6167b2d84c3246a2dd2e92">dataLimit</a>;
+<a name="l00224"></a>00224 
+<a name="l00226"></a><a class="code" href="classLinearGen.html#a76968ef2ad8d208fe33cfb493986e85a">00226</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLinearGen.html#a76968ef2ad8d208fe33cfb493986e85a">nextAddr</a>;
+<a name="l00227"></a>00227 
+<a name="l00233"></a><a class="code" href="classLinearGen.html#a708cc056d3a52d0f8f5a2cceffdc6d99">00233</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLinearGen.html#a708cc056d3a52d0f8f5a2cceffdc6d99">dataManipulated</a>;
+<a name="l00234"></a>00234 };
+<a name="l00235"></a>00235 
+<a name="l00241"></a><a class="code" href="classRandomGen.html">00241</a> <span class="keyword">class </span><a class="code" href="classRandomGen.html">RandomGen</a> : <span class="keyword">public</span> <a class="code" href="classBaseGen.html">BaseGen</a>
+<a name="l00242"></a>00242 {
+<a name="l00243"></a>00243 
+<a name="l00244"></a>00244   <span class="keyword">public</span>:
+<a name="l00245"></a>00245 
+<a name="l00262"></a><a class="code" href="classRandomGen.html#adee762769ba5fd3bc9fe1224c8f7ee78">00262</a>     <a class="code" href="classRandomGen.html#adee762769ba5fd3bc9fe1224c8f7ee78">RandomGen</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>, <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> master_id, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _duration,
+<a name="l00263"></a>00263               <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> start_addr, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> end_addr, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> _blocksize,
+<a name="l00264"></a>00264               <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> min_period, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> max_period,
+<a name="l00265"></a>00265               uint8_t read_percent, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> data_limit)
+<a name="l00266"></a>00266         : <a class="code" href="classBaseGen.html">BaseGen</a>(_name, master_id, _duration),
+<a name="l00267"></a>00267           <a class="code" href="classRandomGen.html#a6aeb968ddd05c079215ef147ed22708a">startAddr</a>(start_addr), <a class="code" href="classRandomGen.html#a1f198116a3da3ee4d73abf4760f70815">endAddr</a>(end_addr),
+<a name="l00268"></a>00268           <a class="code" href="classRandomGen.html#aebddb11d20f173e7a5ec2c9f2f591171">blocksize</a>(_blocksize), <a class="code" href="classRandomGen.html#a4e49eae3c2467df5de83a296f8123619">minPeriod</a>(min_period),
+<a name="l00269"></a>00269           <a class="code" href="classRandomGen.html#a1c8c13cc371c24fa5cbb14c737c97f9d">maxPeriod</a>(max_period), <a class="code" href="classRandomGen.html#af72793641cb115852317a23ca19dc514">readPercent</a>(read_percent),
+<a name="l00270"></a>00270           <a class="code" href="classRandomGen.html#ad6ef2f2a9a6167b2d84c3246a2dd2e92">dataLimit</a>(data_limit)
+<a name="l00271"></a>00271     { }
+<a name="l00272"></a>00272 
+<a name="l00273"></a>00273     <span class="keywordtype">void</span> <a class="code" href="classRandomGen.html#a2759dad6560aaf485b16356d7142d69d">enter</a>();
+<a name="l00274"></a>00274 
+<a name="l00275"></a>00275     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classRandomGen.html#a938aa9841a9a62a776afbd0768af5379">getNextPacket</a>();
+<a name="l00276"></a>00276 
+<a name="l00277"></a>00277     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classRandomGen.html#a65f805b54c24ac3ce0a37716de3e8abc">nextPacketTick</a>(<span class="keywordtype">bool</span> elastic, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> delay) <span class="keyword">const</span>;
+<a name="l00278"></a>00278 
+<a name="l00279"></a>00279   <span class="keyword">protected</span>:
+<a name="l00280"></a>00280 
+<a name="l00282"></a><a class="code" href="classRandomGen.html#a6aeb968ddd05c079215ef147ed22708a">00282</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classRandomGen.html#a6aeb968ddd05c079215ef147ed22708a">startAddr</a>;
+<a name="l00283"></a>00283 
+<a name="l00285"></a><a class="code" href="classRandomGen.html#a1f198116a3da3ee4d73abf4760f70815">00285</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classRandomGen.html#a1f198116a3da3ee4d73abf4760f70815">endAddr</a>;
+<a name="l00286"></a>00286 
+<a name="l00288"></a><a class="code" href="classRandomGen.html#aebddb11d20f173e7a5ec2c9f2f591171">00288</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classRandomGen.html#aebddb11d20f173e7a5ec2c9f2f591171">blocksize</a>;
+<a name="l00289"></a>00289 
+<a name="l00291"></a><a class="code" href="classRandomGen.html#a4e49eae3c2467df5de83a296f8123619">00291</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classRandomGen.html#a4e49eae3c2467df5de83a296f8123619">minPeriod</a>;
+<a name="l00292"></a><a class="code" href="classRandomGen.html#a1c8c13cc371c24fa5cbb14c737c97f9d">00292</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classRandomGen.html#a1c8c13cc371c24fa5cbb14c737c97f9d">maxPeriod</a>;
+<a name="l00293"></a>00293 
+<a name="l00297"></a><a class="code" href="classRandomGen.html#af72793641cb115852317a23ca19dc514">00297</a>     <span class="keyword">const</span> uint8_t <a class="code" href="classRandomGen.html#af72793641cb115852317a23ca19dc514">readPercent</a>;
+<a name="l00298"></a>00298 
+<a name="l00300"></a><a class="code" href="classRandomGen.html#ad6ef2f2a9a6167b2d84c3246a2dd2e92">00300</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classRandomGen.html#ad6ef2f2a9a6167b2d84c3246a2dd2e92">dataLimit</a>;
+<a name="l00301"></a>00301 
+<a name="l00307"></a><a class="code" href="classRandomGen.html#a708cc056d3a52d0f8f5a2cceffdc6d99">00307</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classRandomGen.html#a708cc056d3a52d0f8f5a2cceffdc6d99">dataManipulated</a>;
+<a name="l00308"></a>00308 };
+<a name="l00309"></a>00309 
+<a name="l00315"></a><a class="code" href="classDramGen.html">00315</a> <span class="keyword">class </span><a class="code" href="classDramGen.html">DramGen</a> : <span class="keyword">public</span> <a class="code" href="classRandomGen.html">RandomGen</a>
+<a name="l00316"></a>00316 {
+<a name="l00317"></a>00317 
+<a name="l00318"></a>00318   <span class="keyword">public</span>:
+<a name="l00319"></a>00319 
+<a name="l00342"></a><a class="code" href="classDramGen.html#afc7f569fe1b2004371d6c159a9bdcba7">00342</a>     <a class="code" href="classDramGen.html#afc7f569fe1b2004371d6c159a9bdcba7">DramGen</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>, <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> master_id, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _duration,
+<a name="l00343"></a>00343             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> start_addr, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> end_addr, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> _blocksize,
+<a name="l00344"></a>00344             <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> min_period, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> max_period,
+<a name="l00345"></a>00345             uint8_t read_percent, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> data_limit,
+<a name="l00346"></a>00346             <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> num_seq_pkts, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> page_size,
+<a name="l00347"></a>00347             <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nbr_of_banks_DRAM, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> nbr_of_banks_util,
+<a name="l00348"></a>00348             <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> addr_mapping)
+<a name="l00349"></a>00349         : <a class="code" href="classRandomGen.html">RandomGen</a>(_name, master_id, _duration, start_addr, end_addr,
+<a name="l00350"></a>00350           _blocksize, min_period, max_period, read_percent, data_limit),
+<a name="l00351"></a>00351           <a class="code" href="classDramGen.html#a3904e98c281ec13010eaf9fe0671cda4">numSeqPkts</a>(num_seq_pkts), <a class="code" href="classDramGen.html#afe76fc6f68d7bc6df6e5757cbc74d949">countNumSeqPkts</a>(0),
+<a name="l00352"></a>00352           <a class="code" href="classDramGen.html#a1ba0c9f9857ad696d8c3cd03de468fae">isRead</a>(true), <a class="code" href="classDramGen.html#a0a5d2b9bad523ef4f6c613e9955c461d">pageSize</a>(page_size),
+<a name="l00353"></a>00353           <a class="code" href="classDramGen.html#a91979f75432119c425a60258ae2fae8f">pageBits</a>(<a class="code" href="intmath_8hh.html#ad61f5307b84292529da332fee695614e">floorLog2</a>(page_size / _blocksize)),
+<a name="l00354"></a>00354           <a class="code" href="classDramGen.html#a501bda29f816788d3bba6d280d6fdc94">bankBits</a>(<a class="code" href="intmath_8hh.html#ad61f5307b84292529da332fee695614e">floorLog2</a>(nbr_of_banks_DRAM)),
+<a name="l00355"></a>00355           <a class="code" href="classDramGen.html#a5f384954184da222f096688b1a3cc7a5">blockBits</a>(<a class="code" href="intmath_8hh.html#ad61f5307b84292529da332fee695614e">floorLog2</a>(_blocksize)),
+<a name="l00356"></a>00356           <a class="code" href="classDramGen.html#aad527c6f300f25a1ee8484deaba3d63c">nbrOfBanksDRAM</a>(nbr_of_banks_DRAM),
+<a name="l00357"></a>00357           <a class="code" href="classDramGen.html#ad0a8571226776987fe09f08baf268a06">nbrOfBanksUtil</a>(nbr_of_banks_util), <a class="code" href="classDramGen.html#ad03c09dad8f497cd0d9fb1a58500acab">addrMapping</a>(addr_mapping)
+<a name="l00358"></a>00358     {
+<a name="l00359"></a>00359         <span class="keywordflow">if</span> (<a class="code" href="classDramGen.html#ad03c09dad8f497cd0d9fb1a58500acab">addrMapping</a> != 1 &amp;&amp; <a class="code" href="classDramGen.html#ad03c09dad8f497cd0d9fb1a58500acab">addrMapping</a> != 0) {
+<a name="l00360"></a>00360             <a class="code" href="classDramGen.html#ad03c09dad8f497cd0d9fb1a58500acab">addrMapping</a> = 1;
+<a name="l00361"></a>00361             <a class="code" href="base_2misc_8hh.html#a8224a361dddd2ad59b411982e5ea746f">warn</a>(<span class="stringliteral">&quot;Unknown address mapping specified, using RoRaBaCoCh\n&quot;</span>);
+<a name="l00362"></a>00362         }
+<a name="l00363"></a>00363     }
+<a name="l00364"></a>00364 
+<a name="l00365"></a>00365     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classDramGen.html#a938aa9841a9a62a776afbd0768af5379">getNextPacket</a>();
+<a name="l00366"></a>00366 
+<a name="l00367"></a>00367   <span class="keyword">private</span>:
+<a name="l00368"></a>00368 
+<a name="l00370"></a><a class="code" href="classDramGen.html#a3904e98c281ec13010eaf9fe0671cda4">00370</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#a3904e98c281ec13010eaf9fe0671cda4">numSeqPkts</a>;
+<a name="l00371"></a>00371 
+<a name="l00373"></a><a class="code" href="classDramGen.html#afe76fc6f68d7bc6df6e5757cbc74d949">00373</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#afe76fc6f68d7bc6df6e5757cbc74d949">countNumSeqPkts</a>;
+<a name="l00374"></a>00374 
+<a name="l00376"></a><a class="code" href="classDramGen.html#a0bb77b4ba61e408313e1118250f9278c">00376</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classDramGen.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00377"></a>00377 
+<a name="l00379"></a><a class="code" href="classDramGen.html#a1ba0c9f9857ad696d8c3cd03de468fae">00379</a>     <span class="keywordtype">bool</span> <a class="code" href="classDramGen.html#a1ba0c9f9857ad696d8c3cd03de468fae">isRead</a>;
+<a name="l00380"></a>00380 
+<a name="l00382"></a><a class="code" href="classDramGen.html#a0a5d2b9bad523ef4f6c613e9955c461d">00382</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#a0a5d2b9bad523ef4f6c613e9955c461d">pageSize</a>;
+<a name="l00383"></a>00383 
+<a name="l00385"></a><a class="code" href="classDramGen.html#a91979f75432119c425a60258ae2fae8f">00385</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#a91979f75432119c425a60258ae2fae8f">pageBits</a>;
+<a name="l00386"></a>00386 
+<a name="l00388"></a><a class="code" href="classDramGen.html#a501bda29f816788d3bba6d280d6fdc94">00388</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#a501bda29f816788d3bba6d280d6fdc94">bankBits</a>;
+<a name="l00389"></a>00389 
+<a name="l00391"></a><a class="code" href="classDramGen.html#a5f384954184da222f096688b1a3cc7a5">00391</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#a5f384954184da222f096688b1a3cc7a5">blockBits</a>;
+<a name="l00392"></a>00392 
+<a name="l00394"></a><a class="code" href="classDramGen.html#aad527c6f300f25a1ee8484deaba3d63c">00394</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#aad527c6f300f25a1ee8484deaba3d63c">nbrOfBanksDRAM</a>;
+<a name="l00395"></a>00395 
+<a name="l00397"></a><a class="code" href="classDramGen.html#ad0a8571226776987fe09f08baf268a06">00397</a>     <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#ad0a8571226776987fe09f08baf268a06">nbrOfBanksUtil</a>;
+<a name="l00398"></a>00398 
+<a name="l00400"></a><a class="code" href="classDramGen.html#ad03c09dad8f497cd0d9fb1a58500acab">00400</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDramGen.html#ad03c09dad8f497cd0d9fb1a58500acab">addrMapping</a>;
+<a name="l00401"></a>00401 };
+<a name="l00402"></a>00402 
+<a name="l00408"></a><a class="code" href="classTraceGen.html">00408</a> <span class="keyword">class </span><a class="code" href="classTraceGen.html">TraceGen</a> : <span class="keyword">public</span> <a class="code" href="classBaseGen.html">BaseGen</a>
+<a name="l00409"></a>00409 {
+<a name="l00410"></a>00410 
+<a name="l00411"></a>00411   <span class="keyword">private</span>:
+<a name="l00412"></a>00412 
+<a name="l00416"></a><a class="code" href="structTraceGen_1_1TraceElement.html">00416</a>     <span class="keyword">struct </span><a class="code" href="structTraceGen_1_1TraceElement.html">TraceElement</a> {
+<a name="l00417"></a>00417 
+<a name="l00419"></a><a class="code" href="structTraceGen_1_1TraceElement.html#af88eb56d484b750933cd2ea86594f001">00419</a>         <a class="code" href="classMemCmd.html">MemCmd</a> <a class="code" href="structTraceGen_1_1TraceElement.html#af88eb56d484b750933cd2ea86594f001">cmd</a>;
+<a name="l00420"></a>00420 
+<a name="l00422"></a><a class="code" href="structTraceGen_1_1TraceElement.html#a0bb77b4ba61e408313e1118250f9278c">00422</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTraceGen_1_1TraceElement.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00423"></a>00423 
+<a name="l00425"></a><a class="code" href="structTraceGen_1_1TraceElement.html#ac1ad082ce835505ea433e658c844c8ac">00425</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTraceGen_1_1TraceElement.html#ac1ad082ce835505ea433e658c844c8ac">blocksize</a>;
+<a name="l00426"></a>00426 
+<a name="l00428"></a><a class="code" href="structTraceGen_1_1TraceElement.html#a4daae57fbf09ee5423d123f5ce330e92">00428</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="structTraceGen_1_1TraceElement.html#a4daae57fbf09ee5423d123f5ce330e92">tick</a>;
+<a name="l00429"></a>00429 
+<a name="l00431"></a><a class="code" href="structTraceGen_1_1TraceElement.html#a539ce2286409a81e04ce978c1ea74c18">00431</a>         <a class="code" href="classRequest.html#a2da503161d95c65aea559dbabcf570aa">Request::FlagsType</a> <a class="code" href="structTraceGen_1_1TraceElement.html#a539ce2286409a81e04ce978c1ea74c18">flags</a>;
+<a name="l00432"></a>00432 
+<a name="l00438"></a><a class="code" href="structTraceGen_1_1TraceElement.html#aac1b70a2ed67ead038c4d3f5ac4d8a81">00438</a>         <span class="keywordtype">bool</span> <a class="code" href="structTraceGen_1_1TraceElement.html#aac1b70a2ed67ead038c4d3f5ac4d8a81">isValid</a>()<span class="keyword"> const </span>{
+<a name="l00439"></a>00439             <span class="keywordflow">return</span> <a class="code" href="structTraceGen_1_1TraceElement.html#af88eb56d484b750933cd2ea86594f001">cmd</a> != <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a47dcc37c58138c184357ccbe13373b51">MemCmd::InvalidCmd</a>;
+<a name="l00440"></a>00440         }
+<a name="l00441"></a>00441 
+<a name="l00445"></a><a class="code" href="structTraceGen_1_1TraceElement.html#ac8bb3912a3ce86b15842e79d0b421204">00445</a>         <span class="keywordtype">void</span> <a class="code" href="structTraceGen_1_1TraceElement.html#ac8bb3912a3ce86b15842e79d0b421204">clear</a>() {
+<a name="l00446"></a>00446             <a class="code" href="structTraceGen_1_1TraceElement.html#af88eb56d484b750933cd2ea86594f001">cmd</a> = <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a47dcc37c58138c184357ccbe13373b51">MemCmd::InvalidCmd</a>;
+<a name="l00447"></a>00447         }
+<a name="l00448"></a>00448     };
+<a name="l00449"></a>00449 
+<a name="l00455"></a><a class="code" href="classTraceGen_1_1InputStream.html">00455</a>     <span class="keyword">class </span><a class="code" href="classTraceGen_1_1InputStream.html">InputStream</a>
+<a name="l00456"></a>00456     {
+<a name="l00457"></a>00457 
+<a name="l00458"></a>00458       <span class="keyword">private</span>:
+<a name="l00459"></a>00459 
+<a name="l00461"></a><a class="code" href="classTraceGen_1_1InputStream.html#aeea802262475e8c5d837e45e63ed5fa9">00461</a>         <a class="code" href="classProtoInputStream.html">ProtoInputStream</a> <a class="code" href="classTraceGen_1_1InputStream.html#aeea802262475e8c5d837e45e63ed5fa9" title="Input file stream for the protobuf trace.">trace</a>;
+<a name="l00462"></a>00462 
+<a name="l00463"></a>00463       <span class="keyword">public</span>:
+<a name="l00464"></a>00464 
+<a name="l00470"></a>00470         <a class="code" href="classTraceGen_1_1InputStream.html#a579e53605c9d23917107c48e4c68d02d">InputStream</a>(<span class="keyword">const</span> std::string&amp; filename);
+<a name="l00471"></a>00471 
+<a name="l00476"></a>00476         <span class="keywordtype">void</span> <a class="code" href="classTraceGen_1_1InputStream.html#ad20897c5c8bd47f5d4005989bead0e55">reset</a>();
+<a name="l00477"></a>00477 
+<a name="l00482"></a>00482         <span class="keywordtype">void</span> <a class="code" href="classTraceGen_1_1InputStream.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00483"></a>00483 
+<a name="l00492"></a>00492         <span class="keywordtype">bool</span> <a class="code" href="classTraceGen_1_1InputStream.html#ad46fc07f6483a6b8cd3b07223de00477">read</a>(<a class="code" href="structTraceGen_1_1TraceElement.html">TraceElement</a>&amp; element);
+<a name="l00493"></a>00493     };
+<a name="l00494"></a>00494 
+<a name="l00495"></a>00495   <span class="keyword">public</span>:
+<a name="l00496"></a>00496 
+<a name="l00506"></a><a class="code" href="classTraceGen.html#a6c6cce0385b1ab2fd059a9b4ac5ccd5a">00506</a>     <a class="code" href="classTraceGen.html#a6c6cce0385b1ab2fd059a9b4ac5ccd5a">TraceGen</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classBaseGen.html#a1b003dc5cfce1a4d8f9a0c4b9b589045">_name</a>, <a class="code" href="request_8hh.html#ac366b729262fd8e7cbd3283da6f775cf">MasterID</a> master_id, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> _duration,
+<a name="l00507"></a>00507              <span class="keyword">const</span> std::string&amp; trace_file, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> addr_offset)
+<a name="l00508"></a>00508         : <a class="code" href="classBaseGen.html">BaseGen</a>(_name, master_id, _duration),
+<a name="l00509"></a>00509           <a class="code" href="classTraceGen.html#a5dfbfce0ad4d1bee9295a75fb9f22e67">trace</a>(trace_file),
+<a name="l00510"></a>00510           <a class="code" href="classTraceGen.html#a909a0f7344e9c9dc4e84b9db494e3913">tickOffset</a>(0),
+<a name="l00511"></a>00511           <a class="code" href="classTraceGen.html#ab197a601b77c63555474cccf2ba4132c">addrOffset</a>(addr_offset),
+<a name="l00512"></a>00512           <a class="code" href="classTraceGen.html#a072f6c8d6720b220445074f5a4c0ceff">traceComplete</a>(false)
+<a name="l00513"></a>00513     {
+<a name="l00514"></a>00514     }
+<a name="l00515"></a>00515 
+<a name="l00516"></a>00516     <span class="keywordtype">void</span> <a class="code" href="classTraceGen.html#a2759dad6560aaf485b16356d7142d69d">enter</a>();
+<a name="l00517"></a>00517 
+<a name="l00518"></a>00518     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classTraceGen.html#a938aa9841a9a62a776afbd0768af5379">getNextPacket</a>();
+<a name="l00519"></a>00519 
+<a name="l00520"></a>00520     <span class="keywordtype">void</span> <a class="code" href="classTraceGen.html#a358d2e2397ca11ccd17553e3c40e7901">exit</a>();
+<a name="l00521"></a>00521 
+<a name="l00527"></a>00527     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classTraceGen.html#a65f805b54c24ac3ce0a37716de3e8abc">nextPacketTick</a>(<span class="keywordtype">bool</span> elastic, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> delay) <span class="keyword">const</span>;
+<a name="l00528"></a>00528 
+<a name="l00529"></a>00529   <span class="keyword">private</span>:
+<a name="l00530"></a>00530 
+<a name="l00532"></a><a class="code" href="classTraceGen.html#a5dfbfce0ad4d1bee9295a75fb9f22e67">00532</a>     <a class="code" href="classTraceGen_1_1InputStream.html">InputStream</a> <a class="code" href="classTraceGen.html#a5dfbfce0ad4d1bee9295a75fb9f22e67">trace</a>;
+<a name="l00533"></a>00533 
+<a name="l00535"></a><a class="code" href="classTraceGen.html#a9569c34c782ed59f9eabae29d83b3c69">00535</a>     <a class="code" href="structTraceGen_1_1TraceElement.html">TraceElement</a> <a class="code" href="classTraceGen.html#a9569c34c782ed59f9eabae29d83b3c69">currElement</a>;
+<a name="l00536"></a><a class="code" href="classTraceGen.html#af75daad6a6b104153bcfc8b0b9738fc1">00536</a>     <a class="code" href="structTraceGen_1_1TraceElement.html">TraceElement</a> <a class="code" href="classTraceGen.html#af75daad6a6b104153bcfc8b0b9738fc1">nextElement</a>;
+<a name="l00537"></a>00537 
+<a name="l00543"></a><a class="code" href="classTraceGen.html#a909a0f7344e9c9dc4e84b9db494e3913">00543</a>     <span class="keyword">mutable</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classTraceGen.html#a909a0f7344e9c9dc4e84b9db494e3913">tickOffset</a>;
+<a name="l00544"></a>00544 
+<a name="l00549"></a><a class="code" href="classTraceGen.html#ab197a601b77c63555474cccf2ba4132c">00549</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classTraceGen.html#ab197a601b77c63555474cccf2ba4132c">addrOffset</a>;
+<a name="l00550"></a>00550 
+<a name="l00555"></a><a class="code" href="classTraceGen.html#a072f6c8d6720b220445074f5a4c0ceff">00555</a>     <span class="keywordtype">bool</span> <a class="code" href="classTraceGen.html#a072f6c8d6720b220445074f5a4c0ceff">traceComplete</a>;
+<a name="l00556"></a>00556 };
+<a name="l00557"></a>00557 
+<a name="l00558"></a>00558 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

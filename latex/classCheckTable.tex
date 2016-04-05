@@ -1,0 +1,233 @@
+\hypertarget{classCheckTable}{
+\section{クラス CheckTable}
+\label{classCheckTable}\index{CheckTable@{CheckTable}}
+}
+
+
+{\ttfamily \#include $<$CheckTable.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCheckTable_aed6c2bde7c6c92e895bdf796e49c9d57}{CheckTable} (int \_\-num\_\-writers, int \_\-num\_\-readers, \hyperlink{classRubyTester}{RubyTester} $\ast$\_\-tester)
+\item 
+\hyperlink{classCheckTable_a20cfee885e35bdf6c3f8e5d3706336e2}{$\sim$CheckTable} ()
+\item 
+\hyperlink{classCheck}{Check} $\ast$ \hyperlink{classCheckTable_a5fe64727ae5d3d896fd48784401d4f68}{getRandomCheck} ()
+\item 
+\hyperlink{classCheck}{Check} $\ast$ \hyperlink{classCheckTable_ae48218016205b6d25f2ea8289929f9e5}{getCheck} (const \hyperlink{classAddress}{Address} \&address)
+\item 
+void \hyperlink{classCheckTable_ac55fe386a101fbae38c716067c9966a0}{print} (std::ostream \&out) const 
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classCheckTable_ae2fdd769e0caa9423868851dac434175}{addCheck} (const \hyperlink{classAddress}{Address} \&address)
+\item 
+\hyperlink{classCheckTable_a49ff58d7c5aa9ffaebf3c47b54df261d}{CheckTable} (const \hyperlink{classCheckTable}{CheckTable} \&obj)
+\item 
+\hyperlink{classCheckTable}{CheckTable} \& \hyperlink{classCheckTable_a706745367fb31497ca5823e17715f995}{operator=} (const \hyperlink{classCheckTable}{CheckTable} \&obj)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classCheck}{Check} $\ast$ $>$ \hyperlink{classCheckTable_ace539dad76cd6cc52c665170d8a81286}{m\_\-check\_\-vector}
+\item 
+m5::hash\_\-map$<$ \hyperlink{classAddress}{Address}, \hyperlink{classCheck}{Check} $\ast$ $>$ \hyperlink{classCheckTable_a3d7090a34667b11d65c47adaf7c220da}{m\_\-lookup\_\-map}
+\item 
+int \hyperlink{classCheckTable_aedeaccd67403213e1e43d99ff1c70f44}{m\_\-num\_\-writers}
+\item 
+int \hyperlink{classCheckTable_a7d224a04c5f0d1049dd6c6ab070884cb}{m\_\-num\_\-readers}
+\item 
+\hyperlink{classRubyTester}{RubyTester} $\ast$ \hyperlink{classCheckTable_aaff3af064462a4d4b7f986a4a2454ff0}{m\_\-tester\_\-ptr}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCheckTable_aed6c2bde7c6c92e895bdf796e49c9d57}{
+\index{CheckTable@{CheckTable}!CheckTable@{CheckTable}}
+\index{CheckTable@{CheckTable}!CheckTable@{CheckTable}}
+\subsubsection[{CheckTable}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CheckTable} (int {\em \_\-num\_\-writers}, \/  int {\em \_\-num\_\-readers}, \/  {\bf RubyTester} $\ast$ {\em \_\-tester})}}
+\label{classCheckTable_aed6c2bde7c6c92e895bdf796e49c9d57}
+
+
+
+\begin{DoxyCode}
+36     : m_num_writers(_num_writers), m_num_readers(_num_readers),
+37       m_tester_ptr(_tester)
+38 {
+39     physical_address_t physical = 0;
+40     Address address;
+41 
+42     const int size1 = 32;
+43     const int size2 = 100;
+44 
+45     // The first set is to get some false sharing
+46     physical = 1000;
+47     for (int i = 0; i < size1; i++) {
+48         // Setup linear addresses
+49         address.setAddress(physical);
+50         addCheck(address);
+51         physical += CHECK_SIZE;
+52     }
+53 
+54     // The next two sets are to get some limited false sharing and
+55     // cache conflicts
+56     physical = 1000;
+57     for (int i = 0; i < size2; i++) {
+58         // Setup linear addresses
+59         address.setAddress(physical);
+60         addCheck(address);
+61         physical += 256;
+62     }
+63 
+64     physical = 1000 + CHECK_SIZE;
+65     for (int i = 0; i < size2; i++) {
+66         // Setup linear addresses
+67         address.setAddress(physical);
+68         addCheck(address);
+69         physical += 256;
+70     }
+71 }
+\end{DoxyCode}
+\hypertarget{classCheckTable_a20cfee885e35bdf6c3f8e5d3706336e2}{
+\index{CheckTable@{CheckTable}!$\sim$CheckTable@{$\sim$CheckTable}}
+\index{$\sim$CheckTable@{$\sim$CheckTable}!CheckTable@{CheckTable}}
+\subsubsection[{$\sim$CheckTable}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf CheckTable} ()}}
+\label{classCheckTable_a20cfee885e35bdf6c3f8e5d3706336e2}
+
+
+
+\begin{DoxyCode}
+74 {
+75     int size = m_check_vector.size();
+76     for (int i = 0; i < size; i++)
+77         delete m_check_vector[i];
+78 }
+\end{DoxyCode}
+\hypertarget{classCheckTable_a49ff58d7c5aa9ffaebf3c47b54df261d}{
+\index{CheckTable@{CheckTable}!CheckTable@{CheckTable}}
+\index{CheckTable@{CheckTable}!CheckTable@{CheckTable}}
+\subsubsection[{CheckTable}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CheckTable} (const {\bf CheckTable} \& {\em obj})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_a49ff58d7c5aa9ffaebf3c47b54df261d}
+
+
+\subsection{関数}
+\hypertarget{classCheckTable_ae2fdd769e0caa9423868851dac434175}{
+\index{CheckTable@{CheckTable}!addCheck@{addCheck}}
+\index{addCheck@{addCheck}!CheckTable@{CheckTable}}
+\subsubsection[{addCheck}]{\setlength{\rightskip}{0pt plus 5cm}void addCheck (const {\bf Address} \& {\em address})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_ae2fdd769e0caa9423868851dac434175}
+
+
+
+\begin{DoxyCode}
+82 {
+83     if (floorLog2(CHECK_SIZE) != 0) {
+84         if (address.bitSelect(0, CHECK_SIZE_BITS - 1) != 0) {
+85             panic("Check not aligned");
+86         }
+87     }
+88 
+89     for (int i = 0; i < CHECK_SIZE; i++) {
+90         if (m_lookup_map.count(Address(address.getAddress()+i))) {
+91             // A mapping for this byte already existed, discard the
+92             // entire check
+93             return;
+94         }
+95     }
+96 
+97     Check* check_ptr = new Check(address, Address(100 + m_check_vector.size()),
+98                                  m_num_writers, m_num_readers, m_tester_ptr);
+99     for (int i = 0; i < CHECK_SIZE; i++) {
+100         // Insert it once per byte
+101         m_lookup_map[Address(address.getAddress() + i)] = check_ptr;
+102     }
+103     m_check_vector.push_back(check_ptr);
+104 }
+\end{DoxyCode}
+\hypertarget{classCheckTable_ae48218016205b6d25f2ea8289929f9e5}{
+\index{CheckTable@{CheckTable}!getCheck@{getCheck}}
+\index{getCheck@{getCheck}!CheckTable@{CheckTable}}
+\subsubsection[{getCheck}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Check} $\ast$ getCheck (const {\bf Address} \& {\em address})}}
+\label{classCheckTable_ae48218016205b6d25f2ea8289929f9e5}
+
+
+
+\begin{DoxyCode}
+115 {
+116     DPRINTF(RubyTest, "Looking for check by address: %s", address);
+117 
+118     m5::hash_map<Address, Check*>::iterator i = m_lookup_map.find(address);
+119 
+120     if (i == m_lookup_map.end())
+121         return NULL;
+122 
+123     Check* check = i->second;
+124     assert(check != NULL);
+125     return check;
+126 }
+\end{DoxyCode}
+\hypertarget{classCheckTable_a5fe64727ae5d3d896fd48784401d4f68}{
+\index{CheckTable@{CheckTable}!getRandomCheck@{getRandomCheck}}
+\index{getRandomCheck@{getRandomCheck}!CheckTable@{CheckTable}}
+\subsubsection[{getRandomCheck}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Check} $\ast$ getRandomCheck ()}}
+\label{classCheckTable_a5fe64727ae5d3d896fd48784401d4f68}
+
+
+
+\begin{DoxyCode}
+108 {
+109     assert(m_check_vector.size() > 0);
+110     return m_check_vector[random() % m_check_vector.size()];
+111 }
+\end{DoxyCode}
+\hypertarget{classCheckTable_a706745367fb31497ca5823e17715f995}{
+\index{CheckTable@{CheckTable}!operator=@{operator=}}
+\index{operator=@{operator=}!CheckTable@{CheckTable}}
+\subsubsection[{operator=}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CheckTable}\& operator= (const {\bf CheckTable} \& {\em obj})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_a706745367fb31497ca5823e17715f995}
+\hypertarget{classCheckTable_ac55fe386a101fbae38c716067c9966a0}{
+\index{CheckTable@{CheckTable}!print@{print}}
+\index{print@{print}!CheckTable@{CheckTable}}
+\subsubsection[{print}]{\setlength{\rightskip}{0pt plus 5cm}void print (std::ostream \& {\em out}) const}}
+\label{classCheckTable_ac55fe386a101fbae38c716067c9966a0}
+
+
+
+\begin{DoxyCode}
+130 {
+131 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCheckTable_ace539dad76cd6cc52c665170d8a81286}{
+\index{CheckTable@{CheckTable}!m\_\-check\_\-vector@{m\_\-check\_\-vector}}
+\index{m\_\-check\_\-vector@{m\_\-check\_\-vector}!CheckTable@{CheckTable}}
+\subsubsection[{m\_\-check\_\-vector}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf Check}$\ast$$>$ {\bf m\_\-check\_\-vector}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_ace539dad76cd6cc52c665170d8a81286}
+\hypertarget{classCheckTable_a3d7090a34667b11d65c47adaf7c220da}{
+\index{CheckTable@{CheckTable}!m\_\-lookup\_\-map@{m\_\-lookup\_\-map}}
+\index{m\_\-lookup\_\-map@{m\_\-lookup\_\-map}!CheckTable@{CheckTable}}
+\subsubsection[{m\_\-lookup\_\-map}]{\setlength{\rightskip}{0pt plus 5cm}m5::hash\_\-map$<${\bf Address}, {\bf Check}$\ast$$>$ {\bf m\_\-lookup\_\-map}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_a3d7090a34667b11d65c47adaf7c220da}
+\hypertarget{classCheckTable_a7d224a04c5f0d1049dd6c6ab070884cb}{
+\index{CheckTable@{CheckTable}!m\_\-num\_\-readers@{m\_\-num\_\-readers}}
+\index{m\_\-num\_\-readers@{m\_\-num\_\-readers}!CheckTable@{CheckTable}}
+\subsubsection[{m\_\-num\_\-readers}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-num\_\-readers}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_a7d224a04c5f0d1049dd6c6ab070884cb}
+\hypertarget{classCheckTable_aedeaccd67403213e1e43d99ff1c70f44}{
+\index{CheckTable@{CheckTable}!m\_\-num\_\-writers@{m\_\-num\_\-writers}}
+\index{m\_\-num\_\-writers@{m\_\-num\_\-writers}!CheckTable@{CheckTable}}
+\subsubsection[{m\_\-num\_\-writers}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf m\_\-num\_\-writers}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_aedeaccd67403213e1e43d99ff1c70f44}
+\hypertarget{classCheckTable_aaff3af064462a4d4b7f986a4a2454ff0}{
+\index{CheckTable@{CheckTable}!m\_\-tester\_\-ptr@{m\_\-tester\_\-ptr}}
+\index{m\_\-tester\_\-ptr@{m\_\-tester\_\-ptr}!CheckTable@{CheckTable}}
+\subsubsection[{m\_\-tester\_\-ptr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RubyTester}$\ast$ {\bf m\_\-tester\_\-ptr}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCheckTable_aaff3af064462a4d4b7f986a4a2454ff0}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/testers/rubytest/\hyperlink{CheckTable_8hh}{CheckTable.hh}\item 
+cpu/testers/rubytest/\hyperlink{CheckTable_8cc}{CheckTable.cc}\end{DoxyCompactItemize}

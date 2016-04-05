@@ -1,0 +1,157 @@
+\hypertarget{classPerfKvmTimer}{
+\section{クラス PerfKvmTimer}
+\label{classPerfKvmTimer}\index{PerfKvmTimer@{PerfKvmTimer}}
+}
+
+
+{\ttfamily \#include $<$timer.hh$>$}PerfKvmTimerに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classPerfKvmTimer}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPerfKvmTimer_a9435bd1cf661fdb4e35b2a733d94f92d}{PerfKvmTimer} (\hyperlink{classPerfKvmCounter}{PerfKvmCounter} \&ctr, int \hyperlink{classBaseKvmTimer_a68acd751895efa9ac5a6461017f1d2d8}{signo}, float \hyperlink{classBaseKvmTimer_a0ef366aa4bbbcdc2f7eeb7fcd3962dde}{hostFactor}, \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classBaseKvmTimer_af880b55be2bf83ac65eb9b0abe62ae49}{hostFreq})
+\item 
+\hyperlink{classPerfKvmTimer_a0095b8dff4f2db7d8d44674689127373}{$\sim$PerfKvmTimer} ()
+\item 
+void \hyperlink{classPerfKvmTimer_a5041ff590d50fcb1f0f5149b2e7eb4bb}{arm} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} ticks)
+\item 
+void \hyperlink{classPerfKvmTimer_a9882bfa120cede575461197f2a13cd8b}{disarm} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classPerfKvmTimer_a02798cc202bebceef3ff0e3ff3d7b5b8}{calcResolution} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPerfKvmCounter}{PerfKvmCounter} \& \hyperlink{classPerfKvmTimer_af183dc3e77e7fc3603a0d4ff4a8fb65d}{hwOverflow}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+PerfEvent based timer using the host's CPU cycle counter.
+
+\begin{DoxyWarning}{警告}
+There is a known problem in some versions of the PerfEvent API that prevents the counter overflow period from being updated reliably, which might break this timer. See \hyperlink{classPerfKvmCounter_a08ec1e452f32c7b0e573d63f126a2bbf}{PerfKvmCounter::period()} for details. 
+\end{DoxyWarning}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPerfKvmTimer_a9435bd1cf661fdb4e35b2a733d94f92d}{
+\index{PerfKvmTimer@{PerfKvmTimer}!PerfKvmTimer@{PerfKvmTimer}}
+\index{PerfKvmTimer@{PerfKvmTimer}!PerfKvmTimer@{PerfKvmTimer}}
+\subsubsection[{PerfKvmTimer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PerfKvmTimer} ({\bf PerfKvmCounter} \& {\em ctr}, \/  int {\em signo}, \/  float {\em hostFactor}, \/  {\bf Tick} {\em hostFreq})}}
+\label{classPerfKvmTimer_a9435bd1cf661fdb4e35b2a733d94f92d}
+Create a timer that uses an existing hardware cycle counter.
+
+\begin{DoxyNote}{覚え書き}
+The performance counter must be configured for overflow sampling, which in practice means that it must have a non-\/zero sample period. The initial sample period is ignored since period will be updated when \hyperlink{classPerfKvmTimer_a5041ff590d50fcb1f0f5149b2e7eb4bb}{arm()} is called.
+\end{DoxyNote}
+
+\begin{DoxyParams}{引数}
+\item[{\em ctr}]Attached performance counter configured for overflow reporting. \item[{\em signo}]Signal to deliver \item[{\em hostFactor}]Performance scaling factor \item[{\em hostFreq}]\hyperlink{classClock}{Clock} frequency of the host \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+161     : BaseKvmTimer(signo, hostFactor, hostFreq),
+162       hwOverflow(ctr)
+163 {
+164     hwOverflow.enableSignals(signo);
+165 }
+\end{DoxyCode}
+\hypertarget{classPerfKvmTimer_a0095b8dff4f2db7d8d44674689127373}{
+\index{PerfKvmTimer@{PerfKvmTimer}!$\sim$PerfKvmTimer@{$\sim$PerfKvmTimer}}
+\index{$\sim$PerfKvmTimer@{$\sim$PerfKvmTimer}!PerfKvmTimer@{PerfKvmTimer}}
+\subsubsection[{$\sim$PerfKvmTimer}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf PerfKvmTimer} ()}}
+\label{classPerfKvmTimer_a0095b8dff4f2db7d8d44674689127373}
+
+
+
+\begin{DoxyCode}
+168 {
+169 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPerfKvmTimer_a5041ff590d50fcb1f0f5149b2e7eb4bb}{
+\index{PerfKvmTimer@{PerfKvmTimer}!arm@{arm}}
+\index{arm@{arm}!PerfKvmTimer@{PerfKvmTimer}}
+\subsubsection[{arm}]{\setlength{\rightskip}{0pt plus 5cm}void arm ({\bf Tick} {\em ticks})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPerfKvmTimer_a5041ff590d50fcb1f0f5149b2e7eb4bb}
+Arm the timer so that it fires after a certain number of ticks.
+
+\begin{DoxyNote}{覚え書き}
+A timer implementation is free to convert between simulation ticks and virtualized time using any method it chooses. The accuracy of the timer therefore depends on what it measures, an accurate timer implementation should measure the number of cycles or instructions executed in the guest. If such counters are unavailable, it may fallback to wall clock time.
+\end{DoxyNote}
+
+\begin{DoxyParams}{引数}
+\item[{\em ticks}]Number of ticks until the timer fires \end{DoxyParams}
+
+
+\hyperlink{classBaseKvmTimer_af6a92c8cd2abd0bf8699cbefe1257074}{BaseKvmTimer}を実装しています。
+
+
+\begin{DoxyCode}
+173 {
+174     hwOverflow.period(hostCycles(ticks));
+175     hwOverflow.refresh(1);
+176 }
+\end{DoxyCode}
+\hypertarget{classPerfKvmTimer_a02798cc202bebceef3ff0e3ff3d7b5b8}{
+\index{PerfKvmTimer@{PerfKvmTimer}!calcResolution@{calcResolution}}
+\index{calcResolution@{calcResolution}!PerfKvmTimer@{PerfKvmTimer}}
+\subsubsection[{calcResolution}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} calcResolution ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classPerfKvmTimer_a02798cc202bebceef3ff0e3ff3d7b5b8}
+Calculate the timer resolution, used by \hyperlink{classBaseKvmTimer_a4450cc644b16fe4cb8b25ed02fb6446f}{resolution()} which caches the result.
+
+\begin{DoxyReturn}{戻り値}
+Minimum number of ticks the timer can resolve 
+\end{DoxyReturn}
+
+
+\hyperlink{classBaseKvmTimer_a8bff362cf60f8a6adbdc0aa31cb9be27}{BaseKvmTimer}を実装しています。
+
+
+\begin{DoxyCode}
+186 {
+187     return ticksFromHostCycles(MIN_HOST_CYCLES);
+188 }
+\end{DoxyCode}
+\hypertarget{classPerfKvmTimer_a9882bfa120cede575461197f2a13cd8b}{
+\index{PerfKvmTimer@{PerfKvmTimer}!disarm@{disarm}}
+\index{disarm@{disarm}!PerfKvmTimer@{PerfKvmTimer}}
+\subsubsection[{disarm}]{\setlength{\rightskip}{0pt plus 5cm}void disarm ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classPerfKvmTimer_a9882bfa120cede575461197f2a13cd8b}
+Disarm the timer.
+
+When this method has returned, the timer may no longer deliver signals upon timeout. 
+
+\hyperlink{classBaseKvmTimer_aaef5c4bcad609bff2d6580c368020346}{BaseKvmTimer}を実装しています。
+
+
+\begin{DoxyCode}
+180 {
+181     hwOverflow.stop();
+182 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPerfKvmTimer_af183dc3e77e7fc3603a0d4ff4a8fb65d}{
+\index{PerfKvmTimer@{PerfKvmTimer}!hwOverflow@{hwOverflow}}
+\index{hwOverflow@{hwOverflow}!PerfKvmTimer@{PerfKvmTimer}}
+\subsubsection[{hwOverflow}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PerfKvmCounter}\& {\bf hwOverflow}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPerfKvmTimer_af183dc3e77e7fc3603a0d4ff4a8fb65d}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/kvm/\hyperlink{timer_8hh}{timer.hh}\item 
+cpu/kvm/\hyperlink{timer_8cc}{timer.cc}\end{DoxyCompactItemize}

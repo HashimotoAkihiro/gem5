@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/structures/Prefetcher.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/structures/Prefetcher.hh</h1><a href="Prefetcher_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 1999-2012 Mark D. Hill and David A. Wood</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> */</span>
+<a name="l00028"></a>00028 
+<a name="l00029"></a>00029 <span class="preprocessor">#ifndef PREFETCHER_H</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define PREFETCHER_H</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span>
+<a name="l00032"></a>00032 <span class="comment">// Implements Power 4 like prefetching</span>
+<a name="l00033"></a>00033 
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;bitset&gt;</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="MessageBuffer_8hh.html">mem/ruby/buffers/MessageBuffer.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="Address_8hh.html">mem/ruby/common/Address.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="AbstractController_8hh.html">mem/ruby/slicc_interface/AbstractController.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="RubyRequest_8hh.html">mem/ruby/slicc_interface/RubyRequest.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="System_8hh.html">mem/ruby/system/System.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;params/Prefetcher.hh&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a><a class="code" href="Prefetcher_8hh.html#a3f538565a1611925be3c57c2b35bbcfd">00045</a> <span class="preprocessor">#define MAX_PF_INFLIGHT 8</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span>
+<a name="l00047"></a><a class="code" href="classPrefetchEntry.html">00047</a> <span class="keyword">class </span><a class="code" href="classPrefetchEntry.html">PrefetchEntry</a>
+<a name="l00048"></a>00048 {
+<a name="l00049"></a>00049     <span class="keyword">public</span>:
+<a name="l00051"></a><a class="code" href="classPrefetchEntry.html#a50ec5ab4d2e06f3dbfd82cc2590a574d">00051</a>         <a class="code" href="classPrefetchEntry.html#a50ec5ab4d2e06f3dbfd82cc2590a574d" title="constructor">PrefetchEntry</a>()
+<a name="l00052"></a>00052         {
+<a name="l00053"></a>00053             <span class="comment">// default: 1 cache-line stride</span>
+<a name="l00054"></a>00054             <a class="code" href="classPrefetchEntry.html#a8b3c2bb6e8f9ed6318723fb273cf6b5e" title="stride distance to get next address from">m_stride</a>   = (1 &lt;&lt; <a class="code" href="classRubySystem.html#a2b48f2ef758982094ea9fd3a70cf078b">RubySystem::getBlockSizeBits</a>());
+<a name="l00055"></a>00055             <a class="code" href="classPrefetchEntry.html#a2f044fe87b9fd71df60401cbbb9b57f8" title="the last time that any prefetched request was used">m_use_time</a> = <a class="code" href="classCycles.html">Cycles</a>(0);
+<a name="l00056"></a>00056             <a class="code" href="classPrefetchEntry.html#a3163252d457c8ef3a286a8538d7e319f" title="valid bit for each stream">m_is_valid</a> = <span class="keyword">false</span>;
+<a name="l00057"></a>00057         }
+<a name="l00058"></a>00058 
+<a name="l00060"></a><a class="code" href="classPrefetchEntry.html#a9fc76d7db60d4f05200f8248a697ea28">00060</a>         <a class="code" href="classAddress.html">Address</a> <a class="code" href="classPrefetchEntry.html#a9fc76d7db60d4f05200f8248a697ea28" title="The base address for the stream prefetch.">m_address</a>;
+<a name="l00061"></a>00061 
+<a name="l00063"></a><a class="code" href="classPrefetchEntry.html#a8b3c2bb6e8f9ed6318723fb273cf6b5e">00063</a>         <span class="keywordtype">int</span> <a class="code" href="classPrefetchEntry.html#a8b3c2bb6e8f9ed6318723fb273cf6b5e" title="stride distance to get next address from">m_stride</a>;
+<a name="l00064"></a>00064 
+<a name="l00066"></a><a class="code" href="classPrefetchEntry.html#a2f044fe87b9fd71df60401cbbb9b57f8">00066</a>         <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classPrefetchEntry.html#a2f044fe87b9fd71df60401cbbb9b57f8" title="the last time that any prefetched request was used">m_use_time</a>;
+<a name="l00067"></a>00067 
+<a name="l00069"></a><a class="code" href="classPrefetchEntry.html#a3163252d457c8ef3a286a8538d7e319f">00069</a>         <span class="keywordtype">bool</span> <a class="code" href="classPrefetchEntry.html#a3163252d457c8ef3a286a8538d7e319f" title="valid bit for each stream">m_is_valid</a>;
+<a name="l00070"></a>00070 
+<a name="l00072"></a><a class="code" href="classPrefetchEntry.html#a7d010f0854d320898448eae2da5997f8">00072</a>         RubyRequestType <a class="code" href="classPrefetchEntry.html#a7d010f0854d320898448eae2da5997f8" title="L1D prefetches loads and stores.">m_type</a>;
+<a name="l00073"></a>00073 
+<a name="l00076"></a><a class="code" href="classPrefetchEntry.html#a6b5dd4a5a1dcdda3d0d502f6658547a4">00076</a>         std::bitset&lt;MAX_PF_INFLIGHT&gt; <a class="code" href="classPrefetchEntry.html#a6b5dd4a5a1dcdda3d0d502f6658547a4">requestIssued</a>;
+<a name="l00077"></a><a class="code" href="classPrefetchEntry.html#a341ad93f9c76b96f1e7c344829d846b4">00077</a>         std::bitset&lt;MAX_PF_INFLIGHT&gt; <a class="code" href="classPrefetchEntry.html#a341ad93f9c76b96f1e7c344829d846b4">requestCompleted</a>;
+<a name="l00078"></a>00078 };
+<a name="l00079"></a>00079 
+<a name="l00080"></a><a class="code" href="classPrefetcher.html">00080</a> <span class="keyword">class </span><a class="code" href="classPrefetcher.html">Prefetcher</a> : <span class="keyword">public</span> <a class="code" href="classSimObject.html">SimObject</a>
+<a name="l00081"></a>00081 {
+<a name="l00082"></a>00082     <span class="keyword">public</span>:
+<a name="l00083"></a><a class="code" href="classPrefetcher.html#aa178e3582d29b08c028c11634875499c">00083</a>         <span class="keyword">typedef</span> PrefetcherParams <a class="code" href="classPrefetcher.html#aa178e3582d29b08c028c11634875499c">Params</a>;
+<a name="l00084"></a>00084         <a class="code" href="classPrefetcher.html#a103945d22642f41049b79540b7b03773">Prefetcher</a>(<span class="keyword">const</span> <a class="code" href="classPrefetcher.html#aa178e3582d29b08c028c11634875499c">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00085"></a>00085         <a class="code" href="classPrefetcher.html#a7b071405fe38f9da007866b7510e773c">~Prefetcher</a>();
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#a837cf1d68756e156957f5d7c36d5da7e">issueNextPrefetch</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a> &amp;address, <a class="code" href="classPrefetchEntry.html">PrefetchEntry</a> *stream);
+<a name="l00094"></a>00094         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#ad42b59b907f12b2820fda827538f272f">observePfHit</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00095"></a>00095         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#a54bad4fe990aa1c8c9e3910c7c972089">observePfMiss</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00096"></a>00096 
+<a name="l00102"></a>00102         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#a0aeb99b55e0ebe2fe1ebc894a1f08ebc">observeMiss</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, <span class="keyword">const</span> RubyRequestType&amp; <a class="code" href="namespaceX86ISA.html#ad805db903f6899f960fd9a982272096a">type</a>);
+<a name="l00103"></a>00103 
+<a name="l00107"></a>00107         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#ac55fe386a101fbae38c716067c9966a0">print</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00108"></a><a class="code" href="classPrefetcher.html#ad1772ea493bb64a517a46484972c9efc">00108</a>         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#ad1772ea493bb64a517a46484972c9efc">setController</a>(<a class="code" href="classAbstractController.html">AbstractController</a> *_ctrl)
+<a name="l00109"></a>00109         { <a class="code" href="classPrefetcher.html#a1e7049f2cd244dc3944af370eb3e979a">m_controller</a> = _ctrl; }
+<a name="l00110"></a>00110 
+<a name="l00111"></a>00111         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113     <span class="keyword">private</span>:
+<a name="l00119"></a>00119         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#ae2a3897ee6d47f9e162f17bea5f21a11">getLRUindex</a>(<span class="keywordtype">void</span>);
+<a name="l00120"></a>00120 
+<a name="l00122"></a>00122         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#a6bd67ad0a5fd462f191abb16d3c6bfa8" title="clear a non-unit stride prefetcher entry">clearNonunitEntry</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>);
+<a name="l00123"></a>00123 
+<a name="l00125"></a>00125         <span class="keywordtype">void</span> <a class="code" href="classPrefetcher.html#a5125f46f95961714c0ebdf658b6bb745" title="allocate a new stream buffer at a specific index">initializeStream</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a37eb53a9544702853d40d1e014ba88ea">stride</a>,
+<a name="l00126"></a>00126             <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>, <span class="keyword">const</span> RubyRequestType&amp; <a class="code" href="namespaceX86ISA.html#ad805db903f6899f960fd9a982272096a">type</a>);
+<a name="l00127"></a>00127 
+<a name="l00130"></a>00130         <a class="code" href="classPrefetchEntry.html">PrefetchEntry</a>* <a class="code" href="classPrefetcher.html#a9d6cbff2a87bd34af85710cae48c6077">getPrefetchEntry</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a> &amp;address,
+<a name="l00131"></a>00131             <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> &amp;<a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>);
+<a name="l00132"></a>00132 
+<a name="l00134"></a>00134         <span class="keywordtype">bool</span> <a class="code" href="classPrefetcher.html#ab7279136d42cc2cc34787356c5dc6f67" title="access a unit stride filter to determine if there is a hit">accessUnitFilter</a>(<a class="code" href="classstd_1_1vector.html">std::vector&lt;Address&gt;</a>&amp; filter_table,
+<a name="l00135"></a>00135             <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> *hit_table, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> &amp;<a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>, <span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a> &amp;address,
+<a name="l00136"></a>00136             <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a37eb53a9544702853d40d1e014ba88ea">stride</a>, <span class="keywordtype">bool</span> &amp;alloc);
+<a name="l00137"></a>00137 
+<a name="l00139"></a>00139         <span class="keywordtype">bool</span> <a class="code" href="classPrefetcher.html#a11579c7a5838c568fb11ac662a82d6f5" title="access a unit stride filter to determine if there is a hit">accessNonunitFilter</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, <span class="keywordtype">int</span> *<a class="code" href="namespaceArmISA.html#a37eb53a9544702853d40d1e014ba88ea">stride</a>,
+<a name="l00140"></a>00140             <span class="keywordtype">bool</span> &amp;alloc);
+<a name="l00141"></a>00141 
+<a name="l00143"></a><a class="code" href="classPrefetcher.html#af24cc9f3fcde8ff672f65b91689b1c9c">00143</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#af24cc9f3fcde8ff672f65b91689b1c9c" title="number of prefetch streams available">m_num_streams</a>;
+<a name="l00145"></a><a class="code" href="classPrefetcher.html#ac70c7174698e1bb57e75d7ee4d31db32">00145</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;PrefetchEntry&gt;</a> <a class="code" href="classPrefetcher.html#ac70c7174698e1bb57e75d7ee4d31db32" title="an array of the active prefetch streams">m_array</a>;
+<a name="l00146"></a>00146 
+<a name="l00148"></a><a class="code" href="classPrefetcher.html#ab90010829f9a17cf9fc34b16723e3d75">00148</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#ab90010829f9a17cf9fc34b16723e3d75" title="number of misses I must see before allocating a stream">m_train_misses</a>;
+<a name="l00150"></a><a class="code" href="classPrefetcher.html#a0a4656906ae582dc063cb6d703f1c3d6">00150</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#a0a4656906ae582dc063cb6d703f1c3d6" title="number of initial prefetches to startup a stream">m_num_startup_pfs</a>;
+<a name="l00152"></a><a class="code" href="classPrefetcher.html#a05a4b7a047922b33e9ce39b879a2ae6b">00152</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#a05a4b7a047922b33e9ce39b879a2ae6b" title="number of stride filters">m_num_unit_filters</a>;
+<a name="l00154"></a><a class="code" href="classPrefetcher.html#ad6f212487f4bbedaa6d22125da88fa04">00154</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#ad6f212487f4bbedaa6d22125da88fa04" title="number of non-stride filters">m_num_nonunit_filters</a>;
+<a name="l00155"></a>00155 
+<a name="l00158"></a><a class="code" href="classPrefetcher.html#a22e41c52e5646478755d6c2a699f2a3e">00158</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;Address&gt;</a> <a class="code" href="classPrefetcher.html#a22e41c52e5646478755d6c2a699f2a3e">m_unit_filter</a>;
+<a name="l00160"></a><a class="code" href="classPrefetcher.html#aa7152e0ba18507f4499632ccffc8ddad">00160</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#aa7152e0ba18507f4499632ccffc8ddad" title="a round robin pointer into the unit filter group">m_unit_filter_index</a>;
+<a name="l00163"></a><a class="code" href="classPrefetcher.html#adb0b4ed5c68fa291f0f0b1e5a08dd1e8">00163</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> *<a class="code" href="classPrefetcher.html#adb0b4ed5c68fa291f0f0b1e5a08dd1e8">m_unit_filter_hit</a>;
+<a name="l00164"></a>00164 
+<a name="l00167"></a><a class="code" href="classPrefetcher.html#a596c08c70ae40df3eb032cbdf16db62f">00167</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;Address&gt;</a> <a class="code" href="classPrefetcher.html#a596c08c70ae40df3eb032cbdf16db62f">m_negative_filter</a>;
+<a name="l00169"></a><a class="code" href="classPrefetcher.html#a515ce9fec5ecb09164d1915f41bdd881">00169</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#a515ce9fec5ecb09164d1915f41bdd881" title="a round robin pointer into the negative filter group">m_negative_filter_index</a>;
+<a name="l00172"></a><a class="code" href="classPrefetcher.html#a634a8a03b20af61b964bf187317ff430">00172</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> *<a class="code" href="classPrefetcher.html#a634a8a03b20af61b964bf187317ff430">m_negative_filter_hit</a>;
+<a name="l00173"></a>00173 
+<a name="l00176"></a><a class="code" href="classPrefetcher.html#a561535cdda35027c698a573b6b3e5e52">00176</a>         <a class="code" href="classstd_1_1vector.html">std::vector&lt;Address&gt;</a> <a class="code" href="classPrefetcher.html#a561535cdda35027c698a573b6b3e5e52">m_nonunit_filter</a>;
+<a name="l00178"></a><a class="code" href="classPrefetcher.html#ae5f5874d1f5f2ae17e490bc3e932e2bc">00178</a>         <span class="keywordtype">int</span> *<a class="code" href="classPrefetcher.html#ae5f5874d1f5f2ae17e490bc3e932e2bc" title="An array of strides (in # of cache lines) for the filter entries.">m_nonunit_stride</a>;
+<a name="l00181"></a><a class="code" href="classPrefetcher.html#ad152c2b22b30ca16bd8a4247fbf54e41">00181</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> *<a class="code" href="classPrefetcher.html#ad152c2b22b30ca16bd8a4247fbf54e41">m_nonunit_hit</a>;
+<a name="l00183"></a><a class="code" href="classPrefetcher.html#abf85cabfde70657a26802059aeb4b971">00183</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classPrefetcher.html#abf85cabfde70657a26802059aeb4b971" title="a round robin pointer into the unit filter group">m_nonunit_index</a>;
+<a name="l00184"></a>00184 
+<a name="l00186"></a><a class="code" href="classPrefetcher.html#ac07a573d2ab82546c1d3291e9124db84">00186</a>         <span class="keywordtype">bool</span> <a class="code" href="classPrefetcher.html#ac07a573d2ab82546c1d3291e9124db84" title="Used for allowing prefetches across pages.">m_prefetch_cross_pages</a>;
+<a name="l00187"></a>00187 
+<a name="l00188"></a><a class="code" href="classPrefetcher.html#a1e7049f2cd244dc3944af370eb3e979a">00188</a>         <a class="code" href="classAbstractController.html">AbstractController</a> *<a class="code" href="classPrefetcher.html#a1e7049f2cd244dc3944af370eb3e979a">m_controller</a>;
+<a name="l00189"></a>00189 
+<a name="l00191"></a><a class="code" href="classPrefetcher.html#ad1e6c9fb59c342c342de2ec92e395174">00191</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#ad1e6c9fb59c342c342de2ec92e395174" title="Count of accesses to the prefetcher.">numMissObserved</a>;
+<a name="l00193"></a><a class="code" href="classPrefetcher.html#a9fa8a2d34e0af70cb6db907ad8df7470">00193</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a9fa8a2d34e0af70cb6db907ad8df7470" title="Count of prefetch streams allocated.">numAllocatedStreams</a>;
+<a name="l00195"></a><a class="code" href="classPrefetcher.html#a112363546083c7fbefe26b74e3181baf">00195</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a112363546083c7fbefe26b74e3181baf" title="Count of prefetch requests made.">numPrefetchRequested</a>;
+<a name="l00197"></a><a class="code" href="classPrefetcher.html#a9644f1356b157e6cf7e86db7a9356be7">00197</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a9644f1356b157e6cf7e86db7a9356be7" title="Count of prefetch requests accepted.">numPrefetchAccepted</a>;
+<a name="l00199"></a><a class="code" href="classPrefetcher.html#a4165aaa9b3590259a258114e9469c74e">00199</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a4165aaa9b3590259a258114e9469c74e" title="Count of prefetches dropped.">numDroppedPrefetches</a>;
+<a name="l00201"></a><a class="code" href="classPrefetcher.html#a1651af6d8d96734f82a6e95a8aea4af0">00201</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a1651af6d8d96734f82a6e95a8aea4af0" title="Count of successful prefetches.">numHits</a>;
+<a name="l00203"></a><a class="code" href="classPrefetcher.html#a46a96500ada7b244799f94064bf2b24d">00203</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a46a96500ada7b244799f94064bf2b24d" title="Count of partial successful prefetches.">numPartialHits</a>;
+<a name="l00205"></a><a class="code" href="classPrefetcher.html#a40bc6d68ddd4537932b2ac90e93dee85">00205</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a40bc6d68ddd4537932b2ac90e93dee85" title="Count of pages crossed.">numPagesCrossed</a>;
+<a name="l00207"></a><a class="code" href="classPrefetcher.html#a7131480b702efc8b888a80270c77aab2">00207</a>         <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classPrefetcher.html#a7131480b702efc8b888a80270c77aab2" title="Count of misses incurred for blocks that were prefetched.">numMissedPrefetchedBlocks</a>;
+<a name="l00208"></a>00208 };
+<a name="l00209"></a>00209 
+<a name="l00210"></a>00210 <span class="preprocessor">#endif // PREFETCHER_H</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

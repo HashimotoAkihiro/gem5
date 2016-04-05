@@ -1,0 +1,612 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/ozone/lw_lsq.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/ozone/lw_lsq.hh</h1><a href="lw__lsq_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2006 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __CPU_OZONE_LW_LSQ_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_OZONE_LW_LSQ_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;algorithm&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;map&gt;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00038"></a>00038 
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="hashmap_8hh.html">base/hashmap.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="port_8hh.html">mem/port.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="comment">//#include &quot;mem/page_table.hh&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="sim_2debug_8hh.html">sim/debug.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="fault__fwd_8hh.html">sim/fault_fwd.hh</a>&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="keyword">class </span><a class="code" href="classMemObject.html">MemObject</a>;
+<a name="l00051"></a>00051 
+<a name="l00063"></a>00063 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00064"></a><a class="code" href="classOzoneLWLSQ.html">00064</a> <span class="keyword">class </span><a class="code" href="classOzoneLWLSQ.html">OzoneLWLSQ</a> {
+<a name="l00065"></a>00065   <span class="keyword">public</span>:
+<a name="l00066"></a><a class="code" href="classOzoneLWLSQ.html#a818e103eae798a24a06a0a34631849ea">00066</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#ab62ca16eeca26566ad2422b5df4943ce">Impl::Params</a> <a class="code" href="classOzoneLWLSQ.html#a818e103eae798a24a06a0a34631849ea">Params</a>;
+<a name="l00067"></a><a class="code" href="classOzoneLWLSQ.html#a9730cc41bccb218cae8f32869b8d887e">00067</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::OzoneCPU <a class="code" href="classOzoneCPU.html">OzoneCPU</a>;
+<a name="l00068"></a><a class="code" href="classOzoneLWLSQ.html#a3de526baa0cbb2b55bf669a6f7bf81cc">00068</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::BackEnd <a class="code" href="classBackEnd.html">BackEnd</a>;
+<a name="l00069"></a><a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">00069</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00070"></a><a class="code" href="classOzoneLWLSQ.html#a568c86f6403070f1cb743e994405ba8b">00070</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::IssueStruct <a class="code" href="structIssueStruct.html">IssueStruct</a>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a><a class="code" href="classOzoneLWLSQ.html#a1355cb78d031430d4d70eb5080267604">00072</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a0e080577527fb3e9685399f75b5caf15">TheISA::IntReg</a> <a class="code" href="classOzoneLWLSQ.html#a1355cb78d031430d4d70eb5080267604">IntReg</a>;
+<a name="l00073"></a>00073 
+<a name="l00074"></a><a class="code" href="classOzoneLWLSQ.html#a8b43ca5318a59872c61492868e50bab6">00074</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> std::map&lt;InstSeqNum, DynInstPtr&gt;::iterator <a class="code" href="classOzoneLWLSQ.html#a8b43ca5318a59872c61492868e50bab6">LdMapIt</a>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076   <span class="keyword">public</span>:
+<a name="l00078"></a>00078     <a class="code" href="classOzoneLWLSQ.html#aa933366a7f11b182f805d690c533776a">OzoneLWLSQ</a>();
+<a name="l00079"></a>00079 
+<a name="l00081"></a>00081     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#ae8565b0968a8115705f1585e8aa21f75">init</a>(<a class="code" href="classOzoneLWLSQ.html#a818e103eae798a24a06a0a34631849ea">Params</a> *params, <span class="keywordtype">unsigned</span> maxLQEntries,
+<a name="l00082"></a>00082               <span class="keywordtype">unsigned</span> maxSQEntries, <span class="keywordtype">unsigned</span> <span class="keywordtype">id</span>);
+<a name="l00083"></a>00083 
+<a name="l00085"></a>00085     std::string <a class="code" href="classOzoneLWLSQ.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>() <span class="keyword">const</span>;
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00088"></a>00088 
+<a name="l00090"></a>00090     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#ab8056057b67b41f234f56940cc115cc1">setCPU</a>(<a class="code" href="classOzoneCPU.html">OzoneCPU</a> *cpu_ptr);
+<a name="l00091"></a>00091 
+<a name="l00093"></a><a class="code" href="classOzoneLWLSQ.html#a9134276ed85820d74779ad5826580822">00093</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a9134276ed85820d74779ad5826580822">setBE</a>(<a class="code" href="classBackEnd.html">BackEnd</a> *be_ptr)
+<a name="l00094"></a>00094     { <a class="code" href="classOzoneLWLSQ.html#a84f815aa1fa864ba2e6d75f5ad2b52d1">be</a> = be_ptr; }
+<a name="l00095"></a>00095 
+<a name="l00096"></a><a class="code" href="classOzoneLWLSQ.html#a32e64f82b805fe23a17b01dda0f44fb0">00096</a>     <a class="code" href="classPort.html">Port</a> *<a class="code" href="classOzoneLWLSQ.html#a32e64f82b805fe23a17b01dda0f44fb0">getDcachePort</a>() { <span class="keywordflow">return</span> &amp;<a class="code" href="classOzoneLWLSQ.html#a38b03978ad7720fdc910ff6a8b44585f">dcachePort</a>; }
+<a name="l00097"></a>00097 
+<a name="l00103"></a><a class="code" href="classOzoneLWLSQ.html#a873dd91783f9efb4a590aded1f70d6b0">00103</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>() { <a class="code" href="classOzoneLWLSQ.html#a03435d626b7567ed154de5d7d8c3d419">usedPorts</a> = 0; }
+<a name="l00104"></a>00104 
+<a name="l00106"></a>00106     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a773e88db1aa010c3755e603493bf40ec">insert</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00108"></a>00108     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#ad22b3ecafed2bcd9c59fcab049a1cb98">insertLoad</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;load_inst);
+<a name="l00110"></a>00110     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a6a4b4e51bfff3639932ebaba45e8a282">insertStore</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;store_inst);
+<a name="l00111"></a>00111 
+<a name="l00113"></a>00113     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneLWLSQ.html#a30c6332142c2ecca389ed6ee463c692b">executeLoad</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00114"></a>00114 
+<a name="l00116"></a>00116     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneLWLSQ.html#aad78b8a37ee5c61e47df58dd39980340">executeStore</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00117"></a>00117 
+<a name="l00119"></a>00119     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a8ddd26e169a62ec5ae591a9f95934839">commitLoad</a>();
+<a name="l00121"></a>00121     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a1ae517a923a864a4e3a5aa1eeb2dd2d6">commitLoads</a>(<a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;youngest_inst);
+<a name="l00122"></a>00122 
+<a name="l00124"></a>00124     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a954ce1ce58b67cae49ba127d5ea40701">commitStores</a>(<a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;youngest_inst);
+<a name="l00125"></a>00125 
+<a name="l00127"></a>00127     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a5f04e29d6f6feb8b86460491f2ba7547">writebackStores</a>();
+<a name="l00128"></a>00128 
+<a name="l00131"></a>00131     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a0f7f0d3412bbf494cd3d0c0f48e5fcf2">completeDataAccess</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00132"></a>00132 
+<a name="l00133"></a>00133     <span class="comment">// @todo: Include stats in the LSQ unit.</span>
+<a name="l00134"></a>00134     <span class="comment">//void regStats();</span>
+<a name="l00135"></a>00135 
+<a name="l00137"></a>00137     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#ae3af532345dbe6519e8272d9cd677230">clearLQ</a>();
+<a name="l00138"></a>00138 
+<a name="l00140"></a>00140     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a171cd7891063f418b1ee217f5c03537b">clearSQ</a>();
+<a name="l00141"></a>00141 
+<a name="l00143"></a>00143     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a3bc9500810cb2d5615e29206e2d6499f">resizeLQ</a>(<span class="keywordtype">unsigned</span> size);
+<a name="l00144"></a>00144 
+<a name="l00146"></a>00146     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a341dd6a3bd8d240659fd9d698c3b5c65">resizeSQ</a>(<span class="keywordtype">unsigned</span> size);
+<a name="l00147"></a>00147 
+<a name="l00149"></a>00149     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a51dd7e304d5413447717826fac6f4921">squash</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;squashed_num);
+<a name="l00150"></a>00150 
+<a name="l00154"></a><a class="code" href="classOzoneLWLSQ.html#a4f720bbfb5fdefdb23516500eeb0b4de">00154</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a4f720bbfb5fdefdb23516500eeb0b4de">violation</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a270a20c3fa52139e0538288275db9d22">memDepViolator</a>; }
+<a name="l00155"></a>00155 
+<a name="l00157"></a>00157     <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classOzoneLWLSQ.html#a30adaf6f5fb6b38b5747f35c419e3f31">getMemDepViolator</a>();
+<a name="l00158"></a>00158 
+<a name="l00162"></a><a class="code" href="classOzoneLWLSQ.html#a05c413ba417c6453e99f75d87c958590">00162</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a05c413ba417c6453e99f75d87c958590">loadBlocked</a>()
+<a name="l00163"></a>00163     { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a95dc31b4ce3ebcb6b9d75a510b3a128c">isLoadBlocked</a>; }
+<a name="l00164"></a>00164 
+<a name="l00165"></a><a class="code" href="classOzoneLWLSQ.html#aaa9628e569d007b553e6830774b8548c">00165</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#aaa9628e569d007b553e6830774b8548c">clearLoadBlocked</a>()
+<a name="l00166"></a>00166     { <a class="code" href="classOzoneLWLSQ.html#a95dc31b4ce3ebcb6b9d75a510b3a128c">isLoadBlocked</a> = <span class="keyword">false</span>; }
+<a name="l00167"></a>00167 
+<a name="l00168"></a><a class="code" href="classOzoneLWLSQ.html#ad0aa91a7b51ca925abf9c9992abad314">00168</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#ad0aa91a7b51ca925abf9c9992abad314">isLoadBlockedHandled</a>()
+<a name="l00169"></a>00169     { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a2c1620029c162c7180e523b089e56ed5">loadBlockedHandled</a>; }
+<a name="l00170"></a>00170 
+<a name="l00171"></a><a class="code" href="classOzoneLWLSQ.html#ac8bfb1e163f7ba2261d702623226973d">00171</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#ac8bfb1e163f7ba2261d702623226973d">setLoadBlockedHandled</a>()
+<a name="l00172"></a>00172     { <a class="code" href="classOzoneLWLSQ.html#a2c1620029c162c7180e523b089e56ed5">loadBlockedHandled</a> = <span class="keyword">true</span>; }
+<a name="l00173"></a>00173 
+<a name="l00175"></a>00175     <span class="keywordtype">unsigned</span> <a class="code" href="classOzoneLWLSQ.html#a028971a565aca048c67ea1c36a6a9d51">numFreeEntries</a>();
+<a name="l00176"></a>00176 
+<a name="l00178"></a>00178     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#a9aa5d5a61b2229931008ac2ea802a3ab">numLoadsReady</a>();
+<a name="l00179"></a>00179 
+<a name="l00181"></a><a class="code" href="classOzoneLWLSQ.html#a54460b759fb06e2b18e26657279a6f49">00181</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#a54460b759fb06e2b18e26657279a6f49">numLoads</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a867971f18e464abd16193e069c64a8ad">loads</a>; }
+<a name="l00182"></a>00182 
+<a name="l00184"></a><a class="code" href="classOzoneLWLSQ.html#aa0fc32a4a9d77696f5907f4d25e7d07f">00184</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#aa0fc32a4a9d77696f5907f4d25e7d07f">numStores</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#ade9e895aa9c5ace27779c985c4f43326">stores</a> + <a class="code" href="classOzoneLWLSQ.html#a04638dcfe9b4f8584453bb178bd2da5e">storesInFlight</a>; }
+<a name="l00185"></a>00185 
+<a name="l00187"></a><a class="code" href="classOzoneLWLSQ.html#a3e70330939fdfc4dbc2f60c1a660584d">00187</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a5893daf623130be826f492bbff58f757">lqFull</a>() || <a class="code" href="classOzoneLWLSQ.html#a477981d1f905d2d398a1527f7149e3c4">sqFull</a>(); }
+<a name="l00188"></a>00188 
+<a name="l00190"></a><a class="code" href="classOzoneLWLSQ.html#a5893daf623130be826f492bbff58f757">00190</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a5893daf623130be826f492bbff58f757">lqFull</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a867971f18e464abd16193e069c64a8ad">loads</a> &gt;= (<a class="code" href="classOzoneLWLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a> - 1); }
+<a name="l00191"></a>00191 
+<a name="l00193"></a><a class="code" href="classOzoneLWLSQ.html#a477981d1f905d2d398a1527f7149e3c4">00193</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a477981d1f905d2d398a1527f7149e3c4">sqFull</a>() { <span class="keywordflow">return</span> (<a class="code" href="classOzoneLWLSQ.html#ade9e895aa9c5ace27779c985c4f43326">stores</a> + <a class="code" href="classOzoneLWLSQ.html#a04638dcfe9b4f8584453bb178bd2da5e">storesInFlight</a>) &gt;= (<a class="code" href="classOzoneLWLSQ.html#a38c8af5392da70119dc5cce4e3637cbc">SQEntries</a> - 1); }
+<a name="l00194"></a>00194 
+<a name="l00196"></a>00196     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a80587b4fe043bbe1995536cb3b361588">dumpInsts</a>();
+<a name="l00197"></a>00197 
+<a name="l00199"></a><a class="code" href="classOzoneLWLSQ.html#a24ba9cb3fa1e726321780a20a960c8cd">00199</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classOzoneLWLSQ.html#a24ba9cb3fa1e726321780a20a960c8cd">getCount</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a867971f18e464abd16193e069c64a8ad">loads</a> + <a class="code" href="classOzoneLWLSQ.html#ade9e895aa9c5ace27779c985c4f43326">stores</a>; }
+<a name="l00200"></a>00200 
+<a name="l00202"></a><a class="code" href="classOzoneLWLSQ.html#ad2e4b46255cfb53e85522adeed4e2089">00202</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#ad2e4b46255cfb53e85522adeed4e2089">hasStoresToWB</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a3831a7965ffbe90df177026988476f9c">storesToWB</a>; }
+<a name="l00203"></a>00203 
+<a name="l00205"></a><a class="code" href="classOzoneLWLSQ.html#a276cdbdaf4551f1b846c4e2535c5f882">00205</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#a276cdbdaf4551f1b846c4e2535c5f882">numStoresToWB</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a3831a7965ffbe90df177026988476f9c">storesToWB</a>; }
+<a name="l00206"></a>00206 
+<a name="l00208"></a><a class="code" href="classOzoneLWLSQ.html#a338be821734603396bfef8d9fb8f04b0">00208</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a338be821734603396bfef8d9fb8f04b0">willWB</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>.back().canWB &amp;&amp;
+<a name="l00209"></a>00209                         !<a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>.back().completed &amp;&amp;
+<a name="l00210"></a>00210                         !<a class="code" href="classOzoneLWLSQ.html#a89d931c74b63e0b0e7ad856fe9525ff6">isStoreBlocked</a>; }
+<a name="l00211"></a>00211 
+<a name="l00212"></a>00212     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a05f299b443f8cc73a93d61572edc0218">switchOut</a>();
+<a name="l00213"></a>00213 
+<a name="l00214"></a>00214     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a5a901e7ec5b94a55bd61fde88ad0b7f1">takeOverFrom</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *old_tc = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>);
+<a name="l00215"></a>00215 
+<a name="l00216"></a><a class="code" href="classOzoneLWLSQ.html#a471165257f311a78136ce991a3bad31a">00216</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a471165257f311a78136ce991a3bad31a">isSwitchedOut</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a1aee6db9bfb75cf02e38a82e5d02847f">switchedOut</a>; }
+<a name="l00217"></a>00217 
+<a name="l00218"></a><a class="code" href="classOzoneLWLSQ.html#a1aee6db9bfb75cf02e38a82e5d02847f">00218</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a1aee6db9bfb75cf02e38a82e5d02847f">switchedOut</a>;
+<a name="l00219"></a>00219 
+<a name="l00220"></a>00220   <span class="keyword">private</span>:
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a3911bacb8817c31cfbeefd125dba0217">writeback</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst, <a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00223"></a>00223 
+<a name="l00225"></a>00225     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#af841afeea43eb2b2272f0dfaf17c3f4e">storePostSend</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00226"></a>00226 
+<a name="l00228"></a>00228     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a14bf528b217d02373076ed257f448dbf">completeStore</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00229"></a>00229 
+<a name="l00230"></a>00230     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#ad5ff9e08c63a01ac86a8f80765b37365">removeStore</a>(<span class="keywordtype">int</span> store_idx);
+<a name="l00231"></a>00231 
+<a name="l00233"></a>00233     <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00234"></a>00234 
+<a name="l00235"></a>00235   <span class="keyword">private</span>:
+<a name="l00237"></a><a class="code" href="classOzoneLWLSQ.html#a61b5f503eec141308b0cd6b4322b405b">00237</a>     <a class="code" href="classOzoneCPU.html">OzoneCPU</a> *<a class="code" href="classOzoneLWLSQ.html#a61b5f503eec141308b0cd6b4322b405b">cpu</a>;
+<a name="l00238"></a>00238 
+<a name="l00240"></a><a class="code" href="classOzoneLWLSQ.html#a84f815aa1fa864ba2e6d75f5ad2b52d1">00240</a>     <a class="code" href="classBackEnd.html">BackEnd</a> *<a class="code" href="classOzoneLWLSQ.html#a84f815aa1fa864ba2e6d75f5ad2b52d1">be</a>;
+<a name="l00241"></a>00241 
+<a name="l00242"></a><a class="code" href="classOzoneLWLSQ_1_1DcachePort.html">00242</a>     <span class="keyword">class </span><a class="code" href="classOzoneLWLSQ_1_1DcachePort.html">DcachePort</a> : <span class="keyword">public</span> <a class="code" href="classMasterPort.html">MasterPort</a>
+<a name="l00243"></a>00243     {
+<a name="l00244"></a>00244       <span class="keyword">protected</span>:
+<a name="l00245"></a><a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a792c595626894860987780b90079d2ee">00245</a>         <a class="code" href="classOzoneLWLSQ.html">OzoneLWLSQ</a> *<a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a792c595626894860987780b90079d2ee">lsq</a>;
+<a name="l00246"></a>00246 
+<a name="l00247"></a>00247       <span class="keyword">public</span>:
+<a name="l00248"></a><a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a5f7643d592d525aed12c1a80f2d9399e">00248</a>         <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a5f7643d592d525aed12c1a80f2d9399e">DcachePort</a>(<a class="code" href="classOzoneLWLSQ.html">OzoneLWLSQ</a> *_lsq)
+<a name="l00249"></a>00249             : <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a792c595626894860987780b90079d2ee">lsq</a>(_lsq)
+<a name="l00250"></a>00250         { }
+<a name="l00251"></a>00251 
+<a name="l00252"></a>00252       <span class="keyword">protected</span>:
+<a name="l00253"></a>00253         <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00254"></a>00254 
+<a name="l00255"></a>00255         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#aeefa907fb6d6a787e6dab90e8138ea90">recvFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00256"></a>00256 
+<a name="l00260"></a><a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a32602a6a3c3d66a639455036d6c08dd6">00260</a>         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a32602a6a3c3d66a639455036d6c08dd6">isSnooping</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00261"></a>00261 
+<a name="l00262"></a>00262         <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#aaeef0f6f81d00988bb7b8ba8fe56049e">recvTiming</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00263"></a>00263 
+<a name="l00264"></a>00264         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html#a29cb5a4f98063ce6e9210eacbdb35298">recvRetry</a>();
+<a name="l00265"></a>00265     };
+<a name="l00266"></a>00266 
+<a name="l00268"></a><a class="code" href="classOzoneLWLSQ.html#a38b03978ad7720fdc910ff6a8b44585f">00268</a>     <a class="code" href="classOzoneLWLSQ_1_1DcachePort.html">DcachePort</a> <a class="code" href="classOzoneLWLSQ.html#a38b03978ad7720fdc910ff6a8b44585f">dcachePort</a>;
+<a name="l00269"></a>00269 
+<a name="l00270"></a>00270   <span class="keyword">public</span>:
+<a name="l00271"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html">00271</a>     <span class="keyword">struct </span><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html">SQEntry</a> {
+<a name="l00273"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a3e45ad78b5babe810aa50349be32637b">00273</a>         <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a3e45ad78b5babe810aa50349be32637b">SQEntry</a>()
+<a name="l00274"></a>00274             : <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a956cd41d82347558b9c0a5b0474903f2">req</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a439227feff9d7f55384e8780cfc2eb82">size</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a075dba7fb6badd5634e3d6f7da55c239">data</a>(0),
+<a name="l00275"></a>00275               <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2e445065a38a8a82256decf088cd3e6d">canWB</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a28712f511a3687635fff96e084fdab9a">committed</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a8c06e370b709d689e392a4b7b53b47c5">completed</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2577e9f27485807aed8aa5e8602595d7">lqIt</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>)
+<a name="l00276"></a>00276         { }
+<a name="l00277"></a>00277 
+<a name="l00279"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a3b163ba1f4e957334b0fe8a659562015">00279</a>         <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a3e45ad78b5babe810aa50349be32637b">SQEntry</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;_inst)
+<a name="l00280"></a>00280             : <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>(_inst), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a956cd41d82347558b9c0a5b0474903f2">req</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a439227feff9d7f55384e8780cfc2eb82">size</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a075dba7fb6badd5634e3d6f7da55c239">data</a>(0),
+<a name="l00281"></a>00281               <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2e445065a38a8a82256decf088cd3e6d">canWB</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a28712f511a3687635fff96e084fdab9a">committed</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a8c06e370b709d689e392a4b7b53b47c5">completed</a>(0), <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2577e9f27485807aed8aa5e8602595d7">lqIt</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>)
+<a name="l00282"></a>00282         { }
+<a name="l00283"></a>00283 
+<a name="l00285"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">00285</a>         <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>;
+<a name="l00287"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a956cd41d82347558b9c0a5b0474903f2">00287</a>         <a class="code" href="classRequest.html">RequestPtr</a> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a956cd41d82347558b9c0a5b0474903f2">req</a>;
+<a name="l00289"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a439227feff9d7f55384e8780cfc2eb82">00289</a>         <span class="keywordtype">int</span> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00291"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a075dba7fb6badd5634e3d6f7da55c239">00291</a>         <a class="code" href="classOzoneLWLSQ.html#a1355cb78d031430d4d70eb5080267604">IntReg</a> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a075dba7fb6badd5634e3d6f7da55c239">data</a>;
+<a name="l00293"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2e445065a38a8a82256decf088cd3e6d">00293</a>         <span class="keywordtype">bool</span> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2e445065a38a8a82256decf088cd3e6d">canWB</a>;
+<a name="l00295"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a28712f511a3687635fff96e084fdab9a">00295</a>         <span class="keywordtype">bool</span> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a28712f511a3687635fff96e084fdab9a">committed</a>;
+<a name="l00297"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a8c06e370b709d689e392a4b7b53b47c5">00297</a>         <span class="keywordtype">bool</span> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a8c06e370b709d689e392a4b7b53b47c5">completed</a>;
+<a name="l00298"></a>00298 
+<a name="l00299"></a><a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2577e9f27485807aed8aa5e8602595d7">00299</a>         <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="structOzoneLWLSQ_1_1SQEntry.html#a2577e9f27485807aed8aa5e8602595d7">lqIt</a>;
+<a name="l00300"></a>00300     };
+<a name="l00301"></a>00301 
+<a name="l00303"></a><a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html">00303</a>     <span class="keyword">class </span><a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html">LSQSenderState</a> : <span class="keyword">public</span> <a class="code" href="classPacket.html">Packet</a>::<a class="code" href="structRubyTester_1_1SenderState.html">SenderState</a>
+<a name="l00304"></a>00304     {
+<a name="l00305"></a>00305       <span class="keyword">public</span>:
+<a name="l00307"></a><a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#a0f4caf0593be7a2d809d7335984820d2">00307</a>         <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#a0f4caf0593be7a2d809d7335984820d2">LSQSenderState</a>()
+<a name="l00308"></a>00308             : <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#aee33f1eef98f14502c88334f70e6c03d">noWB</a>(false)
+<a name="l00309"></a>00309         { }
+<a name="l00310"></a>00310 
+<a name="l00312"></a><a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#af5d4fb974eeb4507d4c837d365d0cefc">00312</a>         <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>;
+<a name="l00314"></a><a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#aaa492a23dd827a27baf0e8abcf09e391">00314</a>         <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#aaa492a23dd827a27baf0e8abcf09e391">isLoad</a>;
+<a name="l00316"></a><a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#ae40354a1051342eb5a9db005715dcfa9">00316</a>         <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#ae40354a1051342eb5a9db005715dcfa9">idx</a>;
+<a name="l00318"></a><a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#aee33f1eef98f14502c88334f70e6c03d">00318</a>         <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#aee33f1eef98f14502c88334f70e6c03d">noWB</a>;
+<a name="l00319"></a>00319     };
+<a name="l00320"></a>00320 
+<a name="l00322"></a><a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html">00322</a>     <span class="keyword">class </span><a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html">WritebackEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a> {
+<a name="l00323"></a>00323       <span class="keyword">public</span>:
+<a name="l00325"></a>00325         <a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#a4de731bd611fafa473682bcfce09134c">WritebackEvent</a>(<a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;_inst, <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#a3a891bc2a0fcbe6be5297077d94e2df7">pkt</a>, <a class="code" href="classOzoneLWLSQ.html">OzoneLWLSQ</a> *lsq_ptr);
+<a name="l00326"></a>00326 
+<a name="l00328"></a>00328         <span class="keywordtype">void</span> <a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00329"></a>00329 
+<a name="l00331"></a>00331         <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00332"></a>00332 
+<a name="l00333"></a>00333       <span class="keyword">private</span>:
+<a name="l00335"></a><a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#af5d4fb974eeb4507d4c837d365d0cefc">00335</a>         <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>;
+<a name="l00336"></a>00336 
+<a name="l00338"></a><a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#a3a891bc2a0fcbe6be5297077d94e2df7">00338</a>         <a class="code" href="classPacket.html">PacketPtr</a> pkt;
+<a name="l00339"></a>00339 
+<a name="l00341"></a><a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#a12f06bf70a86210f1df02ebe1b6d4d1a">00341</a>         <a class="code" href="classOzoneLWLSQ.html">OzoneLWLSQ&lt;Impl&gt;</a> *<a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html#a12f06bf70a86210f1df02ebe1b6d4d1a">lsqPtr</a>;
+<a name="l00342"></a>00342     };
+<a name="l00343"></a>00343 
+<a name="l00344"></a><a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">00344</a>     <span class="keyword">enum</span> <a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> {
+<a name="l00345"></a><a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">00345</a>         <a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">Running</a>,
+<a name="l00346"></a><a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">00346</a>         <a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00347"></a><a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba4ba5ae5815b190bd652669e2fdea5ed7">00347</a>         <a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba4ba5ae5815b190bd652669e2fdea5ed7">DcacheMissStall</a>,
+<a name="l00348"></a><a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad01f64e5e67cc64e6ad4152f187a034d">00348</a>         <a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad01f64e5e67cc64e6ad4152f187a034d">DcacheMissSwitch</a>
+<a name="l00349"></a>00349     };
+<a name="l00350"></a>00350 
+<a name="l00351"></a>00351   <span class="keyword">private</span>:
+<a name="l00353"></a><a class="code" href="classOzoneLWLSQ.html#adfd96fbbaa327a31d20f0d4134418fad">00353</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classOzoneLWLSQ.html#adfd96fbbaa327a31d20f0d4134418fad">lsqID</a>;
+<a name="l00354"></a>00354 
+<a name="l00356"></a><a class="code" href="classOzoneLWLSQ.html#a6cdf6e6db875a442f3ab6db542bd2bb5">00356</a>     <a class="code" href="classOzoneLWLSQ.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classOzoneLWLSQ.html#a6cdf6e6db875a442f3ab6db542bd2bb5">_status</a>;
+<a name="l00357"></a>00357 
+<a name="l00359"></a><a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">00359</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;SQEntry&gt;</a> <a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>;
+<a name="l00361"></a><a class="code" href="classOzoneLWLSQ.html#a6800290ffd43f3207c629be7f2d6228f">00361</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classOzoneLWLSQ.html#a6800290ffd43f3207c629be7f2d6228f">loadQueue</a>;
+<a name="l00362"></a>00362 
+<a name="l00363"></a><a class="code" href="classOzoneLWLSQ.html#a3b2dd16f487adc977c43201cd7f51558">00363</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;SQEntry&gt;::iterator</a> <a class="code" href="classOzoneLWLSQ.html#a3b2dd16f487adc977c43201cd7f51558">SQIt</a>;
+<a name="l00364"></a><a class="code" href="classOzoneLWLSQ.html#a363c8c15e054d23b34f72063429933b8">00364</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classOzoneLWLSQ.html#a363c8c15e054d23b34f72063429933b8">LQIt</a>;
+<a name="l00365"></a>00365 
+<a name="l00366"></a>00366 
+<a name="l00367"></a><a class="code" href="structOzoneLWLSQ_1_1HashFn.html">00367</a>     <span class="keyword">struct </span><a class="code" href="structOzoneLWLSQ_1_1HashFn.html">HashFn</a> {
+<a name="l00368"></a><a class="code" href="structOzoneLWLSQ_1_1HashFn.html#a4a917ffce70d71fb2df730f42d4ebfdb">00368</a>     <span class="keywordtype">size_t</span> <a class="code" href="structOzoneLWLSQ_1_1HashFn.html#a4a917ffce70d71fb2df730f42d4ebfdb">operator() </a>(<span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>)<span class="keyword"> const</span>
+<a name="l00369"></a>00369 <span class="keyword">    </span>{
+<a name="l00370"></a>00370         <span class="keywordtype">unsigned</span> hash = (((a &gt;&gt; 14) ^ ((a &gt;&gt; 2) &amp; 0xffff))) &amp; 0x7FFFFFFF;
+<a name="l00371"></a>00371 
+<a name="l00372"></a>00372         <span class="keywordflow">return</span> hash;
+<a name="l00373"></a>00373     }
+<a name="l00374"></a>00374     };
+<a name="l00375"></a>00375 
+<a name="l00376"></a><a class="code" href="classOzoneLWLSQ.html#a3eb9bc9d55fde5b98e8d28a220d247f6">00376</a>     m5::hash_map&lt;int, SQIt, HashFn&gt; <a class="code" href="classOzoneLWLSQ.html#a3eb9bc9d55fde5b98e8d28a220d247f6">SQItHash</a>;
+<a name="l00377"></a><a class="code" href="classOzoneLWLSQ.html#a94838aca72c880423d2328ae17f065e6">00377</a>     std::queue&lt;int&gt; <a class="code" href="classOzoneLWLSQ.html#a94838aca72c880423d2328ae17f065e6">SQIndices</a>;
+<a name="l00378"></a><a class="code" href="classOzoneLWLSQ.html#afd55cfcf685cda7dafc7c52d5105e129">00378</a>     m5::hash_map&lt;int, LQIt, HashFn&gt; <a class="code" href="classOzoneLWLSQ.html#afd55cfcf685cda7dafc7c52d5105e129">LQItHash</a>;
+<a name="l00379"></a><a class="code" href="classOzoneLWLSQ.html#a78218da891879fae16fe75c73981f75f">00379</a>     std::queue&lt;int&gt; <a class="code" href="classOzoneLWLSQ.html#a78218da891879fae16fe75c73981f75f">LQIndices</a>;
+<a name="l00380"></a>00380 
+<a name="l00381"></a><a class="code" href="classOzoneLWLSQ.html#ac0ca3d8ca19168e251c7233ec1f9a171">00381</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> m5::hash_map&lt;int, LQIt, HashFn&gt;::iterator <a class="code" href="classOzoneLWLSQ.html#ac0ca3d8ca19168e251c7233ec1f9a171">LQHashIt</a>;
+<a name="l00382"></a><a class="code" href="classOzoneLWLSQ.html#af476de7b08376a4d7d7cd4b8dbbabb7a">00382</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> m5::hash_map&lt;int, SQIt, HashFn&gt;::iterator <a class="code" href="classOzoneLWLSQ.html#af476de7b08376a4d7d7cd4b8dbbabb7a">SQHashIt</a>;
+<a name="l00383"></a>00383     <span class="comment">// Consider making these 16 bits</span>
+<a name="l00385"></a><a class="code" href="classOzoneLWLSQ.html#aafa99d800d574095881acbacdbbbcc47">00385</a> <span class="comment"></span>    <span class="keywordtype">unsigned</span> <a class="code" href="classOzoneLWLSQ.html#aafa99d800d574095881acbacdbbbcc47">LQEntries</a>;
+<a name="l00387"></a><a class="code" href="classOzoneLWLSQ.html#a38c8af5392da70119dc5cce4e3637cbc">00387</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classOzoneLWLSQ.html#a38c8af5392da70119dc5cce4e3637cbc">SQEntries</a>;
+<a name="l00388"></a>00388 
+<a name="l00390"></a><a class="code" href="classOzoneLWLSQ.html#a867971f18e464abd16193e069c64a8ad">00390</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#a867971f18e464abd16193e069c64a8ad">loads</a>;
+<a name="l00394"></a><a class="code" href="classOzoneLWLSQ.html#ade9e895aa9c5ace27779c985c4f43326">00394</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#ade9e895aa9c5ace27779c985c4f43326">stores</a>;
+<a name="l00395"></a>00395 
+<a name="l00396"></a><a class="code" href="classOzoneLWLSQ.html#a3831a7965ffbe90df177026988476f9c">00396</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#a3831a7965ffbe90df177026988476f9c">storesToWB</a>;
+<a name="l00397"></a>00397 
+<a name="l00398"></a>00398   <span class="keyword">public</span>:
+<a name="l00399"></a><a class="code" href="classOzoneLWLSQ.html#a04638dcfe9b4f8584453bb178bd2da5e">00399</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#a04638dcfe9b4f8584453bb178bd2da5e">storesInFlight</a>;
+<a name="l00400"></a>00400 
+<a name="l00401"></a>00401   <span class="keyword">private</span>:
+<a name="l00403"></a>00403 
+<a name="l00404"></a><a class="code" href="classOzoneLWLSQ.html#ab2e23636971c40e7ed945026b2a184e1">00404</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#ab2e23636971c40e7ed945026b2a184e1">cachePorts</a>;
+<a name="l00405"></a>00405 
+<a name="l00407"></a><a class="code" href="classOzoneLWLSQ.html#a03435d626b7567ed154de5d7d8c3d419">00407</a>     <span class="keywordtype">int</span> <a class="code" href="classOzoneLWLSQ.html#a03435d626b7567ed154de5d7d8c3d419">usedPorts</a>;
+<a name="l00408"></a>00408 
+<a name="l00409"></a>00409     <span class="comment">//list&lt;InstSeqNum&gt; mshrSeqNums;</span>
+<a name="l00410"></a>00410 
+<a name="l00412"></a><a class="code" href="classOzoneLWLSQ.html#ac499fc2b461e03a110deae7c695f75bc">00412</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classOzoneLWLSQ.html#ac499fc2b461e03a110deae7c695f75bc">lsqMemOrderViolation</a>;
+<a name="l00413"></a>00413 
+<a name="l00414"></a>00414      <span class="comment">//Stats::Scalar dcacheStallCycles;</span>
+<a name="l00415"></a><a class="code" href="classOzoneLWLSQ.html#a8b4696062ef09ab956804a7a99491853">00415</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classOzoneLWLSQ.html#a8b4696062ef09ab956804a7a99491853">lastDcacheStall</a>;
+<a name="l00416"></a>00416 
+<a name="l00417"></a>00417     <span class="comment">// Make these per thread?</span>
+<a name="l00419"></a><a class="code" href="classOzoneLWLSQ.html#a6f8bff553ad30865c7d0c62e05421eb8">00419</a> <span class="comment"></span>    <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a6f8bff553ad30865c7d0c62e05421eb8">stalled</a>;
+<a name="l00423"></a><a class="code" href="classOzoneLWLSQ.html#afe1cdcfca6b44c28581d862228adc3da">00423</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classOzoneLWLSQ.html#afe1cdcfca6b44c28581d862228adc3da">stallingStoreIsn</a>;
+<a name="l00425"></a><a class="code" href="classOzoneLWLSQ.html#a567a64b358df6ae6162124cfe4d00db3">00425</a>     <a class="code" href="classOzoneLWLSQ.html#a363c8c15e054d23b34f72063429933b8">LQIt</a> <a class="code" href="classOzoneLWLSQ.html#a567a64b358df6ae6162124cfe4d00db3">stallingLoad</a>;
+<a name="l00426"></a>00426 
+<a name="l00428"></a><a class="code" href="classOzoneLWLSQ.html#a314ae93c04b3ca96e79e1b1f39a8e478">00428</a>     <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classOzoneLWLSQ.html#a314ae93c04b3ca96e79e1b1f39a8e478">retryPkt</a>;
+<a name="l00429"></a>00429 
+<a name="l00431"></a><a class="code" href="classOzoneLWLSQ.html#a89d931c74b63e0b0e7ad856fe9525ff6">00431</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a89d931c74b63e0b0e7ad856fe9525ff6">isStoreBlocked</a>;
+<a name="l00432"></a>00432 
+<a name="l00436"></a><a class="code" href="classOzoneLWLSQ.html#a95dc31b4ce3ebcb6b9d75a510b3a128c">00436</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a95dc31b4ce3ebcb6b9d75a510b3a128c">isLoadBlocked</a>;
+<a name="l00437"></a>00437 
+<a name="l00438"></a><a class="code" href="classOzoneLWLSQ.html#a2c1620029c162c7180e523b089e56ed5">00438</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#a2c1620029c162c7180e523b089e56ed5">loadBlockedHandled</a>;
+<a name="l00439"></a>00439 
+<a name="l00440"></a><a class="code" href="classOzoneLWLSQ.html#a3fca34b247fd8d081557578f8ca60fe3">00440</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classOzoneLWLSQ.html#a3fca34b247fd8d081557578f8ca60fe3">blockedLoadSeqNum</a>;
+<a name="l00441"></a>00441 
+<a name="l00443"></a><a class="code" href="classOzoneLWLSQ.html#a7123aa8b10829cc4712dff5454e13978">00443</a>     <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classOzoneLWLSQ.html#a7123aa8b10829cc4712dff5454e13978">loadFaultInst</a>;
+<a name="l00445"></a><a class="code" href="classOzoneLWLSQ.html#ab98cf7d5235b7402e8916e78569f4ab2">00445</a>     <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classOzoneLWLSQ.html#ab98cf7d5235b7402e8916e78569f4ab2">storeFaultInst</a>;
+<a name="l00446"></a>00446 
+<a name="l00448"></a><a class="code" href="classOzoneLWLSQ.html#a270a20c3fa52139e0538288275db9d22">00448</a>     <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classOzoneLWLSQ.html#a270a20c3fa52139e0538288275db9d22">memDepViolator</a>;
+<a name="l00449"></a>00449 
+<a name="l00450"></a>00450     <span class="comment">// Will also need how many read/write ports the Dcache has.  Or keep track</span>
+<a name="l00451"></a>00451     <span class="comment">// of that in stage that is one level up, and only call executeLoad/Store</span>
+<a name="l00452"></a>00452     <span class="comment">// the appropriate number of times.</span>
+<a name="l00453"></a>00453 
+<a name="l00454"></a>00454   <span class="keyword">public</span>:
+<a name="l00456"></a>00456     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00457"></a>00457     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneLWLSQ.html#a0747777ac998dabdc20fa0c554d378d3">read</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> load_idx);
+<a name="l00458"></a>00458 
+<a name="l00460"></a>00460     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00461"></a>00461     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneLWLSQ.html#abbf7bcc93511421a1787650a43e2642a">write</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> store_idx);
+<a name="l00462"></a>00462 
+<a name="l00464"></a><a class="code" href="classOzoneLWLSQ.html#aee7352adadc6b43b7ce36a8c052eb222">00464</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classOzoneLWLSQ.html#aee7352adadc6b43b7ce36a8c052eb222">getLoadHeadSeqNum</a>()
+<a name="l00465"></a>00465     {
+<a name="l00466"></a>00466         <span class="keywordflow">if</span> (!<a class="code" href="classOzoneLWLSQ.html#a6800290ffd43f3207c629be7f2d6228f">loadQueue</a>.empty()) {
+<a name="l00467"></a>00467             <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a6800290ffd43f3207c629be7f2d6228f">loadQueue</a>.back()-&gt;seqNum;
+<a name="l00468"></a>00468         } <span class="keywordflow">else</span> {
+<a name="l00469"></a>00469             <span class="keywordflow">return</span> 0;
+<a name="l00470"></a>00470         }
+<a name="l00471"></a>00471 
+<a name="l00472"></a>00472     }
+<a name="l00473"></a>00473 
+<a name="l00475"></a><a class="code" href="classOzoneLWLSQ.html#a1813b58ab7569d6aeefb5d4e235cceda">00475</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classOzoneLWLSQ.html#a1813b58ab7569d6aeefb5d4e235cceda">getStoreHeadSeqNum</a>()
+<a name="l00476"></a>00476     {
+<a name="l00477"></a>00477         <span class="keywordflow">if</span> (!<a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>.empty()) {
+<a name="l00478"></a>00478             <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>.back().inst-&gt;seqNum;
+<a name="l00479"></a>00479         } <span class="keywordflow">else</span> {
+<a name="l00480"></a>00480             <span class="keywordflow">return</span> 0;
+<a name="l00481"></a>00481         }
+<a name="l00482"></a>00482 
+<a name="l00483"></a>00483     }
+<a name="l00484"></a>00484 
+<a name="l00486"></a><a class="code" href="classOzoneLWLSQ.html#af8eb8590fbfa6ecd2f796390677a4c00">00486</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneLWLSQ.html#af8eb8590fbfa6ecd2f796390677a4c00">isStalled</a>()  { <span class="keywordflow">return</span> <a class="code" href="classOzoneLWLSQ.html#a6f8bff553ad30865c7d0c62e05421eb8">stalled</a>; }
+<a name="l00487"></a>00487 };
+<a name="l00488"></a>00488 
+<a name="l00489"></a>00489 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00490"></a>00490 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00491"></a>00491 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00492"></a><a class="code" href="classOzoneLWLSQ.html#a0747777ac998dabdc20fa0c554d378d3">00492</a> <a class="code" href="classOzoneLWLSQ.html#a0747777ac998dabdc20fa0c554d378d3">OzoneLWLSQ&lt;Impl&gt;::read</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> load_idx)
+<a name="l00493"></a>00493 {
+<a name="l00494"></a>00494     <span class="comment">//Depending on issue2execute delay a squashed load could</span>
+<a name="l00495"></a>00495     <span class="comment">//execute if it is found to be squashed in the same</span>
+<a name="l00496"></a>00496     <span class="comment">//cycle it is scheduled to execute</span>
+<a name="l00497"></a>00497     <span class="keyword">typename</span> m5::hash_map&lt;int, LQIt, HashFn&gt;::iterator
+<a name="l00498"></a>00498         lq_hash_it = <a class="code" href="classOzoneLWLSQ.html#afd55cfcf685cda7dafc7c52d5105e129">LQItHash</a>.find(load_idx);
+<a name="l00499"></a>00499     assert(lq_hash_it != <a class="code" href="classOzoneLWLSQ.html#afd55cfcf685cda7dafc7c52d5105e129">LQItHash</a>.end());
+<a name="l00500"></a>00500     <a class="code" href="classOzoneLWLSQ.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> inst = (*(*lq_hash_it).second);
+<a name="l00501"></a>00501 
+<a name="l00502"></a>00502     <span class="comment">// Make sure this isn&apos;t an uncacheable access</span>
+<a name="l00503"></a>00503     <span class="comment">// A bit of a hackish way to get uncached accesses to work only if they&apos;re</span>
+<a name="l00504"></a>00504     <span class="comment">// at the head of the LSQ and are ready to commit (at the head of the ROB</span>
+<a name="l00505"></a>00505     <span class="comment">// too).</span>
+<a name="l00506"></a>00506     <span class="comment">// @todo: Fix uncached accesses.</span>
+<a name="l00507"></a>00507     <span class="keywordflow">if</span> (req-&gt;<a class="code" href="classRequest.html#a70c74b2809417ea8701dd6ba9e34312d">isUncacheable</a>() &amp;&amp;
+<a name="l00508"></a>00508         (inst != <a class="code" href="classOzoneLWLSQ.html#a6800290ffd43f3207c629be7f2d6228f">loadQueue</a>.back() || !inst-&gt;isAtCommit())) {
+<a name="l00509"></a>00509         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classOzoneLSQ.html">OzoneLSQ</a>, <span class="stringliteral">&quot;[sn:%lli] Uncached load and not head of &quot;</span>
+<a name="l00510"></a>00510                 <span class="stringliteral">&quot;commit/LSQ!\n&quot;</span>,
+<a name="l00511"></a>00511                 inst-&gt;seqNum);
+<a name="l00512"></a>00512         <a class="code" href="classOzoneLWLSQ.html#a84f815aa1fa864ba2e6d75f5ad2b52d1">be</a>-&gt;<a class="code" href="classBackEnd.html#aa9c46f45f491ef90a936c7e2b95f20aa">rescheduleMemInst</a>(inst);
+<a name="l00513"></a>00513         <span class="keywordflow">return</span> TheISA::genMachineCheckFault();
+<a name="l00514"></a>00514     }
+<a name="l00515"></a>00515 
+<a name="l00516"></a>00516     <span class="comment">// Check the SQ for any previous stores that might lead to forwarding</span>
+<a name="l00517"></a>00517     <a class="code" href="classOzoneLWLSQ.html#a3b2dd16f487adc977c43201cd7f51558">SQIt</a> sq_it = <a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>.begin();
+<a name="l00518"></a>00518     <span class="keywordtype">int</span> store_size = 0;
+<a name="l00519"></a>00519 
+<a name="l00520"></a>00520     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classOzoneLSQ.html">OzoneLSQ</a>, <span class="stringliteral">&quot;Read called, load idx: %i addr: %#x\n&quot;</span>,
+<a name="l00521"></a>00521             load_idx, req-&gt;<a class="code" href="classRequest.html#a744ef11a5afe9d3651ce5f954259cb43">getPaddr</a>());
+<a name="l00522"></a>00522 
+<a name="l00523"></a>00523     <span class="keywordflow">while</span> (sq_it != <a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>.end() &amp;&amp; (*sq_it).inst-&gt;seqNum &gt; inst-&gt;seqNum)
+<a name="l00524"></a>00524         ++sq_it;
+<a name="l00525"></a>00525 
+<a name="l00526"></a>00526     <span class="keywordflow">while</span> (1) {
+<a name="l00527"></a>00527         <span class="comment">// End once we&apos;ve reached the top of the LSQ</span>
+<a name="l00528"></a>00528         <span class="keywordflow">if</span> (sq_it == <a class="code" href="classOzoneLWLSQ.html#aadda2adf789b0c8a3eb952ac5d65d4ed">storeQueue</a>.end()) {
+<a name="l00529"></a>00529             <span class="keywordflow">break</span>;
+<a name="l00530"></a>00530         }
+<a name="l00531"></a>00531 
+<a name="l00532"></a>00532         assert((*sq_it).inst);
+<a name="l00533"></a>00533 
+<a name="l00534"></a>00534         store_size = (*sq_it).size;
+<a name="l00535"></a>00535 
+<a name="l00536"></a>00536         <span class="keywordflow">if</span> (store_size == 0 || (*sq_it).committed) {
+<a name="l00537"></a>00537             sq_it++;
+<a name="l00538"></a>00538             <span class="keywordflow">continue</span>;
+<a name="l00539"></a>00539         }
+<a name="l00540"></a>00540 
+<a name="l00541"></a>00541         <span class="comment">// Check if the store data is within the lower and upper bounds of</span>
+<a name="l00542"></a>00542         <span class="comment">// addresses that the request needs.</span>
+<a name="l00543"></a>00543         <span class="keywordtype">bool</span> store_has_lower_limit =
+<a name="l00544"></a>00544             req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>() &gt;= (*sq_it).inst-&gt;effAddr;
+<a name="l00545"></a>00545         <span class="keywordtype">bool</span> store_has_upper_limit =
+<a name="l00546"></a>00546             (req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>() + req-&gt;<a class="code" href="classRequest.html#a3c4029b904a61a9873e6d12785ce19a1">getSize</a>()) &lt;= ((*sq_it).inst-&gt;effAddr +
+<a name="l00547"></a>00547                                                    store_size);
+<a name="l00548"></a>00548         <span class="keywordtype">bool</span> lower_load_has_store_part =
+<a name="l00549"></a>00549             req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>() &lt; ((*sq_it).inst-&gt;effAddr +
+<a name="l00550"></a>00550                                store_size);
+<a name="l00551"></a>00551         <span class="keywordtype">bool</span> upper_load_has_store_part =
+<a name="l00552"></a>00552             (req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>() + req-&gt;<a class="code" href="classRequest.html#a3c4029b904a61a9873e6d12785ce19a1">getSize</a>()) &gt; (*sq_it).inst-&gt;effAddr;
+<a name="l00553"></a>00553 
+<a name="l00554"></a>00554         <span class="comment">// If the store&apos;s data has all of the data needed, we can forward.</span>
+<a name="l00555"></a>00555         if (store_has_lower_limit &amp;&amp; store_has_upper_limit) {
+<a name="l00556"></a>00556             <span class="keywordtype">int</span> shift_amt = req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>() &amp; (store_size - 1);
+<a name="l00557"></a>00557             <span class="comment">// Assumes byte addressing</span>
+<a name="l00558"></a>00558             shift_amt = shift_amt &lt;&lt; 3;
+<a name="l00559"></a>00559 
+<a name="l00560"></a>00560             <span class="comment">// Cast this to type T?</span>
+<a name="l00561"></a>00561             data = (*sq_it).data &gt;&gt; shift_amt;
+<a name="l00562"></a>00562 
+<a name="l00563"></a>00563             assert(!inst-&gt;memData);
+<a name="l00564"></a>00564             inst-&gt;memData = <span class="keyword">new</span> uint8_t[64];
+<a name="l00565"></a>00565 
+<a name="l00566"></a>00566             memcpy(inst-&gt;memData, &amp;data, req-&gt;<a class="code" href="classRequest.html#a3c4029b904a61a9873e6d12785ce19a1">getSize</a>());
+<a name="l00567"></a>00567 
+<a name="l00568"></a>00568             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classOzoneLSQ.html">OzoneLSQ</a>, <span class="stringliteral">&quot;Forwarding from store [sn:%lli] to load to &quot;</span>
+<a name="l00569"></a>00569                     <span class="stringliteral">&quot;[sn:%lli] addr %#x, data %#x\n&quot;</span>,
+<a name="l00570"></a>00570                     (*sq_it).inst-&gt;seqNum, inst-&gt;seqNum, req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>(),
+<a name="l00571"></a>00571                     *(inst-&gt;memData));
+<a name="l00572"></a>00572 
+<a name="l00573"></a>00573             <a class="code" href="classPacket.html">PacketPtr</a> data_pkt = <span class="keyword">new</span> <a class="code" href="classPacket.html">Packet</a>(req, Packet::ReadReq);
+<a name="l00574"></a>00574             data_pkt-&gt;<a class="code" href="classPacket.html#a60621b00d6ecd49b3e336087aca2eda0">dataStatic</a>(inst-&gt;memData);
+<a name="l00575"></a>00575 
+<a name="l00576"></a>00576             <a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html">WritebackEvent</a> *wb = <span class="keyword">new</span> <a class="code" href="classOzoneLWLSQ_1_1WritebackEvent.html">WritebackEvent</a>(inst, data_pkt, <span class="keyword">this</span>);
+<a name="l00577"></a>00577 
+<a name="l00578"></a>00578             <span class="comment">// We&apos;ll say this has a 1 cycle load-store forwarding latency</span>
+<a name="l00579"></a>00579             <span class="comment">// for now.</span>
+<a name="l00580"></a>00580             <span class="comment">// @todo: Need to make this a parameter.</span>
+<a name="l00581"></a>00581             wb-&gt;schedule(<a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>());
+<a name="l00582"></a>00582 
+<a name="l00583"></a>00583             <span class="comment">// Should keep track of stat for forwarded data</span>
+<a name="l00584"></a>00584             <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00585"></a>00585         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((store_has_lower_limit &amp;&amp; lower_load_has_store_part) ||
+<a name="l00586"></a>00586                    (store_has_upper_limit &amp;&amp; upper_load_has_store_part) ||
+<a name="l00587"></a>00587                    (lower_load_has_store_part &amp;&amp; upper_load_has_store_part)) {
+<a name="l00588"></a>00588             <span class="comment">// This is the partial store-load forwarding case where a store</span>
+<a name="l00589"></a>00589             <span class="comment">// has only part of the load&apos;s data.</span>
+<a name="l00590"></a>00590 
+<a name="l00591"></a>00591             <span class="comment">// If it&apos;s already been written back, then don&apos;t worry about</span>
+<a name="l00592"></a>00592             <span class="comment">// stalling on it.</span>
+<a name="l00593"></a>00593             <span class="keywordflow">if</span> ((*sq_it).completed) {
+<a name="l00594"></a>00594                 sq_it++;
+<a name="l00595"></a>00595                 <span class="keywordflow">break</span>;
+<a name="l00596"></a>00596             }
+<a name="l00597"></a>00597 
+<a name="l00598"></a>00598             <span class="comment">// Must stall load and force it to retry, so long as it&apos;s the oldest</span>
+<a name="l00599"></a>00599             <span class="comment">// load that needs to do so.</span>
+<a name="l00600"></a>00600             <span class="keywordflow">if</span> (!<a class="code" href="classOzoneLWLSQ.html#a6f8bff553ad30865c7d0c62e05421eb8">stalled</a> ||
+<a name="l00601"></a>00601                 (<a class="code" href="classOzoneLWLSQ.html#a6f8bff553ad30865c7d0c62e05421eb8">stalled</a> &amp;&amp;
+<a name="l00602"></a>00602                  inst-&gt;seqNum &lt;
+<a name="l00603"></a>00603                  (*stallingLoad)-&gt;seqNum)) {
+<a name="l00604"></a>00604                 <a class="code" href="classOzoneLWLSQ.html#a6f8bff553ad30865c7d0c62e05421eb8">stalled</a> = <span class="keyword">true</span>;
+<a name="l00605"></a>00605                 <a class="code" href="classOzoneLWLSQ.html#afe1cdcfca6b44c28581d862228adc3da">stallingStoreIsn</a> = (*sq_it).inst-&gt;seqNum;
+<a name="l00606"></a>00606                 <a class="code" href="classOzoneLWLSQ.html#a567a64b358df6ae6162124cfe4d00db3">stallingLoad</a> = (*lq_hash_it).second;
+<a name="l00607"></a>00607             }
+<a name="l00608"></a>00608 
+<a name="l00609"></a>00609             <span class="comment">// Tell IQ/mem dep unit that this instruction will need to be</span>
+<a name="l00610"></a>00610             <span class="comment">// rescheduled eventually</span>
+<a name="l00611"></a>00611             <a class="code" href="classOzoneLWLSQ.html#a84f815aa1fa864ba2e6d75f5ad2b52d1">be</a>-&gt;<a class="code" href="classBackEnd.html#aa9c46f45f491ef90a936c7e2b95f20aa">rescheduleMemInst</a>(inst);
+<a name="l00612"></a>00612 
+<a name="l00613"></a>00613             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classOzoneLSQ.html">OzoneLSQ</a>, <span class="stringliteral">&quot;Load-store forwarding mis-match. &quot;</span>
+<a name="l00614"></a>00614                     <span class="stringliteral">&quot;Store [sn:%lli] to load addr %#x\n&quot;</span>,
+<a name="l00615"></a>00615                     (*sq_it).inst-&gt;seqNum, req-&gt;<a class="code" href="classRequest.html#a68d2230b37b30d25462093fefdd813ac">getVaddr</a>());
+<a name="l00616"></a>00616 
+<a name="l00617"></a>00617             <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00618"></a>00618         }
+<a name="l00619"></a>00619         sq_it++;
+<a name="l00620"></a>00620     }
+<a name="l00621"></a>00621 
+<a name="l00622"></a>00622     <span class="comment">// If there&apos;s no forwarding case, then go access memory</span>
+<a name="l00623"></a>00623     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classOzoneLSQ.html">OzoneLSQ</a>, <span class="stringliteral">&quot;Doing functional access for inst PC %#x\n&quot;</span>,
+<a name="l00624"></a>00624             inst-&gt;readPC());
+<a name="l00625"></a>00625 
+<a name="l00626"></a>00626     assert(!inst-&gt;memData);
+<a name="l00627"></a>00627     inst-&gt;memData = <span class="keyword">new</span> uint8_t[64];
+<a name="l00628"></a>00628 
+<a name="l00629"></a>00629     ++<a class="code" href="classOzoneLWLSQ.html#a03435d626b7567ed154de5d7d8c3d419">usedPorts</a>;
+<a name="l00630"></a>00630 
+<a name="l00631"></a>00631     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classOzoneLSQ.html">OzoneLSQ</a>, <span class="stringliteral">&quot;Doing timing access for inst PC %#x\n&quot;</span>,
+<a name="l00632"></a>00632             inst-&gt;readPC());
+<a name="l00633"></a>00633 
+<a name="l00634"></a>00634     <a class="code" href="classPacket.html">PacketPtr</a> data_pkt =
+<a name="l00635"></a>00635         <span class="keyword">new</span> <a class="code" href="classPacket.html">Packet</a>(req,
+<a name="l00636"></a>00636                    (req-&gt;<a class="code" href="classRequest.html#a8965874e960faf91ad4b6af8dbf31875">isLLSC</a>() ?
+<a name="l00637"></a>00637                     <a class="code" href="classMemCmd.html#a2afce0a47a93eee73a314d53e4890153a1c703221ee751b9d3d635fe33ea8e350">MemCmd::LoadLockedReq</a> : Packet::ReadReq));
+<a name="l00638"></a>00638     data_pkt-&gt;dataStatic(inst-&gt;memData);
+<a name="l00639"></a>00639 
+<a name="l00640"></a>00640     <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html">LSQSenderState</a> *state = <span class="keyword">new</span> <a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html">LSQSenderState</a>;
+<a name="l00641"></a>00641     state-&gt;<a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#aaa492a23dd827a27baf0e8abcf09e391">isLoad</a> = <span class="keyword">true</span>;
+<a name="l00642"></a>00642     state-&gt;<a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#ae40354a1051342eb5a9db005715dcfa9">idx</a> = load_idx;
+<a name="l00643"></a>00643     state-&gt;<a class="code" href="classOzoneLWLSQ_1_1LSQSenderState.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a> = inst;
+<a name="l00644"></a>00644     data_pkt-&gt;senderState = state;
+<a name="l00645"></a>00645 
+<a name="l00646"></a>00646     <span class="comment">// if we have a cache, do cache access too</span>
+<a name="l00647"></a>00647     <span class="keywordflow">if</span> (!<a class="code" href="classOzoneLWLSQ.html#a38b03978ad7720fdc910ff6a8b44585f">dcachePort</a>.sendTiming(data_pkt)) {
+<a name="l00648"></a>00648         <span class="comment">// There&apos;s an older load that&apos;s already going to squash.</span>
+<a name="l00649"></a>00649         <span class="keywordflow">if</span> (<a class="code" href="classOzoneLWLSQ.html#a95dc31b4ce3ebcb6b9d75a510b3a128c">isLoadBlocked</a> &amp;&amp; blockedLoadSeqNum &lt; inst-&gt;seqNum)
+<a name="l00650"></a>00650             <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00651"></a>00651 
+<a name="l00652"></a>00652         <span class="comment">// Record that the load was blocked due to memory.  This</span>
+<a name="l00653"></a>00653         <span class="comment">// load will squash all instructions after it, be</span>
+<a name="l00654"></a>00654         <span class="comment">// refetched, and re-executed.</span>
+<a name="l00655"></a>00655         <a class="code" href="classOzoneLWLSQ.html#a95dc31b4ce3ebcb6b9d75a510b3a128c">isLoadBlocked</a> = <span class="keyword">true</span>;
+<a name="l00656"></a>00656         <a class="code" href="classOzoneLWLSQ.html#a2c1620029c162c7180e523b089e56ed5">loadBlockedHandled</a> = <span class="keyword">false</span>;
+<a name="l00657"></a>00657         <a class="code" href="classOzoneLWLSQ.html#a3fca34b247fd8d081557578f8ca60fe3">blockedLoadSeqNum</a> = inst-&gt;seqNum;
+<a name="l00658"></a>00658         <span class="comment">// No fault occurred, even though the interface is blocked.</span>
+<a name="l00659"></a>00659         <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00660"></a>00660     }
+<a name="l00661"></a>00661 
+<a name="l00662"></a>00662     <span class="keywordflow">if</span> (req-&gt;<a class="code" href="classRequest.html#a8965874e960faf91ad4b6af8dbf31875">isLLSC</a>()) {
+<a name="l00663"></a>00663         <a class="code" href="classOzoneLWLSQ.html#a61b5f503eec141308b0cd6b4322b405b">cpu</a>-&gt;<a class="code" href="classOzoneCPU.html#aa062c7f3423632ca66107fdbb9d38131">lockFlag</a> = <span class="keyword">true</span>;
+<a name="l00664"></a>00664     }
+<a name="l00665"></a>00665 
+<a name="l00666"></a>00666     <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00667"></a>00667 }
+<a name="l00668"></a>00668 
+<a name="l00669"></a>00669 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00670"></a>00670 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00671"></a>00671 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00672"></a><a class="code" href="classOzoneLWLSQ.html#abbf7bcc93511421a1787650a43e2642a">00672</a> <a class="code" href="classOzoneLWLSQ.html#abbf7bcc93511421a1787650a43e2642a">OzoneLWLSQ&lt;Impl&gt;::write</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> store_idx)
+<a name="l00673"></a>00673 {
+<a name="l00674"></a>00674     <a class="code" href="classOzoneLWLSQ.html#af476de7b08376a4d7d7cd4b8dbbabb7a">SQHashIt</a> sq_hash_it = <a class="code" href="classOzoneLWLSQ.html#a3eb9bc9d55fde5b98e8d28a220d247f6">SQItHash</a>.find(store_idx);
+<a name="l00675"></a>00675     assert(sq_hash_it != <a class="code" href="classOzoneLWLSQ.html#a3eb9bc9d55fde5b98e8d28a220d247f6">SQItHash</a>.end());
+<a name="l00676"></a>00676 
+<a name="l00677"></a>00677     <a class="code" href="classOzoneLWLSQ.html#a3b2dd16f487adc977c43201cd7f51558">SQIt</a> sq_it = (*sq_hash_it).second;
+<a name="l00678"></a>00678     assert((*sq_it).inst);
+<a name="l00679"></a>00679 
+<a name="l00680"></a>00680     <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(<a class="code" href="classOzoneLSQ.html">OzoneLSQ</a>, <span class="stringliteral">&quot;Doing write to store idx %i, addr %#x data %#x&quot;</span>
+<a name="l00681"></a>00681             <span class="stringliteral">&quot; | [sn:%lli]\n&quot;</span>,
+<a name="l00682"></a>00682             store_idx, req-&gt;<a class="code" href="classRequest.html#a744ef11a5afe9d3651ce5f954259cb43">getPaddr</a>(), data, (*sq_it).inst-&gt;seqNum);
+<a name="l00683"></a>00683 
+<a name="l00684"></a>00684     (*sq_it).req = req;
+<a name="l00685"></a>00685     (*sq_it).size = <span class="keyword">sizeof</span>(T);
+<a name="l00686"></a>00686     (*sq_it).data = data;
+<a name="l00687"></a>00687 <span class="comment">/*</span>
+<a name="l00688"></a>00688 <span class="comment">    assert(!req-&gt;data);</span>
+<a name="l00689"></a>00689 <span class="comment">    req-&gt;data = new uint8_t[64];</span>
+<a name="l00690"></a>00690 <span class="comment">    memcpy(req-&gt;data, (uint8_t *)&amp;(*sq_it).data, req-&gt;size);</span>
+<a name="l00691"></a>00691 <span class="comment">*/</span>
+<a name="l00692"></a>00692 
+<a name="l00693"></a>00693     <span class="comment">// This function only writes the data to the store queue, so no fault</span>
+<a name="l00694"></a>00694     <span class="comment">// can happen here.</span>
+<a name="l00695"></a>00695     <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00696"></a>00696 }
+<a name="l00697"></a>00697 
+<a name="l00698"></a>00698 <span class="preprocessor">#endif // __CPU_OZONE_LW_LSQ_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

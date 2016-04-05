@@ -1,0 +1,98 @@
+\hypertarget{condcodes_8hh}{
+\section{base/condcodes.hh}
+\label{condcodes_8hh}\index{base/condcodes.hh@{base/condcodes.hh}}
+}
+{\ttfamily \#include \char`\"{}base/bitfield.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{condcodes_8hh_af1b1c69a86b8cee6804f7df3ccfeea1e}{findCarry} (int width, uint64\_\-t dest, uint64\_\-t src1, uint64\_\-t src2)
+\item 
+bool \hyperlink{condcodes_8hh_ab8af463ce20b2c4519622e1c79100057}{findOverflow} (int width, uint64\_\-t dest, uint64\_\-t src1, uint64\_\-t src2)
+\item 
+bool \hyperlink{condcodes_8hh_a8b5d8a69b154bcb06d1fef2db3ed24c7}{findParity} (int width, uint64\_\-t dest)
+\item 
+bool \hyperlink{condcodes_8hh_a43e1d3b7ba28675edcf5c15acb397516}{findNegative} (int width, uint64\_\-t dest)
+\item 
+bool \hyperlink{condcodes_8hh_ac6d1aef2bae3d34668b695f62ed7bace}{findZero} (int width, uint64\_\-t dest)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{condcodes_8hh_af1b1c69a86b8cee6804f7df3ccfeea1e}{
+\index{condcodes.hh@{condcodes.hh}!findCarry@{findCarry}}
+\index{findCarry@{findCarry}!condcodes.hh@{condcodes.hh}}
+\subsubsection[{findCarry}]{\setlength{\rightskip}{0pt plus 5cm}bool findCarry (int {\em width}, \/  uint64\_\-t {\em dest}, \/  uint64\_\-t {\em src1}, \/  uint64\_\-t {\em src2})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{condcodes_8hh_af1b1c69a86b8cee6804f7df3ccfeea1e}
+Calculate the carry flag from an addition. This should work even when a carry value is also added in. 
+
+
+\begin{DoxyCode}
+43                                                                   {
+44     int shift = width - 1;
+45     return ((~(dest >> shift) & 1) +
+46             ((src1 >> shift) & 1) +
+47             ((src2 >> shift) & 1)) & 0x2;
+48 }
+\end{DoxyCode}
+\hypertarget{condcodes_8hh_a43e1d3b7ba28675edcf5c15acb397516}{
+\index{condcodes.hh@{condcodes.hh}!findNegative@{findNegative}}
+\index{findNegative@{findNegative}!condcodes.hh@{condcodes.hh}}
+\subsubsection[{findNegative}]{\setlength{\rightskip}{0pt plus 5cm}bool findNegative (int {\em width}, \/  uint64\_\-t {\em dest})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{condcodes_8hh_a43e1d3b7ba28675edcf5c15acb397516}
+Calculate the negative flag. 
+
+
+\begin{DoxyCode}
+81                                        {
+82     return bits(dest, width - 1, width - 1);
+83 }
+\end{DoxyCode}
+\hypertarget{condcodes_8hh_ab8af463ce20b2c4519622e1c79100057}{
+\index{condcodes.hh@{condcodes.hh}!findOverflow@{findOverflow}}
+\index{findOverflow@{findOverflow}!condcodes.hh@{condcodes.hh}}
+\subsubsection[{findOverflow}]{\setlength{\rightskip}{0pt plus 5cm}bool findOverflow (int {\em width}, \/  uint64\_\-t {\em dest}, \/  uint64\_\-t {\em src1}, \/  uint64\_\-t {\em src2})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{condcodes_8hh_ab8af463ce20b2c4519622e1c79100057}
+Calculate the overflow flag from an addition. 
+
+
+\begin{DoxyCode}
+55                                                                      {
+56     int shift = width - 1;
+57     return ((src1 ^ ~src2) & (src1 ^ dest)) & (1ULL << shift);
+58 }
+\end{DoxyCode}
+\hypertarget{condcodes_8hh_a8b5d8a69b154bcb06d1fef2db3ed24c7}{
+\index{condcodes.hh@{condcodes.hh}!findParity@{findParity}}
+\index{findParity@{findParity}!condcodes.hh@{condcodes.hh}}
+\subsubsection[{findParity}]{\setlength{\rightskip}{0pt plus 5cm}bool findParity (int {\em width}, \/  uint64\_\-t {\em dest})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{condcodes_8hh_a8b5d8a69b154bcb06d1fef2db3ed24c7}
+Calculate the parity of a value. 1 is for odd parity and 0 is for even. 
+
+
+\begin{DoxyCode}
+65                                      {
+66     dest &= mask(width);
+67     dest ^= (dest >> 32);
+68     dest ^= (dest >> 16);
+69     dest ^= (dest >> 8);
+70     dest ^= (dest >> 4);
+71     dest ^= (dest >> 2);
+72     dest ^= (dest >> 1);
+73     return dest & 1;
+74 }
+\end{DoxyCode}
+\hypertarget{condcodes_8hh_ac6d1aef2bae3d34668b695f62ed7bace}{
+\index{condcodes.hh@{condcodes.hh}!findZero@{findZero}}
+\index{findZero@{findZero}!condcodes.hh@{condcodes.hh}}
+\subsubsection[{findZero}]{\setlength{\rightskip}{0pt plus 5cm}bool findZero (int {\em width}, \/  uint64\_\-t {\em dest})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{condcodes_8hh_ac6d1aef2bae3d34668b695f62ed7bace}
+Calculate the zero flag. 
+
+
+\begin{DoxyCode}
+90                                    {
+91     return !(dest & mask(width));
+92 }
+\end{DoxyCode}

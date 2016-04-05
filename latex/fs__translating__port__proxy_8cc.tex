@@ -1,0 +1,99 @@
+\hypertarget{fs__translating__port__proxy_8cc}{
+\section{mem/fs\_\-translating\_\-port\_\-proxy.cc}
+\label{fs__translating__port__proxy_8cc}\index{mem/fs\_\-translating\_\-port\_\-proxy.cc@{mem/fs\_\-translating\_\-port\_\-proxy.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/vtophys.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/chunk\_\-generator.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/base.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/thread\_\-context.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/fs\_\-translating\_\-port\_\-proxy.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/system.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{fs__translating__port__proxy_8cc_a532188374aa989b4aeff3e0a1dff22fe}{CopyOut} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, void $\ast$dest, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} src, size\_\-t cplen)
+\item 
+void \hyperlink{fs__translating__port__proxy_8cc_aebd8031c1b14c8ee120ea9a924f4820a}{CopyIn} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} dest, void $\ast$source, size\_\-t cplen)
+\item 
+void \hyperlink{fs__translating__port__proxy_8cc_a3dba1fb48832b9fc799b4899dcb59128}{CopyStringOut} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, char $\ast$dst, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} vaddr, size\_\-t maxlen)
+\item 
+void \hyperlink{fs__translating__port__proxy_8cc_ae5894da106db9f266e5b5de9eeee5231}{CopyStringIn} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, char $\ast$src, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} vaddr)
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\hyperlink{classPort}{Port} object definitions. 
+
+\subsection{関数}
+\hypertarget{fs__translating__port__proxy_8cc_aebd8031c1b14c8ee120ea9a924f4820a}{
+\index{fs\_\-translating\_\-port\_\-proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}!CopyIn@{CopyIn}}
+\index{CopyIn@{CopyIn}!fs_translating_port_proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}}
+\subsubsection[{CopyIn}]{\setlength{\rightskip}{0pt plus 5cm}void CopyIn ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf Addr} {\em dest}, \/  void $\ast$ {\em source}, \/  size\_\-t {\em cplen})}}
+\label{fs__translating__port__proxy_8cc_aebd8031c1b14c8ee120ea9a924f4820a}
+
+
+
+\begin{DoxyCode}
+133 {
+134     uint8_t *src = (uint8_t *)source;
+135     tc->getVirtProxy().writeBlob(dest, src, cplen);
+136 }
+\end{DoxyCode}
+\hypertarget{fs__translating__port__proxy_8cc_a532188374aa989b4aeff3e0a1dff22fe}{
+\index{fs\_\-translating\_\-port\_\-proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}!CopyOut@{CopyOut}}
+\index{CopyOut@{CopyOut}!fs_translating_port_proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}}
+\subsubsection[{CopyOut}]{\setlength{\rightskip}{0pt plus 5cm}void CopyOut ({\bf ThreadContext} $\ast$ {\em tc}, \/  void $\ast$ {\em dest}, \/  {\bf Addr} {\em src}, \/  size\_\-t {\em cplen})}}
+\label{fs__translating__port__proxy_8cc_a532188374aa989b4aeff3e0a1dff22fe}
+
+
+
+\begin{DoxyCode}
+126 {
+127     uint8_t *dst = (uint8_t *)dest;
+128     tc->getVirtProxy().readBlob(src, dst, cplen);
+129 }
+\end{DoxyCode}
+\hypertarget{fs__translating__port__proxy_8cc_ae5894da106db9f266e5b5de9eeee5231}{
+\index{fs\_\-translating\_\-port\_\-proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}!CopyStringIn@{CopyStringIn}}
+\index{CopyStringIn@{CopyStringIn}!fs_translating_port_proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}}
+\subsubsection[{CopyStringIn}]{\setlength{\rightskip}{0pt plus 5cm}void CopyStringIn ({\bf ThreadContext} $\ast$ {\em tc}, \/  char $\ast$ {\em src}, \/  {\bf Addr} {\em vaddr})}}
+\label{fs__translating__port__proxy_8cc_ae5894da106db9f266e5b5de9eeee5231}
+
+
+
+\begin{DoxyCode}
+158 {
+159     FSTranslatingPortProxy &vp = tc->getVirtProxy();
+160     for (ChunkGenerator gen(vaddr, strlen(src), TheISA::PageBytes); !gen.done();
+161          gen.next())
+162     {
+163         vp.writeBlob(gen.addr(), (uint8_t*)src, gen.size());
+164         src += gen.size();
+165     }
+166 }
+\end{DoxyCode}
+\hypertarget{fs__translating__port__proxy_8cc_a3dba1fb48832b9fc799b4899dcb59128}{
+\index{fs\_\-translating\_\-port\_\-proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}!CopyStringOut@{CopyStringOut}}
+\index{CopyStringOut@{CopyStringOut}!fs_translating_port_proxy.cc@{fs\_\-translating\_\-port\_\-proxy.cc}}
+\subsubsection[{CopyStringOut}]{\setlength{\rightskip}{0pt plus 5cm}void CopyStringOut ({\bf ThreadContext} $\ast$ {\em tc}, \/  char $\ast$ {\em dst}, \/  {\bf Addr} {\em vaddr}, \/  size\_\-t {\em maxlen})}}
+\label{fs__translating__port__proxy_8cc_a3dba1fb48832b9fc799b4899dcb59128}
+
+
+
+\begin{DoxyCode}
+140 {
+141     char *start = dst;
+142     FSTranslatingPortProxy &vp = tc->getVirtProxy();
+143 
+144     bool foundNull = false;
+145     while ((dst - start + 1) < maxlen && !foundNull) {
+146         vp.readBlob(vaddr++, (uint8_t*)dst, 1);
+147         if (*dst == '\0')
+148             foundNull = true;
+149         dst++;
+150     }
+151 
+152     if (!foundNull)
+153         *dst = '\0';
+154 }
+\end{DoxyCode}

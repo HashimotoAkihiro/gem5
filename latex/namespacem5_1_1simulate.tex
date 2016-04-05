@@ -1,0 +1,446 @@
+\hypertarget{namespacem5_1_1simulate}{
+\section{ネームスペース m5::simulate}
+\label{namespacem5_1_1simulate}\index{m5::simulate@{m5::simulate}}
+}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a48d1fb163c2020416869a3bfd42b7913}{instantiate}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a3bf1ccb8f6c13411a277600326562f5c}{simulate}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a31b3d3628897d38d2c530832ef4907cf}{curTick}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a125fb26cebcc172aca2d13dbf5a2f73c}{drain}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a3749cab57b3758cee3da1f4138c380f2}{memWriteback}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a76619a20f934a952b6551b37dfa0ce7c}{memInvalidate}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a2985608bac11887a6ae3df9b068b10fe}{resume}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a5fae4e20027ec1eaf6fdb333b9e4b2bf}{checkpoint}
+\item 
+def \hyperlink{namespacem5_1_1simulate_aa1c89476d25ce43527d97c047f909a12}{\_\-changeMemoryMode}
+\item 
+def \hyperlink{namespacem5_1_1simulate_a962abc699043c45d6c8c3057469e1aec}{switchCpus}
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{namespacem5_1_1simulate_a2c372e2e14aee3b7fbcfbd49210559d7}{MaxTick} = 2
+\item 
+dictionary \hyperlink{namespacem5_1_1simulate_ab4c814bc9719fb6019f8b1ddc4e3bf81}{\_\-memory\_\-modes}
+\item 
+list \hyperlink{namespacem5_1_1simulate_a032ac35775aee51d7a28909bc144b1ed}{need\_\-resume} = \mbox{[}$\,$\mbox{]}
+\item 
+\hyperlink{namespacem5_1_1simulate_a0e9c92fcadba6c1848a6cacce579e3b8}{need\_\-startup} = True
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespacem5_1_1simulate_aa1c89476d25ce43527d97c047f909a12}{
+\index{m5::simulate@{m5::simulate}!\_\-changeMemoryMode@{\_\-changeMemoryMode}}
+\index{\_\-changeMemoryMode@{\_\-changeMemoryMode}!m5::simulate@{m5::simulate}}
+\subsubsection[{\_\-changeMemoryMode}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::\_\-changeMemoryMode ( {\em system}, \/   {\em mode})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{namespacem5_1_1simulate_aa1c89476d25ce43527d97c047f909a12}
+
+
+
+\begin{DoxyCode}
+218                                    :
+219     if not isinstance(system, (objects.Root, objects.System)):
+220         raise TypeError, "Parameter of type '%s'.  Must be type %s or %s." % \
+221               (type(system), objects.Root, objects.System)
+222     if system.getMemoryMode() != mode:
+223         drain(system)
+224         system.setMemoryMode(mode)
+225     else:
+226         print "System already in target mode. Memory mode unchanged."
+227 
+def switchCpus(system, cpuList, do_drain=True, verbose=True):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a5fae4e20027ec1eaf6fdb333b9e4b2bf}{
+\index{m5::simulate@{m5::simulate}!checkpoint@{checkpoint}}
+\index{checkpoint@{checkpoint}!m5::simulate@{m5::simulate}}
+\subsubsection[{checkpoint}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::checkpoint ( {\em dir})}}
+\label{namespacem5_1_1simulate_a5fae4e20027ec1eaf6fdb333b9e4b2bf}
+
+
+
+\begin{DoxyCode}
+208                    :
+209     root = objects.Root.getInstance()
+210     if not isinstance(root, objects.Root):
+211         raise TypeError, "Checkpoint must be called on a root object."
+212     drain(root)
+213     memWriteback(root)
+214     print "Writing checkpoint"
+215     internal.core.serializeAll(dir)
+216     resume(root)
+217 
+def _changeMemoryMode(system, mode):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a31b3d3628897d38d2c530832ef4907cf}{
+\index{m5::simulate@{m5::simulate}!curTick@{curTick}}
+\index{curTick@{curTick}!m5::simulate@{m5::simulate}}
+\subsubsection[{curTick}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::curTick ()}}
+\label{namespacem5_1_1simulate_a31b3d3628897d38d2c530832ef4907cf}
+The current simulated tick. 
+
+
+\begin{DoxyCode}
+170              :
+171     return internal.core.curTick()
+172 
+173 # Drain the system in preparation of a checkpoint or memory mode
+174 # switch.
+def drain(root):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a125fb26cebcc172aca2d13dbf5a2f73c}{
+\index{m5::simulate@{m5::simulate}!drain@{drain}}
+\index{drain@{drain}!m5::simulate@{m5::simulate}}
+\subsubsection[{drain}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::drain ( {\em root})}}
+\label{namespacem5_1_1simulate_a125fb26cebcc172aca2d13dbf5a2f73c}
+
+
+
+\begin{DoxyCode}
+175                :
+176     # Try to drain all objects. Draining might not be completed unless
+177     # all objects return that they are drained on the first call. This
+178     # is because as objects drain they may cause other objects to no
+179     # longer be drained.
+180     def _drain():
+181         all_drained = False
+182         dm = internal.drain.createDrainManager()
+183         unready_objs = sum(obj.drain(dm) for obj in root.descendants())
+184         # If we've got some objects that can't drain immediately, then simulate
+185         if unready_objs > 0:
+186             dm.setCount(unready_objs)
+187             simulate()
+188         else:
+189             all_drained = True
+190         internal.drain.cleanupDrainManager(dm)
+191         return all_drained
+192 
+193     all_drained = _drain()
+194     while (not all_drained):
+195         all_drained = _drain()
+196 
+def memWriteback(root):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a48d1fb163c2020416869a3bfd42b7913}{
+\index{m5::simulate@{m5::simulate}!instantiate@{instantiate}}
+\index{instantiate@{instantiate}!m5::simulate@{m5::simulate}}
+\subsubsection[{instantiate}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::instantiate ( {\em ckpt\_\-dir} = {\ttfamily None})}}
+\label{namespacem5_1_1simulate_a48d1fb163c2020416869a3bfd42b7913}
+
+
+
+\begin{DoxyCode}
+71                               :
+72     from m5 import options
+73 
+74     root = objects.Root.getInstance()
+75 
+76     if not root:
+77         fatal("Need to instantiate Root() before calling instantiate()")
+78 
+79     # we need to fix the global frequency
+80     ticks.fixGlobalFrequency()
+81 
+82     # Make sure SimObject-valued params are in the configuration
+83     # hierarchy so we catch them with future descendants() walks
+84     for obj in root.descendants(): obj.adoptOrphanParams()
+85 
+86     # Unproxy in sorted order for determinism
+87     for obj in root.descendants(): obj.unproxyParams()
+88 
+89     if options.dump_config:
+90         ini_file = file(os.path.join(options.outdir, options.dump_config), 'w')
+91         # Print ini sections in sorted order for easier diffing
+92         for obj in sorted(root.descendants(), key=lambda o: o.path()):
+93             obj.print_ini(ini_file)
+94         ini_file.close()
+95 
+96     if options.json_config:
+97         try:
+98             import json
+99             json_file = file(os.path.join(options.outdir, options.json_config), '
+      w')
+100             d = root.get_config_as_dict()
+101             json.dump(d, json_file, indent=4)
+102             json_file.close()
+103         except ImportError:
+104             pass
+105 
+106     do_dot(root, options.outdir, options.dot_config)
+107 
+108     # Initialize the global statistics
+109     stats.initSimStats()
+110 
+111     # Create the C++ sim objects and connect ports
+112     for obj in root.descendants(): obj.createCCObject()
+113     for obj in root.descendants(): obj.connectPorts()
+114 
+115     # Do a second pass to finish initializing the sim objects
+116     for obj in root.descendants(): obj.init()
+117 
+118     # Do a third pass to initialize statistics
+119     for obj in root.descendants(): obj.regStats()
+120 
+121     # Do a fourth pass to initialize probe points
+122     for obj in root.descendants(): obj.regProbePoints()
+123 
+124     # Do a fifth pass to connect probe listeners
+125     for obj in root.descendants(): obj.regProbeListeners()
+126 
+127     # We're done registering statistics.  Enable the stats package now.
+128     stats.enable()
+129 
+130     # Restore checkpoint (if any)
+131     if ckpt_dir:
+132         ckpt = internal.core.getCheckpoint(ckpt_dir)
+133         internal.core.unserializeGlobals(ckpt);
+134         for obj in root.descendants(): obj.loadState(ckpt)
+135         need_resume.append(root)
+136     else:
+137         for obj in root.descendants(): obj.initState()
+138 
+139     # Check to see if any of the stat events are in the past after resuming from
+140     # a checkpoint, If so, this call will shift them to be at a valid time.
+141     updateStatEvents()
+142 
+need_resume = []
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a76619a20f934a952b6551b37dfa0ce7c}{
+\index{m5::simulate@{m5::simulate}!memInvalidate@{memInvalidate}}
+\index{memInvalidate@{memInvalidate}!m5::simulate@{m5::simulate}}
+\subsubsection[{memInvalidate}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::memInvalidate ( {\em root})}}
+\label{namespacem5_1_1simulate_a76619a20f934a952b6551b37dfa0ce7c}
+
+
+
+\begin{DoxyCode}
+201                        :
+202     for obj in root.descendants():
+203         obj.memInvalidate()
+204 
+def resume(root):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a3749cab57b3758cee3da1f4138c380f2}{
+\index{m5::simulate@{m5::simulate}!memWriteback@{memWriteback}}
+\index{memWriteback@{memWriteback}!m5::simulate@{m5::simulate}}
+\subsubsection[{memWriteback}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::memWriteback ( {\em root})}}
+\label{namespacem5_1_1simulate_a3749cab57b3758cee3da1f4138c380f2}
+
+
+
+\begin{DoxyCode}
+197                       :
+198     for obj in root.descendants():
+199         obj.memWriteback()
+200 
+def memInvalidate(root):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a2985608bac11887a6ae3df9b068b10fe}{
+\index{m5::simulate@{m5::simulate}!resume@{resume}}
+\index{resume@{resume}!m5::simulate@{m5::simulate}}
+\subsubsection[{resume}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::resume ( {\em root})}}
+\label{namespacem5_1_1simulate_a2985608bac11887a6ae3df9b068b10fe}
+
+
+
+\begin{DoxyCode}
+205                 :
+206     for obj in root.descendants(): obj.drainResume()
+207 
+def checkpoint(dir):
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a3bf1ccb8f6c13411a277600326562f5c}{
+\index{m5::simulate@{m5::simulate}!simulate@{simulate}}
+\index{simulate@{simulate}!m5::simulate@{m5::simulate}}
+\subsubsection[{simulate}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::simulate ( {\em args}, \/   {\em kwargs})}}
+\label{namespacem5_1_1simulate_a3bf1ccb8f6c13411a277600326562f5c}
+
+
+
+\begin{DoxyCode}
+145                              :
+146     global need_resume, need_startup
+147 
+148     if need_startup:
+149         root = objects.Root.getInstance()
+150         for obj in root.descendants(): obj.startup()
+151         need_startup = False
+152 
+153         # Python exit handlers happen in reverse order.
+154         # We want to dump stats last.
+155         atexit.register(stats.dump)
+156 
+157         # register our C++ exit callback function with Python
+158         atexit.register(internal.core.doExitCleanup)
+159 
+160         # Reset to put the stats in a consistent state.
+161         stats.reset()
+162 
+163     for root in need_resume:
+164         resume(root)
+165     need_resume = []
+166 
+167     return internal.event.simulate(*args, **kwargs)
+168 
+169 # Export curTick to user script.
+def curTick():
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a962abc699043c45d6c8c3057469e1aec}{
+\index{m5::simulate@{m5::simulate}!switchCpus@{switchCpus}}
+\index{switchCpus@{switchCpus}!m5::simulate@{m5::simulate}}
+\subsubsection[{switchCpus}]{\setlength{\rightskip}{0pt plus 5cm}def m5::simulate::switchCpus ( {\em system}, \/   {\em cpuList}, \/   {\em do\_\-drain} = {\ttfamily True}, \/   {\em verbose} = {\ttfamily True})}}
+\label{namespacem5_1_1simulate_a962abc699043c45d6c8c3057469e1aec}
+\begin{DoxyVerb}Switch CPUs in a system.
+
+By default, this method drains and resumes the system. This
+behavior can be disabled by setting the keyword argument
+'do_drain' to false, which might be desirable if multiple
+operations requiring a drained system are going to be performed in
+sequence.
+
+Note: This method may switch the memory mode of the system if that
+is required by the CPUs. It may also flush all caches in the
+system.
+
+Arguments:
+  system -- Simulated system.
+  cpuList -- (old_cpu, new_cpu) tuples
+
+Keyword Arguments:
+  do_drain -- Perform a drain/resume of the system when switching.
+\end{DoxyVerb}
+ 
+
+
+\begin{DoxyCode}
+228                                                             :
+229     """Switch CPUs in a system.
+230 
+231     By default, this method drains and resumes the system. This
+232     behavior can be disabled by setting the keyword argument
+233     'do_drain' to false, which might be desirable if multiple
+234     operations requiring a drained system are going to be performed in
+235     sequence.
+236 
+237     Note: This method may switch the memory mode of the system if that
+238     is required by the CPUs. It may also flush all caches in the
+239     system.
+240 
+241     Arguments:
+242       system -- Simulated system.
+243       cpuList -- (old_cpu, new_cpu) tuples
+244 
+245     Keyword Arguments:
+246       do_drain -- Perform a drain/resume of the system when switching.
+247     """
+248 
+249     if verbose:
+250         print "switching cpus"
+251 
+252     if not isinstance(cpuList, list):
+253         raise RuntimeError, "Must pass a list to this function"
+254     for item in cpuList:
+255         if not isinstance(item, tuple) or len(item) != 2:
+256             raise RuntimeError, "List must have tuples of (oldCPU,newCPU)"
+257 
+258     old_cpus = [old_cpu for old_cpu, new_cpu in cpuList]
+259     new_cpus = [new_cpu for old_cpu, new_cpu in cpuList]
+260     old_cpu_set = set(old_cpus)
+261     memory_mode_name = new_cpus[0].memory_mode()
+262     for old_cpu, new_cpu in cpuList:
+263         if not isinstance(old_cpu, objects.BaseCPU):
+264             raise TypeError, "%s is not of type BaseCPU" % old_cpu
+265         if not isinstance(new_cpu, objects.BaseCPU):
+266             raise TypeError, "%s is not of type BaseCPU" % new_cpu
+267         if new_cpu in old_cpu_set:
+268             raise RuntimeError, \
+269                 "New CPU (%s) is in the list of old CPUs." % (old_cpu,)
+270         if not new_cpu.switchedOut():
+271             raise RuntimeError, \
+272                 "New CPU (%s) is already active." % (new_cpu,)
+273         if not new_cpu.support_take_over():
+274             raise RuntimeError, \
+275                 "New CPU (%s) does not support CPU handover." % (old_cpu,)
+276         if new_cpu.memory_mode() != memory_mode_name:
+277             raise RuntimeError, \
+278                 "%s and %s require different memory modes." % (new_cpu,
+279                                                                new_cpus[0])
+280         if old_cpu.switchedOut():
+281             raise RuntimeError, \
+282                 "Old CPU (%s) is inactive." % (new_cpu,)
+283         if not old_cpu.support_take_over():
+284             raise RuntimeError, \
+285                 "Old CPU (%s) does not support CPU handover." % (old_cpu,)
+286 
+287     try:
+288         memory_mode = _memory_modes[memory_mode_name]
+289     except KeyError:
+290         raise RuntimeError, "Invalid memory mode (%s)" % memory_mode_name
+291 
+292     if do_drain:
+293         drain(system)
+294 
+295     # Now all of the CPUs are ready to be switched out
+296     for old_cpu, new_cpu in cpuList:
+297         old_cpu.switchOut()
+298 
+299     # Change the memory mode if required. We check if this is needed
+300     # to avoid printing a warning if no switch was performed.
+301     if system.getMemoryMode() != memory_mode:
+302         # Flush the memory system if we are switching to a memory mode
+303         # that disables caches. This typically happens when switching to a
+304         # hardware virtualized CPU.
+305         if memory_mode == objects.params.atomic_noncaching:
+306             memWriteback(system)
+307             memInvalidate(system)
+308 
+309         _changeMemoryMode(system, memory_mode)
+310 
+311     for old_cpu, new_cpu in cpuList:
+312         new_cpu.takeOverFrom(old_cpu)
+313 
+314     if do_drain:
+315         resume(system)
+316 
+from internal.core import disableAllListeners
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{namespacem5_1_1simulate_ab4c814bc9719fb6019f8b1ddc4e3bf81}{
+\index{m5::simulate@{m5::simulate}!\_\-memory\_\-modes@{\_\-memory\_\-modes}}
+\index{\_\-memory\_\-modes@{\_\-memory\_\-modes}!m5::simulate@{m5::simulate}}
+\subsubsection[{\_\-memory\_\-modes}]{\setlength{\rightskip}{0pt plus 5cm}dictionary {\bf \_\-memory\_\-modes}}}
+\label{namespacem5_1_1simulate_ab4c814bc9719fb6019f8b1ddc4e3bf81}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+{
+    "atomic" : objects.params.atomic,
+    "timing" : objects.params.timing,
+    "atomic_noncaching" : objects.params.atomic_noncaching,
+    }
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1simulate_a2c372e2e14aee3b7fbcfbd49210559d7}{
+\index{m5::simulate@{m5::simulate}!MaxTick@{MaxTick}}
+\index{MaxTick@{MaxTick}!m5::simulate@{m5::simulate}}
+\subsubsection[{MaxTick}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf MaxTick} = 2}}
+\label{namespacem5_1_1simulate_a2c372e2e14aee3b7fbcfbd49210559d7}
+\hypertarget{namespacem5_1_1simulate_a032ac35775aee51d7a28909bc144b1ed}{
+\index{m5::simulate@{m5::simulate}!need\_\-resume@{need\_\-resume}}
+\index{need\_\-resume@{need\_\-resume}!m5::simulate@{m5::simulate}}
+\subsubsection[{need\_\-resume}]{\setlength{\rightskip}{0pt plus 5cm}list {\bf need\_\-resume} = \mbox{[}$\,$\mbox{]}}}
+\label{namespacem5_1_1simulate_a032ac35775aee51d7a28909bc144b1ed}
+\hypertarget{namespacem5_1_1simulate_a0e9c92fcadba6c1848a6cacce579e3b8}{
+\index{m5::simulate@{m5::simulate}!need\_\-startup@{need\_\-startup}}
+\index{need\_\-startup@{need\_\-startup}!m5::simulate@{m5::simulate}}
+\subsubsection[{need\_\-startup}]{\setlength{\rightskip}{0pt plus 5cm}{\bf need\_\-startup} = True}}
+\label{namespacem5_1_1simulate_a0e9c92fcadba6c1848a6cacce579e3b8}

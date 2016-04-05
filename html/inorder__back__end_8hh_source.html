@@ -1,0 +1,415 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/ozone/inorder_back_end.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/ozone/inorder_back_end.hh</h1><a href="inorder__back__end_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2006 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __CPU_OZONE_INORDER_BACK_END_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_OZONE_INORDER_BACK_END_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="rename__table_8hh.html">cpu/ozone/rename_table.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="ozone_2thread__state_8hh.html">cpu/ozone/thread_state.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="thread__context_8hh.html">cpu/thread_context.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="timebuf_8hh.html">cpu/timebuf.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="request_8hh.html">mem/request.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00046"></a><a class="code" href="classInorderBackEnd.html">00046</a> <span class="keyword">class </span><a class="code" href="classInorderBackEnd.html">InorderBackEnd</a>
+<a name="l00047"></a>00047 {
+<a name="l00048"></a>00048   <span class="keyword">public</span>:
+<a name="l00049"></a><a class="code" href="classInorderBackEnd.html#a818e103eae798a24a06a0a34631849ea">00049</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#ab62ca16eeca26566ad2422b5df4943ce">Impl::Params</a> <a class="code" href="classInorderBackEnd.html#a818e103eae798a24a06a0a34631849ea">Params</a>;
+<a name="l00050"></a><a class="code" href="classInorderBackEnd.html#a028ce10889c5f6450239d9e9a7347976">00050</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classInorderBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00051"></a><a class="code" href="classInorderBackEnd.html#a90ba84e54618cc07f2e8f05e046cb5ce">00051</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::FullCPU <a class="code" href="classInorderBackEnd.html#a90ba84e54618cc07f2e8f05e046cb5ce">FullCPU</a>;
+<a name="l00052"></a><a class="code" href="classInorderBackEnd.html#abe8e1d8243582d5024a1076f6091d9fe">00052</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::FrontEnd <a class="code" href="classFrontEnd.html">FrontEnd</a>;
+<a name="l00053"></a>00053 
+<a name="l00054"></a><a class="code" href="classInorderBackEnd.html#abb1fee810c0fc9d68df56bdf67688be8">00054</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> FullCPU::OzoneTC <a class="code" href="classInorderBackEnd.html#abb1fee810c0fc9d68df56bdf67688be8">OzoneTC</a>;
+<a name="l00055"></a><a class="code" href="classInorderBackEnd.html#a82fb3c7183ba777a05c510ab2fbcfb82">00055</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::FullCPU::CommStruct <a class="code" href="classInorderBackEnd.html#a82fb3c7183ba777a05c510ab2fbcfb82">CommStruct</a>;
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057     <a class="code" href="classInorderBackEnd.html#ae2482e08cc2f4d90269bf53efd5193b7">InorderBackEnd</a>(<a class="code" href="classInorderBackEnd.html#a818e103eae798a24a06a0a34631849ea">Params</a> *params);
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059     std::string <a class="code" href="classInorderBackEnd.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>() <span class="keyword">const</span>;
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="classInorderBackEnd.html#ad491c9766121fc19aa77fd0723e7641d">00061</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#ad491c9766121fc19aa77fd0723e7641d">setCPU</a>(<a class="code" href="classInorderBackEnd.html#a90ba84e54618cc07f2e8f05e046cb5ce">FullCPU</a> *cpu_ptr)
+<a name="l00062"></a>00062     { <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a> = cpu_ptr; }
+<a name="l00063"></a>00063 
+<a name="l00064"></a><a class="code" href="classInorderBackEnd.html#a122009fa2730cee3898ac945227da8eb">00064</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a122009fa2730cee3898ac945227da8eb">setFrontEnd</a>(<a class="code" href="classFrontEnd.html">FrontEnd</a> *front_end_ptr)
+<a name="l00065"></a>00065     { <a class="code" href="classInorderBackEnd.html#a67c762418bb2017cb2dce5a0c94f0788">frontEnd</a> = front_end_ptr; }
+<a name="l00066"></a>00066 
+<a name="l00067"></a><a class="code" href="classInorderBackEnd.html#aeabdb9f0aae07df67c3029f8fddb2693">00067</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#aeabdb9f0aae07df67c3029f8fddb2693">setCommBuffer</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;CommStruct&gt;</a> *_comm)
+<a name="l00068"></a>00068     { <a class="code" href="classInorderBackEnd.html#a282f2307a986f183b83e887756561687">comm</a> = _comm; }
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#ac6ccaaea6ac518cab92f71723b5a739e">setTC</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *tc_ptr);
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a2a6551551e11d9e1947d6805e8322757">setThreadState</a>(<a class="code" href="structOzoneThreadState.html">OzoneThreadState&lt;Impl&gt;</a> *thread_ptr);
+<a name="l00073"></a>00073 
+<a name="l00074"></a><a class="code" href="classInorderBackEnd.html#a4dc637449366fcdfc4e764cdf12d9b11">00074</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>() { }
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a53f309de2e633a8788fc67ba03d23675">checkInterrupts</a>();
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a873dd91783f9efb4a590aded1f70d6b0">tick</a>();
+<a name="l00079"></a>00079     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a2d00e30d66a56e4667e28df302c98ac0">executeInsts</a>();
+<a name="l00080"></a>00080     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#aa332542122e7959baf01e00f79e82bba">squash</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;squash_num, <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;next_PC);
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a647eb6c891733b0ef3d9233af7f15748">squashFromXC</a>();
+<a name="l00083"></a><a class="code" href="classInorderBackEnd.html#ae4e704602e6cab77b5b96396fee5d104">00083</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#ae4e704602e6cab77b5b96396fee5d104">generateXCEvent</a>() { }
+<a name="l00084"></a>00084 
+<a name="l00085"></a><a class="code" href="classInorderBackEnd.html#a5c38df1621043861ada4dd0939509869">00085</a>     <span class="keywordtype">bool</span> <a class="code" href="classInorderBackEnd.html#a5c38df1621043861ada4dd0939509869">robEmpty</a>() { <span class="keywordflow">return</span> <a class="code" href="classInorderBackEnd.html#ae10a391d02ce1ef67ee13cd82b7d46e5">instList</a>.empty(); }
+<a name="l00086"></a>00086 
+<a name="l00087"></a><a class="code" href="classInorderBackEnd.html#a3e70330939fdfc4dbc2f60c1a660584d">00087</a>     <span class="keywordtype">bool</span> <a class="code" href="classInorderBackEnd.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>() { <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00088"></a><a class="code" href="classInorderBackEnd.html#ae6ec007d68382eb124ed25bc90ae9c17">00088</a>     <span class="keywordtype">bool</span> <a class="code" href="classInorderBackEnd.html#ae6ec007d68382eb124ed25bc90ae9c17">isBlocked</a>() { <span class="keywordflow">return</span> <a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a> == <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba616b5057fea90109e3c27b633a60b77f">DcacheMissStoreStall</a> ||
+<a name="l00089"></a>00089                            <a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a> == <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad5ccc7221ed484b5a546171f5a52c806">DcacheMissLoadStall</a> ||
+<a name="l00090"></a>00090                            <a class="code" href="classInorderBackEnd.html#ae2e3d2da6f5c26e7f0eca5784b6397d1">interruptBlocked</a>; }
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a71dcc69e5b01fa12b8ccd2dccdcc9917">fetchFault</a>(<a class="code" href="classRefCountingPtr.html">Fault</a> &amp;fault);
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a80587b4fe043bbe1995536cb3b361588">dumpInsts</a>();
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096   <span class="keyword">private</span>:
+<a name="l00097"></a>00097     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#acd8f81ae1aa6143073f58ab038f684f0">handleFault</a>();
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a9f7604c717497f0c9b7f416b3265e085">setSquashInfoFromTC</a>();
+<a name="l00100"></a>00100 
+<a name="l00101"></a><a class="code" href="classInorderBackEnd.html#a2aafb6fc593b04986eeed845923a8953">00101</a>     <span class="keywordtype">bool</span> <a class="code" href="classInorderBackEnd.html#a2aafb6fc593b04986eeed845923a8953">squashPending</a>;
+<a name="l00102"></a><a class="code" href="classInorderBackEnd.html#a34292b1418c46ca63c892e7826510d77">00102</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classInorderBackEnd.html#a34292b1418c46ca63c892e7826510d77">squashSeqNum</a>;
+<a name="l00103"></a><a class="code" href="classInorderBackEnd.html#aabe0c73b4678ef858d3363c9bed18906">00103</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classInorderBackEnd.html#aabe0c73b4678ef858d3363c9bed18906">squashNextPC</a>;
+<a name="l00104"></a>00104 
+<a name="l00105"></a><a class="code" href="classInorderBackEnd.html#a21a86a2f5f30b0f512909bdc8b2aae53">00105</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classInorderBackEnd.html#a21a86a2f5f30b0f512909bdc8b2aae53">faultFromFetch</a>;
+<a name="l00106"></a>00106 
+<a name="l00107"></a><a class="code" href="classInorderBackEnd.html#ae2e3d2da6f5c26e7f0eca5784b6397d1">00107</a>     <span class="keywordtype">bool</span> <a class="code" href="classInorderBackEnd.html#ae2e3d2da6f5c26e7f0eca5784b6397d1">interruptBlocked</a>;
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109   <span class="keyword">public</span>:
+<a name="l00110"></a>00110     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00111"></a>00111     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classInorderBackEnd.html#a54c0093df1bc3e8cd4f00246884389cc">read</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, T &amp;data, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>);
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00114"></a>00114     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classInorderBackEnd.html#a54c0093df1bc3e8cd4f00246884389cc">read</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> load_idx);
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00117"></a>00117     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classInorderBackEnd.html#ace3a2a0aed65c3714979fca6f51276f9">write</a>(T data, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>, uint64_t *res);
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00120"></a>00120     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classInorderBackEnd.html#ace3a2a0aed65c3714979fca6f51276f9">write</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, T &amp;data, <span class="keywordtype">int</span> store_idx);
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="classInorderBackEnd.html#aa28f3fe58fde4b038a92b9f87a40cb10">00122</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classInorderBackEnd.html#aa28f3fe58fde4b038a92b9f87a40cb10">readCommitPC</a>() { <span class="keywordflow">return</span> <a class="code" href="classInorderBackEnd.html#af043d6103c5f173871f527899c41d2d2">commitPC</a>; }
+<a name="l00123"></a>00123 
+<a name="l00124"></a><a class="code" href="classInorderBackEnd.html#af043d6103c5f173871f527899c41d2d2">00124</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classInorderBackEnd.html#af043d6103c5f173871f527899c41d2d2">commitPC</a>;
+<a name="l00125"></a>00125 
+<a name="l00126"></a><a class="code" href="classInorderBackEnd.html#a05f299b443f8cc73a93d61572edc0218">00126</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a05f299b443f8cc73a93d61572edc0218">switchOut</a>() { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Not implemented!&quot;</span>); }
+<a name="l00127"></a><a class="code" href="classInorderBackEnd.html#a039b639c41c289e1cfe6d71c41d9308c">00127</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a039b639c41c289e1cfe6d71c41d9308c">doSwitchOut</a>() { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Not implemented!&quot;</span>); }
+<a name="l00128"></a><a class="code" href="classInorderBackEnd.html#a5a901e7ec5b94a55bd61fde88ad0b7f1">00128</a>     <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd.html#a5a901e7ec5b94a55bd61fde88ad0b7f1">takeOverFrom</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *old_tc = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Not implemented!&quot;</span>); }
+<a name="l00129"></a>00129 
+<a name="l00130"></a>00130   <span class="keyword">public</span>:
+<a name="l00131"></a><a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">00131</a>     <a class="code" href="classInorderBackEnd.html#a90ba84e54618cc07f2e8f05e046cb5ce">FullCPU</a> *<a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>;
+<a name="l00132"></a>00132 
+<a name="l00133"></a><a class="code" href="classInorderBackEnd.html#a67c762418bb2017cb2dce5a0c94f0788">00133</a>     <a class="code" href="classFrontEnd.html">FrontEnd</a> *<a class="code" href="classInorderBackEnd.html#a67c762418bb2017cb2dce5a0c94f0788">frontEnd</a>;
+<a name="l00134"></a>00134 
+<a name="l00135"></a><a class="code" href="classInorderBackEnd.html#a4455a4759e69e5ebe68ae7298cbcc37d">00135</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classInorderBackEnd.html#a4455a4759e69e5ebe68ae7298cbcc37d">tc</a>;
+<a name="l00136"></a>00136 
+<a name="l00137"></a><a class="code" href="classInorderBackEnd.html#ab6f834310107fd693035eba2eeca583f">00137</a>     <a class="code" href="structOzoneThreadState.html">OzoneThreadState&lt;Impl&gt;</a> *<a class="code" href="classInorderBackEnd.html#ab6f834310107fd693035eba2eeca583f">thread</a>;
+<a name="l00138"></a>00138 
+<a name="l00139"></a><a class="code" href="classInorderBackEnd.html#af8d3f859e7c0dd9408ba99de6f415616">00139</a>     <a class="code" href="classRenameTable.html">RenameTable&lt;Impl&gt;</a> <a class="code" href="classInorderBackEnd.html#af8d3f859e7c0dd9408ba99de6f415616">renameTable</a>;
+<a name="l00140"></a>00140 
+<a name="l00141"></a>00141   <span class="keyword">protected</span>:
+<a name="l00142"></a><a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">00142</a>     <span class="keyword">enum</span> <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> {
+<a name="l00143"></a><a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">00143</a>         <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb">Running</a>,
+<a name="l00144"></a><a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">00144</a>         <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19">Idle</a>,
+<a name="l00145"></a><a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad5ccc7221ed484b5a546171f5a52c806">00145</a>         <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad5ccc7221ed484b5a546171f5a52c806">DcacheMissLoadStall</a>,
+<a name="l00146"></a><a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba616b5057fea90109e3c27b633a60b77f">00146</a>         <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba616b5057fea90109e3c27b633a60b77f">DcacheMissStoreStall</a>,
+<a name="l00147"></a><a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1eb81f4540c1c4b90839b08ae63c5d7f">00147</a>         <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba1eb81f4540c1c4b90839b08ae63c5d7f">DcacheMissComplete</a>,
+<a name="l00148"></a><a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">00148</a>         <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30">Blocked</a>
+<a name="l00149"></a>00149     };
+<a name="l00150"></a>00150 
+<a name="l00151"></a><a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">00151</a>     <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a>;
+<a name="l00152"></a>00152 
+<a name="l00153"></a><a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html">00153</a>     <span class="keyword">class </span><a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html">DCacheCompletionEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00154"></a>00154     {
+<a name="l00155"></a>00155       <span class="keyword">private</span>:
+<a name="l00156"></a><a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html#a3baa3e0e5f56f4dff4d37bbe214925d7">00156</a>         <a class="code" href="classInorderBackEnd.html">InorderBackEnd</a> *<a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html#a3baa3e0e5f56f4dff4d37bbe214925d7">be</a>;
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158       <span class="keyword">public</span>:
+<a name="l00159"></a>00159         <a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html#a58396b39cb5df3ad178cfed0d1992c1c">DCacheCompletionEvent</a>(<a class="code" href="classInorderBackEnd.html">InorderBackEnd</a> *_be);
+<a name="l00160"></a>00160 
+<a name="l00161"></a>00161         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00162"></a>00162         <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00163"></a>00163 
+<a name="l00164"></a><a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html#af5d4fb974eeb4507d4c837d365d0cefc">00164</a>         <a class="code" href="classInorderBackEnd.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>;
+<a name="l00165"></a>00165     };
+<a name="l00166"></a>00166 
+<a name="l00167"></a><a class="code" href="classInorderBackEnd.html#a27227be5511e316f17702a3a99fb0b98">00167</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html">DCacheCompletionEvent</a>;
+<a name="l00168"></a>00168 
+<a name="l00169"></a><a class="code" href="classInorderBackEnd.html#a08f9ddeb55a0840fc2f9d8f4c5e7a9fc">00169</a>     <a class="code" href="classInorderBackEnd_1_1DCacheCompletionEvent.html">DCacheCompletionEvent</a> <a class="code" href="classInorderBackEnd.html#a08f9ddeb55a0840fc2f9d8f4c5e7a9fc">cacheCompletionEvent</a>;
+<a name="l00170"></a>00170 
+<a name="l00171"></a>00171 <span class="comment">//    MemInterface *dcacheInterface;</span>
+<a name="l00172"></a>00172 
+<a name="l00173"></a><a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">00173</a>     <a class="code" href="classRequest.html">RequestPtr</a> <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>;
+<a name="l00174"></a>00174 
+<a name="l00175"></a>00175   <span class="keyword">private</span>:
+<a name="l00176"></a><a class="code" href="classInorderBackEnd.html#a4da46d72d68fcd5bfe65dc701c358379">00176</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classInorderBackEnd.html#a4da46d72d68fcd5bfe65dc701c358379">InstListIt</a>;
+<a name="l00177"></a>00177 
+<a name="l00178"></a><a class="code" href="classInorderBackEnd.html#ae10a391d02ce1ef67ee13cd82b7d46e5">00178</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classInorderBackEnd.html#ae10a391d02ce1ef67ee13cd82b7d46e5">instList</a>;
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180     <span class="comment">// General back end width. Used if the more specific isn&apos;t given.</span>
+<a name="l00181"></a><a class="code" href="classInorderBackEnd.html#a2474a5474cbff19523a51eb1de01cda4">00181</a>     <span class="keywordtype">int</span> <a class="code" href="classInorderBackEnd.html#a2474a5474cbff19523a51eb1de01cda4">width</a>;
+<a name="l00182"></a>00182 
+<a name="l00183"></a><a class="code" href="classInorderBackEnd.html#a9c5bf07170b5d91cfb44d4bfd0517128">00183</a>     <span class="keywordtype">int</span> <a class="code" href="classInorderBackEnd.html#a9c5bf07170b5d91cfb44d4bfd0517128">latency</a>;
+<a name="l00184"></a>00184 
+<a name="l00185"></a><a class="code" href="classInorderBackEnd.html#a440f8cda1481977c324a827c7c9f1e24">00185</a>     <span class="keywordtype">int</span> <a class="code" href="classInorderBackEnd.html#a440f8cda1481977c324a827c7c9f1e24">squashLatency</a>;
+<a name="l00186"></a>00186 
+<a name="l00187"></a><a class="code" href="classInorderBackEnd.html#a34cd6ffaeb59e3f95f2cc2aaf8eb7ecf">00187</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;int&gt;</a> <a class="code" href="classInorderBackEnd.html#a34cd6ffaeb59e3f95f2cc2aaf8eb7ecf">numInstsToWB</a>;
+<a name="l00188"></a><a class="code" href="classInorderBackEnd.html#a3bafa8bcab17d8f51c2b5fdf04679d47">00188</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;int&gt;::wire</a> <a class="code" href="classInorderBackEnd.html#a3bafa8bcab17d8f51c2b5fdf04679d47">instsAdded</a>;
+<a name="l00189"></a><a class="code" href="classInorderBackEnd.html#aea4c234514337a9dd2233b49732f6638">00189</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;int&gt;::wire</a> <a class="code" href="classInorderBackEnd.html#aea4c234514337a9dd2233b49732f6638">instsToExecute</a>;
+<a name="l00190"></a>00190 
+<a name="l00191"></a><a class="code" href="classInorderBackEnd.html#a282f2307a986f183b83e887756561687">00191</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;CommStruct&gt;</a> *<a class="code" href="classInorderBackEnd.html#a282f2307a986f183b83e887756561687">comm</a>;
+<a name="l00192"></a>00192     <span class="comment">// number of cycles stalled for D-cache misses</span>
+<a name="l00193"></a><a class="code" href="classInorderBackEnd.html#a06d11574ef2a7c403c51d626e834d91e">00193</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInorderBackEnd.html#a06d11574ef2a7c403c51d626e834d91e">dcacheStallCycles</a>;
+<a name="l00194"></a><a class="code" href="classInorderBackEnd.html#a8b4696062ef09ab956804a7a99491853">00194</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classInorderBackEnd.html#a8b4696062ef09ab956804a7a99491853">lastDcacheStall</a>;
+<a name="l00195"></a>00195 };
+<a name="l00196"></a>00196 
+<a name="l00197"></a>00197 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00198"></a>00198 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00199"></a>00199 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00200"></a><a class="code" href="classInorderBackEnd.html#a54c0093df1bc3e8cd4f00246884389cc">00200</a> <a class="code" href="classInorderBackEnd.html#a54c0093df1bc3e8cd4f00246884389cc">InorderBackEnd&lt;Impl&gt;::read</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, T &amp;data, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>)
+<a name="l00201"></a>00201 {
+<a name="l00202"></a>00202     <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;reset(addr, <span class="keyword">sizeof</span>(T), flags);
+<a name="l00203"></a>00203 
+<a name="l00204"></a>00204     <span class="comment">// translate to physical address</span>
+<a name="l00205"></a>00205     <a class="code" href="classRefCountingPtr.html">Fault</a> fault = <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>-&gt;dtb-&gt;translateAtomic(<a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>, <a class="code" href="classInorderBackEnd.html#ab6f834310107fd693035eba2eeca583f">thread</a>-&gt;getTC(), <span class="keyword">false</span>);
+<a name="l00206"></a>00206 
+<a name="l00207"></a>00207     <span class="comment">// if we have a cache, do cache access too</span>
+<a name="l00208"></a>00208     <span class="keywordflow">if</span> (fault == <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a> &amp;&amp; dcacheInterface) {
+<a name="l00209"></a>00209         <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;cmd = Read;
+<a name="l00210"></a>00210         <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;completionEvent = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00211"></a>00211         <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;<a class="code" href="classRequest.html#aaaea92a2d64ddb509862dd876becf90b">time</a> = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00212"></a>00212         MemAccessResult result = dcacheInterface-&gt;access(<a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>);
+<a name="l00213"></a>00213 
+<a name="l00214"></a>00214         <span class="comment">// Ugly hack to get an event scheduled *only* if the access is</span>
+<a name="l00215"></a>00215         <span class="comment">// a miss.  We really should add first-class support for this</span>
+<a name="l00216"></a>00216         <span class="comment">// at some point.</span>
+<a name="l00217"></a>00217         <span class="keywordflow">if</span> (result != MA_HIT) {
+<a name="l00218"></a>00218             <span class="comment">// Fix this hack for keeping funcExeInst correct with loads that</span>
+<a name="l00219"></a>00219             <span class="comment">// are executed twice.</span>
+<a name="l00220"></a>00220             <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;completionEvent = &amp;<a class="code" href="classInorderBackEnd.html#a08f9ddeb55a0840fc2f9d8f4c5e7a9fc">cacheCompletionEvent</a>;
+<a name="l00221"></a>00221             <a class="code" href="classInorderBackEnd.html#a8b4696062ef09ab956804a7a99491853">lastDcacheStall</a> = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00222"></a>00222 <span class="comment">//          unscheduleTickEvent();</span>
+<a name="l00223"></a>00223             <a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a> = <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad5ccc7221ed484b5a546171f5a52c806">DcacheMissLoadStall</a>;
+<a name="l00224"></a>00224             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache miss stall!\n&quot;</span>);
+<a name="l00225"></a>00225         } <span class="keywordflow">else</span> {
+<a name="l00226"></a>00226             <span class="comment">// do functional access</span>
+<a name="l00227"></a>00227             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache hit!\n&quot;</span>);
+<a name="l00228"></a>00228         }
+<a name="l00229"></a>00229     }
+<a name="l00230"></a>00230     <span class="keywordflow">return</span> fault;
+<a name="l00231"></a>00231 }
+<a name="l00232"></a>00232 
+<a name="l00233"></a>00233 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00234"></a>00234 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00235"></a>00235 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00236"></a><a class="code" href="classInorderBackEnd.html#ace3a2a0aed65c3714979fca6f51276f9">00236</a> <a class="code" href="classInorderBackEnd.html#ace3a2a0aed65c3714979fca6f51276f9">InorderBackEnd&lt;Impl&gt;::write</a>(T data, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">unsigned</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>, uint64_t *res)
+<a name="l00237"></a>00237 {
+<a name="l00238"></a>00238     <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;reset(addr, <span class="keyword">sizeof</span>(T), flags);
+<a name="l00239"></a>00239 
+<a name="l00240"></a>00240     <span class="comment">// translate to physical address</span>
+<a name="l00241"></a>00241     <a class="code" href="classRefCountingPtr.html">Fault</a> fault = <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>-&gt;dtb-&gt;translateAtomic(<a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>, <a class="code" href="classInorderBackEnd.html#ab6f834310107fd693035eba2eeca583f">thread</a>-&gt;getTC(), <span class="keyword">true</span>);
+<a name="l00242"></a>00242 
+<a name="l00243"></a>00243     <span class="keywordflow">if</span> (fault == <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a> &amp;&amp; dcacheInterface) {
+<a name="l00244"></a>00244         <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;cmd = Write;
+<a name="l00245"></a>00245 <span class="comment">//      memcpy(memReq-&gt;data,(uint8_t *)&amp;data,memReq-&gt;size);</span>
+<a name="l00246"></a>00246         <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;completionEvent = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00247"></a>00247         <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;<a class="code" href="classRequest.html#aaaea92a2d64ddb509862dd876becf90b">time</a> = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00248"></a>00248         MemAccessResult result = dcacheInterface-&gt;access(<a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>);
+<a name="l00249"></a>00249 
+<a name="l00250"></a>00250         <span class="comment">// Ugly hack to get an event scheduled *only* if the access is</span>
+<a name="l00251"></a>00251         <span class="comment">// a miss.  We really should add first-class support for this</span>
+<a name="l00252"></a>00252         <span class="comment">// at some point.</span>
+<a name="l00253"></a>00253         <span class="keywordflow">if</span> (result != MA_HIT) {
+<a name="l00254"></a>00254             <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;completionEvent = &amp;<a class="code" href="classInorderBackEnd.html#a08f9ddeb55a0840fc2f9d8f4c5e7a9fc">cacheCompletionEvent</a>;
+<a name="l00255"></a>00255             <a class="code" href="classInorderBackEnd.html#a8b4696062ef09ab956804a7a99491853">lastDcacheStall</a> = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00256"></a>00256 <span class="comment">//          unscheduleTickEvent();</span>
+<a name="l00257"></a>00257             <a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a> = <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba616b5057fea90109e3c27b633a60b77f">DcacheMissStoreStall</a>;
+<a name="l00258"></a>00258             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache miss stall!\n&quot;</span>);
+<a name="l00259"></a>00259         } <span class="keywordflow">else</span> {
+<a name="l00260"></a>00260             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache hit!\n&quot;</span>);
+<a name="l00261"></a>00261         }
+<a name="l00262"></a>00262     }
+<a name="l00263"></a>00263 
+<a name="l00264"></a>00264     <span class="keywordflow">if</span> (res &amp;&amp; (fault == <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>))
+<a name="l00265"></a>00265         *res = <a class="code" href="classInorderBackEnd.html#a5520eb2f7c2cf4b0e109d6ffd6d2d053">memReq</a>-&gt;result;
+<a name="l00266"></a>00266     <span class="keywordflow">return</span> fault;
+<a name="l00267"></a>00267 }
+<a name="l00268"></a>00268 
+<a name="l00269"></a>00269 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00270"></a>00270 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00271"></a>00271 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00272"></a><a class="code" href="classInorderBackEnd.html#ad2981b6704bca036af0723daaaebe57e">00272</a> <a class="code" href="classInorderBackEnd.html#a54c0093df1bc3e8cd4f00246884389cc">InorderBackEnd&lt;Impl&gt;::read</a>(MemReqPtr &amp;req, T &amp;data, <span class="keywordtype">int</span> load_idx)
+<a name="l00273"></a>00273 {
+<a name="l00274"></a>00274 <span class="comment">//    panic(&quot;Unimplemented!&quot;);</span>
+<a name="l00275"></a>00275 <span class="comment">//    memReq-&gt;reset(addr, sizeof(T), flags);</span>
+<a name="l00276"></a>00276 
+<a name="l00277"></a>00277     <span class="comment">// translate to physical address</span>
+<a name="l00278"></a>00278 <span class="comment">//    Fault fault = cpu-&gt;translateDataReadReq(req);</span>
+<a name="l00279"></a>00279     req-&gt;cmd = Read;
+<a name="l00280"></a>00280     req-&gt;completionEvent = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00281"></a>00281     req-&gt;time = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00282"></a>00282     assert(!req-&gt;data);
+<a name="l00283"></a>00283     req-&gt;data = <span class="keyword">new</span> uint8_t[64];
+<a name="l00284"></a>00284     <a class="code" href="classRefCountingPtr.html">Fault</a> fault = <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>-&gt;read(req, data);
+<a name="l00285"></a>00285     memcpy(req-&gt;data, &amp;data, <span class="keyword">sizeof</span>(T));
+<a name="l00286"></a>00286 
+<a name="l00287"></a>00287     <span class="comment">// if we have a cache, do cache access too</span>
+<a name="l00288"></a>00288     <span class="keywordflow">if</span> (dcacheInterface) {
+<a name="l00289"></a>00289         MemAccessResult result = dcacheInterface-&gt;access(req);
+<a name="l00290"></a>00290 
+<a name="l00291"></a>00291         <span class="comment">// Ugly hack to get an event scheduled *only* if the access is</span>
+<a name="l00292"></a>00292         <span class="comment">// a miss.  We really should add first-class support for this</span>
+<a name="l00293"></a>00293         <span class="comment">// at some point.</span>
+<a name="l00294"></a>00294         <span class="keywordflow">if</span> (result != MA_HIT) {
+<a name="l00295"></a>00295             req-&gt;completionEvent = &amp;<a class="code" href="classInorderBackEnd.html#a08f9ddeb55a0840fc2f9d8f4c5e7a9fc">cacheCompletionEvent</a>;
+<a name="l00296"></a>00296             <a class="code" href="classInorderBackEnd.html#a8b4696062ef09ab956804a7a99491853">lastDcacheStall</a> = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00297"></a>00297 <span class="comment">//          unscheduleTickEvent();</span>
+<a name="l00298"></a>00298             <a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a> = <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70bad5ccc7221ed484b5a546171f5a52c806">DcacheMissLoadStall</a>;
+<a name="l00299"></a>00299             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache miss load stall!\n&quot;</span>);
+<a name="l00300"></a>00300         } <span class="keywordflow">else</span> {
+<a name="l00301"></a>00301             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache hit!\n&quot;</span>);
+<a name="l00302"></a>00302 
+<a name="l00303"></a>00303         }
+<a name="l00304"></a>00304     }
+<a name="l00305"></a>00305 
+<a name="l00306"></a>00306     <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00307"></a>00307 }
+<a name="l00308"></a>00308 
+<a name="l00309"></a>00309 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00310"></a>00310 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00311"></a>00311 <a class="code" href="classRefCountingPtr.html">Fault</a>
+<a name="l00312"></a><a class="code" href="classInorderBackEnd.html#a173162a41482ee35c5a15394b4befa4b">00312</a> <a class="code" href="classInorderBackEnd.html#ace3a2a0aed65c3714979fca6f51276f9">InorderBackEnd&lt;Impl&gt;::write</a>(MemReqPtr &amp;req, T &amp;data, <span class="keywordtype">int</span> store_idx)
+<a name="l00313"></a>00313 {
+<a name="l00314"></a>00314 <span class="comment">//    req-&gt;reset(addr, sizeof(T), flags);</span>
+<a name="l00315"></a>00315 
+<a name="l00316"></a>00316     <span class="comment">// translate to physical address</span>
+<a name="l00317"></a>00317 <span class="comment">//    Fault fault = cpu-&gt;translateDataWriteReq(req);</span>
+<a name="l00318"></a>00318 
+<a name="l00319"></a>00319     req-&gt;cmd = Write;
+<a name="l00320"></a>00320     req-&gt;completionEvent = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00321"></a>00321     req-&gt;time = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00322"></a>00322     assert(!req-&gt;data);
+<a name="l00323"></a>00323     req-&gt;data = <span class="keyword">new</span> uint8_t[64];
+<a name="l00324"></a>00324     memcpy(req-&gt;data, (uint8_t *)&amp;data, req-&gt;size);
+<a name="l00325"></a>00325 
+<a name="l00326"></a>00326     <span class="keywordflow">switch</span>(req-&gt;size) {
+<a name="l00327"></a>00327       <span class="keywordflow">case</span> 1:
+<a name="l00328"></a>00328         <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>-&gt;write(req, (uint8_t &amp;)data);
+<a name="l00329"></a>00329         <span class="keywordflow">break</span>;
+<a name="l00330"></a>00330       <span class="keywordflow">case</span> 2:
+<a name="l00331"></a>00331         <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>-&gt;write(req, (uint16_t &amp;)data);
+<a name="l00332"></a>00332         <span class="keywordflow">break</span>;
+<a name="l00333"></a>00333       <span class="keywordflow">case</span> 4:
+<a name="l00334"></a>00334         <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>-&gt;write(req, (<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> &amp;)data);
+<a name="l00335"></a>00335         <span class="keywordflow">break</span>;
+<a name="l00336"></a>00336       <span class="keywordflow">case</span> 8:
+<a name="l00337"></a>00337         <a class="code" href="classInorderBackEnd.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>-&gt;write(req, (uint64_t &amp;)data);
+<a name="l00338"></a>00338         <span class="keywordflow">break</span>;
+<a name="l00339"></a>00339       <span class="keywordflow">default</span>:
+<a name="l00340"></a>00340         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Unexpected store size!\n&quot;</span>);
+<a name="l00341"></a>00341     }
+<a name="l00342"></a>00342 
+<a name="l00343"></a>00343     <span class="keywordflow">if</span> (dcacheInterface) {
+<a name="l00344"></a>00344         req-&gt;cmd = Write;
+<a name="l00345"></a>00345         req-&gt;data = <span class="keyword">new</span> uint8_t[64];
+<a name="l00346"></a>00346         memcpy(req-&gt;data,(uint8_t *)&amp;data,req-&gt;size);
+<a name="l00347"></a>00347         req-&gt;completionEvent = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00348"></a>00348         req-&gt;time = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00349"></a>00349         MemAccessResult result = dcacheInterface-&gt;access(req);
+<a name="l00350"></a>00350 
+<a name="l00351"></a>00351         <span class="comment">// Ugly hack to get an event scheduled *only* if the access is</span>
+<a name="l00352"></a>00352         <span class="comment">// a miss.  We really should add first-class support for this</span>
+<a name="l00353"></a>00353         <span class="comment">// at some point.</span>
+<a name="l00354"></a>00354         <span class="keywordflow">if</span> (result != MA_HIT) {
+<a name="l00355"></a>00355             req-&gt;completionEvent = &amp;<a class="code" href="classInorderBackEnd.html#a08f9ddeb55a0840fc2f9d8f4c5e7a9fc">cacheCompletionEvent</a>;
+<a name="l00356"></a>00356             <a class="code" href="classInorderBackEnd.html#a8b4696062ef09ab956804a7a99491853">lastDcacheStall</a> = <a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>();
+<a name="l00357"></a>00357 <span class="comment">//          unscheduleTickEvent();</span>
+<a name="l00358"></a>00358             <a class="code" href="classInorderBackEnd.html#ae29aa2d4ae440022daaed1107eb306b3">status</a> = <a class="code" href="classInorderBackEnd.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba616b5057fea90109e3c27b633a60b77f">DcacheMissStoreStall</a>;
+<a name="l00359"></a>00359             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache miss store stall!\n&quot;</span>);
+<a name="l00360"></a>00360         } <span class="keywordflow">else</span> {
+<a name="l00361"></a>00361             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IBE, <span class="stringliteral">&quot;Dcache hit!\n&quot;</span>);
+<a name="l00362"></a>00362 
+<a name="l00363"></a>00363         }
+<a name="l00364"></a>00364     }
+<a name="l00365"></a>00365 <span class="comment">/*</span>
+<a name="l00366"></a>00366 <span class="comment">    if (req-&gt;isLLSC()) {</span>
+<a name="l00367"></a>00367 <span class="comment">        if (req-&gt;isUncacheable()) {</span>
+<a name="l00368"></a>00368 <span class="comment">            // Don&apos;t update result register (see stq_c in isa_desc)</span>
+<a name="l00369"></a>00369 <span class="comment">            req-&gt;result = 2;</span>
+<a name="l00370"></a>00370 <span class="comment">        } else {</span>
+<a name="l00371"></a>00371 <span class="comment">            req-&gt;result = 1;</span>
+<a name="l00372"></a>00372 <span class="comment">        }</span>
+<a name="l00373"></a>00373 <span class="comment">    }</span>
+<a name="l00374"></a>00374 <span class="comment">*/</span>
+<a name="l00375"></a>00375 <span class="comment">/*</span>
+<a name="l00376"></a>00376 <span class="comment">    if (res &amp;&amp; (fault == NoFault))</span>
+<a name="l00377"></a>00377 <span class="comment">        *res = req-&gt;result;</span>
+<a name="l00378"></a>00378 <span class="comment">        */</span>
+<a name="l00379"></a>00379     <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>;
+<a name="l00380"></a>00380 }
+<a name="l00381"></a>00381 
+<a name="l00382"></a>00382 <span class="preprocessor">#endif // __CPU_OZONE_INORDER_BACK_END_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

@@ -1,0 +1,136 @@
+\hypertarget{pyobject_8hh}{
+\section{python/swig/pyobject.hh}
+\label{pyobject_8hh}\index{python/swig/pyobject.hh@{python/swig/pyobject.hh}}
+}
+{\ttfamily \#include $<$Python.h$>$}\par
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}dev/etherint.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/serialize.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-object.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSimObject}{SimObject} $\ast$ \hyperlink{pyobject_8hh_a35bd8f1c38b15825afd59cae5bb0169e}{convertSwigSimObjectPtr} (\hyperlink{init_8hh_ae19630c1f4ca6d5236b30719d9140013}{PyObject} $\ast$)
+\item 
+\hyperlink{classSimObject}{SimObject} $\ast$ \hyperlink{pyobject_8hh_a86dd63b6a0431f583c8a984934c005ea}{resolveSimObject} (const std::string \&name)
+\item 
+\hyperlink{classEtherInt}{EtherInt} $\ast$ \hyperlink{pyobject_8hh_a7140d9d13a7d38ed7ac6fe75319f64ca}{lookupEthPort} (\hyperlink{classSimObject}{SimObject} $\ast$so, const std::string \&name, int i)
+\item 
+int \hyperlink{pyobject_8hh_a07ed93a9ca4128b7d2b30ee7a82bb77e}{connectPorts} (\hyperlink{classSimObject}{SimObject} $\ast$o1, const std::string \&name1, int i1, \hyperlink{classSimObject}{SimObject} $\ast$o2, const std::string \&name2, int i2)
+\item 
+void \hyperlink{pyobject_8hh_a4d874e18d11647800fec682fd72a51db}{serializeAll} (const std::string \&cpt\_\-dir)
+\item 
+\hyperlink{classCheckpoint}{Checkpoint} $\ast$ \hyperlink{pyobject_8hh_aac5019b5f736b89388804c7cb43bf754}{getCheckpoint} (const std::string \&cpt\_\-dir)
+\item 
+void \hyperlink{pyobject_8hh_a26aaa7facb37dfe9ef4c39b082978ef9}{unserializeGlobals} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{pyobject_8hh_a07ed93a9ca4128b7d2b30ee7a82bb77e}{
+\index{pyobject.hh@{pyobject.hh}!connectPorts@{connectPorts}}
+\index{connectPorts@{connectPorts}!pyobject.hh@{pyobject.hh}}
+\subsubsection[{connectPorts}]{\setlength{\rightskip}{0pt plus 5cm}int connectPorts ({\bf SimObject} $\ast$ {\em o1}, \/  const std::string \& {\em name1}, \/  int {\em i1}, \/  {\bf SimObject} $\ast$ {\em o2}, \/  const std::string \& {\em name2}, \/  int {\em i2})}}
+\label{pyobject_8hh_a07ed93a9ca4128b7d2b30ee7a82bb77e}
+Connect the described \hyperlink{classMemObject}{MemObject} ports. Called from Python via SWIG.
+
+Connect the described \hyperlink{classMemObject}{MemObject} ports. Called from Python via SWIG. The indices i1 \& i2 will be -\/1 for regular ports, $>$= 0 for vector ports. SimObject1 is the master, and SimObject2 is the slave 
+
+
+\begin{DoxyCode}
+77 {
+78 #if THE_ISA != NULL_ISA
+79     if (FullSystem) {
+80         EtherObject *eo1, *eo2;
+81         EtherDevice *ed1, *ed2;
+82         eo1 = dynamic_cast<EtherObject*>(o1);
+83         ed1 = dynamic_cast<EtherDevice*>(o1);
+84         eo2 = dynamic_cast<EtherObject*>(o2);
+85         ed2 = dynamic_cast<EtherDevice*>(o2);
+86 
+87         if ((eo1 || ed1) && (eo2 || ed2)) {
+88             EtherInt *p1 = lookupEthPort(o1, name1, i1);
+89             EtherInt *p2 = lookupEthPort(o2, name2, i2);
+90 
+91             if (p1 != NULL &&  p2 != NULL) {
+92 
+93                 p1->setPeer(p2);
+94                 p2->setPeer(p1);
+95 
+96                 return 1;
+97             }
+98         }
+99     }
+100 #endif
+101     MemObject *mo1, *mo2;
+102     mo1 = dynamic_cast<MemObject*>(o1);
+103     mo2 = dynamic_cast<MemObject*>(o2);
+104 
+105     if(mo1 == NULL || mo2 == NULL) {
+106         panic ("Error casting SimObjects %s and %s to MemObject", o1->name(),
+107                o2->name());
+108     }
+109 
+110     // generic master/slave port connection
+111     BaseMasterPort& masterPort = mo1->getMasterPort(name1, i1);
+112     BaseSlavePort& slavePort   = mo2->getSlavePort(name2, i2);
+113 
+114     masterPort.bind(slavePort);
+115 
+116     return 1;
+117 }
+\end{DoxyCode}
+\hypertarget{pyobject_8hh_a35bd8f1c38b15825afd59cae5bb0169e}{
+\index{pyobject.hh@{pyobject.hh}!convertSwigSimObjectPtr@{convertSwigSimObjectPtr}}
+\index{convertSwigSimObjectPtr@{convertSwigSimObjectPtr}!pyobject.hh@{pyobject.hh}}
+\subsubsection[{convertSwigSimObjectPtr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject}$\ast$ convertSwigSimObjectPtr ({\bf PyObject} $\ast$)}}
+\label{pyobject_8hh_a35bd8f1c38b15825afd59cae5bb0169e}
+\hypertarget{pyobject_8hh_aac5019b5f736b89388804c7cb43bf754}{
+\index{pyobject.hh@{pyobject.hh}!getCheckpoint@{getCheckpoint}}
+\index{getCheckpoint@{getCheckpoint}!pyobject.hh@{pyobject.hh}}
+\subsubsection[{getCheckpoint}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Checkpoint}$\ast$ getCheckpoint (const std::string \& {\em cpt\_\-dir})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{pyobject_8hh_aac5019b5f736b89388804c7cb43bf754}
+
+
+
+\begin{DoxyCode}
+58 {
+59     return new Checkpoint(cpt_dir);
+60 }
+\end{DoxyCode}
+\hypertarget{pyobject_8hh_a7140d9d13a7d38ed7ac6fe75319f64ca}{
+\index{pyobject.hh@{pyobject.hh}!lookupEthPort@{lookupEthPort}}
+\index{lookupEthPort@{lookupEthPort}!pyobject.hh@{pyobject.hh}}
+\subsubsection[{lookupEthPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf EtherInt}$\ast$ lookupEthPort ({\bf SimObject} $\ast$ {\em so}, \/  const std::string \& {\em name}, \/  int {\em i})}}
+\label{pyobject_8hh_a7140d9d13a7d38ed7ac6fe75319f64ca}
+\hypertarget{pyobject_8hh_a86dd63b6a0431f583c8a984934c005ea}{
+\index{pyobject.hh@{pyobject.hh}!resolveSimObject@{resolveSimObject}}
+\index{resolveSimObject@{resolveSimObject}!pyobject.hh@{pyobject.hh}}
+\subsubsection[{resolveSimObject}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject}$\ast$ resolveSimObject (const std::string \& {\em name})}}
+\label{pyobject_8hh_a86dd63b6a0431f583c8a984934c005ea}
+\hypertarget{pyobject_8hh_a4d874e18d11647800fec682fd72a51db}{
+\index{pyobject.hh@{pyobject.hh}!serializeAll@{serializeAll}}
+\index{serializeAll@{serializeAll}!pyobject.hh@{pyobject.hh}}
+\subsubsection[{serializeAll}]{\setlength{\rightskip}{0pt plus 5cm}void serializeAll (const std::string \& {\em cpt\_\-dir})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{pyobject_8hh_a4d874e18d11647800fec682fd72a51db}
+
+
+
+\begin{DoxyCode}
+52 {
+53     Serializable::serializeAll(cpt_dir);
+54 }
+\end{DoxyCode}
+\hypertarget{pyobject_8hh_a26aaa7facb37dfe9ef4c39b082978ef9}{
+\index{pyobject.hh@{pyobject.hh}!unserializeGlobals@{unserializeGlobals}}
+\index{unserializeGlobals@{unserializeGlobals}!pyobject.hh@{pyobject.hh}}
+\subsubsection[{unserializeGlobals}]{\setlength{\rightskip}{0pt plus 5cm}void unserializeGlobals ({\bf Checkpoint} $\ast$ {\em cp})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{pyobject_8hh_a26aaa7facb37dfe9ef4c39b082978ef9}
+
+
+
+\begin{DoxyCode}
+64 {
+65     Serializable::unserializeGlobals(cp);
+66 }
+\end{DoxyCode}

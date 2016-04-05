@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/generic/linux/threadinfo.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/generic/linux/threadinfo.hh</h1><a href="threadinfo_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2004 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00029"></a>00029 <span class="comment"> *          Nathan Binkert</span>
+<a name="l00030"></a>00030 <span class="comment"> *          Dam Sunwoo</span>
+<a name="l00031"></a>00031 <span class="comment"> */</span>
+<a name="l00032"></a>00032 
+<a name="l00033"></a>00033 <span class="preprocessor">#ifndef __ARCH_GENERIC_LINUX_THREADINFO_HH__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_GENERIC_LINUX_THREADINFO_HH__</span>
+<a name="l00035"></a>00035 <span class="preprocessor"></span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="thread__context_8hh.html">cpu/thread_context.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="sim_2system_8hh.html">sim/system.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="vptr_8hh.html">sim/vptr.hh</a>&quot;</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a><a class="code" href="namespaceLinux.html">00040</a> <span class="keyword">namespace </span><a class="code" href="classLinux.html">Linux</a> {
+<a name="l00041"></a>00041 
+<a name="l00042"></a><a class="code" href="classLinux_1_1ThreadInfo.html">00042</a> <span class="keyword">class </span><a class="code" href="classLinux_1_1ThreadInfo.html">ThreadInfo</a>
+<a name="l00043"></a>00043 {
+<a name="l00044"></a>00044   <span class="keyword">private</span>:
+<a name="l00045"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a4455a4759e69e5ebe68ae7298cbcc37d">00045</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>;
+<a name="l00046"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">00046</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classLinux_1_1ThreadInfo.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>;
+<a name="l00047"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a6e10da530c8ba76b721d983185b1ea8d">00047</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLinux_1_1ThreadInfo.html#a6e10da530c8ba76b721d983185b1ea8d">pcbb</a>;
+<a name="l00048"></a>00048 
+<a name="l00049"></a>00049     <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
+<a name="l00050"></a>00050     <span class="keywordtype">bool</span>
+<a name="l00051"></a><a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">00051</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *symbol, T &amp;data)
+<a name="l00052"></a>00052     {
+<a name="l00053"></a>00053         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a> = 0;
+<a name="l00054"></a>00054         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>-&gt;<a class="code" href="classSystem.html#a579bef006c1d6148c2764355c0b039b7">kernelSymtab</a>-&gt;<a class="code" href="classSymbolTable.html#a14c997354df4213240205fe85d61a504">findAddress</a>(symbol, addr)) {
+<a name="l00055"></a>00055             <a class="code" href="base_2misc_8hh.html#abb243c15dfbeedf4ae64aa213f4f18c7">warn_once</a>(<span class="stringliteral">&quot;Unable to find kernel symbol %s\n&quot;</span>, symbol);
+<a name="l00056"></a>00056             <a class="code" href="base_2misc_8hh.html#abb243c15dfbeedf4ae64aa213f4f18c7">warn_once</a>(<span class="stringliteral">&quot;Kernel not compiled with task_struct info; can&apos;t get &quot;</span>
+<a name="l00057"></a>00057                       <span class="stringliteral">&quot;currently executing task/process/thread name/ids!\n&quot;</span>);
+<a name="l00058"></a>00058             <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00059"></a>00059         }
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061         <a class="code" href="fs__translating__port__proxy_8cc.html#a532188374aa989b4aeff3e0a1dff22fe">CopyOut</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, &amp;data, addr, <span class="keyword">sizeof</span>(T));
+<a name="l00062"></a>00062 
+<a name="l00063"></a>00063         data = <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">TheISA::gtoh</a>(data);
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065         <span class="keywordflow">return</span> <span class="keyword">true</span>;
+<a name="l00066"></a>00066     }
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068   <span class="keyword">public</span>:
+<a name="l00069"></a><a class="code" href="classLinux_1_1ThreadInfo.html#ac45ecf2813a7b8622615eb399e4ef8d7">00069</a>     <a class="code" href="classLinux_1_1ThreadInfo.html">ThreadInfo</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *_tc, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> _pcbb = 0)
+<a name="l00070"></a>00070         : <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>(_tc), <a class="code" href="classLinux_1_1ThreadInfo.html#a8ae37465ba84acfef6af3e9b9e6dbbd5">sys</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>-&gt;getSystemPtr()), <a class="code" href="classLinux_1_1ThreadInfo.html#a6e10da530c8ba76b721d983185b1ea8d">pcbb</a>(_pcbb)
+<a name="l00071"></a>00071     {
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073     }
+<a name="l00074"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a4eb41aa67f0202861fc2a3862127964e">00074</a>     ~<a class="code" href="classLinux_1_1ThreadInfo.html">ThreadInfo</a>()
+<a name="l00075"></a>00075     {}
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077     <span class="keyword">inline</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00078"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a858f183600a76216a02ed8118d784cdc">00078</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#a858f183600a76216a02ed8118d784cdc">curThreadInfo</a>()
+<a name="l00079"></a>00079     {
+<a name="l00080"></a>00080         <span class="keywordflow">if</span> (!<a class="code" href="namespaceAlphaISA.html#a9faf3aac879cfa867d4ae15d4119c45e">TheISA::CurThreadInfoImplemented</a>)
+<a name="l00081"></a>00081             <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;curThreadInfo() not implemented for this ISA&quot;</span>);
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a> = <a class="code" href="classLinux_1_1ThreadInfo.html#a6e10da530c8ba76b721d983185b1ea8d">pcbb</a>;
+<a name="l00084"></a>00084         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#abec75b7aaa6ffc77683fc30a8b8abdba">sp</a>;
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086         <span class="keywordflow">if</span> (!addr)
+<a name="l00087"></a>00087             addr = <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>-&gt;<a class="code" href="classThreadContext.html#a93c9c97261cb7289d5976b8222f70c4c">readMiscRegNoEffect</a>(<a class="code" href="namespaceAlphaISA.html#a7e5bf2f33f34327efc1eeccbb0c1141f">TheISA::CurThreadInfoReg</a>);
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089         <a class="code" href="classPortProxy.html">PortProxy</a> &amp;<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a> = <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>-&gt;<a class="code" href="classThreadContext.html#a2c278159cd0cf8983446313f71dad2b4">getPhysProxy</a>();
+<a name="l00090"></a>00090         p.<a class="code" href="classPortProxy.html#ad63586ad1fa7fd707ea7e03665c25502">readBlob</a>(addr, (uint8_t *)&amp;sp, <span class="keyword">sizeof</span>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>));
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092         <span class="keywordflow">return</span> sp &amp; ~<a class="code" href="base_2types_8hh.html#adcc3cf526a71c0dfaae020d432c78b83">ULL</a>(0x3fff);
+<a name="l00093"></a>00093     }
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095     <span class="keyword">inline</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00096"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a1a8fccfe3891a5949b7acbf68d210165">00096</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#a1a8fccfe3891a5949b7acbf68d210165">curTaskInfo</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> = 0)
+<a name="l00097"></a>00097     {
+<a name="l00098"></a>00098         int32_t <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>;
+<a name="l00099"></a>00099         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="stringliteral">&quot;thread_info_task&quot;</span>, offset))
+<a name="l00100"></a>00100             <span class="keywordflow">return</span> 0;
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102         <span class="keywordflow">if</span> (!<a class="code" href="structLinux_1_1thread__info.html">thread_info</a>)
+<a name="l00103"></a>00103             <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> = <a class="code" href="classLinux_1_1ThreadInfo.html#a858f183600a76216a02ed8118d784cdc">curThreadInfo</a>();
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>;
+<a name="l00106"></a>00106         <a class="code" href="fs__translating__port__proxy_8cc.html#a532188374aa989b4aeff3e0a1dff22fe">CopyOut</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, &amp;addr, <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> + offset, <span class="keyword">sizeof</span>(addr));
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108         <span class="keywordflow">return</span> addr;
+<a name="l00109"></a>00109     }
+<a name="l00110"></a>00110 
+<a name="l00111"></a>00111     int32_t
+<a name="l00112"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a61cccca364818b8d499410a9b100d307">00112</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#a61cccca364818b8d499410a9b100d307">curTaskPID</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> = 0)
+<a name="l00113"></a>00113     {
+<a name="l00114"></a>00114         int32_t <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>;
+<a name="l00115"></a>00115         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="stringliteral">&quot;task_struct_pid&quot;</span>, offset))
+<a name="l00116"></a>00116             <span class="keywordflow">return</span> -1;
+<a name="l00117"></a>00117 
+<a name="l00118"></a>00118         int32_t pid;
+<a name="l00119"></a>00119         <a class="code" href="fs__translating__port__proxy_8cc.html#a532188374aa989b4aeff3e0a1dff22fe">CopyOut</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, &amp;pid, <a class="code" href="classLinux_1_1ThreadInfo.html#a1a8fccfe3891a5949b7acbf68d210165">curTaskInfo</a>(<a class="code" href="structLinux_1_1thread__info.html">thread_info</a>) + offset, <span class="keyword">sizeof</span>(pid));
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121         <span class="keywordflow">return</span> pid;
+<a name="l00122"></a>00122     }
+<a name="l00123"></a>00123 
+<a name="l00124"></a>00124     int32_t
+<a name="l00125"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a95f8711d141a94ab8f2b192bb58d6fc1">00125</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#a95f8711d141a94ab8f2b192bb58d6fc1">curTaskTGID</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> = 0)
+<a name="l00126"></a>00126     {
+<a name="l00127"></a>00127         int32_t <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>;
+<a name="l00128"></a>00128         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="stringliteral">&quot;task_struct_tgid&quot;</span>, offset))
+<a name="l00129"></a>00129             <span class="keywordflow">return</span> -1;
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131         int32_t tgid;
+<a name="l00132"></a>00132         <a class="code" href="fs__translating__port__proxy_8cc.html#a532188374aa989b4aeff3e0a1dff22fe">CopyOut</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, &amp;tgid, <a class="code" href="classLinux_1_1ThreadInfo.html#a1a8fccfe3891a5949b7acbf68d210165">curTaskInfo</a>(<a class="code" href="structLinux_1_1thread__info.html">thread_info</a>) + offset, <span class="keyword">sizeof</span>(tgid));
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134         <span class="keywordflow">return</span> tgid;
+<a name="l00135"></a>00135     }
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137     int64_t
+<a name="l00138"></a><a class="code" href="classLinux_1_1ThreadInfo.html#aa1fc5d282b28d10354417f72a82a36c7">00138</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#aa1fc5d282b28d10354417f72a82a36c7">curTaskStart</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> = 0)
+<a name="l00139"></a>00139     {
+<a name="l00140"></a>00140         int32_t <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>;
+<a name="l00141"></a>00141         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="stringliteral">&quot;task_struct_start_time&quot;</span>, offset))
+<a name="l00142"></a>00142             <span class="keywordflow">return</span> -1;
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144         int64_t data;
+<a name="l00145"></a>00145         <span class="comment">// start_time is actually of type timespec, but if we just</span>
+<a name="l00146"></a>00146         <span class="comment">// grab the first long, we&apos;ll get the seconds out of it</span>
+<a name="l00147"></a>00147         <a class="code" href="fs__translating__port__proxy_8cc.html#a532188374aa989b4aeff3e0a1dff22fe">CopyOut</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, &amp;data, <a class="code" href="classLinux_1_1ThreadInfo.html#a1a8fccfe3891a5949b7acbf68d210165">curTaskInfo</a>(<a class="code" href="structLinux_1_1thread__info.html">thread_info</a>) + offset, <span class="keyword">sizeof</span>(data));
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149         <span class="keywordflow">return</span> data;
+<a name="l00150"></a>00150     }
+<a name="l00151"></a>00151 
+<a name="l00152"></a>00152     std::string
+<a name="l00153"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a35e25daf337cac7b44d13cf92382f45e">00153</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#a35e25daf337cac7b44d13cf92382f45e">curTaskName</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> = 0)
+<a name="l00154"></a>00154     {
+<a name="l00155"></a>00155         int32_t <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>;
+<a name="l00156"></a>00156         int32_t size;
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="stringliteral">&quot;task_struct_comm&quot;</span>, offset))
+<a name="l00159"></a>00159             <span class="keywordflow">return</span> <span class="stringliteral">&quot;FailureIn_curTaskName&quot;</span>;
+<a name="l00160"></a>00160 
+<a name="l00161"></a>00161         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="stringliteral">&quot;task_struct_comm_size&quot;</span>, size))
+<a name="l00162"></a>00162             <span class="keywordflow">return</span> <span class="stringliteral">&quot;FailureIn_curTaskName&quot;</span>;
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164         <span class="keywordtype">char</span> buffer[size + 1];
+<a name="l00165"></a>00165         <a class="code" href="fs__translating__port__proxy_8cc.html#a3dba1fb48832b9fc799b4899dcb59128">CopyStringOut</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, buffer, <a class="code" href="classLinux_1_1ThreadInfo.html#a1a8fccfe3891a5949b7acbf68d210165">curTaskInfo</a>(<a class="code" href="structLinux_1_1thread__info.html">thread_info</a>) + offset, size);
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167         <span class="keywordflow">return</span> buffer;
+<a name="l00168"></a>00168     }
+<a name="l00169"></a>00169 
+<a name="l00170"></a>00170     int32_t
+<a name="l00171"></a><a class="code" href="classLinux_1_1ThreadInfo.html#a9e35eef467b5e80427937e62772c91da">00171</a>     <a class="code" href="classLinux_1_1ThreadInfo.html#a9e35eef467b5e80427937e62772c91da">curTaskMm</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structLinux_1_1thread__info.html">thread_info</a> = 0)
+<a name="l00172"></a>00172     {
+<a name="l00173"></a>00173         int32_t <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>;
+<a name="l00174"></a>00174         <span class="keywordflow">if</span> (!<a class="code" href="classLinux_1_1ThreadInfo.html#af0da1d324f55329a4d5ca716b05dc79f">get_data</a>(<span class="stringliteral">&quot;task_struct_mm&quot;</span>, offset))
+<a name="l00175"></a>00175             <span class="keywordflow">return</span> -1;
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177         int32_t mm_ptr;
+<a name="l00178"></a>00178         <a class="code" href="fs__translating__port__proxy_8cc.html#a532188374aa989b4aeff3e0a1dff22fe">CopyOut</a>(<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, &amp;mm_ptr, <a class="code" href="classLinux_1_1ThreadInfo.html#a1a8fccfe3891a5949b7acbf68d210165">curTaskInfo</a>(<a class="code" href="structLinux_1_1thread__info.html">thread_info</a>) + offset, <span class="keyword">sizeof</span>(mm_ptr));
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180         <span class="keywordflow">return</span> mm_ptr;
+<a name="l00181"></a>00181     }
+<a name="l00182"></a>00182 };
+<a name="l00183"></a>00183 
+<a name="l00184"></a>00184 } <span class="comment">// namespace Linux</span>
+<a name="l00185"></a>00185 
+<a name="l00186"></a>00186 <span class="preprocessor">#endif // __ARCH_GENERIC_LINUX_THREADINFO_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

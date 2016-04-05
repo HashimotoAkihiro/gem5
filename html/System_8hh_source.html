@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/system/System.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/system/System.hh</h1><a href="System_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 1999-2012 Mark D. Hill and David A. Wood</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> */</span>
+<a name="l00028"></a>00028 
+<a name="l00029"></a>00029 <span class="comment">/*</span>
+<a name="l00030"></a>00030 <span class="comment"> * Contains all of the various parts of the system we are simulating.</span>
+<a name="l00031"></a>00031 <span class="comment"> * Performs allocation, deallocation, and setup of all the major</span>
+<a name="l00032"></a>00032 <span class="comment"> * components of the system</span>
+<a name="l00033"></a>00033 <span class="comment"> */</span>
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="preprocessor">#ifndef __MEM_RUBY_SYSTEM_SYSTEM_HH__</span>
+<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_SYSTEM_SYSTEM_HH__</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="callback_8hh.html">base/callback.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="output_8hh.html">base/output.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="Profiler_8hh.html">mem/ruby/profiler/Profiler.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="CacheRecorder_8hh.html">mem/ruby/recorder/CacheRecorder.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="AbstractController_8hh.html">mem/ruby/slicc_interface/AbstractController.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="MemoryControl_8hh.html">mem/ruby/system/MemoryControl.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="MemoryVector_8hh.html">mem/ruby/system/MemoryVector.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="SparseMemory_8hh.html">mem/ruby/system/SparseMemory.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;params/RubySystem.hh&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="clocked__object_8hh.html">sim/clocked_object.hh</a>&quot;</span>
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="keyword">class </span><a class="code" href="classNetwork.html">Network</a>;
+<a name="l00051"></a>00051 
+<a name="l00052"></a><a class="code" href="classRubySystem.html">00052</a> <span class="keyword">class </span><a class="code" href="classRubySystem.html">RubySystem</a> : <span class="keyword">public</span> <a class="code" href="classClockedObject_1_1ClockedObject.html">ClockedObject</a>
+<a name="l00053"></a>00053 {
+<a name="l00054"></a>00054   <span class="keyword">public</span>:
+<a name="l00055"></a><a class="code" href="classRubySystem_1_1RubyEvent.html">00055</a>     <span class="keyword">class </span><a class="code" href="classRubySystem_1_1RubyEvent.html">RubyEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00056"></a>00056     {
+<a name="l00057"></a>00057       <span class="keyword">public</span>:
+<a name="l00058"></a><a class="code" href="classRubySystem_1_1RubyEvent.html#a0d7af27651b7cc286549f123951f6de6">00058</a>         <a class="code" href="classRubySystem_1_1RubyEvent.html#a0d7af27651b7cc286549f123951f6de6">RubyEvent</a>(<a class="code" href="classRubySystem.html">RubySystem</a>* _ruby_system)
+<a name="l00059"></a>00059         {
+<a name="l00060"></a>00060             <a class="code" href="classRubySystem_1_1RubyEvent.html#a88928242e9a532cb6f4abe42dd8240a7">ruby_system</a> = _ruby_system;
+<a name="l00061"></a>00061         }
+<a name="l00062"></a>00062       <span class="keyword">private</span>:
+<a name="l00063"></a>00063         <span class="keywordtype">void</span> <a class="code" href="classRubySystem_1_1RubyEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00064"></a>00064 
+<a name="l00065"></a><a class="code" href="classRubySystem_1_1RubyEvent.html#a88928242e9a532cb6f4abe42dd8240a7">00065</a>         <a class="code" href="classRubySystem.html">RubySystem</a>* <a class="code" href="classRubySystem_1_1RubyEvent.html#a88928242e9a532cb6f4abe42dd8240a7">ruby_system</a>;
+<a name="l00066"></a>00066     };
+<a name="l00067"></a>00067 
+<a name="l00068"></a><a class="code" href="classRubySystem.html#a384b2b27e44aae348fc2c459a78d4a90">00068</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classRubySystem_1_1RubyEvent.html">RubyEvent</a>;
+<a name="l00069"></a>00069 
+<a name="l00070"></a><a class="code" href="classRubySystem.html#af3998ceb414058e5e416b8b239698858">00070</a>     <span class="keyword">typedef</span> RubySystemParams <a class="code" href="classRubySystem.html#af3998ceb414058e5e416b8b239698858">Params</a>;
+<a name="l00071"></a>00071     <a class="code" href="classRubySystem.html#a84ecac2914c133c0db81fe28405e815b">RubySystem</a>(<span class="keyword">const</span> <a class="code" href="classRubySystem.html#af3998ceb414058e5e416b8b239698858">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00072"></a>00072     <a class="code" href="classRubySystem.html#a335c948aafcd4d981ba75e02f1b33500">~RubySystem</a>();
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074     <span class="comment">// config accessors</span>
+<a name="l00075"></a><a class="code" href="classRubySystem.html#aed9d96608b2dca650ff1cece99ace997">00075</a>     <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classRubySystem.html#aed9d96608b2dca650ff1cece99ace997">getRandomSeed</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#af65ef68d40faf23fe1e78331e0447958">m_random_seed</a>; }
+<a name="l00076"></a><a class="code" href="classRubySystem.html#a2c9e274659748daf59b6e960456cea85">00076</a>     <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classRubySystem.html#a2c9e274659748daf59b6e960456cea85">getRandomization</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#aa846ca9467116a26a879dc4b262cf36a">m_randomization</a>; }
+<a name="l00077"></a><a class="code" href="classRubySystem.html#ad5726e8c9283b1447b75c3a8c67ffa75">00077</a>     <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRubySystem.html#ad5726e8c9283b1447b75c3a8c67ffa75">getBlockSizeBytes</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#a6ffc54d275164accb6a789f59f228ee1">m_block_size_bytes</a>; }
+<a name="l00078"></a><a class="code" href="classRubySystem.html#a2b48f2ef758982094ea9fd3a70cf078b">00078</a>     <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRubySystem.html#a2b48f2ef758982094ea9fd3a70cf078b">getBlockSizeBits</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#a138d3bdf8b6cd953f0bf8634db379365">m_block_size_bits</a>; }
+<a name="l00079"></a><a class="code" href="classRubySystem.html#a736ae287325afa244eda540419cdd90c">00079</a>     <span class="keyword">static</span> uint64_t <a class="code" href="classRubySystem.html#a736ae287325afa244eda540419cdd90c">getMemorySizeBytes</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#af9b18a9cc774821d72777f50821b4429">m_memory_size_bytes</a>; }
+<a name="l00080"></a><a class="code" href="classRubySystem.html#a30259c41e1b009b45c094bccf585dab3">00080</a>     <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRubySystem.html#a30259c41e1b009b45c094bccf585dab3">getMemorySizeBits</a>() { <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#afcfee986c39619dff25c7e96187708c0">m_memory_size_bits</a>; }
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082     <span class="comment">// Public Methods</span>
+<a name="l00083"></a>00083     <a class="code" href="classProfiler.html">Profiler</a>*
+<a name="l00084"></a><a class="code" href="classRubySystem.html#a1dc2a271b826284445c889f60c62b2fb">00084</a>     <a class="code" href="classRubySystem.html#a1dc2a271b826284445c889f60c62b2fb">getProfiler</a>()
+<a name="l00085"></a>00085     {
+<a name="l00086"></a>00086         assert(<a class="code" href="classRubySystem.html#ad0e39538c0dbbe770d4c19025103b39a">m_profiler</a> != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>);
+<a name="l00087"></a>00087         <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#ad0e39538c0dbbe770d4c19025103b39a">m_profiler</a>;
+<a name="l00088"></a>00088     }
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090     <a class="code" href="classMemoryVector.html">MemoryVector</a>*
+<a name="l00091"></a><a class="code" href="classRubySystem.html#aae1baebbd770dbbcf63259f5053681ea">00091</a>     <a class="code" href="classRubySystem.html#aae1baebbd770dbbcf63259f5053681ea">getMemoryVector</a>()
+<a name="l00092"></a>00092     {
+<a name="l00093"></a>00093         assert(<a class="code" href="classRubySystem.html#a107b799e6f2f820a02d25dc1ba6f7014">m_mem_vec</a> != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>);
+<a name="l00094"></a>00094         <span class="keywordflow">return</span> <a class="code" href="classRubySystem.html#a107b799e6f2f820a02d25dc1ba6f7014">m_mem_vec</a>;
+<a name="l00095"></a>00095     }
+<a name="l00096"></a>00096 
+<a name="l00097"></a><a class="code" href="classRubySystem.html#a4dc637449366fcdfc4e764cdf12d9b11">00097</a>     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>() { <a class="code" href="classRubySystem.html#ad0e39538c0dbbe770d4c19025103b39a">m_profiler</a>-&gt;<a class="code" href="classProfiler.html#a3dd3443357312bcb75580eaa508c48a4">regStats</a>(<a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>()); }
+<a name="l00098"></a><a class="code" href="classRubySystem.html#a208669cbc0bb1d52565956ca8c690c55">00098</a>     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a208669cbc0bb1d52565956ca8c690c55">collateStats</a>() { <a class="code" href="classRubySystem.html#ad0e39538c0dbbe770d4c19025103b39a">m_profiler</a>-&gt;<a class="code" href="classProfiler.html#a208669cbc0bb1d52565956ca8c690c55">collateStats</a>(); }
+<a name="l00099"></a>00099     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a65880e61108132689a1bd769b9187fb7">resetStats</a>();
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00103"></a>00103     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00104"></a>00104     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#aecc7d8debf54990ffeaaed5bac7d7d81">startup</a>();
+<a name="l00105"></a>00105     <span class="keywordtype">bool</span> <a class="code" href="classRubySystem.html#a9fece07bc06f16d7c5190f08e42f5359">functionalRead</a>(<a class="code" href="classPacket.html">Packet</a> *ptr);
+<a name="l00106"></a>00106     <span class="keywordtype">bool</span> <a class="code" href="classRubySystem.html#af751326b50cd1150f91ec688d9336ffc">functionalWrite</a>(<a class="code" href="classPacket.html">Packet</a> *ptr);
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#ac1a2d2ecf9164e8b3e11b461abab8521">registerNetwork</a>(<a class="code" href="classNetwork.html">Network</a>*);
+<a name="l00109"></a>00109     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#ab7d5364ddbfcfd86ca9a47684f12c162">registerAbstractController</a>(<a class="code" href="classAbstractController.html">AbstractController</a>*);
+<a name="l00110"></a>00110     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a7eb79d5477e1c2026d9b1d8b6e26112b">registerSparseMemory</a>(<a class="code" href="classSparseMemory.html">SparseMemory</a>*);
+<a name="l00111"></a>00111     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#ac9de1de608e144dd7905a56770e60bfc">registerMemController</a>(<a class="code" href="classMemoryControl.html">MemoryControl</a> *mc);
+<a name="l00112"></a>00112 
+<a name="l00113"></a><a class="code" href="classRubySystem.html#a89b51bcc3a463cd78acf62b3fc66288f">00113</a>     <span class="keywordtype">bool</span> <a class="code" href="classRubySystem.html#a89b51bcc3a463cd78acf62b3fc66288f">eventQueueEmpty</a>() { <span class="keywordflow">return</span> <a class="code" href="classEventManager.html#acfd644007a0f188b7f221e67a6b453aa">eventq</a>-&gt;<a class="code" href="classEventQueue.html#ac6e61de369e994009e36f344f99c15ad">empty</a>(); }
+<a name="l00114"></a><a class="code" href="classRubySystem.html#a14b5a6783cc1c4f01aef58ab8ddaf46e">00114</a>     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a14b5a6783cc1c4f01aef58ab8ddaf46e">enqueueRubyEvent</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classClockedObject.html#a4daae57fbf09ee5423d123f5ce330e92">tick</a>)
+<a name="l00115"></a>00115     {
+<a name="l00116"></a>00116         <a class="code" href="classRubySystem_1_1RubyEvent.html">RubyEvent</a>* <a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a> = <span class="keyword">new</span> <a class="code" href="classRubySystem.html#a384b2b27e44aae348fc2c459a78d4a90">RubyEvent</a>(<span class="keyword">this</span>);
+<a name="l00117"></a>00117         <a class="code" href="classEventManager.html#a4ddebbfe9a12b95be6fb993ce892dcd3">schedule</a>(e, tick);
+<a name="l00118"></a>00118     }
+<a name="l00119"></a>00119 
+<a name="l00120"></a>00120   <span class="keyword">private</span>:
+<a name="l00121"></a>00121     <span class="comment">// Private copy constructor and assignment operator</span>
+<a name="l00122"></a>00122     <a class="code" href="classRubySystem.html#a84ecac2914c133c0db81fe28405e815b">RubySystem</a>(<span class="keyword">const</span> <a class="code" href="classRubySystem.html">RubySystem</a>&amp; obj);
+<a name="l00123"></a>00123     <a class="code" href="classRubySystem.html">RubySystem</a>&amp; <a class="code" href="classRubySystem.html#a58b52a9b6b16a43dede7354145249435">operator=</a>(<span class="keyword">const</span> <a class="code" href="classRubySystem.html">RubySystem</a>&amp; obj);
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a94173d52d87090e6088f923496535c1d">readCompressedTrace</a>(std::string filename,
+<a name="l00126"></a>00126                              uint8_t *&amp;raw_data,
+<a name="l00127"></a>00127                              <a class="code" href="TypeDefines_8hh.html#a29940ae63ec06c9998bba873e25407ad">uint64</a>&amp; uncompressed_trace_size);
+<a name="l00128"></a>00128     <span class="keywordtype">void</span> <a class="code" href="classRubySystem.html#a158f1a4484dab34bceeee8cb54501ced">writeCompressedTrace</a>(uint8_t *raw_data, std::string file,
+<a name="l00129"></a>00129                               <a class="code" href="TypeDefines_8hh.html#a29940ae63ec06c9998bba873e25407ad">uint64</a> uncompressed_trace_size);
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131   <span class="keyword">private</span>:
+<a name="l00132"></a>00132     <span class="comment">// configuration parameters</span>
+<a name="l00133"></a><a class="code" href="classRubySystem.html#af65ef68d40faf23fe1e78331e0447958">00133</a>     <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classRubySystem.html#af65ef68d40faf23fe1e78331e0447958">m_random_seed</a>;
+<a name="l00134"></a><a class="code" href="classRubySystem.html#aa846ca9467116a26a879dc4b262cf36a">00134</a>     <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classRubySystem.html#aa846ca9467116a26a879dc4b262cf36a">m_randomization</a>;
+<a name="l00135"></a><a class="code" href="classRubySystem.html#a6ffc54d275164accb6a789f59f228ee1">00135</a>     <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRubySystem.html#a6ffc54d275164accb6a789f59f228ee1">m_block_size_bytes</a>;
+<a name="l00136"></a><a class="code" href="classRubySystem.html#a138d3bdf8b6cd953f0bf8634db379365">00136</a>     <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRubySystem.html#a138d3bdf8b6cd953f0bf8634db379365">m_block_size_bits</a>;
+<a name="l00137"></a><a class="code" href="classRubySystem.html#af9b18a9cc774821d72777f50821b4429">00137</a>     <span class="keyword">static</span> uint64_t <a class="code" href="classRubySystem.html#af9b18a9cc774821d72777f50821b4429">m_memory_size_bytes</a>;
+<a name="l00138"></a><a class="code" href="classRubySystem.html#afcfee986c39619dff25c7e96187708c0">00138</a>     <span class="keyword">static</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRubySystem.html#afcfee986c39619dff25c7e96187708c0">m_memory_size_bits</a>;
+<a name="l00139"></a>00139 
+<a name="l00140"></a><a class="code" href="classRubySystem.html#a9ee1ed03705a87b18e7244ead083c182">00140</a>     <a class="code" href="classNetwork.html">Network</a>* <a class="code" href="classRubySystem.html#a9ee1ed03705a87b18e7244ead083c182">m_network</a>;
+<a name="l00141"></a><a class="code" href="classRubySystem.html#a666fa896076bf9fd8b1e86b823fc36b5">00141</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;MemoryControl *&gt;</a> <a class="code" href="classRubySystem.html#a666fa896076bf9fd8b1e86b823fc36b5">m_memory_controller_vec</a>;
+<a name="l00142"></a><a class="code" href="classRubySystem.html#adb7cc2941698a199e44de621cf24f868">00142</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;AbstractController *&gt;</a> <a class="code" href="classRubySystem.html#adb7cc2941698a199e44de621cf24f868">m_abs_cntrl_vec</a>;
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144   <span class="keyword">public</span>:
+<a name="l00145"></a><a class="code" href="classRubySystem.html#ad0e39538c0dbbe770d4c19025103b39a">00145</a>     <a class="code" href="classProfiler.html">Profiler</a>* <a class="code" href="classRubySystem.html#ad0e39538c0dbbe770d4c19025103b39a">m_profiler</a>;
+<a name="l00146"></a><a class="code" href="classRubySystem.html#a107b799e6f2f820a02d25dc1ba6f7014">00146</a>     <a class="code" href="classMemoryVector.html">MemoryVector</a>* <a class="code" href="classRubySystem.html#a107b799e6f2f820a02d25dc1ba6f7014">m_mem_vec</a>;
+<a name="l00147"></a><a class="code" href="classRubySystem.html#ae9051ba7e9770f4a2be7a20f6f185e86">00147</a>     <span class="keywordtype">bool</span> <a class="code" href="classRubySystem.html#ae9051ba7e9770f4a2be7a20f6f185e86">m_warmup_enabled</a>;
+<a name="l00148"></a><a class="code" href="classRubySystem.html#a89b41c4f399369eb42a580d0c32a7c0b">00148</a>     <span class="keywordtype">bool</span> <a class="code" href="classRubySystem.html#a89b41c4f399369eb42a580d0c32a7c0b">m_cooldown_enabled</a>;
+<a name="l00149"></a><a class="code" href="classRubySystem.html#a12cc73bd44b03600f54d4ca386f7bc20">00149</a>     <a class="code" href="classCacheRecorder.html">CacheRecorder</a>* <a class="code" href="classRubySystem.html#a12cc73bd44b03600f54d4ca386f7bc20">m_cache_recorder</a>;
+<a name="l00150"></a><a class="code" href="classRubySystem.html#a808eab8032db5c7032a0b805fbb77351">00150</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;SparseMemory*&gt;</a> <a class="code" href="classRubySystem.html#a808eab8032db5c7032a0b805fbb77351">m_sparse_memory_vector</a>;
+<a name="l00151"></a>00151 };
+<a name="l00152"></a>00152 
+<a name="l00153"></a><a class="code" href="classRubyStatsCallback.html">00153</a> <span class="keyword">class </span><a class="code" href="classRubyStatsCallback.html">RubyStatsCallback</a> : <span class="keyword">public</span> <a class="code" href="classCallback.html">Callback</a>
+<a name="l00154"></a>00154 {
+<a name="l00155"></a>00155   <span class="keyword">private</span>:
+<a name="l00156"></a><a class="code" href="classRubyStatsCallback.html#a88928242e9a532cb6f4abe42dd8240a7">00156</a>     <a class="code" href="classRubySystem.html">RubySystem</a> *<a class="code" href="classRubyStatsCallback.html#a88928242e9a532cb6f4abe42dd8240a7">ruby_system</a>;
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158   <span class="keyword">public</span>:
+<a name="l00159"></a><a class="code" href="classRubyStatsCallback.html#a23c82de724037c9a52d90f0a8c487512">00159</a>     <span class="keyword">virtual</span> <a class="code" href="classRubyStatsCallback.html#a23c82de724037c9a52d90f0a8c487512">~RubyStatsCallback</a>() {}
+<a name="l00160"></a><a class="code" href="classRubyStatsCallback.html#a99197472a406321ad0919d3b9f54572e">00160</a>     <a class="code" href="classRubyStatsCallback.html#a99197472a406321ad0919d3b9f54572e">RubyStatsCallback</a>(<a class="code" href="classRubySystem.html">RubySystem</a> *<a class="code" href="namespaceX86ISA.html#a400778a664a4822401bb6677e1cef9c3">system</a>) : <a class="code" href="classRubyStatsCallback.html#a88928242e9a532cb6f4abe42dd8240a7">ruby_system</a>(system) {}
+<a name="l00161"></a><a class="code" href="classRubyStatsCallback.html#a2e9c5136d19b1a95fc427e0852deab5c">00161</a>     <span class="keywordtype">void</span> <a class="code" href="classRubyStatsCallback.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>() { <a class="code" href="classRubyStatsCallback.html#a88928242e9a532cb6f4abe42dd8240a7">ruby_system</a>-&gt;<a class="code" href="classRubySystem.html#a208669cbc0bb1d52565956ca8c690c55">collateStats</a>(); }
+<a name="l00162"></a>00162 };
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164 <span class="preprocessor">#endif // __MEM_RUBY_SYSTEM_SYSTEM_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

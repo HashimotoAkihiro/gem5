@@ -1,0 +1,473 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/simple_thread.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/simple_thread.hh</h1><a href="simple__thread_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011-2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00007"></a>00007 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00008"></a>00008 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00009"></a>00009 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00010"></a>00010 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00011"></a>00011 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00012"></a>00012 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00013"></a>00013 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00014"></a>00014 <span class="comment"> *</span>
+<a name="l00015"></a>00015 <span class="comment"> * Copyright (c) 2001-2006 The Regents of The University of Michigan</span>
+<a name="l00016"></a>00016 <span class="comment"> * All rights reserved.</span>
+<a name="l00017"></a>00017 <span class="comment"> *</span>
+<a name="l00018"></a>00018 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00019"></a>00019 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00020"></a>00020 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00021"></a>00021 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00022"></a>00022 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00023"></a>00023 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00024"></a>00024 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00025"></a>00025 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00026"></a>00026 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00027"></a>00027 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00030"></a>00030 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00032"></a>00032 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00033"></a>00033 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00034"></a>00034 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00035"></a>00035 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00036"></a>00036 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00037"></a>00037 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00038"></a>00038 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00039"></a>00039 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00040"></a>00040 <span class="comment"> *</span>
+<a name="l00041"></a>00041 <span class="comment"> * Authors: Steve Reinhardt</span>
+<a name="l00042"></a>00042 <span class="comment"> *          Nathan Binkert</span>
+<a name="l00043"></a>00043 <span class="comment"> */</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="preprocessor">#ifndef __CPU_SIMPLE_THREAD_HH__</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_SIMPLE_THREAD_HH__</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;arch/decoder.hh&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;arch/isa.hh&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;arch/isa_traits.hh&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;arch/registers.hh&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;arch/tlb.hh&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="thread__context_8hh.html">cpu/thread_context.hh</a>&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;<a class="code" href="thread__state_8hh.html">cpu/thread_state.hh</a>&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;debug/CCRegs.hh&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;debug/FloatRegs.hh&quot;</span>
+<a name="l00060"></a>00060 <span class="preprocessor">#include &quot;debug/IntRegs.hh&quot;</span>
+<a name="l00061"></a>00061 <span class="preprocessor">#include &quot;<a class="code" href="page__table_8hh.html">mem/page_table.hh</a>&quot;</span>
+<a name="l00062"></a>00062 <span class="preprocessor">#include &quot;<a class="code" href="request_8hh.html">mem/request.hh</a>&quot;</span>
+<a name="l00063"></a>00063 <span class="preprocessor">#include &quot;<a class="code" href="byteswap_8hh.html">sim/byteswap.hh</a>&quot;</span>
+<a name="l00064"></a>00064 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00065"></a>00065 <span class="preprocessor">#include &quot;<a class="code" href="sim_2process_8hh.html">sim/process.hh</a>&quot;</span>
+<a name="l00066"></a>00066 <span class="preprocessor">#include &quot;<a class="code" href="serialize_8hh.html">sim/serialize.hh</a>&quot;</span>
+<a name="l00067"></a>00067 <span class="preprocessor">#include &quot;<a class="code" href="sim_2system_8hh.html">sim/system.hh</a>&quot;</span>
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069 <span class="keyword">class </span><a class="code" href="classBaseCPU.html">BaseCPU</a>;
+<a name="l00070"></a>00070 <span class="keyword">class </span><a class="code" href="classCheckerCPU.html">CheckerCPU</a>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072 <span class="keyword">class </span><a class="code" href="classFunctionProfile.html">FunctionProfile</a>;
+<a name="l00073"></a>00073 <span class="keyword">class </span><a class="code" href="classProfileNode.html">ProfileNode</a>;
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075 <span class="keyword">namespace </span>TheISA {
+<a name="l00076"></a>00076     <span class="keyword">namespace </span>Kernel {
+<a name="l00077"></a>00077         <span class="keyword">class </span>Statistics;
+<a name="l00078"></a>00078     }
+<a name="l00079"></a>00079 }
+<a name="l00080"></a>00080 
+<a name="l00097"></a><a class="code" href="classSimpleThread.html">00097</a> <span class="keyword">class </span><a class="code" href="classSimpleThread.html">SimpleThread</a> : <span class="keyword">public</span> <a class="code" href="structThreadState.html">ThreadState</a>
+<a name="l00098"></a>00098 {
+<a name="l00099"></a>00099   <span class="keyword">protected</span>:
+<a name="l00100"></a><a class="code" href="classSimpleThread.html#a4617f528417b8f55f809ae0988284c9b">00100</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a301c22ea09fa33dcfe6ddf22f203699c">TheISA::MachInst</a> <a class="code" href="classSimpleThread.html#a4617f528417b8f55f809ae0988284c9b">MachInst</a>;
+<a name="l00101"></a><a class="code" href="classSimpleThread.html#aaf5f073a387db0556d1db4bcc45428bc">00101</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">TheISA::MiscReg</a> <a class="code" href="classSimpleThread.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a>;
+<a name="l00102"></a><a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">00102</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a06fae4f187c7c94b8b0046dd6802be48">TheISA::FloatReg</a> <a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a>;
+<a name="l00103"></a><a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">00103</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a6905e424d12491fe126e1a22a9c8d655">TheISA::FloatRegBits</a> <a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a>;
+<a name="l00104"></a><a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">00104</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a5834599c0196ce4accda8049e7320621">TheISA::CCReg</a> <a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a>;
+<a name="l00105"></a>00105   <span class="keyword">public</span>:
+<a name="l00106"></a><a class="code" href="classSimpleThread.html#a3af29dcea6d2bbb0a1de56f02ec789f1">00106</a>     <span class="keyword">typedef</span> <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">ThreadContext::Status</a> <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a>;
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108   <span class="keyword">protected</span>:
+<a name="l00109"></a>00109     <span class="keyword">union </span>{
+<a name="l00110"></a><a class="code" href="classSimpleThread.html#a1ad2ddcae8ed0b6b5f1807294a6093e7">00110</a>         <a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="classSimpleThread.html#a1ad2ddcae8ed0b6b5f1807294a6093e7">f</a>[<a class="code" href="namespaceAlphaISA.html#a627b25288f2452be107872a138df8b85">TheISA::NumFloatRegs</a>];
+<a name="l00111"></a><a class="code" href="classSimpleThread.html#a2dbb1d94eafced2e977e763f9254a549">00111</a>         <a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="classSimpleThread.html#a2dbb1d94eafced2e977e763f9254a549">i</a>[<a class="code" href="namespaceAlphaISA.html#a627b25288f2452be107872a138df8b85">TheISA::NumFloatRegs</a>];
+<a name="l00112"></a>00112     } <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>;
+<a name="l00113"></a><a class="code" href="classSimpleThread.html#a60193e9fd43c9cb3bec8505a0b25e3b1">00113</a>     <a class="code" href="namespaceAlphaISA.html#a0e080577527fb3e9685399f75b5caf15">TheISA::IntReg</a> <a class="code" href="classSimpleThread.html#a60193e9fd43c9cb3bec8505a0b25e3b1">intRegs</a>[<a class="code" href="namespaceAlphaISA.html#a9c412b5118ce369570c156c4e156638a">TheISA::NumIntRegs</a>];
+<a name="l00114"></a>00114 <span class="preprocessor">#ifdef ISA_HAS_CC_REGS</span>
+<a name="l00115"></a><a class="code" href="classSimpleThread.html#a0e0d321ede8414ee0cd5e6f93ff51dc2">00115</a> <span class="preprocessor"></span>    <a class="code" href="namespaceAlphaISA.html#a5834599c0196ce4accda8049e7320621">TheISA::CCReg</a> <a class="code" href="classSimpleThread.html#a0e0d321ede8414ee0cd5e6f93ff51dc2">ccRegs</a>[<a class="code" href="namespaceAlphaISA.html#a717317b863009b3e1b683c3bdddb9fd3">TheISA::NumCCRegs</a>];
+<a name="l00116"></a>00116 <span class="preprocessor">#endif</span>
+<a name="l00117"></a><a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">00117</a> <span class="preprocessor"></span>    TheISA::ISA *<span class="keyword">const</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>;    <span class="comment">// one &quot;instance&quot; of the current ISA.</span>
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">00119</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a>;
+<a name="l00120"></a>00120 
+<a name="l00122"></a><a class="code" href="classSimpleThread.html#afbb4c93008d44e809c143bbe5021d16e">00122</a>     <span class="keywordtype">bool</span> <a class="code" href="classSimpleThread.html#afbb4c93008d44e809c143bbe5021d16e">predicate</a>;
+<a name="l00123"></a>00123 
+<a name="l00124"></a>00124   <span class="keyword">public</span>:
+<a name="l00125"></a><a class="code" href="classSimpleThread.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00125</a>     std::string <a class="code" href="classSimpleThread.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>()<span class="keyword"> const</span>
+<a name="l00126"></a>00126 <span class="keyword">    </span>{
+<a name="l00127"></a>00127         <span class="keywordflow">return</span> <a class="code" href="cprintf_8hh.html#ace22d1c39f2df58e593bc49d1613eca2">csprintf</a>(<span class="stringliteral">&quot;%s.[tid:%i]&quot;</span>, <a class="code" href="structThreadState.html#adb939b26e0dd28db6717cc3f68c295a8">baseCpu</a>-&gt;name(), <a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">tc</a>-&gt;<a class="code" href="classProxyThreadContext.html#afc38d04c77e7b5fc3bbb0dd00fc87742">threadId</a>());
+<a name="l00128"></a>00128     }
+<a name="l00129"></a>00129 
+<a name="l00130"></a><a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">00130</a>     <a class="code" href="classProxyThreadContext.html">ProxyThreadContext&lt;SimpleThread&gt;</a> *<a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">tc</a>;
+<a name="l00131"></a>00131 
+<a name="l00132"></a><a class="code" href="classSimpleThread.html#af27ccd765f13a4b7bd119dc7579e2746">00132</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classSimpleThread.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00133"></a>00133 
+<a name="l00134"></a><a class="code" href="classSimpleThread.html#abcb37ddc11515555d8484702697bc4bb">00134</a>     TheISA::TLB *<a class="code" href="classSimpleThread.html#abcb37ddc11515555d8484702697bc4bb">itb</a>;
+<a name="l00135"></a><a class="code" href="classSimpleThread.html#ad2fd039621f87592c4b344d4f8948e78">00135</a>     TheISA::TLB *<a class="code" href="classSimpleThread.html#ad2fd039621f87592c4b344d4f8948e78">dtb</a>;
+<a name="l00136"></a>00136 
+<a name="l00137"></a><a class="code" href="classSimpleThread.html#a8adfd3ea89691b05b671dd288a595958">00137</a>     TheISA::Decoder <a class="code" href="classSimpleThread.html#a8adfd3ea89691b05b671dd288a595958">decoder</a>;
+<a name="l00138"></a>00138 
+<a name="l00139"></a>00139     <span class="comment">// constructor: initialize SimpleThread from given process structure</span>
+<a name="l00140"></a>00140     <span class="comment">// FS</span>
+<a name="l00141"></a>00141     <a class="code" href="classSimpleThread.html#a1b31d6552d3e1bc9e3fe401d56a03aef">SimpleThread</a>(<a class="code" href="classBaseCPU.html">BaseCPU</a> *_cpu, <span class="keywordtype">int</span> _thread_num, <a class="code" href="classSystem.html">System</a> *_system,
+<a name="l00142"></a>00142                  TheISA::TLB *_itb, TheISA::TLB *_dtb, TheISA::ISA *_isa,
+<a name="l00143"></a>00143                  <span class="keywordtype">bool</span> use_kernel_stats = <span class="keyword">true</span>);
+<a name="l00144"></a>00144     <span class="comment">// SE</span>
+<a name="l00145"></a>00145     <a class="code" href="classSimpleThread.html#a1b31d6552d3e1bc9e3fe401d56a03aef">SimpleThread</a>(<a class="code" href="classBaseCPU.html">BaseCPU</a> *_cpu, <span class="keywordtype">int</span> _thread_num, <a class="code" href="classSystem.html">System</a> *_system,
+<a name="l00146"></a>00146                  <a class="code" href="classProcess.html">Process</a> *_process, TheISA::TLB *_itb, TheISA::TLB *_dtb,
+<a name="l00147"></a>00147                  TheISA::ISA *_isa);
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149     <span class="keyword">virtual</span> <a class="code" href="classSimpleThread.html#a2504f376b7b0a45d380e5af6f189458d">~SimpleThread</a>();
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a5811640aa3008d2916f3d3aba621b82d">takeOverFrom</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *oldContext);
+<a name="l00152"></a>00152 
+<a name="l00153"></a>00153     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a3dd3443357312bcb75580eaa508c48a4">regStats</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="classSimpleThread.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>);
+<a name="l00154"></a>00154 
+<a name="l00155"></a>00155     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a51d24d05286ee0c24574372ca4c517b6">copyState</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *oldContext);
+<a name="l00156"></a>00156 
+<a name="l00157"></a>00157     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00158"></a>00158     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00159"></a>00159     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#aecc7d8debf54990ffeaaed5bac7d7d81">startup</a>();
+<a name="l00160"></a>00160 
+<a name="l00161"></a>00161     <span class="comment">/***************************************************************</span>
+<a name="l00162"></a>00162 <span class="comment">     *  SimpleThread functions to provide CPU with access to various</span>
+<a name="l00163"></a>00163 <span class="comment">     *  state.</span>
+<a name="l00164"></a>00164 <span class="comment">     **************************************************************/</span>
+<a name="l00165"></a>00165 
+<a name="l00170"></a><a class="code" href="classSimpleThread.html#a81894d15db5190d5364449a4915b76f5">00170</a>     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classSimpleThread.html#a81894d15db5190d5364449a4915b76f5">getTC</a>() { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">tc</a>; }
+<a name="l00171"></a>00171 
+<a name="l00172"></a><a class="code" href="classSimpleThread.html#a2d698ff909513b48a1263f8a5440e067">00172</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a2d698ff909513b48a1263f8a5440e067">demapPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00173"></a>00173     {
+<a name="l00174"></a>00174         <a class="code" href="classSimpleThread.html#abcb37ddc11515555d8484702697bc4bb">itb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00175"></a>00175         <a class="code" href="classSimpleThread.html#ad2fd039621f87592c4b344d4f8948e78">dtb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00176"></a>00176     }
+<a name="l00177"></a>00177 
+<a name="l00178"></a><a class="code" href="classSimpleThread.html#ac8a36d45a839b07f50b73f1eee119615">00178</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#ac8a36d45a839b07f50b73f1eee119615">demapInstPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00179"></a>00179     {
+<a name="l00180"></a>00180         <a class="code" href="classSimpleThread.html#abcb37ddc11515555d8484702697bc4bb">itb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00181"></a>00181     }
+<a name="l00182"></a>00182 
+<a name="l00183"></a><a class="code" href="classSimpleThread.html#a26789603cc94992d18f8ddedfff96acf">00183</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a26789603cc94992d18f8ddedfff96acf">demapDataPage</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00184"></a>00184     {
+<a name="l00185"></a>00185         <a class="code" href="classSimpleThread.html#ad2fd039621f87592c4b344d4f8948e78">dtb</a>-&gt;demapPage(vaddr, asn);
+<a name="l00186"></a>00186     }
+<a name="l00187"></a>00187 
+<a name="l00188"></a>00188     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a13fa12d1779a94a1e0b968946a1367c7">dumpFuncProfile</a>();
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classSimpleThread.html#a5f42e07ae335dff417664e91518c7f1e">hwrei</a>();
+<a name="l00191"></a>00191 
+<a name="l00192"></a>00192     <span class="keywordtype">bool</span> <a class="code" href="classSimpleThread.html#a461205960be9d52e9beda48a77e9c600">simPalCheck</a>(<span class="keywordtype">int</span> palFunc);
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194     <span class="comment">/*******************************************</span>
+<a name="l00195"></a>00195 <span class="comment">     * ThreadContext interface functions.</span>
+<a name="l00196"></a>00196 <span class="comment">     ******************************************/</span>
+<a name="l00197"></a>00197 
+<a name="l00198"></a><a class="code" href="classSimpleThread.html#a4f35ce7d5cb2ec57504bc2c2bc03c879">00198</a>     <a class="code" href="classBaseCPU.html">BaseCPU</a> *<a class="code" href="classSimpleThread.html#a4f35ce7d5cb2ec57504bc2c2bc03c879">getCpuPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="structThreadState.html#adb939b26e0dd28db6717cc3f68c295a8">baseCpu</a>; }
+<a name="l00199"></a>00199 
+<a name="l00200"></a><a class="code" href="classSimpleThread.html#a95b7e95d0558cd03d69613142fff9137">00200</a>     TheISA::TLB *<a class="code" href="classSimpleThread.html#a95b7e95d0558cd03d69613142fff9137">getITBPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#abcb37ddc11515555d8484702697bc4bb">itb</a>; }
+<a name="l00201"></a>00201 
+<a name="l00202"></a><a class="code" href="classSimpleThread.html#a2fe6a07c44bc2a4d83b86bea605ba971">00202</a>     TheISA::TLB *<a class="code" href="classSimpleThread.html#a2fe6a07c44bc2a4d83b86bea605ba971">getDTBPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#ad2fd039621f87592c4b344d4f8948e78">dtb</a>; }
+<a name="l00203"></a>00203 
+<a name="l00204"></a><a class="code" href="classSimpleThread.html#a0807ebbe39e158fdf6007ca00e3f7252">00204</a>     <a class="code" href="classCheckerCPU.html">CheckerCPU</a> *<a class="code" href="classSimpleThread.html#a0807ebbe39e158fdf6007ca00e3f7252">getCheckerCpuPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>; }
+<a name="l00205"></a>00205 
+<a name="l00206"></a><a class="code" href="classSimpleThread.html#a6ae33963bc5f8b515f0a50c483f21c7f">00206</a>     TheISA::Decoder *<a class="code" href="classSimpleThread.html#a6ae33963bc5f8b515f0a50c483f21c7f">getDecoderPtr</a>() { <span class="keywordflow">return</span> &amp;<a class="code" href="classSimpleThread.html#a8adfd3ea89691b05b671dd288a595958">decoder</a>; }
+<a name="l00207"></a>00207 
+<a name="l00208"></a><a class="code" href="classSimpleThread.html#af7bdb56e0088b380302741ad9008f321">00208</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classSimpleThread.html#af7bdb56e0088b380302741ad9008f321">getSystemPtr</a>() { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>; }
+<a name="l00209"></a>00209 
+<a name="l00210"></a><a class="code" href="classSimpleThread.html#a2ad9e92a82d6f783b3061584729c2f4a">00210</a>     <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> <a class="code" href="classSimpleThread.html#a2ad9e92a82d6f783b3061584729c2f4a">status</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structThreadState.html#ac749a0cabd0ad3556ddabdfe50040d3e">_status</a>; }
+<a name="l00211"></a>00211 
+<a name="l00212"></a><a class="code" href="classSimpleThread.html#a1ab41c7c20554bc6a9205b5b69d30406">00212</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a1ab41c7c20554bc6a9205b5b69d30406">setStatus</a>(<a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70b">Status</a> newStatus) { <a class="code" href="structThreadState.html#ac749a0cabd0ad3556ddabdfe50040d3e">_status</a> = newStatus; }
+<a name="l00213"></a>00213 
+<a name="l00216"></a>00216     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#ab542a5cf9ce4b41042d61e42dfe3aeab">activate</a>(<a class="code" href="classCycles.html">Cycles</a> delay = <a class="code" href="classCycles.html">Cycles</a>(1));
+<a name="l00217"></a>00217 
+<a name="l00219"></a>00219     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a3605b58fb45d69d498721bc2f2a14b1c" title="Set the status to Suspended.">suspend</a>();
+<a name="l00220"></a>00220 
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#ade0430439247877006d7df950f94918a" title="Set the status to Halted.">halt</a>();
+<a name="l00223"></a>00223 
+<a name="l00224"></a>00224     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSimpleThread.html#a99768639c728ee835cce54b8b42b3d8f">misspeculating</a>();
+<a name="l00225"></a>00225 
+<a name="l00226"></a>00226     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a01b372f805c92c90e6148b76d23d6236">copyArchRegs</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">tc</a>);
+<a name="l00227"></a>00227 
+<a name="l00228"></a><a class="code" href="classSimpleThread.html#ad5c88ea41846742bd8c70d9c50f31945">00228</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#ad5c88ea41846742bd8c70d9c50f31945">clearArchRegs</a>()
+<a name="l00229"></a>00229     {
+<a name="l00230"></a>00230         <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a> = 0;
+<a name="l00231"></a>00231         memset(<a class="code" href="classSimpleThread.html#a60193e9fd43c9cb3bec8505a0b25e3b1">intRegs</a>, 0, <span class="keyword">sizeof</span>(<a class="code" href="classSimpleThread.html#a60193e9fd43c9cb3bec8505a0b25e3b1">intRegs</a>));
+<a name="l00232"></a>00232         memset(<a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.i, 0, <span class="keyword">sizeof</span>(<a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.i));
+<a name="l00233"></a>00233 <span class="preprocessor">#ifdef ISA_HAS_CC_REGS</span>
+<a name="l00234"></a>00234 <span class="preprocessor"></span>        memset(<a class="code" href="classSimpleThread.html#a0e0d321ede8414ee0cd5e6f93ff51dc2">ccRegs</a>, 0, <span class="keyword">sizeof</span>(<a class="code" href="classSimpleThread.html#a0e0d321ede8414ee0cd5e6f93ff51dc2">ccRegs</a>));
+<a name="l00235"></a>00235 <span class="preprocessor">#endif</span>
+<a name="l00236"></a>00236 <span class="preprocessor"></span>        <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;clear();
+<a name="l00237"></a>00237     }
+<a name="l00238"></a>00238 
+<a name="l00239"></a>00239     <span class="comment">//</span>
+<a name="l00240"></a>00240     <span class="comment">// New accessors for new decoder.</span>
+<a name="l00241"></a>00241     <span class="comment">//</span>
+<a name="l00242"></a><a class="code" href="classSimpleThread.html#a21c850cd41ab977a2cf3450fe66ec25a">00242</a>     uint64_t <a class="code" href="classSimpleThread.html#a21c850cd41ab977a2cf3450fe66ec25a">readIntReg</a>(<span class="keywordtype">int</span> reg_idx)
+<a name="l00243"></a>00243     {
+<a name="l00244"></a>00244         <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenIntIndex(reg_idx);
+<a name="l00245"></a>00245         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a9c412b5118ce369570c156c4e156638a">TheISA::NumIntRegs</a>);
+<a name="l00246"></a>00246         uint64_t regVal(<a class="code" href="classSimpleThread.html#aed7abd4afcb954f8612e4ef1fe73317a">readIntRegFlat</a>(flatIndex));
+<a name="l00247"></a>00247         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IntRegs, <span class="stringliteral">&quot;Reading int reg %d (%d) as %#x.\n&quot;</span>,
+<a name="l00248"></a>00248                 reg_idx, flatIndex, regVal);
+<a name="l00249"></a>00249         <span class="keywordflow">return</span> regVal;
+<a name="l00250"></a>00250     }
+<a name="l00251"></a>00251 
+<a name="l00252"></a><a class="code" href="classSimpleThread.html#a2f97d83baef4fbda00b7f7f62779752f">00252</a>     <a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="classSimpleThread.html#a2f97d83baef4fbda00b7f7f62779752f">readFloatReg</a>(<span class="keywordtype">int</span> reg_idx)
+<a name="l00253"></a>00253     {
+<a name="l00254"></a>00254         <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenFloatIndex(reg_idx);
+<a name="l00255"></a>00255         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a627b25288f2452be107872a138df8b85">TheISA::NumFloatRegs</a>);
+<a name="l00256"></a>00256         <a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> regVal(<a class="code" href="classSimpleThread.html#aaa32dc9f4a8719a465c267fed47cbdc6">readFloatRegFlat</a>(flatIndex));
+<a name="l00257"></a>00257         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(FloatRegs, <span class="stringliteral">&quot;Reading float reg %d (%d) as %f, %#x.\n&quot;</span>,
+<a name="l00258"></a>00258                 reg_idx, flatIndex, regVal, <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.i[flatIndex]);
+<a name="l00259"></a>00259         <span class="keywordflow">return</span> regVal;
+<a name="l00260"></a>00260     }
+<a name="l00261"></a>00261 
+<a name="l00262"></a><a class="code" href="classSimpleThread.html#a4998e6615f835676762af364eff198e3">00262</a>     <a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="classSimpleThread.html#a4998e6615f835676762af364eff198e3">readFloatRegBits</a>(<span class="keywordtype">int</span> reg_idx)
+<a name="l00263"></a>00263     {
+<a name="l00264"></a>00264         <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenFloatIndex(reg_idx);
+<a name="l00265"></a>00265         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a627b25288f2452be107872a138df8b85">TheISA::NumFloatRegs</a>);
+<a name="l00266"></a>00266         <a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> regVal(<a class="code" href="classSimpleThread.html#a2fa29585c9694c9bffcce2a63f871759">readFloatRegBitsFlat</a>(flatIndex));
+<a name="l00267"></a>00267         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(FloatRegs, <span class="stringliteral">&quot;Reading float reg %d (%d) bits as %#x, %f.\n&quot;</span>,
+<a name="l00268"></a>00268                 reg_idx, flatIndex, regVal, <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.f[flatIndex]);
+<a name="l00269"></a>00269         <span class="keywordflow">return</span> regVal;
+<a name="l00270"></a>00270     }
+<a name="l00271"></a>00271 
+<a name="l00272"></a><a class="code" href="classSimpleThread.html#ac3d147c535052bfb1f8e8fe0697168d7">00272</a>     <a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="classSimpleThread.html#ac3d147c535052bfb1f8e8fe0697168d7">readCCReg</a>(<span class="keywordtype">int</span> reg_idx)
+<a name="l00273"></a>00273     {
+<a name="l00274"></a>00274 <span class="preprocessor">#ifdef ISA_HAS_CC_REGS</span>
+<a name="l00275"></a>00275 <span class="preprocessor"></span>        <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenCCIndex(reg_idx);
+<a name="l00276"></a>00276         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a717317b863009b3e1b683c3bdddb9fd3">TheISA::NumCCRegs</a>);
+<a name="l00277"></a>00277         uint64_t regVal(<a class="code" href="classSimpleThread.html#a78f8bb511732f8abab3bd11a18d32072">readCCRegFlat</a>(flatIndex));
+<a name="l00278"></a>00278         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(CCRegs, <span class="stringliteral">&quot;Reading CC reg %d (%d) as %#x.\n&quot;</span>,
+<a name="l00279"></a>00279                 reg_idx, flatIndex, regVal);
+<a name="l00280"></a>00280         <span class="keywordflow">return</span> regVal;
+<a name="l00281"></a>00281 <span class="preprocessor">#else</span>
+<a name="l00282"></a>00282 <span class="preprocessor"></span>        <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Tried to read a CC register.&quot;</span>);
+<a name="l00283"></a>00283         <span class="keywordflow">return</span> 0;
+<a name="l00284"></a>00284 <span class="preprocessor">#endif</span>
+<a name="l00285"></a>00285 <span class="preprocessor"></span>    }
+<a name="l00286"></a>00286 
+<a name="l00287"></a><a class="code" href="classSimpleThread.html#abc264e8ee37c6bd7d7b5759b97c34356">00287</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#abc264e8ee37c6bd7d7b5759b97c34356">setIntReg</a>(<span class="keywordtype">int</span> reg_idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00288"></a>00288     {
+<a name="l00289"></a>00289         <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenIntIndex(reg_idx);
+<a name="l00290"></a>00290         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a9c412b5118ce369570c156c4e156638a">TheISA::NumIntRegs</a>);
+<a name="l00291"></a>00291         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(IntRegs, <span class="stringliteral">&quot;Setting int reg %d (%d) to %#x.\n&quot;</span>,
+<a name="l00292"></a>00292                 reg_idx, flatIndex, val);
+<a name="l00293"></a>00293         <a class="code" href="classSimpleThread.html#ae3b8c9c2c1ae95767f0703357957a3f8">setIntRegFlat</a>(flatIndex, val);
+<a name="l00294"></a>00294     }
+<a name="l00295"></a>00295 
+<a name="l00296"></a><a class="code" href="classSimpleThread.html#ab6fd8e55b81c173f448ec0c42bc28b99">00296</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#ab6fd8e55b81c173f448ec0c42bc28b99">setFloatReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00297"></a>00297     {
+<a name="l00298"></a>00298         <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenFloatIndex(reg_idx);
+<a name="l00299"></a>00299         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a627b25288f2452be107872a138df8b85">TheISA::NumFloatRegs</a>);
+<a name="l00300"></a>00300         <a class="code" href="classSimpleThread.html#a71ec23ca2c029120932e5af4babc0da1">setFloatRegFlat</a>(flatIndex, val);
+<a name="l00301"></a>00301         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(FloatRegs, <span class="stringliteral">&quot;Setting float reg %d (%d) to %f, %#x.\n&quot;</span>,
+<a name="l00302"></a>00302                 reg_idx, flatIndex, val, <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.i[flatIndex]);
+<a name="l00303"></a>00303     }
+<a name="l00304"></a>00304 
+<a name="l00305"></a><a class="code" href="classSimpleThread.html#a618651078f08ecd328dfe3312f0f2ea7">00305</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a618651078f08ecd328dfe3312f0f2ea7">setFloatRegBits</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00306"></a>00306     {
+<a name="l00307"></a>00307         <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenFloatIndex(reg_idx);
+<a name="l00308"></a>00308         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a627b25288f2452be107872a138df8b85">TheISA::NumFloatRegs</a>);
+<a name="l00309"></a>00309         <span class="comment">// XXX: Fix array out of bounds compiler error for gem5.fast</span>
+<a name="l00310"></a>00310         <span class="comment">// when checkercpu enabled</span>
+<a name="l00311"></a>00311         <span class="keywordflow">if</span> (flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a627b25288f2452be107872a138df8b85">TheISA::NumFloatRegs</a>)
+<a name="l00312"></a>00312             <a class="code" href="classSimpleThread.html#acd974292ff0461c2e94c0b5a1126b503">setFloatRegBitsFlat</a>(flatIndex, val);
+<a name="l00313"></a>00313         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(FloatRegs, <span class="stringliteral">&quot;Setting float reg %d (%d) bits to %#x, %#f.\n&quot;</span>,
+<a name="l00314"></a>00314                 reg_idx, flatIndex, val, <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.f[flatIndex]);
+<a name="l00315"></a>00315     }
+<a name="l00316"></a>00316 
+<a name="l00317"></a><a class="code" href="classSimpleThread.html#afd6c42b1888ad21a4382078ca7a86d09">00317</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#afd6c42b1888ad21a4382078ca7a86d09">setCCReg</a>(<span class="keywordtype">int</span> reg_idx, <a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00318"></a>00318     {
+<a name="l00319"></a>00319 <span class="preprocessor">#ifdef ISA_HAS_CC_REGS</span>
+<a name="l00320"></a>00320 <span class="preprocessor"></span>        <span class="keywordtype">int</span> flatIndex = <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenCCIndex(reg_idx);
+<a name="l00321"></a>00321         assert(flatIndex &lt; <a class="code" href="namespaceAlphaISA.html#a717317b863009b3e1b683c3bdddb9fd3">TheISA::NumCCRegs</a>);
+<a name="l00322"></a>00322         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(CCRegs, <span class="stringliteral">&quot;Setting CC reg %d (%d) to %#x.\n&quot;</span>,
+<a name="l00323"></a>00323                 reg_idx, flatIndex, val);
+<a name="l00324"></a>00324         <a class="code" href="classSimpleThread.html#a6dec2284dd5904f992642f24bb289f14">setCCRegFlat</a>(flatIndex, val);
+<a name="l00325"></a>00325 <span class="preprocessor">#else</span>
+<a name="l00326"></a>00326 <span class="preprocessor"></span>        <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;Tried to set a CC register.&quot;</span>);
+<a name="l00327"></a>00327 <span class="preprocessor">#endif</span>
+<a name="l00328"></a>00328 <span class="preprocessor"></span>    }
+<a name="l00329"></a>00329 
+<a name="l00330"></a>00330     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a>
+<a name="l00331"></a><a class="code" href="classSimpleThread.html#a827fb3454585cf4c620f4fd341966317">00331</a>     <a class="code" href="classSimpleThread.html#a827fb3454585cf4c620f4fd341966317">pcState</a>()
+<a name="l00332"></a>00332     {
+<a name="l00333"></a>00333         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a>;
+<a name="l00334"></a>00334     }
+<a name="l00335"></a>00335 
+<a name="l00336"></a>00336     <span class="keywordtype">void</span>
+<a name="l00337"></a><a class="code" href="classSimpleThread.html#a5e9cfc754c9ef9b7db875ce89871944e">00337</a>     <a class="code" href="classSimpleThread.html#a827fb3454585cf4c620f4fd341966317">pcState</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00338"></a>00338     {
+<a name="l00339"></a>00339         <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a> = val;
+<a name="l00340"></a>00340     }
+<a name="l00341"></a>00341 
+<a name="l00342"></a>00342     <span class="keywordtype">void</span>
+<a name="l00343"></a><a class="code" href="classSimpleThread.html#a6005386aeeaecb35499c3199fb47ba2f">00343</a>     <a class="code" href="classSimpleThread.html#a6005386aeeaecb35499c3199fb47ba2f">pcStateNoRecord</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00344"></a>00344     {
+<a name="l00345"></a>00345         <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a> = val;
+<a name="l00346"></a>00346     }
+<a name="l00347"></a>00347 
+<a name="l00348"></a>00348     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00349"></a><a class="code" href="classSimpleThread.html#a53c92716db281ae16ffb693c6d7803c7">00349</a>     <a class="code" href="classSimpleThread.html#a53c92716db281ae16ffb693c6d7803c7">instAddr</a>()
+<a name="l00350"></a>00350     {
+<a name="l00351"></a>00351         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a>.instAddr();
+<a name="l00352"></a>00352     }
+<a name="l00353"></a>00353 
+<a name="l00354"></a>00354     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>
+<a name="l00355"></a><a class="code" href="classSimpleThread.html#aceec6e28772f91b3cc921c0e3927b0c2">00355</a>     <a class="code" href="classSimpleThread.html#aceec6e28772f91b3cc921c0e3927b0c2">nextInstAddr</a>()
+<a name="l00356"></a>00356     {
+<a name="l00357"></a>00357         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a>.nextInstAddr();
+<a name="l00358"></a>00358     }
+<a name="l00359"></a>00359 
+<a name="l00360"></a>00360     <a class="code" href="base_2types_8hh.html#adfb4d8b20c5abc8be73dd367b16f2d57">MicroPC</a>
+<a name="l00361"></a><a class="code" href="classSimpleThread.html#a1a21696f33a7d38f251687ae0b5e9718">00361</a>     <a class="code" href="classSimpleThread.html#a1a21696f33a7d38f251687ae0b5e9718">microPC</a>()
+<a name="l00362"></a>00362     {
+<a name="l00363"></a>00363         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#af217f22b3a4af1960222745e7e2b36c8">_pcState</a>.microPC();
+<a name="l00364"></a>00364     }
+<a name="l00365"></a>00365 
+<a name="l00366"></a><a class="code" href="classSimpleThread.html#a254cecc48d457ea298b08a8bb009f9cf">00366</a>     <span class="keywordtype">bool</span> <a class="code" href="classSimpleThread.html#a254cecc48d457ea298b08a8bb009f9cf">readPredicate</a>()
+<a name="l00367"></a>00367     {
+<a name="l00368"></a>00368         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#afbb4c93008d44e809c143bbe5021d16e">predicate</a>;
+<a name="l00369"></a>00369     }
+<a name="l00370"></a>00370 
+<a name="l00371"></a><a class="code" href="classSimpleThread.html#a137a8c6cced89c2ff8387900439436b4">00371</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a137a8c6cced89c2ff8387900439436b4">setPredicate</a>(<span class="keywordtype">bool</span> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00372"></a>00372     {
+<a name="l00373"></a>00373         <a class="code" href="classSimpleThread.html#afbb4c93008d44e809c143bbe5021d16e">predicate</a> = val;
+<a name="l00374"></a>00374     }
+<a name="l00375"></a>00375 
+<a name="l00376"></a>00376     <a class="code" href="classSimpleThread.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a>
+<a name="l00377"></a><a class="code" href="classSimpleThread.html#af2ec8925148a53b9bddefb7fb65a7223">00377</a>     <a class="code" href="classSimpleThread.html#af2ec8925148a53b9bddefb7fb65a7223">readMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0)
+<a name="l00378"></a>00378     {
+<a name="l00379"></a>00379         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;readMiscRegNoEffect(misc_reg);
+<a name="l00380"></a>00380     }
+<a name="l00381"></a>00381 
+<a name="l00382"></a>00382     <a class="code" href="classSimpleThread.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a>
+<a name="l00383"></a><a class="code" href="classSimpleThread.html#a71d44ee14eeab530a09bc7d68d97ece2">00383</a>     <a class="code" href="classSimpleThread.html#a71d44ee14eeab530a09bc7d68d97ece2">readMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0)
+<a name="l00384"></a>00384     {
+<a name="l00385"></a>00385         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;readMiscReg(misc_reg, <a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">tc</a>);
+<a name="l00386"></a>00386     }
+<a name="l00387"></a>00387 
+<a name="l00388"></a>00388     <span class="keywordtype">void</span>
+<a name="l00389"></a><a class="code" href="classSimpleThread.html#ab8dd4afdd4e652ca191b235505691f68">00389</a>     <a class="code" href="classSimpleThread.html#ab8dd4afdd4e652ca191b235505691f68">setMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="classSimpleThread.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0)
+<a name="l00390"></a>00390     {
+<a name="l00391"></a>00391         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;setMiscRegNoEffect(misc_reg, val);
+<a name="l00392"></a>00392     }
+<a name="l00393"></a>00393 
+<a name="l00394"></a>00394     <span class="keywordtype">void</span>
+<a name="l00395"></a><a class="code" href="classSimpleThread.html#a9b618db833e56fbb32246fe25716846f">00395</a>     <a class="code" href="classSimpleThread.html#a9b618db833e56fbb32246fe25716846f">setMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="classSimpleThread.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0)
+<a name="l00396"></a>00396     {
+<a name="l00397"></a>00397         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;setMiscReg(misc_reg, val, <a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">tc</a>);
+<a name="l00398"></a>00398     }
+<a name="l00399"></a>00399 
+<a name="l00400"></a>00400     <span class="keywordtype">int</span>
+<a name="l00401"></a><a class="code" href="classSimpleThread.html#aa529f2d70520c578e3e29b3bf1a66312">00401</a>     <a class="code" href="classSimpleThread.html#aa529f2d70520c578e3e29b3bf1a66312">flattenIntIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00402"></a>00402     {
+<a name="l00403"></a>00403         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenIntIndex(reg);
+<a name="l00404"></a>00404     }
+<a name="l00405"></a>00405 
+<a name="l00406"></a>00406     <span class="keywordtype">int</span>
+<a name="l00407"></a><a class="code" href="classSimpleThread.html#ab9ea3f8f1a21df875c7273c7377dfac1">00407</a>     <a class="code" href="classSimpleThread.html#ab9ea3f8f1a21df875c7273c7377dfac1">flattenFloatIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00408"></a>00408     {
+<a name="l00409"></a>00409         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenFloatIndex(reg);
+<a name="l00410"></a>00410     }
+<a name="l00411"></a>00411 
+<a name="l00412"></a>00412     <span class="keywordtype">int</span>
+<a name="l00413"></a><a class="code" href="classSimpleThread.html#ac33d74353e36a595ec48962cd0446320">00413</a>     <a class="code" href="classSimpleThread.html#ac33d74353e36a595ec48962cd0446320">flattenCCIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00414"></a>00414     {
+<a name="l00415"></a>00415         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenCCIndex(reg);
+<a name="l00416"></a>00416     }
+<a name="l00417"></a>00417 
+<a name="l00418"></a>00418     <span class="keywordtype">int</span>
+<a name="l00419"></a><a class="code" href="classSimpleThread.html#a5adc7d32f3a8bd75c5dc0a62d95564fd">00419</a>     <a class="code" href="classSimpleThread.html#a5adc7d32f3a8bd75c5dc0a62d95564fd">flattenMiscIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)
+<a name="l00420"></a>00420     {
+<a name="l00421"></a>00421         <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a8634f828e98f5175e8838b3c99532ba5">isa</a>-&gt;flattenMiscIndex(reg);
+<a name="l00422"></a>00422     }
+<a name="l00423"></a>00423 
+<a name="l00424"></a><a class="code" href="classSimpleThread.html#a25b995a791e41965e088d8bf3f2bf859">00424</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classSimpleThread.html#a25b995a791e41965e088d8bf3f2bf859">readStCondFailures</a>() { <span class="keywordflow">return</span> <a class="code" href="structThreadState.html#af112e3f6e9a9305596d19209d67354fb">storeCondFailures</a>; }
+<a name="l00425"></a>00425 
+<a name="l00426"></a><a class="code" href="classSimpleThread.html#abbe779fa43c72cd485ddb736ab17ff61">00426</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#abbe779fa43c72cd485ddb736ab17ff61">setStCondFailures</a>(<span class="keywordtype">unsigned</span> sc_failures)
+<a name="l00427"></a>00427     { <a class="code" href="structThreadState.html#af112e3f6e9a9305596d19209d67354fb">storeCondFailures</a> = sc_failures; }
+<a name="l00428"></a>00428 
+<a name="l00429"></a><a class="code" href="classSimpleThread.html#a36e0b96120fcbbc2ee8699158f7be5c2">00429</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a36e0b96120fcbbc2ee8699158f7be5c2">syscall</a>(int64_t callnum)
+<a name="l00430"></a>00430     {
+<a name="l00431"></a>00431         <a class="code" href="structThreadState.html#a075e3da8f2570b13cecbbffca7e30d1a">process</a>-&gt;<a class="code" href="classProcess.html#a0abb4f4856f531e5b48484f5114a5bf9">syscall</a>(callnum, <a class="code" href="classSimpleThread.html#a922168dc0855a866d2ed033338c1ca27">tc</a>);
+<a name="l00432"></a>00432     }
+<a name="l00433"></a>00433 
+<a name="l00434"></a><a class="code" href="classSimpleThread.html#aed7abd4afcb954f8612e4ef1fe73317a">00434</a>     uint64_t <a class="code" href="classSimpleThread.html#aed7abd4afcb954f8612e4ef1fe73317a">readIntRegFlat</a>(<span class="keywordtype">int</span> idx) { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a60193e9fd43c9cb3bec8505a0b25e3b1">intRegs</a>[idx]; }
+<a name="l00435"></a><a class="code" href="classSimpleThread.html#ae3b8c9c2c1ae95767f0703357957a3f8">00435</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#ae3b8c9c2c1ae95767f0703357957a3f8">setIntRegFlat</a>(<span class="keywordtype">int</span> idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) { <a class="code" href="classSimpleThread.html#a60193e9fd43c9cb3bec8505a0b25e3b1">intRegs</a>[idx] = val; }
+<a name="l00436"></a>00436 
+<a name="l00437"></a><a class="code" href="classSimpleThread.html#aaa32dc9f4a8719a465c267fed47cbdc6">00437</a>     <a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="classSimpleThread.html#aaa32dc9f4a8719a465c267fed47cbdc6">readFloatRegFlat</a>(<span class="keywordtype">int</span> idx) { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.f[idx]; }
+<a name="l00438"></a><a class="code" href="classSimpleThread.html#a71ec23ca2c029120932e5af4babc0da1">00438</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a71ec23ca2c029120932e5af4babc0da1">setFloatRegFlat</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classSimpleThread.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) { <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.f[idx] = val; }
+<a name="l00439"></a>00439 
+<a name="l00440"></a><a class="code" href="classSimpleThread.html#a2fa29585c9694c9bffcce2a63f871759">00440</a>     <a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="classSimpleThread.html#a2fa29585c9694c9bffcce2a63f871759">readFloatRegBitsFlat</a>(<span class="keywordtype">int</span> idx) { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.i[idx]; }
+<a name="l00441"></a><a class="code" href="classSimpleThread.html#acd974292ff0461c2e94c0b5a1126b503">00441</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#acd974292ff0461c2e94c0b5a1126b503">setFloatRegBitsFlat</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classSimpleThread.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) {
+<a name="l00442"></a>00442         <a class="code" href="classSimpleThread.html#a3dfbf30c655c5ae58763d7b1b5321501">floatRegs</a>.i[idx] = val;
+<a name="l00443"></a>00443     }
+<a name="l00444"></a>00444 
+<a name="l00445"></a>00445 <span class="preprocessor">#ifdef ISA_HAS_CC_REGS</span>
+<a name="l00446"></a><a class="code" href="classSimpleThread.html#a78f8bb511732f8abab3bd11a18d32072">00446</a> <span class="preprocessor"></span>    <a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="classSimpleThread.html#a78f8bb511732f8abab3bd11a18d32072">readCCRegFlat</a>(<span class="keywordtype">int</span> idx) { <span class="keywordflow">return</span> <a class="code" href="classSimpleThread.html#a0e0d321ede8414ee0cd5e6f93ff51dc2">ccRegs</a>[idx]; }
+<a name="l00447"></a><a class="code" href="classSimpleThread.html#a6dec2284dd5904f992642f24bb289f14">00447</a>     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a6dec2284dd5904f992642f24bb289f14">setCCRegFlat</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) { <a class="code" href="classSimpleThread.html#a0e0d321ede8414ee0cd5e6f93ff51dc2">ccRegs</a>[idx] = val; }
+<a name="l00448"></a>00448 <span class="preprocessor">#else</span>
+<a name="l00449"></a>00449 <span class="preprocessor"></span>    <a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="classSimpleThread.html#a78f8bb511732f8abab3bd11a18d32072">readCCRegFlat</a>(<span class="keywordtype">int</span> idx)
+<a name="l00450"></a>00450     { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;readCCRegFlat w/no CC regs!\n&quot;</span>); }
+<a name="l00451"></a>00451 
+<a name="l00452"></a>00452     <span class="keywordtype">void</span> <a class="code" href="classSimpleThread.html#a6dec2284dd5904f992642f24bb289f14">setCCRegFlat</a>(<span class="keywordtype">int</span> idx, <a class="code" href="classSimpleThread.html#a0c9de550a32808e6a25b54b6c791d5ab">CCReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00453"></a>00453     { <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;setCCRegFlat w/no CC regs!\n&quot;</span>); }
+<a name="l00454"></a>00454 <span class="preprocessor">#endif</span>
+<a name="l00455"></a>00455 <span class="preprocessor"></span>};
+<a name="l00456"></a>00456 
+<a name="l00457"></a>00457 
+<a name="l00458"></a>00458 <span class="comment">// for non-speculative execution context, spec_mode is always false</span>
+<a name="l00459"></a>00459 <span class="keyword">inline</span> <span class="keywordtype">bool</span>
+<a name="l00460"></a><a class="code" href="classSimpleThread.html#a99768639c728ee835cce54b8b42b3d8f">00460</a> <a class="code" href="classSimpleThread.html#a99768639c728ee835cce54b8b42b3d8f">SimpleThread::misspeculating</a>()
+<a name="l00461"></a>00461 {
+<a name="l00462"></a>00462     <span class="keywordflow">return</span> <span class="keyword">false</span>;
+<a name="l00463"></a>00463 }
+<a name="l00464"></a>00464 
+<a name="l00465"></a>00465 <span class="preprocessor">#endif // __CPU_CPU_EXEC_CONTEXT_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

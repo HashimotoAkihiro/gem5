@@ -1,0 +1,256 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/sparc/isa.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/sparc/isa.hh</h1><a href="sparc_2isa_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2009 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __ARCH_SPARC_ISA_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_SPARC_ISA_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;ostream&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="sparc_2registers_8hh.html">arch/sparc/registers.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="arch_2sparc_2types_8hh.html">arch/sparc/types.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="cpuevent_8hh.html">cpu/cpuevent.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00041"></a>00041 
+<a name="l00042"></a>00042 <span class="keyword">class </span><a class="code" href="classCheckpoint.html">Checkpoint</a>;
+<a name="l00043"></a>00043 <span class="keyword">class </span><a class="code" href="classEventManager.html">EventManager</a>;
+<a name="l00044"></a>00044 <span class="keyword">struct </span>SparcISAParams;
+<a name="l00045"></a>00045 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="keyword">namespace </span>SparcISA
+<a name="l00048"></a>00048 {
+<a name="l00049"></a><a class="code" href="classSparcISA_1_1ISA.html">00049</a> <span class="keyword">class </span><a class="code" href="classSparcISA_1_1ISA.html">ISA</a> : <span class="keyword">public</span> <a class="code" href="classm5_1_1SimObject_1_1SimObject.html">SimObject</a>
+<a name="l00050"></a>00050 {
+<a name="l00051"></a>00051   <span class="keyword">private</span>:
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053     <span class="comment">/* ASR Registers */</span>
+<a name="l00054"></a>00054     <span class="comment">// uint64_t y;          // Y (used in obsolete multiplication)</span>
+<a name="l00055"></a>00055     <span class="comment">// uint8_t ccr;         // Condition Code Register</span>
+<a name="l00056"></a><a class="code" href="classSparcISA_1_1ISA.html#a04ffaeb169260b645b1d60977a569820">00056</a>     uint8_t <a class="code" href="classSparcISA_1_1ISA.html#a04ffaeb169260b645b1d60977a569820">asi</a>;            <span class="comment">// Address Space Identifier</span>
+<a name="l00057"></a><a class="code" href="classSparcISA_1_1ISA.html#a2c38447b8253c8df855e3131c95941a1">00057</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a2c38447b8253c8df855e3131c95941a1">tick</a>;          <span class="comment">// Hardware clock-tick counter</span>
+<a name="l00058"></a><a class="code" href="classSparcISA_1_1ISA.html#a7998e88b27c4979415f261a97674aecf">00058</a>     uint8_t <a class="code" href="classSparcISA_1_1ISA.html#a7998e88b27c4979415f261a97674aecf">fprs</a>;           <span class="comment">// Floating-Point Register State</span>
+<a name="l00059"></a><a class="code" href="classSparcISA_1_1ISA.html#a0c19cf9f633dff632c426c2c975e8e66">00059</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a0c19cf9f633dff632c426c2c975e8e66">gsr</a>;           <span class="comment">// General Status Register</span>
+<a name="l00060"></a><a class="code" href="classSparcISA_1_1ISA.html#a96081a4d834ffd28272d41775e39b4ef">00060</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a96081a4d834ffd28272d41775e39b4ef">softint</a>;
+<a name="l00061"></a><a class="code" href="classSparcISA_1_1ISA.html#a87a44a4ab3e44b877905a26637748706">00061</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a87a44a4ab3e44b877905a26637748706">tick_cmpr</a>;     <span class="comment">// Hardware tick compare registers</span>
+<a name="l00062"></a><a class="code" href="classSparcISA_1_1ISA.html#a42a7fb68106d856c2b3e862a7f3de025">00062</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a42a7fb68106d856c2b3e862a7f3de025">stick</a>;         <span class="comment">// Hardware clock-tick counter</span>
+<a name="l00063"></a><a class="code" href="classSparcISA_1_1ISA.html#a674d6e6acef0455ec9a012b42107ff9e">00063</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a674d6e6acef0455ec9a012b42107ff9e">stick_cmpr</a>;    <span class="comment">// Hardware tick compare registers</span>
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065 
+<a name="l00066"></a>00066     <span class="comment">/* Privileged Registers */</span>
+<a name="l00067"></a><a class="code" href="classSparcISA_1_1ISA.html#a9f38b96093eb2fa24e914d41ea4c2ff6">00067</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a9f38b96093eb2fa24e914d41ea4c2ff6">tpc</a>[<a class="code" href="namespaceSparcISA.html#a8d6a6b2e04f9b3ebcec03466060ff24a">MaxTL</a>];    <span class="comment">// Trap Program Counter (value from</span>
+<a name="l00068"></a>00068                             <span class="comment">// previous trap level)</span>
+<a name="l00069"></a><a class="code" href="classSparcISA_1_1ISA.html#afed274d04ab4ab24420bbdd8db997d76">00069</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#afed274d04ab4ab24420bbdd8db997d76">tnpc</a>[<a class="code" href="namespaceSparcISA.html#a8d6a6b2e04f9b3ebcec03466060ff24a">MaxTL</a>];   <span class="comment">// Trap Next Program Counter (value from</span>
+<a name="l00070"></a>00070                             <span class="comment">// previous trap level)</span>
+<a name="l00071"></a><a class="code" href="classSparcISA_1_1ISA.html#ab944f4fa2221eb756d169e0d1f1d38d8">00071</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#ab944f4fa2221eb756d169e0d1f1d38d8">tstate</a>[<a class="code" href="namespaceSparcISA.html#a8d6a6b2e04f9b3ebcec03466060ff24a">MaxTL</a>]; <span class="comment">// Trap State</span>
+<a name="l00072"></a><a class="code" href="classSparcISA_1_1ISA.html#a17e4289d606d8e516baaf88a4fac1440">00072</a>     uint16_t <a class="code" href="classSparcISA_1_1ISA.html#a17e4289d606d8e516baaf88a4fac1440">tt</a>[<a class="code" href="namespaceSparcISA.html#a8d6a6b2e04f9b3ebcec03466060ff24a">MaxTL</a>];     <span class="comment">// Trap Type (Type of trap which occured</span>
+<a name="l00073"></a>00073                             <span class="comment">// on the previous level)</span>
+<a name="l00074"></a><a class="code" href="classSparcISA_1_1ISA.html#a43324060a9385bf166885c934a9cd598">00074</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a43324060a9385bf166885c934a9cd598">tba</a>;           <span class="comment">// Trap Base Address</span>
+<a name="l00075"></a>00075 
+<a name="l00076"></a><a class="code" href="classSparcISA_1_1ISA.html#af3e9d055518924e91c868c1caeabf960">00076</a>     PSTATE <a class="code" href="classSparcISA_1_1ISA.html#af3e9d055518924e91c868c1caeabf960">pstate</a>;        <span class="comment">// Process State Register</span>
+<a name="l00077"></a><a class="code" href="classSparcISA_1_1ISA.html#a245b42e6f340c7874989d56608af5cb5">00077</a>     uint8_t <a class="code" href="classSparcISA_1_1ISA.html#a245b42e6f340c7874989d56608af5cb5">tl</a>;             <span class="comment">// Trap Level</span>
+<a name="l00078"></a><a class="code" href="classSparcISA_1_1ISA.html#a66223bd530b4057219479647e23beed6">00078</a>     uint8_t <a class="code" href="classSparcISA_1_1ISA.html#a66223bd530b4057219479647e23beed6">pil</a>;            <span class="comment">// Process Interrupt Register</span>
+<a name="l00079"></a><a class="code" href="classSparcISA_1_1ISA.html#a58c702bc16d587a7bd7a38d609dea6d8">00079</a>     uint8_t <a class="code" href="classSparcISA_1_1ISA.html#a58c702bc16d587a7bd7a38d609dea6d8">cwp</a>;            <span class="comment">// Current Window Pointer</span>
+<a name="l00080"></a>00080     <span class="comment">// uint8_t cansave;     // Savable windows</span>
+<a name="l00081"></a>00081     <span class="comment">// uint8_t canrestore;  // Restorable windows</span>
+<a name="l00082"></a>00082     <span class="comment">// uint8_t cleanwin;    // Clean windows</span>
+<a name="l00083"></a>00083     <span class="comment">// uint8_t otherwin;    // Other windows</span>
+<a name="l00084"></a>00084     <span class="comment">// uint8_t wstate;      // Window State</span>
+<a name="l00085"></a><a class="code" href="classSparcISA_1_1ISA.html#a285fa13127daefc218bebcdb2437ad1a">00085</a>     uint8_t <a class="code" href="classSparcISA_1_1ISA.html#a285fa13127daefc218bebcdb2437ad1a">gl</a>;             <span class="comment">// Global level register</span>
+<a name="l00086"></a>00086 
+<a name="l00088"></a><a class="code" href="classSparcISA_1_1ISA.html#ac750e45e1f2206dda9eb77b9abda8e1f">00088</a>     HPSTATE <a class="code" href="classSparcISA_1_1ISA.html#ac750e45e1f2206dda9eb77b9abda8e1f">hpstate</a>;       <span class="comment">// Hyperprivileged State Register</span>
+<a name="l00089"></a><a class="code" href="classSparcISA_1_1ISA.html#a5672f7d32a200a25344a957b6cf28bdd">00089</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a5672f7d32a200a25344a957b6cf28bdd">htstate</a>[<a class="code" href="namespaceSparcISA.html#a8d6a6b2e04f9b3ebcec03466060ff24a">MaxTL</a>];<span class="comment">// Hyperprivileged Trap State Register</span>
+<a name="l00090"></a><a class="code" href="classSparcISA_1_1ISA.html#a80178c50623dd8f9e7cf81fdcb03a5a3">00090</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a80178c50623dd8f9e7cf81fdcb03a5a3">hintp</a>;
+<a name="l00091"></a><a class="code" href="classSparcISA_1_1ISA.html#a394227ebf5f2ab997956fe039b9d8c55">00091</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a394227ebf5f2ab997956fe039b9d8c55">htba</a>;          <span class="comment">// Hyperprivileged Trap Base Address register</span>
+<a name="l00092"></a><a class="code" href="classSparcISA_1_1ISA.html#a79e2b19decd8bd9410d920d868b3e449">00092</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a79e2b19decd8bd9410d920d868b3e449">hstick_cmpr</a>;   <span class="comment">// Hardware tick compare registers</span>
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classSparcISA_1_1ISA.html#ae6cd03a484c4fdb1182defef00b5c966">00094</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#ae6cd03a484c4fdb1182defef00b5c966">strandStatusReg</a>;<span class="comment">// Per strand status register</span>
+<a name="l00095"></a>00095 
+<a name="l00097"></a><a class="code" href="classSparcISA_1_1ISA.html#a671452da0a617e5f667a200a620572e0">00097</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a671452da0a617e5f667a200a620572e0">fsr</a>;           <span class="comment">// Floating-Point State Register</span>
+<a name="l00098"></a>00098 
+<a name="l00100"></a><a class="code" href="classSparcISA_1_1ISA.html#a5fe352a7943e22456a05c5300a6a49ae">00100</a>     uint16_t <a class="code" href="classSparcISA_1_1ISA.html#a5fe352a7943e22456a05c5300a6a49ae">priContext</a>;
+<a name="l00101"></a><a class="code" href="classSparcISA_1_1ISA.html#a815fd20b8c74821c4bf2a9f0380b4d7f">00101</a>     uint16_t <a class="code" href="classSparcISA_1_1ISA.html#a815fd20b8c74821c4bf2a9f0380b4d7f">secContext</a>;
+<a name="l00102"></a><a class="code" href="classSparcISA_1_1ISA.html#ae7345726b86ab42318467a52e4e1bfe8">00102</a>     uint16_t <a class="code" href="classSparcISA_1_1ISA.html#ae7345726b86ab42318467a52e4e1bfe8">partId</a>;
+<a name="l00103"></a><a class="code" href="classSparcISA_1_1ISA.html#a6e32b79603096a37834479deaa7964c1">00103</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a6e32b79603096a37834479deaa7964c1">lsuCtrlReg</a>;
+<a name="l00104"></a>00104 
+<a name="l00105"></a><a class="code" href="classSparcISA_1_1ISA.html#accdaadbaa1cb32c92b64de0ffb9d5dfe">00105</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#accdaadbaa1cb32c92b64de0ffb9d5dfe">scratchPad</a>[8];
+<a name="l00106"></a>00106 
+<a name="l00107"></a><a class="code" href="classSparcISA_1_1ISA.html#acc2fabb40ae04b90d3d10c49327213e6">00107</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#acc2fabb40ae04b90d3d10c49327213e6">cpu_mondo_head</a>;
+<a name="l00108"></a><a class="code" href="classSparcISA_1_1ISA.html#a68772afbd190aea65a3a74d716801cc5">00108</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a68772afbd190aea65a3a74d716801cc5">cpu_mondo_tail</a>;
+<a name="l00109"></a><a class="code" href="classSparcISA_1_1ISA.html#a5e058fd05845d4b8527d627e8fac70f8">00109</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a5e058fd05845d4b8527d627e8fac70f8">dev_mondo_head</a>;
+<a name="l00110"></a><a class="code" href="classSparcISA_1_1ISA.html#a5a529b655214fffb3d1cff2c0d4eb1dd">00110</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a5a529b655214fffb3d1cff2c0d4eb1dd">dev_mondo_tail</a>;
+<a name="l00111"></a><a class="code" href="classSparcISA_1_1ISA.html#a82458e32f522aa74099e9d613b09af6e">00111</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a82458e32f522aa74099e9d613b09af6e">res_error_head</a>;
+<a name="l00112"></a><a class="code" href="classSparcISA_1_1ISA.html#a1133915920bc64289d3eb90df5f9f8fd">00112</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a1133915920bc64289d3eb90df5f9f8fd">res_error_tail</a>;
+<a name="l00113"></a><a class="code" href="classSparcISA_1_1ISA.html#a821c065349acec659246d605e9677a19">00113</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a821c065349acec659246d605e9677a19">nres_error_head</a>;
+<a name="l00114"></a><a class="code" href="classSparcISA_1_1ISA.html#a6067e91b1e4fa5d14b645f673b8052d3">00114</a>     uint64_t <a class="code" href="classSparcISA_1_1ISA.html#a6067e91b1e4fa5d14b645f673b8052d3">nres_error_tail</a>;
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116     <span class="comment">// These need to check the int_dis field and if 0 then</span>
+<a name="l00117"></a>00117     <span class="comment">// set appropriate bit in softint and checkinterrutps on the cpu</span>
+<a name="l00118"></a>00118     <span class="keywordtype">void</span>  <a class="code" href="classSparcISA_1_1ISA.html#af746bd351f28656415fa83508c51f99d">setFSReg</a>(<span class="keywordtype">int</span> miscReg, <span class="keyword">const</span> <a class="code" href="namespaceSparcISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00119"></a>00119     <a class="code" href="namespaceSparcISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="classSparcISA_1_1ISA.html#ae5670dc7b39c2d746bb37c321aea7c6f">readFSReg</a>(<span class="keywordtype">int</span> miscReg, <a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121     <span class="comment">// Update interrupt state on softint or pil change</span>
+<a name="l00122"></a>00122     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#ae02c952584deaa6119c15c810faf6d54">checkSoftInt</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00123"></a>00123 
+<a name="l00126"></a>00126     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a6c81ced7d761098b6a3b733c6e70e041">processTickCompare</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00127"></a>00127     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a69feece7c04b8dc0567ec5050e809913">processSTickCompare</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00128"></a>00128     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a3ad754d09a0ae2ad17746198b0d3563d">processHSTickCompare</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00129"></a>00129 
+<a name="l00130"></a>00130     <span class="keyword">typedef</span> <a class="code" href="classCpuEventWrapper.html">CpuEventWrapper</a>&lt;<a class="code" href="classSparcISA_1_1ISA.html">ISA</a>,
+<a name="l00131"></a><a class="code" href="classSparcISA_1_1ISA.html#aa0cdda97db933627d221397f0073c608">00131</a>             &amp;<a class="code" href="classSparcISA_1_1ISA.html#a6c81ced7d761098b6a3b733c6e70e041">ISA::processTickCompare</a>&gt; <a class="code" href="classCpuEventWrapper.html">TickCompareEvent</a>;
+<a name="l00132"></a><a class="code" href="classSparcISA_1_1ISA.html#ac35cd2e6db9b53a961d7c27b5ddb06e2">00132</a>     <a class="code" href="classCpuEventWrapper.html">TickCompareEvent</a> *<a class="code" href="classSparcISA_1_1ISA.html#ac35cd2e6db9b53a961d7c27b5ddb06e2">tickCompare</a>;
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134     <span class="keyword">typedef</span> <a class="code" href="classCpuEventWrapper.html">CpuEventWrapper</a>&lt;<a class="code" href="classSparcISA_1_1ISA.html">ISA</a>,
+<a name="l00135"></a><a class="code" href="classSparcISA_1_1ISA.html#a8a23f1de4077b437f4cb46bb42bea046">00135</a>             &amp;<a class="code" href="classSparcISA_1_1ISA.html#a69feece7c04b8dc0567ec5050e809913">ISA::processSTickCompare</a>&gt; <a class="code" href="classCpuEventWrapper.html">STickCompareEvent</a>;
+<a name="l00136"></a><a class="code" href="classSparcISA_1_1ISA.html#aa6afa0d89310534cbe845f9450f7f7f3">00136</a>     <a class="code" href="classCpuEventWrapper.html">STickCompareEvent</a> *<a class="code" href="classSparcISA_1_1ISA.html#aa6afa0d89310534cbe845f9450f7f7f3">sTickCompare</a>;
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138     <span class="keyword">typedef</span> <a class="code" href="classCpuEventWrapper.html">CpuEventWrapper</a>&lt;<a class="code" href="classSparcISA_1_1ISA.html">ISA</a>,
+<a name="l00139"></a><a class="code" href="classSparcISA_1_1ISA.html#ac90fb4d74917543141ff203e233b2635">00139</a>             &amp;<a class="code" href="classSparcISA_1_1ISA.html#a3ad754d09a0ae2ad17746198b0d3563d">ISA::processHSTickCompare</a>&gt; <a class="code" href="classCpuEventWrapper.html">HSTickCompareEvent</a>;
+<a name="l00140"></a><a class="code" href="classSparcISA_1_1ISA.html#a98fc67c7d29f456770395ec06f5e7959">00140</a>     <a class="code" href="classCpuEventWrapper.html">HSTickCompareEvent</a> *<a class="code" href="classSparcISA_1_1ISA.html#a98fc67c7d29f456770395ec06f5e7959">hSTickCompare</a>;
+<a name="l00141"></a>00141 
+<a name="l00142"></a><a class="code" href="classSparcISA_1_1ISA.html#abd837d1660a059e15c481b15de81245e">00142</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#abd837d1660a059e15c481b15de81245e">NumGlobalRegs</a> = 8;
+<a name="l00143"></a><a class="code" href="classSparcISA_1_1ISA.html#a9d358d98321735bfa556505af1ffd32b">00143</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#a9d358d98321735bfa556505af1ffd32b">NumWindowedRegs</a> = 24;
+<a name="l00144"></a><a class="code" href="classSparcISA_1_1ISA.html#aca1beb46289722aec38d4b6c230d6d50">00144</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#aca1beb46289722aec38d4b6c230d6d50">WindowOverlap</a> = 8;
+<a name="l00145"></a>00145 
+<a name="l00146"></a><a class="code" href="classSparcISA_1_1ISA.html#a0022a569233296cddbcb0862a16a0f06">00146</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#a0022a569233296cddbcb0862a16a0f06">TotalGlobals</a> = (<a class="code" href="namespaceSparcISA.html#af56470bc16dfc33549217225934bcd23">MaxGL</a> + 1) * <a class="code" href="classSparcISA_1_1ISA.html#abd837d1660a059e15c481b15de81245e">NumGlobalRegs</a>;
+<a name="l00147"></a><a class="code" href="classSparcISA_1_1ISA.html#ae0502aa41dafc203f8470512a2ca6fe8">00147</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#ae0502aa41dafc203f8470512a2ca6fe8">RegsPerWindow</a> = <a class="code" href="classSparcISA_1_1ISA.html#a9d358d98321735bfa556505af1ffd32b">NumWindowedRegs</a> - <a class="code" href="classSparcISA_1_1ISA.html#aca1beb46289722aec38d4b6c230d6d50">WindowOverlap</a>;
+<a name="l00148"></a><a class="code" href="classSparcISA_1_1ISA.html#afbaca3bf9771df45107bf33d834e3108">00148</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#afbaca3bf9771df45107bf33d834e3108">TotalWindowed</a> = <a class="code" href="namespaceSparcISA.html#a6216686abfee3750d491873b95a05308">NWindows</a> * <a class="code" href="classSparcISA_1_1ISA.html#ae0502aa41dafc203f8470512a2ca6fe8">RegsPerWindow</a>;
+<a name="l00149"></a>00149 
+<a name="l00150"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132">00150</a>     <span class="keyword">enum</span> <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132">InstIntRegOffsets</a> {
+<a name="l00151"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a8ddf639e9d7f7721aa26a5d1b8001c94">00151</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a8ddf639e9d7f7721aa26a5d1b8001c94">CurrentGlobalsOffset</a> = 0,
+<a name="l00152"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a10baad906f67874d234e79a6ea2cd5c2">00152</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a10baad906f67874d234e79a6ea2cd5c2">CurrentWindowOffset</a> = <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a8ddf639e9d7f7721aa26a5d1b8001c94">CurrentGlobalsOffset</a> + <a class="code" href="classSparcISA_1_1ISA.html#abd837d1660a059e15c481b15de81245e">NumGlobalRegs</a>,
+<a name="l00153"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a18465f66d55c0d4e47b1725075e781f7">00153</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a18465f66d55c0d4e47b1725075e781f7">MicroIntOffset</a> = <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a10baad906f67874d234e79a6ea2cd5c2">CurrentWindowOffset</a> + <a class="code" href="classSparcISA_1_1ISA.html#a9d358d98321735bfa556505af1ffd32b">NumWindowedRegs</a>,
+<a name="l00154"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a2f3b64c7dd09a753db6ed45de075a722">00154</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a2f3b64c7dd09a753db6ed45de075a722">NextGlobalsOffset</a> = <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a18465f66d55c0d4e47b1725075e781f7">MicroIntOffset</a> + <a class="code" href="namespaceSparcISA.html#a985912475a96ec00a4ff48b39004d43a">NumMicroIntRegs</a>,
+<a name="l00155"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132aa2887eefe1d14f5e91bc7a4cb6ee1019">00155</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132aa2887eefe1d14f5e91bc7a4cb6ee1019">NextWindowOffset</a> = <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a2f3b64c7dd09a753db6ed45de075a722">NextGlobalsOffset</a> + NumGlobalRegs,
+<a name="l00156"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a23d0b05b9e659a09779ea2285309b79c">00156</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a23d0b05b9e659a09779ea2285309b79c">PreviousGlobalsOffset</a> = <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132aa2887eefe1d14f5e91bc7a4cb6ee1019">NextWindowOffset</a> + NumWindowedRegs,
+<a name="l00157"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132abbced67d7e86c489436870ebbf669941">00157</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132abbced67d7e86c489436870ebbf669941">PreviousWindowOffset</a> = <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132a23d0b05b9e659a09779ea2285309b79c">PreviousGlobalsOffset</a> + NumGlobalRegs,
+<a name="l00158"></a><a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132adecfaa9607681de2f0741d2c17a6b512">00158</a>         <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132adecfaa9607681de2f0741d2c17a6b512">TotalInstIntRegs</a> = <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132abbced67d7e86c489436870ebbf669941">PreviousWindowOffset</a> + NumWindowedRegs
+<a name="l00159"></a>00159     };
+<a name="l00160"></a>00160 
+<a name="l00161"></a><a class="code" href="classSparcISA_1_1ISA.html#a56cee90834264b564effd9a3d9f46c3e">00161</a>     <a class="code" href="namespaceSparcISA.html#a69329e1d929a534ff51be6cf8216b69a">RegIndex</a> <a class="code" href="classSparcISA_1_1ISA.html#a56cee90834264b564effd9a3d9f46c3e">intRegMap</a>[<a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132adecfaa9607681de2f0741d2c17a6b512">TotalInstIntRegs</a>];
+<a name="l00162"></a>00162     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#ad1a90ae0758b89c2260267de79805f93">installWindow</a>(<span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#a58c702bc16d587a7bd7a38d609dea6d8">cwp</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>);
+<a name="l00163"></a>00163     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a8bccf96ba4158dc5a446b2236c8743ae">installGlobals</a>(<span class="keywordtype">int</span> <a class="code" href="classSparcISA_1_1ISA.html#a285fa13127daefc218bebcdb2437ad1a">gl</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a>);
+<a name="l00164"></a>00164     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a3425c21bb9f49c5ebcd3cddc2d1ec247">reloadRegMap</a>();
+<a name="l00165"></a>00165 
+<a name="l00166"></a>00166   <span class="keyword">public</span>:
+<a name="l00167"></a>00167 
+<a name="l00168"></a>00168     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#ac8bb3912a3ce86b15842e79d0b421204">clear</a>();
+<a name="l00169"></a>00169 
+<a name="l00170"></a>00170     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp; <a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00171"></a>00171 
+<a name="l00172"></a>00172     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp; section);
+<a name="l00173"></a>00173 
+<a name="l00174"></a><a class="code" href="classSparcISA_1_1ISA.html#a769e733729615c529fdb54f538f11dba">00174</a>     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a769e733729615c529fdb54f538f11dba">startup</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) {}
+<a name="l00175"></a>00175 
+<a name="l00177"></a>00177     <span class="keyword">using</span> <a class="code" href="classSimObject.html#aecc7d8debf54990ffeaaed5bac7d7d81">SimObject::startup</a>;
+<a name="l00178"></a>00178 
+<a name="l00179"></a>00179   <span class="keyword">protected</span>:
+<a name="l00180"></a><a class="code" href="classSparcISA_1_1ISA.html#a842f98879c435ed5980772bd9a48ec85">00180</a>     <span class="keywordtype">bool</span> <a class="code" href="classSparcISA_1_1ISA.html#a842f98879c435ed5980772bd9a48ec85">isHyperPriv</a>() { <span class="keywordflow">return</span> <a class="code" href="classSparcISA_1_1ISA.html#ac750e45e1f2206dda9eb77b9abda8e1f">hpstate</a>.hpriv; }
+<a name="l00181"></a><a class="code" href="classSparcISA_1_1ISA.html#a9ce1572daa5a507ad7a319d5de9e6fe3">00181</a>     <span class="keywordtype">bool</span> <a class="code" href="classSparcISA_1_1ISA.html#a9ce1572daa5a507ad7a319d5de9e6fe3">isPriv</a>() { <span class="keywordflow">return</span> <a class="code" href="classSparcISA_1_1ISA.html#ac750e45e1f2206dda9eb77b9abda8e1f">hpstate</a>.hpriv || <a class="code" href="classSparcISA_1_1ISA.html#af3e9d055518924e91c868c1caeabf960">pstate</a>.priv; }
+<a name="l00182"></a><a class="code" href="classSparcISA_1_1ISA.html#a3e258d603a97a9f1693046a8f2b227b3">00182</a>     <span class="keywordtype">bool</span> <a class="code" href="classSparcISA_1_1ISA.html#a3e258d603a97a9f1693046a8f2b227b3">isNonPriv</a>() { <span class="keywordflow">return</span> !<a class="code" href="classSparcISA_1_1ISA.html#a9ce1572daa5a507ad7a319d5de9e6fe3">isPriv</a>(); }
+<a name="l00183"></a>00183 
+<a name="l00184"></a>00184   <span class="keyword">public</span>:
+<a name="l00185"></a>00185 
+<a name="l00186"></a>00186     <a class="code" href="namespaceSparcISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="classSparcISA_1_1ISA.html#a8147f1448b78d0de3f86766175429e19">readMiscRegNoEffect</a>(<span class="keywordtype">int</span> miscReg);
+<a name="l00187"></a>00187     <a class="code" href="namespaceSparcISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="classSparcISA_1_1ISA.html#ac9a5ba47c1dd9552c65c3164fba45f20">readMiscReg</a>(<span class="keywordtype">int</span> miscReg, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00188"></a>00188 
+<a name="l00189"></a>00189     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#ae0c0c2b6f950ae0716dd72d9ecc38b18">setMiscRegNoEffect</a>(<span class="keywordtype">int</span> miscReg, <span class="keyword">const</span> <a class="code" href="namespaceSparcISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00190"></a>00190     <span class="keywordtype">void</span> <a class="code" href="classSparcISA_1_1ISA.html#a74734f9fecafa198d6a4881f65992ee3">setMiscReg</a>(<span class="keywordtype">int</span> miscReg, <span class="keyword">const</span> <a class="code" href="namespaceSparcISA.html#aa16539aa6584fd12f7d6fa868f75b4de">MiscReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>,
+<a name="l00191"></a>00191             <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00192"></a>00192 
+<a name="l00193"></a>00193     <span class="keywordtype">int</span>
+<a name="l00194"></a><a class="code" href="classSparcISA_1_1ISA.html#aece4b88ffcab608652e8e9f0fbe643d4">00194</a>     <a class="code" href="classSparcISA_1_1ISA.html#aece4b88ffcab608652e8e9f0fbe643d4">flattenIntIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00195"></a>00195 <span class="keyword">    </span>{
+<a name="l00196"></a>00196         assert(reg &lt; <a class="code" href="classSparcISA_1_1ISA.html#acdbae92f22e3cb157c78d08e5a56f132adecfaa9607681de2f0741d2c17a6b512">TotalInstIntRegs</a>);
+<a name="l00197"></a>00197         <a class="code" href="namespaceSparcISA.html#a69329e1d929a534ff51be6cf8216b69a">RegIndex</a> flatIndex = <a class="code" href="classSparcISA_1_1ISA.html#a56cee90834264b564effd9a3d9f46c3e">intRegMap</a>[reg];
+<a name="l00198"></a>00198         assert(flatIndex &lt; <a class="code" href="namespaceSparcISA.html#a9c412b5118ce369570c156c4e156638a">NumIntRegs</a>);
+<a name="l00199"></a>00199         <span class="keywordflow">return</span> flatIndex;
+<a name="l00200"></a>00200     }
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202     <span class="keywordtype">int</span>
+<a name="l00203"></a><a class="code" href="classSparcISA_1_1ISA.html#a85addcd4f57c5a0ffa81805dcad1eeb7">00203</a>     <a class="code" href="classSparcISA_1_1ISA.html#a85addcd4f57c5a0ffa81805dcad1eeb7">flattenFloatIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00204"></a>00204 <span class="keyword">    </span>{
+<a name="l00205"></a>00205         <span class="keywordflow">return</span> reg;
+<a name="l00206"></a>00206     }
+<a name="l00207"></a>00207 
+<a name="l00208"></a>00208     <span class="comment">// dummy</span>
+<a name="l00209"></a>00209     <span class="keywordtype">int</span>
+<a name="l00210"></a><a class="code" href="classSparcISA_1_1ISA.html#a7a5d7476bd10e5af09e6e753d1fca087">00210</a>     <a class="code" href="classSparcISA_1_1ISA.html#a7a5d7476bd10e5af09e6e753d1fca087">flattenCCIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00211"></a>00211 <span class="keyword">    </span>{
+<a name="l00212"></a>00212         <span class="keywordflow">return</span> reg;
+<a name="l00213"></a>00213     }
+<a name="l00214"></a>00214 
+<a name="l00215"></a>00215     <span class="keywordtype">int</span>
+<a name="l00216"></a><a class="code" href="classSparcISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">00216</a>     <a class="code" href="classSparcISA_1_1ISA.html#a8997760aa4425793911f57440a4dd8ae">flattenMiscIndex</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#aeeb02ad833ab76f3430553ef93213a6b">reg</a>)<span class="keyword"> const</span>
+<a name="l00217"></a>00217 <span class="keyword">    </span>{
+<a name="l00218"></a>00218         <span class="keywordflow">return</span> reg;
+<a name="l00219"></a>00219     }
+<a name="l00220"></a>00220 
+<a name="l00221"></a>00221 
+<a name="l00222"></a><a class="code" href="classSparcISA_1_1ISA.html#ac7cac3e1b138ac21b8c4fddb4d68ed25">00222</a>     <span class="keyword">typedef</span> SparcISAParams <a class="code" href="classSparcISA_1_1ISA.html#ac7cac3e1b138ac21b8c4fddb4d68ed25">Params</a>;
+<a name="l00223"></a>00223     <span class="keyword">const</span> <a class="code" href="classSparcISA_1_1ISA.html#ac7cac3e1b138ac21b8c4fddb4d68ed25">Params</a> *<a class="code" href="classSparcISA_1_1ISA.html#a920ae59e79267fe19ed92248b3807e8d">params</a>() <span class="keyword">const</span>;
+<a name="l00224"></a>00224 
+<a name="l00225"></a>00225     <a class="code" href="classSparcISA_1_1ISA.html#ae9132e021b3f3b20c917fc328a056bbd">ISA</a>(<a class="code" href="classSparcISA_1_1ISA.html#ac7cac3e1b138ac21b8c4fddb4d68ed25">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00226"></a>00226 };
+<a name="l00227"></a>00227 }
+<a name="l00228"></a>00228 
+<a name="l00229"></a>00229 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

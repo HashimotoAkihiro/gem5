@@ -1,0 +1,291 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/x86/i8042.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/x86/i8042.hh</h1><a href="i8042_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2008 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __DEV_X86_I8042_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_X86_I8042_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="intdev_8hh.html">dev/x86/intdev.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="io__device_8hh.html">dev/io_device.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;params/I8042.hh&quot;</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="keyword">namespace </span>X86ISA
+<a name="l00041"></a>00041 {
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="keyword">class </span>IntPin;
+<a name="l00044"></a>00044 
+<a name="l00045"></a><a class="code" href="classX86ISA_1_1PS2Device.html">00045</a> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1PS2Device.html">PS2Device</a>
+<a name="l00046"></a>00046 {
+<a name="l00047"></a>00047   <span class="keyword">protected</span>:
+<a name="l00048"></a><a class="code" href="classX86ISA_1_1PS2Device.html#a89ae3ffe23f18460b725ac460c577049">00048</a>     std::queue&lt;uint8_t&gt; <a class="code" href="classX86ISA_1_1PS2Device.html#a89ae3ffe23f18460b725ac460c577049">outBuffer</a>;
+<a name="l00049"></a>00049 
+<a name="l00050"></a><a class="code" href="classX86ISA_1_1PS2Device.html#afa7b02fd8bda5e1de413e0b8776294ad">00050</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint16_t <a class="code" href="classX86ISA_1_1PS2Device.html#afa7b02fd8bda5e1de413e0b8776294ad">NoCommand</a> = (uint16_t)(-1);
+<a name="l00051"></a>00051 
+<a name="l00052"></a><a class="code" href="classX86ISA_1_1PS2Device.html#a0db1139e4bbd0a84a125c3aec0cb4334">00052</a>     uint16_t <a class="code" href="classX86ISA_1_1PS2Device.html#a0db1139e4bbd0a84a125c3aec0cb4334">lastCommand</a>;
+<a name="l00053"></a>00053     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1PS2Device.html#ae2ad55fbaa638568a74bdd631bcc0757">bufferData</a>(<span class="keyword">const</span> uint8_t *data, <span class="keywordtype">int</span> size);
+<a name="l00054"></a>00054     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1PS2Device.html#ad1d30e70693fa0b07c77697ecf181ef1">ack</a>();
+<a name="l00055"></a>00055     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1PS2Device.html#add2392e874a62256159bff48d370fe4d">nack</a>();
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057   <span class="keyword">public</span>:
+<a name="l00058"></a><a class="code" href="classX86ISA_1_1PS2Device.html#a301312a5e152ace246063d63da23028e">00058</a>     <span class="keyword">virtual</span> <a class="code" href="classX86ISA_1_1PS2Device.html#a301312a5e152ace246063d63da23028e">~PS2Device</a>()
+<a name="l00059"></a>00059     {};
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="classX86ISA_1_1PS2Device.html#a428b97491100c33940d240972502bae7">00061</a>     <a class="code" href="classX86ISA_1_1PS2Device.html#a428b97491100c33940d240972502bae7">PS2Device</a>() : <a class="code" href="classX86ISA_1_1PS2Device.html#a0db1139e4bbd0a84a125c3aec0cb4334">lastCommand</a>(<a class="code" href="classX86ISA_1_1PS2Device.html#afa7b02fd8bda5e1de413e0b8776294ad">NoCommand</a>)
+<a name="l00062"></a>00062     {}
+<a name="l00063"></a>00063 
+<a name="l00064"></a><a class="code" href="classX86ISA_1_1PS2Device.html#a409e05a5f45af16b718f74360a118941">00064</a>     <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1PS2Device.html#a409e05a5f45af16b718f74360a118941">hasData</a>()
+<a name="l00065"></a>00065     {
+<a name="l00066"></a>00066         <span class="keywordflow">return</span> !<a class="code" href="classX86ISA_1_1PS2Device.html#a89ae3ffe23f18460b725ac460c577049">outBuffer</a>.empty();
+<a name="l00067"></a>00067     }
+<a name="l00068"></a>00068 
+<a name="l00069"></a><a class="code" href="classX86ISA_1_1PS2Device.html#abe40c1e97e22c2185a0cce90fe4c04a7">00069</a>     uint8_t <a class="code" href="classX86ISA_1_1PS2Device.html#abe40c1e97e22c2185a0cce90fe4c04a7">getData</a>()
+<a name="l00070"></a>00070     {
+<a name="l00071"></a>00071         uint8_t data = <a class="code" href="classX86ISA_1_1PS2Device.html#a89ae3ffe23f18460b725ac460c577049">outBuffer</a>.front();
+<a name="l00072"></a>00072         <a class="code" href="classX86ISA_1_1PS2Device.html#a89ae3ffe23f18460b725ac460c577049">outBuffer</a>.pop();
+<a name="l00073"></a>00073         <span class="keywordflow">return</span> data;
+<a name="l00074"></a>00074     }
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1PS2Device.html#a7bfab1b5725d41896d0cd06793244ab7">processData</a>(uint8_t data) = 0;
+<a name="l00077"></a>00077 };
+<a name="l00078"></a>00078 
+<a name="l00079"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html">00079</a> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1PS2Mouse.html">PS2Mouse</a> : <span class="keyword">public</span> <a class="code" href="classX86ISA_1_1PS2Device.html">PS2Device</a>
+<a name="l00080"></a>00080 {
+<a name="l00081"></a>00081   <span class="keyword">protected</span>:
+<a name="l00082"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#aad1dea7ff5c01171f72700e686ae867e">00082</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint8_t <a class="code" href="classX86ISA_1_1PS2Mouse.html#aad1dea7ff5c01171f72700e686ae867e">ID</a>[];
+<a name="l00083"></a>00083 
+<a name="l00084"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153">00084</a>     <span class="keyword">enum</span> <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153">Command</a>
+<a name="l00085"></a>00085     {
+<a name="l00086"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153abd085e6a01d495102699846faf8323e6">00086</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153abd085e6a01d495102699846faf8323e6">Scale1to1</a> = 0xE6,
+<a name="l00087"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a784b9163a7c176b9bb5c7ec2968cdfbd">00087</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a784b9163a7c176b9bb5c7ec2968cdfbd">Scale2to1</a> = 0xE7,
+<a name="l00088"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a1fa45c553056ac473f7d280e9f8b58e6">00088</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a1fa45c553056ac473f7d280e9f8b58e6">SetResolution</a> = 0xE8,
+<a name="l00089"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a050d7c8b46c7296173d8c6f565695cb0">00089</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a050d7c8b46c7296173d8c6f565695cb0">GetStatus</a> = 0xE9,
+<a name="l00090"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153adf6fcea7ad456e7310f3043a88e8cc37">00090</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153adf6fcea7ad456e7310f3043a88e8cc37">ReadData</a> = 0xEB,
+<a name="l00091"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a620df770460f5ddaa328b10dc735eda4">00091</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a620df770460f5ddaa328b10dc735eda4">ResetWrapMode</a> = 0xEC,
+<a name="l00092"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a3685cf23fb69875be18aa25a9cdb3c51">00092</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a3685cf23fb69875be18aa25a9cdb3c51">WrapMode</a> = 0xEE,
+<a name="l00093"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153ace41457597e88d0ef23effe601406df8">00093</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153ace41457597e88d0ef23effe601406df8">RemoteMode</a> = 0xF0,
+<a name="l00094"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153af2dc99b912a4b0eda5322902128c8695">00094</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153af2dc99b912a4b0eda5322902128c8695">ReadID</a> = 0xF2,
+<a name="l00095"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a2813b71971fb08700b07ab786fa5c2e3">00095</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a2813b71971fb08700b07ab786fa5c2e3">SampleRate</a> = 0xF3,
+<a name="l00096"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a30e97a34a968f87aaf32a1615ec1e5bb">00096</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a30e97a34a968f87aaf32a1615ec1e5bb">EnableReporting</a> = 0xF4,
+<a name="l00097"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a823a797dce4051d9344dcf4dc3906384">00097</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a823a797dce4051d9344dcf4dc3906384">DisableReporting</a> = 0xF5,
+<a name="l00098"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a98019ed7a55373ba59012493c7b79851">00098</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a98019ed7a55373ba59012493c7b79851">DefaultsAndDisable</a> = 0xF6,
+<a name="l00099"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a09faf5069efc511c8f45196604b91ee9">00099</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a09faf5069efc511c8f45196604b91ee9">Resend</a> = 0xFE,
+<a name="l00100"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a92793663441ced378f4676b8a6524385">00100</a>         <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2afce0a47a93eee73a314d53e4890153a92793663441ced378f4676b8a6524385">Reset</a> = 0xFF
+<a name="l00101"></a>00101     };
+<a name="l00102"></a>00102 
+<a name="l00103"></a>00103     <a class="code" href="classX86ISA_1_1PS2Mouse.html#ad5a62dd93ada43b5048b0d9ddfc8b076">BitUnion8</a>(Status)
+<a name="l00104"></a>00104         Bitfield&lt;6&gt; remote;
+<a name="l00105"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a6e035794fee205f35fff611c97f74849">00105</a>         Bitfield&lt;5&gt; <a class="code" href="classX86ISA_1_1PS2Mouse.html#a6e035794fee205f35fff611c97f74849">enabled</a>;
+<a name="l00106"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#ad672b278dde865a7b38ff03434e9a8ac">00106</a>         Bitfield&lt;4&gt; <a class="code" href="classX86ISA_1_1PS2Mouse.html#ad672b278dde865a7b38ff03434e9a8ac">twoToOne</a>;
+<a name="l00107"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#aa3262d4baf4a5ae55d9a4c3696d27507">00107</a>         Bitfield&lt;2&gt; <a class="code" href="classX86ISA_1_1PS2Mouse.html#aa3262d4baf4a5ae55d9a4c3696d27507">leftButton</a>;
+<a name="l00108"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#ad3b9d6ae9675e18b890099ea98665858">00108</a>         Bitfield&lt;0&gt; <a class="code" href="classX86ISA_1_1PS2Mouse.html#ad3b9d6ae9675e18b890099ea98665858">rightButton</a>;
+<a name="l00109"></a>00109     <a class="code" href="classX86ISA_1_1PS2Mouse.html#a716a44dd9c10b22cacb46491ae3e525a">EndBitUnion</a>(Status)
+<a name="l00110"></a>00110 
+<a name="l00111"></a>00111     Status <a class="code" href="namespaceArmISA.html#a566327436c4c7e7a63ab9ac137e9d50e">status</a>;
+<a name="l00112"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a2b8bdf2ccdee1cc9e95e8ec7714b68d2">00112</a>     uint8_t <a class="code" href="classX86ISA_1_1PS2Mouse.html#a2b8bdf2ccdee1cc9e95e8ec7714b68d2">resolution</a>;
+<a name="l00113"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a5022f9261e83b503585507a1028d344e">00113</a>     uint8_t <a class="code" href="classX86ISA_1_1PS2Mouse.html#a5022f9261e83b503585507a1028d344e">sampleRate</a>;
+<a name="l00114"></a>00114   public:
+<a name="l00115"></a><a class="code" href="classX86ISA_1_1PS2Mouse.html#a7445002f3bb5ca2ff1fbacb583d8d4b6">00115</a>     <a class="code" href="classX86ISA_1_1PS2Mouse.html">PS2Mouse</a>() : <a class="code" href="classX86ISA_1_1PS2Device.html">PS2Device</a>(), status(0), resolution(4), sampleRate(100)
+<a name="l00116"></a>00116     {}
+<a name="l00117"></a>00117 
+<a name="l00118"></a>00118     <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1PS2Mouse.html#a501fdeaf8d614f432cfbf95f23675982">processData</a>(uint8_t data);
+<a name="l00119"></a>00119 
+<a name="l00120"></a>00120     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1PS2Mouse.html#ab4138b21b48e3371a8e20df72b675a88">serialize</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00121"></a>00121     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1PS2Mouse.html#a147c320e3d6506edf5587a40cd8e430d">unserialize</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, <a class="code" href="classCheckpoint.html">Checkpoint</a> *cp,
+<a name="l00122"></a>00122             <span class="keyword">const</span> std::string &amp;section);
+<a name="l00123"></a>00123 };
+<a name="l00124"></a>00124 
+<a name="l00125"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html">00125</a> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1PS2Keyboard.html">PS2Keyboard</a> : <span class="keyword">public</span> <a class="code" href="classX86ISA_1_1PS2Device.html">PS2Device</a>
+<a name="l00126"></a>00126 {
+<a name="l00127"></a>00127   <span class="keyword">protected</span>:
+<a name="l00128"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#aad1dea7ff5c01171f72700e686ae867e">00128</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint8_t <a class="code" href="classX86ISA_1_1PS2Keyboard.html#aad1dea7ff5c01171f72700e686ae867e">ID</a>[];
+<a name="l00129"></a>00129 
+<a name="l00130"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153">00130</a>     <span class="keyword">enum</span> <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153">Command</a>
+<a name="l00131"></a>00131     {
+<a name="l00132"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153ad6dc91d2413e9f2cdf89ad871a93031c">00132</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153ad6dc91d2413e9f2cdf89ad871a93031c">LEDWrite</a> = 0xED,
+<a name="l00133"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a423a0a8ae28f19327df4c132d2d7d195">00133</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a423a0a8ae28f19327df4c132d2d7d195">DiagnosticEcho</a> = 0xEE,
+<a name="l00134"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a90d5c9255a1d8ccd1d6d6308ed498b4c">00134</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a90d5c9255a1d8ccd1d6d6308ed498b4c">AlternateScanCodes</a> = 0xF0,
+<a name="l00135"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153af2dc99b912a4b0eda5322902128c8695">00135</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153af2dc99b912a4b0eda5322902128c8695">ReadID</a> = 0xF2,
+<a name="l00136"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a2fde6a8a26839238b4bfc635450b51f9">00136</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a2fde6a8a26839238b4bfc635450b51f9">TypematicInfo</a> = 0xF3,
+<a name="l00137"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a80cb2080e90221d1f5b425387d9bd030">00137</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a80cb2080e90221d1f5b425387d9bd030">Enable</a> = 0xF4,
+<a name="l00138"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a9f306dd8981a103d6827f8b4e80da8aa">00138</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a9f306dd8981a103d6827f8b4e80da8aa">Disable</a> = 0xF5,
+<a name="l00139"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a98019ed7a55373ba59012493c7b79851">00139</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a98019ed7a55373ba59012493c7b79851">DefaultsAndDisable</a> = 0xF6,
+<a name="l00140"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a6ae200ec07f334faf280cc06917a65f3">00140</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a6ae200ec07f334faf280cc06917a65f3">AllKeysToTypematic</a> = 0xF7,
+<a name="l00141"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a5e3e81955e4297c90c49977f1de5b792">00141</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a5e3e81955e4297c90c49977f1de5b792">AllKeysToMakeRelease</a> = 0xF8,
+<a name="l00142"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153add98083e3a887cee194a567450d1d52c">00142</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153add98083e3a887cee194a567450d1d52c">AllKeysToMake</a> = 0xF9,
+<a name="l00143"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a3340b2b67728800eb25ee28b3d510953">00143</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a3340b2b67728800eb25ee28b3d510953">AllKeysToTypematicMakeRelease</a> = 0xFA,
+<a name="l00144"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a2f2757f401e96d614ca6ccf1a96af4f3">00144</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a2f2757f401e96d614ca6ccf1a96af4f3">KeyToTypematic</a> = 0xFB,
+<a name="l00145"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a9e2d3c230fffc303926c29a019170532">00145</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a9e2d3c230fffc303926c29a019170532">KeyToMakeRelease</a> = 0xFC,
+<a name="l00146"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a4fdf61786633aab4eed245badad8bb6c">00146</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a4fdf61786633aab4eed245badad8bb6c">KeyToMakeOnly</a> = 0xFD,
+<a name="l00147"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a09faf5069efc511c8f45196604b91ee9">00147</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a09faf5069efc511c8f45196604b91ee9">Resend</a> = 0xFE,
+<a name="l00148"></a><a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a92793663441ced378f4676b8a6524385">00148</a>         <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a2afce0a47a93eee73a314d53e4890153a92793663441ced378f4676b8a6524385">Reset</a> = 0xFF
+<a name="l00149"></a>00149     };
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151   <span class="keyword">public</span>:
+<a name="l00152"></a>00152     <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a501fdeaf8d614f432cfbf95f23675982">processData</a>(uint8_t data);
+<a name="l00153"></a>00153 
+<a name="l00154"></a>00154     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1PS2Keyboard.html#ab4138b21b48e3371a8e20df72b675a88">serialize</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00155"></a>00155     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1PS2Keyboard.html#a147c320e3d6506edf5587a40cd8e430d">unserialize</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, <a class="code" href="classCheckpoint.html">Checkpoint</a> *cp,
+<a name="l00156"></a>00156             <span class="keyword">const</span> std::string &amp;section);
+<a name="l00157"></a>00157 };
+<a name="l00158"></a>00158 
+<a name="l00159"></a><a class="code" href="classX86ISA_1_1I8042.html">00159</a> <span class="keyword">class </span><a class="code" href="classX86ISA_1_1I8042.html">I8042</a> : <span class="keyword">public</span> <a class="code" href="classBasicPioDevice.html">BasicPioDevice</a>
+<a name="l00160"></a>00160 {
+<a name="l00161"></a>00161   <span class="keyword">protected</span>:
+<a name="l00162"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153">00162</a>     <span class="keyword">enum</span> <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153">Command</a>
+<a name="l00163"></a>00163     {
+<a name="l00164"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a23d5de50ab3986c273f16d27873759b8">00164</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a23d5de50ab3986c273f16d27873759b8">GetCommandByte</a> = 0x20,
+<a name="l00165"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a9b0985cd9d73a7881a7453e9287fc020">00165</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a9b0985cd9d73a7881a7453e9287fc020">ReadControllerRamBase</a> = 0x20,
+<a name="l00166"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153ab1dea94380ecd4e4c89e930df17d8d47">00166</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153ab1dea94380ecd4e4c89e930df17d8d47">WriteCommandByte</a> = 0x60,
+<a name="l00167"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a05cf4c570a5283bcd19744ece80507ea">00167</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a05cf4c570a5283bcd19744ece80507ea">WriteControllerRamBase</a> = 0x60,
+<a name="l00168"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a22b61ddbb05a5f9d258cd86e4f257cca">00168</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a22b61ddbb05a5f9d258cd86e4f257cca">CheckForPassword</a> = 0xA4,
+<a name="l00169"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a2eaca5606959cbc70001d3138ceda8b6">00169</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a2eaca5606959cbc70001d3138ceda8b6">LoadPassword</a> = 0xA5,
+<a name="l00170"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a015a89c4c142f0f69d5ac2cb7bf56b9c">00170</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a015a89c4c142f0f69d5ac2cb7bf56b9c">CheckPassword</a> = 0xA6,
+<a name="l00171"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153abbe97dae342dfdf3e85a257c90a6ce60">00171</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153abbe97dae342dfdf3e85a257c90a6ce60">DisableMouse</a> = 0xA7,
+<a name="l00172"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a16c1a67575ff1313d2c25473e8ac04e4">00172</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a16c1a67575ff1313d2c25473e8ac04e4">EnableMouse</a> = 0xA8,
+<a name="l00173"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a6277be2e9193123b1eac49cca489fc0c">00173</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a6277be2e9193123b1eac49cca489fc0c">TestMouse</a> = 0xA9,
+<a name="l00174"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a9248a447bc1c5001d5692afd5fc86f06">00174</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a9248a447bc1c5001d5692afd5fc86f06">SelfTest</a> = 0xAA,
+<a name="l00175"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a1c8233858c433f8bdbc3ce5185c0a101">00175</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a1c8233858c433f8bdbc3ce5185c0a101">InterfaceTest</a> = 0xAB,
+<a name="l00176"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a099644eade2e1c756daae13c264ba5b8">00176</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a099644eade2e1c756daae13c264ba5b8">DiagnosticDump</a> = 0xAC,
+<a name="l00177"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153aeb0e477719ae6fd34645beef2a1ad752">00177</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153aeb0e477719ae6fd34645beef2a1ad752">DisableKeyboard</a> = 0xAD,
+<a name="l00178"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a1f7b43427403a4c6f1574b16c967cecc">00178</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a1f7b43427403a4c6f1574b16c967cecc">EnableKeyboard</a> = 0xAE,
+<a name="l00179"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a8509d4fd3b0205f744f648a4bc2052d7">00179</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a8509d4fd3b0205f744f648a4bc2052d7">ReadInputPort</a> = 0xC0,
+<a name="l00180"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a051d34b6b649514ad2cd950431393bb1">00180</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a051d34b6b649514ad2cd950431393bb1">ContinuousPollLow</a> = 0xC1,
+<a name="l00181"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a04558413a7a04cf4f5348e31f7e25d41">00181</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a04558413a7a04cf4f5348e31f7e25d41">ContinuousPollHigh</a> = 0xC2,
+<a name="l00182"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153aade35f253085f916a9e93b23f87d7192">00182</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153aade35f253085f916a9e93b23f87d7192">ReadOutputPort</a> = 0xD0,
+<a name="l00183"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a4f2168d3b7108d68797c401ca07dcadd">00183</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a4f2168d3b7108d68797c401ca07dcadd">WriteOutputPort</a> = 0xD1,
+<a name="l00184"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a3ec3c826304679aa03f277eb6f237b78">00184</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a3ec3c826304679aa03f277eb6f237b78">WriteKeyboardOutputBuff</a> = 0xD2,
+<a name="l00185"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a1472aac208d2a3be8de4ea68f2df7582">00185</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a1472aac208d2a3be8de4ea68f2df7582">WriteMouseOutputBuff</a> = 0xD3,
+<a name="l00186"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153aca85cf74a065e596943486095dc366ef">00186</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153aca85cf74a065e596943486095dc366ef">WriteToMouse</a> = 0xD4,
+<a name="l00187"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a6389bcd602a97980469a0dc45b453b7c">00187</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a6389bcd602a97980469a0dc45b453b7c">DisableA20</a> = 0xDD,
+<a name="l00188"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a43a94edb97e3e43d85007fd572854b22">00188</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a43a94edb97e3e43d85007fd572854b22">EnableA20</a> = 0xDF,
+<a name="l00189"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153afcf1121396fa916967c3206c5803eb11">00189</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153afcf1121396fa916967c3206c5803eb11">ReadTestInputs</a> = 0xE0,
+<a name="l00190"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a711be2129b337131e878f1dfc6d9a79d">00190</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a711be2129b337131e878f1dfc6d9a79d">PulseOutputBitBase</a> = 0xF0,
+<a name="l00191"></a><a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a7256ac4658ec7af1eb4705b83266a603">00191</a>         <a class="code" href="classX86ISA_1_1I8042.html#a2afce0a47a93eee73a314d53e4890153a7256ac4658ec7af1eb4705b83266a603">SystemReset</a> = 0xFE
+<a name="l00192"></a>00192     };
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194     <a class="code" href="classX86ISA_1_1I8042.html#ac0c09369d67be3737e41443fac983e6a">BitUnion8</a>(StatusReg)
+<a name="l00195"></a>00195         Bitfield&lt;7&gt; parityError;
+<a name="l00196"></a><a class="code" href="classX86ISA_1_1I8042.html#a1e751f93440ec6b2aa8aba4c7336d6ea">00196</a>         Bitfield&lt;6&gt; <a class="code" href="classX86ISA_1_1I8042.html#a1e751f93440ec6b2aa8aba4c7336d6ea">timeout</a>;
+<a name="l00197"></a><a class="code" href="classX86ISA_1_1I8042.html#a43270e273e78021e88be7f7afe75721c">00197</a>         Bitfield&lt;5&gt; <a class="code" href="classX86ISA_1_1I8042.html#a43270e273e78021e88be7f7afe75721c">mouseOutputFull</a>;
+<a name="l00198"></a><a class="code" href="classX86ISA_1_1I8042.html#a4f11d228c35e9d97c1cc003762735a41">00198</a>         Bitfield&lt;4&gt; <a class="code" href="classX86ISA_1_1I8042.html#a4f11d228c35e9d97c1cc003762735a41">keyboardUnlocked</a>;
+<a name="l00199"></a><a class="code" href="classX86ISA_1_1I8042.html#a18c2dccc45c7e23576d55985c4b23eb5">00199</a>         Bitfield&lt;3&gt; <a class="code" href="classX86ISA_1_1I8042.html#a18c2dccc45c7e23576d55985c4b23eb5">commandLast</a>;
+<a name="l00200"></a><a class="code" href="classX86ISA_1_1I8042.html#a0a84c3649aab70a73e2c963a742a4643">00200</a>         Bitfield&lt;2&gt; <a class="code" href="classX86ISA_1_1I8042.html#a0a84c3649aab70a73e2c963a742a4643">passedSelfTest</a>;
+<a name="l00201"></a><a class="code" href="classX86ISA_1_1I8042.html#a39b55243e60ceda31d8762352cc3748c">00201</a>         Bitfield&lt;1&gt; <a class="code" href="classX86ISA_1_1I8042.html#a39b55243e60ceda31d8762352cc3748c">inputFull</a>;
+<a name="l00202"></a><a class="code" href="classX86ISA_1_1I8042.html#a7f94b3d2e2e3de211854f0645c7e0ec6">00202</a>         Bitfield&lt;0&gt; <a class="code" href="classX86ISA_1_1I8042.html#a7f94b3d2e2e3de211854f0645c7e0ec6">outputFull</a>;
+<a name="l00203"></a>00203     <a class="code" href="classX86ISA_1_1I8042.html#a1da145de36668df00f37d59c90f5eae2">EndBitUnion</a>(StatusReg)
+<a name="l00204"></a>00204 
+<a name="l00205"></a>00205     <a class="code" href="classX86ISA_1_1I8042.html#ac0c09369d67be3737e41443fac983e6a">BitUnion8</a>(CommandByte)
+<a name="l00206"></a>00206         Bitfield&lt;6&gt; convertScanCodes;
+<a name="l00207"></a><a class="code" href="classX86ISA_1_1I8042.html#ad59723c85703511350224ef784f6a9ac">00207</a>         Bitfield&lt;5&gt; <a class="code" href="classX86ISA_1_1I8042.html#ad59723c85703511350224ef784f6a9ac">disableMouse</a>;
+<a name="l00208"></a><a class="code" href="classX86ISA_1_1I8042.html#ac82b276112510c9b2475d568d42b4d9e">00208</a>         Bitfield&lt;4&gt; <a class="code" href="classX86ISA_1_1I8042.html#ac82b276112510c9b2475d568d42b4d9e">disableKeyboard</a>;
+<a name="l00209"></a>00209         Bitfield&lt;2&gt; passedSelfTest;
+<a name="l00210"></a><a class="code" href="classX86ISA_1_1I8042.html#a38053b2dbafabea0adbbe5a36998f465">00210</a>         Bitfield&lt;1&gt; <a class="code" href="classX86ISA_1_1I8042.html#a38053b2dbafabea0adbbe5a36998f465">mouseFullInt</a>;
+<a name="l00211"></a><a class="code" href="classX86ISA_1_1I8042.html#a212d28c640ebffd0723d406a3e85ba13">00211</a>         Bitfield&lt;0&gt; <a class="code" href="classX86ISA_1_1I8042.html#a212d28c640ebffd0723d406a3e85ba13">keyboardFullInt</a>;
+<a name="l00212"></a>00212     <a class="code" href="classX86ISA_1_1I8042.html#a1da145de36668df00f37d59c90f5eae2">EndBitUnion</a>(CommandByte)
+<a name="l00213"></a>00213 
+<a name="l00214"></a>00214     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> latency;
+<a name="l00215"></a><a class="code" href="classX86ISA_1_1I8042.html#af1be5149a7fbbf84684505d8ef42f46f">00215</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1I8042.html#af1be5149a7fbbf84684505d8ef42f46f">dataPort</a>;
+<a name="l00216"></a><a class="code" href="classX86ISA_1_1I8042.html#a922fab707fbbc527ea7d1df668c33513">00216</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1I8042.html#a922fab707fbbc527ea7d1df668c33513">commandPort</a>;
+<a name="l00217"></a>00217 
+<a name="l00218"></a><a class="code" href="classX86ISA_1_1I8042.html#a08336c94695c08fbcf6cb02060bd9b94">00218</a>     StatusReg <a class="code" href="classX86ISA_1_1I8042.html#a08336c94695c08fbcf6cb02060bd9b94">statusReg</a>;
+<a name="l00219"></a><a class="code" href="classX86ISA_1_1I8042.html#a70ba06fc42f64ee547bc6ac1d84b8605">00219</a>     CommandByte <a class="code" href="classX86ISA_1_1I8042.html#a70ba06fc42f64ee547bc6ac1d84b8605">commandByte</a>;
+<a name="l00220"></a>00220 
+<a name="l00221"></a><a class="code" href="classX86ISA_1_1I8042.html#a09dcf88896631b75dbb19f2a5be01e30">00221</a>     uint8_t <a class="code" href="classX86ISA_1_1I8042.html#a09dcf88896631b75dbb19f2a5be01e30">dataReg</a>;
+<a name="l00222"></a>00222 
+<a name="l00223"></a><a class="code" href="classX86ISA_1_1I8042.html#afa7b02fd8bda5e1de413e0b8776294ad">00223</a>     static const uint16_t <a class="code" href="classX86ISA_1_1I8042.html#afa7b02fd8bda5e1de413e0b8776294ad">NoCommand</a> = (uint16_t)(-1);
+<a name="l00224"></a><a class="code" href="classX86ISA_1_1I8042.html#a0db1139e4bbd0a84a125c3aec0cb4334">00224</a>     uint16_t <a class="code" href="classX86ISA_1_1I8042.html#a0db1139e4bbd0a84a125c3aec0cb4334">lastCommand</a>;
+<a name="l00225"></a>00225 
+<a name="l00226"></a><a class="code" href="classX86ISA_1_1I8042.html#a43567e6650dc601b0bdbb359a639d974">00226</a>     <a class="code" href="classX86ISA_1_1IntSourcePin.html">IntSourcePin</a> *<a class="code" href="classX86ISA_1_1I8042.html#a43567e6650dc601b0bdbb359a639d974">mouseIntPin</a>;
+<a name="l00227"></a><a class="code" href="classX86ISA_1_1I8042.html#a93c7118e433fc446924c13e65a718473">00227</a>     <a class="code" href="classX86ISA_1_1IntSourcePin.html">IntSourcePin</a> *<a class="code" href="classX86ISA_1_1I8042.html#a93c7118e433fc446924c13e65a718473">keyboardIntPin</a>;
+<a name="l00228"></a>00228 
+<a name="l00229"></a><a class="code" href="classX86ISA_1_1I8042.html#ab174297071ac5e00a17024b3ea4489a8">00229</a>     <a class="code" href="classX86ISA_1_1PS2Mouse.html">PS2Mouse</a> <a class="code" href="classX86ISA_1_1I8042.html#ab174297071ac5e00a17024b3ea4489a8">mouse</a>;
+<a name="l00230"></a><a class="code" href="classX86ISA_1_1I8042.html#a4d45508aaea1af22f73cbd9fa5525f33">00230</a>     <a class="code" href="classX86ISA_1_1PS2Keyboard.html">PS2Keyboard</a> <a class="code" href="classX86ISA_1_1I8042.html#a4d45508aaea1af22f73cbd9fa5525f33">keyboard</a>;
+<a name="l00231"></a>00231 
+<a name="l00232"></a>00232     <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1I8042.html#abc11493a3bf9f79d51f3c434c64483da">writeData</a>(uint8_t newData, <span class="keywordtype">bool</span> mouse = false);
+<a name="l00233"></a>00233     uint8_t <a class="code" href="classX86ISA_1_1I8042.html#a1ba9c6a2a23bdea21924e02dc6cf9d22">readDataOut</a>();
+<a name="l00234"></a>00234 
+<a name="l00235"></a>00235   public:
+<a name="l00236"></a><a class="code" href="classX86ISA_1_1I8042.html#ae70fe038127f3e2a71a81dde45f38dc5">00236</a>     typedef I8042Params <a class="code" href="classX86ISA_1_1I8042.html#ae70fe038127f3e2a71a81dde45f38dc5">Params</a>;
+<a name="l00237"></a>00237 
+<a name="l00238"></a>00238     const Params *
+<a name="l00239"></a><a class="code" href="classX86ISA_1_1I8042.html#acd3c3feb78ae7a8f88fe0f110a718dff">00239</a>     <a class="code" href="classX86ISA_1_1I8042.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00240"></a>00240 <span class="keyword">    </span>{
+<a name="l00241"></a>00241         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span>Params *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00242"></a>00242     }
+<a name="l00243"></a>00243 
+<a name="l00244"></a>00244     <a class="code" href="classX86ISA_1_1I8042.html#a46a61113522fbd1946d4f58441b939bf">I8042</a>(<a class="code" href="classX86ISA_1_1I8042.html#ae70fe038127f3e2a71a81dde45f38dc5">Params</a> *<a class="code" href="namespaceX86ISA.html#af675c1d542a25b96e11164b80809a856">p</a>);
+<a name="l00245"></a>00245 
+<a name="l00246"></a>00246     <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classX86ISA_1_1I8042.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00247"></a>00247 
+<a name="l00248"></a>00248     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classX86ISA_1_1I8042.html#a613ec7d5e1ec64f8d21fec78ae8e568e">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00249"></a>00249 
+<a name="l00250"></a>00250     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classX86ISA_1_1I8042.html#a4cefab464e72b5dd42c003a0a4341802">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00251"></a>00251 
+<a name="l00252"></a>00252     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1I8042.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00253"></a>00253     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1I8042.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00254"></a>00254 };
+<a name="l00255"></a>00255 
+<a name="l00256"></a>00256 } <span class="comment">// namespace X86ISA</span>
+<a name="l00257"></a>00257 
+<a name="l00258"></a>00258 <span class="preprocessor">#endif //__DEV_X86_I8042_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

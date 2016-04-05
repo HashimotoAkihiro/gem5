@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: KVM Interrupt handling.</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>KVM Interrupt handling.</h1><table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2"><h2>関数</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__KvmInterrupts.html#gabc700469cba2d4bba666902e552e7c2e">kvmNonMaskableInterrupt</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__KvmInterrupts.html#ga16b8f95e3f70098952604e6b8a121679">kvmInterrupt</a> (const struct kvm_interrupt &amp;interrupt)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__KvmInterrupts.html#ga75f1140369bf3942bb93a75d1b3de2c9">createIRQChip</a> ()</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">void&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__KvmInterrupts.html#ga5037b917c47fff611ecdd5b547655284">setIRQLine</a> (<a class="el" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> irq, bool high)</td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">bool&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="group__KvmInterrupts.html#ga4e9371a3b5e598c4cde8ebef65be940f">hasKernelIRQChip</a> () const </td></tr>
+</table>
+<hr/><a name="_details"></a><h2>説明</h2>
+<p>These methods control interrupt delivery to the guest system. </p>
+<hr/><h2>関数</h2>
+<a class="anchor" id="ga75f1140369bf3942bb93a75d1b3de2c9"></a><!-- doxytag: member="KvmVM::createIRQChip" ref="ga75f1140369bf3942bb93a75d1b3de2c9" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void createIRQChip </td>
+          <td>(</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [inherited]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Create an in-kernel interrupt controller</p>
+<dl class="note"><dt><b>覚え書き:</b></dt><dd>This functionality depends on <a class="el" href="classKvm.html#ab3e6d2bb7ea83c6cdc20369bf3a274a6">Kvm::capIRQChip()</a>. </dd></dl>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00403"></a>00403 {
+<a name="l00404"></a>00404     <span class="keywordflow">if</span> (<a class="code" href="classKvmVM.html#a7256488cd8c3b1c41c2417ade40cde88">_hasKernelIRQChip</a>)
+<a name="l00405"></a>00405         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;KvmVM::createIRQChip called twice.\n&quot;</span>);
+<a name="l00406"></a>00406 
+<a name="l00407"></a>00407     <span class="keywordflow">if</span> (<a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(KVM_CREATE_IRQCHIP) != -1) {
+<a name="l00408"></a>00408         <a class="code" href="classKvmVM.html#a7256488cd8c3b1c41c2417ade40cde88">_hasKernelIRQChip</a> = <span class="keyword">true</span>;
+<a name="l00409"></a>00409     } <span class="keywordflow">else</span> {
+<a name="l00410"></a>00410         <a class="code" href="base_2misc_8hh.html#a8224a361dddd2ad59b411982e5ea746f">warn</a>(<span class="stringliteral">&quot;KVM: Failed to create in-kernel IRQ chip (errno: %i)\n&quot;</span>,
+<a name="l00411"></a>00411              errno);
+<a name="l00412"></a>00412         <a class="code" href="classKvmVM.html#a7256488cd8c3b1c41c2417ade40cde88">_hasKernelIRQChip</a> = <span class="keyword">false</span>;
+<a name="l00413"></a>00413     }
+<a name="l00414"></a>00414 }
+</pre></div></p>
+
+</div>
+</div>
+<a class="anchor" id="ga4e9371a3b5e598c4cde8ebef65be940f"></a><!-- doxytag: member="KvmVM::hasKernelIRQChip" ref="ga4e9371a3b5e598c4cde8ebef65be940f" args="() const " -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool hasKernelIRQChip </td>
+          <td>(</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td> const<code> [inline, inherited]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Is in-kernel IRQ chip emulation enabled? </p>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00331"></a>00331 { <span class="keywordflow">return</span> <a class="code" href="classKvmVM.html#a7256488cd8c3b1c41c2417ade40cde88">_hasKernelIRQChip</a>; }
+</pre></div></p>
+
+</div>
+</div>
+<a class="anchor" id="ga16b8f95e3f70098952604e6b8a121679"></a><!-- doxytag: member="BaseKvmCPU::kvmInterrupt" ref="ga16b8f95e3f70098952604e6b8a121679" args="(const struct kvm_interrupt &amp;interrupt)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void kvmInterrupt </td>
+          <td>(</td>
+          <td class="paramtype">const struct kvm_interrupt &amp;&nbsp;</td>
+          <td class="paramname"> <em>interrupt</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [protected, inherited]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Send a normal interrupt to the guest</p>
+<dl class="note"><dt><b>覚え書き:</b></dt><dd>Make sure that ready_for_interrupt_injection in kvm_run is set prior to calling this function. If not, an interrupt window must be requested by setting request_interrupt_window in kvm_run to 1 and restarting the guest.</dd></dl>
+<dl><dt><b>引数:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>interrupt</em>&nbsp;</td><td>Structure describing the interrupt to send </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00717"></a>00717 {
+<a name="l00718"></a>00718     ++<a class="code" href="classBaseKvmCPU.html#a5ff214621d200e4672d581b12832886a">numInterrupts</a>;
+<a name="l00719"></a>00719     <span class="keywordflow">if</span> (<a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(KVM_INTERRUPT, (<span class="keywordtype">void</span> *)&amp;interrupt) == -1)
+<a name="l00720"></a>00720         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;KVM: Failed to deliver interrupt to virtual CPU\n&quot;</span>);
+<a name="l00721"></a>00721 }
+</pre></div></p>
+
+</div>
+</div>
+<a class="anchor" id="gabc700469cba2d4bba666902e552e7c2e"></a><!-- doxytag: member="BaseKvmCPU::kvmNonMaskableInterrupt" ref="gabc700469cba2d4bba666902e552e7c2e" args="()" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void kvmNonMaskableInterrupt </td>
+          <td>(</td>
+          <td class="paramname"></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [protected, inherited]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p>Send a non-maskable interrupt to the guest</p>
+<dl class="note"><dt><b>覚え書き:</b></dt><dd>The presence of this call depends on <a class="el" href="classKvm.html#acf36e247bf7857c1c7b1e260eff7f7db">Kvm::capUserNMI()</a>. </dd></dl>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00709"></a>00709 {
+<a name="l00710"></a>00710     ++<a class="code" href="classBaseKvmCPU.html#a5ff214621d200e4672d581b12832886a">numInterrupts</a>;
+<a name="l00711"></a>00711     <span class="keywordflow">if</span> (<a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(KVM_NMI) == -1)
+<a name="l00712"></a>00712         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;KVM: Failed to deliver NMI to virtual CPU\n&quot;</span>);
+<a name="l00713"></a>00713 }
+</pre></div></p>
+
+</div>
+</div>
+<a class="anchor" id="ga5037b917c47fff611ecdd5b547655284"></a><!-- doxytag: member="KvmVM::setIRQLine" ref="ga5037b917c47fff611ecdd5b547655284" args="(uint32_t irq, bool high)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void setIRQLine </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>&nbsp;</td>
+          <td class="paramname"> <em>irq</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&nbsp;</td>
+          <td class="paramname"> <em>high</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td><code> [inherited]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+<p><a class="el" href="classSet.html">Set</a> the status of an IRQ line using KVM_IRQ_LINE.</p>
+<dl class="note"><dt><b>覚え書き:</b></dt><dd>This ioctl is usually only used if the interrupt controller is emulated by the kernel (i.e., after calling <a class="el" href="group__KvmInterrupts.html#ga75f1140369bf3942bb93a75d1b3de2c9">createIRQChip()</a>). Some architectures (e.g., ARM) use it instead of <a class="el" href="group__KvmInterrupts.html#ga16b8f95e3f70098952604e6b8a121679">BaseKvmCPU::kvmInterrupt()</a>.</dd></dl>
+<dl><dt><b>引数:</b></dt><dd>
+  <table border="0" cellspacing="2" cellpadding="0">
+    <tr><td valign="top"></td><td valign="top"><em>irq</em>&nbsp;</td><td>Interrupt number </td></tr>
+    <tr><td valign="top"></td><td valign="top"><em>high</em>&nbsp;</td><td>Line level (true for high, false for low) </td></tr>
+  </table>
+  </dd>
+</dl>
+
+<p><div class="fragment"><pre class="fragment"><a name="l00418"></a>00418 {
+<a name="l00419"></a>00419     <span class="keyword">struct </span>kvm_irq_level kvm_level;
+<a name="l00420"></a>00420 
+<a name="l00421"></a>00421     kvm_level.irq = <a class="code" href="namespaceArmISA.html#ab4cb505fdb6b51415c3a27f4c4323960">irq</a>;
+<a name="l00422"></a>00422     kvm_level.level = high ? 1 : 0;
+<a name="l00423"></a>00423 
+<a name="l00424"></a>00424     <span class="keywordflow">if</span> (<a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(KVM_IRQ_LINE, &amp;kvm_level) == -1)
+<a name="l00425"></a>00425         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;KVM: Failed to set IRQ line level (errno: %i)\n&quot;</span>,
+<a name="l00426"></a>00426               errno);
+<a name="l00427"></a>00427 }
+</pre></div></p>
+
+</div>
+</div>
+</div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

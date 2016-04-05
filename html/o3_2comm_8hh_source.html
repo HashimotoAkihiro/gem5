@@ -1,0 +1,240 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/comm.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/comm.hh</h1><a href="o3_2comm_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __CPU_O3_COMM_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_COMM_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="comment">// Typedef for physical register index type. Although the Impl would be the</span>
+<a name="l00054"></a>00054 <span class="comment">// most likely location for this, there are a few classes that need this</span>
+<a name="l00055"></a>00055 <span class="comment">// typedef yet are not templated on the Impl. For now it will be defined here.</span>
+<a name="l00056"></a><a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">00056</a> <span class="keyword">typedef</span> <span class="keywordtype">short</span> <span class="keywordtype">int</span> <a class="code" href="o3_2comm_8hh.html#a5ec29599c4bc29a3054c451674969e7b">PhysRegIndex</a>;
+<a name="l00057"></a>00057 
+<a name="l00059"></a>00059 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00060"></a><a class="code" href="structDefaultFetchDefaultDecode.html">00060</a> <span class="keyword">struct </span><a class="code" href="structDefaultFetchDefaultDecode.html">DefaultFetchDefaultDecode</a> {
+<a name="l00061"></a><a class="code" href="structDefaultFetchDefaultDecode.html#a028ce10889c5f6450239d9e9a7347976">00061</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="structDefaultFetchDefaultDecode.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00062"></a>00062 
+<a name="l00063"></a><a class="code" href="structDefaultFetchDefaultDecode.html#a439227feff9d7f55384e8780cfc2eb82">00063</a>     <span class="keywordtype">int</span> <a class="code" href="structDefaultFetchDefaultDecode.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00064"></a>00064 
+<a name="l00065"></a><a class="code" href="structDefaultFetchDefaultDecode.html#a84958be72c3a0ec66109a9483e6c0331">00065</a>     <a class="code" href="structDefaultFetchDefaultDecode.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structDefaultFetchDefaultDecode.html#a84958be72c3a0ec66109a9483e6c0331">insts</a>[Impl::MaxWidth];
+<a name="l00066"></a><a class="code" href="structDefaultFetchDefaultDecode.html#ac2f4c2fc84b40d9abd220e8bd21242c9">00066</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="structDefaultFetchDefaultDecode.html#ac2f4c2fc84b40d9abd220e8bd21242c9">fetchFault</a>;
+<a name="l00067"></a><a class="code" href="structDefaultFetchDefaultDecode.html#a6076715dd3cff9cb36f4ec6fea7b7297">00067</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="structDefaultFetchDefaultDecode.html#a6076715dd3cff9cb36f4ec6fea7b7297">fetchFaultSN</a>;
+<a name="l00068"></a><a class="code" href="structDefaultFetchDefaultDecode.html#a856dd3fa4ffcbaf645463aabe1876781">00068</a>     <span class="keywordtype">bool</span> <a class="code" href="structDefaultFetchDefaultDecode.html#a856dd3fa4ffcbaf645463aabe1876781">clearFetchFault</a>;
+<a name="l00069"></a>00069 };
+<a name="l00070"></a>00070 
+<a name="l00072"></a>00072 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00073"></a><a class="code" href="structDefaultDecodeDefaultRename.html">00073</a> <span class="keyword">struct </span><a class="code" href="structDefaultDecodeDefaultRename.html">DefaultDecodeDefaultRename</a> {
+<a name="l00074"></a><a class="code" href="structDefaultDecodeDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">00074</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="structDefaultDecodeDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a><a class="code" href="structDefaultDecodeDefaultRename.html#a439227feff9d7f55384e8780cfc2eb82">00076</a>     <span class="keywordtype">int</span> <a class="code" href="structDefaultDecodeDefaultRename.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00077"></a>00077 
+<a name="l00078"></a><a class="code" href="structDefaultDecodeDefaultRename.html#a84958be72c3a0ec66109a9483e6c0331">00078</a>     <a class="code" href="structDefaultDecodeDefaultRename.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structDefaultDecodeDefaultRename.html#a84958be72c3a0ec66109a9483e6c0331">insts</a>[Impl::MaxWidth];
+<a name="l00079"></a>00079 };
+<a name="l00080"></a>00080 
+<a name="l00082"></a>00082 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00083"></a><a class="code" href="structDefaultRenameDefaultIEW.html">00083</a> <span class="keyword">struct </span><a class="code" href="structDefaultRenameDefaultIEW.html">DefaultRenameDefaultIEW</a> {
+<a name="l00084"></a><a class="code" href="structDefaultRenameDefaultIEW.html#a028ce10889c5f6450239d9e9a7347976">00084</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="structDefaultRenameDefaultIEW.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00085"></a>00085 
+<a name="l00086"></a><a class="code" href="structDefaultRenameDefaultIEW.html#a439227feff9d7f55384e8780cfc2eb82">00086</a>     <span class="keywordtype">int</span> <a class="code" href="structDefaultRenameDefaultIEW.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00087"></a>00087 
+<a name="l00088"></a><a class="code" href="structDefaultRenameDefaultIEW.html#a84958be72c3a0ec66109a9483e6c0331">00088</a>     <a class="code" href="structDefaultRenameDefaultIEW.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structDefaultRenameDefaultIEW.html#a84958be72c3a0ec66109a9483e6c0331">insts</a>[Impl::MaxWidth];
+<a name="l00089"></a>00089 };
+<a name="l00090"></a>00090 
+<a name="l00092"></a>00092 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00093"></a><a class="code" href="structDefaultIEWDefaultCommit.html">00093</a> <span class="keyword">struct </span><a class="code" href="structDefaultIEWDefaultCommit.html">DefaultIEWDefaultCommit</a> {
+<a name="l00094"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">00094</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="structDefaultIEWDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00095"></a>00095 
+<a name="l00096"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a439227feff9d7f55384e8780cfc2eb82">00096</a>     <span class="keywordtype">int</span> <a class="code" href="structDefaultIEWDefaultCommit.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00097"></a>00097 
+<a name="l00098"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a84958be72c3a0ec66109a9483e6c0331">00098</a>     <a class="code" href="structDefaultIEWDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structDefaultIEWDefaultCommit.html#a84958be72c3a0ec66109a9483e6c0331">insts</a>[Impl::MaxWidth];
+<a name="l00099"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a39a39d0373d22fba851125f24097756f">00099</a>     <a class="code" href="structDefaultIEWDefaultCommit.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structDefaultIEWDefaultCommit.html#a39a39d0373d22fba851125f24097756f">mispredictInst</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00100"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a3fee36ecd6e2d8a9bb2b85f59c7d3882">00100</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structDefaultIEWDefaultCommit.html#a3fee36ecd6e2d8a9bb2b85f59c7d3882">mispredPC</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00101"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a97d5a7e4630ad1d017909f7504b9ec32">00101</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="structDefaultIEWDefaultCommit.html#a97d5a7e4630ad1d017909f7504b9ec32">squashedSeqNum</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00102"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">00102</a>     <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="structDefaultIEWDefaultCommit.html#a6e6091c9272a281b8693c0f46279cad0">pc</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00103"></a>00103 
+<a name="l00104"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a1ecc4947f538d6f0777049675b1d4dbc">00104</a>     <span class="keywordtype">bool</span> <a class="code" href="structDefaultIEWDefaultCommit.html#a1ecc4947f538d6f0777049675b1d4dbc">squash</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00105"></a><a class="code" href="structDefaultIEWDefaultCommit.html#ad250d56453906f1c145342ad4c930612">00105</a>     <span class="keywordtype">bool</span> <a class="code" href="structDefaultIEWDefaultCommit.html#ad250d56453906f1c145342ad4c930612">branchMispredict</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00106"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a8f87121d9af02a522e3bfdbfafe500a2">00106</a>     <span class="keywordtype">bool</span> <a class="code" href="structDefaultIEWDefaultCommit.html#a8f87121d9af02a522e3bfdbfafe500a2">branchTaken</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00107"></a><a class="code" href="structDefaultIEWDefaultCommit.html#a4e52109fe1d9517fec57f3e5ac5c0905">00107</a>     <span class="keywordtype">bool</span> <a class="code" href="structDefaultIEWDefaultCommit.html#a4e52109fe1d9517fec57f3e5ac5c0905">includeSquashInst</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00108"></a>00108 };
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00111"></a><a class="code" href="structIssueStruct.html">00111</a> <span class="keyword">struct </span><a class="code" href="structIssueStruct.html">IssueStruct</a> {
+<a name="l00112"></a><a class="code" href="structIssueStruct.html#a028ce10889c5f6450239d9e9a7347976">00112</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="structIssueStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00113"></a>00113 
+<a name="l00114"></a><a class="code" href="structIssueStruct.html#a439227feff9d7f55384e8780cfc2eb82">00114</a>     <span class="keywordtype">int</span> <a class="code" href="structIssueStruct.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;
+<a name="l00115"></a>00115 
+<a name="l00116"></a><a class="code" href="structIssueStruct.html#a84958be72c3a0ec66109a9483e6c0331">00116</a>     <a class="code" href="structIssueStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structIssueStruct.html#a84958be72c3a0ec66109a9483e6c0331">insts</a>[Impl::MaxWidth];
+<a name="l00117"></a>00117 };
+<a name="l00118"></a>00118 
+<a name="l00120"></a>00120 <span class="keyword">template</span>&lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00121"></a><a class="code" href="structTimeBufStruct.html">00121</a> <span class="keyword">struct </span><a class="code" href="structTimeBufStruct.html">TimeBufStruct</a> {
+<a name="l00122"></a><a class="code" href="structTimeBufStruct.html#a028ce10889c5f6450239d9e9a7347976">00122</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="structTimeBufStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00123"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html">00123</a>     <span class="keyword">struct </span><a class="code" href="structTimeBufStruct_1_1decodeComm.html">decodeComm</a> {
+<a name="l00124"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#aef3ad01245ca343e181967f07b45d64f">00124</a>         <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#aef3ad01245ca343e181967f07b45d64f">nextPC</a>;
+<a name="l00125"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#a30072968ccd286f8f546aa26eb2c5c33">00125</a>         <a class="code" href="structTimeBufStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#a30072968ccd286f8f546aa26eb2c5c33">mispredictInst</a>;
+<a name="l00126"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#afa5fc700e0c019c77c06164b8aa9367d">00126</a>         <a class="code" href="structTimeBufStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#afa5fc700e0c019c77c06164b8aa9367d">squashInst</a>;
+<a name="l00127"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#a45920c1d79a22b1320274c5f53504654">00127</a>         <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#a45920c1d79a22b1320274c5f53504654">doneSeqNum</a>;
+<a name="l00128"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#a6b1e9add7cf7068e3e5a818b3620d431">00128</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#a6b1e9add7cf7068e3e5a818b3620d431">mispredPC</a>;
+<a name="l00129"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#a7ace6908c22f3540a6e47ba6e4c93ca9">00129</a>         uint64_t <a class="code" href="structTimeBufStruct_1_1decodeComm.html#a7ace6908c22f3540a6e47ba6e4c93ca9">branchAddr</a>;
+<a name="l00130"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#a644677c475ad18d9385f149676b410f0">00130</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#a644677c475ad18d9385f149676b410f0">branchCount</a>;
+<a name="l00131"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#a61b7f55a2e0399c2eee9f78204b37d8c">00131</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#a61b7f55a2e0399c2eee9f78204b37d8c">squash</a>;
+<a name="l00132"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#ae212dd334d04ad76e2db0bec9487c24c">00132</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#ae212dd334d04ad76e2db0bec9487c24c">predIncorrect</a>;
+<a name="l00133"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#a6cb772edab329f6d602f28bcc5e135d8">00133</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#a6cb772edab329f6d602f28bcc5e135d8">branchMispredict</a>;
+<a name="l00134"></a><a class="code" href="structTimeBufStruct_1_1decodeComm.html#abea53a673db4866c41444561cbc6dac0">00134</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1decodeComm.html#abea53a673db4866c41444561cbc6dac0">branchTaken</a>;
+<a name="l00135"></a>00135     };
+<a name="l00136"></a>00136 
+<a name="l00137"></a><a class="code" href="structTimeBufStruct.html#af215dd191ecd9a4b7e5635285704690a">00137</a>     <a class="code" href="structTimeBufStruct_1_1decodeComm.html">decodeComm</a> <a class="code" href="structTimeBufStruct.html#af215dd191ecd9a4b7e5635285704690a">decodeInfo</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00138"></a>00138 
+<a name="l00139"></a><a class="code" href="structTimeBufStruct_1_1renameComm.html">00139</a>     <span class="keyword">struct </span><a class="code" href="structTimeBufStruct_1_1renameComm.html">renameComm</a> {
+<a name="l00140"></a>00140     };
+<a name="l00141"></a>00141 
+<a name="l00142"></a><a class="code" href="structTimeBufStruct.html#a9aadb85753df262a74edcd9a6f5c8735">00142</a>     <a class="code" href="structTimeBufStruct_1_1renameComm.html">renameComm</a> <a class="code" href="structTimeBufStruct.html#a9aadb85753df262a74edcd9a6f5c8735">renameInfo</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00143"></a>00143 
+<a name="l00144"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html">00144</a>     <span class="keyword">struct </span><a class="code" href="structTimeBufStruct_1_1iewComm.html">iewComm</a> {
+<a name="l00145"></a>00145         <span class="comment">// Also eventually include skid buffer space.</span>
+<a name="l00146"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#a864079a61010b1280286f2fe3c01461a">00146</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#a864079a61010b1280286f2fe3c01461a">freeIQEntries</a>;
+<a name="l00147"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#a56f28800f89ab3f7d830f7df88638aec">00147</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#a56f28800f89ab3f7d830f7df88638aec">freeLSQEntries</a>;
+<a name="l00148"></a>00148 
+<a name="l00149"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#aa5611b833c5fbf4d408ea7089af4363d">00149</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#aa5611b833c5fbf4d408ea7089af4363d">iqCount</a>;
+<a name="l00150"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#a52109cc78528c91e02ffca5527cf0096">00150</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#a52109cc78528c91e02ffca5527cf0096">ldstqCount</a>;
+<a name="l00151"></a>00151 
+<a name="l00152"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#a6f92db6a7ecb5f643d615a343e979454">00152</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#a6f92db6a7ecb5f643d615a343e979454">dispatched</a>;
+<a name="l00153"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#a245527337573c4adaa818d22ab45c148">00153</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#a245527337573c4adaa818d22ab45c148">dispatchedToLSQ</a>;
+<a name="l00154"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#aff147844c2a6343e51b2edcbc1c8483a">00154</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#aff147844c2a6343e51b2edcbc1c8483a">usedIQ</a>;
+<a name="l00155"></a><a class="code" href="structTimeBufStruct_1_1iewComm.html#a45425b23616d043e2fc9f582ab422e80">00155</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1iewComm.html#a45425b23616d043e2fc9f582ab422e80">usedLSQ</a>;
+<a name="l00156"></a>00156     };
+<a name="l00157"></a>00157 
+<a name="l00158"></a><a class="code" href="structTimeBufStruct.html#a898f85599633ab431450fe791aeb0b4d">00158</a>     <a class="code" href="structTimeBufStruct_1_1iewComm.html">iewComm</a> <a class="code" href="structTimeBufStruct.html#a898f85599633ab431450fe791aeb0b4d">iewInfo</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00159"></a>00159 
+<a name="l00160"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html">00160</a>     <span class="keyword">struct </span><a class="code" href="structTimeBufStruct_1_1commitComm.html">commitComm</a> {
+<a name="l00162"></a>00162         <span class="comment">// This code has been re-structured for better packing of variables</span>
+<a name="l00163"></a>00163         <span class="comment">// instead of by stage which is the more logical way to arrange the</span>
+<a name="l00164"></a>00164         <span class="comment">// data.</span>
+<a name="l00165"></a>00165         <span class="comment">// F = Fetch</span>
+<a name="l00166"></a>00166         <span class="comment">// D = Decode</span>
+<a name="l00167"></a>00167         <span class="comment">// I = IEW</span>
+<a name="l00168"></a>00168         <span class="comment">// R = Rename</span>
+<a name="l00169"></a>00169         <span class="comment">// As such each member is annotated with who consumes it</span>
+<a name="l00170"></a>00170         <span class="comment">// e.g. bool variable name // *F,R for Fetch and Rename</span>
+<a name="l00172"></a>00172 <span class="comment"></span>
+<a name="l00176"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#ad3585c83b0eac985107aa5a86e43e1b4">00176</a>         <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="structTimeBufStruct_1_1commitComm.html#ad3585c83b0eac985107aa5a86e43e1b4">pc</a>; <span class="comment">// *F</span>
+<a name="l00177"></a>00177 
+<a name="l00180"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a30072968ccd286f8f546aa26eb2c5c33">00180</a>         <a class="code" href="structTimeBufStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a30072968ccd286f8f546aa26eb2c5c33">mispredictInst</a>;  <span class="comment">// *F</span>
+<a name="l00181"></a>00181 
+<a name="l00183"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#afa5fc700e0c019c77c06164b8aa9367d">00183</a>         <a class="code" href="structTimeBufStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structTimeBufStruct_1_1commitComm.html#afa5fc700e0c019c77c06164b8aa9367d" title="Instruction that caused the a non-mispredict squash.">squashInst</a>; <span class="comment">// *F</span>
+<a name="l00184"></a>00184 
+<a name="l00186"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a45b8aff83b2d4696abea3583a02ea31e">00186</a>         <a class="code" href="structTimeBufStruct.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a45b8aff83b2d4696abea3583a02ea31e" title="Hack for now to send back an uncached access to the IEW stage.">uncachedLoad</a>; <span class="comment">// *I</span>
+<a name="l00187"></a>00187 
+<a name="l00190"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a2109aaf648ce5c87f53ac688b4e51db1">00190</a>         <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a2109aaf648ce5c87f53ac688b4e51db1">nonSpecSeqNum</a>; <span class="comment">// *I</span>
+<a name="l00191"></a>00191 
+<a name="l00195"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a45920c1d79a22b1320274c5f53504654">00195</a>         <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a45920c1d79a22b1320274c5f53504654">doneSeqNum</a>; <span class="comment">// *F, I</span>
+<a name="l00196"></a>00196 
+<a name="l00198"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a87a4648b43fbb12beaf408d684fff6dc">00198</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a87a4648b43fbb12beaf408d684fff6dc" title="Tell Rename how many free entries it has in the ROB.">freeROBEntries</a>; <span class="comment">// *R</span>
+<a name="l00199"></a>00199 
+<a name="l00200"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a61b7f55a2e0399c2eee9f78204b37d8c">00200</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a61b7f55a2e0399c2eee9f78204b37d8c">squash</a>; <span class="comment">// *F, D, R, I</span>
+<a name="l00201"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a897a27c9efdd9f32d97a34a08a529cfc">00201</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a897a27c9efdd9f32d97a34a08a529cfc">robSquashing</a>; <span class="comment">// *F, D, R, I</span>
+<a name="l00202"></a>00202 
+<a name="l00204"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a7947bc5bf9b7709eeb835c213e0d6c36">00204</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a7947bc5bf9b7709eeb835c213e0d6c36" title="Rename should re-read number of free rob entries.">usedROB</a>; <span class="comment">// *R</span>
+<a name="l00205"></a>00205 
+<a name="l00207"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a145243270bb508720c507e02ad0a8e6a">00207</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a145243270bb508720c507e02ad0a8e6a" title="Notify Rename that the ROB is empty.">emptyROB</a>; <span class="comment">// *R</span>
+<a name="l00208"></a>00208 
+<a name="l00210"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#abea53a673db4866c41444561cbc6dac0">00210</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#abea53a673db4866c41444561cbc6dac0" title="Was the branch taken or not.">branchTaken</a>; <span class="comment">// *F</span>
+<a name="l00212"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a310de3efc6b60f47de5792d2b00d0840">00212</a> <span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a310de3efc6b60f47de5792d2b00d0840" title="If an interrupt is pending and fetch should stall.">interruptPending</a>; <span class="comment">// *F</span>
+<a name="l00214"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#a695ef2b5d408e6ca8b4a3019293ec106">00214</a> <span class="comment"></span>        <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#a695ef2b5d408e6ca8b4a3019293ec106" title="If the interrupt ended up being cleared before being handled.">clearInterrupt</a>; <span class="comment">// *F</span>
+<a name="l00215"></a>00215 
+<a name="l00217"></a><a class="code" href="structTimeBufStruct_1_1commitComm.html#aab896ca9f63476ee85c0cac2bbff0811">00217</a>         <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct_1_1commitComm.html#aab896ca9f63476ee85c0cac2bbff0811" title="Hack for now to send back an uncached access to the IEW stage.">uncached</a>; <span class="comment">// *I</span>
+<a name="l00218"></a>00218 
+<a name="l00219"></a>00219     };
+<a name="l00220"></a>00220 
+<a name="l00221"></a><a class="code" href="structTimeBufStruct.html#a00017f06df3e141cb5a9ab5bb64b9bae">00221</a>     <a class="code" href="structTimeBufStruct_1_1commitComm.html">commitComm</a> <a class="code" href="structTimeBufStruct.html#a00017f06df3e141cb5a9ab5bb64b9bae">commitInfo</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00222"></a>00222 
+<a name="l00223"></a><a class="code" href="structTimeBufStruct.html#a37fbecdc2160421c24f03815d6c5fbf0">00223</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#a37fbecdc2160421c24f03815d6c5fbf0">decodeBlock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00224"></a><a class="code" href="structTimeBufStruct.html#a235259108fda6460b35f4d3d2a7630c5">00224</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#a235259108fda6460b35f4d3d2a7630c5">decodeUnblock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00225"></a><a class="code" href="structTimeBufStruct.html#aafde0fc1bba1f774a65de44feb7ef3f5">00225</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#aafde0fc1bba1f774a65de44feb7ef3f5">renameBlock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00226"></a><a class="code" href="structTimeBufStruct.html#a90edcda648198fd45bdf495a159c65e0">00226</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#a90edcda648198fd45bdf495a159c65e0">renameUnblock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00227"></a><a class="code" href="structTimeBufStruct.html#a648b3362f6977c243ba62db7f06a2788">00227</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#a648b3362f6977c243ba62db7f06a2788">iewBlock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00228"></a><a class="code" href="structTimeBufStruct.html#aa12d9fbdb77c719794157efc32244331">00228</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#aa12d9fbdb77c719794157efc32244331">iewUnblock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00229"></a><a class="code" href="structTimeBufStruct.html#a5c4d4f5745c9950cd14ce633faea7f29">00229</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#a5c4d4f5745c9950cd14ce633faea7f29">commitBlock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00230"></a><a class="code" href="structTimeBufStruct.html#ac417d2ad64fda7b8f055e9d9ab040d95">00230</a>     <span class="keywordtype">bool</span> <a class="code" href="structTimeBufStruct.html#ac417d2ad64fda7b8f055e9d9ab040d95">commitUnblock</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00231"></a>00231 };
+<a name="l00232"></a>00232 
+<a name="l00233"></a>00233 <span class="preprocessor">#endif //__CPU_O3_COMM_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

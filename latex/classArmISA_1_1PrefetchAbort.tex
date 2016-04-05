@@ -1,0 +1,163 @@
+\hypertarget{classArmISA_1_1PrefetchAbort}{
+\section{クラス PrefetchAbort}
+\label{classArmISA_1_1PrefetchAbort}\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+}
+
+
+{\ttfamily \#include $<$faults.hh$>$}PrefetchAbortに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classArmISA_1_1PrefetchAbort}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1PrefetchAbort_adbe1805a5aad9380631cc0402ae0667e}{PrefetchAbort} (\hyperlink{classm5_1_1params_1_1Addr}{Addr} \_\-addr, uint8\_\-t \_\-source, bool \_\-stage2=false, \hyperlink{classArmISA_1_1ArmFault_ad78237d6390becbe8bdf9e73979c56ae}{ArmFault::TranMethod} \_\-tranMethod=ArmFault::UnknownTran)
+\item 
+\hyperlink{namespaceArmISA_a04034d12009cf36227f4d2abff3331a2}{ExceptionClass} \hyperlink{classArmISA_1_1PrefetchAbort_aefab73b22a74d7c48b8a23230906d7cd}{ec} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\item 
+bool \hyperlink{classArmISA_1_1PrefetchAbort_afd7a21fdb010230ad53094254739dde8}{routeToMonitor} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\item 
+bool \hyperlink{classArmISA_1_1PrefetchAbort_a16facd13ba8e6d15d2b865882c379d5f}{routeToHyp} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\end{DoxyCompactItemize}
+\subsection*{Static Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+static const \hyperlink{namespaceArmISA_a1e522017e015d4c7efd6b2360143aa67}{MiscRegIndex} \hyperlink{classArmISA_1_1PrefetchAbort_a0fc945049ae4ebc86b2c2765b65ab5c8}{FsrIndex} = MISCREG\_\-IFSR
+\item 
+static const \hyperlink{namespaceArmISA_a1e522017e015d4c7efd6b2360143aa67}{MiscRegIndex} \hyperlink{classArmISA_1_1PrefetchAbort_a3c751f200a61047c7edace6f38db43aa}{FarIndex} = MISCREG\_\-IFAR
+\item 
+static const \hyperlink{namespaceArmISA_a1e522017e015d4c7efd6b2360143aa67}{MiscRegIndex} \hyperlink{classArmISA_1_1PrefetchAbort_adf1eccd205afd5770084542cc2295d6c}{HFarIndex} = MISCREG\_\-HIFAR
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1PrefetchAbort_adbe1805a5aad9380631cc0402ae0667e}{
+\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}!PrefetchAbort@{PrefetchAbort}}
+\index{PrefetchAbort@{PrefetchAbort}!ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+\subsubsection[{PrefetchAbort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PrefetchAbort} ({\bf Addr} {\em \_\-addr}, \/  uint8\_\-t {\em \_\-source}, \/  bool {\em \_\-stage2} = {\ttfamily false}, \/  {\bf ArmFault::TranMethod} {\em \_\-tranMethod} = {\ttfamily ArmFault::UnknownTran})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classArmISA_1_1PrefetchAbort_adbe1805a5aad9380631cc0402ae0667e}
+
+
+
+\begin{DoxyCode}
+423                                                                         :
+424         AbortFault<PrefetchAbort>(_addr, false, TlbEntry::DomainType::NoAccess,
+425                 _source, _stage2, _tranMethod)
+426     {}
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classArmISA_1_1PrefetchAbort_aefab73b22a74d7c48b8a23230906d7cd}{
+\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}!ec@{ec}}
+\index{ec@{ec}!ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+\subsubsection[{ec}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ExceptionClass} ec ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1PrefetchAbort_aefab73b22a74d7c48b8a23230906d7cd}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_aa4dd5fb47a1253dbe17e692e905a8c7c}{ArmFaultVals$<$ PrefetchAbort $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1062 {
+1063     if (to64) {
+1064         // AArch64
+1065         if (toEL == fromEL)
+1066             return EC_PREFETCH_ABORT_CURR_EL;
+1067         else
+1068             return EC_PREFETCH_ABORT_LOWER_EL;
+1069     } else {
+1070         // AArch32
+1071         // Abort faults have different EC codes depending on whether
+1072         // the fault originated within HYP mode, or not. So override
+1073         // the method and add the extra adjustment of the EC value.
+1074 
+1075         ExceptionClass ec = ArmFaultVals<PrefetchAbort>::vals.ec;
+1076 
+1077         CPSR spsr = tc->readMiscReg(MISCREG_SPSR_HYP);
+1078         if (spsr.mode == MODE_HYP) {
+1079             ec = ((ExceptionClass) (((uint32_t) ec) + 1));
+1080         }
+1081         return ec;
+1082     }
+1083 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1PrefetchAbort_a16facd13ba8e6d15d2b865882c379d5f}{
+\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}!routeToHyp@{routeToHyp}}
+\index{routeToHyp@{routeToHyp}!ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+\subsubsection[{routeToHyp}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToHyp ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1PrefetchAbort_a16facd13ba8e6d15d2b865882c379d5f}
+
+
+\hyperlink{classArmISA_1_1ArmFault_a6fa7b734487c2a8da04a28ace414a355}{ArmFault}を再定義しています。
+
+
+\begin{DoxyCode}
+1099 {
+1100     bool toHyp;
+1101 
+1102     SCR  scr  = tc->readMiscRegNoEffect(MISCREG_SCR);
+1103     HCR  hcr  = tc->readMiscRegNoEffect(MISCREG_HCR);
+1104     CPSR cpsr = tc->readMiscRegNoEffect(MISCREG_CPSR);
+1105     HDCR hdcr = tc->readMiscRegNoEffect(MISCREG_HDCR);
+1106 
+1107     // if in Hyp mode then stay in Hyp mode
+1108     toHyp  = scr.ns && (cpsr.mode == MODE_HYP);
+1109     // otherwise, check whether to take to Hyp mode through Hyp Trap vector
+1110     toHyp |= (stage2 ||
+1111                 ( (source ==               DebugEvent) && hdcr.tde && (cpsr.mode 
+      !=  MODE_HYP)) ||
+1112                 ( (source == SynchronousExternalAbort) && hcr.tge  && (cpsr.mode 
+      == MODE_USER))
+1113              ) && !inSecureState(scr, cpsr);
+1114     return toHyp;
+1115 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1PrefetchAbort_afd7a21fdb010230ad53094254739dde8}{
+\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}!routeToMonitor@{routeToMonitor}}
+\index{routeToMonitor@{routeToMonitor}!ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+\subsubsection[{routeToMonitor}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToMonitor ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1PrefetchAbort_afd7a21fdb010230ad53094254739dde8}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_a9a0a467b98f43890c1d89d1d59a5923c}{ArmFaultVals$<$ PrefetchAbort $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1087 {
+1088     SCR scr = 0;
+1089     if (from64)
+1090         scr = tc->readMiscRegNoEffect(MISCREG_SCR_EL3);
+1091     else
+1092         scr = tc->readMiscRegNoEffect(MISCREG_SCR);
+1093 
+1094     return scr.ea && !isMMUFault();
+1095 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classArmISA_1_1PrefetchAbort_a3c751f200a61047c7edace6f38db43aa}{
+\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}!FarIndex@{FarIndex}}
+\index{FarIndex@{FarIndex}!ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+\subsubsection[{FarIndex}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf MiscRegIndex} {\bf FarIndex} = MISCREG\_\-IFAR\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classArmISA_1_1PrefetchAbort_a3c751f200a61047c7edace6f38db43aa}
+\hypertarget{classArmISA_1_1PrefetchAbort_a0fc945049ae4ebc86b2c2765b65ab5c8}{
+\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}!FsrIndex@{FsrIndex}}
+\index{FsrIndex@{FsrIndex}!ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+\subsubsection[{FsrIndex}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf MiscRegIndex} {\bf FsrIndex} = MISCREG\_\-IFSR\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classArmISA_1_1PrefetchAbort_a0fc945049ae4ebc86b2c2765b65ab5c8}
+\hypertarget{classArmISA_1_1PrefetchAbort_adf1eccd205afd5770084542cc2295d6c}{
+\index{ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}!HFarIndex@{HFarIndex}}
+\index{HFarIndex@{HFarIndex}!ArmISA::PrefetchAbort@{ArmISA::PrefetchAbort}}
+\subsubsection[{HFarIndex}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf MiscRegIndex} {\bf HFarIndex} = MISCREG\_\-HIFAR\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classArmISA_1_1PrefetchAbort_adf1eccd205afd5770084542cc2295d6c}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8hh}{faults.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

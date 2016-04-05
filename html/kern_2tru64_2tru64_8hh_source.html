@@ -1,0 +1,1187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: kern/tru64/tru64.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>kern/tru64/tru64.hh</h1><a href="kern_2tru64_2tru64_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2001-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> *          Ali Saidi</span>
+<a name="l00030"></a>00030 <span class="comment"> */</span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifndef __TRU64_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define __TRU64_HH__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;<a class="code" href="operatingsystem_8hh.html">kern/operatingsystem.hh</a>&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="byteswap_8hh.html">sim/byteswap.hh</a>&quot;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#include &lt;sys/stat.h&gt;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &lt;sys/types.h&gt;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__FreeBSD__)</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#include &lt;sys/mount.h&gt;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &lt;sys/param.h&gt;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#else</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#include &lt;sys/statfs.h&gt;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#endif</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &lt;dirent.h&gt;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &lt;fcntl.h&gt;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &lt;unistd.h&gt;</span>
+<a name="l00050"></a>00050 
+<a name="l00051"></a>00051 <span class="preprocessor">#include &lt;cerrno&gt;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &lt;cstring&gt;</span>     <span class="comment">// for memset()</span>
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="alpha_2registers_8hh.html">arch/alpha/registers.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="cpu_2base_8hh.html">cpu/base.hh</a>&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;debug/SyscallVerbose.hh&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="core_8hh.html">sim/core.hh</a>&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;<a class="code" href="syscall__emul_8hh.html">sim/syscall_emul.hh</a>&quot;</span>
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a38e9c9050f8ef6245f3e4e2cdb25ae18">00061</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>stat <a class="code" href="kern_2tru64_2tru64_8hh.html#a38e9c9050f8ef6245f3e4e2cdb25ae18">global_stat</a>;
+<a name="l00062"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a1a8529336c3f2704cb49ee2cd97412a8">00062</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>statfs <a class="code" href="kern_2tru64_2tru64_8hh.html#a1a8529336c3f2704cb49ee2cd97412a8">global_statfs</a>;
+<a name="l00063"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#ae8a7ba972c525e3d137846c7f1d0a1d5">00063</a> <span class="keyword">typedef</span> <span class="keyword">struct </span>dirent <a class="code" href="kern_2tru64_2tru64_8hh.html#ae8a7ba972c525e3d137846c7f1d0a1d5">global_dirent</a>;
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065 <span class="keyword">class </span><a class="code" href="classSETranslatingPortProxy.html">SETranslatingPortProxy</a>;
+<a name="l00066"></a>00066 
+<a name="l00072"></a><a class="code" href="classTru64.html">00072</a> <span class="keyword">class </span><a class="code" href="classTru64.html">Tru64</a> : <span class="keyword">public</span> <a class="code" href="classOperatingSystem.html">OperatingSystem</a>
+<a name="l00073"></a>00073 {
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075   <span class="keyword">public</span>:
+<a name="l00076"></a>00076 
+<a name="l00078"></a>00078 
+<a name="l00079"></a><a class="code" href="classTru64.html#a186ea1339bffb378854987065835afe3">00079</a>     <span class="keyword">typedef</span> uint64_t <a class="code" href="classTru64.html#a186ea1339bffb378854987065835afe3" title="Basic Tru64 types.">size_t</a>;
+<a name="l00080"></a><a class="code" href="classTru64.html#a2cb84cf5f02a29b7e8f237ff151a9225">00080</a>     <span class="keyword">typedef</span> uint64_t <a class="code" href="classTru64.html#a2cb84cf5f02a29b7e8f237ff151a9225">off_t</a>;
+<a name="l00081"></a><a class="code" href="classTru64.html#a772a435921844488d52ef4df39b3e702">00081</a>     <span class="keyword">typedef</span> uint16_t <a class="code" href="classTru64.html#a772a435921844488d52ef4df39b3e702">nlink_t</a>;
+<a name="l00082"></a><a class="code" href="classTru64.html#abf62b93d918a43f0c5ee0ab777b1c3ef">00082</a>     <span class="keyword">typedef</span> int32_t  <a class="code" href="classTru64.html#abf62b93d918a43f0c5ee0ab777b1c3ef">dev_t</a>;
+<a name="l00083"></a><a class="code" href="classTru64.html#af2306308627701b66dc6f3babe821ab4">00083</a>     <span class="keyword">typedef</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classTru64.html#af2306308627701b66dc6f3babe821ab4">uid_t</a>;
+<a name="l00084"></a><a class="code" href="classTru64.html#aa7352f1065fe606194d792e2b292cf83">00084</a>     <span class="keyword">typedef</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classTru64.html#aa7352f1065fe606194d792e2b292cf83">gid_t</a>;
+<a name="l00085"></a><a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">00085</a>     <span class="keyword">typedef</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>;
+<a name="l00086"></a><a class="code" href="classTru64.html#af8f4385bb42836d1e3ad4fea9d71d1b9">00086</a>     <span class="keyword">typedef</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classTru64.html#af8f4385bb42836d1e3ad4fea9d71d1b9">mode_t</a>;
+<a name="l00087"></a><a class="code" href="classTru64.html#aed4e918b44240739869c4bdb1c4787a9">00087</a>     <span class="keyword">typedef</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classTru64.html#aed4e918b44240739869c4bdb1c4787a9">ino_t</a>;
+<a name="l00088"></a><a class="code" href="structTru64_1_1quad.html#a30664d3c0c4c94c52f1b946ceae73842">00088</a>     <span class="keyword">typedef</span> <span class="keyword">struct </span>{ <span class="keywordtype">int</span> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>[2]; } <a class="code" href="structTru64_1_1quad.html">quad</a>;
+<a name="l00089"></a><a class="code" href="classTru64.html#abcb767738eec58d41562764284835524">00089</a>     <span class="keyword">typedef</span> <a class="code" href="structTru64_1_1quad.html">quad</a> <a class="code" href="structTru64_1_1quad.html">fsid_t</a>;
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092 
+<a name="l00094"></a><a class="code" href="structTru64_1_1F64__statfs.html">00094</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1F64__statfs.html" title="For statfs().">F64_statfs</a> {
+<a name="l00095"></a><a class="code" href="structTru64_1_1F64__statfs.html#aa0722a16ad0079be617958da83f98ce0">00095</a>         int16_t   <a class="code" href="structTru64_1_1F64__statfs.html#aa0722a16ad0079be617958da83f98ce0">f_type</a>;
+<a name="l00096"></a><a class="code" href="structTru64_1_1F64__statfs.html#a20c775afb53740b13af4894efef44eff">00096</a>         int16_t   <a class="code" href="structTru64_1_1F64__statfs.html#a20c775afb53740b13af4894efef44eff">f_flags</a>;
+<a name="l00097"></a><a class="code" href="structTru64_1_1F64__statfs.html#a7be6c48c441eb8b294b01c64d652ca29">00097</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#a7be6c48c441eb8b294b01c64d652ca29">f_retired1</a>;
+<a name="l00098"></a><a class="code" href="structTru64_1_1F64__statfs.html#a00565633c0266ea7b229e5e4345281b7">00098</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#a00565633c0266ea7b229e5e4345281b7">f_retired2</a>;
+<a name="l00099"></a><a class="code" href="structTru64_1_1F64__statfs.html#acb46517b4b0251fb49c3da2b8d395e30">00099</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#acb46517b4b0251fb49c3da2b8d395e30">f_retired3</a>;
+<a name="l00100"></a><a class="code" href="structTru64_1_1F64__statfs.html#a2d449b2e62ee61b7b9dc515385116306">00100</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#a2d449b2e62ee61b7b9dc515385116306">f_retired4</a>;
+<a name="l00101"></a><a class="code" href="structTru64_1_1F64__statfs.html#a98dd8544a02549e66ed2f10735e163d3">00101</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#a98dd8544a02549e66ed2f10735e163d3">f_retired5</a>;
+<a name="l00102"></a><a class="code" href="structTru64_1_1F64__statfs.html#a094ba42f02eebe6d5b520934652449db">00102</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#a094ba42f02eebe6d5b520934652449db">f_retired6</a>;
+<a name="l00103"></a><a class="code" href="structTru64_1_1F64__statfs.html#ac661b4ce5e3520e496d66f18f006675f">00103</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#ac661b4ce5e3520e496d66f18f006675f">f_retired7</a>;
+<a name="l00104"></a><a class="code" href="structTru64_1_1F64__statfs.html#a8a64796a8d470994acfed74f13ee7195">00104</a>         <a class="code" href="structTru64_1_1quad.html">fsid_t</a>  <a class="code" href="structTru64_1_1F64__statfs.html#a8a64796a8d470994acfed74f13ee7195">f_fsid</a>;
+<a name="l00105"></a><a class="code" href="structTru64_1_1F64__statfs.html#a8ade6b3791688e640ffe1f5c4960ff4b">00105</a>         int32_t     <a class="code" href="structTru64_1_1F64__statfs.html#a8ade6b3791688e640ffe1f5c4960ff4b">f_spare</a>[9];
+<a name="l00106"></a><a class="code" href="structTru64_1_1F64__statfs.html#a745b6e9de6a420725894d700cb8312c5">00106</a>         <span class="keywordtype">char</span>    <a class="code" href="structTru64_1_1F64__statfs.html#a745b6e9de6a420725894d700cb8312c5">f_retired8</a>[90];
+<a name="l00107"></a><a class="code" href="structTru64_1_1F64__statfs.html#a9ef784491081d55fba5bcba4daf7f251">00107</a>         <span class="keywordtype">char</span>    <a class="code" href="structTru64_1_1F64__statfs.html#a9ef784491081d55fba5bcba4daf7f251">f_retired9</a>[90];
+<a name="l00108"></a><a class="code" href="structTru64_1_1F64__statfs.html#a4cd74d7de5e89a80fa201325cf18b8fd">00108</a>         uint64_t <a class="code" href="structTru64_1_1F64__statfs.html#a4cd74d7de5e89a80fa201325cf18b8fd">dummy</a>[10]; <span class="comment">// was union mount_info mount_info;</span>
+<a name="l00109"></a><a class="code" href="structTru64_1_1F64__statfs.html#a7d4584d268a0b90e4d48b55fcb7df4d5">00109</a>         uint64_t  <a class="code" href="structTru64_1_1F64__statfs.html#a7d4584d268a0b90e4d48b55fcb7df4d5">f_flags2</a>;
+<a name="l00110"></a><a class="code" href="structTru64_1_1F64__statfs.html#a87d442af5cc940ec998224826a9230bd">00110</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#a87d442af5cc940ec998224826a9230bd">f_spare2</a>[14];
+<a name="l00111"></a><a class="code" href="structTru64_1_1F64__statfs.html#a2d16e9093f068b79e8b3672e6bf6e0cf">00111</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#a2d16e9093f068b79e8b3672e6bf6e0cf">f_fsize</a>;
+<a name="l00112"></a><a class="code" href="structTru64_1_1F64__statfs.html#a0d893c69ad2c6fcf7def020a81a7cdd9">00112</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#a0d893c69ad2c6fcf7def020a81a7cdd9">f_bsize</a>;
+<a name="l00113"></a><a class="code" href="structTru64_1_1F64__statfs.html#a68137154ae95f06f2317ee1d6c23d49e">00113</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#a68137154ae95f06f2317ee1d6c23d49e">f_blocks</a>;
+<a name="l00114"></a><a class="code" href="structTru64_1_1F64__statfs.html#a4d8b842cc5ca569ce4086215e29d4c36">00114</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#a4d8b842cc5ca569ce4086215e29d4c36">f_bfree</a>;
+<a name="l00115"></a><a class="code" href="structTru64_1_1F64__statfs.html#abfb75516855e6fbfb151874c033872c7">00115</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#abfb75516855e6fbfb151874c033872c7">f_bavail</a>;
+<a name="l00116"></a><a class="code" href="structTru64_1_1F64__statfs.html#a016818ad29d835fe0a6a3bca3f477ca6">00116</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#a016818ad29d835fe0a6a3bca3f477ca6">f_files</a>;
+<a name="l00117"></a><a class="code" href="structTru64_1_1F64__statfs.html#a9b367124beed32a52ece9401c8182f47">00117</a>         int64_t    <a class="code" href="structTru64_1_1F64__statfs.html#a9b367124beed32a52ece9401c8182f47">f_ffree</a>;
+<a name="l00118"></a><a class="code" href="structTru64_1_1F64__statfs.html#a999c2258bfd97680947883a5a21b1276">00118</a>         <span class="keywordtype">char</span>    <a class="code" href="structTru64_1_1F64__statfs.html#a999c2258bfd97680947883a5a21b1276">f_mntonname</a>[1024];
+<a name="l00119"></a><a class="code" href="structTru64_1_1F64__statfs.html#a33c4d293d3c9920d2d14cfb4665a42c4">00119</a>         <span class="keywordtype">char</span>    <a class="code" href="structTru64_1_1F64__statfs.html#a33c4d293d3c9920d2d14cfb4665a42c4">f_mntfromname</a>[1024];
+<a name="l00120"></a>00120     };
+<a name="l00121"></a>00121 
+<a name="l00123"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html">00123</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1pre__F64__statfs.html" title="For old Tru64 v4.x statfs().">pre_F64_statfs</a> {
+<a name="l00124"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#aa0722a16ad0079be617958da83f98ce0">00124</a>         int16_t   <a class="code" href="structTru64_1_1pre__F64__statfs.html#aa0722a16ad0079be617958da83f98ce0">f_type</a>;
+<a name="l00125"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a20c775afb53740b13af4894efef44eff">00125</a>         int16_t   <a class="code" href="structTru64_1_1pre__F64__statfs.html#a20c775afb53740b13af4894efef44eff">f_flags</a>;
+<a name="l00126"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a1bb154c566b7a49bab772195adc48e11">00126</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#a1bb154c566b7a49bab772195adc48e11">f_fsize</a>;
+<a name="l00127"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a7f0a1c3c49d5ff66040ffba26026b8db">00127</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#a7f0a1c3c49d5ff66040ffba26026b8db">f_bsize</a>;
+<a name="l00128"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a199ab36dc22b9a68fac077a26543a34e">00128</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#a199ab36dc22b9a68fac077a26543a34e">f_blocks</a>;
+<a name="l00129"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a7b6f2e45cd83f27524dd19aaee0fd355">00129</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#a7b6f2e45cd83f27524dd19aaee0fd355">f_bfree</a>;
+<a name="l00130"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a3569ac2d1a1e4f504790713a14573547">00130</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#a3569ac2d1a1e4f504790713a14573547">f_bavail</a>;
+<a name="l00131"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#afadb20625758ce43538519ca8d903bde">00131</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#afadb20625758ce43538519ca8d903bde">f_files</a>;
+<a name="l00132"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a5278009646ea2743c6219585d2247ded">00132</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#a5278009646ea2743c6219585d2247ded">f_ffree</a>;
+<a name="l00133"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a8a64796a8d470994acfed74f13ee7195">00133</a>         <a class="code" href="structTru64_1_1quad.html">fsid_t</a>  <a class="code" href="structTru64_1_1pre__F64__statfs.html#a8a64796a8d470994acfed74f13ee7195">f_fsid</a>;
+<a name="l00134"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a8ade6b3791688e640ffe1f5c4960ff4b">00134</a>         int32_t     <a class="code" href="structTru64_1_1pre__F64__statfs.html#a8ade6b3791688e640ffe1f5c4960ff4b">f_spare</a>[9];
+<a name="l00135"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#aa2570f2c18c34fa7c18c8c214eef885c">00135</a>         <span class="keywordtype">char</span>    <a class="code" href="structTru64_1_1pre__F64__statfs.html#aa2570f2c18c34fa7c18c8c214eef885c">f_mntonname</a>[90];
+<a name="l00136"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#ae1b514698ddbfb9f725dea8522f6a00c">00136</a>         <span class="keywordtype">char</span>    <a class="code" href="structTru64_1_1pre__F64__statfs.html#ae1b514698ddbfb9f725dea8522f6a00c">f_mntfromname</a>[90];
+<a name="l00137"></a><a class="code" href="structTru64_1_1pre__F64__statfs.html#a4cd74d7de5e89a80fa201325cf18b8fd">00137</a>         uint64_t <a class="code" href="structTru64_1_1pre__F64__statfs.html#a4cd74d7de5e89a80fa201325cf18b8fd">dummy</a>[10]; <span class="comment">// was union mount_info mount_info;</span>
+<a name="l00138"></a>00138     };
+<a name="l00139"></a>00139 
+<a name="l00141"></a><a class="code" href="structTru64_1_1dirent.html">00141</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1dirent.html" title="For getdirentries().">dirent</a>
+<a name="l00142"></a>00142     {
+<a name="l00143"></a><a class="code" href="structTru64_1_1dirent.html#a3fb8db68a229e05567ff4874104aed4b">00143</a>         <a class="code" href="classTru64.html#aed4e918b44240739869c4bdb1c4787a9">ino_t</a> <a class="code" href="structTru64_1_1dirent.html#a3fb8db68a229e05567ff4874104aed4b" title="file number of entry">d_ino</a>;            
+<a name="l00144"></a><a class="code" href="structTru64_1_1dirent.html#a14f5c4b79ce9b7772e5033ac64644c63">00144</a>         uint16_t <a class="code" href="structTru64_1_1dirent.html#a14f5c4b79ce9b7772e5033ac64644c63" title="length of this record">d_reclen</a>;      
+<a name="l00145"></a><a class="code" href="structTru64_1_1dirent.html#aa87b10da682d903e5c780d7cfaa4ee82">00145</a>         uint16_t <a class="code" href="structTru64_1_1dirent.html#aa87b10da682d903e5c780d7cfaa4ee82" title="length of string in d_name">d_namlen</a>;      
+<a name="l00146"></a><a class="code" href="structTru64_1_1dirent.html#a156ab9c5b093392ec66d64794aa91260">00146</a>         <span class="keywordtype">char</span> <a class="code" href="structTru64_1_1dirent.html#a156ab9c5b093392ec66d64794aa91260" title="dummy name length">d_name</a>[256];       
+<a name="l00147"></a>00147     };
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149 
+<a name="l00151"></a><a class="code" href="classTru64.html#a1a19d4c9718c9a4ad5fa2e48271fccc9">00151</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classTru64.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a> = 32;
+<a name="l00152"></a>00152 
+<a name="l00154"></a><a class="code" href="structTru64_1_1utsname.html">00154</a>     <span class="keyword">struct </span><a class="code" href="structOperatingSystem_1_1utsname.html" title="Interface struct for uname().">utsname</a> {
+<a name="l00155"></a><a class="code" href="structTru64_1_1utsname.html#a2deb62088193f0a1a1c7169961ef9417">00155</a>         <span class="keywordtype">char</span> <a class="code" href="structTru64_1_1utsname.html#a2deb62088193f0a1a1c7169961ef9417" title="System name.">sysname</a>[<a class="code" href="classTru64.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00156"></a><a class="code" href="structTru64_1_1utsname.html#a3e8872e682806e061de2b1ee07bc75f3">00156</a>         <span class="keywordtype">char</span> <a class="code" href="structTru64_1_1utsname.html#a3e8872e682806e061de2b1ee07bc75f3" title="Node name.">nodename</a>[<a class="code" href="classTru64.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];       
+<a name="l00157"></a><a class="code" href="structTru64_1_1utsname.html#a4015ecb9ca3fd601ff8b8961eda3e7e2">00157</a>         <span class="keywordtype">char</span> <a class="code" href="structTru64_1_1utsname.html#a4015ecb9ca3fd601ff8b8961eda3e7e2" title="OS release.">release</a>[<a class="code" href="classTru64.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00158"></a><a class="code" href="structTru64_1_1utsname.html#a1e88526d3e96aa25d88df1541dafe922">00158</a>         <span class="keywordtype">char</span> <a class="code" href="structTru64_1_1utsname.html#a1e88526d3e96aa25d88df1541dafe922" title="OS version.">version</a>[<a class="code" href="classTru64.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00159"></a><a class="code" href="structTru64_1_1utsname.html#a0687759450f1b8396e8e9415abe4b867">00159</a>         <span class="keywordtype">char</span> <a class="code" href="structTru64_1_1utsname.html#a0687759450f1b8396e8e9415abe4b867" title="Machine type.">machine</a>[<a class="code" href="classTru64.html#a1a19d4c9718c9a4ad5fa2e48271fccc9" title="Length of strings in struct utsname (plus 1 for null char).">_SYS_NMLN</a>];        
+<a name="l00160"></a>00160     };
+<a name="l00161"></a>00161 
+<a name="l00163"></a><a class="code" href="structTru64_1_1rlimit.html">00163</a>     <span class="keyword">struct </span><a class="code" href="structOperatingSystem_1_1rlimit.html" title="Limit struct for getrlimit/setrlimit.">rlimit</a> {
+<a name="l00164"></a><a class="code" href="structTru64_1_1rlimit.html#af39897d07737cb27ef9484ae73c05fa4">00164</a>         uint64_t  <a class="code" href="structTru64_1_1rlimit.html#af39897d07737cb27ef9484ae73c05fa4" title="soft limit">rlim_cur</a>;     
+<a name="l00165"></a><a class="code" href="structTru64_1_1rlimit.html#af8e4fdfd658610e9b762fb606dce339a">00165</a>         uint64_t  <a class="code" href="structTru64_1_1rlimit.html#af8e4fdfd658610e9b762fb606dce339a" title="hard limit">rlim_max</a>;     
+<a name="l00166"></a>00166     };
+<a name="l00167"></a>00167 
+<a name="l00168"></a>00168 
+<a name="l00170"></a><a class="code" href="structTru64_1_1cpu__info.html">00170</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1cpu__info.html" title="For getsysinfo() GSI_CPU_INFO option.">cpu_info</a> {
+<a name="l00171"></a><a class="code" href="structTru64_1_1cpu__info.html#a515699dbb122f4a0aa217ad2038731f6">00171</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>     <a class="code" href="structTru64_1_1cpu__info.html#a515699dbb122f4a0aa217ad2038731f6" title="current_cpu">current_cpu</a>;       
+<a name="l00172"></a><a class="code" href="structTru64_1_1cpu__info.html#ae4e140571dc31f461adcff810fd04f53">00172</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>     <a class="code" href="structTru64_1_1cpu__info.html#ae4e140571dc31f461adcff810fd04f53" title="cpus_in_box">cpus_in_box</a>;       
+<a name="l00173"></a><a class="code" href="structTru64_1_1cpu__info.html#ac6304017c7a42fa42cee906c65b9aec6">00173</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>     <a class="code" href="structTru64_1_1cpu__info.html#ac6304017c7a42fa42cee906c65b9aec6" title="cpu_type">cpu_type</a>;          
+<a name="l00174"></a><a class="code" href="structTru64_1_1cpu__info.html#a6748c01687174bb54946596a156269ba">00174</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>     <a class="code" href="structTru64_1_1cpu__info.html#a6748c01687174bb54946596a156269ba" title="ncpus">ncpus</a>;             
+<a name="l00175"></a><a class="code" href="structTru64_1_1cpu__info.html#afae844ab0f3d2ceabc4643394049ad33">00175</a>         uint64_t     <a class="code" href="structTru64_1_1cpu__info.html#afae844ab0f3d2ceabc4643394049ad33" title="cpus_present">cpus_present</a>;      
+<a name="l00176"></a><a class="code" href="structTru64_1_1cpu__info.html#a7214e080781778954dc11356fd39bd09">00176</a>         uint64_t     <a class="code" href="structTru64_1_1cpu__info.html#a7214e080781778954dc11356fd39bd09" title="cpus_running">cpus_running</a>;      
+<a name="l00177"></a><a class="code" href="structTru64_1_1cpu__info.html#ad785dd4acdf2b025d47237c0cc60ab83">00177</a>         uint64_t     <a class="code" href="structTru64_1_1cpu__info.html#ad785dd4acdf2b025d47237c0cc60ab83" title="cpu_binding">cpu_binding</a>;       
+<a name="l00178"></a><a class="code" href="structTru64_1_1cpu__info.html#afa2e4ea220df3f99687c22142a93788e">00178</a>         uint64_t     <a class="code" href="structTru64_1_1cpu__info.html#afa2e4ea220df3f99687c22142a93788e" title="cpu_ex_binding">cpu_ex_binding</a>;    
+<a name="l00179"></a><a class="code" href="structTru64_1_1cpu__info.html#a83860928a4faeb84e30409273ff5c131">00179</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>     <a class="code" href="structTru64_1_1cpu__info.html#a83860928a4faeb84e30409273ff5c131" title="mhz">mhz</a>;               
+<a name="l00180"></a><a class="code" href="structTru64_1_1cpu__info.html#a636f5e28f6df8b80216977d9f5adb246">00180</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>     <a class="code" href="structTru64_1_1cpu__info.html#a636f5e28f6df8b80216977d9f5adb246" title="future expansion">unused</a>[3];         
+<a name="l00181"></a>00181     };
+<a name="l00182"></a>00182 
+<a name="l00184"></a><a class="code" href="structTru64_1_1timeval.html">00184</a>     <span class="keyword">struct </span><a class="code" href="structOperatingSystem_1_1timeval.html" title="For gettimeofday().">timeval</a> {
+<a name="l00185"></a><a class="code" href="structTru64_1_1timeval.html#a114f22e1578cd276434d684f3579bb1c">00185</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structTru64_1_1timeval.html#a114f22e1578cd276434d684f3579bb1c" title="seconds">tv_sec</a>;        
+<a name="l00186"></a><a class="code" href="structTru64_1_1timeval.html#a992cb17cdfd7acb0c5088ffea2054731">00186</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structTru64_1_1timeval.html#a992cb17cdfd7acb0c5088ffea2054731" title="microseconds">tv_usec</a>;       
+<a name="l00187"></a>00187     };
+<a name="l00188"></a>00188 
+<a name="l00190"></a><a class="code" href="structTru64_1_1rusage.html">00190</a>     <span class="keyword">struct </span><a class="code" href="structOperatingSystem_1_1rusage.html" title="For getrusage().">rusage</a> {
+<a name="l00191"></a><a class="code" href="structTru64_1_1rusage.html#a40e27c5d4340b0c6532787d6740b22ab">00191</a>         <span class="keyword">struct </span><a class="code" href="structOperatingSystem_1_1timeval.html" title="For gettimeofday().">timeval</a> <a class="code" href="structTru64_1_1rusage.html#a40e27c5d4340b0c6532787d6740b22ab" title="user time used">ru_utime</a>;        
+<a name="l00192"></a><a class="code" href="structTru64_1_1rusage.html#a15f836efd7b69c0a0eb19f5d9505e3e9">00192</a>         <span class="keyword">struct </span><a class="code" href="structOperatingSystem_1_1timeval.html" title="For gettimeofday().">timeval</a> <a class="code" href="structTru64_1_1rusage.html#a15f836efd7b69c0a0eb19f5d9505e3e9" title="system time used">ru_stime</a>;        
+<a name="l00193"></a><a class="code" href="structTru64_1_1rusage.html#a18ca792cc3096b531c56f927a8529e33">00193</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#a18ca792cc3096b531c56f927a8529e33" title="ru_maxrss">ru_maxrss</a>;             
+<a name="l00194"></a><a class="code" href="structTru64_1_1rusage.html#aeeb78e75e86d62b485307cf394a033e6">00194</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#aeeb78e75e86d62b485307cf394a033e6" title="integral shared memory size">ru_ixrss</a>;              
+<a name="l00195"></a><a class="code" href="structTru64_1_1rusage.html#a3bcd09d2a9febd230bd9f391e3fd81e9">00195</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#a3bcd09d2a9febd230bd9f391e3fd81e9" title="integral unshared data ">ru_idrss</a>;              
+<a name="l00196"></a><a class="code" href="structTru64_1_1rusage.html#a63957e8e1508b676b26994bb6e6359f7">00196</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#a63957e8e1508b676b26994bb6e6359f7" title="integral unshared stack ">ru_isrss</a>;              
+<a name="l00197"></a><a class="code" href="structTru64_1_1rusage.html#a9f685fa333aba8f0d8011e7e3432e37a">00197</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#a9f685fa333aba8f0d8011e7e3432e37a" title="page reclaims - total vmfaults">ru_minflt</a>;             
+<a name="l00198"></a><a class="code" href="structTru64_1_1rusage.html#af792eaad91f67fd7d350c542e688e504">00198</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#af792eaad91f67fd7d350c542e688e504" title="page faults">ru_majflt</a>;             
+<a name="l00199"></a><a class="code" href="structTru64_1_1rusage.html#abf406f2a6065ca24836b3b2c9adeb881">00199</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#abf406f2a6065ca24836b3b2c9adeb881" title="swaps">ru_nswap</a>;              
+<a name="l00200"></a><a class="code" href="structTru64_1_1rusage.html#a1ee829a3685f9d009c73b1f1a8aa8955">00200</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#a1ee829a3685f9d009c73b1f1a8aa8955" title="block input operations">ru_inblock</a>;            
+<a name="l00201"></a><a class="code" href="structTru64_1_1rusage.html#a9eddb1aed5f3e17217da06d264f01970">00201</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#a9eddb1aed5f3e17217da06d264f01970" title="block output operations">ru_oublock</a>;            
+<a name="l00202"></a><a class="code" href="structTru64_1_1rusage.html#a39008dba683527b4369224fecc4bc17b">00202</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#a39008dba683527b4369224fecc4bc17b" title="messages sent">ru_msgsnd</a>;             
+<a name="l00203"></a><a class="code" href="structTru64_1_1rusage.html#ae145f05fe8148c6170f11f2acd9f16bb">00203</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#ae145f05fe8148c6170f11f2acd9f16bb" title="messages received">ru_msgrcv</a>;             
+<a name="l00204"></a><a class="code" href="structTru64_1_1rusage.html#aaed29750e3c746e4666278d303109511">00204</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#aaed29750e3c746e4666278d303109511" title="signals received">ru_nsignals</a>;           
+<a name="l00205"></a><a class="code" href="structTru64_1_1rusage.html#aa283058b4b95b6777b3beb03ebaae43a">00205</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#aa283058b4b95b6777b3beb03ebaae43a" title="voluntary context switches">ru_nvcsw</a>;              
+<a name="l00206"></a><a class="code" href="structTru64_1_1rusage.html#aa9e3584d4779e36f0479719f187b7c96">00206</a>         uint64_t <a class="code" href="structTru64_1_1rusage.html#aa9e3584d4779e36f0479719f187b7c96" title="involuntary ">ru_nivcsw</a>;             
+<a name="l00207"></a>00207     };
+<a name="l00208"></a>00208 
+<a name="l00210"></a><a class="code" href="structTru64_1_1sigcontext.html">00210</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1sigcontext.html" title="For sigreturn().">sigcontext</a> {
+<a name="l00211"></a><a class="code" href="structTru64_1_1sigcontext.html#aac6248d3fc6622d1eba5e745eead2afe">00211</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#aac6248d3fc6622d1eba5e745eead2afe" title="sigstack state to restore">sc_onstack</a>;             
+<a name="l00212"></a><a class="code" href="structTru64_1_1sigcontext.html#aca41ac798f6ea09747ad6eea4fc2d619">00212</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#aca41ac798f6ea09747ad6eea4fc2d619" title="signal mask to restore">sc_mask</a>;                
+<a name="l00213"></a><a class="code" href="structTru64_1_1sigcontext.html#a90105ddd3817a2c44be1bb1f0bd30d82">00213</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#a90105ddd3817a2c44be1bb1f0bd30d82" title="pc at time of signal">sc_pc</a>;                  
+<a name="l00214"></a><a class="code" href="structTru64_1_1sigcontext.html#adde30abb98da1164049bf0ddc578f0ae">00214</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#adde30abb98da1164049bf0ddc578f0ae" title="psl to retore">sc_ps</a>;                  
+<a name="l00215"></a><a class="code" href="structTru64_1_1sigcontext.html#af70718846f00ef020466ed0cc32face6">00215</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#af70718846f00ef020466ed0cc32face6" title="processor regs 0 to 31">sc_regs</a>[32];            
+<a name="l00216"></a><a class="code" href="structTru64_1_1sigcontext.html#a732c560c7a713e0b257de41bf7b87492">00216</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#a732c560c7a713e0b257de41bf7b87492" title="fp has been used">sc_ownedfp</a>;             
+<a name="l00217"></a><a class="code" href="structTru64_1_1sigcontext.html#a2ea5188bbda21c51b675a6ae858f26f2">00217</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#a2ea5188bbda21c51b675a6ae858f26f2" title="fp regs 0 to 31">sc_fpregs</a>[32];          
+<a name="l00218"></a><a class="code" href="structTru64_1_1sigcontext.html#a8a56b1140ffe46bd98dc46d1b3d0f9e8">00218</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#a8a56b1140ffe46bd98dc46d1b3d0f9e8" title="floating point control reg">sc_fpcr</a>;               
+<a name="l00219"></a><a class="code" href="structTru64_1_1sigcontext.html#a7424e3c8190d07388ff2556b9bbdead7">00219</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#a7424e3c8190d07388ff2556b9bbdead7" title="software fpcr">sc_fp_control</a>;         
+<a name="l00220"></a><a class="code" href="structTru64_1_1sigcontext.html#a0837bcfc191b292323ea5f4d78dd770d">00220</a>         int64_t <a class="code" href="structTru64_1_1sigcontext.html#a0837bcfc191b292323ea5f4d78dd770d" title="reserved for kernel">sc_reserved1</a>;           
+<a name="l00221"></a><a class="code" href="structTru64_1_1sigcontext.html#ae6ae97be9e30fac27f56a51e627154a7">00221</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structTru64_1_1sigcontext.html#ae6ae97be9e30fac27f56a51e627154a7" title="reserved for kernel">sc_kreserved1</a>;         
+<a name="l00222"></a><a class="code" href="structTru64_1_1sigcontext.html#a9eda181ddd4232c393460580a3b1ba90">00222</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structTru64_1_1sigcontext.html#a9eda181ddd4232c393460580a3b1ba90" title="reserved for kernel">sc_kreserved2</a>;         
+<a name="l00223"></a><a class="code" href="structTru64_1_1sigcontext.html#aae4918b0e1b1034786efbc691e13d776">00223</a>         <span class="keywordtype">size_t</span>  <a class="code" href="structTru64_1_1sigcontext.html#aae4918b0e1b1034786efbc691e13d776" title="stack size">sc_ssize</a>;               
+<a name="l00224"></a><a class="code" href="structTru64_1_1sigcontext.html#a2df71070c2e1f6c5afdea3223aa228a5">00224</a>         caddr_t <a class="code" href="structTru64_1_1sigcontext.html#a2df71070c2e1f6c5afdea3223aa228a5" title="stack start">sc_sbase</a>;               
+<a name="l00225"></a><a class="code" href="structTru64_1_1sigcontext.html#aa2835095904203751c6ad8c601b1e976">00225</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#aa2835095904203751c6ad8c601b1e976" title="a0 argument to trap on exc">sc_traparg_a0</a>;         
+<a name="l00226"></a><a class="code" href="structTru64_1_1sigcontext.html#a3d0b9c34979fb5ffe689ad3c89725d38">00226</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#a3d0b9c34979fb5ffe689ad3c89725d38" title="a1 argument to trap on exc">sc_traparg_a1</a>;         
+<a name="l00227"></a><a class="code" href="structTru64_1_1sigcontext.html#aeb3bf4e999feccefabeb886ebd6aa8f8">00227</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#aeb3bf4e999feccefabeb886ebd6aa8f8" title="a2 argument to trap on exc">sc_traparg_a2</a>;         
+<a name="l00228"></a><a class="code" href="structTru64_1_1sigcontext.html#ab10a3d10e3fe65f63611c9a40a8d2f38">00228</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#ab10a3d10e3fe65f63611c9a40a8d2f38" title="imprecise pc">sc_fp_trap_pc</a>;         
+<a name="l00229"></a><a class="code" href="structTru64_1_1sigcontext.html#ac63ae298a0894715703d0df20f66043b">00229</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#ac63ae298a0894715703d0df20f66043b" title="Exception summary at trigg.">sc_fp_trigger_sum</a>;     
+<a name="l00230"></a><a class="code" href="structTru64_1_1sigcontext.html#a64e94a086e3a5973c5eb9bf5412fe9cb">00230</a>         uint64_t <a class="code" href="structTru64_1_1sigcontext.html#a64e94a086e3a5973c5eb9bf5412fe9cb" title="Instruction at trigger pc.">sc_fp_trigger_inst</a>;    
+<a name="l00231"></a>00231     };
+<a name="l00232"></a>00232 
+<a name="l00233"></a>00233 
+<a name="l00234"></a>00234 
+<a name="l00236"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html">00236</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1tbl__sysinfo.html" title="For table().">tbl_sysinfo</a> {
+<a name="l00237"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#ad4a5a7ae9451778b6c8bbdc01e9453c7">00237</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#ad4a5a7ae9451778b6c8bbdc01e9453c7" title="User time.">si_user</a>;       
+<a name="l00238"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#aed9a8695776e5886c1616fd3c41d6d39">00238</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#aed9a8695776e5886c1616fd3c41d6d39" title="Nice time.">si_nice</a>;       
+<a name="l00239"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#a379c36837524ffda4336d4ec44dfed65">00239</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#a379c36837524ffda4336d4ec44dfed65" title="System time.">si_sys</a>;        
+<a name="l00240"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#a8fff4f4e29135600aaeb694cfb3295f1">00240</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#a8fff4f4e29135600aaeb694cfb3295f1" title="Idle time.">si_idle</a>;       
+<a name="l00241"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#a9d1ee351cd7d391b91bc5059079e3d17">00241</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#a9d1ee351cd7d391b91bc5059079e3d17" title="hz">si_hz</a>;         
+<a name="l00242"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#a0d64d5cfd0905608018f7a103fb6db89">00242</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#a0d64d5cfd0905608018f7a103fb6db89" title="phz">si_phz</a>;        
+<a name="l00243"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#a88cbcb3dfc04059ff4adefb1ccbebec4">00243</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#a88cbcb3dfc04059ff4adefb1ccbebec4" title="Boot time in seconds.">si_boottime</a>;   
+<a name="l00244"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#a26c8b9811207ae95ab63ce8c4f8b88b6">00244</a>         uint64_t <a class="code" href="structTru64_1_1tbl__sysinfo.html#a26c8b9811207ae95ab63ce8c4f8b88b6" title="Wait time.">wait</a>;          
+<a name="l00245"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#a6c16d857f83a24c5f4d487f5a5d16047">00245</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>  <a class="code" href="structTru64_1_1tbl__sysinfo.html#a6c16d857f83a24c5f4d487f5a5d16047" title="rpb-&amp;gt;rpb_numprocs">si_max_procs</a>; 
+<a name="l00246"></a><a class="code" href="structTru64_1_1tbl__sysinfo.html#af2191e484304a1e686e883bd359037a3">00246</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>  <a class="code" href="structTru64_1_1tbl__sysinfo.html#af2191e484304a1e686e883bd359037a3" title="padding">pad</a>;          
+<a name="l00247"></a>00247     };
+<a name="l00248"></a>00248 
+<a name="l00249"></a>00249 
+<a name="l00251"></a><a class="code" href="structTru64_1_1vm__stack.html">00251</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1vm__stack.html" title="For stack_create.">vm_stack</a> {
+<a name="l00252"></a>00252         <span class="comment">// was void *</span>
+<a name="l00253"></a><a class="code" href="structTru64_1_1vm__stack.html#ab9fefac780347b9571641226e9db77c1">00253</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>    <a class="code" href="structTru64_1_1vm__stack.html#ab9fefac780347b9571641226e9db77c1" title="address hint">address</a>;        
+<a name="l00254"></a><a class="code" href="structTru64_1_1vm__stack.html#aa915f6b06d95b6c4842464eb624a044e">00254</a>         <span class="keywordtype">size_t</span>  <a class="code" href="structTru64_1_1vm__stack.html#aa915f6b06d95b6c4842464eb624a044e" title="red zone size">rsize</a>;          
+<a name="l00255"></a><a class="code" href="structTru64_1_1vm__stack.html#aef0bffca6586c3e1489aba142b0a6771">00255</a>         <span class="keywordtype">size_t</span>  <a class="code" href="structTru64_1_1vm__stack.html#aef0bffca6586c3e1489aba142b0a6771" title="yellow zone size">ysize</a>;          
+<a name="l00256"></a><a class="code" href="structTru64_1_1vm__stack.html#af84708c92b04498d486cd4e33fe4243e">00256</a>         <span class="keywordtype">size_t</span>  <a class="code" href="structTru64_1_1vm__stack.html#af84708c92b04498d486cd4e33fe4243e" title="green zone size">gsize</a>;          
+<a name="l00257"></a><a class="code" href="structTru64_1_1vm__stack.html#abb8ba4eaf2e820b8b06fcf18f3c95bd3">00257</a>         <span class="keywordtype">size_t</span>  <a class="code" href="structTru64_1_1vm__stack.html#abb8ba4eaf2e820b8b06fcf18f3c95bd3" title="amount of swap to reserve">swap</a>;           
+<a name="l00258"></a><a class="code" href="structTru64_1_1vm__stack.html#ae691c9312749cf655eb0457c50344979">00258</a>         <span class="keywordtype">size_t</span>  <a class="code" href="structTru64_1_1vm__stack.html#ae691c9312749cf655eb0457c50344979" title="growth increment">incr</a>;           
+<a name="l00259"></a><a class="code" href="structTru64_1_1vm__stack.html#ae762be4c1d1b1bf587592e9225d96d5c">00259</a>         uint64_t        <a class="code" href="structTru64_1_1vm__stack.html#ae762be4c1d1b1bf587592e9225d96d5c" title="address alignment">align</a>;          
+<a name="l00260"></a><a class="code" href="structTru64_1_1vm__stack.html#a899a76dc5f03f0d4ea3793c339e07ee9">00260</a>         uint64_t        <a class="code" href="structTru64_1_1vm__stack.html#a899a76dc5f03f0d4ea3793c339e07ee9" title="MAP_FIXED etc.">flags</a>;          
+<a name="l00261"></a>00261         <span class="comment">// was struct memalloc_attr *</span>
+<a name="l00262"></a><a class="code" href="structTru64_1_1vm__stack.html#a4fd2848e51f4914089a66fb22de5c35d">00262</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>    <a class="code" href="structTru64_1_1vm__stack.html#a4fd2848e51f4914089a66fb22de5c35d" title="allocation policy">attr</a>;           
+<a name="l00263"></a><a class="code" href="structTru64_1_1vm__stack.html#ac35c1fbebe2017fc1ca10f5803668dfd">00263</a>         uint64_t <a class="code" href="structTru64_1_1vm__stack.html#ac35c1fbebe2017fc1ca10f5803668dfd" title="reserved">reserved</a>;      
+<a name="l00264"></a>00264     };
+<a name="l00265"></a>00265 
+<a name="l00267"></a>00267     <span class="keyword">enum</span> {
+<a name="l00268"></a><a class="code" href="classTru64.html#a68c01102755fc7d1c810bb0b0635fa90a7fff089a9b1eae0e9e60e82d7ab27b03">00268</a>         <a class="code" href="classTru64.html#a68c01102755fc7d1c810bb0b0635fa90a7fff089a9b1eae0e9e60e82d7ab27b03">KERN_NOT_RECEIVER</a> = 7,
+<a name="l00269"></a><a class="code" href="classTru64.html#a68c01102755fc7d1c810bb0b0635fa90ae5ac70379d7d014f8f37ba0ee504f35c">00269</a>         <a class="code" href="classTru64.html#a68c01102755fc7d1c810bb0b0635fa90ae5ac70379d7d014f8f37ba0ee504f35c">KERN_NOT_IN_SET</a> = 12
+<a name="l00270"></a>00270     };
+<a name="l00271"></a>00271 
+<a name="l00273"></a><a class="code" href="classTru64.html#a284276950ab5fbb4ed5432a4fe77c0b4">00273</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classTru64.html#a284276950ab5fbb4ed5432a4fe77c0b4" title="For nxm_task_init.">NXM_TASK_INIT_VP</a> = 2;      
+<a name="l00274"></a>00274 
+<a name="l00276"></a><a class="code" href="structTru64_1_1nxm__task__attr.html">00276</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1nxm__task__attr.html" title="Task attribute structure.">nxm_task_attr</a> {
+<a name="l00277"></a><a class="code" href="structTru64_1_1nxm__task__attr.html#a3e280a023ffa784d26a4f41306d718f0">00277</a>         int64_t <a class="code" href="structTru64_1_1nxm__task__attr.html#a3e280a023ffa784d26a4f41306d718f0" title="nxm_callback">nxm_callback</a>;   
+<a name="l00278"></a><a class="code" href="structTru64_1_1nxm__task__attr.html#a70d8998193fec354ad484f497c870676">00278</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__task__attr.html#a70d8998193fec354ad484f497c870676" title="nxm_version">nxm_version</a>;       
+<a name="l00279"></a><a class="code" href="structTru64_1_1nxm__task__attr.html#a3b5f76b3e0f76058019240a3c5dcaec1">00279</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="structTru64_1_1nxm__task__attr.html#a3b5f76b3e0f76058019240a3c5dcaec1" title="nxm_uniq_offset">nxm_uniq_offset</a>; 
+<a name="l00280"></a><a class="code" href="structTru64_1_1nxm__task__attr.html#a1cbb17ede73ea044a04a129bf4d86976">00280</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="structTru64_1_1nxm__task__attr.html#a1cbb17ede73ea044a04a129bf4d86976" title="flags">flags</a>;   
+<a name="l00281"></a><a class="code" href="structTru64_1_1nxm__task__attr.html#a1edf25e35f3eb9bddad20dec442db246">00281</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__task__attr.html#a1edf25e35f3eb9bddad20dec442db246" title="nxm_quantum">nxm_quantum</a>;        
+<a name="l00282"></a><a class="code" href="structTru64_1_1nxm__task__attr.html#a6c4eee056561c43fe94348a659fb09c4">00282</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__task__attr.html#a6c4eee056561c43fe94348a659fb09c4" title="pad1">pad1</a>;               
+<a name="l00283"></a><a class="code" href="structTru64_1_1nxm__task__attr.html#aba56448df1792d4590740cf5a8784799">00283</a>         int64_t <a class="code" href="structTru64_1_1nxm__task__attr.html#aba56448df1792d4590740cf5a8784799" title="pad2">pad2</a>;           
+<a name="l00284"></a>00284     };
+<a name="l00285"></a>00285 
+<a name="l00287"></a><a class="code" href="classTru64.html#ae770e87ab143e8ad7feaf75b78a89718">00287</a>     <span class="keyword">typedef</span> uint64_t   <a class="code" href="classTru64.html#ae770e87ab143e8ad7feaf75b78a89718" title="Signal set.">sigset_t</a>;
+<a name="l00288"></a>00288 
+<a name="l00290"></a><a class="code" href="structTru64_1_1ushared__state.html">00290</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1ushared__state.html" title="Thread state shared between user &amp;amp; kernel.">ushared_state</a> {
+<a name="l00291"></a><a class="code" href="structTru64_1_1ushared__state.html#a84a273d642c19957017a87b1f54031e6">00291</a>         <a class="code" href="classTru64.html#ae770e87ab143e8ad7feaf75b78a89718" title="Signal set.">sigset_t</a>        <a class="code" href="structTru64_1_1ushared__state.html#a84a273d642c19957017a87b1f54031e6" title="thread signal mask">sigmask</a>;        
+<a name="l00292"></a><a class="code" href="structTru64_1_1ushared__state.html#a9c53d1e3c0bc3d8be6911f0f232a7079">00292</a>         <a class="code" href="classTru64.html#ae770e87ab143e8ad7feaf75b78a89718" title="Signal set.">sigset_t</a>        <a class="code" href="structTru64_1_1ushared__state.html#a9c53d1e3c0bc3d8be6911f0f232a7079" title="thread pending mask">sig</a>;            
+<a name="l00293"></a>00293         <span class="comment">// struct nxm_pth_state *</span>
+<a name="l00294"></a><a class="code" href="structTru64_1_1ushared__state.html#a7e2b56424c95350d108ff8d0fab23b48">00294</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTru64_1_1ushared__state.html#a7e2b56424c95350d108ff8d0fab23b48" title="out-of-line state">pth_id</a>; 
+<a name="l00295"></a><a class="code" href="structTru64_1_1ushared__state.html#ac8bf36fe0577cba66bccda3a6f7e80a4">00295</a>         <span class="keywordtype">int</span>             <a class="code" href="structTru64_1_1ushared__state.html#ac8bf36fe0577cba66bccda3a6f7e80a4" title="shared flags">flags</a>;          
+<a name="l00296"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#ac24e0f8db00c21320591c78141f02db3">00296</a> <span class="preprocessor">#define US_SIGSTACK     0x1             // thread called sigaltstack</span>
+<a name="l00297"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a4e9bea1f0bf5eaa0a3de4cf4f96fb703">00297</a> <span class="preprocessor"></span><span class="preprocessor">#define US_ONSTACK      0x2             // thread is running on altstack</span>
+<a name="l00298"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a8e6cbedf17c907260a68ba151e334beb">00298</a> <span class="preprocessor"></span><span class="preprocessor">#define US_PROFILE      0x4             // thread called profil</span>
+<a name="l00299"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a05dc14b0b6e83cebfc7e62a67b99a5b6">00299</a> <span class="preprocessor"></span><span class="preprocessor">#define US_SYSCALL      0x8             // thread in syscall</span>
+<a name="l00300"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a464d91849cd67867458ccb546abccb3f">00300</a> <span class="preprocessor"></span><span class="preprocessor">#define US_TRAP         0x10            // thread has trapped</span>
+<a name="l00301"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a689c6ea145e701718abb3b2a4dc8c519">00301</a> <span class="preprocessor"></span><span class="preprocessor">#define US_YELLOW       0x20            // thread has mellowed yellow</span>
+<a name="l00302"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#add5a5fbe7fe7caed1b149f2a608af2e2">00302</a> <span class="preprocessor"></span><span class="preprocessor">#define US_YZONE        0x40            // thread has zoned out</span>
+<a name="l00303"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#aa03cff48983215334518b8b1520a8430">00303</a> <span class="preprocessor"></span><span class="preprocessor">#define US_FP_OWNED     0x80            // thread used floating point</span>
+<a name="l00304"></a>00304 <span class="preprocessor"></span>
+<a name="l00305"></a><a class="code" href="structTru64_1_1ushared__state.html#aabbd9f971cb4aa1bd714e3f22cd35654">00305</a>         <span class="keywordtype">int</span>             <a class="code" href="structTru64_1_1ushared__state.html#aabbd9f971cb4aa1bd714e3f22cd35654" title="thread&amp;#39;s cancelation state">cancel_state</a>;   
+<a name="l00306"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a3ee52ec290fe142e43267b7bc43dc2f1">00306</a> <span class="preprocessor">#define US_CANCEL         0x1           // cancel pending</span>
+<a name="l00307"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a819fb2af3c0a9d945735a98248d1a983">00307</a> <span class="preprocessor"></span><span class="preprocessor">#define US_NOCANCEL       0X2           // synch cancel disabled</span>
+<a name="l00308"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#abe6a60485e6bd345b1a3c98d2a3c5d3f">00308</a> <span class="preprocessor"></span><span class="preprocessor">#define US_SYS_NOCANCEL   0x4           // syscall cancel disabled</span>
+<a name="l00309"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a8fb59dd3e825f2e645ccd2708ec6153c">00309</a> <span class="preprocessor"></span><span class="preprocessor">#define US_ASYNC_NOCANCEL 0x8           // asynch cancel disabled</span>
+<a name="l00310"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#aff7376b113f465e1313234392ac9a49a">00310</a> <span class="preprocessor"></span><span class="preprocessor">#define US_CANCEL_BITS  (US_NOCANCEL|US_SYS_NOCANCEL|US_ASYNC_NOCANCEL)</span>
+<a name="l00311"></a><a class="code" href="kern_2tru64_2tru64_8hh.html#a346c9edb572174f9be6d764ea22df611">00311</a> <span class="preprocessor"></span><span class="preprocessor">#define US_CANCEL_MASK  (US_CANCEL|US_NOCANCEL|US_SYS_NOCANCEL| \</span>
+<a name="l00312"></a>00312 <span class="preprocessor">                         US_ASYNC_NOCANCEL)</span>
+<a name="l00313"></a>00313 <span class="preprocessor"></span>
+<a name="l00314"></a>00314         <span class="comment">// These are semi-shared. They are always visible to</span>
+<a name="l00315"></a>00315         <span class="comment">// the kernel but are never context-switched by the library.</span>
+<a name="l00316"></a>00316 
+<a name="l00317"></a><a class="code" href="structTru64_1_1ushared__state.html#ab1f77590928da984017362cd8114956a">00317</a>         <span class="keywordtype">int</span>             <a class="code" href="structTru64_1_1ushared__state.html#ab1f77590928da984017362cd8114956a" title="scheduler&amp;#39;s synchronous signals">nxm_ssig</a>;       
+<a name="l00318"></a><a class="code" href="structTru64_1_1ushared__state.html#a18a373c8b2126ea9409c08cede8f7326">00318</a>         <span class="keywordtype">int</span>             <a class="code" href="structTru64_1_1ushared__state.html#a18a373c8b2126ea9409c08cede8f7326" title="reserved1">reserved1</a>;      
+<a name="l00319"></a><a class="code" href="structTru64_1_1ushared__state.html#a1d8e8613bfc82fdd41b1a9cecff3a8c8">00319</a>         int64_t            <a class="code" href="structTru64_1_1ushared__state.html#a1d8e8613bfc82fdd41b1a9cecff3a8c8" title="scheduler active">nxm_active</a>;     
+<a name="l00320"></a><a class="code" href="structTru64_1_1ushared__state.html#ac962a352ad5618348c3871ef54b4d2ee">00320</a>         int64_t            <a class="code" href="structTru64_1_1ushared__state.html#ac962a352ad5618348c3871ef54b4d2ee" title="reserved2">reserved2</a>;   
+<a name="l00321"></a>00321     };
+<a name="l00322"></a>00322 
+<a name="l00323"></a><a class="code" href="structTru64_1_1nxm__sched__state.html">00323</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1nxm__sched__state.html">nxm_sched_state</a> {
+<a name="l00324"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46">00324</a>         <span class="keyword">struct          </span><a class="code" href="structTru64_1_1ushared__state.html" title="Thread state shared between user &amp;amp; kernel.">ushared_state</a> <a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>;    
+<a name="l00325"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#aebeca6fcbee8c6e89bdb8f64f661eda1">00325</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span>    <a class="code" href="structTru64_1_1nxm__sched__state.html#aebeca6fcbee8c6e89bdb8f64f661eda1" title="scheduler state / slot">nxm_bits</a>;               
+<a name="l00326"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#a1edf25e35f3eb9bddad20dec442db246">00326</a>         <span class="keywordtype">int</span>             <a class="code" href="structTru64_1_1nxm__sched__state.html#a1edf25e35f3eb9bddad20dec442db246" title="quantum count-down value">nxm_quantum</a>;            
+<a name="l00327"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#a9291f98fb828769c72a7342ac8b1432a">00327</a>         <span class="keywordtype">int</span>             <a class="code" href="structTru64_1_1nxm__sched__state.html#a9291f98fb828769c72a7342ac8b1432a" title="quantum reset value">nxm_set_quantum</a>;        
+<a name="l00328"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#aa46cf99f11765db5dcd6ea3d6f276d02">00328</a>         <span class="keywordtype">int</span>             <a class="code" href="structTru64_1_1nxm__sched__state.html#aa46cf99f11765db5dcd6ea3d6f276d02" title="syscall state">nxm_sysevent</a>;           
+<a name="l00329"></a>00329         <span class="comment">// struct nxm_upcall *</span>
+<a name="l00330"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#a2321cce735687222b55d66da9530112f">00330</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>        <a class="code" href="structTru64_1_1nxm__sched__state.html#a2321cce735687222b55d66da9530112f" title="stack ptr of null thread">nxm_uc_ret</a>; 
+<a name="l00331"></a>00331         <span class="comment">// void *</span>
+<a name="l00332"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#ab037907b00a7ae4bbb8c8a1ad8e1cbcd">00332</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTru64_1_1nxm__sched__state.html#ab037907b00a7ae4bbb8c8a1ad8e1cbcd" title="scheduler&amp;#39;s thread id">nxm_tid</a>;               
+<a name="l00333"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#ae84de29884ab739a856f7a85c13a55c2">00333</a>         int64_t            <a class="code" href="structTru64_1_1nxm__sched__state.html#ae84de29884ab739a856f7a85c13a55c2" title="page fault address">nxm_va</a>;                 
+<a name="l00334"></a>00334         <span class="comment">// struct nxm_pth_state *</span>
+<a name="l00335"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#a9037a44821c821f7098445624b66415e">00335</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTru64_1_1nxm__sched__state.html#a9037a44821c821f7098445624b66415e" title="id of null thread">nxm_pthid</a>; 
+<a name="l00336"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#adbbe482b35936baecb83728927feafa4">00336</a>         uint64_t   <a class="code" href="structTru64_1_1nxm__sched__state.html#adbbe482b35936baecb83728927feafa4" title="bound PCS thread count">nxm_bound_pcs_count</a>;    
+<a name="l00337"></a><a class="code" href="structTru64_1_1nxm__sched__state.html#ab80989b0e8ced8520cd836ae8dcd588c">00337</a>         int64_t            <a class="code" href="structTru64_1_1nxm__sched__state.html#ab80989b0e8ced8520cd836ae8dcd588c" title="pad">pad</a>[2];         
+<a name="l00338"></a>00338     };
+<a name="l00339"></a>00339 
+<a name="l00341"></a><a class="code" href="structTru64_1_1nxm__shared.html">00341</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1nxm__shared.html" title="nxm_shared.">nxm_shared</a> {
+<a name="l00342"></a><a class="code" href="structTru64_1_1nxm__shared.html#a3e280a023ffa784d26a4f41306d718f0">00342</a>         int64_t <a class="code" href="structTru64_1_1nxm__shared.html#a3e280a023ffa784d26a4f41306d718f0" title="address of upcall routine">nxm_callback</a>;              
+<a name="l00343"></a><a class="code" href="structTru64_1_1nxm__shared.html#a70d8998193fec354ad484f497c870676">00343</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__shared.html#a70d8998193fec354ad484f497c870676" title="version number">nxm_version</a>;       
+<a name="l00344"></a><a class="code" href="structTru64_1_1nxm__shared.html#a3b5f76b3e0f76058019240a3c5dcaec1">00344</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="structTru64_1_1nxm__shared.html#a3b5f76b3e0f76058019240a3c5dcaec1" title="correction factor for TEB">nxm_uniq_offset</a>; 
+<a name="l00345"></a><a class="code" href="structTru64_1_1nxm__shared.html#ae142edeff5e8e134c7b06d379b189d61">00345</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">short</span> <a class="code" href="structTru64_1_1nxm__shared.html#ae142edeff5e8e134c7b06d379b189d61" title="pad1">pad1</a>;            
+<a name="l00346"></a><a class="code" href="structTru64_1_1nxm__shared.html#a752b57f2668491e9bdc2d0f3c8ac0862">00346</a>         int64_t <a class="code" href="structTru64_1_1nxm__shared.html#a752b57f2668491e9bdc2d0f3c8ac0862" title="future growth">space</a>[2];                  
+<a name="l00347"></a><a class="code" href="structTru64_1_1nxm__shared.html#a7bd02c4884a470c89958d25e45f3e34c">00347</a>         <span class="keyword">struct </span><a class="code" href="structTru64_1_1nxm__sched__state.html">nxm_sched_state</a> <a class="code" href="structTru64_1_1nxm__shared.html#a7bd02c4884a470c89958d25e45f3e34c" title="array of shared areas">nxm_ss</a>[1]; 
+<a name="l00348"></a>00348     };
+<a name="l00349"></a>00349 
+<a name="l00351"></a><a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1">00351</a>     <span class="keyword">enum</span> <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1" title="nxm_slot_state_t.">nxm_slot_state_t</a> {
+<a name="l00352"></a><a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1a50b7d030b516364e6a36300e54aedf42">00352</a>         <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1a50b7d030b516364e6a36300e54aedf42">NXM_SLOT_AVAIL</a>,
+<a name="l00353"></a><a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1ac7fa50c98e9a7cf0683966b0d6a6104e">00353</a>         <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1ac7fa50c98e9a7cf0683966b0d6a6104e">NXM_SLOT_BOUND</a>,
+<a name="l00354"></a><a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1af2d76554995e1f7f2990e8deb0e444e5">00354</a>         <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1af2d76554995e1f7f2990e8deb0e444e5">NXM_SLOT_UNBOUND</a>,
+<a name="l00355"></a><a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1aa29b88969e5bd1d58b5a3340c872c8ad">00355</a>         <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1aa29b88969e5bd1d58b5a3340c872c8ad">NXM_SLOT_EMPTY</a>
+<a name="l00356"></a>00356     };
+<a name="l00357"></a>00357 
+<a name="l00359"></a><a class="code" href="structTru64_1_1nxm__config__info.html">00359</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1nxm__config__info.html" title="nxm_config_info">nxm_config_info</a> {
+<a name="l00360"></a><a class="code" href="structTru64_1_1nxm__config__info.html#ae850243d0c164134126c812301a40cb4">00360</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__config__info.html#ae850243d0c164134126c812301a40cb4" title="max number of VP slots per RAD">nxm_nslots_per_rad</a>;         
+<a name="l00361"></a><a class="code" href="structTru64_1_1nxm__config__info.html#a4e9fc0098f3b715006c6e06626842884">00361</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__config__info.html#a4e9fc0098f3b715006c6e06626842884" title="max number of RADs">nxm_nrads</a>;                  
+<a name="l00362"></a>00362         <span class="comment">// nxm_slot_state_t *</span>
+<a name="l00363"></a><a class="code" href="structTru64_1_1nxm__config__info.html#a5af50da8cac8bb510a64e9e314ac797a">00363</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTru64_1_1nxm__config__info.html#a5af50da8cac8bb510a64e9e314ac797a" title="per-VP slot state">nxm_slot_state</a>; 
+<a name="l00364"></a>00364         <span class="comment">// struct nxm_shared *</span>
+<a name="l00365"></a><a class="code" href="structTru64_1_1nxm__config__info.html#a6f50aa5521412896eb5f261175c5dd7b">00365</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTru64_1_1nxm__config__info.html#a6f50aa5521412896eb5f261175c5dd7b" title="per-RAD shared areas">nxm_rad</a>[1];  
+<a name="l00366"></a>00366     };
+<a name="l00367"></a>00367 
+<a name="l00369"></a><a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384">00369</a>     <span class="keyword">enum</span> <a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384" title="For nxm_thread_create.">nxm_thread_type</a> {
+<a name="l00370"></a><a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a3ac97f98b04f22186a86480ad5fa471d">00370</a>         <a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a3ac97f98b04f22186a86480ad5fa471d">NXM_TYPE_SCS</a>    = 0,
+<a name="l00371"></a><a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a1d6a136a94a41d702244a74edccdb312">00371</a>         <a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a1d6a136a94a41d702244a74edccdb312">NXM_TYPE_VP</a>             = 1,
+<a name="l00372"></a><a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a94b977628442e840a44dd81fdeb105ae">00372</a>         <a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a94b977628442e840a44dd81fdeb105ae">NXM_TYPE_MANAGER</a>        = 2
+<a name="l00373"></a>00373     };
+<a name="l00374"></a>00374 
+<a name="l00376"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html">00376</a>     <span class="keyword">struct </span><a class="code" href="structTru64_1_1nxm__thread__attr.html" title="Thread attributes.">nxm_thread_attr</a> {
+<a name="l00377"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#aad880fc4455c253781e8968f2239d56f">00377</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__thread__attr.html#aad880fc4455c253781e8968f2239d56f" title="version">version</a>;    
+<a name="l00378"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#ac765329451135abec74c45e1897abf26">00378</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__thread__attr.html#ac765329451135abec74c45e1897abf26" title="type">type</a>;       
+<a name="l00379"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#abae33d4052ae649b5a0c3a3e708ab255">00379</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__thread__attr.html#abae33d4052ae649b5a0c3a3e708ab255" title="cancel_flags">cancel_flags</a>;       
+<a name="l00380"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#acec9ce2df15222151ad66fcb1d74eb9f">00380</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__thread__attr.html#acec9ce2df15222151ad66fcb1d74eb9f" title="priority">priority</a>;   
+<a name="l00381"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#af1360db1ee84d9d6f13b0b9a3114b6b7">00381</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__thread__attr.html#af1360db1ee84d9d6f13b0b9a3114b6b7" title="policy">policy</a>;     
+<a name="l00382"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#a83a847385a7ebdc5a054dd0e1ab6f0e9">00382</a>         <span class="keywordtype">int</span> <a class="code" href="structTru64_1_1nxm__thread__attr.html#a83a847385a7ebdc5a054dd0e1ab6f0e9" title="signal_type">signal_type</a>;        
+<a name="l00383"></a>00383         <span class="comment">// void *</span>
+<a name="l00384"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#af7f4b7550d078bd48a2c270556b49d68">00384</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structTru64_1_1nxm__thread__attr.html#af7f4b7550d078bd48a2c270556b49d68" title="pthid">pthid</a>;     
+<a name="l00385"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#a84a273d642c19957017a87b1f54031e6">00385</a>         <a class="code" href="classTru64.html#ae770e87ab143e8ad7feaf75b78a89718" title="Signal set.">sigset_t</a> <a class="code" href="structTru64_1_1nxm__thread__attr.html#a84a273d642c19957017a87b1f54031e6">sigmask</a>;       
+<a name="l00386"></a>00386 
+<a name="l00387"></a>00387         <span class="keyword">struct </span>{
+<a name="l00388"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#a37cc15f96d8bac81ed087fc247a0c5a0">00388</a>             uint64_t <a class="code" href="structTru64_1_1nxm__thread__attr.html#a37cc15f96d8bac81ed087fc247a0c5a0" title="pc">pc</a>;        
+<a name="l00389"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#acd6941efd501803089091f06f1967f7d">00389</a>             uint64_t <a class="code" href="structTru64_1_1nxm__thread__attr.html#acd6941efd501803089091f06f1967f7d" title="sp">sp</a>;        
+<a name="l00390"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#adafeae317d72d102ea18f6cdbbdee4db">00390</a>             uint64_t <a class="code" href="structTru64_1_1nxm__thread__attr.html#adafeae317d72d102ea18f6cdbbdee4db" title="a0">a0</a>;        
+<a name="l00391"></a>00391         } <a class="code" href="structTru64_1_1nxm__thread__attr.html#a6c91caa556776951bbcfb885487bb2e3" title="Initial register values.">registers</a>;
+<a name="l00392"></a><a class="code" href="structTru64_1_1nxm__thread__attr.html#ab4facb1f9e21ad7ed046f59b180ac05b">00392</a>         uint64_t <a class="code" href="structTru64_1_1nxm__thread__attr.html#ab4facb1f9e21ad7ed046f59b180ac05b" title="pad2">pad2</a>[2];       
+<a name="l00393"></a>00393     };
+<a name="l00394"></a>00394 
+<a name="l00398"></a>00398     <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00399"></a>00399     <span class="keyword">static</span> <span class="keywordtype">void</span>
+<a name="l00400"></a><a class="code" href="classTru64.html#ab39f4973592abe61638b8b998bc5691d">00400</a>     <a class="code" href="classTru64.html#ab39f4973592abe61638b8b998bc5691d">copyOutStatfsBuf</a>(<a class="code" href="classSETranslatingPortProxy.html">SETranslatingPortProxy</a> &amp;mem, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>,
+<a name="l00401"></a>00401                      <a class="code" href="kern_2tru64_2tru64_8hh.html#a1a8529336c3f2704cb49ee2cd97412a8">global_statfs</a> *host)
+<a name="l00402"></a>00402     {
+<a name="l00403"></a>00403         <span class="keyword">using namespace </span>TheISA;
+<a name="l00404"></a>00404 
+<a name="l00405"></a>00405         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;T&gt;</a> tgt(addr);
+<a name="l00406"></a>00406 
+<a name="l00407"></a>00407 <span class="preprocessor">#if defined(__OpenBSD__) || defined(__APPLE__) || defined(__FreeBSD__)</span>
+<a name="l00408"></a>00408 <span class="preprocessor"></span>        tgt-&gt;f_type = 0;
+<a name="l00409"></a>00409 <span class="preprocessor">#else</span>
+<a name="l00410"></a>00410 <span class="preprocessor"></span>        tgt-&gt;f_type = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(host-&gt;f_type);
+<a name="l00411"></a>00411 <span class="preprocessor">#endif</span>
+<a name="l00412"></a>00412 <span class="preprocessor"></span>        tgt-&gt;f_bsize = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(host-&gt;f_bsize);
+<a name="l00413"></a>00413         tgt-&gt;f_blocks = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(host-&gt;f_blocks);
+<a name="l00414"></a>00414         tgt-&gt;f_bfree = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(host-&gt;f_bfree);
+<a name="l00415"></a>00415         tgt-&gt;f_bavail = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(host-&gt;f_bavail);
+<a name="l00416"></a>00416         tgt-&gt;f_files = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(host-&gt;f_files);
+<a name="l00417"></a>00417         tgt-&gt;f_ffree = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(host-&gt;f_ffree);
+<a name="l00418"></a>00418 
+<a name="l00419"></a>00419         <span class="comment">// Is this as string normally?</span>
+<a name="l00420"></a>00420         memcpy(&amp;tgt-&gt;f_fsid, &amp;host-&gt;f_fsid, <span class="keyword">sizeof</span>(host-&gt;f_fsid));
+<a name="l00421"></a>00421 
+<a name="l00422"></a>00422         tgt.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(mem);
+<a name="l00423"></a>00423     }
+<a name="l00424"></a>00424 
+<a name="l00425"></a>00425 
+<a name="l00427"></a><a class="code" href="classTru64.html#aad01339e89106fdf68f57ef118956fa9">00427</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classTru64.html#aad01339e89106fdf68f57ef118956fa9" title="The target system&amp;#39;s hostname.">hostname</a>;
+<a name="l00428"></a>00428 
+<a name="l00429"></a>00429 
+<a name="l00431"></a>00431     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00432"></a><a class="code" href="classTru64.html#a2e7bba81ca6d880e6cbf4e1db6100a68">00432</a>     <a class="code" href="classTru64.html#a2e7bba81ca6d880e6cbf4e1db6100a68" title="Target getdirentries() handler.">getdirentriesFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00433"></a>00433                       <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00434"></a>00434     {
+<a name="l00435"></a>00435         <span class="keyword">using namespace </span>TheISA;
+<a name="l00436"></a>00436 
+<a name="l00437"></a>00437 <span class="preprocessor">#if defined(__APPLE__) || defined(__CYGWIN__)</span>
+<a name="l00438"></a>00438 <span class="preprocessor"></span>        <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;getdirent not implemented on cygwin!&quot;</span>);
+<a name="l00439"></a>00439 <span class="preprocessor">#else</span>
+<a name="l00440"></a>00440 <span class="preprocessor"></span>        <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00441"></a>00441         <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a87001e8063b8b1b5dc88f5a4b43b2a5a">fd</a> = process-&gt;<a class="code" href="classProcess.html#ac7bb7ef35884d6fb4a2c02f167ab7679">sim_fd</a>(process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l00442"></a>00442         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> tgt_buf = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00443"></a>00443         <span class="keywordtype">int</span> tgt_nbytes = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00444"></a>00444         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> tgt_basep = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00445"></a>00445 
+<a name="l00446"></a>00446         <span class="keywordtype">char</span> * <span class="keyword">const</span> host_buf = <span class="keyword">new</span> <span class="keywordtype">char</span>[tgt_nbytes];
+<a name="l00447"></a>00447 
+<a name="l00448"></a>00448         <span class="comment">// just pass basep through uninterpreted.</span>
+<a name="l00449"></a>00449         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;int64_t&gt;</a> basep(tgt_basep);
+<a name="l00450"></a>00450         basep.<a class="code" href="classBaseBufferArg.html#a857fbf24e9b55ad1f3d566d9c7768b93">copyIn</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00451"></a>00451         <span class="keywordtype">long</span> host_basep = (<a class="code" href="classTru64.html#a2cb84cf5f02a29b7e8f237ff151a9225">off_t</a>)<a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>((int64_t)*basep);
+<a name="l00452"></a>00452         <span class="keywordtype">int</span> host_result = getdirentries(fd, host_buf, tgt_nbytes, &amp;host_basep);
+<a name="l00453"></a>00453 
+<a name="l00454"></a>00454         <span class="comment">// check for error</span>
+<a name="l00455"></a>00455         <span class="keywordflow">if</span> (host_result &lt; 0) {
+<a name="l00456"></a>00456             <span class="keyword">delete</span> [] host_buf;
+<a name="l00457"></a>00457             <span class="keywordflow">return</span> -errno;
+<a name="l00458"></a>00458         }
+<a name="l00459"></a>00459 
+<a name="l00460"></a>00460         <span class="comment">// no error: copy results back to target space</span>
+<a name="l00461"></a>00461         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> tgt_buf_ptr = tgt_buf;
+<a name="l00462"></a>00462         <span class="keywordtype">char</span> *host_buf_ptr = host_buf;
+<a name="l00463"></a>00463         <span class="keywordtype">char</span> *host_buf_end = host_buf + host_result;
+<a name="l00464"></a>00464         <span class="keywordflow">while</span> (host_buf_ptr &lt; host_buf_end) {
+<a name="l00465"></a>00465             <a class="code" href="kern_2tru64_2tru64_8hh.html#ae8a7ba972c525e3d137846c7f1d0a1d5">global_dirent</a> *host_dp = (<a class="code" href="kern_2tru64_2tru64_8hh.html#ae8a7ba972c525e3d137846c7f1d0a1d5">global_dirent</a> *)host_buf_ptr;
+<a name="l00466"></a>00466             <span class="keywordtype">int</span> namelen = strlen(host_dp-&gt;d_name);
+<a name="l00467"></a>00467 
+<a name="l00468"></a>00468             <span class="comment">// Actual size includes padded string rounded up for alignment.</span>
+<a name="l00469"></a>00469             <span class="comment">// Subtract 256 for dummy char array in Tru64::dirent definition.</span>
+<a name="l00470"></a>00470             <span class="comment">// Add 1 to namelen for terminating null char.</span>
+<a name="l00471"></a>00471             <span class="keywordtype">int</span> tgt_bufsize = <span class="keyword">sizeof</span>(<a class="code" href="structTru64_1_1dirent.html" title="For getdirentries().">Tru64::dirent</a>) - 256 + <a class="code" href="intmath_8hh.html#a4d254a89b294890f6ce3a474f4e8c6c7">roundUp</a>(namelen+1, 8);
+<a name="l00472"></a>00472             <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::dirent&gt;</a> tgt_dp(tgt_buf_ptr, tgt_bufsize);
+<a name="l00473"></a>00473             tgt_dp-&gt;d_ino = host_dp-&gt;d_ino;
+<a name="l00474"></a>00474             tgt_dp-&gt;d_reclen = tgt_bufsize;
+<a name="l00475"></a>00475             tgt_dp-&gt;d_namlen = namelen;
+<a name="l00476"></a>00476             strcpy(tgt_dp-&gt;d_name, host_dp-&gt;d_name);
+<a name="l00477"></a>00477             tgt_dp.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00478"></a>00478 
+<a name="l00479"></a>00479             tgt_buf_ptr += tgt_bufsize;
+<a name="l00480"></a>00480             host_buf_ptr += host_dp-&gt;d_reclen;
+<a name="l00481"></a>00481         }
+<a name="l00482"></a>00482 
+<a name="l00483"></a>00483         <span class="keyword">delete</span> [] host_buf;
+<a name="l00484"></a>00484 
+<a name="l00485"></a>00485         *basep = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>((int64_t)host_basep);
+<a name="l00486"></a>00486         basep.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00487"></a>00487 
+<a name="l00488"></a>00488         <span class="keywordflow">return</span> tgt_buf_ptr - tgt_buf;
+<a name="l00489"></a>00489 <span class="preprocessor">#endif</span>
+<a name="l00490"></a>00490 <span class="preprocessor"></span>    }
+<a name="l00491"></a>00491 
+<a name="l00493"></a>00493     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00494"></a><a class="code" href="classTru64.html#a368f998d81d17c06f2fb1639683f8302">00494</a>     <a class="code" href="classTru64.html#a368f998d81d17c06f2fb1639683f8302" title="Target sigreturn() handler.">sigreturnFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00495"></a>00495                   <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00496"></a>00496     {
+<a name="l00497"></a>00497         <span class="keyword">using namespace </span>TheISA;
+<a name="l00498"></a>00498 
+<a name="l00499"></a>00499         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00500"></a>00500         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::sigcontext&gt;</a> sc(process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l00501"></a>00501 
+<a name="l00502"></a>00502         sc.copyIn(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00503"></a>00503 
+<a name="l00504"></a>00504         <span class="comment">// Restore state from sigcontext structure.</span>
+<a name="l00505"></a>00505         <span class="comment">// Note that we&apos;ll advance PC &lt;- NPC before the end of the cycle,</span>
+<a name="l00506"></a>00506         <span class="comment">// so we need to restore the desired PC into NPC.</span>
+<a name="l00507"></a>00507         <span class="comment">// The current regs-&gt;pc will get clobbered.</span>
+<a name="l00508"></a>00508         <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">PCState</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a> = tc-&gt;<a class="code" href="classThreadContext.html#a1aaca26c0732d2191edbde1477d7ec13">pcState</a>();
+<a name="l00509"></a>00509         pc.npc(<a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(sc-&gt;sc_pc));
+<a name="l00510"></a>00510         tc-&gt;<a class="code" href="classThreadContext.html#a1aaca26c0732d2191edbde1477d7ec13">pcState</a>(pc);
+<a name="l00511"></a>00511 
+<a name="l00512"></a>00512         <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; 31; ++<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) {
+<a name="l00513"></a>00513             tc-&gt;<a class="code" href="classThreadContext.html#a995ac11ab79af59e135d473df10c72da">setIntReg</a>(<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(sc-&gt;sc_regs[<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>]));
+<a name="l00514"></a>00514             tc-&gt;<a class="code" href="classThreadContext.html#a8f0c8b07cd1c4a6019a5b3922689d1db">setFloatRegBits</a>(<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(sc-&gt;sc_fpregs[<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>]));
+<a name="l00515"></a>00515         }
+<a name="l00516"></a>00516 
+<a name="l00517"></a>00517         tc-&gt;<a class="code" href="classThreadContext.html#a2987c1ff22ebdf6cdf354a31462bdbfb">setMiscRegNoEffect</a>(<a class="code" href="namespaceAlphaISA.html#a1e522017e015d4c7efd6b2360143aa67a015a601dd43bbdcfc4010fd4b4ab8489">AlphaISA::MISCREG_FPCR</a>, <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(sc-&gt;sc_fpcr));
+<a name="l00518"></a>00518 
+<a name="l00519"></a>00519         <span class="keywordflow">return</span> 0;
+<a name="l00520"></a>00520     }
+<a name="l00521"></a>00521 
+<a name="l00522"></a>00522 
+<a name="l00523"></a>00523     <span class="comment">//</span>
+<a name="l00524"></a>00524     <span class="comment">// Mach syscalls -- identified by negated syscall numbers</span>
+<a name="l00525"></a>00525     <span class="comment">//</span>
+<a name="l00526"></a>00526 
+<a name="l00528"></a>00528     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00529"></a><a class="code" href="classTru64.html#ac6e3676ee42b0ad6a609f36f0cf654bb">00529</a>     <a class="code" href="classTru64.html#ac6e3676ee42b0ad6a609f36f0cf654bb" title="Create a stack region for a thread.">stack_createFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00530"></a>00530                      <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00531"></a>00531     {
+<a name="l00532"></a>00532         <span class="keyword">using namespace </span>TheISA;
+<a name="l00533"></a>00533 
+<a name="l00534"></a>00534         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00535"></a>00535         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::vm_stack&gt;</a> argp(process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l00536"></a>00536 
+<a name="l00537"></a>00537         argp.copyIn(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00538"></a>00538 
+<a name="l00539"></a>00539         <span class="keywordtype">int</span> stack_size =
+<a name="l00540"></a>00540             <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(argp-&gt;rsize) + <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(argp-&gt;ysize) + <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(argp-&gt;gsize);
+<a name="l00541"></a>00541 
+<a name="l00542"></a>00542         <span class="comment">// if the user chose an address, just let them have it.  Otherwise</span>
+<a name="l00543"></a>00543         <span class="comment">// pick one for them.</span>
+<a name="l00544"></a>00544         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> stack_base = <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(argp-&gt;address);
+<a name="l00545"></a>00545 
+<a name="l00546"></a>00546         <span class="keywordflow">if</span> (stack_base == 0) {
+<a name="l00547"></a>00547             stack_base = process-&gt;<a class="code" href="classProcess.html#a55a3705006af6c58cba9f9a23ba89864">next_thread_stack_base</a>;
+<a name="l00548"></a>00548             process-&gt;<a class="code" href="classProcess.html#a55a3705006af6c58cba9f9a23ba89864">next_thread_stack_base</a> -= stack_size;
+<a name="l00549"></a>00549         }
+<a name="l00550"></a>00550 
+<a name="l00551"></a>00551         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> rounded_stack_base = <a class="code" href="intmath_8hh.html#a343c19b0ae885d5f3c7960987096e9d5">roundDown</a>(stack_base, <a class="code" href="namespaceAlphaISA.html#a06fc87d81c62e9abb8790b6e5713c55babe0c83362ff9a394bc07b0e26f089b83">VMPageSize</a>);
+<a name="l00552"></a>00552         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> rounded_stack_size = <a class="code" href="intmath_8hh.html#a4d254a89b294890f6ce3a474f4e8c6c7">roundUp</a>(stack_size, <a class="code" href="namespaceAlphaISA.html#a06fc87d81c62e9abb8790b6e5713c55babe0c83362ff9a394bc07b0e26f089b83">VMPageSize</a>);
+<a name="l00553"></a>00553 
+<a name="l00554"></a>00554         <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(SyscallVerbose,
+<a name="l00555"></a>00555                 <span class="stringliteral">&quot;stack_create: allocating stack @ %#x size %#x &quot;</span>
+<a name="l00556"></a>00556                 <span class="stringliteral">&quot;(rounded from %#x, %#x)\n&quot;</span>,
+<a name="l00557"></a>00557                 rounded_stack_base, rounded_stack_size,
+<a name="l00558"></a>00558                 stack_base, stack_size);
+<a name="l00559"></a>00559 
+<a name="l00560"></a>00560         <span class="comment">// map memory</span>
+<a name="l00561"></a>00561         process-&gt;<a class="code" href="classProcess.html#aaebf8af407502fcc035e598795f77089">allocateMem</a>(rounded_stack_base, rounded_stack_size);
+<a name="l00562"></a>00562 
+<a name="l00563"></a>00563         argp-&gt;address = <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(rounded_stack_base);
+<a name="l00564"></a>00564         argp.copyOut(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00565"></a>00565 
+<a name="l00566"></a>00566         <span class="keywordflow">return</span> 0;
+<a name="l00567"></a>00567     }
+<a name="l00568"></a>00568 
+<a name="l00570"></a>00570     <span class="keyword">static</span>
+<a name="l00571"></a><a class="code" href="classTru64.html#a42f5e6243e70c3d99afed9a0ab5ac3c1">00571</a>     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classTru64.html#a42f5e6243e70c3d99afed9a0ab5ac3c1" title="NXM library version stamp.">NXM_LIB_VERSION</a> = 301003;
+<a name="l00572"></a>00572 
+<a name="l00576"></a>00576     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00577"></a><a class="code" href="classTru64.html#a7393c42ceaadfe69e71c4cab0d059968">00577</a>     <a class="code" href="classTru64.html#a7393c42ceaadfe69e71c4cab0d059968">nxm_task_initFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00578"></a>00578                       <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00579"></a>00579     {
+<a name="l00580"></a>00580         <span class="keyword">using namespace </span>std;
+<a name="l00581"></a>00581         <span class="keyword">using namespace </span>TheISA;
+<a name="l00582"></a>00582 
+<a name="l00583"></a>00583         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00584"></a>00584         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::nxm_task_attr&gt;</a>
+<a name="l00585"></a>00585             attrp(process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l00586"></a>00586         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Addr&gt;</a> configptr_ptr(process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l00587"></a>00587 
+<a name="l00588"></a>00588         attrp.copyIn(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00589"></a>00589 
+<a name="l00590"></a>00590         <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;nxm_version) != <a class="code" href="classTru64.html#a42f5e6243e70c3d99afed9a0ab5ac3c1" title="NXM library version stamp.">NXM_LIB_VERSION</a>) {
+<a name="l00591"></a>00591             cerr &lt;&lt; <span class="stringliteral">&quot;nxm_task_init: thread library version mismatch! &quot;</span>
+<a name="l00592"></a>00592                  &lt;&lt; <span class="stringliteral">&quot;got &quot;</span> &lt;&lt; attrp-&gt;nxm_version
+<a name="l00593"></a>00593                  &lt;&lt; <span class="stringliteral">&quot;, expected &quot;</span> &lt;&lt; <a class="code" href="classTru64.html#a42f5e6243e70c3d99afed9a0ab5ac3c1" title="NXM library version stamp.">NXM_LIB_VERSION</a> &lt;&lt; endl;
+<a name="l00594"></a>00594             abort();
+<a name="l00595"></a>00595         }
+<a name="l00596"></a>00596 
+<a name="l00597"></a>00597         <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;flags) != <a class="code" href="classTru64.html#a284276950ab5fbb4ed5432a4fe77c0b4" title="For nxm_task_init.">Tru64::NXM_TASK_INIT_VP</a>) {
+<a name="l00598"></a>00598             cerr &lt;&lt; <span class="stringliteral">&quot;nxm_task_init: bad flag value &quot;</span> &lt;&lt; attrp-&gt;flags
+<a name="l00599"></a>00599                  &lt;&lt; <span class="stringliteral">&quot; (expected &quot;</span> &lt;&lt; <a class="code" href="classTru64.html#a284276950ab5fbb4ed5432a4fe77c0b4" title="For nxm_task_init.">Tru64::NXM_TASK_INIT_VP</a> &lt;&lt; <span class="stringliteral">&quot;)&quot;</span> &lt;&lt; endl;
+<a name="l00600"></a>00600             abort();
+<a name="l00601"></a>00601         }
+<a name="l00602"></a>00602 
+<a name="l00603"></a>00603         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> base_addr = 0x12000; <span class="comment">// was 0x3f0000000LL;</span>
+<a name="l00604"></a>00604         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> cur_addr = base_addr; <span class="comment">// next addresses to use</span>
+<a name="l00605"></a>00605         <span class="comment">// first comes the config_info struct</span>
+<a name="l00606"></a>00606         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> config_addr = cur_addr;
+<a name="l00607"></a>00607         cur_addr += <span class="keyword">sizeof</span>(<a class="code" href="structTru64_1_1nxm__config__info.html" title="nxm_config_info">Tru64::nxm_config_info</a>);
+<a name="l00608"></a>00608         <span class="comment">// next comes the per-cpu state vector</span>
+<a name="l00609"></a>00609         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> slot_state_addr = cur_addr;
+<a name="l00610"></a>00610         <span class="keywordtype">int</span> slot_state_size =
+<a name="l00611"></a>00611             process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>() * <span class="keyword">sizeof</span>(<a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1" title="nxm_slot_state_t.">Tru64::nxm_slot_state_t</a>);
+<a name="l00612"></a>00612         cur_addr += slot_state_size;
+<a name="l00613"></a>00613         <span class="comment">// now the per-RAD state struct (we only support one RAD)</span>
+<a name="l00614"></a>00614         cur_addr = 0x14000;     <span class="comment">// bump up addr for alignment</span>
+<a name="l00615"></a>00615         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> rad_state_addr = cur_addr;
+<a name="l00616"></a>00616         <span class="keywordtype">int</span> rad_state_size =
+<a name="l00617"></a>00617             (<span class="keyword">sizeof</span>(<a class="code" href="structTru64_1_1nxm__shared.html" title="nxm_shared.">Tru64::nxm_shared</a>)
+<a name="l00618"></a>00618              + (process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>()-1) * <span class="keyword">sizeof</span>(<a class="code" href="structTru64_1_1nxm__sched__state.html">Tru64::nxm_sched_state</a>));
+<a name="l00619"></a>00619         cur_addr += rad_state_size;
+<a name="l00620"></a>00620 
+<a name="l00621"></a>00621         <span class="comment">// now initialize a config_info struct and copy it out to user space</span>
+<a name="l00622"></a>00622         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::nxm_config_info&gt;</a> config(config_addr);
+<a name="l00623"></a>00623 
+<a name="l00624"></a>00624         config-&gt;nxm_nslots_per_rad = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>());
+<a name="l00625"></a>00625         config-&gt;nxm_nrads = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(1);    <span class="comment">// only one RAD in our system!</span>
+<a name="l00626"></a>00626         config-&gt;nxm_slot_state = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(slot_state_addr);
+<a name="l00627"></a>00627         config-&gt;nxm_rad[0] = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(rad_state_addr);
+<a name="l00628"></a>00628 
+<a name="l00629"></a>00629         <span class="comment">// initialize the slot_state array and copy it out</span>
+<a name="l00630"></a>00630         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::nxm_slot_state_t&gt;</a> slot_state(slot_state_addr,
+<a name="l00631"></a>00631                                                            slot_state_size);
+<a name="l00632"></a>00632         <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>(); ++<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) {
+<a name="l00633"></a>00633             <span class="comment">// CPU 0 is bound to the calling process; all others are available</span>
+<a name="l00634"></a>00634             <span class="comment">// XXX this code should have an endian conversion, but I don&apos;t think</span>
+<a name="l00635"></a>00635             <span class="comment">// it works anyway</span>
+<a name="l00636"></a>00636             slot_state[<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>] =
+<a name="l00637"></a>00637                 (<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> == 0) ? <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1ac7fa50c98e9a7cf0683966b0d6a6104e">Tru64::NXM_SLOT_BOUND</a> : <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1a50b7d030b516364e6a36300e54aedf42">Tru64::NXM_SLOT_AVAIL</a>;
+<a name="l00638"></a>00638         }
+<a name="l00639"></a>00639 
+<a name="l00640"></a>00640         <span class="comment">// same for the per-RAD &quot;shared&quot; struct.  Note that we need to</span>
+<a name="l00641"></a>00641         <span class="comment">// allocate extra bytes for the per-VP array which is embedded at</span>
+<a name="l00642"></a>00642         <span class="comment">// the end.</span>
+<a name="l00643"></a>00643         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::nxm_shared&gt;</a> rad_state(rad_state_addr,
+<a name="l00644"></a>00644                                                     rad_state_size);
+<a name="l00645"></a>00645 
+<a name="l00646"></a>00646         rad_state-&gt;nxm_callback = attrp-&gt;nxm_callback;
+<a name="l00647"></a>00647         rad_state-&gt;nxm_version = attrp-&gt;nxm_version;
+<a name="l00648"></a>00648         rad_state-&gt;nxm_uniq_offset = attrp-&gt;nxm_uniq_offset;
+<a name="l00649"></a>00649         <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>(); ++<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) {
+<a name="l00650"></a>00650             <a class="code" href="structTru64_1_1nxm__sched__state.html">Tru64::nxm_sched_state</a> *ssp = &amp;rad_state-&gt;nxm_ss[<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>];
+<a name="l00651"></a>00651             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a84a273d642c19957017a87b1f54031e6" title="thread signal mask">sigmask</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00652"></a>00652             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a9c53d1e3c0bc3d8be6911f0f232a7079" title="thread pending mask">sig</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00653"></a>00653             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#ac8bf36fe0577cba66bccda3a6f7e80a4" title="shared flags">flags</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00654"></a>00654             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#aabbd9f971cb4aa1bd714e3f22cd35654" title="thread&amp;#39;s cancelation state">cancel_state</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00655"></a>00655             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#ab1f77590928da984017362cd8114956a" title="scheduler&amp;#39;s synchronous signals">nxm_ssig</a> = 0;
+<a name="l00656"></a>00656             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#aebeca6fcbee8c6e89bdb8f64f661eda1" title="scheduler state / slot">nxm_bits</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00657"></a>00657             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#a1edf25e35f3eb9bddad20dec442db246" title="quantum count-down value">nxm_quantum</a> = attrp-&gt;nxm_quantum;
+<a name="l00658"></a>00658             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#a9291f98fb828769c72a7342ac8b1432a" title="quantum reset value">nxm_set_quantum</a> = attrp-&gt;nxm_quantum;
+<a name="l00659"></a>00659             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#aa46cf99f11765db5dcd6ea3d6f276d02" title="syscall state">nxm_sysevent</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00660"></a>00660 
+<a name="l00661"></a>00661             <span class="keywordflow">if</span> (<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> == 0) {
+<a name="l00662"></a>00662                 uint64_t uniq = tc-&gt;<a class="code" href="classThreadContext.html#a93c9c97261cb7289d5976b8222f70c4c">readMiscRegNoEffect</a>(<a class="code" href="namespaceAlphaISA.html#a1e522017e015d4c7efd6b2360143aa67ac7d1563911c3c3cbd38713677fce2991">AlphaISA::MISCREG_UNIQ</a>);
+<a name="l00663"></a>00663                 ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a7e2b56424c95350d108ff8d0fab23b48" title="out-of-line state">pth_id</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(uniq + <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;nxm_uniq_offset));
+<a name="l00664"></a>00664                 ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a1d8e8613bfc82fdd41b1a9cecff3a8c8" title="scheduler active">nxm_active</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(uniq | 1);
+<a name="l00665"></a>00665             }
+<a name="l00666"></a>00666             <span class="keywordflow">else</span> {
+<a name="l00667"></a>00667                 ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a7e2b56424c95350d108ff8d0fab23b48" title="out-of-line state">pth_id</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00668"></a>00668                 ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a1d8e8613bfc82fdd41b1a9cecff3a8c8" title="scheduler active">nxm_active</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(0);
+<a name="l00669"></a>00669             }
+<a name="l00670"></a>00670         }
+<a name="l00671"></a>00671 
+<a name="l00672"></a>00672         <span class="comment">//</span>
+<a name="l00673"></a>00673         <span class="comment">// copy pointer to shared config area out to user</span>
+<a name="l00674"></a>00674         <span class="comment">//</span>
+<a name="l00675"></a>00675         *configptr_ptr = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(config_addr);
+<a name="l00676"></a>00676 
+<a name="l00677"></a>00677         <span class="comment">// Register this as a valid address range with the process</span>
+<a name="l00678"></a>00678         base_addr = <a class="code" href="intmath_8hh.html#a343c19b0ae885d5f3c7960987096e9d5">roundDown</a>(base_addr, <a class="code" href="namespaceAlphaISA.html#a06fc87d81c62e9abb8790b6e5713c55babe0c83362ff9a394bc07b0e26f089b83">VMPageSize</a>);
+<a name="l00679"></a>00679         <span class="keywordtype">int</span> size = cur_addr - base_addr;
+<a name="l00680"></a>00680         process-&gt;<a class="code" href="classProcess.html#aaebf8af407502fcc035e598795f77089">allocateMem</a>(base_addr, <a class="code" href="intmath_8hh.html#a4d254a89b294890f6ce3a474f4e8c6c7">roundUp</a>(size, <a class="code" href="namespaceAlphaISA.html#a06fc87d81c62e9abb8790b6e5713c55babe0c83362ff9a394bc07b0e26f089b83">VMPageSize</a>));
+<a name="l00681"></a>00681 
+<a name="l00682"></a>00682         config.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00683"></a>00683         slot_state.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00684"></a>00684         rad_state.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00685"></a>00685         configptr_ptr.copyOut(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00686"></a>00686 
+<a name="l00687"></a>00687         <span class="keywordflow">return</span> 0;
+<a name="l00688"></a>00688     }
+<a name="l00689"></a>00689 
+<a name="l00691"></a>00691     <span class="keyword">static</span> <span class="keywordtype">void</span>
+<a name="l00692"></a><a class="code" href="classTru64.html#a83da5f99bb14ade814d1509f55d1db1b">00692</a>     <a class="code" href="classTru64.html#a83da5f99bb14ade814d1509f55d1db1b" title="Initialize thread context.">init_thread_context</a>(<a class="code" href="classLiveProcess.html">LiveProcess</a> *process, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00693"></a>00693                       <a class="code" href="structTru64_1_1nxm__thread__attr.html" title="Thread attributes.">Tru64::nxm_thread_attr</a> *attrp, uint64_t uniq_val)
+<a name="l00694"></a>00694     {
+<a name="l00695"></a>00695         <span class="keyword">using namespace </span>TheISA;
+<a name="l00696"></a>00696 
+<a name="l00697"></a>00697         tc-&gt;<a class="code" href="classThreadContext.html#ae0375c0a094eeb6fe8f73db4393d4ceb">clearArchRegs</a>();
+<a name="l00698"></a>00698 
+<a name="l00699"></a>00699         process-&gt;<a class="code" href="classLiveProcess.html#a0f596ddb560a15ade4257db3a6c9dd44">setSyscallArg</a>(tc, 0, <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;<a class="code" href="structTru64_1_1nxm__thread__attr.html#a6c91caa556776951bbcfb885487bb2e3" title="Initial register values.">registers</a>.<a class="code" href="structTru64_1_1nxm__thread__attr.html#adafeae317d72d102ea18f6cdbbdee4db" title="a0">a0</a>));
+<a name="l00700"></a>00700         tc-&gt;<a class="code" href="classThreadContext.html#a995ac11ab79af59e135d473df10c72da">setIntReg</a>(27<span class="comment">/*t12*/</span>, <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;<a class="code" href="structTru64_1_1nxm__thread__attr.html#a6c91caa556776951bbcfb885487bb2e3" title="Initial register values.">registers</a>.<a class="code" href="structTru64_1_1nxm__thread__attr.html#a37cc15f96d8bac81ed087fc247a0c5a0" title="pc">pc</a>));
+<a name="l00701"></a>00701         tc-&gt;<a class="code" href="classThreadContext.html#a995ac11ab79af59e135d473df10c72da">setIntReg</a>(<a class="code" href="namespaceAlphaISA.html#a344fcaf70f4d9d6fe84dc5eda59e49eb">TheISA::StackPointerReg</a>, <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;<a class="code" href="structTru64_1_1nxm__thread__attr.html#a6c91caa556776951bbcfb885487bb2e3" title="Initial register values.">registers</a>.<a class="code" href="structTru64_1_1nxm__thread__attr.html#acd6941efd501803089091f06f1967f7d" title="sp">sp</a>));
+<a name="l00702"></a>00702         tc-&gt;<a class="code" href="classThreadContext.html#a2987c1ff22ebdf6cdf354a31462bdbfb">setMiscRegNoEffect</a>(<a class="code" href="namespaceAlphaISA.html#a1e522017e015d4c7efd6b2360143aa67ac7d1563911c3c3cbd38713677fce2991">AlphaISA::MISCREG_UNIQ</a>, uniq_val);
+<a name="l00703"></a>00703 
+<a name="l00704"></a>00704         tc-&gt;<a class="code" href="classThreadContext.html#a1aaca26c0732d2191edbde1477d7ec13">pcState</a>(<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;<a class="code" href="structTru64_1_1nxm__thread__attr.html#a6c91caa556776951bbcfb885487bb2e3" title="Initial register values.">registers</a>.<a class="code" href="structTru64_1_1nxm__thread__attr.html#a37cc15f96d8bac81ed087fc247a0c5a0" title="pc">pc</a>));
+<a name="l00705"></a>00705 
+<a name="l00706"></a>00706         tc-&gt;<a class="code" href="classThreadContext.html#a9270160e6cce25ded6999f6e4e60a3ed">activate</a>();
+<a name="l00707"></a>00707     }
+<a name="l00708"></a>00708 
+<a name="l00710"></a>00710     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00711"></a><a class="code" href="classTru64.html#a56167e2aed868ff95f0864b9075adab1">00711</a>     <a class="code" href="classTru64.html#a56167e2aed868ff95f0864b9075adab1" title="Create thread.">nxm_thread_createFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00712"></a>00712                           <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00713"></a>00713     {
+<a name="l00714"></a>00714         <span class="keyword">using namespace </span>std;
+<a name="l00715"></a>00715         <span class="keyword">using namespace </span>TheISA;
+<a name="l00716"></a>00716 
+<a name="l00717"></a>00717         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00718"></a>00718         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::nxm_thread_attr&gt;</a>
+<a name="l00719"></a>00719             attrp(process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l00720"></a>00720         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;uint64_t&gt;</a> kidp(process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l00721"></a>00721         <span class="keywordtype">int</span> thread_index = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00722"></a>00722 
+<a name="l00723"></a>00723         <span class="comment">// get attribute args</span>
+<a name="l00724"></a>00724         attrp.copyIn(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00725"></a>00725 
+<a name="l00726"></a>00726         <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;version) != <a class="code" href="classTru64.html#a42f5e6243e70c3d99afed9a0ab5ac3c1" title="NXM library version stamp.">NXM_LIB_VERSION</a>) {
+<a name="l00727"></a>00727             cerr &lt;&lt; <span class="stringliteral">&quot;nxm_thread_create: thread library version mismatch! &quot;</span>
+<a name="l00728"></a>00728                  &lt;&lt; <span class="stringliteral">&quot;got &quot;</span> &lt;&lt; attrp-&gt;version
+<a name="l00729"></a>00729                  &lt;&lt; <span class="stringliteral">&quot;, expected &quot;</span> &lt;&lt; <a class="code" href="classTru64.html#a42f5e6243e70c3d99afed9a0ab5ac3c1" title="NXM library version stamp.">NXM_LIB_VERSION</a> &lt;&lt; endl;
+<a name="l00730"></a>00730             abort();
+<a name="l00731"></a>00731         }
+<a name="l00732"></a>00732 
+<a name="l00733"></a>00733         <span class="keywordflow">if</span> (thread_index &lt; 0 || thread_index &gt; process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>()) {
+<a name="l00734"></a>00734             cerr &lt;&lt; <span class="stringliteral">&quot;nxm_thread_create: bad thread index &quot;</span> &lt;&lt; thread_index
+<a name="l00735"></a>00735                  &lt;&lt; endl;
+<a name="l00736"></a>00736             abort();
+<a name="l00737"></a>00737         }
+<a name="l00738"></a>00738 
+<a name="l00739"></a>00739         <span class="comment">// On a real machine, the per-RAD shared structure is in</span>
+<a name="l00740"></a>00740         <span class="comment">// shared memory, so both the user and kernel can get at it.</span>
+<a name="l00741"></a>00741         <span class="comment">// We don&apos;t have that luxury, so we just copy it in and then</span>
+<a name="l00742"></a>00742         <span class="comment">// back out again.</span>
+<a name="l00743"></a>00743         <span class="keywordtype">int</span> rad_state_size =
+<a name="l00744"></a>00744             (<span class="keyword">sizeof</span>(<a class="code" href="structTru64_1_1nxm__shared.html" title="nxm_shared.">Tru64::nxm_shared</a>) +
+<a name="l00745"></a>00745              (process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>()-1) * <span class="keyword">sizeof</span>(<a class="code" href="structTru64_1_1nxm__sched__state.html">Tru64::nxm_sched_state</a>));
+<a name="l00746"></a>00746 
+<a name="l00747"></a>00747         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::nxm_shared&gt;</a> rad_state(0x14000,
+<a name="l00748"></a>00748                                                     rad_state_size);
+<a name="l00749"></a>00749         rad_state.<a class="code" href="classBaseBufferArg.html#a857fbf24e9b55ad1f3d566d9c7768b93">copyIn</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00750"></a>00750 
+<a name="l00751"></a>00751         uint64_t uniq_val = <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;pthid) - <a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(rad_state-&gt;nxm_uniq_offset);
+<a name="l00752"></a>00752 
+<a name="l00753"></a>00753         <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;type) == <a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a94b977628442e840a44dd81fdeb105ae">Tru64::NXM_TYPE_MANAGER</a>) {
+<a name="l00754"></a>00754             <span class="comment">// DEC pthreads seems to always create one of these (in</span>
+<a name="l00755"></a>00755             <span class="comment">// addition to N application threads), but we don&apos;t use it,</span>
+<a name="l00756"></a>00756             <span class="comment">// so don&apos;t bother creating it.</span>
+<a name="l00757"></a>00757 
+<a name="l00758"></a>00758             <span class="comment">// This is supposed to be a port number.  Make something up.</span>
+<a name="l00759"></a>00759             *kidp = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(99);
+<a name="l00760"></a>00760             kidp.copyOut(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00761"></a>00761 
+<a name="l00762"></a>00762             <span class="keywordflow">return</span> 0;
+<a name="l00763"></a>00763         } <span class="keywordflow">else</span> <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(attrp-&gt;type) == <a class="code" href="classTru64.html#a047f3ab687492e1d75f613e182664384a1d6a136a94a41d702244a74edccdb312">Tru64::NXM_TYPE_VP</a>) {
+<a name="l00764"></a>00764             <span class="comment">// A real &quot;virtual processor&quot; kernel thread.  Need to fork</span>
+<a name="l00765"></a>00765             <span class="comment">// this thread on another CPU.</span>
+<a name="l00766"></a>00766             <a class="code" href="structTru64_1_1nxm__sched__state.html">Tru64::nxm_sched_state</a> *ssp = &amp;rad_state-&gt;nxm_ss[thread_index];
+<a name="l00767"></a>00767 
+<a name="l00768"></a>00768             <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a1d8e8613bfc82fdd41b1a9cecff3a8c8" title="scheduler active">nxm_active</a>) != 0)
+<a name="l00769"></a>00769                 <span class="keywordflow">return</span> (<span class="keywordtype">int</span>) <a class="code" href="classTru64.html#a68c01102755fc7d1c810bb0b0635fa90a7fff089a9b1eae0e9e60e82d7ab27b03">Tru64::KERN_NOT_RECEIVER</a>;
+<a name="l00770"></a>00770 
+<a name="l00771"></a>00771             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a7e2b56424c95350d108ff8d0fab23b48" title="out-of-line state">pth_id</a> = attrp-&gt;pthid;
+<a name="l00772"></a>00772             ssp-&gt;<a class="code" href="structTru64_1_1nxm__sched__state.html#abff28b82019b9db3f64738a3048d0a46" title="state own by user thread">nxm_u</a>.<a class="code" href="structTru64_1_1ushared__state.html#a1d8e8613bfc82fdd41b1a9cecff3a8c8" title="scheduler active">nxm_active</a> = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(uniq_val | 1);
+<a name="l00773"></a>00773 
+<a name="l00774"></a>00774             rad_state.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00775"></a>00775 
+<a name="l00776"></a>00776             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> slot_state_addr = 0x12000 + <span class="keyword">sizeof</span>(<a class="code" href="structTru64_1_1nxm__config__info.html" title="nxm_config_info">Tru64::nxm_config_info</a>);
+<a name="l00777"></a>00777             <span class="keywordtype">int</span> slot_state_size =
+<a name="l00778"></a>00778                 process-&gt;<a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>() * <span class="keyword">sizeof</span>(<a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1" title="nxm_slot_state_t.">Tru64::nxm_slot_state_t</a>);
+<a name="l00779"></a>00779 
+<a name="l00780"></a>00780             <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;Tru64::nxm_slot_state_t&gt;</a>
+<a name="l00781"></a>00781                 slot_state(slot_state_addr,
+<a name="l00782"></a>00782                            slot_state_size);
+<a name="l00783"></a>00783 
+<a name="l00784"></a>00784             slot_state.<a class="code" href="classBaseBufferArg.html#a857fbf24e9b55ad1f3d566d9c7768b93">copyIn</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00785"></a>00785 
+<a name="l00786"></a>00786             <span class="keywordflow">if</span> (slot_state[thread_index] != <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1a50b7d030b516364e6a36300e54aedf42">Tru64::NXM_SLOT_AVAIL</a>) {
+<a name="l00787"></a>00787                 cerr &lt;&lt; <span class="stringliteral">&quot;nxm_thread_createFunc: requested VP slot &quot;</span>
+<a name="l00788"></a>00788                      &lt;&lt; thread_index &lt;&lt; <span class="stringliteral">&quot; not available!&quot;</span> &lt;&lt; endl;
+<a name="l00789"></a>00789                 <a class="code" href="base_2misc_8hh.html#acad519418dbfdd70c1208711e609c80e">fatal</a>(<span class="stringliteral">&quot;&quot;</span>);
+<a name="l00790"></a>00790             }
+<a name="l00791"></a>00791 
+<a name="l00792"></a>00792             <span class="comment">// XXX This should have an endian conversion but I think this code</span>
+<a name="l00793"></a>00793             <span class="comment">// doesn&apos;t work anyway</span>
+<a name="l00794"></a>00794             slot_state[thread_index] = <a class="code" href="classTru64.html#a8fb8339baae435616a985ef0d3fa6af1ac7fa50c98e9a7cf0683966b0d6a6104e">Tru64::NXM_SLOT_BOUND</a>;
+<a name="l00795"></a>00795 
+<a name="l00796"></a>00796             slot_state.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00797"></a>00797 
+<a name="l00798"></a>00798             <span class="comment">// Find a free simulator thread context.</span>
+<a name="l00799"></a>00799             <a class="code" href="classThreadContext.html">ThreadContext</a> *tc = process-&gt;<a class="code" href="classProcess.html#ac26b4f23be05f684886e00f4f7526a0e">findFreeContext</a>();
+<a name="l00800"></a>00800             <span class="keywordflow">if</span> (tc) {
+<a name="l00801"></a>00801                 <span class="comment">// inactive context... grab it</span>
+<a name="l00802"></a>00802                 <a class="code" href="classTru64.html#a83da5f99bb14ade814d1509f55d1db1b" title="Initialize thread context.">init_thread_context</a>(process, tc, attrp, uniq_val);
+<a name="l00803"></a>00803 
+<a name="l00804"></a>00804                 <span class="comment">// This is supposed to be a port number, but we&apos;ll try</span>
+<a name="l00805"></a>00805                 <span class="comment">// and get away with just sticking the thread index</span>
+<a name="l00806"></a>00806                 <span class="comment">// here.</span>
+<a name="l00807"></a>00807                 *kidp = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(thread_index);
+<a name="l00808"></a>00808                 kidp.copyOut(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00809"></a>00809 
+<a name="l00810"></a>00810                 <span class="keywordflow">return</span> 0;
+<a name="l00811"></a>00811             }
+<a name="l00812"></a>00812 
+<a name="l00813"></a>00813             <span class="comment">// fell out of loop... no available inactive context</span>
+<a name="l00814"></a>00814             cerr &lt;&lt; <span class="stringliteral">&quot;nxm_thread_create: no idle contexts available.&quot;</span> &lt;&lt; endl;
+<a name="l00815"></a>00815             abort();
+<a name="l00816"></a>00816         } <span class="keywordflow">else</span> {
+<a name="l00817"></a>00817             cerr &lt;&lt; <span class="stringliteral">&quot;nxm_thread_create: can&apos;t handle thread type &quot;</span>
+<a name="l00818"></a>00818                  &lt;&lt; attrp-&gt;type &lt;&lt; endl;
+<a name="l00819"></a>00819             abort();
+<a name="l00820"></a>00820         }
+<a name="l00821"></a>00821 
+<a name="l00822"></a>00822         <span class="keywordflow">return</span> 0;
+<a name="l00823"></a>00823     }
+<a name="l00824"></a>00824 
+<a name="l00826"></a>00826     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00827"></a><a class="code" href="classTru64.html#a7d672681a6c03ce2f3d8e64b159d23d7">00827</a>     <a class="code" href="classTru64.html#a7d672681a6c03ce2f3d8e64b159d23d7" title="Thread idle call (like yield()).">nxm_idleFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00828"></a>00828                  <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00829"></a>00829     {
+<a name="l00830"></a>00830         <span class="keywordflow">return</span> 0;
+<a name="l00831"></a>00831     }
+<a name="l00832"></a>00832 
+<a name="l00834"></a>00834     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00835"></a><a class="code" href="classTru64.html#a05e8a076d0c534c96b680a3661fc9003">00835</a>     <a class="code" href="classTru64.html#a05e8a076d0c534c96b680a3661fc9003" title="Block thread.">nxm_thread_blockFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00836"></a>00836                          <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00837"></a>00837     {
+<a name="l00838"></a>00838         <span class="keyword">using namespace </span>std;
+<a name="l00839"></a>00839 
+<a name="l00840"></a>00840         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00841"></a>00841         uint64_t tid = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00842"></a>00842         uint64_t secs = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00843"></a>00843         uint64_t <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a> = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00844"></a>00844         uint64_t action = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00845"></a>00845         uint64_t usecs = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00846"></a>00846 
+<a name="l00847"></a>00847         cout &lt;&lt; tc-&gt;<a class="code" href="classThreadContext.html#ad10a7ef049c2d2ffadfc809341e66d4e">getCpuPtr</a>()-&gt;name() &lt;&lt; <span class="stringliteral">&quot;: nxm_thread_block &quot;</span> &lt;&lt; tid &lt;&lt; <span class="stringliteral">&quot; &quot;</span>
+<a name="l00848"></a>00848              &lt;&lt; secs &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; flags &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; action &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; usecs &lt;&lt; endl;
+<a name="l00849"></a>00849 
+<a name="l00850"></a>00850         <span class="keywordflow">return</span> 0;
+<a name="l00851"></a>00851     }
+<a name="l00852"></a>00852 
+<a name="l00854"></a>00854     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00855"></a><a class="code" href="classTru64.html#ad497f5d8e1f57340b73ad9ea52b88dd3">00855</a>     <a class="code" href="classTru64.html#ad497f5d8e1f57340b73ad9ea52b88dd3" title="block.">nxm_blockFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00856"></a>00856                   <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00857"></a>00857     {
+<a name="l00858"></a>00858         <span class="keyword">using namespace </span>std;
+<a name="l00859"></a>00859 
+<a name="l00860"></a>00860         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00861"></a>00861         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00862"></a>00862         uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a> = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00863"></a>00863         uint64_t secs = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00864"></a>00864         uint64_t usecs = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00865"></a>00865         uint64_t <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a> = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00866"></a>00866 
+<a name="l00867"></a>00867         <a class="code" href="classBaseCPU.html">BaseCPU</a> *cpu = tc-&gt;<a class="code" href="classThreadContext.html#ad10a7ef049c2d2ffadfc809341e66d4e">getCpuPtr</a>();
+<a name="l00868"></a>00868 
+<a name="l00869"></a>00869         cout &lt;&lt; cpu-&gt;name() &lt;&lt; <span class="stringliteral">&quot;: nxm_block &quot;</span>
+<a name="l00870"></a>00870              &lt;&lt; hex &lt;&lt; uaddr &lt;&lt; dec &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; val
+<a name="l00871"></a>00871              &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; secs &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; usecs
+<a name="l00872"></a>00872              &lt;&lt; <span class="stringliteral">&quot; &quot;</span> &lt;&lt; flags &lt;&lt; endl;
+<a name="l00873"></a>00873 
+<a name="l00874"></a>00874         <span class="keywordflow">return</span> 0;
+<a name="l00875"></a>00875     }
+<a name="l00876"></a>00876 
+<a name="l00878"></a>00878     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00879"></a><a class="code" href="classTru64.html#abdd09a9b9645e7199d23afbdae212ef6">00879</a>     <a class="code" href="classTru64.html#abdd09a9b9645e7199d23afbdae212ef6" title="Unblock thread.">nxm_unblockFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00880"></a>00880                     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00881"></a>00881     {
+<a name="l00882"></a>00882         <span class="keyword">using namespace </span>std;
+<a name="l00883"></a>00883 
+<a name="l00884"></a>00884         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00885"></a>00885         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00886"></a>00886 
+<a name="l00887"></a>00887         cout &lt;&lt; tc-&gt;<a class="code" href="classThreadContext.html#ad10a7ef049c2d2ffadfc809341e66d4e">getCpuPtr</a>()-&gt;name() &lt;&lt; <span class="stringliteral">&quot;: nxm_unblock &quot;</span>
+<a name="l00888"></a>00888              &lt;&lt; hex &lt;&lt; uaddr &lt;&lt; dec &lt;&lt; endl;
+<a name="l00889"></a>00889 
+<a name="l00890"></a>00890         <span class="keywordflow">return</span> 0;
+<a name="l00891"></a>00891     }
+<a name="l00892"></a>00892 
+<a name="l00894"></a>00894     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00895"></a><a class="code" href="classTru64.html#a447627b7d2862dbc933f4d4a4433cd4c">00895</a>     <a class="code" href="classTru64.html#a447627b7d2862dbc933f4d4a4433cd4c" title="Switch thread priority.">swtch_priFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00896"></a>00896                   <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00897"></a>00897     {
+<a name="l00898"></a>00898         <span class="comment">// Attempts to switch to another runnable thread (if there is</span>
+<a name="l00899"></a>00899         <span class="comment">// one).  Returns false if there are no other threads to run</span>
+<a name="l00900"></a>00900         <span class="comment">// (i.e., the thread can reasonably spin-wait) or true if there</span>
+<a name="l00901"></a>00901         <span class="comment">// are other threads.</span>
+<a name="l00902"></a>00902         <span class="comment">//</span>
+<a name="l00903"></a>00903         <span class="comment">// Since we assume at most one &quot;kernel&quot; thread per CPU, it&apos;s</span>
+<a name="l00904"></a>00904         <span class="comment">// always safe to return false here.</span>
+<a name="l00905"></a>00905         <span class="keywordflow">return</span> 0; <span class="comment">//false;</span>
+<a name="l00906"></a>00906     }
+<a name="l00907"></a>00907 
+<a name="l00908"></a>00908 
+<a name="l00911"></a>00911     <span class="keyword">static</span> <span class="keywordtype">int</span>
+<a name="l00912"></a><a class="code" href="classTru64.html#aaef9d5f33173de4f6d2875193eb83d7a">00912</a>     <a class="code" href="classTru64.html#aaef9d5f33173de4f6d2875193eb83d7a">activate_waiting_context</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00913"></a>00913                              <span class="keywordtype">bool</span> activate_all = <span class="keyword">false</span>)
+<a name="l00914"></a>00914     {
+<a name="l00915"></a>00915         <span class="keyword">using namespace </span>std;
+<a name="l00916"></a>00916 
+<a name="l00917"></a>00917         <span class="keywordtype">int</span> num_activated = 0;
+<a name="l00918"></a>00918 
+<a name="l00919"></a>00919         list&lt;Process::WaitRec&gt;::iterator <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = process-&gt;<a class="code" href="classProcess.html#a8af61364ae9c966602b3b5ec1c0f7f09">waitList</a>.begin();
+<a name="l00920"></a>00920         list&lt;Process::WaitRec&gt;::iterator end = process-&gt;<a class="code" href="classProcess.html#a8af61364ae9c966602b3b5ec1c0f7f09">waitList</a>.end();
+<a name="l00921"></a>00921 
+<a name="l00922"></a>00922         <span class="keywordflow">while</span> (i != end &amp;&amp; (num_activated == 0 || activate_all)) {
+<a name="l00923"></a>00923             <span class="keywordflow">if</span> (i-&gt;waitChan == uaddr) {
+<a name="l00924"></a>00924                 <span class="comment">// found waiting process: make it active</span>
+<a name="l00925"></a>00925                 <a class="code" href="classThreadContext.html">ThreadContext</a> *newCtx = i-&gt;waitingContext;
+<a name="l00926"></a>00926                 assert(newCtx-&gt;<a class="code" href="classThreadContext.html#adfba9b39542cba955a02b8ff3ba023a9">status</a>() == <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba13bd6ff4bd5714ccc293f6802aacb40d">ThreadContext::Suspended</a>);
+<a name="l00927"></a>00927                 newCtx-&gt;<a class="code" href="classThreadContext.html#a9270160e6cce25ded6999f6e4e60a3ed">activate</a>();
+<a name="l00928"></a>00928 
+<a name="l00929"></a>00929                 <span class="comment">// get rid of this record</span>
+<a name="l00930"></a>00930                 i = process-&gt;<a class="code" href="classProcess.html#a8af61364ae9c966602b3b5ec1c0f7f09">waitList</a>.erase(i);
+<a name="l00931"></a>00931 
+<a name="l00932"></a>00932                 ++num_activated;
+<a name="l00933"></a>00933             } <span class="keywordflow">else</span> {
+<a name="l00934"></a>00934                 ++i;
+<a name="l00935"></a>00935             }
+<a name="l00936"></a>00936         }
+<a name="l00937"></a>00937 
+<a name="l00938"></a>00938         <span class="keywordflow">return</span> num_activated;
+<a name="l00939"></a>00939     }
+<a name="l00940"></a>00940 
+<a name="l00942"></a>00942     <span class="keyword">static</span> <span class="keywordtype">void</span>
+<a name="l00943"></a><a class="code" href="classTru64.html#a029c70f7b96e2ccaa00ea5252875de90">00943</a>     <a class="code" href="classTru64.html#a029c70f7b96e2ccaa00ea5252875de90" title="M5 hacked-up lock acquire.">m5_lock_mutex</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00944"></a>00944     {
+<a name="l00945"></a>00945         <span class="keyword">using namespace </span>TheISA;
+<a name="l00946"></a>00946 
+<a name="l00947"></a>00947         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;uint64_t&gt;</a> lockp(uaddr);
+<a name="l00948"></a>00948 
+<a name="l00949"></a>00949         lockp.<a class="code" href="classBaseBufferArg.html#a857fbf24e9b55ad1f3d566d9c7768b93">copyIn</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00950"></a>00950 
+<a name="l00951"></a>00951         <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(*lockp) == 0) {
+<a name="l00952"></a>00952             <span class="comment">// lock is free: grab it</span>
+<a name="l00953"></a>00953             *lockp = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(1);
+<a name="l00954"></a>00954             lockp.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00955"></a>00955         } <span class="keywordflow">else</span> {
+<a name="l00956"></a>00956             <span class="comment">// lock is busy: disable until free</span>
+<a name="l00957"></a>00957             process-&gt;<a class="code" href="classProcess.html#a8af61364ae9c966602b3b5ec1c0f7f09">waitList</a>.push_back(<a class="code" href="structProcess_1_1WaitRec.html">Process::WaitRec</a>(uaddr, tc));
+<a name="l00958"></a>00958             tc-&gt;<a class="code" href="classThreadContext.html#af2ae27d19d77b0301484ac488d97d37b" title="Set the status to Suspended.">suspend</a>();
+<a name="l00959"></a>00959         }
+<a name="l00960"></a>00960     }
+<a name="l00961"></a>00961 
+<a name="l00963"></a>00963     <span class="keyword">static</span> <span class="keywordtype">void</span>
+<a name="l00964"></a><a class="code" href="classTru64.html#ac965ae70992f9a6f184c1e6f177e3b5b">00964</a>     <a class="code" href="classTru64.html#ac965ae70992f9a6f184c1e6f177e3b5b" title="M5 unlock call.">m5_unlock_mutex</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00965"></a>00965     {
+<a name="l00966"></a>00966         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;uint64_t&gt;</a> lockp(uaddr);
+<a name="l00967"></a>00967 
+<a name="l00968"></a>00968         lockp.<a class="code" href="classBaseBufferArg.html#a857fbf24e9b55ad1f3d566d9c7768b93">copyIn</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00969"></a>00969         assert(*lockp != 0);
+<a name="l00970"></a>00970 
+<a name="l00971"></a>00971         <span class="comment">// Check for a process waiting on the lock.</span>
+<a name="l00972"></a>00972         <span class="keywordtype">int</span> num_waiting = <a class="code" href="classTru64.html#aaef9d5f33173de4f6d2875193eb83d7a">activate_waiting_context</a>(uaddr, process);
+<a name="l00973"></a>00973 
+<a name="l00974"></a>00974         <span class="comment">// clear lock field if no waiting context is taking over the lock</span>
+<a name="l00975"></a>00975         <span class="keywordflow">if</span> (num_waiting == 0) {
+<a name="l00976"></a>00976             *lockp = 0;
+<a name="l00977"></a>00977             lockp.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l00978"></a>00978         }
+<a name="l00979"></a>00979     }
+<a name="l00980"></a>00980 
+<a name="l00982"></a>00982     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00983"></a><a class="code" href="classTru64.html#a5a1fd874973f006aecd51e98ce0b6579">00983</a>     <a class="code" href="classTru64.html#a5a1fd874973f006aecd51e98ce0b6579" title="Lock acquire syscall handler.">m5_mutex_lockFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l00984"></a>00984                       <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l00985"></a>00985     {
+<a name="l00986"></a>00986         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l00987"></a>00987         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l00988"></a>00988 
+<a name="l00989"></a>00989         <a class="code" href="classTru64.html#a029c70f7b96e2ccaa00ea5252875de90" title="M5 hacked-up lock acquire.">m5_lock_mutex</a>(uaddr, process, tc);
+<a name="l00990"></a>00990 
+<a name="l00991"></a>00991         <span class="comment">// Return 0 since we will always return to the user with the lock</span>
+<a name="l00992"></a>00992         <span class="comment">// acquired.  We will just keep the context inactive until that is</span>
+<a name="l00993"></a>00993         <span class="comment">// true.</span>
+<a name="l00994"></a>00994         <span class="keywordflow">return</span> 0;
+<a name="l00995"></a>00995     }
+<a name="l00996"></a>00996 
+<a name="l00998"></a>00998     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l00999"></a><a class="code" href="classTru64.html#aa8d051ea34736b976895f70df5f48b9d">00999</a>     <a class="code" href="classTru64.html#aa8d051ea34736b976895f70df5f48b9d" title="Try lock (non-blocking).">m5_mutex_trylockFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l01000"></a>01000                          <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l01001"></a>01001     {
+<a name="l01002"></a>01002         <span class="keyword">using namespace </span>TheISA;
+<a name="l01003"></a>01003 
+<a name="l01004"></a>01004         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l01005"></a>01005         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l01006"></a>01006         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;uint64_t&gt;</a> lockp(uaddr);
+<a name="l01007"></a>01007 
+<a name="l01008"></a>01008         lockp.<a class="code" href="classBaseBufferArg.html#a857fbf24e9b55ad1f3d566d9c7768b93">copyIn</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l01009"></a>01009 
+<a name="l01010"></a>01010         <span class="keywordflow">if</span> (<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(*lockp) == 0) {
+<a name="l01011"></a>01011             <span class="comment">// lock is free: grab it</span>
+<a name="l01012"></a>01012             *lockp = <a class="code" href="namespaceBigEndianGuest.html#a10c3370b6af5a1216a2a64c0d379f788">htog</a>(1);
+<a name="l01013"></a>01013             lockp.<a class="code" href="classBaseBufferArg.html#ac23dfde74cedabe689c1380678b66622">copyOut</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l01014"></a>01014             <span class="keywordflow">return</span> 0;
+<a name="l01015"></a>01015         } <span class="keywordflow">else</span> {
+<a name="l01016"></a>01016             <span class="keywordflow">return</span> 1;
+<a name="l01017"></a>01017         }
+<a name="l01018"></a>01018     }
+<a name="l01019"></a>01019 
+<a name="l01021"></a>01021     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l01022"></a><a class="code" href="classTru64.html#a13ce77bfaa709faa1a3006cea0465959">01022</a>     <a class="code" href="classTru64.html#a13ce77bfaa709faa1a3006cea0465959" title="Unlock syscall handler.">m5_mutex_unlockFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l01023"></a>01023                         <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l01024"></a>01024     {
+<a name="l01025"></a>01025         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l01026"></a>01026         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> uaddr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l01027"></a>01027 
+<a name="l01028"></a>01028         <a class="code" href="classTru64.html#ac965ae70992f9a6f184c1e6f177e3b5b" title="M5 unlock call.">m5_unlock_mutex</a>(uaddr, process, tc);
+<a name="l01029"></a>01029 
+<a name="l01030"></a>01030         <span class="keywordflow">return</span> 0;
+<a name="l01031"></a>01031     }
+<a name="l01032"></a>01032 
+<a name="l01034"></a>01034     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l01035"></a><a class="code" href="classTru64.html#acfc803d4984b3037abb896038e4f6fc1">01035</a>     <a class="code" href="classTru64.html#acfc803d4984b3037abb896038e4f6fc1" title="Signal ocndition.">m5_cond_signalFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l01036"></a>01036                        <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l01037"></a>01037     {
+<a name="l01038"></a>01038         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l01039"></a>01039         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> cond_addr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l01040"></a>01040 
+<a name="l01041"></a>01041         <span class="comment">// Wake up one process waiting on the condition variable.</span>
+<a name="l01042"></a>01042         <a class="code" href="classTru64.html#aaef9d5f33173de4f6d2875193eb83d7a">activate_waiting_context</a>(cond_addr, process);
+<a name="l01043"></a>01043 
+<a name="l01044"></a>01044         <span class="keywordflow">return</span> 0;
+<a name="l01045"></a>01045     }
+<a name="l01046"></a>01046 
+<a name="l01048"></a>01048     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l01049"></a><a class="code" href="classTru64.html#a0553f30a35d45bbc6ba7fd2120332c9c">01049</a>     <a class="code" href="classTru64.html#a0553f30a35d45bbc6ba7fd2120332c9c" title="Wake up all processes waiting on the condition variable.">m5_cond_broadcastFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l01050"></a>01050                           <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l01051"></a>01051     {
+<a name="l01052"></a>01052         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l01053"></a>01053         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> cond_addr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l01054"></a>01054 
+<a name="l01055"></a>01055         <a class="code" href="classTru64.html#aaef9d5f33173de4f6d2875193eb83d7a">activate_waiting_context</a>(cond_addr, process, <span class="keyword">true</span>);
+<a name="l01056"></a>01056 
+<a name="l01057"></a>01057         <span class="keywordflow">return</span> 0;
+<a name="l01058"></a>01058     }
+<a name="l01059"></a>01059 
+<a name="l01061"></a>01061     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l01062"></a><a class="code" href="classTru64.html#a2c38b28b551cfcfe04f70cbfbff3a55e">01062</a>     <a class="code" href="classTru64.html#a2c38b28b551cfcfe04f70cbfbff3a55e" title="Wait on a condition.">m5_cond_waitFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l01063"></a>01063                      <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l01064"></a>01064     {
+<a name="l01065"></a>01065         <span class="keyword">using namespace </span>TheISA;
+<a name="l01066"></a>01066 
+<a name="l01067"></a>01067         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l01068"></a>01068         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> cond_addr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l01069"></a>01069         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> lock_addr = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l01070"></a>01070         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;uint64_t&gt;</a> condp(cond_addr);
+<a name="l01071"></a>01071         <a class="code" href="classTypedBufferArg.html">TypedBufferArg&lt;uint64_t&gt;</a> lockp(lock_addr);
+<a name="l01072"></a>01072 
+<a name="l01073"></a>01073         <span class="comment">// user is supposed to acquire lock before entering</span>
+<a name="l01074"></a>01074         lockp.<a class="code" href="classBaseBufferArg.html#a857fbf24e9b55ad1f3d566d9c7768b93">copyIn</a>(tc-&gt;<a class="code" href="classThreadContext.html#a840e8764d04f2a3fb061c56738f3a874">getMemProxy</a>());
+<a name="l01075"></a>01075         assert(<a class="code" href="namespaceBigEndianGuest.html#adb51b41dd17278558edf419359f52de6">gtoh</a>(*lockp) != 0);
+<a name="l01076"></a>01076 
+<a name="l01077"></a>01077         <a class="code" href="classTru64.html#ac965ae70992f9a6f184c1e6f177e3b5b" title="M5 unlock call.">m5_unlock_mutex</a>(lock_addr, process, tc);
+<a name="l01078"></a>01078 
+<a name="l01079"></a>01079         process-&gt;<a class="code" href="classProcess.html#a8af61364ae9c966602b3b5ec1c0f7f09">waitList</a>.push_back(<a class="code" href="structProcess_1_1WaitRec.html">Process::WaitRec</a>(cond_addr, tc));
+<a name="l01080"></a>01080         tc-&gt;<a class="code" href="classThreadContext.html#af2ae27d19d77b0301484ac488d97d37b" title="Set the status to Suspended.">suspend</a>();
+<a name="l01081"></a>01081 
+<a name="l01082"></a>01082         <span class="keywordflow">return</span> 0;
+<a name="l01083"></a>01083     }
+<a name="l01084"></a>01084 
+<a name="l01086"></a>01086     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l01087"></a><a class="code" href="classTru64.html#a56f0a437d8a86b1220497375406a3f78">01087</a>     <a class="code" href="classTru64.html#a56f0a437d8a86b1220497375406a3f78" title="Thread exit.">m5_thread_exitFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l01088"></a>01088                        <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l01089"></a>01089     {
+<a name="l01090"></a>01090         assert(tc-&gt;<a class="code" href="classThreadContext.html#adfba9b39542cba955a02b8ff3ba023a9">status</a>() == <a class="code" href="classThreadContext.html#a67a0db04d321a74b7e7fcfd3f1a3f70ba26bd8444261cc58df7a86753c79d2520">ThreadContext::Active</a>);
+<a name="l01091"></a>01091         tc-&gt;<a class="code" href="classThreadContext.html#a1cf6e868fcd49300a04acd0cae4fd142" title="Set the status to Halted.">halt</a>();
+<a name="l01092"></a>01092 
+<a name="l01093"></a>01093         <span class="keywordflow">return</span> 0;
+<a name="l01094"></a>01094     }
+<a name="l01095"></a>01095 
+<a name="l01097"></a>01097     <span class="keyword">static</span> <a class="code" href="classSyscallReturn.html">SyscallReturn</a>
+<a name="l01098"></a><a class="code" href="classTru64.html#a82607daf4ef0639e0013656b0c861927">01098</a>     <a class="code" href="classTru64.html#a82607daf4ef0639e0013656b0c861927" title="Indirect syscall invocation (call #0).">indirectSyscallFunc</a>(<a class="code" href="classSyscallDesc.html">SyscallDesc</a> *desc, <span class="keywordtype">int</span> callnum, <a class="code" href="classLiveProcess.html">LiveProcess</a> *process,
+<a name="l01099"></a>01099                         <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)
+<a name="l01100"></a>01100     {
+<a name="l01101"></a>01101         <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a> = 0;
+<a name="l01102"></a>01102         <span class="keywordtype">int</span> new_callnum = process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index);
+<a name="l01103"></a>01103 
+<a name="l01104"></a>01104         <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; 5; ++<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>)
+<a name="l01105"></a>01105             process-&gt;<a class="code" href="classLiveProcess.html#a0f596ddb560a15ade4257db3a6c9dd44">setSyscallArg</a>(tc, <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, process-&gt;<a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(tc, index));
+<a name="l01106"></a>01106 
+<a name="l01107"></a>01107 
+<a name="l01108"></a>01108         <a class="code" href="classSyscallDesc.html">SyscallDesc</a> *new_desc = process-&gt;<a class="code" href="classLiveProcess.html#a478f396f8895ef7728d26866a00121d7">getDesc</a>(new_callnum);
+<a name="l01109"></a>01109         <span class="keywordflow">if</span> (desc == <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>)
+<a name="l01110"></a>01110             <a class="code" href="base_2misc_8hh.html#acad519418dbfdd70c1208711e609c80e">fatal</a>(<span class="stringliteral">&quot;Syscall %d out of range&quot;</span>, callnum);
+<a name="l01111"></a>01111 
+<a name="l01112"></a>01112         new_desc-&gt;<a class="code" href="classSyscallDesc.html#a8a1b93297498c16444130f7ce9a12304" title="Emulate the syscall. Public interface for calling through funcPtr.">doSyscall</a>(new_callnum, process, tc);
+<a name="l01113"></a>01113 
+<a name="l01114"></a>01114         <span class="keywordflow">return</span> 0;
+<a name="l01115"></a>01115     }
+<a name="l01116"></a>01116 
+<a name="l01117"></a>01117 };  <span class="comment">// class Tru64</span>
+<a name="l01118"></a>01118 
+<a name="l01119"></a><a class="code" href="classTru64__F64.html">01119</a> <span class="keyword">class </span><a class="code" href="classTru64__F64.html">Tru64_F64</a> : <span class="keyword">public</span> <a class="code" href="classTru64.html">Tru64</a>
+<a name="l01120"></a>01120 {
+<a name="l01121"></a>01121   <span class="keyword">public</span>:
+<a name="l01122"></a>01122 
+<a name="l01127"></a><a class="code" href="structTru64__F64_1_1F64__stat.html">01127</a>     <span class="keyword">struct </span><a class="code" href="structTru64__F64_1_1F64__stat.html">F64_stat</a> {
+<a name="l01128"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a38914c334b6acaa9e0e94c9d28d590e6">01128</a>         <a class="code" href="classTru64.html#abf62b93d918a43f0c5ee0ab777b1c3ef">dev_t</a>   <a class="code" href="structTru64__F64_1_1F64__stat.html#a38914c334b6acaa9e0e94c9d28d590e6" title="st_dev">st_dev</a>;                 
+<a name="l01129"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a222b8cdb7ccd0d3408704a3cf59ff25f">01129</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#a222b8cdb7ccd0d3408704a3cf59ff25f" title="st_retired1">st_retired1</a>;            
+<a name="l01130"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#aee5b542fc82f176aad79ec67feb729c8">01130</a>         <a class="code" href="classTru64.html#af8f4385bb42836d1e3ad4fea9d71d1b9">mode_t</a>  <a class="code" href="structTru64__F64_1_1F64__stat.html#aee5b542fc82f176aad79ec67feb729c8" title="st_mode">st_mode</a>;                
+<a name="l01131"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#aaf71fe94712c34e733e71a11933d2794">01131</a>         <a class="code" href="classTru64.html#a772a435921844488d52ef4df39b3e702">nlink_t</a> <a class="code" href="structTru64__F64_1_1F64__stat.html#aaf71fe94712c34e733e71a11933d2794" title="st_nlink">st_nlink</a>;               
+<a name="l01132"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#ab0c27b218278c0f3b5721b5d8cb8a7b9">01132</a>         uint16_t <a class="code" href="structTru64__F64_1_1F64__stat.html#ab0c27b218278c0f3b5721b5d8cb8a7b9" title="st_nlink_reserved">st_nlink_reserved</a>;     
+<a name="l01133"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#aaa7d1c91bc417749646433fe7b0c4214">01133</a>         <a class="code" href="classTru64.html#af2306308627701b66dc6f3babe821ab4">uid_t</a>   <a class="code" href="structTru64__F64_1_1F64__stat.html#aaa7d1c91bc417749646433fe7b0c4214" title="st_uid">st_uid</a>;                 
+<a name="l01134"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a77f5167746caec57eabf971231282e45">01134</a>         <a class="code" href="classTru64.html#aa7352f1065fe606194d792e2b292cf83">gid_t</a>   <a class="code" href="structTru64__F64_1_1F64__stat.html#a77f5167746caec57eabf971231282e45" title="st_gid">st_gid</a>;                 
+<a name="l01135"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a9f0b8ba437421362903a7bc1aeeaff4b">01135</a>         <a class="code" href="classTru64.html#abf62b93d918a43f0c5ee0ab777b1c3ef">dev_t</a>   <a class="code" href="structTru64__F64_1_1F64__stat.html#a9f0b8ba437421362903a7bc1aeeaff4b" title="st_rdev">st_rdev</a>;                
+<a name="l01136"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#afe898922e87f9d30c656091edc140bc5">01136</a>         <a class="code" href="classTru64.html#abf62b93d918a43f0c5ee0ab777b1c3ef">dev_t</a>   <a class="code" href="structTru64__F64_1_1F64__stat.html#afe898922e87f9d30c656091edc140bc5" title="st_ldev">st_ldev</a>;                
+<a name="l01137"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a4de8e8d5f90f6deec5e71e2105ee93f9">01137</a>         <a class="code" href="classTru64.html#a2cb84cf5f02a29b7e8f237ff151a9225">off_t</a>   <a class="code" href="structTru64__F64_1_1F64__stat.html#a4de8e8d5f90f6deec5e71e2105ee93f9" title="st_size">st_size</a>;                
+<a name="l01138"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a6668d445dec2751d2fa878dd87643455">01138</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__F64_1_1F64__stat.html#a6668d445dec2751d2fa878dd87643455" title="st_retired2">st_retired2</a>;            
+<a name="l01139"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a6caf16ebcb1abaac55eae66b7369e79d">01139</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#a6caf16ebcb1abaac55eae66b7369e79d" title="st_uatime">st_uatime</a>;              
+<a name="l01140"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a6a137d1a408d41d64e843692dc41bc3c">01140</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__F64_1_1F64__stat.html#a6a137d1a408d41d64e843692dc41bc3c" title="st_retired3">st_retired3</a>;            
+<a name="l01141"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a16037ac74c7c2f8a1f7ded265cc777d4">01141</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#a16037ac74c7c2f8a1f7ded265cc777d4" title="st_umtime">st_umtime</a>;              
+<a name="l01142"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a16ecff62d12ff4c0e0fa2ae04655c75b">01142</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__F64_1_1F64__stat.html#a16ecff62d12ff4c0e0fa2ae04655c75b" title="st_retired4">st_retired4</a>;            
+<a name="l01143"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a005f83a63490ba18e22eefc0f250b02c">01143</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#a005f83a63490ba18e22eefc0f250b02c" title="st_uctime">st_uctime</a>;              
+<a name="l01144"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a6d0eb1325021703c95aee98d69e59ddc">01144</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#a6d0eb1325021703c95aee98d69e59ddc" title="st_retired5">st_retired5</a>;            
+<a name="l01145"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a3ab2ad983542ab13f8caa7b9a3f8b29b">01145</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#a3ab2ad983542ab13f8caa7b9a3f8b29b" title="st_retired6">st_retired6</a>;            
+<a name="l01146"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a2bac91973217293ac3be9cd5f402a819">01146</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        <a class="code" href="structTru64__F64_1_1F64__stat.html#a2bac91973217293ac3be9cd5f402a819" title="st_flags">st_flags</a>;       
+<a name="l01147"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a5c579182b97b4e228d986b8b856d44ce">01147</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>        <a class="code" href="structTru64__F64_1_1F64__stat.html#a5c579182b97b4e228d986b8b856d44ce" title="st_gen">st_gen</a>;         
+<a name="l01148"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#ac39ec7752207ee408453ca20150ce13b">01148</a>         uint64_t        <a class="code" href="structTru64__F64_1_1F64__stat.html#ac39ec7752207ee408453ca20150ce13b" title="st_spare[4]">st_spare</a>[4];    
+<a name="l01149"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#ac4a6c013b12dad2fb1bce6bd99d66f6f">01149</a>         <a class="code" href="classTru64.html#aed4e918b44240739869c4bdb1c4787a9">ino_t</a>   <a class="code" href="structTru64__F64_1_1F64__stat.html#ac4a6c013b12dad2fb1bce6bd99d66f6f" title="st_ino">st_ino</a>;                 
+<a name="l01150"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#ae8ea2ae37bd5c50619c04b9f2a10c157">01150</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#ae8ea2ae37bd5c50619c04b9f2a10c157" title="st_ino_reserved">st_ino_reserved</a>;        
+<a name="l01151"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a6034c5ae284e55dd118804aeb619f5b9">01151</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__F64_1_1F64__stat.html#a6034c5ae284e55dd118804aeb619f5b9" title="st_atime">st_atimeX</a>;              
+<a name="l01152"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a51c2cc99b0e93b1a4e80e185d98ae589">01152</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#a51c2cc99b0e93b1a4e80e185d98ae589" title="st_atime_reserved">st_atime_reserved</a>;      
+<a name="l01153"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a34d66c07fbc0daeae3195bf330321283">01153</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__F64_1_1F64__stat.html#a34d66c07fbc0daeae3195bf330321283" title="st_mtime">st_mtimeX</a>;              
+<a name="l01154"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#ad8e87ee941a583e8193d5c18024b559f">01154</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#ad8e87ee941a583e8193d5c18024b559f" title="st_mtime_reserved">st_mtime_reserved</a>;      
+<a name="l01155"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a841e825ad73dcc00b9f2e4ef3b7c343f">01155</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__F64_1_1F64__stat.html#a841e825ad73dcc00b9f2e4ef3b7c343f" title="st_ctime">st_ctimeX</a>;              
+<a name="l01156"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#acb38cd3b14e3508432a90ccb757ec614">01156</a>         int32_t <a class="code" href="structTru64__F64_1_1F64__stat.html#acb38cd3b14e3508432a90ccb757ec614" title="st_ctime_reserved">st_ctime_reserved</a>;      
+<a name="l01157"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#adb9252bb3343471e4aaaf7bf7df5363a">01157</a>         uint64_t        <a class="code" href="structTru64__F64_1_1F64__stat.html#adb9252bb3343471e4aaaf7bf7df5363a" title="st_blksize">st_blksize</a>;     
+<a name="l01158"></a><a class="code" href="structTru64__F64_1_1F64__stat.html#a72c24b54949be7eaac849d71fc056a3c">01158</a>         uint64_t        <a class="code" href="structTru64__F64_1_1F64__stat.html#a72c24b54949be7eaac849d71fc056a3c" title="st_blocks">st_blocks</a>;      
+<a name="l01159"></a>01159     };
+<a name="l01160"></a>01160 
+<a name="l01161"></a><a class="code" href="classTru64__F64.html#ae57fa534da0197e5bb73fbc40bd59a08">01161</a>     <span class="keyword">typedef</span> <a class="code" href="structTru64__F64_1_1F64__stat.html">F64_stat</a> <a class="code" href="classTru64__F64.html#ae57fa534da0197e5bb73fbc40bd59a08">tgt_stat</a>;
+<a name="l01162"></a>01162 <span class="comment">/*</span>
+<a name="l01163"></a>01163 <span class="comment">    static void copyOutStatBuf(SETranslatingPortProxy &amp;mem, Addr addr,</span>
+<a name="l01164"></a>01164 <span class="comment">                               global_stat *host)</span>
+<a name="l01165"></a>01165 <span class="comment">    {</span>
+<a name="l01166"></a>01166 <span class="comment">        Tru64::copyOutStatBuf&lt;Tru64::F64_stat&gt;(mem, addr, host);</span>
+<a name="l01167"></a>01167 <span class="comment">    }*/</span>
+<a name="l01168"></a>01168 
+<a name="l01169"></a><a class="code" href="classTru64__F64.html#ab39f4973592abe61638b8b998bc5691d">01169</a>     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classTru64__F64.html#ab39f4973592abe61638b8b998bc5691d">copyOutStatfsBuf</a>(<a class="code" href="classSETranslatingPortProxy.html">SETranslatingPortProxy</a> &amp;mem, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>,
+<a name="l01170"></a>01170                                  <a class="code" href="kern_2tru64_2tru64_8hh.html#a1a8529336c3f2704cb49ee2cd97412a8">global_statfs</a> *host)
+<a name="l01171"></a>01171     {
+<a name="l01172"></a>01172         Tru64::copyOutStatfsBuf&lt;Tru64::F64_statfs&gt;(mem, addr, host);
+<a name="l01173"></a>01173     }
+<a name="l01174"></a>01174 };
+<a name="l01175"></a>01175 
+<a name="l01176"></a><a class="code" href="classTru64__PreF64.html">01176</a> <span class="keyword">class </span><a class="code" href="classTru64__PreF64.html">Tru64_PreF64</a> : <span class="keyword">public</span> <a class="code" href="classTru64.html">Tru64</a>
+<a name="l01177"></a>01177 {
+<a name="l01178"></a>01178   <span class="keyword">public</span>:
+<a name="l01179"></a>01179 
+<a name="l01185"></a>01185 
+<a name="l01186"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html">01186</a>     <span class="keyword">struct </span><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html">pre_F64_stat</a> {
+<a name="l01187"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a38914c334b6acaa9e0e94c9d28d590e6">01187</a>         <a class="code" href="classTru64.html#abf62b93d918a43f0c5ee0ab777b1c3ef">dev_t</a>   <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a38914c334b6acaa9e0e94c9d28d590e6">st_dev</a>;
+<a name="l01188"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#ac4a6c013b12dad2fb1bce6bd99d66f6f">01188</a>         <a class="code" href="classTru64.html#aed4e918b44240739869c4bdb1c4787a9">ino_t</a>   <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#ac4a6c013b12dad2fb1bce6bd99d66f6f">st_ino</a>;
+<a name="l01189"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#aee5b542fc82f176aad79ec67feb729c8">01189</a>         <a class="code" href="classTru64.html#af8f4385bb42836d1e3ad4fea9d71d1b9">mode_t</a>  <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#aee5b542fc82f176aad79ec67feb729c8">st_mode</a>;
+<a name="l01190"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#aaf71fe94712c34e733e71a11933d2794">01190</a>         <a class="code" href="classTru64.html#a772a435921844488d52ef4df39b3e702">nlink_t</a> <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#aaf71fe94712c34e733e71a11933d2794">st_nlink</a>;
+<a name="l01191"></a>01191         <a class="code" href="classTru64.html#af2306308627701b66dc6f3babe821ab4">uid_t</a>   st_uid <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a9e6045dec3e69974586d17b8d3d8bfd6">__attribute__</a> ((aligned(<span class="keyword">sizeof</span>(<a class="code" href="classTru64.html#af2306308627701b66dc6f3babe821ab4">uid_t</a>))));
+<a name="l01192"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a77f5167746caec57eabf971231282e45">01192</a>         <a class="code" href="classTru64.html#aa7352f1065fe606194d792e2b292cf83">gid_t</a>   <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a77f5167746caec57eabf971231282e45">st_gid</a>;
+<a name="l01193"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a9f0b8ba437421362903a7bc1aeeaff4b">01193</a>         <a class="code" href="classTru64.html#abf62b93d918a43f0c5ee0ab777b1c3ef">dev_t</a>   <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a9f0b8ba437421362903a7bc1aeeaff4b">st_rdev</a>;
+<a name="l01194"></a>01194         <a class="code" href="classTru64.html#a2cb84cf5f02a29b7e8f237ff151a9225">off_t</a>   st_size <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a9e6045dec3e69974586d17b8d3d8bfd6">__attribute__</a> ((aligned(<span class="keyword">sizeof</span>(<a class="code" href="classTru64.html#a2cb84cf5f02a29b7e8f237ff151a9225">off_t</a>))));
+<a name="l01195"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a6034c5ae284e55dd118804aeb619f5b9">01195</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a6034c5ae284e55dd118804aeb619f5b9">st_atimeX</a>;
+<a name="l01196"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a6caf16ebcb1abaac55eae66b7369e79d">01196</a>         int32_t <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a6caf16ebcb1abaac55eae66b7369e79d">st_uatime</a>;
+<a name="l01197"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a34d66c07fbc0daeae3195bf330321283">01197</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a34d66c07fbc0daeae3195bf330321283">st_mtimeX</a>;
+<a name="l01198"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a16037ac74c7c2f8a1f7ded265cc777d4">01198</a>         int32_t <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a16037ac74c7c2f8a1f7ded265cc777d4">st_umtime</a>;
+<a name="l01199"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a841e825ad73dcc00b9f2e4ef3b7c343f">01199</a>         <a class="code" href="classTru64.html#a3346b04b0420b32ccf6b706551b70762">time_t</a>  <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a841e825ad73dcc00b9f2e4ef3b7c343f">st_ctimeX</a>;
+<a name="l01200"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a005f83a63490ba18e22eefc0f250b02c">01200</a>         int32_t <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a005f83a63490ba18e22eefc0f250b02c">st_uctime</a>;
+<a name="l01201"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a952cc52eb5efd16f9cebffe863823593">01201</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a952cc52eb5efd16f9cebffe863823593">st_blksize</a>;
+<a name="l01202"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a9bdc90ebe5192856e17c3ad67c0cb140">01202</a>         int32_t <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a9bdc90ebe5192856e17c3ad67c0cb140">st_blocks</a>;
+<a name="l01203"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a2bac91973217293ac3be9cd5f402a819">01203</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a2bac91973217293ac3be9cd5f402a819">st_flags</a>;
+<a name="l01204"></a><a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a5c579182b97b4e228d986b8b856d44ce">01204</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html#a5c579182b97b4e228d986b8b856d44ce">st_gen</a>;
+<a name="l01205"></a>01205     };
+<a name="l01206"></a>01206 
+<a name="l01207"></a><a class="code" href="classTru64__PreF64.html#a704fbfa7adb0a1c876af25fc5367ccac">01207</a>     <span class="keyword">typedef</span> <a class="code" href="structTru64__PreF64_1_1pre__F64__stat.html">pre_F64_stat</a> <a class="code" href="classTru64__PreF64.html#a704fbfa7adb0a1c876af25fc5367ccac">tgt_stat</a>;
+<a name="l01208"></a>01208 <span class="comment">/*</span>
+<a name="l01209"></a>01209 <span class="comment">    static void copyOutStatBuf(SETranslatingPortProxy &amp;mem, Addr addr,</span>
+<a name="l01210"></a>01210 <span class="comment">                               global_stat *host)</span>
+<a name="l01211"></a>01211 <span class="comment">    {</span>
+<a name="l01212"></a>01212 <span class="comment">        Tru64::copyOutStatBuf&lt;Tru64::pre_F64_stat&gt;(mem, addr, host);</span>
+<a name="l01213"></a>01213 <span class="comment">    }*/</span>
+<a name="l01214"></a>01214 
+<a name="l01215"></a><a class="code" href="classTru64__PreF64.html#ab39f4973592abe61638b8b998bc5691d">01215</a>     <span class="keyword">static</span> <span class="keywordtype">void</span> <a class="code" href="classTru64__PreF64.html#ab39f4973592abe61638b8b998bc5691d">copyOutStatfsBuf</a>(<a class="code" href="classSETranslatingPortProxy.html">SETranslatingPortProxy</a> &amp;mem, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>,
+<a name="l01216"></a>01216                                  <a class="code" href="kern_2tru64_2tru64_8hh.html#a1a8529336c3f2704cb49ee2cd97412a8">global_statfs</a> *host)
+<a name="l01217"></a>01217     {
+<a name="l01218"></a>01218         Tru64::copyOutStatfsBuf&lt;Tru64::pre_F64_statfs&gt;(mem, addr, host);
+<a name="l01219"></a>01219     }
+<a name="l01220"></a>01220 };
+<a name="l01221"></a>01221 
+<a name="l01222"></a>01222 <span class="preprocessor">#endif // __TRU64_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

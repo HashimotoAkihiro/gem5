@@ -1,0 +1,241 @@
+\hypertarget{printk_8cc}{
+\section{kern/linux/printk.cc}
+\label{printk_8cc}\index{kern/linux/printk.cc@{kern/linux/printk.cc}}
+}
+{\ttfamily \#include $<$sys/types.h$>$}\par
+{\ttfamily \#include $<$algorithm$>$}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}kern/linux/printk.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/arguments.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{printk_8cc_a6835058655756110cd3b70eafbb93aa4}{Printk} (stringstream \&out, \hyperlink{classArguments}{Arguments} args)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{printk_8cc_a6835058655756110cd3b70eafbb93aa4}{
+\index{printk.cc@{printk.cc}!Printk@{Printk}}
+\index{Printk@{Printk}!printk.cc@{printk.cc}}
+\subsubsection[{Printk}]{\setlength{\rightskip}{0pt plus 5cm}void Printk (stringstream \& {\em out}, \/  {\bf Arguments} {\em args})}}
+\label{printk_8cc_a6835058655756110cd3b70eafbb93aa4}
+
+
+
+\begin{DoxyCode}
+45 {
+46     char *p = (char *)args++;
+47 
+48     while (*p) {
+49         switch (*p) {
+50           case '%': {
+51               bool more = true;
+52               bool islong = false;
+53               bool leftjustify = false;
+54               bool format = false;
+55               bool zero = false;
+56               int width = 0;
+57               while (more && *++p) {
+58                   switch (*p) {
+59                     case 'l':
+60                     case 'L':
+61                       islong = true;
+62                       break;
+63                     case '-':
+64                       leftjustify = true;
+65                       break;
+66                     case '#':
+67                       format = true;
+68                       break;
+69                     case '0':
+70                       if (width)
+71                           width *= 10;
+72                       else
+73                           zero = true;
+74                       break;
+75                     default:
+76                       if (*p >= '1' && *p <= '9')
+77                           width = 10 * width + *p - '0';
+78                       else
+79                           more = false;
+80                       break;
+81                   }
+82               }
+83 
+84               bool hexnum = false;
+85               bool octal = false;
+86               bool sign = false;
+87               switch (*p) {
+88                 case 'X':
+89                 case 'x':
+90                   hexnum = true;
+91                   break;
+92                 case 'O':
+93                 case 'o':
+94                   octal = true;
+95                   break;
+96                 case 'D':
+97                 case 'd':
+98                   sign = true;
+99                   break;
+100                 case 'P':
+101                   format = true;
+102                 case 'p':
+103                   hexnum = true;
+104                   break;
+105               }
+106 
+107               switch (*p) {
+108                 case 'D':
+109                 case 'd':
+110                 case 'U':
+111                 case 'u':
+112                 case 'X':
+113                 case 'x':
+114                 case 'O':
+115                 case 'o':
+116                 case 'P':
+117                 case 'p': {
+118                   if (hexnum)
+119                       out << hex;
+120 
+121                   if (octal)
+122                       out << oct;
+123 
+124                   if (format) {
+125                       if (!zero)
+126                           out.setf(ios::showbase);
+127                       else {
+128                           if (hexnum) {
+129                               out << "0x";
+130                               width -= 2;
+131                           } else if (octal) {
+132                               out << "0";
+133                               width -= 1;
+134                           }
+135                       }
+136                   }
+137 
+138                   if (zero)
+139                       out.fill('0');
+140 
+141                   if (width > 0)
+142                       out.width(width);
+143 
+144                   if (leftjustify && !zero)
+145                       out.setf(ios::left);
+146 
+147                   if (sign) {
+148                       if (islong)
+149                           out << (int64_t)args;
+150                       else
+151                           out << (int32_t)args;
+152                   } else {
+153                       if (islong)
+154                           out << (uint64_t)args;
+155                       else
+156                           out << (uint32_t)args;
+157                   }
+158 
+159                   if (zero)
+160                       out.fill(' ');
+161 
+162                   if (width > 0)
+163                       out.width(0);
+164 
+165                   out << dec;
+166 
+167                   ++args;
+168                 }
+169                   break;
+170 
+171                 case 's': {
+172                     const char *s = (char *)args;
+173                     if (!s)
+174                         s = "<NULL>";
+175 
+176                     if (width > 0)
+177                         out.width(width);
+178                     if (leftjustify)
+179                         out.setf(ios::left);
+180 
+181                     out << s;
+182                     ++args;
+183                 }
+184                   break;
+185                 case 'C':
+186                 case 'c': {
+187                     uint64_t mask = (*p == 'C') ? 0xffL : 0x7fL;
+188                     uint64_t num;
+189                     int cwidth;
+190 
+191                     if (islong) {
+192                         num = (uint64_t)args;
+193                         cwidth = sizeof(uint64_t);
+194                     } else {
+195                         num = (uint32_t)args;
+196                         cwidth = sizeof(uint32_t);
+197                     }
+198 
+199                     while (cwidth-- > 0) {
+200                         char c = (char)(num & mask);
+201                         if (c)
+202                             out << c;
+203                         num >>= 8;
+204                     }
+205 
+206                     ++args;
+207                 }
+208                   break;
+209                 case 'b': {
+210                   uint64_t n = (uint64_t)args++;
+211                   char *s = (char *)args++;
+212                   out << s << ": " << n;
+213                 }
+214                   break;
+215                 case 'n':
+216                 case 'N': {
+217                     args += 2;
+218 #if 0
+219                     uint64_t n = (uint64_t)args++;
+220                     struct reg_values *rv = (struct reg_values *)args++;
+221 #endif
+222                 }
+223                   break;
+224                 case 'r':
+225                 case 'R': {
+226                     args += 2;
+227 #if 0
+228                     uint64_t n = (uint64_t)args++;
+229                     struct reg_desc *rd = (struct reg_desc *)args++;
+230 #endif
+231                 }
+232                   break;
+233                 case '%':
+234                   out << '%';
+235                   break;
+236               }
+237               ++p;
+238           }
+239             break;
+240           case '\n':
+241             out << endl;
+242             ++p;
+243             break;
+244           case '\r':
+245             ++p;
+246             if (*p != '\n')
+247                 out << endl;
+248             break;
+249 
+250           default: {
+251               size_t len = strcspn(p, "%\n\r\0");
+252               out.write(p, len);
+253               p += len;
+254           }
+255         }
+256     }
+257 
+258 }
+\end{DoxyCode}

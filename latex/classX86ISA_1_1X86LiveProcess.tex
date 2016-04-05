@@ -1,0 +1,439 @@
+\hypertarget{classX86ISA_1_1X86LiveProcess}{
+\section{クラス X86LiveProcess}
+\label{classX86ISA_1_1X86LiveProcess}\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}X86LiveProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classX86ISA_1_1X86LiveProcess}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classX86ISA_1_1X86LiveProcess_a3fa3a6673b5b14edb04c4b8dfdb46051}{gdtStart} ()
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classX86ISA_1_1X86LiveProcess_abf5ae8f7b5ef9fdfd43c7b783fd540b1}{gdtSize} ()
+\item 
+\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$ \hyperlink{classX86ISA_1_1X86LiveProcess_aebbff609a7235342925445690acf5ee8}{getDesc} (int callnum)
+\item 
+void \hyperlink{classX86ISA_1_1X86LiveProcess_aaefd02663c1eae206b851290d9276a5e}{setSyscallReturn} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, \hyperlink{classSyscallReturn}{SyscallReturn} return\_\-value)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1X86LiveProcess_a6a12433fc14d1afa3744abbe3c019b7b}{X86LiveProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile}, \hyperlink{classSyscallDesc}{SyscallDesc} $\ast$\_\-syscallDescs, int \_\-numSyscallDescs)
+\item 
+{\footnotesize template$<$class IntType $>$ }\\void \hyperlink{classX86ISA_1_1X86LiveProcess_ac7876453870f7620e67298b48c3ec93c}{argsInit} (int pageSize, \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{structAuxVector}{AuxVector}$<$ IntType $>$ $>$ extraAuxvs)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classX86ISA_1_1X86LiveProcess_ac5ecf9d163642401bfbd3a3c123e7588}{\_\-gdtStart}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classX86ISA_1_1X86LiveProcess_a758d088d5e01acff75151eb6b1fd4a16}{\_\-gdtSize}
+\item 
+\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$ \hyperlink{classX86ISA_1_1X86LiveProcess_a36d3cbdd5c6e5a64542256b84b0fa0c3}{syscallDescs}
+\item 
+const int \hyperlink{classX86ISA_1_1X86LiveProcess_ae08bf33f0aaf2f6045ed37acbe0779c8}{numSyscallDescs}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classX86ISA_1_1X86LiveProcess_a6a12433fc14d1afa3744abbe3c019b7b}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!X86LiveProcess@{X86LiveProcess}}
+\index{X86LiveProcess@{X86LiveProcess}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{X86LiveProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf X86LiveProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile}, \/  {\bf SyscallDesc} $\ast$ {\em \_\-syscallDescs}, \/  int {\em \_\-numSyscallDescs})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_a6a12433fc14d1afa3744abbe3c019b7b}
+
+
+
+\begin{DoxyCode}
+84                                                           :
+85     LiveProcess(params, objFile), syscallDescs(_syscallDescs),
+86     numSyscallDescs(_numSyscallDescs)
+87 {
+88     brk_point = objFile->dataBase() + objFile->dataSize() + objFile->bssSize();
+89     brk_point = roundUp(brk_point, VMPageSize);
+90 }
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classX86ISA_1_1X86LiveProcess_ac7876453870f7620e67298b48c3ec93c}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!argsInit@{argsInit}}
+\index{argsInit@{argsInit}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{argsInit}]{\setlength{\rightskip}{0pt plus 5cm}void argsInit (int {\em pageSize}, \/  {\bf std::vector}$<$ {\bf AuxVector}$<$ IntType $>$ $>$ {\em extraAuxvs})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_ac7876453870f7620e67298b48c3ec93c}
+
+
+
+\begin{DoxyCode}
+379 {
+380     int intSize = sizeof(IntType);
+381 
+382     typedef AuxVector<IntType> auxv_t;
+383     std::vector<auxv_t> auxv = extraAuxvs;
+384 
+385     string filename;
+386     if(argv.size() < 1)
+387         filename = "";
+388     else
+389         filename = argv[0];
+390 
+391     //We want 16 byte alignment
+392     uint64_t align = 16;
+393 
+394     // load object file into target memory
+395     objFile->loadSections(initVirtMem);
+396 
+397     enum X86CpuFeature {
+398         X86_OnboardFPU = 1 << 0,
+399         X86_VirtualModeExtensions = 1 << 1,
+400         X86_DebuggingExtensions = 1 << 2,
+401         X86_PageSizeExtensions = 1 << 3,
+402 
+403         X86_TimeStampCounter = 1 << 4,
+404         X86_ModelSpecificRegisters = 1 << 5,
+405         X86_PhysicalAddressExtensions = 1 << 6,
+406         X86_MachineCheckExtensions = 1 << 7,
+407 
+408         X86_CMPXCHG8Instruction = 1 << 8,
+409         X86_OnboardAPIC = 1 << 9,
+410         X86_SYSENTER_SYSEXIT = 1 << 11,
+411 
+412         X86_MemoryTypeRangeRegisters = 1 << 12,
+413         X86_PageGlobalEnable = 1 << 13,
+414         X86_MachineCheckArchitecture = 1 << 14,
+415         X86_CMOVInstruction = 1 << 15,
+416 
+417         X86_PageAttributeTable = 1 << 16,
+418         X86_36BitPSEs = 1 << 17,
+419         X86_ProcessorSerialNumber = 1 << 18,
+420         X86_CLFLUSHInstruction = 1 << 19,
+421 
+422         X86_DebugTraceStore = 1 << 21,
+423         X86_ACPIViaMSR = 1 << 22,
+424         X86_MultimediaExtensions = 1 << 23,
+425 
+426         X86_FXSAVE_FXRSTOR = 1 << 24,
+427         X86_StreamingSIMDExtensions = 1 << 25,
+428         X86_StreamingSIMDExtensions2 = 1 << 26,
+429         X86_CPUSelfSnoop = 1 << 27,
+430 
+431         X86_HyperThreading = 1 << 28,
+432         X86_AutomaticClockControl = 1 << 29,
+433         X86_IA64Processor = 1 << 30
+434     };
+435 
+436     //Setup the auxilliary vectors. These will already have endian conversion.
+437     //Auxilliary vectors are loaded only for elf formatted executables.
+438     ElfObject * elfObject = dynamic_cast<ElfObject *>(objFile);
+439     if(elfObject)
+440     {
+441         uint64_t features =
+442             X86_OnboardFPU |
+443             X86_VirtualModeExtensions |
+444             X86_DebuggingExtensions |
+445             X86_PageSizeExtensions |
+446             X86_TimeStampCounter |
+447             X86_ModelSpecificRegisters |
+448             X86_PhysicalAddressExtensions |
+449             X86_MachineCheckExtensions |
+450             X86_CMPXCHG8Instruction |
+451             X86_OnboardAPIC |
+452             X86_SYSENTER_SYSEXIT |
+453             X86_MemoryTypeRangeRegisters |
+454             X86_PageGlobalEnable |
+455             X86_MachineCheckArchitecture |
+456             X86_CMOVInstruction |
+457             X86_PageAttributeTable |
+458             X86_36BitPSEs |
+459 //            X86_ProcessorSerialNumber |
+460             X86_CLFLUSHInstruction |
+461 //            X86_DebugTraceStore |
+462 //            X86_ACPIViaMSR |
+463             X86_MultimediaExtensions |
+464             X86_FXSAVE_FXRSTOR |
+465             X86_StreamingSIMDExtensions |
+466             X86_StreamingSIMDExtensions2 |
+467 //            X86_CPUSelfSnoop |
+468 //            X86_HyperThreading |
+469 //            X86_AutomaticClockControl |
+470 //            X86_IA64Processor |
+471             0;
+472 
+473         //Bits which describe the system hardware capabilities
+474         //XXX Figure out what these should be
+475         auxv.push_back(auxv_t(M5_AT_HWCAP, features));
+476         //The system page size
+477         auxv.push_back(auxv_t(M5_AT_PAGESZ, X86ISA::VMPageSize));
+478         //Frequency at which times() increments
+479         //Defined to be 100 in the kernel source.
+480         auxv.push_back(auxv_t(M5_AT_CLKTCK, 100));
+481         // For statically linked executables, this is the virtual address of the
+482         // program header tables if they appear in the executable image
+483         auxv.push_back(auxv_t(M5_AT_PHDR, elfObject->programHeaderTable()));
+484         // This is the size of a program header entry from the elf file.
+485         auxv.push_back(auxv_t(M5_AT_PHENT, elfObject->programHeaderSize()));
+486         // This is the number of program headers from the original elf file.
+487         auxv.push_back(auxv_t(M5_AT_PHNUM, elfObject->programHeaderCount()));
+488         //This is the address of the elf "interpreter", It should be set
+489         //to 0 for regular executables. It should be something else
+490         //(not sure what) for dynamic libraries.
+491         auxv.push_back(auxv_t(M5_AT_BASE, 0));
+492 
+493         //XXX Figure out what this should be.
+494         auxv.push_back(auxv_t(M5_AT_FLAGS, 0));
+495         //The entry point to the program
+496         auxv.push_back(auxv_t(M5_AT_ENTRY, objFile->entryPoint()));
+497         //Different user and group IDs
+498         auxv.push_back(auxv_t(M5_AT_UID, uid()));
+499         auxv.push_back(auxv_t(M5_AT_EUID, euid()));
+500         auxv.push_back(auxv_t(M5_AT_GID, gid()));
+501         auxv.push_back(auxv_t(M5_AT_EGID, egid()));
+502         //Whether to enable "secure mode" in the executable
+503         auxv.push_back(auxv_t(M5_AT_SECURE, 0));
+504         //The address of 16 "random" bytes.
+505         auxv.push_back(auxv_t(M5_AT_RANDOM, 0));
+506         //The name of the program
+507         auxv.push_back(auxv_t(M5_AT_EXECFN, 0));
+508         //The platform string
+509         auxv.push_back(auxv_t(M5_AT_PLATFORM, 0));
+510     }
+511 
+512     //Figure out how big the initial stack needs to be
+513 
+514     // A sentry NULL void pointer at the top of the stack.
+515     int sentry_size = intSize;
+516 
+517     //This is the name of the file which is present on the initial stack
+518     //It's purpose is to let the user space linker examine the original file.
+519     int file_name_size = filename.size() + 1;
+520 
+521     const int numRandomBytes = 16;
+522     int aux_data_size = numRandomBytes;
+523 
+524     string platform = "x86_64";
+525     aux_data_size += platform.size() + 1;
+526 
+527     int env_data_size = 0;
+528     for (int i = 0; i < envp.size(); ++i) {
+529         env_data_size += envp[i].size() + 1;
+530     }
+531     int arg_data_size = 0;
+532     for (int i = 0; i < argv.size(); ++i) {
+533         arg_data_size += argv[i].size() + 1;
+534     }
+535 
+536     //The info_block needs to be padded so it's size is a multiple of the
+537     //alignment mask. Also, it appears that there needs to be at least some
+538     //padding, so if the size is already a multiple, we need to increase it
+539     //anyway.
+540     int base_info_block_size =
+541         sentry_size + file_name_size + env_data_size + arg_data_size;
+542 
+543     int info_block_size = roundUp(base_info_block_size, align);
+544 
+545     int info_block_padding = info_block_size - base_info_block_size;
+546 
+547     //Each auxilliary vector is two 8 byte words
+548     int aux_array_size = intSize * 2 * (auxv.size() + 1);
+549 
+550     int envp_array_size = intSize * (envp.size() + 1);
+551     int argv_array_size = intSize * (argv.size() + 1);
+552 
+553     int argc_size = intSize;
+554 
+555     //Figure out the size of the contents of the actual initial frame
+556     int frame_size =
+557         aux_array_size +
+558         envp_array_size +
+559         argv_array_size +
+560         argc_size;
+561 
+562     //There needs to be padding after the auxiliary vector data so that the
+563     //very bottom of the stack is aligned properly.
+564     int partial_size = frame_size + aux_data_size;
+565     int aligned_partial_size = roundUp(partial_size, align);
+566     int aux_padding = aligned_partial_size - partial_size;
+567 
+568     int space_needed =
+569         info_block_size +
+570         aux_data_size +
+571         aux_padding +
+572         frame_size;
+573 
+574     stack_min = stack_base - space_needed;
+575     stack_min = roundDown(stack_min, align);
+576     stack_size = stack_base - stack_min;
+577 
+578     // map memory
+579     allocateMem(roundDown(stack_min, pageSize), roundUp(stack_size, pageSize));
+580 
+581     // map out initial stack contents
+582     IntType sentry_base = stack_base - sentry_size;
+583     IntType file_name_base = sentry_base - file_name_size;
+584     IntType env_data_base = file_name_base - env_data_size;
+585     IntType arg_data_base = env_data_base - arg_data_size;
+586     IntType aux_data_base = arg_data_base - info_block_padding - aux_data_size;
+587     IntType auxv_array_base = aux_data_base - aux_array_size - aux_padding;
+588     IntType envp_array_base = auxv_array_base - envp_array_size;
+589     IntType argv_array_base = envp_array_base - argv_array_size;
+590     IntType argc_base = argv_array_base - argc_size;
+591 
+592     DPRINTF(Stack, "The addresses of items on the initial stack:\n");
+593     DPRINTF(Stack, "0x%x - file name\n", file_name_base);
+594     DPRINTF(Stack, "0x%x - env data\n", env_data_base);
+595     DPRINTF(Stack, "0x%x - arg data\n", arg_data_base);
+596     DPRINTF(Stack, "0x%x - aux data\n", aux_data_base);
+597     DPRINTF(Stack, "0x%x - auxv array\n", auxv_array_base);
+598     DPRINTF(Stack, "0x%x - envp array\n", envp_array_base);
+599     DPRINTF(Stack, "0x%x - argv array\n", argv_array_base);
+600     DPRINTF(Stack, "0x%x - argc \n", argc_base);
+601     DPRINTF(Stack, "0x%x - stack min\n", stack_min);
+602 
+603     // write contents to stack
+604 
+605     // figure out argc
+606     IntType argc = argv.size();
+607     IntType guestArgc = X86ISA::htog(argc);
+608 
+609     //Write out the sentry void *
+610     IntType sentry_NULL = 0;
+611     initVirtMem.writeBlob(sentry_base,
+612             (uint8_t*)&sentry_NULL, sentry_size);
+613 
+614     //Write the file name
+615     initVirtMem.writeString(file_name_base, filename.c_str());
+616 
+617     //Fix up the aux vectors which point to data
+618     assert(auxv[auxv.size() - 3].a_type == M5_AT_RANDOM);
+619     auxv[auxv.size() - 3].a_val = aux_data_base;
+620     assert(auxv[auxv.size() - 2].a_type == M5_AT_EXECFN);
+621     auxv[auxv.size() - 2].a_val = argv_array_base;
+622     assert(auxv[auxv.size() - 1].a_type == M5_AT_PLATFORM);
+623     auxv[auxv.size() - 1].a_val = aux_data_base + numRandomBytes;
+624 
+625     //Copy the aux stuff
+626     for(int x = 0; x < auxv.size(); x++)
+627     {
+628         initVirtMem.writeBlob(auxv_array_base + x * 2 * intSize,
+629                 (uint8_t*)&(auxv[x].a_type), intSize);
+630         initVirtMem.writeBlob(auxv_array_base + (x * 2 + 1) * intSize,
+631                 (uint8_t*)&(auxv[x].a_val), intSize);
+632     }
+633     //Write out the terminating zeroed auxilliary vector
+634     const uint64_t zero = 0;
+635     initVirtMem.writeBlob(auxv_array_base + 2 * intSize * auxv.size(),
+636             (uint8_t*)&zero, 2 * intSize);
+637 
+638     initVirtMem.writeString(aux_data_base, platform.c_str());
+639 
+640     copyStringArray(envp, envp_array_base, env_data_base, initVirtMem);
+641     copyStringArray(argv, argv_array_base, arg_data_base, initVirtMem);
+642 
+643     initVirtMem.writeBlob(argc_base, (uint8_t*)&guestArgc, intSize);
+644 
+645     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+646     //Set the stack pointer register
+647     tc->setIntReg(StackPointerReg, stack_min);
+648 
+649     // There doesn't need to be any segment base added in since we're dealing
+650     // with the flat segmentation model.
+651     tc->pcState(objFile->entryPoint());
+652 
+653     //Align the "stack_min" to a page boundary.
+654     stack_min = roundDown(stack_min, pageSize);
+655 
+656 //    num_processes++;
+657 }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1X86LiveProcess_abf5ae8f7b5ef9fdfd43c7b783fd540b1}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!gdtSize@{gdtSize}}
+\index{gdtSize@{gdtSize}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{gdtSize}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} gdtSize ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_abf5ae8f7b5ef9fdfd43c7b783fd540b1}
+
+
+
+\begin{DoxyCode}
+78         { return _gdtSize; }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1X86LiveProcess_a3fa3a6673b5b14edb04c4b8dfdb46051}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!gdtStart@{gdtStart}}
+\index{gdtStart@{gdtStart}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{gdtStart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} gdtStart ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_a3fa3a6673b5b14edb04c4b8dfdb46051}
+
+
+
+\begin{DoxyCode}
+75         { return _gdtStart; }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1X86LiveProcess_aebbff609a7235342925445690acf5ee8}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!getDesc@{getDesc}}
+\index{getDesc@{getDesc}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{getDesc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} $\ast$ getDesc (int {\em callnum})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_aebbff609a7235342925445690acf5ee8}
+
+
+\hyperlink{classLiveProcess_a478f396f8895ef7728d26866a00121d7}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+155 {
+156     if (callnum < 0 || callnum >= numSyscallDescs)
+157         return NULL;
+158     return &syscallDescs[callnum];
+159 }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1X86LiveProcess_aaefd02663c1eae206b851290d9276a5e}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!setSyscallReturn@{setSyscallReturn}}
+\index{setSyscallReturn@{setSyscallReturn}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{setSyscallReturn}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallReturn ({\bf ThreadContext} $\ast$ {\em tc}, \/  {\bf SyscallReturn} {\em return\_\-value})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_aaefd02663c1eae206b851290d9276a5e}
+
+
+\hyperlink{classLiveProcess_a5955e790542b86589b9fd75df24ec2d3}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+682 {
+683     tc->setIntReg(INTREG_RAX, retval.encodedValue());
+684 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classX86ISA_1_1X86LiveProcess_a758d088d5e01acff75151eb6b1fd4a16}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!\_\-gdtSize@{\_\-gdtSize}}
+\index{\_\-gdtSize@{\_\-gdtSize}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{\_\-gdtSize}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf \_\-gdtSize}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_a758d088d5e01acff75151eb6b1fd4a16}
+\hypertarget{classX86ISA_1_1X86LiveProcess_ac5ecf9d163642401bfbd3a3c123e7588}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!\_\-gdtStart@{\_\-gdtStart}}
+\index{\_\-gdtStart@{\_\-gdtStart}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{\_\-gdtStart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf \_\-gdtStart}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_ac5ecf9d163642401bfbd3a3c123e7588}
+\hypertarget{classX86ISA_1_1X86LiveProcess_ae08bf33f0aaf2f6045ed37acbe0779c8}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!numSyscallDescs@{numSyscallDescs}}
+\index{numSyscallDescs@{numSyscallDescs}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{numSyscallDescs}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf numSyscallDescs}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_ae08bf33f0aaf2f6045ed37acbe0779c8}
+\hypertarget{classX86ISA_1_1X86LiveProcess_a36d3cbdd5c6e5a64542256b84b0fa0c3}{
+\index{X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}!syscallDescs@{syscallDescs}}
+\index{syscallDescs@{syscallDescs}!X86ISA::X86LiveProcess@{X86ISA::X86LiveProcess}}
+\subsubsection[{syscallDescs}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc}$\ast$ {\bf syscallDescs}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1X86LiveProcess_a36d3cbdd5c6e5a64542256b84b0fa0c3}
+
+
+\hyperlink{classX86ISA_1_1X86__64LinuxProcess_a08d67a94820b75842e07f030e548372e}{X86\_\-64LinuxProcess}, と \hyperlink{classX86ISA_1_1I386LinuxProcess_a08d67a94820b75842e07f030e548372e}{I386LinuxProcess}で再定義されています。
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/\hyperlink{arch_2x86_2process_8hh}{process.hh}\item 
+arch/x86/\hyperlink{arch_2x86_2process_8cc}{process.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,1014 @@
+\hypertarget{x86__cpu_8cc}{
+\section{cpu/kvm/x86\_\-cpu.cc}
+\label{x86__cpu_8cc}\index{cpu/kvm/x86\_\-cpu.cc@{cpu/kvm/x86\_\-cpu.cc}}
+}
+{\ttfamily \#include $<$linux/kvm.h$>$}\par
+{\ttfamily \#include $<$algorithm$>$}\par
+{\ttfamily \#include $<$cerrno$>$}\par
+{\ttfamily \#include $<$memory$>$}\par
+{\ttfamily \#include \char`\"{}arch/x86/regs/msr.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/cpuid.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/utility.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/registers.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/kvm/base.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/kvm/x86\_\-cpu.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/Drain.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/Kvm.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/KvmContext.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/KvmIO.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/KvmInt.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structFXSave}{FXSave}
+\end{DoxyCompactItemize}
+\subsection*{マクロ定義}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{x86__cpu_8cc_a48a07da9eda1a7054027cbbd5701f7cc}{MSR\_\-TSC}~0x10
+\item 
+\#define \hyperlink{x86__cpu_8cc_aa249f80ee7382ea304af9e36af7e7b36}{IO\_\-PCI\_\-CONF\_\-ADDR}~0xCF8
+\item 
+\#define \hyperlink{x86__cpu_8cc_a5242fcbaf586dae287efe4163b97c019}{IO\_\-PCI\_\-CONF\_\-DATA\_\-BASE}~0xCFC
+\item 
+\#define \hyperlink{x86__cpu_8cc_ab981dfcf0b109de1740a5684d6eed5d8}{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-AVAILABLE}~9
+\item 
+\#define \hyperlink{x86__cpu_8cc_a7dbae927888360923f7d7dbb529a3668}{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-BUSY}~11
+\item 
+\#define \hyperlink{x86__cpu_8cc_a4a17e8eb656d44e302e42eaad4ed7d55}{SEG\_\-CS\_\-TYPE\_\-ACCESSED}~9
+\item 
+\#define \hyperlink{x86__cpu_8cc_a64546b78e0c66406e0c585251017e97d}{SEG\_\-CS\_\-TYPE\_\-READ\_\-ACCESSED}~11
+\item 
+\#define \hyperlink{x86__cpu_8cc_a4d4061bc93950e881300fc67c076eebd}{SEG\_\-TYPE\_\-BIT\_\-ACCESSED}~1
+\item 
+\#define \hyperlink{x86__cpu_8cc_a1b70a9e03d3e57124b5ec691a3de8720}{FOREACH\_\-IREG}()
+\item 
+\#define \hyperlink{x86__cpu_8cc_aa90701ca0a4e8e76a8fe2e712b1435a2}{FOREACH\_\-SREG}()
+\item 
+\#define \hyperlink{x86__cpu_8cc_a356ecb0e240862ff8435fda6237e8cc9}{FOREACH\_\-DREG}()
+\item 
+\#define \hyperlink{x86__cpu_8cc_a9687b0de58e7126c4e4bfa5396205bfe}{FOREACH\_\-SEGMENT}()
+\item 
+\#define \hyperlink{x86__cpu_8cc_ad8b16766eca6fa646fa2cc82fbd44cb7}{FOREACH\_\-DTABLE}()
+\item 
+\#define \hyperlink{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}{APPLY\_\-IREG}(kreg, mreg)~inform(\char`\"{}$\backslash$t\char`\"{} \# kreg \char`\"{}: 0x\%llx$\backslash$n\char`\"{}, regs.kreg)
+\item 
+\#define \hyperlink{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}{APPLY\_\-SREG}(kreg, mreg)~inform(\char`\"{}$\backslash$t\char`\"{} \# kreg \char`\"{}: 0x\%llx$\backslash$n\char`\"{}, sregs.kreg);
+\item 
+\#define \hyperlink{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{APPLY\_\-SEGMENT}(kreg, idx)~dumpKvm(\# kreg, sregs.kreg);
+\item 
+\#define \hyperlink{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}{APPLY\_\-DTABLE}(kreg, idx)~dumpKvm(\# kreg, sregs.kreg);
+\item 
+\#define \hyperlink{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}{APPLY\_\-IREG}(kreg, mreg)~regs.kreg = tc-\/$>$readIntReg(mreg)
+\item 
+\#define \hyperlink{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}{APPLY\_\-SREG}(kreg, mreg)~sregs.kreg = tc-\/$>$readMiscRegNoEffect(mreg)
+\item 
+\#define \hyperlink{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{APPLY\_\-SEGMENT}(kreg, idx)~setKvmSegmentReg(tc, sregs.kreg, idx)
+\item 
+\#define \hyperlink{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}{APPLY\_\-DTABLE}(kreg, idx)~setKvmDTableReg(tc, sregs.kreg, idx)
+\item 
+\#define \hyperlink{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{APPLY\_\-SEGMENT}(kreg, idx)~checkSeg(\# kreg, idx + MISCREG\_\-SEG\_\-SEL\_\-BASE, sregs.kreg, sregs)
+\item 
+\#define \hyperlink{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}{APPLY\_\-IREG}(kreg, mreg)~tc-\/$>$setIntReg(mreg, regs.kreg)
+\item 
+\#define \hyperlink{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}{APPLY\_\-SREG}(kreg, mreg)~tc-\/$>$setMiscRegNoEffect(mreg, sregs.kreg)
+\item 
+\#define \hyperlink{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{APPLY\_\-SEGMENT}(kreg, idx)~setContextSegment(tc, sregs.kreg, idx)
+\item 
+\#define \hyperlink{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}{APPLY\_\-DTABLE}(kreg, idx)~setContextSegment(tc, sregs.kreg, idx)
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{x86__cpu_8cc_a954bbe2225157cef7b550ee58ce351bd}{static\_\-assert} (sizeof(\hyperlink{structFXSave}{FXSave})==512,\char`\"{}Unexpected size of \hyperlink{structFXSave}{FXSave}\char`\"{})
+\item 
+{\footnotesize template$<$typename STRUCT , typename ENTRY $>$ }\\static STRUCT $\ast$ \hyperlink{x86__cpu_8cc_a28d3018844ed28641faabd89ab18e3ff}{newVarStruct} (size\_\-t entries)
+\item 
+static void \hyperlink{x86__cpu_8cc_ac071f56204bac6717fe834e758908929}{dumpKvm} (const struct kvm\_\-regs \&regs)
+\item 
+static void \hyperlink{x86__cpu_8cc_a74ec3b8549e1f3e742423b0ec38bb9de}{dumpKvm} (const char $\ast$reg\_\-name, const struct kvm\_\-segment \&seg)
+\item 
+static void \hyperlink{x86__cpu_8cc_a69fa7ec6c7399ac8aa29df5e7bfa9efc}{dumpKvm} (const char $\ast$reg\_\-name, const struct kvm\_\-dtable \&dtable)
+\item 
+static void \hyperlink{x86__cpu_8cc_a36910f19c3862f43565434410f6d211b}{dumpKvm} (const struct kvm\_\-sregs \&sregs)
+\item 
+static void \hyperlink{x86__cpu_8cc_adf41008a4447459acb9f919d51a2805b}{dumpFpuSpec} (const struct \hyperlink{structFXSave}{FXSave} \&xs)
+\item 
+static void \hyperlink{x86__cpu_8cc_a66c7b9de0f3bb8c466dd0b8d4fb3567b}{dumpFpuSpec} (const struct kvm\_\-fpu \&fpu)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static void \hyperlink{x86__cpu_8cc_a46f5ba7be6890a81b497c1eeaf8c2029}{dumpFpuCommon} (const T \&fpu)
+\item 
+static void \hyperlink{x86__cpu_8cc_a97136c2e8a5ac2deba6e38795d3b5053}{dumpKvm} (const struct kvm\_\-fpu \&fpu)
+\item 
+static void \hyperlink{x86__cpu_8cc_a865009cd8e167f82ccbd8cdca9eb143c}{dumpKvm} (const struct kvm\_\-xsave \&xsave)
+\item 
+static void \hyperlink{x86__cpu_8cc_ae1337a353229bd0870744e1043623ff4}{dumpKvm} (const struct kvm\_\-msrs \&msrs)
+\item 
+static void \hyperlink{x86__cpu_8cc_af915161a847a8b42b652e6196c97d13f}{dumpKvm} (const struct kvm\_\-xcrs \&regs)
+\item 
+static void \hyperlink{x86__cpu_8cc_afbf85fdc9a68b6997ea5f91a0c17ec10}{dumpKvm} (const struct kvm\_\-vcpu\_\-events \&events)
+\item 
+static bool \hyperlink{x86__cpu_8cc_a897edaa2f5ac7a67d3897d65908e8522}{isCanonicalAddress} (uint64\_\-t addr)
+\item 
+static void \hyperlink{x86__cpu_8cc_a7174d4d5d8e57f423f727d67beaa463d}{checkSeg} (const char $\ast$name, const int idx, const struct kvm\_\-segment \&seg, struct kvm\_\-sregs sregs)
+\item 
+static void \hyperlink{x86__cpu_8cc_a05127157d55aca2814725c2e283a2d19}{setKvmSegmentReg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, struct kvm\_\-segment \&kvm\_\-seg, const int index)
+\item 
+static void \hyperlink{x86__cpu_8cc_a51d8093baee27ba8789bb1af7af824a2}{setKvmDTableReg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, struct kvm\_\-dtable \&kvm\_\-dtable, const int index)
+\item 
+static void \hyperlink{x86__cpu_8cc_a0dd1c17ee1639164887df8dae4a46861}{forceSegAccessed} (struct kvm\_\-segment \&seg)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static void \hyperlink{x86__cpu_8cc_af4646df895fd6ad546cfecaa85e782b7}{updateKvmStateFPUCommon} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, T \&fpu)
+\item 
+void \hyperlink{x86__cpu_8cc_a95c05cceb7cdce6304fb8ebe174bf300}{setContextSegment} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, const struct kvm\_\-segment \&kvm\_\-seg, const int index)
+\item 
+void \hyperlink{x86__cpu_8cc_ada916424bb12b00a7176788153a7a2f4}{setContextSegment} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, const struct kvm\_\-dtable \&kvm\_\-dtable, const int index)
+\item 
+{\footnotesize template$<$typename T $>$ }\\static void \hyperlink{x86__cpu_8cc_a313c58fe9310f894c07dda533fde7fbb}{updateThreadContextFPUCommon} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, const T \&fpu)
+\item 
+static struct kvm\_\-cpuid\_\-entry2 \hyperlink{x86__cpu_8cc_a8e529a8d690941d970b53028ee411ec2}{makeKvmCpuid} (\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} function, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} index, \hyperlink{structX86ISA_1_1CpuidResult}{CpuidResult} \&result)
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structFXSave}{FXSave} \hyperlink{x86__cpu_8cc_a71c71aceb8fa2a663f6ac608a6df0b08}{M5\_\-ATTR\_\-PACKED}
+\end{DoxyCompactItemize}
+
+
+\subsection{マクロ定義}
+\hypertarget{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-DTABLE@{APPLY\_\-DTABLE}}
+\index{APPLY\_\-DTABLE@{APPLY\_\-DTABLE}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-DTABLE}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-DTABLE(kreg, \/  idx)~setContextSegment(tc, sregs.kreg, idx)}}
+\label{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}
+\hypertarget{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-DTABLE@{APPLY\_\-DTABLE}}
+\index{APPLY\_\-DTABLE@{APPLY\_\-DTABLE}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-DTABLE}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-DTABLE(kreg, \/  idx)~setKvmDTableReg(tc, sregs.kreg, idx)}}
+\label{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}
+\hypertarget{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-DTABLE@{APPLY\_\-DTABLE}}
+\index{APPLY\_\-DTABLE@{APPLY\_\-DTABLE}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-DTABLE}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-DTABLE(kreg, \/  idx)~dumpKvm(\# kreg, sregs.kreg);}}
+\label{x86__cpu_8cc_aba8cb1b1518fbda6abb37867aa6b8af2}
+\hypertarget{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-IREG@{APPLY\_\-IREG}}
+\index{APPLY\_\-IREG@{APPLY\_\-IREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-IREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-IREG(kreg, \/  mreg)~tc-\/$>$setIntReg(mreg, regs.kreg)}}
+\label{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}
+\hypertarget{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-IREG@{APPLY\_\-IREG}}
+\index{APPLY\_\-IREG@{APPLY\_\-IREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-IREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-IREG(kreg, \/  mreg)~regs.kreg = tc-\/$>$readIntReg(mreg)}}
+\label{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}
+\hypertarget{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-IREG@{APPLY\_\-IREG}}
+\index{APPLY\_\-IREG@{APPLY\_\-IREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-IREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-IREG(kreg, \/  mreg)~inform(\char`\"{}$\backslash$t\char`\"{} \# kreg \char`\"{}: 0x\%llx$\backslash$n\char`\"{}, regs.kreg)}}
+\label{x86__cpu_8cc_acd661b64526a8ecbee8a9930ebd7b0be}
+\hypertarget{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}}
+\index{APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-SEGMENT}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-SEGMENT(kreg, \/  idx)~setContextSegment(tc, sregs.kreg, idx)}}
+\label{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}
+\hypertarget{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}}
+\index{APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-SEGMENT}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-SEGMENT(kreg, \/  idx)~checkSeg(\# kreg, idx + MISCREG\_\-SEG\_\-SEL\_\-BASE, sregs.kreg, sregs)}}
+\label{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}
+\hypertarget{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}}
+\index{APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-SEGMENT}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-SEGMENT(kreg, \/  idx)~setKvmSegmentReg(tc, sregs.kreg, idx)}}
+\label{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}
+\hypertarget{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}}
+\index{APPLY\_\-SEGMENT@{APPLY\_\-SEGMENT}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-SEGMENT}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-SEGMENT(kreg, \/  idx)~dumpKvm(\# kreg, sregs.kreg);}}
+\label{x86__cpu_8cc_a63320c6620c2a08acd1dd9338417ec95}
+\hypertarget{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-SREG@{APPLY\_\-SREG}}
+\index{APPLY\_\-SREG@{APPLY\_\-SREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-SREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-SREG(kreg, \/  mreg)~tc-\/$>$setMiscRegNoEffect(mreg, sregs.kreg)}}
+\label{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}
+\hypertarget{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-SREG@{APPLY\_\-SREG}}
+\index{APPLY\_\-SREG@{APPLY\_\-SREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-SREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-SREG(kreg, \/  mreg)~sregs.kreg = tc-\/$>$readMiscRegNoEffect(mreg)}}
+\label{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}
+\hypertarget{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!APPLY\_\-SREG@{APPLY\_\-SREG}}
+\index{APPLY\_\-SREG@{APPLY\_\-SREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{APPLY\_\-SREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define APPLY\_\-SREG(kreg, \/  mreg)~inform(\char`\"{}$\backslash$t\char`\"{} \# kreg \char`\"{}: 0x\%llx$\backslash$n\char`\"{}, sregs.kreg);}}
+\label{x86__cpu_8cc_a0388026cca60eb03b28dec28749123c7}
+\hypertarget{x86__cpu_8cc_a356ecb0e240862ff8435fda6237e8cc9}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!FOREACH\_\-DREG@{FOREACH\_\-DREG}}
+\index{FOREACH\_\-DREG@{FOREACH\_\-DREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{FOREACH\_\-DREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define FOREACH\_\-DREG()}}
+\label{x86__cpu_8cc_a356ecb0e240862ff8435fda6237e8cc9}
+{\bfseries 値:}
+\begin{DoxyCode}
+do {                                        \
+        APPLY_DREG(db[0], MISCREG_DR0);         \
+        APPLY_DREG(db[1], MISCREG_DR1);         \
+        APPLY_DREG(db[2], MISCREG_DR2);         \
+        APPLY_DREG(db[3], MISCREG_DR3);         \
+        APPLY_DREG(dr6, MISCREG_DR6);           \
+        APPLY_DREG(dr7, MISCREG_DR7);           \
+    } while(0)
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_ad8b16766eca6fa646fa2cc82fbd44cb7}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!FOREACH\_\-DTABLE@{FOREACH\_\-DTABLE}}
+\index{FOREACH\_\-DTABLE@{FOREACH\_\-DTABLE}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{FOREACH\_\-DTABLE}]{\setlength{\rightskip}{0pt plus 5cm}\#define FOREACH\_\-DTABLE()}}
+\label{x86__cpu_8cc_ad8b16766eca6fa646fa2cc82fbd44cb7}
+{\bfseries 値:}
+\begin{DoxyCode}
+do {                                                        \
+        APPLY_DTABLE(gdt, MISCREG_TSG - MISCREG_SEG_SEL_BASE);  \
+        APPLY_DTABLE(idt, MISCREG_IDTR - MISCREG_SEG_SEL_BASE); \
+    } while(0)
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a1b70a9e03d3e57124b5ec691a3de8720}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!FOREACH\_\-IREG@{FOREACH\_\-IREG}}
+\index{FOREACH\_\-IREG@{FOREACH\_\-IREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{FOREACH\_\-IREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define FOREACH\_\-IREG()}}
+\label{x86__cpu_8cc_a1b70a9e03d3e57124b5ec691a3de8720}
+{\bfseries 値:}
+\begin{DoxyCode}
+do {                                        \
+        APPLY_IREG(rax, INTREG_RAX);            \
+        APPLY_IREG(rbx, INTREG_RBX);            \
+        APPLY_IREG(rcx, INTREG_RCX);            \
+        APPLY_IREG(rdx, INTREG_RDX);            \
+        APPLY_IREG(rsi, INTREG_RSI);            \
+        APPLY_IREG(rdi, INTREG_RDI);            \
+        APPLY_IREG(rsp, INTREG_RSP);            \
+        APPLY_IREG(rbp, INTREG_RBP);            \
+        APPLY_IREG(r8, INTREG_R8);              \
+        APPLY_IREG(r9, INTREG_R9);              \
+        APPLY_IREG(r10, INTREG_R10);            \
+        APPLY_IREG(r11, INTREG_R11);            \
+        APPLY_IREG(r12, INTREG_R12);            \
+        APPLY_IREG(r13, INTREG_R13);            \
+        APPLY_IREG(r14, INTREG_R14);            \
+        APPLY_IREG(r15, INTREG_R15);            \
+    } while(0)
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a9687b0de58e7126c4e4bfa5396205bfe}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!FOREACH\_\-SEGMENT@{FOREACH\_\-SEGMENT}}
+\index{FOREACH\_\-SEGMENT@{FOREACH\_\-SEGMENT}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{FOREACH\_\-SEGMENT}]{\setlength{\rightskip}{0pt plus 5cm}\#define FOREACH\_\-SEGMENT()}}
+\label{x86__cpu_8cc_a9687b0de58e7126c4e4bfa5396205bfe}
+{\bfseries 値:}
+\begin{DoxyCode}
+do {                                                        \
+        APPLY_SEGMENT(cs, MISCREG_CS - MISCREG_SEG_SEL_BASE);   \
+        APPLY_SEGMENT(ds, MISCREG_DS - MISCREG_SEG_SEL_BASE);   \
+        APPLY_SEGMENT(es, MISCREG_ES - MISCREG_SEG_SEL_BASE);   \
+        APPLY_SEGMENT(fs, MISCREG_FS - MISCREG_SEG_SEL_BASE);   \
+        APPLY_SEGMENT(gs, MISCREG_GS - MISCREG_SEG_SEL_BASE);   \
+        APPLY_SEGMENT(ss, MISCREG_SS - MISCREG_SEG_SEL_BASE);   \
+        APPLY_SEGMENT(tr, MISCREG_TR - MISCREG_SEG_SEL_BASE);   \
+        APPLY_SEGMENT(ldt, MISCREG_TSL - MISCREG_SEG_SEL_BASE); \
+    } while(0)
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_aa90701ca0a4e8e76a8fe2e712b1435a2}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!FOREACH\_\-SREG@{FOREACH\_\-SREG}}
+\index{FOREACH\_\-SREG@{FOREACH\_\-SREG}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{FOREACH\_\-SREG}]{\setlength{\rightskip}{0pt plus 5cm}\#define FOREACH\_\-SREG()}}
+\label{x86__cpu_8cc_aa90701ca0a4e8e76a8fe2e712b1435a2}
+{\bfseries 値:}
+\begin{DoxyCode}
+do {                                                \
+        APPLY_SREG(cr0, MISCREG_CR0);                   \
+        APPLY_SREG(cr2, MISCREG_CR2);                   \
+        APPLY_SREG(cr3, MISCREG_CR3);                   \
+        APPLY_SREG(cr4, MISCREG_CR4);                   \
+        APPLY_SREG(cr8, MISCREG_CR8);                   \
+        APPLY_SREG(efer, MISCREG_EFER);                 \
+        APPLY_SREG(apic_base, MISCREG_APIC_BASE);       \
+    } while(0)
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_aa249f80ee7382ea304af9e36af7e7b36}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!IO\_\-PCI\_\-CONF\_\-ADDR@{IO\_\-PCI\_\-CONF\_\-ADDR}}
+\index{IO\_\-PCI\_\-CONF\_\-ADDR@{IO\_\-PCI\_\-CONF\_\-ADDR}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{IO\_\-PCI\_\-CONF\_\-ADDR}]{\setlength{\rightskip}{0pt plus 5cm}\#define IO\_\-PCI\_\-CONF\_\-ADDR~0xCF8}}
+\label{x86__cpu_8cc_aa249f80ee7382ea304af9e36af7e7b36}
+\hypertarget{x86__cpu_8cc_a5242fcbaf586dae287efe4163b97c019}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!IO\_\-PCI\_\-CONF\_\-DATA\_\-BASE@{IO\_\-PCI\_\-CONF\_\-DATA\_\-BASE}}
+\index{IO\_\-PCI\_\-CONF\_\-DATA\_\-BASE@{IO\_\-PCI\_\-CONF\_\-DATA\_\-BASE}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{IO\_\-PCI\_\-CONF\_\-DATA\_\-BASE}]{\setlength{\rightskip}{0pt plus 5cm}\#define IO\_\-PCI\_\-CONF\_\-DATA\_\-BASE~0xCFC}}
+\label{x86__cpu_8cc_a5242fcbaf586dae287efe4163b97c019}
+\hypertarget{x86__cpu_8cc_a48a07da9eda1a7054027cbbd5701f7cc}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!MSR\_\-TSC@{MSR\_\-TSC}}
+\index{MSR\_\-TSC@{MSR\_\-TSC}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{MSR\_\-TSC}]{\setlength{\rightskip}{0pt plus 5cm}\#define MSR\_\-TSC~0x10}}
+\label{x86__cpu_8cc_a48a07da9eda1a7054027cbbd5701f7cc}
+\hypertarget{x86__cpu_8cc_a4a17e8eb656d44e302e42eaad4ed7d55}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!SEG\_\-CS\_\-TYPE\_\-ACCESSED@{SEG\_\-CS\_\-TYPE\_\-ACCESSED}}
+\index{SEG\_\-CS\_\-TYPE\_\-ACCESSED@{SEG\_\-CS\_\-TYPE\_\-ACCESSED}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{SEG\_\-CS\_\-TYPE\_\-ACCESSED}]{\setlength{\rightskip}{0pt plus 5cm}\#define SEG\_\-CS\_\-TYPE\_\-ACCESSED~9}}
+\label{x86__cpu_8cc_a4a17e8eb656d44e302e42eaad4ed7d55}
+\hypertarget{x86__cpu_8cc_a64546b78e0c66406e0c585251017e97d}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!SEG\_\-CS\_\-TYPE\_\-READ\_\-ACCESSED@{SEG\_\-CS\_\-TYPE\_\-READ\_\-ACCESSED}}
+\index{SEG\_\-CS\_\-TYPE\_\-READ\_\-ACCESSED@{SEG\_\-CS\_\-TYPE\_\-READ\_\-ACCESSED}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{SEG\_\-CS\_\-TYPE\_\-READ\_\-ACCESSED}]{\setlength{\rightskip}{0pt plus 5cm}\#define SEG\_\-CS\_\-TYPE\_\-READ\_\-ACCESSED~11}}
+\label{x86__cpu_8cc_a64546b78e0c66406e0c585251017e97d}
+\hypertarget{x86__cpu_8cc_ab981dfcf0b109de1740a5684d6eed5d8}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!SEG\_\-SYS\_\-TYPE\_\-TSS\_\-AVAILABLE@{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-AVAILABLE}}
+\index{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-AVAILABLE@{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-AVAILABLE}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-AVAILABLE}]{\setlength{\rightskip}{0pt plus 5cm}\#define SEG\_\-SYS\_\-TYPE\_\-TSS\_\-AVAILABLE~9}}
+\label{x86__cpu_8cc_ab981dfcf0b109de1740a5684d6eed5d8}
+\hypertarget{x86__cpu_8cc_a7dbae927888360923f7d7dbb529a3668}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!SEG\_\-SYS\_\-TYPE\_\-TSS\_\-BUSY@{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-BUSY}}
+\index{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-BUSY@{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-BUSY}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{SEG\_\-SYS\_\-TYPE\_\-TSS\_\-BUSY}]{\setlength{\rightskip}{0pt plus 5cm}\#define SEG\_\-SYS\_\-TYPE\_\-TSS\_\-BUSY~11}}
+\label{x86__cpu_8cc_a7dbae927888360923f7d7dbb529a3668}
+\hypertarget{x86__cpu_8cc_a4d4061bc93950e881300fc67c076eebd}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!SEG\_\-TYPE\_\-BIT\_\-ACCESSED@{SEG\_\-TYPE\_\-BIT\_\-ACCESSED}}
+\index{SEG\_\-TYPE\_\-BIT\_\-ACCESSED@{SEG\_\-TYPE\_\-BIT\_\-ACCESSED}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{SEG\_\-TYPE\_\-BIT\_\-ACCESSED}]{\setlength{\rightskip}{0pt plus 5cm}\#define SEG\_\-TYPE\_\-BIT\_\-ACCESSED~1}}
+\label{x86__cpu_8cc_a4d4061bc93950e881300fc67c076eebd}
+
+
+\subsection{関数}
+\hypertarget{x86__cpu_8cc_a7174d4d5d8e57f423f727d67beaa463d}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!checkSeg@{checkSeg}}
+\index{checkSeg@{checkSeg}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{checkSeg}]{\setlength{\rightskip}{0pt plus 5cm}static void checkSeg (const char $\ast$ {\em name}, \/  const int {\em idx}, \/  const struct kvm\_\-segment \& {\em seg}, \/  struct kvm\_\-sregs {\em sregs})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a7174d4d5d8e57f423f727d67beaa463d}
+
+
+
+\begin{DoxyCode}
+382 {
+383     // Check the register base
+384     switch (idx) {
+385       case MISCREG_TSL:
+386       case MISCREG_TR:
+387       case MISCREG_FS:
+388       case MISCREG_GS:
+389         if (!isCanonicalAddress(seg.base))
+390             warn("Illegal %s base: 0x%x\n", name, seg.base);
+391         break;
+392 
+393       case MISCREG_SS:
+394       case MISCREG_DS:
+395       case MISCREG_ES:
+396         if (seg.unusable)
+397             break;
+398       case MISCREG_CS:
+399         if (seg.base & 0xffffffff00000000ULL)
+400             warn("Illegal %s base: 0x%x\n", name, seg.base);
+401         break;
+402     }
+403 
+404     // Check the type
+405     switch (idx) {
+406       case MISCREG_CS:
+407         switch (seg.type) {
+408           case 3:
+409             if (seg.dpl != 0)
+410                 warn("CS type is 3 but dpl != 0.\n");
+411             break;
+412           case 9:
+413           case 11:
+414             if (seg.dpl != sregs.ss.dpl)
+415                 warn("CS type is %i but CS DPL != SS DPL\n", seg.type);
+416             break;
+417           case 13:
+418           case 15:
+419             if (seg.dpl > sregs.ss.dpl)
+420                 warn("CS type is %i but CS DPL > SS DPL\n", seg.type);
+421             break;
+422           default:
+423             warn("Illegal CS type: %i\n", seg.type);
+424             break;
+425         }
+426         break;
+427 
+428       case MISCREG_SS:
+429         if (seg.unusable)
+430             break;
+431         switch (seg.type) {
+432           case 3:
+433             if (sregs.cs.type == 3 && seg.dpl != 0)
+434                 warn("CS type is 3, but SS DPL is != 0.\n");
+435             /* FALLTHROUGH */
+436           case 7:
+437             if (!(sregs.cr0 & 1) && seg.dpl != 0)
+438                 warn("SS DPL is %i, but CR0 PE is 0\n", seg.dpl);
+439             break;
+440           default:
+441             warn("Illegal SS type: %i\n", seg.type);
+442             break;
+443         }
+444         break;
+445 
+446       case MISCREG_DS:
+447       case MISCREG_ES:
+448       case MISCREG_FS:
+449       case MISCREG_GS:
+450         if (seg.unusable)
+451             break;
+452         if (!(seg.type & 0x1) ||
+453             ((seg.type & 0x8) && !(seg.type & 0x2)))
+454             warn("%s has an illegal type field: %i\n", name, seg.type);
+455         break;
+456 
+457       case MISCREG_TR:
+458         // TODO: We should check the CPU mode
+459         if (seg.type != 3 && seg.type != 11)
+460             warn("%s: Illegal segment type (%i)\n", name, seg.type);
+461         break;
+462 
+463       case MISCREG_TSL:
+464         if (seg.unusable)
+465             break;
+466         if (seg.type != 2)
+467             warn("%s: Illegal segment type (%i)\n", name, seg.type);
+468         break;
+469     }
+470 
+471     switch (idx) {
+472       case MISCREG_SS:
+473       case MISCREG_DS:
+474       case MISCREG_ES:
+475       case MISCREG_FS:
+476       case MISCREG_GS:
+477         if (seg.unusable)
+478             break;
+479       case MISCREG_CS:
+480         if (!seg.s)
+481             warn("%s: S flag not set\n", name);
+482         break;
+483 
+484       case MISCREG_TSL:
+485         if (seg.unusable)
+486             break;
+487       case MISCREG_TR:
+488         if (seg.s)
+489             warn("%s: S flag is set\n", name);
+490         break;
+491     }
+492 
+493     switch (idx) {
+494       case MISCREG_SS:
+495       case MISCREG_DS:
+496       case MISCREG_ES:
+497       case MISCREG_FS:
+498       case MISCREG_GS:
+499       case MISCREG_TSL:
+500         if (seg.unusable)
+501             break;
+502       case MISCREG_TR:
+503       case MISCREG_CS:
+504         if (!seg.present)
+505             warn("%s: P flag not set\n", name);
+506 
+507         if (((seg.limit & 0xFFF) == 0 && seg.g) ||
+508             ((seg.limit & 0xFFF00000) != 0 && !seg.g)) {
+509             warn("%s limit (0x%x) and g (%i) combination is illegal.\n",
+510                  name, seg.limit, seg.g);
+511         }
+512         break;
+513     }
+514 
+515     // TODO: Check CS DB
+516 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a46f5ba7be6890a81b497c1eeaf8c2029}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpFpuCommon@{dumpFpuCommon}}
+\index{dumpFpuCommon@{dumpFpuCommon}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpFpuCommon}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpFpuCommon (const T \& {\em fpu})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{x86__cpu_8cc_a46f5ba7be6890a81b497c1eeaf8c2029}
+
+
+
+\begin{DoxyCode}
+260 {
+261     const unsigned top((fpu.fsw >> 11) & 0x7);
+262     inform("\tfcw: 0x%x\n", fpu.fcw);
+263 
+264     inform("\tfsw: 0x%x (top: %i, "
+265            "conditions: %s%s%s%s, exceptions: %s%s%s%s%s%s %s%s%s)\n",
+266            fpu.fsw, top,
+267 
+268            (fpu.fsw & CC0Bit) ? "C0" : "",
+269            (fpu.fsw & CC1Bit) ? "C1" : "",
+270            (fpu.fsw & CC2Bit) ? "C2" : "",
+271            (fpu.fsw & CC3Bit) ? "C3" : "",
+272 
+273            (fpu.fsw & IEBit) ? "I" : "",
+274            (fpu.fsw & DEBit) ? "D" : "",
+275            (fpu.fsw & ZEBit) ? "Z" : "",
+276            (fpu.fsw & OEBit) ? "O" : "",
+277            (fpu.fsw & UEBit) ? "U" : "",
+278            (fpu.fsw & PEBit) ? "P" : "",
+279 
+280            (fpu.fsw & StackFaultBit) ? "SF " : "",
+281            (fpu.fsw & ErrSummaryBit) ? "ES " : "",
+282            (fpu.fsw & BusyBit) ? "BUSY " : ""
+283         );
+284     inform("\tftwx: 0x%x\n", fpu.ftwx);
+285     inform("\tlast_opcode: 0x%x\n", fpu.last_opcode);
+286     dumpFpuSpec(fpu);
+287     inform("\tmxcsr: 0x%x\n", fpu.mxcsr);
+288     inform("\tFP Stack:\n");
+289     for (int i = 0; i < 8; ++i) {
+290         const unsigned reg_idx((i + top) & 0x7);
+291         const bool empty(!((fpu.ftwx >> reg_idx) & 0x1));
+292         const double value(X86ISA::loadFloat80(fpu.fpr[i]));
+293         char hex[33];
+294         for (int j = 0; j < 10; ++j)
+295             snprintf(&hex[j*2], 3, "%.2x", fpu.fpr[i][j]);
+296         inform("\t\tST%i/%i: 0x%s (%f)%s\n", i, reg_idx,
+297                hex, value, empty ? " (e)" : "");
+298     }
+299     inform("\tXMM registers:\n");
+300     for (int i = 0; i < 16; ++i) {
+301         char hex[33];
+302         for (int j = 0; j < 16; ++j)
+303             snprintf(&hex[j*2], 3, "%.2x", fpu.xmm[i][j]);
+304         inform("\t\t%i: 0x%s\n", i, hex);
+305     }
+306 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a66c7b9de0f3bb8c466dd0b8d4fb3567b}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpFpuSpec@{dumpFpuSpec}}
+\index{dumpFpuSpec@{dumpFpuSpec}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpFpuSpec}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpFpuSpec (const struct kvm\_\-fpu \& {\em fpu})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a66c7b9de0f3bb8c466dd0b8d4fb3567b}
+
+
+
+\begin{DoxyCode}
+252 {
+253     inform("\tlast_ip: 0x%x\n", fpu.last_ip);
+254     inform("\tlast_dp: 0x%x\n", fpu.last_dp);
+255 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_adf41008a4447459acb9f919d51a2805b}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpFpuSpec@{dumpFpuSpec}}
+\index{dumpFpuSpec@{dumpFpuSpec}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpFpuSpec}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpFpuSpec (const struct {\bf FXSave} \& {\em xs})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_adf41008a4447459acb9f919d51a2805b}
+
+
+
+\begin{DoxyCode}
+244 {
+245     inform("\tlast_ip: 0x%x\n", xs.ctrl64.fpu_ip);
+246     inform("\tlast_dp: 0x%x\n", xs.ctrl64.fpu_dp);
+247     inform("\tmxcsr_mask: 0x%x\n", xs.mxcsr_mask);
+248 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_afbf85fdc9a68b6997ea5f91a0c17ec10}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const struct kvm\_\-vcpu\_\-events \& {\em events})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_afbf85fdc9a68b6997ea5f91a0c17ec10}
+
+
+
+\begin{DoxyCode}
+349 {
+350     inform("vCPU events:\n");
+351 
+352     inform("\tException: [inj: %i, nr: %i, has_ec: %i, ec: %i]\n",
+353            events.exception.injected, events.exception.nr,
+354            events.exception.has_error_code, events.exception.error_code);
+355 
+356     inform("\tInterrupt: [inj: %i, nr: %i, soft: %i]\n",
+357            events.interrupt.injected, events.interrupt.nr,
+358            events.interrupt.soft);
+359 
+360     inform("\tNMI: [inj: %i, pending: %i, masked: %i]\n",
+361            events.nmi.injected, events.nmi.pending,
+362            events.nmi.masked);
+363 
+364     inform("\tSIPI vector: 0x%x\n", events.sipi_vector);
+365     inform("\tFlags: 0x%x\n", events.flags);
+366 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_af915161a847a8b42b652e6196c97d13f}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const struct kvm\_\-xcrs \& {\em regs})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_af915161a847a8b42b652e6196c97d13f}
+
+
+
+\begin{DoxyCode}
+336 {
+337     inform("KVM XCR registers:\n");
+338 
+339     inform("\tFlags: 0x%x\n", regs.flags);
+340     for (int i = 0; i < regs.nr_xcrs; ++i) {
+341         inform("\tXCR[0x%x]: 0x%x\n",
+342                regs.xcrs[i].xcr,
+343                regs.xcrs[i].value);
+344     }
+345 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_ae1337a353229bd0870744e1043623ff4}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const struct kvm\_\-msrs \& {\em msrs})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_ae1337a353229bd0870744e1043623ff4}
+
+
+
+\begin{DoxyCode}
+324 {
+325     inform("MSRs:\n");
+326 
+327     for (int i = 0; i < msrs.nmsrs; ++i) {
+328         const struct kvm_msr_entry &e(msrs.entries[i]);
+329 
+330         inform("\t0x%x: 0x%x\n", e.index, e.data);
+331     }
+332 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a865009cd8e167f82ccbd8cdca9eb143c}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const struct kvm\_\-xsave \& {\em xsave})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a865009cd8e167f82ccbd8cdca9eb143c}
+
+
+
+\begin{DoxyCode}
+317 {
+318     inform("FPU registers (XSave):\n");
+319     dumpFpuCommon(*(FXSave *)xsave.region);
+320 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a97136c2e8a5ac2deba6e38795d3b5053}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const struct kvm\_\-fpu \& {\em fpu})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a97136c2e8a5ac2deba6e38795d3b5053}
+
+
+
+\begin{DoxyCode}
+310 {
+311     inform("FPU registers:\n");
+312     dumpFpuCommon(fpu);
+313 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a36910f19c3862f43565434410f6d211b}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const struct kvm\_\-sregs \& {\em sregs})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a36910f19c3862f43565434410f6d211b}
+
+
+
+\begin{DoxyCode}
+203 {
+204 #define APPLY_SREG(kreg, mreg)                          \
+205     inform("\t" # kreg ": 0x%llx\n", sregs.kreg);
+206 #define APPLY_SEGMENT(kreg, idx)                \
+207     dumpKvm(# kreg, sregs.kreg);
+208 #define APPLY_DTABLE(kreg, idx)                 \
+209     dumpKvm(# kreg, sregs.kreg);
+210 
+211     inform("Special registers:\n");
+212     FOREACH_SEGMENT();
+213     FOREACH_SREG();
+214     FOREACH_DTABLE();
+215 
+216     inform("Interrupt Bitmap:");
+217     for (int i = 0; i < KVM_NR_INTERRUPTS; i += 64)
+218         inform("  0x%.8x", sregs.interrupt_bitmap[i / 64]);
+219 
+220 #undef APPLY_SREG
+221 #undef APPLY_SEGMENT
+222 #undef APPLY_DTABLE
+223 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a69fa7ec6c7399ac8aa29df5e7bfa9efc}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const char $\ast$ {\em reg\_\-name}, \/  const struct kvm\_\-dtable \& {\em dtable})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a69fa7ec6c7399ac8aa29df5e7bfa9efc}
+
+
+
+\begin{DoxyCode}
+196 {
+197     inform("\t%s: @0x%llx+%x\n",
+198            reg_name, dtable.base, dtable.limit);
+199 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a74ec3b8549e1f3e742423b0ec38bb9de}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const char $\ast$ {\em reg\_\-name}, \/  const struct kvm\_\-segment \& {\em seg})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a74ec3b8549e1f3e742423b0ec38bb9de}
+
+
+
+\begin{DoxyCode}
+186 {
+187     inform("\t%s: @0x%llx+%x [sel: 0x%x, type: 0x%x]\n"
+188            "\t\tpres.: %u, dpl: %u, db: %u, s: %u, l: %u, g: %u, avl: %u, unus.: 
+      %u\n",
+189            reg_name,
+190            seg.base, seg.limit, seg.selector, seg.type,
+191            seg.present, seg.dpl, seg.db, seg.s, seg.l, seg.g, seg.avl, seg.unusab
+      le);
+192 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_ac071f56204bac6717fe834e758908929}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!dumpKvm@{dumpKvm}}
+\index{dumpKvm@{dumpKvm}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{dumpKvm}]{\setlength{\rightskip}{0pt plus 5cm}static void dumpKvm (const struct kvm\_\-regs \& {\em regs})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_ac071f56204bac6717fe834e758908929}
+
+
+
+\begin{DoxyCode}
+170 {
+171     inform("KVM register state:\n");
+172 
+173 #define APPLY_IREG(kreg, mreg)                  \
+174     inform("\t" # kreg ": 0x%llx\n", regs.kreg)
+175 
+176     FOREACH_IREG();
+177 
+178 #undef APPLY_IREG
+179 
+180     inform("\trip: 0x%llx\n", regs.rip);
+181     inform("\trflags: 0x%llx\n", regs.rflags);
+182 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a0dd1c17ee1639164887df8dae4a46861}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!forceSegAccessed@{forceSegAccessed}}
+\index{forceSegAccessed@{forceSegAccessed}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{forceSegAccessed}]{\setlength{\rightskip}{0pt plus 5cm}static void forceSegAccessed (struct kvm\_\-segment \& {\em seg})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a0dd1c17ee1639164887df8dae4a46861}
+
+
+
+\begin{DoxyCode}
+741 {
+742     // Intel's VMX requires that (some) usable segments are flagged as
+743     // 'accessed' (i.e., the lowest bit in the segment type is set)
+744     // when entering VMX. This wouldn't necessary be the case even if
+745     // gem5 did set the access bits correctly, so we force it to one
+746     // in that case.
+747     if (!seg.unusable)
+748         seg.type |= SEG_TYPE_BIT_ACCESSED;
+749 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a897edaa2f5ac7a67d3897d65908e8522}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!isCanonicalAddress@{isCanonicalAddress}}
+\index{isCanonicalAddress@{isCanonicalAddress}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{isCanonicalAddress}]{\setlength{\rightskip}{0pt plus 5cm}static bool isCanonicalAddress (uint64\_\-t {\em addr})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{x86__cpu_8cc_a897edaa2f5ac7a67d3897d65908e8522}
+
+
+
+\begin{DoxyCode}
+370 {
+371     // x86-64 doesn't currently use the full 64-bit virtual address
+372     // space, instead it uses signed 48 bit addresses that are
+373     // sign-extended to 64 bits.  Such addresses are known as
+374     // "canonical".
+375     uint64_t upper_half(addr & 0xffff800000000000ULL);
+376     return upper_half == 0 || upper_half == 0xffff800000000000;
+377 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a8e529a8d690941d970b53028ee411ec2}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!makeKvmCpuid@{makeKvmCpuid}}
+\index{makeKvmCpuid@{makeKvmCpuid}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{makeKvmCpuid}]{\setlength{\rightskip}{0pt plus 5cm}static struct kvm\_\-cpuid\_\-entry2 makeKvmCpuid ({\bf uint32\_\-t} {\em function}, \/  {\bf uint32\_\-t} {\em index}, \/  {\bf CpuidResult} \& {\em result})\hspace{0.3cm}{\ttfamily  \mbox{[}static, read\mbox{]}}}}
+\label{x86__cpu_8cc_a8e529a8d690941d970b53028ee411ec2}
+
+
+
+\begin{DoxyCode}
+1410 {
+1411     struct kvm_cpuid_entry2 e;
+1412     e.function = function;
+1413     e.index = index;
+1414     e.flags = 0;
+1415     e.eax = (uint32_t)result.rax;
+1416     e.ebx = (uint32_t)result.rbx;
+1417     e.ecx = (uint32_t)result.rcx;
+1418     e.edx = (uint32_t)result.rdx;
+1419 
+1420     return e;
+1421 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a28d3018844ed28641faabd89ab18e3ff}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!newVarStruct@{newVarStruct}}
+\index{newVarStruct@{newVarStruct}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{newVarStruct}]{\setlength{\rightskip}{0pt plus 5cm}static STRUCT$\ast$ newVarStruct (size\_\-t {\em entries})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{x86__cpu_8cc_a28d3018844ed28641faabd89ab18e3ff}
+
+
+
+\begin{DoxyCode}
+164 {
+165     return (STRUCT *)operator new(sizeof(STRUCT) + entries * sizeof(ENTRY));
+166 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_ada916424bb12b00a7176788153a7a2f4}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!setContextSegment@{setContextSegment}}
+\index{setContextSegment@{setContextSegment}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{setContextSegment}]{\setlength{\rightskip}{0pt plus 5cm}void setContextSegment ({\bf ThreadContext} $\ast$ {\em tc}, \/  const struct kvm\_\-dtable \& {\em kvm\_\-dtable}, \/  const int {\em index})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{x86__cpu_8cc_ada916424bb12b00a7176788153a7a2f4}
+
+
+
+\begin{DoxyCode}
+1016 {
+1017     // We need some setMiscReg magic here to keep the effective base
+1018     // addresses in sync. We need an up-to-date version of EFER, so
+1019     // make sure this is called after the sregs have been synced.
+1020     tc->setMiscReg(MISCREG_SEG_BASE(index), kvm_dtable.base);
+1021     tc->setMiscReg(MISCREG_SEG_LIMIT(index), kvm_dtable.limit);
+1022 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a95c05cceb7cdce6304fb8ebe174bf300}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!setContextSegment@{setContextSegment}}
+\index{setContextSegment@{setContextSegment}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{setContextSegment}]{\setlength{\rightskip}{0pt plus 5cm}void setContextSegment ({\bf ThreadContext} $\ast$ {\em tc}, \/  const struct kvm\_\-segment \& {\em kvm\_\-seg}, \/  const int {\em index})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{x86__cpu_8cc_a95c05cceb7cdce6304fb8ebe174bf300}
+
+
+
+\begin{DoxyCode}
+991 {
+992     SegAttr attr(0);
+993 
+994     attr.type = kvm_seg.type;
+995     attr.present = kvm_seg.present;
+996     attr.dpl = kvm_seg.dpl;
+997     attr.defaultSize = kvm_seg.db;
+998     attr.system = kvm_seg.s;
+999     attr.longMode = kvm_seg.l;
+1000     attr.granularity = kvm_seg.g;
+1001     attr.avl = kvm_seg.avl;
+1002     attr.unusable = kvm_seg.unusable;
+1003 
+1004     // We need some setMiscReg magic here to keep the effective base
+1005     // addresses in sync. We need an up-to-date version of EFER, so
+1006     // make sure this is called after the sregs have been synced.
+1007     tc->setMiscReg(MISCREG_SEG_BASE(index), kvm_seg.base);
+1008     tc->setMiscReg(MISCREG_SEG_LIMIT(index), kvm_seg.limit);
+1009     tc->setMiscReg(MISCREG_SEG_SEL(index), kvm_seg.selector);
+1010     tc->setMiscReg(MISCREG_SEG_ATTR(index), attr);
+1011 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a51d8093baee27ba8789bb1af7af824a2}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!setKvmDTableReg@{setKvmDTableReg}}
+\index{setKvmDTableReg@{setKvmDTableReg}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{setKvmDTableReg}]{\setlength{\rightskip}{0pt plus 5cm}static void setKvmDTableReg ({\bf ThreadContext} $\ast$ {\em tc}, \/  struct kvm\_\-dtable \& {\em kvm\_\-dtable}, \/  const int {\em index})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{x86__cpu_8cc_a51d8093baee27ba8789bb1af7af824a2}
+
+
+
+\begin{DoxyCode}
+734 {
+735     kvm_dtable.base = tc->readMiscRegNoEffect(MISCREG_SEG_BASE(index));
+736     kvm_dtable.limit = tc->readMiscRegNoEffect(MISCREG_SEG_LIMIT(index));
+737 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a05127157d55aca2814725c2e283a2d19}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!setKvmSegmentReg@{setKvmSegmentReg}}
+\index{setKvmSegmentReg@{setKvmSegmentReg}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{setKvmSegmentReg}]{\setlength{\rightskip}{0pt plus 5cm}static void setKvmSegmentReg ({\bf ThreadContext} $\ast$ {\em tc}, \/  struct kvm\_\-segment \& {\em kvm\_\-seg}, \/  const int {\em index})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{x86__cpu_8cc_a05127157d55aca2814725c2e283a2d19}
+
+
+
+\begin{DoxyCode}
+709 {
+710     SegAttr attr(tc->readMiscRegNoEffect(MISCREG_SEG_ATTR(index)));
+711 
+712     kvm_seg.base = tc->readMiscRegNoEffect(MISCREG_SEG_BASE(index));
+713     kvm_seg.limit = tc->readMiscRegNoEffect(MISCREG_SEG_LIMIT(index));
+714     kvm_seg.selector = tc->readMiscRegNoEffect(MISCREG_SEG_SEL(index));
+715     kvm_seg.type = attr.type;
+716     kvm_seg.present = attr.present;
+717     kvm_seg.dpl = attr.dpl;
+718     kvm_seg.db = attr.defaultSize;
+719     kvm_seg.s = attr.system;
+720     kvm_seg.l = attr.longMode;
+721     kvm_seg.g = attr.granularity;
+722     kvm_seg.avl = attr.avl;
+723 
+724     // A segment is normally unusable when the selector is zero. There
+725     // is a attr.unusable flag in gem5, but it seems unused. qemu
+726     // seems to set this to 0 all the time, so we just do the same and
+727     // hope for the best.
+728     kvm_seg.unusable = 0;
+729 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a954bbe2225157cef7b550ee58ce351bd}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!static\_\-assert@{static\_\-assert}}
+\index{static\_\-assert@{static\_\-assert}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{static\_\-assert}]{\setlength{\rightskip}{0pt plus 5cm}static\_\-assert (sizeof({\bf FXSave}) = {\ttfamily =512}, \/  \char`\"{}Unexpected size of {\bf FXSave}\char`\"{})}}
+\label{x86__cpu_8cc_a954bbe2225157cef7b550ee58ce351bd}
+\hypertarget{x86__cpu_8cc_af4646df895fd6ad546cfecaa85e782b7}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!updateKvmStateFPUCommon@{updateKvmStateFPUCommon}}
+\index{updateKvmStateFPUCommon@{updateKvmStateFPUCommon}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{updateKvmStateFPUCommon}]{\setlength{\rightskip}{0pt plus 5cm}static void updateKvmStateFPUCommon ({\bf ThreadContext} $\ast$ {\em tc}, \/  T \& {\em fpu})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{x86__cpu_8cc_af4646df895fd6ad546cfecaa85e782b7}
+
+
+
+\begin{DoxyCode}
+822 {
+823     static_assert(sizeof(X86ISA::FloatRegBits) == 8,
+824                   "Unexpected size of X86ISA::FloatRegBits");
+825 
+826     fpu.mxcsr = tc->readMiscRegNoEffect(MISCREG_MXCSR);
+827     fpu.fcw = tc->readMiscRegNoEffect(MISCREG_FCW);
+828     // No need to rebuild from MISCREG_FSW and MISCREG_TOP if we read
+829     // with effects.
+830     fpu.fsw = tc->readMiscReg(MISCREG_FSW);
+831 
+832     uint64_t ftw(tc->readMiscRegNoEffect(MISCREG_FTW));
+833     fpu.ftwx = X86ISA::convX87TagsToXTags(ftw);
+834 
+835     fpu.last_opcode = tc->readMiscRegNoEffect(MISCREG_FOP);
+836 
+837     const unsigned top((fpu.fsw >> 11) & 0x7);
+838     for (int i = 0; i < 8; ++i) {
+839         const unsigned reg_idx((i + top) & 0x7);
+840         const double value(tc->readFloatReg(FLOATREG_FPR(reg_idx)));
+841         DPRINTF(KvmContext, "Setting KVM FP reg %i (st[%i]) := %f\n",
+842                 reg_idx, i, value);
+843         X86ISA::storeFloat80(fpu.fpr[i], value);
+844     }
+845 
+846     // TODO: We should update the MMX state
+847 
+848     for (int i = 0; i < 16; ++i) {
+849         *(X86ISA::FloatRegBits *)&fpu.xmm[i][0] =
+850             tc->readFloatRegBits(FLOATREG_XMM_LOW(i));
+851         *(X86ISA::FloatRegBits *)&fpu.xmm[i][8] =
+852             tc->readFloatRegBits(FLOATREG_XMM_HIGH(i));
+853     }
+854 }
+\end{DoxyCode}
+\hypertarget{x86__cpu_8cc_a313c58fe9310f894c07dda533fde7fbb}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!updateThreadContextFPUCommon@{updateThreadContextFPUCommon}}
+\index{updateThreadContextFPUCommon@{updateThreadContextFPUCommon}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{updateThreadContextFPUCommon}]{\setlength{\rightskip}{0pt plus 5cm}static void updateThreadContextFPUCommon ({\bf ThreadContext} $\ast$ {\em tc}, \/  const T \& {\em fpu})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, static\mbox{]}}}}
+\label{x86__cpu_8cc_a313c58fe9310f894c07dda533fde7fbb}
+
+
+
+\begin{DoxyCode}
+1044 {
+1045     const unsigned top((fpu.fsw >> 11) & 0x7);
+1046 
+1047     static_assert(sizeof(X86ISA::FloatRegBits) == 8,
+1048                   "Unexpected size of X86ISA::FloatRegBits");
+1049 
+1050     for (int i = 0; i < 8; ++i) {
+1051         const unsigned reg_idx((i + top) & 0x7);
+1052         const double value(X86ISA::loadFloat80(fpu.fpr[i]));
+1053         DPRINTF(KvmContext, "Setting gem5 FP reg %i (st[%i]) := %f\n",
+1054                 reg_idx, i, value);
+1055         tc->setFloatReg(FLOATREG_FPR(reg_idx), value);
+1056     }
+1057 
+1058     // TODO: We should update the MMX state
+1059 
+1060     tc->setMiscRegNoEffect(MISCREG_X87_TOP, top);
+1061     tc->setMiscRegNoEffect(MISCREG_MXCSR, fpu.mxcsr);
+1062     tc->setMiscRegNoEffect(MISCREG_FCW, fpu.fcw);
+1063     tc->setMiscRegNoEffect(MISCREG_FSW, fpu.fsw);
+1064 
+1065     uint64_t ftw(convX87XTagsToTags(fpu.ftwx));
+1066     // TODO: Are these registers really the same?
+1067     tc->setMiscRegNoEffect(MISCREG_FTW, ftw);
+1068     tc->setMiscRegNoEffect(MISCREG_FTAG, ftw);
+1069 
+1070     tc->setMiscRegNoEffect(MISCREG_FOP, fpu.last_opcode);
+1071 
+1072     for (int i = 0; i < 16; ++i) {
+1073         tc->setFloatRegBits(FLOATREG_XMM_LOW(i),
+1074                             *(X86ISA::FloatRegBits *)&fpu.xmm[i][0]);
+1075         tc->setFloatRegBits(FLOATREG_XMM_HIGH(i),
+1076                             *(X86ISA::FloatRegBits *)&fpu.xmm[i][8]);
+1077     }
+1078 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{x86__cpu_8cc_a71c71aceb8fa2a663f6ac608a6df0b08}{
+\index{x86\_\-cpu.cc@{x86\_\-cpu.cc}!M5\_\-ATTR\_\-PACKED@{M5\_\-ATTR\_\-PACKED}}
+\index{M5\_\-ATTR\_\-PACKED@{M5\_\-ATTR\_\-PACKED}!x86_cpu.cc@{x86\_\-cpu.cc}}
+\subsubsection[{M5\_\-ATTR\_\-PACKED}]{\setlength{\rightskip}{0pt plus 5cm}struct {\bf FXSave}  {\bf M5\_\-ATTR\_\-PACKED}}}
+\label{x86__cpu_8cc_a71c71aceb8fa2a663f6ac608a6df0b08}

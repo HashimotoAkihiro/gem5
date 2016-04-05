@@ -1,0 +1,122 @@
+\hypertarget{classArmISA_1_1MacroVFPMemOp}{
+\section{クラス MacroVFPMemOp}
+\label{classArmISA_1_1MacroVFPMemOp}\index{ArmISA::MacroVFPMemOp@{ArmISA::MacroVFPMemOp}}
+}
+
+
+{\ttfamily \#include $<$macromem.hh$>$}MacroVFPMemOpに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classArmISA_1_1MacroVFPMemOp}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1MacroVFPMemOp_ac86efcec990c72ecd0ea1044552863f9}{MacroVFPMemOp} (const char $\ast$mnem, \hyperlink{classStaticInst_a5605d4fc727eae9e595325c90c0ec108}{ExtMachInst} \hyperlink{classStaticInst_a744598b194ca3d4201d9414ce4cc4af4}{machInst}, OpClass \_\-\_\-opClass, \hyperlink{namespaceArmISA_ae64680ba9fb526106829d6bf92fc791b}{IntRegIndex} \hyperlink{namespaceArmISA_adf8c6c579ad8729095a637a4f2181211}{rn}, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} vd, bool single, bool \hyperlink{namespaceArmISA_a3a82fdc0669ddcc0c196b1ac0220c55a}{up}, bool \hyperlink{namespaceArmISA_a8143fa40e9030da2e8b93ba9990a7bb1}{writeback}, bool load, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{namespaceArmISA_a87b7a740701cddafb930a9460e9f4eba}{offset})
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Base class for microcoded floating point memory instructions. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1MacroVFPMemOp_ac86efcec990c72ecd0ea1044552863f9}{
+\index{ArmISA::MacroVFPMemOp@{ArmISA::MacroVFPMemOp}!MacroVFPMemOp@{MacroVFPMemOp}}
+\index{MacroVFPMemOp@{MacroVFPMemOp}!ArmISA::MacroVFPMemOp@{ArmISA::MacroVFPMemOp}}
+\subsubsection[{MacroVFPMemOp}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MacroVFPMemOp} (const char $\ast$ {\em mnem}, \/  {\bf ExtMachInst} {\em machInst}, \/  OpClass {\em \_\-\_\-opClass}, \/  {\bf IntRegIndex} {\em rn}, \/  {\bf RegIndex} {\em vd}, \/  bool {\em single}, \/  bool {\em up}, \/  bool {\em writeback}, \/  bool {\em load}, \/  {\bf uint32\_\-t} {\em offset})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1MacroVFPMemOp_ac86efcec990c72ecd0ea1044552863f9}
+
+
+
+\begin{DoxyCode}
+1337                                                                          :
+1338     PredMacroOp(mnem, machInst, __opClass)
+1339 {
+1340     int i = 0;
+1341 
+1342     // The lowest order bit selects fldmx (set) or fldmd (clear). These seem
+1343     // to be functionally identical except that fldmx is deprecated. For now
+1344     // we'll assume they're otherwise interchangable.
+1345     int count = (single ? offset : (offset / 2));
+1346     if (count == 0 || count > NumFloatV7ArchRegs)
+1347         warn_once("Bad offset field for VFP load/store multiple.\n");
+1348     if (count == 0) {
+1349         // Force there to be at least one microop so the macroop makes sense.
+1350         writeback = true;
+1351     }
+1352     if (count > NumFloatV7ArchRegs)
+1353         count = NumFloatV7ArchRegs;
+1354 
+1355     numMicroops = count * (single ? 1 : 2) + (writeback ? 1 : 0);
+1356     microOps = new StaticInstPtr[numMicroops];
+1357 
+1358     int64_t addr = 0;
+1359 
+1360     if (!up)
+1361         addr = 4 * offset;
+1362 
+1363     bool tempUp = up;
+1364     for (int j = 0; j < count; j++) {
+1365         if (load) {
+1366             if (single) {
+1367                 microOps[i++] = new MicroLdrFpUop(machInst, vd++, rn,
+1368                                                   tempUp, addr);
+1369             } else {
+1370                 microOps[i++] = new MicroLdrDBFpUop(machInst, vd++, rn,
+1371                                                     tempUp, addr);
+1372                 microOps[i++] = new MicroLdrDTFpUop(machInst, vd++, rn, tempUp,
+1373                                                     addr + (up ? 4 : -4));
+1374             }
+1375         } else {
+1376             if (single) {
+1377                 microOps[i++] = new MicroStrFpUop(machInst, vd++, rn,
+1378                                                   tempUp, addr);
+1379             } else {
+1380                 microOps[i++] = new MicroStrDBFpUop(machInst, vd++, rn,
+1381                                                     tempUp, addr);
+1382                 microOps[i++] = new MicroStrDTFpUop(machInst, vd++, rn, tempUp,
+1383                                                     addr + (up ? 4 : -4));
+1384             }
+1385         }
+1386         if (!tempUp) {
+1387             addr -= (single ? 4 : 8);
+1388             // The microops don't handle negative displacement, so turn if we
+1389             // hit zero, flip polarity and start adding.
+1390             if (addr <= 0) {
+1391                 tempUp = true;
+1392                 addr = -addr;
+1393             }
+1394         } else {
+1395             addr += (single ? 4 : 8);
+1396         }
+1397     }
+1398 
+1399     if (writeback) {
+1400         if (up) {
+1401             microOps[i++] =
+1402                 new MicroAddiUop(machInst, rn, rn, 4 * offset);
+1403         } else {
+1404             microOps[i++] =
+1405                 new MicroSubiUop(machInst, rn, rn, 4 * offset);
+1406         }
+1407     }
+1408 
+1409     assert(numMicroops == i);
+1410     microOps[numMicroops - 1]->setLastMicroop();
+1411 
+1412     for (StaticInstPtr *curUop = microOps;
+1413             !(*curUop)->isLastMicroop(); curUop++) {
+1414         MicroOp * uopPtr = dynamic_cast<MicroOp *>(curUop->get());
+1415         assert(uopPtr);
+1416         uopPtr->setDelayedCommit();
+1417     }
+1418 }
+
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/insts/\hyperlink{macromem_8hh}{macromem.hh}\item 
+arch/arm/insts/\hyperlink{macromem_8cc}{macromem.cc}\end{DoxyCompactItemize}

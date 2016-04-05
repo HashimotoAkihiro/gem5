@@ -1,0 +1,145 @@
+\hypertarget{sim_2debug_8cc}{
+\section{sim/debug.cc}
+\label{sim_2debug_8cc}\index{sim/debug.cc@{sim/debug.cc}}
+}
+{\ttfamily \#include $<$Python.h$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include \char`\"{}base/debug.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/debug.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/eventq\_\-impl.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/global\_\-event.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-events.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-exit.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structDebugBreakEvent}{DebugBreakEvent}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{sim_2debug_8cc_a4c79c8ce91cdbeb5e36a2f9ec71f4e73}{schedBreak} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} when)
+\item 
+void \hyperlink{sim_2debug_8cc_a8e601d5e7c5df79b432e340f3af19583}{takeCheckpoint} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} when)
+\item 
+void \hyperlink{sim_2debug_8cc_abce4c2f3b43451b7267d9e1e0b2ec153}{eventqDump} ()
+\item 
+void \hyperlink{sim_2debug_8cc_a11045488b3a5d8e441765810c10272eb}{py\_\-interact} ()
+\item 
+int \hyperlink{sim_2debug_8cc_ada8b15a8637de4d4f29e366c6e1acf51}{getRemoteGDBPort} ()
+\item 
+void \hyperlink{sim_2debug_8cc_a6ff050ba197ef015254b723272affd53}{setRemoteGDBPort} (int port)
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{sim_2debug_8cc_a87494b17c0415f6edfb32a49725c5d51}{remote\_\-gdb\_\-base\_\-port} = 7000
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{sim_2debug_8cc_abce4c2f3b43451b7267d9e1e0b2ec153}{
+\index{sim/debug.cc@{sim/debug.cc}!eventqDump@{eventqDump}}
+\index{eventqDump@{eventqDump}!sim/debug.cc@{sim/debug.cc}}
+\subsubsection[{eventqDump}]{\setlength{\rightskip}{0pt plus 5cm}void eventqDump ()}}
+\label{sim_2debug_8cc_abce4c2f3b43451b7267d9e1e0b2ec153}
+Dump all the events currently on the event queue 
+
+
+\begin{DoxyCode}
+105 {
+106     for (uint32_t i = 0; i < numMainEventQueues; ++i) {
+107         mainEventQueue[i]->dump();
+108     }
+109 }
+\end{DoxyCode}
+\hypertarget{sim_2debug_8cc_ada8b15a8637de4d4f29e366c6e1acf51}{
+\index{sim/debug.cc@{sim/debug.cc}!getRemoteGDBPort@{getRemoteGDBPort}}
+\index{getRemoteGDBPort@{getRemoteGDBPort}!sim/debug.cc@{sim/debug.cc}}
+\subsubsection[{getRemoteGDBPort}]{\setlength{\rightskip}{0pt plus 5cm}int getRemoteGDBPort ()}}
+\label{sim_2debug_8cc_ada8b15a8637de4d4f29e366c6e1acf51}
+
+
+
+\begin{DoxyCode}
+131 {
+132     return remote_gdb_base_port;
+133 }
+\end{DoxyCode}
+\hypertarget{sim_2debug_8cc_a11045488b3a5d8e441765810c10272eb}{
+\index{sim/debug.cc@{sim/debug.cc}!py\_\-interact@{py\_\-interact}}
+\index{py\_\-interact@{py\_\-interact}!sim/debug.cc@{sim/debug.cc}}
+\subsubsection[{py\_\-interact}]{\setlength{\rightskip}{0pt plus 5cm}void py\_\-interact ()}}
+\label{sim_2debug_8cc_a11045488b3a5d8e441765810c10272eb}
+
+
+
+\begin{DoxyCode}
+113 {
+114     PyObject *globals;
+115     PyObject *locals;
+116 
+117     globals = PyEval_GetGlobals();
+118     Py_INCREF(globals);
+119     locals = PyDict_New();
+120     PyRun_String("import code", Py_file_input, globals, locals);
+121     PyRun_String("code.interact(local=globals())", Py_file_input,
+122                  globals, locals);
+123     Py_DECREF(globals);
+124     Py_DECREF(locals);
+125 }
+\end{DoxyCode}
+\hypertarget{sim_2debug_8cc_a4c79c8ce91cdbeb5e36a2f9ec71f4e73}{
+\index{sim/debug.cc@{sim/debug.cc}!schedBreak@{schedBreak}}
+\index{schedBreak@{schedBreak}!sim/debug.cc@{sim/debug.cc}}
+\subsubsection[{schedBreak}]{\setlength{\rightskip}{0pt plus 5cm}void schedBreak ({\bf Tick} {\em when})}}
+\label{sim_2debug_8cc_a4c79c8ce91cdbeb5e36a2f9ec71f4e73}
+Cause the simulator to execute a breakpoint 
+\begin{DoxyParams}{引数}
+\item[{\em when}]the tick to break \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+87 {
+88     new DebugBreakEvent(when);
+89     warn("need to stop all queues");
+90 }
+\end{DoxyCode}
+\hypertarget{sim_2debug_8cc_a6ff050ba197ef015254b723272affd53}{
+\index{sim/debug.cc@{sim/debug.cc}!setRemoteGDBPort@{setRemoteGDBPort}}
+\index{setRemoteGDBPort@{setRemoteGDBPort}!sim/debug.cc@{sim/debug.cc}}
+\subsubsection[{setRemoteGDBPort}]{\setlength{\rightskip}{0pt plus 5cm}void setRemoteGDBPort (int {\em port})}}
+\label{sim_2debug_8cc_a6ff050ba197ef015254b723272affd53}
+
+
+
+\begin{DoxyCode}
+139 {
+140     remote_gdb_base_port = port;
+141 }
+\end{DoxyCode}
+\hypertarget{sim_2debug_8cc_a8e601d5e7c5df79b432e340f3af19583}{
+\index{sim/debug.cc@{sim/debug.cc}!takeCheckpoint@{takeCheckpoint}}
+\index{takeCheckpoint@{takeCheckpoint}!sim/debug.cc@{sim/debug.cc}}
+\subsubsection[{takeCheckpoint}]{\setlength{\rightskip}{0pt plus 5cm}void takeCheckpoint ({\bf Tick} {\em when})}}
+\label{sim_2debug_8cc_a8e601d5e7c5df79b432e340f3af19583}
+Function to cause the simulator to take a checkpoint from the debugger 
+
+
+\begin{DoxyCode}
+97 {
+98     if (!when)
+99         when = curTick() + 1;
+100     exitSimLoop("checkpoint", 0, when, 0);
+101 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{sim_2debug_8cc_a87494b17c0415f6edfb32a49725c5d51}{
+\index{sim/debug.cc@{sim/debug.cc}!remote\_\-gdb\_\-base\_\-port@{remote\_\-gdb\_\-base\_\-port}}
+\index{remote\_\-gdb\_\-base\_\-port@{remote\_\-gdb\_\-base\_\-port}!sim/debug.cc@{sim/debug.cc}}
+\subsubsection[{remote\_\-gdb\_\-base\_\-port}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf remote\_\-gdb\_\-base\_\-port} = 7000}}
+\label{sim_2debug_8cc_a87494b17c0415f6edfb32a49725c5d51}

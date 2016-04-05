@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/ozone/dyn_inst.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/ozone/dyn_inst.hh</h1><a href="ozone_2dyn__inst_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2005-2006 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __CPU_OZONE_DYN_INST_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_OZONE_DYN_INST_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;arch/isa_traits.hh&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="ozone_2cpu_8hh.html">cpu/ozone/cpu.hh</a>&quot;</span>   <span class="comment">// MUST include this</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="ozone__impl_8hh.html">cpu/ozone/ozone_impl.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="base__dyn__inst_8hh.html">cpu/base_dyn_inst.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00046"></a><a class="code" href="classOzoneDynInst.html">00046</a> <span class="keyword">class </span><a class="code" href="classOzoneDynInst.html">OzoneDynInst</a> : <span class="keyword">public</span> <a class="code" href="classBaseDynInst.html">BaseDynInst</a>&lt;Impl&gt;
+<a name="l00047"></a>00047 {
+<a name="l00048"></a>00048   <span class="keyword">public</span>:
+<a name="l00049"></a>00049     <span class="comment">// Typedefs</span>
+<a name="l00050"></a><a class="code" href="classOzoneDynInst.html#a9730cc41bccb218cae8f32869b8d887e">00050</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::OzoneCPU <a class="code" href="classOzoneCPU.html">OzoneCPU</a>;
+<a name="l00051"></a>00051 
+<a name="l00052"></a><a class="code" href="classOzoneDynInst.html#af74382499244d5cf3961ff5eaf314518">00052</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="structOzoneThreadState.html">OzoneCPU::ImplState</a> <a class="code" href="structOzoneThreadState.html">ImplState</a>;
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054     <span class="comment">// Typedef for DynInstPtr.  This is really just a RefCountingPtr&lt;OoODynInst&gt;.</span>
+<a name="l00055"></a><a class="code" href="classOzoneDynInst.html#a028ce10889c5f6450239d9e9a7347976">00055</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classRefCountingPtr.html">DynInstPtr</a>;
+<a name="l00056"></a>00056 
+<a name="l00057"></a><a class="code" href="classOzoneDynInst.html#a5605d4fc727eae9e595325c90c0ec108">00057</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">TheISA::ExtMachInst</a> <a class="code" href="classOzoneDynInst.html#a5605d4fc727eae9e595325c90c0ec108">ExtMachInst</a>;
+<a name="l00058"></a><a class="code" href="classOzoneDynInst.html#a4617f528417b8f55f809ae0988284c9b">00058</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a301c22ea09fa33dcfe6ddf22f203699c">TheISA::MachInst</a> <a class="code" href="classOzoneDynInst.html#a4617f528417b8f55f809ae0988284c9b">MachInst</a>;
+<a name="l00059"></a><a class="code" href="classOzoneDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">00059</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a06fae4f187c7c94b8b0046dd6802be48">TheISA::FloatReg</a> <a class="code" href="classOzoneDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a>;
+<a name="l00060"></a><a class="code" href="classOzoneDynInst.html#aab5eeae86499f9bfe15ef79360eccc64">00060</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a6905e424d12491fe126e1a22a9c8d655">TheISA::FloatRegBits</a> <a class="code" href="classOzoneDynInst.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a>;
+<a name="l00061"></a><a class="code" href="classOzoneDynInst.html#aaf5f073a387db0556d1db4bcc45428bc">00061</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#aa16539aa6584fd12f7d6fa868f75b4de">TheISA::MiscReg</a> <a class="code" href="classOzoneDynInst.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a>;
+<a name="l00062"></a><a class="code" href="classOzoneDynInst.html#a184cb829e22cc656acb41864f68f51ea">00062</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classOzoneDynInst.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a>;
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064     <span class="comment">// Note that this is duplicated from the BaseDynInst class; I&apos;m</span>
+<a name="l00065"></a>00065     <span class="comment">// simply not sure the enum would carry through so I could use it</span>
+<a name="l00066"></a>00066     <span class="comment">// in array declarations in this class.</span>
+<a name="l00067"></a>00067     <span class="keyword">enum</span> {
+<a name="l00068"></a><a class="code" href="classOzoneDynInst.html#ab48899087cc647f0f791ed0c459adc53a17b78fe104e3bf28fca535a040514084">00068</a>         <a class="code" href="classOzoneDynInst.html#ab48899087cc647f0f791ed0c459adc53a17b78fe104e3bf28fca535a040514084">MaxInstSrcRegs</a> = <a class="code" href="namespaceArmISA.html#a520799fb7436e81cf66cbad7b420b833">TheISA::MaxInstSrcRegs</a>,
+<a name="l00069"></a><a class="code" href="classOzoneDynInst.html#ab48899087cc647f0f791ed0c459adc53a6a2e9b17a83d01eb4ee6bbdd739be9eb">00069</a>         <a class="code" href="classOzoneDynInst.html#ab48899087cc647f0f791ed0c459adc53a6a2e9b17a83d01eb4ee6bbdd739be9eb" title="Max source regs.">MaxInstDestRegs</a> = TheISA::MaxInstDestRegs
+<a name="l00070"></a>00070     };
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072     <a class="code" href="classOzoneDynInst.html#a0d71ba7c29db1d27e57fe7c78e711c6d">OzoneDynInst</a>(<a class="code" href="classOzoneCPU.html">OzoneCPU</a> *<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>);
+<a name="l00073"></a>00073 
+<a name="l00074"></a>00074     <a class="code" href="classOzoneDynInst.html#a0d71ba7c29db1d27e57fe7c78e711c6d">OzoneDynInst</a>(<a class="code" href="classOzoneDynInst.html#a5605d4fc727eae9e595325c90c0ec108">ExtMachInst</a> inst, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> PC, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> Pred_PC,
+<a name="l00075"></a>00075                  <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> seq_num, <a class="code" href="classOzoneCPU.html">OzoneCPU</a> *<a class="code" href="classBaseDynInst.html#af0927cfb92eca43bfa3bfd5ce19af308">cpu</a>);
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077     <a class="code" href="classOzoneDynInst.html#a0d71ba7c29db1d27e57fe7c78e711c6d">OzoneDynInst</a>(<a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst);
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079     <a class="code" href="classOzoneDynInst.html#a29f7890cfe51b11cee12ebd8023d0d48">~OzoneDynInst</a>();
+<a name="l00080"></a>00080 
+<a name="l00081"></a><a class="code" href="classOzoneDynInst.html#a3df27bece3830b65ac7c0a8868fff9d8">00081</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a3df27bece3830b65ac7c0a8868fff9d8">setSrcInst</a>(<a class="code" href="classRefCountingPtr.html">DynInstPtr</a> &amp;newSrcInst, <span class="keywordtype">int</span> regIdx)
+<a name="l00082"></a>00082     { <a class="code" href="classOzoneDynInst.html#a1b1532e26249ee7c2b50fd8e23341bf1">srcInsts</a>[regIdx] = newSrcInst; }
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084     <span class="keywordtype">bool</span> <a class="code" href="classOzoneDynInst.html#abd9ccfd808ecf42a7a29602c82011672">srcInstReady</a>(<span class="keywordtype">int</span> regIdx);
+<a name="l00085"></a>00085 
+<a name="l00086"></a><a class="code" href="classOzoneDynInst.html#ae4ceee955b690a2898e5a0c609c9697d">00086</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#ae4ceee955b690a2898e5a0c609c9697d">setPrevDestInst</a>(<a class="code" href="classRefCountingPtr.html">DynInstPtr</a> &amp;oldDestInst, <span class="keywordtype">int</span> regIdx)
+<a name="l00087"></a>00087     { <a class="code" href="classOzoneDynInst.html#afa9f5b8c5f070a82383ea9720a61b968">prevDestInst</a>[regIdx] = oldDestInst; }
+<a name="l00088"></a>00088 
+<a name="l00089"></a><a class="code" href="classOzoneDynInst.html#ada8a08e554bca2a63067ff5350f49b6c">00089</a>     <a class="code" href="classRefCountingPtr.html">DynInstPtr</a> &amp;<a class="code" href="classOzoneDynInst.html#ada8a08e554bca2a63067ff5350f49b6c">getPrevDestInst</a>(<span class="keywordtype">int</span> regIdx)
+<a name="l00090"></a>00090     { <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#afa9f5b8c5f070a82383ea9720a61b968">prevDestInst</a>[regIdx]; }
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a94196a9ba20d5dd3f2e6bb5117417453">addDependent</a>(<a class="code" href="classOzoneDynInst.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;dependent_inst);
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classOzoneDynInst.html#a26eb9ab258ccdd0e4a62062b6bc50446">00094</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;DynInstPtr&gt;</a> &amp;<a class="code" href="classOzoneDynInst.html#a26eb9ab258ccdd0e4a62062b6bc50446">getDependents</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a99b3ba0948715cdad5da539fcb59a9f6">dependents</a>; }
+<a name="l00095"></a><a class="code" href="classOzoneDynInst.html#a912e35c4a6671a919053a95cce3e063a">00095</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;DynInstPtr&gt;</a> &amp;<a class="code" href="classOzoneDynInst.html#a912e35c4a6671a919053a95cce3e063a">getMemDeps</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a5bb0000180ac8f071b922398c3ac227e">memDependents</a>; }
+<a name="l00096"></a><a class="code" href="classOzoneDynInst.html#aabdb1fb2845bfb247663b02f8d684c3e">00096</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> &amp;<a class="code" href="classOzoneDynInst.html#aabdb1fb2845bfb247663b02f8d684c3e">getMemSrcs</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a13a831a5d0ecbe3db725fc446901268d">srcMemInsts</a>; }
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a5e49f18c82c005142bde7623230b7257">wakeDependents</a>();
+<a name="l00099"></a>00099 
+<a name="l00100"></a>00100     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a841278536a46f85a1dd346c1d4f961e1">wakeMemDependents</a>();
+<a name="l00101"></a>00101 
+<a name="l00102"></a><a class="code" href="classOzoneDynInst.html#a04ad69a873bec43dee7056f54e47ee11">00102</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a04ad69a873bec43dee7056f54e47ee11">addMemDependent</a>(<a class="code" href="classRefCountingPtr.html">DynInstPtr</a> &amp;inst) { <a class="code" href="classOzoneDynInst.html#a5bb0000180ac8f071b922398c3ac227e">memDependents</a>.push_back(inst); }
+<a name="l00103"></a>00103 
+<a name="l00104"></a><a class="code" href="classOzoneDynInst.html#a73d116dc8606002353b2b051be86e6fa">00104</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a73d116dc8606002353b2b051be86e6fa">addSrcMemInst</a>(<a class="code" href="classRefCountingPtr.html">DynInstPtr</a> &amp;inst) { <a class="code" href="classOzoneDynInst.html#a13a831a5d0ecbe3db725fc446901268d">srcMemInsts</a>.push_back(inst); }
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#abf45d56d1eadb12109f0ade4f31ad1c4">markMemInstReady</a>(<a class="code" href="classOzoneDynInst.html">OzoneDynInst&lt;Impl&gt;</a> *inst);
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108     <span class="comment">// For now I will remove instructions from the list when they wake</span>
+<a name="l00109"></a>00109     <span class="comment">// up.  In the future, you only really need a counter.</span>
+<a name="l00110"></a><a class="code" href="classOzoneDynInst.html#a9edde0cc2b9486174b982c9dd8ff9a5c">00110</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneDynInst.html#a9edde0cc2b9486174b982c9dd8ff9a5c">memDepReady</a>() { <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a13a831a5d0ecbe3db725fc446901268d">srcMemInsts</a>.empty(); }
+<a name="l00111"></a>00111 
+<a name="l00112"></a>00112   <span class="keyword">private</span>:
+<a name="l00113"></a>00113     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a8a9b6f687d8c5d04a03602a407423179">initInstPtrs</a>();
+<a name="l00114"></a>00114 
+<a name="l00115"></a><a class="code" href="classOzoneDynInst.html#a99b3ba0948715cdad5da539fcb59a9f6">00115</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;DynInstPtr&gt;</a> <a class="code" href="classOzoneDynInst.html#a99b3ba0948715cdad5da539fcb59a9f6">dependents</a>;
+<a name="l00116"></a>00116 
+<a name="l00117"></a><a class="code" href="classOzoneDynInst.html#a5bb0000180ac8f071b922398c3ac227e">00117</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;DynInstPtr&gt;</a> <a class="code" href="classOzoneDynInst.html#a5bb0000180ac8f071b922398c3ac227e">memDependents</a>;
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classOzoneDynInst.html#a13a831a5d0ecbe3db725fc446901268d">00119</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classOzoneDynInst.html#a13a831a5d0ecbe3db725fc446901268d">srcMemInsts</a>;
+<a name="l00120"></a>00120 
+<a name="l00125"></a><a class="code" href="classOzoneDynInst.html#a1b1532e26249ee7c2b50fd8e23341bf1">00125</a>     <a class="code" href="classRefCountingPtr.html">DynInstPtr</a> <a class="code" href="classOzoneDynInst.html#a1b1532e26249ee7c2b50fd8e23341bf1">srcInsts</a>[<a class="code" href="classOzoneDynInst.html#ab48899087cc647f0f791ed0c459adc53a17b78fe104e3bf28fca535a040514084">MaxInstSrcRegs</a>];
+<a name="l00126"></a>00126 
+<a name="l00130"></a><a class="code" href="classOzoneDynInst.html#afa9f5b8c5f070a82383ea9720a61b968">00130</a>     <a class="code" href="classRefCountingPtr.html">DynInstPtr</a> <a class="code" href="classOzoneDynInst.html#afa9f5b8c5f070a82383ea9720a61b968">prevDestInst</a>[<a class="code" href="classOzoneDynInst.html#ab48899087cc647f0f791ed0c459adc53a17b78fe104e3bf28fca535a040514084">MaxInstSrcRegs</a>];
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132   <span class="keyword">public</span>:
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneDynInst.html#af8310f8618e710a06b0c2cbface6ac72">initiateAcc</a>();
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneDynInst.html#ae3a7c08c75c0a49df5adfb7d43996e12">completeAcc</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138     <span class="comment">// The register accessor methods provide the index of the</span>
+<a name="l00139"></a>00139     <span class="comment">// instruction&apos;s operand (e.g., 0 or 1), not the architectural</span>
+<a name="l00140"></a>00140     <span class="comment">// register index, to simplify the implementation of register</span>
+<a name="l00141"></a>00141     <span class="comment">// renaming.  We find the architectural register index by indexing</span>
+<a name="l00142"></a>00142     <span class="comment">// into the instruction&apos;s own operand index table.  Note that a</span>
+<a name="l00143"></a>00143     <span class="comment">// raw pointer to the StaticInst is provided instead of a</span>
+<a name="l00144"></a>00144     <span class="comment">// ref-counted StaticInstPtr to redice overhead.  This is fine as</span>
+<a name="l00145"></a>00145     <span class="comment">// long as these methods don&apos;t copy the pointer into any long-term</span>
+<a name="l00146"></a>00146     <span class="comment">// storage (which is pretty hard to imagine they would have reason</span>
+<a name="l00147"></a>00147     <span class="comment">// to do).</span>
+<a name="l00148"></a>00148 
+<a name="l00149"></a><a class="code" href="classOzoneDynInst.html#a9e7b0a4d5373c48902425c9456b19e7e">00149</a>     uint64_t <a class="code" href="classOzoneDynInst.html#a9e7b0a4d5373c48902425c9456b19e7e">readIntRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx)
+<a name="l00150"></a>00150     {
+<a name="l00151"></a>00151         <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a1b1532e26249ee7c2b50fd8e23341bf1">srcInsts</a>[idx]-&gt;readIntResult();
+<a name="l00152"></a>00152     }
+<a name="l00153"></a>00153 
+<a name="l00154"></a><a class="code" href="classOzoneDynInst.html#a717c88c8c56d79c9ed554ba5992bd8c3">00154</a>     <a class="code" href="classOzoneDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="classOzoneDynInst.html#a717c88c8c56d79c9ed554ba5992bd8c3">readFloatRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx)
+<a name="l00155"></a>00155     {
+<a name="l00156"></a>00156         <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a1b1532e26249ee7c2b50fd8e23341bf1">srcInsts</a>[idx]-&gt;readFloatResult();
+<a name="l00157"></a>00157     }
+<a name="l00158"></a>00158 
+<a name="l00159"></a><a class="code" href="classOzoneDynInst.html#a717c88c8c56d79c9ed554ba5992bd8c3">00159</a>     <a class="code" href="classOzoneDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="classOzoneDynInst.html#a717c88c8c56d79c9ed554ba5992bd8c3">readFloatRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx)
+<a name="l00160"></a>00160     {
+<a name="l00161"></a>00161         <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a1b1532e26249ee7c2b50fd8e23341bf1">srcInsts</a>[idx]-&gt;readFloatResult();
+<a name="l00162"></a>00162     }
+<a name="l00163"></a>00163 
+<a name="l00164"></a><a class="code" href="classOzoneDynInst.html#a39d93624e4481f4a210f2c46ea6b15b0">00164</a>     <a class="code" href="classOzoneDynInst.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="classOzoneDynInst.html#a39d93624e4481f4a210f2c46ea6b15b0">readFloatRegOperandBits</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx)
+<a name="l00165"></a>00165     {
+<a name="l00166"></a>00166         <span class="keywordflow">return</span> <a class="code" href="classOzoneDynInst.html#a1b1532e26249ee7c2b50fd8e23341bf1">srcInsts</a>[idx]-&gt;readIntResult();
+<a name="l00167"></a>00167     }
+<a name="l00168"></a>00168 
+<a name="l00172"></a><a class="code" href="classOzoneDynInst.html#a654e99f2be7cd298378462ce9651bb44">00172</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a654e99f2be7cd298378462ce9651bb44">setIntRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, uint64_t <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00173"></a>00173     {
+<a name="l00174"></a>00174         <a class="code" href="classBaseDynInst.html">BaseDynInst&lt;Impl&gt;::setIntReg</a>(si, idx, val);
+<a name="l00175"></a>00175     }
+<a name="l00176"></a>00176 
+<a name="l00177"></a><a class="code" href="classOzoneDynInst.html#addc8b4b6511725bf8ff48bd09ef22892">00177</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#addc8b4b6511725bf8ff48bd09ef22892">setFloatRegOperand</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx, <a class="code" href="classOzoneDynInst.html#a75484259f1855aabc8d74c6eb1cfe186">FloatReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00178"></a>00178     {
+<a name="l00179"></a>00179         <a class="code" href="classBaseDynInst.html">BaseDynInst&lt;Impl&gt;::setFloatReg</a>(si, idx, val);
+<a name="l00180"></a>00180     }
+<a name="l00181"></a>00181 
+<a name="l00182"></a><a class="code" href="classOzoneDynInst.html#a80a516966713c873cf964af7538dbd37">00182</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a80a516966713c873cf964af7538dbd37">setFloatRegOperandBits</a>(<span class="keyword">const</span> <a class="code" href="classStaticInst.html">StaticInst</a> *<a class="code" href="namespacePowerISA.html#aadcb0bf111dd32fa1c01c2b82f83c3c3">si</a>, <span class="keywordtype">int</span> idx,
+<a name="l00183"></a>00183                                 <a class="code" href="classOzoneDynInst.html#aab5eeae86499f9bfe15ef79360eccc64">FloatRegBits</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>)
+<a name="l00184"></a>00184     {
+<a name="l00185"></a>00185         <a class="code" href="classBaseDynInst.html">BaseDynInst&lt;Impl&gt;::setFloatRegBits</a>(si, idx, val);
+<a name="l00186"></a>00186     }
+<a name="l00187"></a>00187 
+<a name="l00188"></a><a class="code" href="classOzoneDynInst.html#aae8906a08187794ab88e5e140bb4c1e9">00188</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#aae8906a08187794ab88e5e140bb4c1e9">setIntResult</a>(uint64_t result) { this-&gt;<a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>.integer = result; }
+<a name="l00189"></a><a class="code" href="classOzoneDynInst.html#ab7c8bc58a7b7f5d3987308e2346af4ed">00189</a>     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#ab7c8bc58a7b7f5d3987308e2346af4ed">setDoubleResult</a>(<span class="keywordtype">double</span> result) { this-&gt;<a class="code" href="classBaseDynInst.html#a4ed9dfc2276eac05ce2f8a65849c2bf8">instResult</a>.dbl = result; }
+<a name="l00190"></a>00190 
+<a name="l00191"></a>00191     <span class="keywordtype">bool</span> <a class="code" href="classOzoneDynInst.html#a711a83b62e4c8eb42995611093434528">srcsReady</a>();
+<a name="l00192"></a>00192     <span class="keywordtype">bool</span> <a class="code" href="classOzoneDynInst.html#ae3a07556a5b5d8248cbfb1c99561340d">eaSrcsReady</a>();
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneDynInst.html#a1a8de76be7ad0985553c5bae9f26a55b">execute</a>();
+<a name="l00195"></a>00195 
+<a name="l00196"></a><a class="code" href="classOzoneDynInst.html#a336d06f2ef8e1ec90d159cb7183f3e5a">00196</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneDynInst.html#a336d06f2ef8e1ec90d159cb7183f3e5a">executeEAComp</a>()
+<a name="l00197"></a>00197     { <span class="keywordflow">return</span> <a class="code" href="fault__fwd_8hh.html#ab8ce3b69a6737f63fcdcf99910feb153">NoFault</a>; }
+<a name="l00198"></a>00198 
+<a name="l00199"></a><a class="code" href="classOzoneDynInst.html#a7a38dfec007f2f9e9c75fbccc117b256">00199</a>     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneDynInst.html#a7a38dfec007f2f9e9c75fbccc117b256">executeMemAcc</a>()
+<a name="l00200"></a>00200     { <span class="keywordflow">return</span> this-&gt;<a class="code" href="classBaseDynInst.html#a6799d48af805bf0bd72441e882589a6a">staticInst</a>-&gt;memAccInst()-&gt;execute(<span class="keyword">this</span>, this-&gt;<a class="code" href="classBaseDynInst.html#acbcf6d90551f8d3a598a70caae74d1ef">traceData</a>); }
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a11c8fa620d042e357345e77882547d89">clearDependents</a>();
+<a name="l00203"></a>00203 
+<a name="l00204"></a>00204     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a9a80912db66a6c9811bc79e97ab063f8">clearMemDependents</a>();
+<a name="l00205"></a>00205 
+<a name="l00206"></a>00206   <span class="keyword">public</span>:
+<a name="l00207"></a>00207     <span class="comment">// ISA stuff</span>
+<a name="l00208"></a>00208     <a class="code" href="classOzoneDynInst.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> <a class="code" href="classOzoneDynInst.html#a1a9e07a956ef5a2611fe7cd590872097">readMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg);
+<a name="l00209"></a>00209 
+<a name="l00210"></a>00210     <a class="code" href="classOzoneDynInst.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> <a class="code" href="classOzoneDynInst.html#a34ce48319c94bd2802d790e830357b9c">readMiscReg</a>(<span class="keywordtype">int</span> misc_reg);
+<a name="l00211"></a>00211 
+<a name="l00212"></a>00212     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a763517aaea2f3decbc1ef9d064216b6f">setMiscRegNoEffect</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="classOzoneDynInst.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00213"></a>00213 
+<a name="l00214"></a>00214     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#a1877dde4f3eb17a8b7d33ea40176c148">setMiscReg</a>(<span class="keywordtype">int</span> misc_reg, <span class="keyword">const</span> <a class="code" href="classOzoneDynInst.html#aaf5f073a387db0556d1db4bcc45428bc">MiscReg</a> &amp;<a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00215"></a>00215 
+<a name="l00216"></a>00216     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classOzoneDynInst.html#a5f42e07ae335dff417664e91518c7f1e">hwrei</a>();
+<a name="l00217"></a>00217     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#ac74f75adb89c94e4387498067f5567ff">trap</a>(<a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classBaseDynInst.html#a68714ceb74c60ea7ef5dec335bb6c5d7">fault</a>);
+<a name="l00218"></a>00218     <span class="keywordtype">bool</span> <a class="code" href="classOzoneDynInst.html#a461205960be9d52e9beda48a77e9c600">simPalCheck</a>(<span class="keywordtype">int</span> palFunc);
+<a name="l00219"></a>00219     <span class="keywordtype">void</span> <a class="code" href="classOzoneDynInst.html#afb9b1cbbf52b94f9a2da780a3cc4586b">syscall</a>(uint64_t &amp;callnum);
+<a name="l00220"></a>00220 
+<a name="l00221"></a><a class="code" href="classOzoneDynInst.html#a0deec4d5d0af5df075f848b721260166">00221</a>     <a class="code" href="classOzoneDynInst.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> <a class="code" href="classOzoneDynInst.html#a0deec4d5d0af5df075f848b721260166">iqIt</a>;
+<a name="l00222"></a><a class="code" href="classOzoneDynInst.html#ad630ef8b639726d89d9efe060a618034">00222</a>     <span class="keywordtype">bool</span> <a class="code" href="classOzoneDynInst.html#ad630ef8b639726d89d9efe060a618034">iqItValid</a>;
+<a name="l00223"></a>00223 };
+<a name="l00224"></a>00224 
+<a name="l00225"></a>00225 <span class="preprocessor">#endif // __CPU_OZONE_DYN_INST_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

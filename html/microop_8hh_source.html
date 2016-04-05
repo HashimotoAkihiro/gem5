@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/x86/insts/microop.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/x86/insts/microop.hh</h1><a href="microop_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2007 The Hewlett-Packard Development Company</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __ARCH_X86_INSTS_MICROOP_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_X86_INSTS_MICROOP_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="arch_2x86_2insts_2static__inst_8hh.html">arch/x86/insts/static_inst.hh</a>&quot;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="keyword">namespace </span>X86ISA
+<a name="l00046"></a>00046 {
+<a name="l00047"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html">00047</a>     <span class="keyword">namespace </span>ConditionTests
+<a name="l00048"></a>00048     {
+<a name="l00049"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fc">00049</a>         <span class="keyword">enum</span> <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fc">CondTest</a> {
+<a name="l00050"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca6d32c34708a0a3507c4bdb89219d650b">00050</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca6d32c34708a0a3507c4bdb89219d650b">True</a>,
+<a name="l00051"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca802a18a97d25b2c221117d01e429a69e">00051</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca802a18a97d25b2c221117d01e429a69e">NotFalse</a> = <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca6d32c34708a0a3507c4bdb89219d650b">True</a>,
+<a name="l00052"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca6056feb659388029e9c41aaab5223da3">00052</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca6056feb659388029e9c41aaab5223da3">ECF</a>,
+<a name="l00053"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac2224f2a631c5682ea22687126b0027e">00053</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac2224f2a631c5682ea22687126b0027e">EZF</a>,
+<a name="l00054"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca8c466d8cefe4061f021c1deeaff19f79">00054</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca8c466d8cefe4061f021c1deeaff19f79">SZnZF</a>,
+<a name="l00055"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca93548460c8d8b208bd4f3f2fa9a0595c">00055</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca93548460c8d8b208bd4f3f2fa9a0595c">MSTRZ</a>,
+<a name="l00056"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcad0ee05ed095dbbe817f5146795c1f82e">00056</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcad0ee05ed095dbbe817f5146795c1f82e">STRZ</a>,
+<a name="l00057"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca3a3bbb38f57d5f2010158b51ea60e4b9">00057</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca3a3bbb38f57d5f2010158b51ea60e4b9">MSTRC</a>,
+<a name="l00058"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaf55cc3e3ba998d1ec57c25bab8f70dd3">00058</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaf55cc3e3ba998d1ec57c25bab8f70dd3">STRZnEZF</a>,
+<a name="l00059"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca721d4f1eaa4a30661aaef3353e5305e2">00059</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca721d4f1eaa4a30661aaef3353e5305e2">OF</a>,
+<a name="l00060"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcad2a23d01ee6d65fb98ab15b93856fd39">00060</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcad2a23d01ee6d65fb98ab15b93856fd39">CF</a>,
+<a name="l00061"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca88236eb961161da8c0196d093e14864f">00061</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca88236eb961161da8c0196d093e14864f">ZF</a>,
+<a name="l00062"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca6e0f489ca9dcf5389fb8b0ce9002ad87">00062</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca6e0f489ca9dcf5389fb8b0ce9002ad87">CvZF</a>,
+<a name="l00063"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca96bc3519848ec2ba618228bca917088d">00063</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca96bc3519848ec2ba618228bca917088d">SF</a>,
+<a name="l00064"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac1b9838c8d86ff9cdb39757140ebc8ae">00064</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac1b9838c8d86ff9cdb39757140ebc8ae">PF</a>,
+<a name="l00065"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca33343b581cfddd768dc5987b3bebec90">00065</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca33343b581cfddd768dc5987b3bebec90">SxOF</a>,
+<a name="l00066"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac386b7d13378cab63b4fe7277c8df2d7">00066</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac386b7d13378cab63b4fe7277c8df2d7">SxOvZF</a>,
+<a name="l00067"></a>00067 
+<a name="l00068"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaf9d46b7804d93a4fcde88489a1b68c24">00068</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaf9d46b7804d93a4fcde88489a1b68c24">False</a>,
+<a name="l00069"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaabf01928c86aea3c8dfa800923be6e16">00069</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaabf01928c86aea3c8dfa800923be6e16">NotTrue</a> = <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaf9d46b7804d93a4fcde88489a1b68c24">False</a>,
+<a name="l00070"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca3bc53217ccb587ed7c333e9c085a8bd0">00070</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca3bc53217ccb587ed7c333e9c085a8bd0">NotECF</a>,
+<a name="l00071"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcabb772ca434e2badb2c987a91fa6df928">00071</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcabb772ca434e2badb2c987a91fa6df928">NotEZF</a>,
+<a name="l00072"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca7bf91713b36c9044053ea23eeb86c853">00072</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca7bf91713b36c9044053ea23eeb86c853">NotSZnZF</a>,
+<a name="l00073"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca5d8977fd1e16ad2b4c5c8c667e327e25">00073</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca5d8977fd1e16ad2b4c5c8c667e327e25">NotMSTRZ</a>,
+<a name="l00074"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca45a38a51de898faa4c7caa476f73ecfe">00074</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca45a38a51de898faa4c7caa476f73ecfe">NotSTRZ</a>,
+<a name="l00075"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca2e226cfde4e81f2fd03a413fb4c3b76f">00075</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca2e226cfde4e81f2fd03a413fb4c3b76f">NotMSTRC</a>,
+<a name="l00076"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcace6cf50a3aa80ed36fffc5e54a7a0719">00076</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcace6cf50a3aa80ed36fffc5e54a7a0719">STRnZnEZF</a>,
+<a name="l00077"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac649c732770adf884f350341cf429da1">00077</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcac649c732770adf884f350341cf429da1">NotOF</a>,
+<a name="l00078"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcabd32a800399c56dcfbdc416d88da9dd1">00078</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcabd32a800399c56dcfbdc416d88da9dd1">NotCF</a>,
+<a name="l00079"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca904971fa950b9c8ac28da3657e8eb348">00079</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca904971fa950b9c8ac28da3657e8eb348">NotZF</a>,
+<a name="l00080"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcacfb0805a6a9e89ad8403dca2037769c5">00080</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcacfb0805a6a9e89ad8403dca2037769c5">NotCvZF</a>,
+<a name="l00081"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca83083390b79680830797df93a04f4b27">00081</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca83083390b79680830797df93a04f4b27">NotSF</a>,
+<a name="l00082"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca62dd42b6c3f571b551f8134d5292e18d">00082</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fca62dd42b6c3f571b551f8134d5292e18d">NotPF</a>,
+<a name="l00083"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcade399ec8047723c33eaee03853f6ba22">00083</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcade399ec8047723c33eaee03853f6ba22">NotSxOF</a>,
+<a name="l00084"></a><a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaa08f7470dcdecaa87c702826ee21fe04">00084</a>             <a class="code" href="namespaceX86ISA_1_1ConditionTests.html#ab2cbee78c4112e15ec6b28bbb6ea24fcaa08f7470dcdecaa87c702826ee21fe04">NotSxOvZF</a>
+<a name="l00085"></a>00085         };
+<a name="l00086"></a>00086     }
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088     <span class="comment">//A class which is the base of all x86 micro ops. It provides a function to</span>
+<a name="l00089"></a>00089     <span class="comment">//set necessary flags appropriately.</span>
+<a name="l00090"></a><a class="code" href="classX86ISA_1_1X86MicroopBase.html">00090</a>     <span class="keyword">class </span><a class="code" href="classX86ISA_1_1X86MicroopBase.html">X86MicroopBase</a> : <span class="keyword">public</span> <a class="code" href="classX86ISA_1_1X86StaticInst.html">X86StaticInst</a>
+<a name="l00091"></a>00091     {
+<a name="l00092"></a>00092       <span class="keyword">protected</span>:
+<a name="l00093"></a><a class="code" href="classX86ISA_1_1X86MicroopBase.html#a51ebef7342f07ab51f31ef4ae7e04ee0">00093</a>         <span class="keyword">const</span> <span class="keywordtype">char</span> * <a class="code" href="classX86ISA_1_1X86MicroopBase.html#a51ebef7342f07ab51f31ef4ae7e04ee0">instMnem</a>;
+<a name="l00094"></a><a class="code" href="classX86ISA_1_1X86MicroopBase.html#ad3cabad3e6f648d2da97051c2b37229b">00094</a>         uint8_t <a class="code" href="classX86ISA_1_1X86MicroopBase.html#ad3cabad3e6f648d2da97051c2b37229b">opSize</a>;
+<a name="l00095"></a><a class="code" href="classX86ISA_1_1X86MicroopBase.html#aaff1bd964b905dbe543c06ee011c7462">00095</a>         uint8_t <a class="code" href="classX86ISA_1_1X86MicroopBase.html#aaff1bd964b905dbe543c06ee011c7462">addrSize</a>;
+<a name="l00096"></a>00096 
+<a name="l00097"></a><a class="code" href="classX86ISA_1_1X86MicroopBase.html#a2a858ca567a05acc1514fc57cd910c66">00097</a>         <a class="code" href="classX86ISA_1_1X86MicroopBase.html#a2a858ca567a05acc1514fc57cd910c66">X86MicroopBase</a>(<a class="code" href="structX86ISA_1_1ExtMachInst.html">ExtMachInst</a> _machInst,
+<a name="l00098"></a>00098                 <span class="keyword">const</span> <span class="keywordtype">char</span> *mnem, <span class="keyword">const</span> <span class="keywordtype">char</span> *_instMnem,
+<a name="l00099"></a>00099                 uint64_t setFlags, OpClass __opClass) :
+<a name="l00100"></a>00100             <a class="code" href="classX86ISA_1_1X86ISA.html">X86ISA</a>::<a class="code" href="classX86ISA_1_1X86StaticInst.html">X86StaticInst</a>(mnem, _machInst, __opClass),
+<a name="l00101"></a>00101             <a class="code" href="classX86ISA_1_1X86MicroopBase.html#a51ebef7342f07ab51f31ef4ae7e04ee0">instMnem</a>(_instMnem)
+<a name="l00102"></a>00102         {
+<a name="l00103"></a>00103             <span class="keyword">const</span> <span class="keywordtype">int</span> ChunkSize = <span class="keyword">sizeof</span>(<span class="keywordtype">unsigned</span> long);
+<a name="l00104"></a>00104             <span class="keyword">const</span> <span class="keywordtype">int</span> Chunks = <span class="keyword">sizeof</span>(setFlags) / ChunkSize;
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106             <span class="comment">// Since the bitset constructor can only handle unsigned long</span>
+<a name="l00107"></a>00107             <span class="comment">// sized chunks, feed it those one at a time while oring them in.</span>
+<a name="l00108"></a>00108             <span class="keywordflow">for</span> (<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> = 0; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> &lt; Chunks; <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>++) {
+<a name="l00109"></a>00109                 <span class="keywordtype">unsigned</span> <a class="code" href="namespaceArmISA.html#a6d82125bd21b3128b8081781fa6a34a3">shift</a> = <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a> * ChunkSize * 8;
+<a name="l00110"></a>00110                 <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a> |= (std::bitset&lt;Num_Flags&gt;(setFlags &gt;&gt; shift) &lt;&lt; shift);
+<a name="l00111"></a>00111             }
+<a name="l00112"></a>00112         }
+<a name="l00113"></a>00113 
+<a name="l00114"></a><a class="code" href="classX86ISA_1_1X86MicroopBase.html#a95d323a22a5f07e14d6b4c9385a91896">00114</a>         std::string <a class="code" href="classX86ISA_1_1X86MicroopBase.html#a95d323a22a5f07e14d6b4c9385a91896">generateDisassembly</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#aecb63c74e066ecd98e04d057e39028c9">pc</a>,
+<a name="l00115"></a>00115                 <span class="keyword">const</span> <a class="code" href="classSymbolTable.html">SymbolTable</a> *symtab)<span class="keyword"> const</span>
+<a name="l00116"></a>00116 <span class="keyword">        </span>{
+<a name="l00117"></a>00117             std::stringstream <a class="code" href="namespaceArmISA.html#a947232c56fc3fcfcef3ee43afafcc4a6">ss</a>;
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119             <a class="code" href="cprintf_8hh.html#ab172c0b086575bda3d04daee7df17da1">ccprintf</a>(ss, <span class="stringliteral">&quot;\t%s.%s&quot;</span>, <a class="code" href="classX86ISA_1_1X86MicroopBase.html#a51ebef7342f07ab51f31ef4ae7e04ee0">instMnem</a>, <a class="code" href="classStaticInst.html#adfacb526b8ab378bf36f1324303635d0">mnemonic</a>);
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121             <span class="keywordflow">return</span> ss.str();
+<a name="l00122"></a>00122         }
+<a name="l00123"></a>00123 
+<a name="l00124"></a>00124         <span class="keywordtype">bool</span> <a class="code" href="classX86ISA_1_1X86MicroopBase.html#a833205937b579b8b3fa163faba5056ce">checkCondition</a>(uint64_t <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>, <span class="keywordtype">int</span> condition) <span class="keyword">const</span>;
+<a name="l00125"></a>00125 
+<a name="l00126"></a>00126         <span class="keywordtype">void</span>
+<a name="l00127"></a><a class="code" href="classX86ISA_1_1X86MicroopBase.html#af04cd01429462d48e635f3e01ced6257">00127</a>         <a class="code" href="classX86ISA_1_1X86MicroopBase.html#af04cd01429462d48e635f3e01ced6257">advancePC</a>(<a class="code" href="classX86ISA_1_1PCState.html">PCState</a> &amp;pcState)<span class="keyword"> const</span>
+<a name="l00128"></a>00128 <span class="keyword">        </span>{
+<a name="l00129"></a>00129             <span class="keywordflow">if</span> (<a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsLastMicroop])
+<a name="l00130"></a>00130                 pcState.<a class="code" href="classX86ISA_1_1PCState.html#a2f3cdfc88ed61928bd28242996e0f86e">uEnd</a>();
+<a name="l00131"></a>00131             <span class="keywordflow">else</span>
+<a name="l00132"></a>00132                 pcState.<a class="code" href="classGenericISA_1_1UPCState.html#a5e17a0358d00a918a1b1b9beeed380d1">uAdvance</a>();
+<a name="l00133"></a>00133         }
+<a name="l00134"></a>00134     };
+<a name="l00135"></a>00135 }
+<a name="l00136"></a>00136 
+<a name="l00137"></a>00137 <span class="preprocessor">#endif //__ARCH_X86_INSTS_MICROOP_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

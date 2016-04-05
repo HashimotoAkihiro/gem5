@@ -1,0 +1,139 @@
+\hypertarget{initest_8cc}{
+\section{unittest/initest.cc}
+\label{initest_8cc}\index{unittest/initest.cc@{unittest/initest.cc}}
+}
+{\ttfamily \#include $<$fstream$>$}\par
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include \char`\"{}base/cprintf.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/inifile.hh\char`\"{}}\par
+\subsection*{マクロ定義}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{initest_8cc_a29f4de3c02ba340c5c3f924db4a7baa4}{FIND}(C, E)
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{initest_8cc_a2ef30c42cbc289d899a8be5d2d8f77d0}{usage} ()
+\item 
+int \hyperlink{initest_8cc_a0ddf1224851353fc92bfbff6f499fa97}{main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+char $\ast$ \hyperlink{initest_8cc_ab9e1449fd00c98428516f0b41eddcb10}{progname}
+\end{DoxyCompactItemize}
+
+
+\subsection{マクロ定義}
+\hypertarget{initest_8cc_a29f4de3c02ba340c5c3f924db4a7baa4}{
+\index{initest.cc@{initest.cc}!FIND@{FIND}}
+\index{FIND@{FIND}!initest.cc@{initest.cc}}
+\subsubsection[{FIND}]{\setlength{\rightskip}{0pt plus 5cm}\#define FIND(C, \/  E)}}
+\label{initest_8cc_a29f4de3c02ba340c5c3f924db4a7baa4}
+{\bfseries 値:}
+\begin{DoxyCode}
+if (simConfigDB.find(C, E, value)) \
+    cout << ">" << value << "<\n"; \
+  else \
+    cout << "Not Found!\n"
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{initest_8cc_a0ddf1224851353fc92bfbff6f499fa97}{
+\index{initest.cc@{initest.cc}!main@{main}}
+\index{main@{main}!initest.cc@{initest.cc}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (int {\em argc}, \/  char $\ast$ {\em argv}\mbox{[}$\,$\mbox{]})}}
+\label{initest_8cc_a0ddf1224851353fc92bfbff6f499fa97}
+
+
+
+\begin{DoxyCode}
+68 {
+69     IniFile simConfigDB;
+70 
+71     progname = argv[0];
+72 
+73     for (int i = 1; i < argc; ++i) {
+74         char *arg_str = argv[i];
+75 
+76         // if arg starts with '-', parse as option,
+77         // else treat it as a configuration file name and load it
+78         if (arg_str[0] == '-') {
+79             // switch on second char
+80             switch (arg_str[1]) {
+81               case '-':
+82                 // command-line configuration parameter:
+83                 // '--<section>:<parameter>=<value>'
+84 
+85                 if (!simConfigDB.add(arg_str + 2)) {
+86                     // parse error
+87                     ccprintf(cerr,
+88                              "Could not parse configuration argument '%s'\n"
+89                              "Expecting --<section>:<parameter>=<value>\n",
+90                              arg_str);
+91                     exit(0);
+92                 }
+93                 break;
+94 
+95               default:
+96                 usage();
+97             }
+98         }
+99         else {
+100             // no '-', treat as config file name
+101 
+102             if (!simConfigDB.load(arg_str)) {
+103                 cprintf("Error processing file %s\n", arg_str);
+104                 exit(1);
+105             }
+106         }
+107     }
+108 
+109     string value;
+110 
+111 #define FIND(C, E) \
+112   if (simConfigDB.find(C, E, value)) \
+113     cout << ">" << value << "<\n"; \
+114   else \
+115     cout << "Not Found!\n"
+116 
+117     FIND("General", "Test2");
+118     FIND("Junk", "Test3");
+119     FIND("Junk", "Test4");
+120     FIND("General", "Test1");
+121     FIND("Junk2", "test3");
+122     FIND("General", "Test3");
+123 
+124     cout << "\n";
+125 
+126     simConfigDB.dump();
+127 
+128     return 0;
+129 }
+\end{DoxyCode}
+\hypertarget{initest_8cc_a2ef30c42cbc289d899a8be5d2d8f77d0}{
+\index{initest.cc@{initest.cc}!usage@{usage}}
+\index{usage@{usage}!initest.cc@{initest.cc}}
+\subsubsection[{usage}]{\setlength{\rightskip}{0pt plus 5cm}void usage ()}}
+\label{initest_8cc_a2ef30c42cbc289d899a8be5d2d8f77d0}
+
+
+
+\begin{DoxyCode}
+48 {
+49     cout << "Usage: " << progname << " <ini file>\n";
+50     exit(1);
+51 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{initest_8cc_ab9e1449fd00c98428516f0b41eddcb10}{
+\index{initest.cc@{initest.cc}!progname@{progname}}
+\index{progname@{progname}!initest.cc@{initest.cc}}
+\subsubsection[{progname}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ {\bf progname}}}
+\label{initest_8cc_ab9e1449fd00c98428516f0b41eddcb10}

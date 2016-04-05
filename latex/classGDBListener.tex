@@ -1,0 +1,185 @@
+\hypertarget{classGDBListener}{
+\section{クラス GDBListener}
+\label{classGDBListener}\index{GDBListener@{GDBListener}}
+}
+
+
+{\ttfamily \#include $<$remote\_\-gdb.hh$>$}\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classGDBListener_1_1Event}{Event}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classGDBListener_aa8b3c682f637e2fe4d93e2623219ee37}{GDBListener} (\hyperlink{classBaseRemoteGDB}{BaseRemoteGDB} $\ast$g, int p)
+\item 
+\hyperlink{classGDBListener_afe14217db64403242d45b6e321a389a6}{$\sim$GDBListener} ()
+\item 
+void \hyperlink{classGDBListener_aadb9f3b844fb4cf98288cd3c60a3af91}{accept} ()
+\item 
+void \hyperlink{classGDBListener_a458bbe4cf81360301586b2e62a7f9dd2}{listen} ()
+\item 
+std::string \hyperlink{classGDBListener_aa62b508d2c0e7d9cec12924965276eb5}{name} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classGDBListener_1_1Event}{Event} $\ast$ \hyperlink{classGDBListener_a765488c8f26c7f8713d5245212dcae01}{event}
+\item 
+\hyperlink{classListenSocket}{ListenSocket} \hyperlink{classGDBListener_acf9ea448b26a541b4a197f1ca92f700b}{listener}
+\item 
+\hyperlink{classBaseRemoteGDB}{BaseRemoteGDB} $\ast$ \hyperlink{classGDBListener_abc7630d7a55d0751927fed9b12d7b202}{gdb}
+\item 
+int \hyperlink{classGDBListener_a63c89c04d1feae07ca35558055155ffb}{port}
+\end{DoxyCompactItemize}
+\subsection*{フレンド}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classGDBListener_a3c7b3c89bf96f51e80a919b3a82a3915}{Event}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classGDBListener_aa8b3c682f637e2fe4d93e2623219ee37}{
+\index{GDBListener@{GDBListener}!GDBListener@{GDBListener}}
+\index{GDBListener@{GDBListener}!GDBListener@{GDBListener}}
+\subsubsection[{GDBListener}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GDBListener} ({\bf BaseRemoteGDB} $\ast$ {\em g}, \/  int {\em p})}}
+\label{classGDBListener_aa8b3c682f637e2fe4d93e2623219ee37}
+
+
+
+\begin{DoxyCode}
+178     : event(NULL), gdb(g), port(p)
+179 {
+180     assert(!gdb->listener);
+181     gdb->listener = this;
+182 }
+\end{DoxyCode}
+\hypertarget{classGDBListener_afe14217db64403242d45b6e321a389a6}{
+\index{GDBListener@{GDBListener}!$\sim$GDBListener@{$\sim$GDBListener}}
+\index{$\sim$GDBListener@{$\sim$GDBListener}!GDBListener@{GDBListener}}
+\subsubsection[{$\sim$GDBListener}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf GDBListener} ()}}
+\label{classGDBListener_afe14217db64403242d45b6e321a389a6}
+
+
+
+\begin{DoxyCode}
+185 {
+186     if (event)
+187         delete event;
+188 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classGDBListener_aadb9f3b844fb4cf98288cd3c60a3af91}{
+\index{GDBListener@{GDBListener}!accept@{accept}}
+\index{accept@{accept}!GDBListener@{GDBListener}}
+\subsubsection[{accept}]{\setlength{\rightskip}{0pt plus 5cm}void accept ()}}
+\label{classGDBListener_aadb9f3b844fb4cf98288cd3c60a3af91}
+
+
+
+\begin{DoxyCode}
+228 {
+229     if (!listener.islistening())
+230         panic("GDBListener::accept(): cannot accept if we're not listening!");
+231 
+232     int sfd = listener.accept(true);
+233 
+234     if (sfd != -1) {
+235         if (gdb->isattached())
+236             close(sfd);
+237         else
+238             gdb->attach(sfd);
+239     }
+240 }
+\end{DoxyCode}
+\hypertarget{classGDBListener_a458bbe4cf81360301586b2e62a7f9dd2}{
+\index{GDBListener@{GDBListener}!listen@{listen}}
+\index{listen@{listen}!GDBListener@{GDBListener}}
+\subsubsection[{listen}]{\setlength{\rightskip}{0pt plus 5cm}void listen ()}}
+\label{classGDBListener_a458bbe4cf81360301586b2e62a7f9dd2}
+
+
+
+\begin{DoxyCode}
+198 {
+199     if (ListenSocket::allDisabled()) {
+200         warn_once("Sockets disabled, not accepting gdb connections");
+201         return;
+202     }
+203 
+204     while (!listener.listen(port, true)) {
+205         DPRINTF(GDBMisc, "Can't bind port %d\n", port);
+206         port++;
+207     }
+208 
+209     event = new Event(this, listener.getfd(), POLLIN);
+210     pollQueue.schedule(event);
+211 
+212 #ifndef NDEBUG
+213     gdb->number = debuggers.size();
+214     debuggers.push_back(gdb);
+215 #endif
+216 
+217 #ifndef NDEBUG
+218     ccprintf(cerr, "%d: %s: listening for remote gdb #%d on port %d\n",
+219              curTick(), name(), gdb->number, port);
+220 #else
+221     ccprintf(cerr, "%d: %s: listening for remote gdb on port %d\n",
+222              curTick(), name(), port);
+223 #endif
+224 }
+\end{DoxyCode}
+\hypertarget{classGDBListener_aa62b508d2c0e7d9cec12924965276eb5}{
+\index{GDBListener@{GDBListener}!name@{name}}
+\index{name@{name}!GDBListener@{GDBListener}}
+\subsubsection[{name}]{\setlength{\rightskip}{0pt plus 5cm}string name ()}}
+\label{classGDBListener_aa62b508d2c0e7d9cec12924965276eb5}
+
+
+
+\begin{DoxyCode}
+192 {
+193     return gdb->name() + ".listener";
+194 }
+\end{DoxyCode}
+
+
+\subsection{フレンドと関連する関数}
+\hypertarget{classGDBListener_a3c7b3c89bf96f51e80a919b3a82a3915}{
+\index{GDBListener@{GDBListener}!Event@{Event}}
+\index{Event@{Event}!GDBListener@{GDBListener}}
+\subsubsection[{Event}]{\setlength{\rightskip}{0pt plus 5cm}friend class {\bf Event}\hspace{0.3cm}{\ttfamily  \mbox{[}friend\mbox{]}}}}
+\label{classGDBListener_a3c7b3c89bf96f51e80a919b3a82a3915}
+
+
+\subsection{変数}
+\hypertarget{classGDBListener_a765488c8f26c7f8713d5245212dcae01}{
+\index{GDBListener@{GDBListener}!event@{event}}
+\index{event@{event}!GDBListener@{GDBListener}}
+\subsubsection[{event}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Event}$\ast$ {\bf event}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classGDBListener_a765488c8f26c7f8713d5245212dcae01}
+\hypertarget{classGDBListener_abc7630d7a55d0751927fed9b12d7b202}{
+\index{GDBListener@{GDBListener}!gdb@{gdb}}
+\index{gdb@{gdb}!GDBListener@{GDBListener}}
+\subsubsection[{gdb}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BaseRemoteGDB}$\ast$ {\bf gdb}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classGDBListener_abc7630d7a55d0751927fed9b12d7b202}
+\hypertarget{classGDBListener_acf9ea448b26a541b4a197f1ca92f700b}{
+\index{GDBListener@{GDBListener}!listener@{listener}}
+\index{listener@{listener}!GDBListener@{GDBListener}}
+\subsubsection[{listener}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ListenSocket} {\bf listener}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classGDBListener_acf9ea448b26a541b4a197f1ca92f700b}
+\hypertarget{classGDBListener_a63c89c04d1feae07ca35558055155ffb}{
+\index{GDBListener@{GDBListener}!port@{port}}
+\index{port@{port}!GDBListener@{GDBListener}}
+\subsubsection[{port}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf port}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classGDBListener_a63c89c04d1feae07ca35558055155ffb}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{base_2remote__gdb_8hh}{remote\_\-gdb.hh}\item 
+base/\hyperlink{base_2remote__gdb_8cc}{remote\_\-gdb.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: base/refcnt.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>base/refcnt.hh</h1><a href="refcnt_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __BASE_REFCNT_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __BASE_REFCNT_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00045"></a><a class="code" href="classRefCounted.html">00045</a> <span class="keyword">class </span><a class="code" href="classRefCounted.html">RefCounted</a>
+<a name="l00046"></a>00046 {
+<a name="l00047"></a>00047   <span class="keyword">private</span>:
+<a name="l00048"></a>00048     <span class="comment">// The reference count is mutable because one may want to</span>
+<a name="l00049"></a>00049     <span class="comment">// reference count a const pointer.  This really is OK because</span>
+<a name="l00050"></a>00050     <span class="comment">// const is about logical constness of the object not really about</span>
+<a name="l00051"></a>00051     <span class="comment">// strictly disallowing an object to change.</span>
+<a name="l00052"></a><a class="code" href="classRefCounted.html#ad43c3812e6d13e0518d9f8b8f463ffcf">00052</a>     <span class="keyword">mutable</span> <span class="keywordtype">int</span> <a class="code" href="classRefCounted.html#ad43c3812e6d13e0518d9f8b8f463ffcf">count</a>;
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054   <span class="keyword">private</span>:
+<a name="l00055"></a>00055     <span class="comment">// Don&apos;t allow a default copy constructor or copy operator on</span>
+<a name="l00056"></a>00056     <span class="comment">// these objects because the default operation will copy the</span>
+<a name="l00057"></a>00057     <span class="comment">// reference count as well and we certainly don&apos;t want that.</span>
+<a name="l00058"></a>00058     <a class="code" href="classRefCounted.html#aebb1990f519367c00c1861b5b3b3e0a5">RefCounted</a>(<span class="keyword">const</span> <a class="code" href="classRefCounted.html">RefCounted</a> &amp;);
+<a name="l00059"></a>00059     <a class="code" href="classRefCounted.html">RefCounted</a> &amp;<a class="code" href="classRefCounted.html#a6d93b6225e8065317a03fd3eff362552">operator=</a>(<span class="keyword">const</span> <a class="code" href="classRefCounted.html">RefCounted</a> &amp;);
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061   <span class="keyword">public</span>:
+<a name="l00069"></a><a class="code" href="classRefCounted.html#aebb1990f519367c00c1861b5b3b3e0a5">00069</a>     <a class="code" href="classRefCounted.html#aebb1990f519367c00c1861b5b3b3e0a5">RefCounted</a>() : <a class="code" href="classRefCounted.html#ad43c3812e6d13e0518d9f8b8f463ffcf">count</a>(0) {}
+<a name="l00070"></a>00070 
+<a name="l00080"></a><a class="code" href="classRefCounted.html#ae6cca02ff208ebb8704f20b56e6de02b">00080</a>     <span class="keyword">virtual</span> <a class="code" href="classRefCounted.html#ae6cca02ff208ebb8704f20b56e6de02b">~RefCounted</a>() {}
+<a name="l00081"></a>00081 
+<a name="l00083"></a><a class="code" href="classRefCounted.html#ad16d34c97e8d6a988fd2b5ea36bccbf4">00083</a>     <span class="keywordtype">void</span> <a class="code" href="classRefCounted.html#ad16d34c97e8d6a988fd2b5ea36bccbf4" title="Increment the reference count.">incref</a>() { ++<a class="code" href="classRefCounted.html#ad43c3812e6d13e0518d9f8b8f463ffcf">count</a>; }
+<a name="l00084"></a>00084 
+<a name="l00087"></a><a class="code" href="classRefCounted.html#a0ff5c4fba5e67643030a3e2f5b70a737">00087</a>     <span class="keywordtype">void</span> <a class="code" href="classRefCounted.html#a0ff5c4fba5e67643030a3e2f5b70a737">decref</a>() { <span class="keywordflow">if</span> (--<a class="code" href="classRefCounted.html#ad43c3812e6d13e0518d9f8b8f463ffcf">count</a> &lt;= 0) <span class="keyword">delete</span> <span class="keyword">this</span>; }
+<a name="l00088"></a>00088 };
+<a name="l00089"></a>00089 
+<a name="l00105"></a>00105 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00106"></a><a class="code" href="classRefCountingPtr.html">00106</a> <span class="keyword">class </span><a class="code" href="classRefCountingPtr.html">RefCountingPtr</a>
+<a name="l00107"></a>00107 {
+<a name="l00108"></a>00108   <span class="keyword">protected</span>:
+<a name="l00111"></a><a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">00111</a>     T *<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>;
+<a name="l00112"></a>00112 
+<a name="l00119"></a>00119     <span class="keywordtype">void</span>
+<a name="l00120"></a><a class="code" href="classRefCountingPtr.html#a890d36110dbb21266898207adfb2a7d5">00120</a>     <a class="code" href="classRefCountingPtr.html#a890d36110dbb21266898207adfb2a7d5">copy</a>(T *<a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>)
+<a name="l00121"></a>00121     {
+<a name="l00122"></a>00122         <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a> = d;
+<a name="l00123"></a>00123         <span class="comment">/*if(sizeof(T)=16)</span>
+<a name="l00124"></a>00124 <span class="comment">          {</span>
+<a name="l00125"></a>00125 <span class="comment">            *data.data[0] = *d.data[0];</span>
+<a name="l00126"></a>00126 <span class="comment">            *data.data[0] = *d.data[0];</span>
+<a name="l00127"></a>00127 <span class="comment">            *data.data[0] = *d.data[0];</span>
+<a name="l00128"></a>00128 <span class="comment">            *data.data[0] = *d.data[0];</span>
+<a name="l00129"></a>00129 <span class="comment">            }*/</span>
+<a name="l00130"></a>00130         <span class="keywordflow">if</span> (<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>)
+<a name="l00131"></a>00131             <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>-&gt;incref();
+<a name="l00132"></a>00132     }
+<a name="l00133"></a>00133 
+<a name="l00139"></a>00139     <span class="keywordtype">void</span>
+<a name="l00140"></a><a class="code" href="classRefCountingPtr.html#a13120ea5788aaacf44a89b193a0cceef">00140</a>     <a class="code" href="classRefCountingPtr.html#a13120ea5788aaacf44a89b193a0cceef">del</a>()
+<a name="l00141"></a>00141     {
+<a name="l00142"></a>00142         <span class="keywordflow">if</span> (<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>)
+<a name="l00143"></a>00143             <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>-&gt;decref();
+<a name="l00144"></a>00144     }
+<a name="l00145"></a>00145 
+<a name="l00149"></a>00149     <span class="keywordtype">void</span>
+<a name="l00150"></a><a class="code" href="classRefCountingPtr.html#a4bc01a1a918510bef2013a1f089f19fd">00150</a>     <span class="keyword">set</span>(T *<a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>)
+<a name="l00151"></a>00151     {
+<a name="l00152"></a>00152         <span class="comment">// Need to check if we&apos;re actually changing because otherwise</span>
+<a name="l00153"></a>00153         <span class="comment">// we could delete the last reference before adding the new</span>
+<a name="l00154"></a>00154         <span class="comment">// reference.</span>
+<a name="l00155"></a>00155         <span class="keywordflow">if</span> (<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a> != <a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>) {
+<a name="l00156"></a>00156             <a class="code" href="classRefCountingPtr.html#a13120ea5788aaacf44a89b193a0cceef">del</a>();
+<a name="l00157"></a>00157             <a class="code" href="classRefCountingPtr.html#a890d36110dbb21266898207adfb2a7d5">copy</a>(<a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>);
+<a name="l00158"></a>00158         }
+<a name="l00159"></a>00159     }
+<a name="l00160"></a>00160 
+<a name="l00161"></a>00161   <span class="keyword">public</span>:
+<a name="l00163"></a><a class="code" href="classRefCountingPtr.html#a36626d973a3bfce9ea3deda94b2fafe0">00163</a>     <a class="code" href="classRefCountingPtr.html#a36626d973a3bfce9ea3deda94b2fafe0" title="Create an empty reference counting pointer.">RefCountingPtr</a>() : <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>(0) {}
+<a name="l00164"></a>00164 
+<a name="l00167"></a><a class="code" href="classRefCountingPtr.html#ab36d4c5bc63188c9877bf4d552ea8071">00167</a>     <a class="code" href="classRefCountingPtr.html#ab36d4c5bc63188c9877bf4d552ea8071">RefCountingPtr</a>(T *<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>) { <a class="code" href="classRefCountingPtr.html#a890d36110dbb21266898207adfb2a7d5">copy</a>(data); }
+<a name="l00168"></a>00168 
+<a name="l00171"></a><a class="code" href="classRefCountingPtr.html#a9049efc00f5d3c7a115a6d2e0fcec09c">00171</a>     <a class="code" href="classRefCountingPtr.html#a9049efc00f5d3c7a115a6d2e0fcec09c">RefCountingPtr</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>) { <a class="code" href="classRefCountingPtr.html#a890d36110dbb21266898207adfb2a7d5">copy</a>(r.<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>); }
+<a name="l00172"></a>00172 
+<a name="l00174"></a><a class="code" href="classRefCountingPtr.html#a4ebce3855f9a62d273930390acdbde50">00174</a>     <a class="code" href="classRefCountingPtr.html#a4ebce3855f9a62d273930390acdbde50" title="Destroy the pointer and any reference it may hold.">~RefCountingPtr</a>() { <a class="code" href="classRefCountingPtr.html#a13120ea5788aaacf44a89b193a0cceef">del</a>(); }
+<a name="l00175"></a>00175 
+<a name="l00176"></a>00176     <span class="comment">// The following pointer access functions are const because they</span>
+<a name="l00177"></a>00177     <span class="comment">// don&apos;t actually change the pointer, though the user could change</span>
+<a name="l00178"></a>00178     <span class="comment">// what is pointed to.  This is analagous to a &quot;Foo * const&quot;.</span>
+<a name="l00179"></a>00179 
+<a name="l00181"></a><a class="code" href="classRefCountingPtr.html#ac0ddd007dfcfef3121f74d0665dfd0cd">00181</a>     T *<a class="code" href="classRefCountingPtr.html#ac0ddd007dfcfef3121f74d0665dfd0cd" title="Access a member variable.">operator-&gt;</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>; }
+<a name="l00182"></a>00182 
+<a name="l00184"></a><a class="code" href="classRefCountingPtr.html#abcc36ef133f26e7e3145b785df23eb18">00184</a>     T &amp;<a class="code" href="classRefCountingPtr.html#abcc36ef133f26e7e3145b785df23eb18" title="Dereference the pointer.">operator*</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> *<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>; }
+<a name="l00185"></a>00185 
+<a name="l00187"></a><a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96">00187</a>     T *<span class="keyword">get</span>() <span class="keyword">const</span> { <span class="keywordflow">return</span> <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>; }
+<a name="l00188"></a>00188 
+<a name="l00190"></a><a class="code" href="classRefCountingPtr.html#abe913c8dc8f8a418383762d6688f08e4">00190</a>     <span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr</a> &amp;<a class="code" href="classRefCountingPtr.html#abe913c8dc8f8a418383762d6688f08e4" title="Assign a new value to the pointer.">operator=</a>(T *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>) { <span class="keyword">set</span>(p); <span class="keywordflow">return</span> *<span class="keyword">this</span>; }
+<a name="l00191"></a>00191 
+<a name="l00193"></a><a class="code" href="classRefCountingPtr.html#a5227acb51502321f8d32744c73b9f6e3">00193</a>     <span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr</a> &amp;<a class="code" href="classRefCountingPtr.html#abe913c8dc8f8a418383762d6688f08e4" title="Assign a new value to the pointer.">operator=</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00194"></a>00194     { <span class="keywordflow">return</span> <a class="code" href="classRefCountingPtr.html#a5227acb51502321f8d32744c73b9f6e3" title="Copy the pointer from another RefCountingPtr.">operator=</a>(r.<a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a>); }
+<a name="l00195"></a>00195 
+<a name="l00197"></a><a class="code" href="classRefCountingPtr.html#ac8b1d32dbd52d431450c70b151cfa205">00197</a>     <span class="keywordtype">bool</span> <a class="code" href="classRefCountingPtr.html#ac8b1d32dbd52d431450c70b151cfa205" title="Check if the pointer is empty.">operator!</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a> == 0; }
+<a name="l00198"></a>00198 
+<a name="l00200"></a><a class="code" href="classRefCountingPtr.html#aa385aa18f5e42db5a415c25a90f4193d">00200</a>     <a class="code" href="classRefCountingPtr.html#aa385aa18f5e42db5a415c25a90f4193d" title="Check if the pointer is non-empty.">operator bool</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classRefCountingPtr.html#ac88dceffbecaed1137b0e27783adbcc5">data</a> != 0; }
+<a name="l00201"></a>00201 };
+<a name="l00202"></a>00202 
+<a name="l00204"></a>00204 <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;
+<a name="l00205"></a><a class="code" href="refcnt_8hh.html#a80f756a089fa7f637c365317498d9126">00205</a> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="namespaceX86ISA.html#abe769e58d28aff27ee71564bb6f6b0c0">operator==</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00206"></a>00206 { <span class="keywordflow">return</span> l.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>() == r.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>(); }
+<a name="l00207"></a>00207 
+<a name="l00210"></a>00210 <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;
+<a name="l00211"></a><a class="code" href="refcnt_8hh.html#a3d72905499b41a69da9fbeca4d406508">00211</a> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="namespaceX86ISA.html#abe769e58d28aff27ee71564bb6f6b0c0">operator==</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> T *<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00212"></a>00212 { <span class="keywordflow">return</span> l.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>() == r; }
+<a name="l00213"></a>00213 
+<a name="l00216"></a>00216 <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;
+<a name="l00217"></a><a class="code" href="refcnt_8hh.html#a2060a16b61b6e20f45bdaf8ad44ae29d">00217</a> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="namespaceX86ISA.html#abe769e58d28aff27ee71564bb6f6b0c0">operator==</a>(<span class="keyword">const</span> T *<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00218"></a>00218 { <span class="keywordflow">return</span> l == r.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>(); }
+<a name="l00219"></a>00219 
+<a name="l00221"></a>00221 <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;
+<a name="l00222"></a><a class="code" href="refcnt_8hh.html#a096e1231a0265dde049419eeb46b8055">00222</a> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="refcnt_8hh.html#a096e1231a0265dde049419eeb46b8055" title="Check for inequality of two reference counting pointers.">operator!=</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00223"></a>00223 { <span class="keywordflow">return</span> l.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>() != r.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>(); }
+<a name="l00224"></a>00224 
+<a name="l00227"></a>00227 <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;
+<a name="l00228"></a><a class="code" href="refcnt_8hh.html#a9d52e3c3b48f1f3a45c3774943b7368f">00228</a> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="refcnt_8hh.html#a096e1231a0265dde049419eeb46b8055" title="Check for inequality of two reference counting pointers.">operator!=</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> T *<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00229"></a>00229 { <span class="keywordflow">return</span> l.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>() != r; }
+<a name="l00230"></a>00230 
+<a name="l00233"></a>00233 <span class="keyword">template</span>&lt;<span class="keyword">class</span> T&gt;
+<a name="l00234"></a><a class="code" href="refcnt_8hh.html#a9bec8412054511ee771c632a0e62db6d">00234</a> <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="refcnt_8hh.html#a096e1231a0265dde049419eeb46b8055" title="Check for inequality of two reference counting pointers.">operator!=</a>(<span class="keyword">const</span> T *<a class="code" href="namespaceMipsISA.html#a5818de049c10ffd7c1fea7d4dd69ed5c">l</a>, <span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">RefCountingPtr&lt;T&gt;</a> &amp;<a class="code" href="namespaceMipsISA.html#a7de4997f814ef7d6392df74a7a1c5e0d">r</a>)
+<a name="l00235"></a>00235 { <span class="keywordflow">return</span> l != r.<a class="code" href="classRefCountingPtr.html#a07f851191ad3a7c5c1598ef14f710f96" title="Directly access the pointer itself without taking a reference.">get</a>(); }
+<a name="l00236"></a>00236 
+<a name="l00237"></a>00237 <span class="preprocessor">#endif // __BASE_REFCNT_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

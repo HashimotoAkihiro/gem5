@@ -1,0 +1,141 @@
+\hypertarget{classSyscallReturn}{
+\section{クラス SyscallReturn}
+\label{classSyscallReturn}\index{SyscallReturn@{SyscallReturn}}
+}
+
+
+{\ttfamily \#include $<$syscallreturn.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSyscallReturn_a7fdded1828c9eb76cd086f4f55f38da8}{SyscallReturn} (int64\_\-t v)
+\item 
+\hyperlink{classSyscallReturn_a997bdb2ede937063f361964236058fb0}{$\sim$SyscallReturn} ()
+\item 
+bool \hyperlink{classSyscallReturn_a4a56e02db533279e0c23d6010779933e}{successful} () const 
+\begin{DoxyCompactList}\small\item\em Was the system call successful? \item\end{DoxyCompactList}\item 
+int64\_\-t \hyperlink{classSyscallReturn_ab1977b33a1e2019fef23edea0d7e6f2b}{returnValue} () const 
+\begin{DoxyCompactList}\small\item\em The return value. \item\end{DoxyCompactList}\item 
+int \hyperlink{classSyscallReturn_a0d37ad312e6fa6704e35c2008d21ec0a}{errnoValue} () const 
+\begin{DoxyCompactList}\small\item\em The errno value. \item\end{DoxyCompactList}\item 
+int64\_\-t \hyperlink{classSyscallReturn_a57588b532e202b278d875d4e4b1f0e9b}{encodedValue} () const 
+\begin{DoxyCompactList}\small\item\em The encoded value (as described above). \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+int64\_\-t \hyperlink{classSyscallReturn_ac072af30c4ffbc834bb4c681f6ecb514}{value}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+This class represents the return value from an emulated system call, including any errno setting.
+
+On some platforms, the return value and errno are encoded in a single signed integer. A value less than zero but greater than -\/4096 indicates an error, and the value is the negation of the errno value. Otherwise, the call was successful and the integer is the return value. (Large negative numbers are considered successful to allow syscalls to return pointers to high memory, e.g., stack addresses.) See, for example, Appendix A of the AMD64 ABI spec at \href{http://www.x86-64.org/documentation/abi.pdf.}{\tt http://www.x86-\/64.org/documentation/abi.pdf.}
+
+Other platforms use a more complex interface, returning a value and an error code in separate registers.
+
+This class is designed to support both types of interfaces. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classSyscallReturn_a7fdded1828c9eb76cd086f4f55f38da8}{
+\index{SyscallReturn@{SyscallReturn}!SyscallReturn@{SyscallReturn}}
+\index{SyscallReturn@{SyscallReturn}!SyscallReturn@{SyscallReturn}}
+\subsubsection[{SyscallReturn}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallReturn} (int64\_\-t {\em v})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSyscallReturn_a7fdded1828c9eb76cd086f4f55f38da8}
+For simplicity, allow the object to be initialized with a single signed integer using the same positive=success, negative=-\/errno convention described above.
+
+Typically this constructor is used as a default type conversion, so a bare integer is used where a \hyperlink{classSyscallReturn}{SyscallReturn} value is expected, e.g., as the return value from a system call emulation function ('return 0;' or 'return -\/EFAULT;'). 
+
+
+\begin{DoxyCode}
+67         : value(v)
+68     {}
+\end{DoxyCode}
+\hypertarget{classSyscallReturn_a997bdb2ede937063f361964236058fb0}{
+\index{SyscallReturn@{SyscallReturn}!$\sim$SyscallReturn@{$\sim$SyscallReturn}}
+\index{$\sim$SyscallReturn@{$\sim$SyscallReturn}!SyscallReturn@{SyscallReturn}}
+\subsubsection[{$\sim$SyscallReturn}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf SyscallReturn} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSyscallReturn_a997bdb2ede937063f361964236058fb0}
+
+
+
+\begin{DoxyCode}
+70 {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classSyscallReturn_a57588b532e202b278d875d4e4b1f0e9b}{
+\index{SyscallReturn@{SyscallReturn}!encodedValue@{encodedValue}}
+\index{encodedValue@{encodedValue}!SyscallReturn@{SyscallReturn}}
+\subsubsection[{encodedValue}]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t encodedValue () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSyscallReturn_a57588b532e202b278d875d4e4b1f0e9b}
+
+
+The encoded value (as described above). 
+
+
+\begin{DoxyCode}
+94     {
+95         return value;
+96     }
+\end{DoxyCode}
+\hypertarget{classSyscallReturn_a0d37ad312e6fa6704e35c2008d21ec0a}{
+\index{SyscallReturn@{SyscallReturn}!errnoValue@{errnoValue}}
+\index{errnoValue@{errnoValue}!SyscallReturn@{SyscallReturn}}
+\subsubsection[{errnoValue}]{\setlength{\rightskip}{0pt plus 5cm}int errnoValue () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSyscallReturn_a0d37ad312e6fa6704e35c2008d21ec0a}
+
+
+The errno value. 
+
+
+\begin{DoxyCode}
+87     {
+88         assert(!successful());
+89         return -value;
+90     }
+\end{DoxyCode}
+\hypertarget{classSyscallReturn_ab1977b33a1e2019fef23edea0d7e6f2b}{
+\index{SyscallReturn@{SyscallReturn}!returnValue@{returnValue}}
+\index{returnValue@{returnValue}!SyscallReturn@{SyscallReturn}}
+\subsubsection[{returnValue}]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t returnValue () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSyscallReturn_ab1977b33a1e2019fef23edea0d7e6f2b}
+
+
+The return value. 
+
+
+\begin{DoxyCode}
+80     {
+81         assert(successful());
+82         return value;
+83     }
+\end{DoxyCode}
+\hypertarget{classSyscallReturn_a4a56e02db533279e0c23d6010779933e}{
+\index{SyscallReturn@{SyscallReturn}!successful@{successful}}
+\index{successful@{successful}!SyscallReturn@{SyscallReturn}}
+\subsubsection[{successful}]{\setlength{\rightskip}{0pt plus 5cm}bool successful () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classSyscallReturn_a4a56e02db533279e0c23d6010779933e}
+
+
+Was the system call successful? 
+
+
+\begin{DoxyCode}
+74     {
+75         return (value >= 0 || value <= -4096);
+76     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classSyscallReturn_ac072af30c4ffbc834bb4c681f6ecb514}{
+\index{SyscallReturn@{SyscallReturn}!value@{value}}
+\index{value@{value}!SyscallReturn@{SyscallReturn}}
+\subsubsection[{value}]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t {\bf value}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classSyscallReturn_ac072af30c4ffbc834bb4c681f6ecb514}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+sim/\hyperlink{syscallreturn_8hh}{syscallreturn.hh}\end{DoxyCompactItemize}

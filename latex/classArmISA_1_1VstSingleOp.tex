@@ -1,0 +1,234 @@
+\hypertarget{classArmISA_1_1VstSingleOp}{
+\section{クラス VstSingleOp}
+\label{classArmISA_1_1VstSingleOp}\index{ArmISA::VstSingleOp@{ArmISA::VstSingleOp}}
+}
+
+
+{\ttfamily \#include $<$macromem.hh$>$}VstSingleOpに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classArmISA_1_1VstSingleOp}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1VstSingleOp_af0f9e5c15c10a709383bd04133330235}{VstSingleOp} (const char $\ast$mnem, \hyperlink{classStaticInst_a5605d4fc727eae9e595325c90c0ec108}{ExtMachInst} \hyperlink{classStaticInst_a744598b194ca3d4201d9414ce4cc4af4}{machInst}, OpClass \_\-\_\-opClass, bool all, unsigned elems, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{namespaceArmISA_adf8c6c579ad8729095a637a4f2181211}{rn}, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} vd, unsigned regs, unsigned inc, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} size, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} align, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{namespaceArmISA_ad546c2cf2168cf2d8ac21b2a9f485e82}{rm}, unsigned lane)
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1VstSingleOp_af0f9e5c15c10a709383bd04133330235}{
+\index{ArmISA::VstSingleOp@{ArmISA::VstSingleOp}!VstSingleOp@{VstSingleOp}}
+\index{VstSingleOp@{VstSingleOp}!ArmISA::VstSingleOp@{ArmISA::VstSingleOp}}
+\subsubsection[{VstSingleOp}]{\setlength{\rightskip}{0pt plus 5cm}{\bf VstSingleOp} (const char $\ast$ {\em mnem}, \/  {\bf ExtMachInst} {\em machInst}, \/  OpClass {\em \_\-\_\-opClass}, \/  bool {\em all}, \/  unsigned {\em elems}, \/  {\bf RegIndex} {\em rn}, \/  {\bf RegIndex} {\em vd}, \/  unsigned {\em regs}, \/  unsigned {\em inc}, \/  {\bf uint32\_\-t} {\em size}, \/  {\bf uint32\_\-t} {\em align}, \/  {\bf RegIndex} {\em rm}, \/  unsigned {\em lane})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VstSingleOp_af0f9e5c15c10a709383bd04133330235}
+
+
+
+\begin{DoxyCode}
+857                                                      :
+858     PredMacroOp(mnem, machInst, __opClass)
+859 {
+860     assert(!all);
+861     assert(regs > 0 && regs <= 4);
+862     assert(regs % elems == 0);
+863 
+864     unsigned eBytes = (1 << size);
+865     unsigned storeSize = eBytes * elems;
+866     unsigned storeRegs M5_VAR_USED = (storeSize + sizeof(FloatRegBits) - 1) /
+867                          sizeof(FloatRegBits);
+868 
+869     assert(storeRegs > 0 && storeRegs <= 4);
+870 
+871     numMicroops = 1;
+872     bool wb = (rm != 15);
+873 
+874     if (wb) numMicroops++;
+875     numMicroops += (regs / elems);
+876     microOps = new StaticInstPtr[numMicroops];
+877 
+878     RegIndex ufp0 = NumFloatV7ArchRegs;
+879 
+880     unsigned uopIdx = 0;
+881     switch (elems) {
+882       case 4:
+883         assert(regs == 4);
+884         switch (size) {
+885           case 0:
+886             microOps[uopIdx++] = new MicroPackNeon8to2Uop<uint8_t>(
+887                     machInst, ufp0, vd * 2, inc * 2, lane);
+888             break;
+889           case 1:
+890             microOps[uopIdx++] = new MicroPackNeon8to2Uop<uint16_t>(
+891                     machInst, ufp0, vd * 2, inc * 2, lane);
+892             break;
+893           case 2:
+894             microOps[uopIdx++] = new MicroPackNeon8to4Uop<uint32_t>(
+895                     machInst, ufp0, vd * 2, inc * 2, lane);
+896             break;
+897           default:
+898             // Bad size
+899             microOps[uopIdx++] = new Unknown(machInst);
+900             break;
+901         }
+902         break;
+903       case 3:
+904         assert(regs == 3);
+905         switch (size) {
+906           case 0:
+907             microOps[uopIdx++] = new MicroPackNeon6to2Uop<uint8_t>(
+908                     machInst, ufp0, vd * 2, inc * 2, lane);
+909             break;
+910           case 1:
+911             microOps[uopIdx++] = new MicroPackNeon6to2Uop<uint16_t>(
+912                     machInst, ufp0, vd * 2, inc * 2, lane);
+913             break;
+914           case 2:
+915             microOps[uopIdx++] = new MicroPackNeon6to4Uop<uint32_t>(
+916                     machInst, ufp0, vd * 2, inc * 2, lane);
+917             break;
+918           default:
+919             // Bad size
+920             microOps[uopIdx++] = new Unknown(machInst);
+921             break;
+922         }
+923         break;
+924       case 2:
+925         assert(regs == 2);
+926         assert(storeRegs <= 2);
+927         switch (size) {
+928           case 0:
+929             microOps[uopIdx++] = new MicroPackNeon4to2Uop<uint8_t>(
+930                     machInst, ufp0, vd * 2, inc * 2, lane);
+931             break;
+932           case 1:
+933             microOps[uopIdx++] = new MicroPackNeon4to2Uop<uint16_t>(
+934                     machInst, ufp0, vd * 2, inc * 2, lane);
+935             break;
+936           case 2:
+937             microOps[uopIdx++] = new MicroPackNeon4to2Uop<uint32_t>(
+938                     machInst, ufp0, vd * 2, inc * 2, lane);
+939             break;
+940           default:
+941             // Bad size
+942             microOps[uopIdx++] = new Unknown(machInst);
+943             break;
+944         }
+945         break;
+946       case 1:
+947         assert(regs == 1 || (all && regs == 2));
+948         assert(storeRegs <= 2);
+949         for (unsigned offset = 0; offset < regs; offset++) {
+950             switch (size) {
+951               case 0:
+952                 microOps[uopIdx++] = new MicroPackNeon2to2Uop<uint8_t>(
+953                         machInst, ufp0, (vd + offset) * 2, inc * 2, lane);
+954                 break;
+955               case 1:
+956                 microOps[uopIdx++] = new MicroPackNeon2to2Uop<uint16_t>(
+957                         machInst, ufp0, (vd + offset) * 2, inc * 2, lane);
+958                 break;
+959               case 2:
+960                 microOps[uopIdx++] = new MicroPackNeon2to2Uop<uint32_t>(
+961                         machInst, ufp0, (vd + offset) * 2, inc * 2, lane);
+962                 break;
+963               default:
+964                 // Bad size
+965                 microOps[uopIdx++] = new Unknown(machInst);
+966                 break;
+967             }
+968         }
+969         break;
+970       default:
+971         // Bad number of elements to unpack
+972         microOps[uopIdx++] = new Unknown(machInst);
+973     }
+974     switch (storeSize) {
+975       case 1:
+976         microOps[uopIdx++] = new MicroStrNeon1Uop<uint8_t>(
+977                 machInst, ufp0, rn, 0, align);
+978         break;
+979       case 2:
+980         if (eBytes == 2) {
+981             microOps[uopIdx++] = new MicroStrNeon2Uop<uint16_t>(
+982                     machInst, ufp0, rn, 0, align);
+983         } else {
+984             microOps[uopIdx++] = new MicroStrNeon2Uop<uint8_t>(
+985                     machInst, ufp0, rn, 0, align);
+986         }
+987         break;
+988       case 3:
+989         microOps[uopIdx++] = new MicroStrNeon3Uop<uint8_t>(
+990                 machInst, ufp0, rn, 0, align);
+991         break;
+992       case 4:
+993         switch (eBytes) {
+994           case 1:
+995             microOps[uopIdx++] = new MicroStrNeon4Uop<uint8_t>(
+996                     machInst, ufp0, rn, 0, align);
+997             break;
+998           case 2:
+999             microOps[uopIdx++] = new MicroStrNeon4Uop<uint16_t>(
+1000                     machInst, ufp0, rn, 0, align);
+1001             break;
+1002           case 4:
+1003             microOps[uopIdx++] = new MicroStrNeon4Uop<uint32_t>(
+1004                     machInst, ufp0, rn, 0, align);
+1005             break;
+1006         }
+1007         break;
+1008       case 6:
+1009         microOps[uopIdx++] = new MicroStrNeon6Uop<uint16_t>(
+1010                 machInst, ufp0, rn, 0, align);
+1011         break;
+1012       case 8:
+1013         switch (eBytes) {
+1014           case 2:
+1015             microOps[uopIdx++] = new MicroStrNeon8Uop<uint16_t>(
+1016                     machInst, ufp0, rn, 0, align);
+1017             break;
+1018           case 4:
+1019             microOps[uopIdx++] = new MicroStrNeon8Uop<uint32_t>(
+1020                     machInst, ufp0, rn, 0, align);
+1021             break;
+1022         }
+1023         break;
+1024       case 12:
+1025         microOps[uopIdx++] = new MicroStrNeon12Uop<uint32_t>(
+1026                 machInst, ufp0, rn, 0, align);
+1027         break;
+1028       case 16:
+1029         microOps[uopIdx++] = new MicroStrNeon16Uop<uint32_t>(
+1030                 machInst, ufp0, rn, 0, align);
+1031         break;
+1032       default:
+1033         // Bad store size
+1034         microOps[uopIdx++] = new Unknown(machInst);
+1035     }
+1036     if (wb) {
+1037         if (rm != 15 && rm != 13) {
+1038             microOps[uopIdx++] =
+1039                 new MicroAddUop(machInst, rn, rn, rm, 0, ArmISA::LSL);
+1040         } else {
+1041             microOps[uopIdx++] =
+1042                 new MicroAddiUop(machInst, rn, rn, storeSize);
+1043         }
+1044     }
+1045     assert(uopIdx == numMicroops);
+1046 
+1047     for (unsigned i = 0; i < numMicroops - 1; i++) {
+1048         MicroOp * uopPtr = dynamic_cast<MicroOp *>(microOps[i].get());
+1049         assert(uopPtr);
+1050         uopPtr->setDelayedCommit();
+1051     }
+1052     microOps[numMicroops - 1]->setLastMicroop();
+1053 }
+
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/insts/\hyperlink{macromem_8hh}{macromem.hh}\item 
+arch/arm/insts/\hyperlink{macromem_8cc}{macromem.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,234 @@
+\hypertarget{classStridePrefetcher}{
+\section{クラス StridePrefetcher}
+\label{classStridePrefetcher}\index{StridePrefetcher@{StridePrefetcher}}
+}
+
+
+{\ttfamily \#include $<$stride.hh$>$}StridePrefetcherに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classStridePrefetcher}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classStridePrefetcher_1_1StrideEntry}{StrideEntry}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classStridePrefetcher_ad4f8b8679818dea805237ad9617e3f51}{StridePrefetcher} (const \hyperlink{classBasePrefetcher_a46661f02a5642b04fd4e12f645ad9c5c}{Params} $\ast$p)
+\item 
+\hyperlink{classStridePrefetcher_ab40ed6a991c78a4fecd687df2ba79582}{$\sim$StridePrefetcher} ()
+\item 
+void \hyperlink{classStridePrefetcher_a1cc3d838a8314074cfda794f18eb6de9}{calculatePrefetch} (\hyperlink{classPacket}{PacketPtr} \&pkt, \hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} $>$ \&addresses, \hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{classCycles}{Cycles} $>$ \&delays)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{classStridePrefetcher_1_1StrideEntry}{StrideEntry} $\ast$ $>$ \hyperlink{classStridePrefetcher_a55d29ec7c16821e665c5421be16cba2c}{table} \mbox{[}\hyperlink{classStridePrefetcher_abfd49f19b53f332f17db2798d9639ff7}{Max\_\-Contexts}\mbox{]}
+\item 
+bool \hyperlink{classStridePrefetcher_a319ba103fe2fee70bc0385243e15d100}{instTagged}
+\end{DoxyCompactItemize}
+\subsection*{Static Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+static const int \hyperlink{classStridePrefetcher_abfd49f19b53f332f17db2798d9639ff7}{Max\_\-Contexts} = 64
+\item 
+static const int \hyperlink{classStridePrefetcher_af4f15f4ccef3f00f7ce22c987c42fc92}{Max\_\-Conf} = INT\_\-MAX
+\item 
+static const int \hyperlink{classStridePrefetcher_ac7ef7fbd9b695359dfcc4a03788a09d9}{Min\_\-Conf} = INT\_\-MIN
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classStridePrefetcher_ad4f8b8679818dea805237ad9617e3f51}{
+\index{StridePrefetcher@{StridePrefetcher}!StridePrefetcher@{StridePrefetcher}}
+\index{StridePrefetcher@{StridePrefetcher}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{StridePrefetcher}]{\setlength{\rightskip}{0pt plus 5cm}{\bf StridePrefetcher} (const {\bf Params} $\ast$ {\em p})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classStridePrefetcher_ad4f8b8679818dea805237ad9617e3f51}
+
+
+
+\begin{DoxyCode}
+85         : BasePrefetcher(p), instTagged(p->inst_tagged)
+86     {
+87     }
+\end{DoxyCode}
+\hypertarget{classStridePrefetcher_ab40ed6a991c78a4fecd687df2ba79582}{
+\index{StridePrefetcher@{StridePrefetcher}!$\sim$StridePrefetcher@{$\sim$StridePrefetcher}}
+\index{$\sim$StridePrefetcher@{$\sim$StridePrefetcher}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{$\sim$StridePrefetcher}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf StridePrefetcher} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classStridePrefetcher_ab40ed6a991c78a4fecd687df2ba79582}
+
+
+
+\begin{DoxyCode}
+89 {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classStridePrefetcher_a1cc3d838a8314074cfda794f18eb6de9}{
+\index{StridePrefetcher@{StridePrefetcher}!calculatePrefetch@{calculatePrefetch}}
+\index{calculatePrefetch@{calculatePrefetch}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{calculatePrefetch}]{\setlength{\rightskip}{0pt plus 5cm}void calculatePrefetch ({\bf PacketPtr} \& {\em pkt}, \/  {\bf std::list}$<$ {\bf Addr} $>$ \& {\em addresses}, \/  {\bf std::list}$<$ {\bf Cycles} $>$ \& {\em delays})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classStridePrefetcher_a1cc3d838a8314074cfda794f18eb6de9}
+
+
+\hyperlink{classBasePrefetcher_a3db7131bcae7e87e8146195a6e8be817}{BasePrefetcher}を実装しています。
+
+
+\begin{DoxyCode}
+56 {
+57     if (!pkt->req->hasPC()) {
+58         DPRINTF(HWPrefetch, "ignoring request with no PC");
+59         return;
+60     }
+61 
+62     Addr data_addr = pkt->getAddr();
+63     bool is_secure = pkt->isSecure();
+64     MasterID master_id = useMasterId ? pkt->req->masterId() : 0;
+65     Addr pc = pkt->req->getPC();
+66     assert(master_id < Max_Contexts);
+67     std::list<StrideEntry*> &tab = table[master_id];
+68 
+69     // Revert to simple N-block ahead prefetch for instruction fetches
+70     if (instTagged && pkt->req->isInstFetch()) {
+71         for (int d = 1; d <= degree; d++) {
+72             Addr new_addr = data_addr + d * blkSize;
+73             if (pageStop && !samePage(data_addr, new_addr)) {
+74                 // Spanned the page, so now stop
+75                 pfSpanPage += degree - d + 1;
+76                 return;
+77             }
+78             DPRINTF(HWPrefetch, "queuing prefetch to %x @ %d\n",
+79                     new_addr, latency);
+80             addresses.push_back(new_addr);
+81             delays.push_back(latency);
+82         }
+83         return;
+84     }
+85 
+86     /* Scan Table for instAddr Match */
+87     std::list<StrideEntry*>::iterator iter;
+88     for (iter = tab.begin(); iter != tab.end(); iter++) {
+89         // Entries have to match on the security state as well
+90         if ((*iter)->instAddr == pc && (*iter)->isSecure == is_secure)
+91             break;
+92     }
+93 
+94     if (iter != tab.end()) {
+95         // Hit in table
+96 
+97         int new_stride = data_addr - (*iter)->missAddr;
+98         bool stride_match = (new_stride == (*iter)->stride);
+99 
+100         if (stride_match && new_stride != 0) {
+101             (*iter)->tolerance = true;
+102             if ((*iter)->confidence < Max_Conf)
+103                 (*iter)->confidence++;
+104         } else {
+105             if (!((*iter)->tolerance)) {
+106                 (*iter)->stride = new_stride;
+107                 if ((*iter)->confidence > Min_Conf)
+108                     (*iter)->confidence = 0;
+109             } else {
+110                 (*iter)->tolerance = false;
+111             }
+112         }
+113 
+114         DPRINTF(HWPrefetch, "hit: PC %x data_addr %x (%s) stride %d (%s), "
+115                 "conf %d\n", pc, data_addr, is_secure ? "s" : "ns", new_stride,
+116                 stride_match ? "match" : "change",
+117                 (*iter)->confidence);
+118 
+119         (*iter)->missAddr = data_addr;
+120         (*iter)->isSecure = is_secure;
+121 
+122         if ((*iter)->confidence <= 0)
+123             return;
+124 
+125         for (int d = 1; d <= degree; d++) {
+126             Addr new_addr = data_addr + d * (*iter)->stride;
+127             if (pageStop && !samePage(data_addr, new_addr)) {
+128                 // Spanned the page, so now stop
+129                 pfSpanPage += degree - d + 1;
+130                 return;
+131             } else {
+132                 DPRINTF(HWPrefetch, "  queuing prefetch to %x (%s) @ %d\n",
+133                         new_addr, is_secure ? "s" : "ns", latency);
+134                 addresses.push_back(new_addr);
+135                 delays.push_back(latency);
+136             }
+137         }
+138     } else {
+139         // Miss in table
+140         // Find lowest confidence and replace
+141 
+142         DPRINTF(HWPrefetch, "miss: PC %x data_addr %x (%s)\n", pc, data_addr,
+143                 is_secure ? "s" : "ns");
+144 
+145         if (tab.size() >= 256) { //set default table size is 256
+146             std::list<StrideEntry*>::iterator min_pos = tab.begin();
+147             int min_conf = (*min_pos)->confidence;
+148             for (iter = min_pos, ++iter; iter != tab.end(); ++iter) {
+149                 if ((*iter)->confidence < min_conf){
+150                     min_pos = iter;
+151                     min_conf = (*iter)->confidence;
+152                 }
+153             }
+154             DPRINTF(HWPrefetch, "  replacing PC %x (%s)\n",
+155                     (*min_pos)->instAddr, (*min_pos)->isSecure ? "s" : "ns");
+156 
+157             // free entry and delete it
+158             delete *min_pos;
+159             tab.erase(min_pos);
+160         }
+161 
+162         StrideEntry *new_entry = new StrideEntry;
+163         new_entry->instAddr = pc;
+164         new_entry->missAddr = data_addr;
+165         new_entry->isSecure = is_secure;
+166         new_entry->stride = 0;
+167         new_entry->confidence = 0;
+168         new_entry->tolerance = false;
+169         tab.push_back(new_entry);
+170     }
+171 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classStridePrefetcher_a319ba103fe2fee70bc0385243e15d100}{
+\index{StridePrefetcher@{StridePrefetcher}!instTagged@{instTagged}}
+\index{instTagged@{instTagged}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{instTagged}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf instTagged}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classStridePrefetcher_a319ba103fe2fee70bc0385243e15d100}
+\hypertarget{classStridePrefetcher_af4f15f4ccef3f00f7ce22c987c42fc92}{
+\index{StridePrefetcher@{StridePrefetcher}!Max\_\-Conf@{Max\_\-Conf}}
+\index{Max\_\-Conf@{Max\_\-Conf}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{Max\_\-Conf}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf Max\_\-Conf} = INT\_\-MAX\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classStridePrefetcher_af4f15f4ccef3f00f7ce22c987c42fc92}
+\hypertarget{classStridePrefetcher_abfd49f19b53f332f17db2798d9639ff7}{
+\index{StridePrefetcher@{StridePrefetcher}!Max\_\-Contexts@{Max\_\-Contexts}}
+\index{Max\_\-Contexts@{Max\_\-Contexts}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{Max\_\-Contexts}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf Max\_\-Contexts} = 64\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classStridePrefetcher_abfd49f19b53f332f17db2798d9639ff7}
+\hypertarget{classStridePrefetcher_ac7ef7fbd9b695359dfcc4a03788a09d9}{
+\index{StridePrefetcher@{StridePrefetcher}!Min\_\-Conf@{Min\_\-Conf}}
+\index{Min\_\-Conf@{Min\_\-Conf}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{Min\_\-Conf}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf Min\_\-Conf} = INT\_\-MIN\hspace{0.3cm}{\ttfamily  \mbox{[}static, protected\mbox{]}}}}
+\label{classStridePrefetcher_ac7ef7fbd9b695359dfcc4a03788a09d9}
+\hypertarget{classStridePrefetcher_a55d29ec7c16821e665c5421be16cba2c}{
+\index{StridePrefetcher@{StridePrefetcher}!table@{table}}
+\index{table@{table}!StridePrefetcher@{StridePrefetcher}}
+\subsubsection[{table}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::list}$<${\bf StrideEntry}$\ast$$>$ {\bf table}\mbox{[}{\bf Max\_\-Contexts}\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classStridePrefetcher_a55d29ec7c16821e665c5421be16cba2c}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/cache/prefetch/\hyperlink{stride_8hh}{stride.hh}\item 
+mem/cache/prefetch/\hyperlink{stride_8cc}{stride.cc}\end{DoxyCompactItemize}

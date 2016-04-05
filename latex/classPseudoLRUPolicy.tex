@@ -1,0 +1,174 @@
+\hypertarget{classPseudoLRUPolicy}{
+\section{クラス PseudoLRUPolicy}
+\label{classPseudoLRUPolicy}\index{PseudoLRUPolicy@{PseudoLRUPolicy}}
+}
+
+
+{\ttfamily \#include $<$PseudoLRUPolicy.hh$>$}PseudoLRUPolicyに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classPseudoLRUPolicy}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPseudoLRUPolicy_a586be6f6d9e79f655d6166c91088204d}{PseudoLRUPolicy} (\hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} num\_\-sets, \hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} assoc)
+\item 
+\hyperlink{classPseudoLRUPolicy_a46c39a4b2f695e5fdc2d31a75e579d98}{$\sim$PseudoLRUPolicy} ()
+\item 
+void \hyperlink{classPseudoLRUPolicy_a6d3ff52feacdaba90c7c0bfbe9f7f58a}{touch} (\hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} set, \hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} way, \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} time)
+\item 
+\hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} \hyperlink{classPseudoLRUPolicy_aad2c302009bdae8c2f86d7c4e0ed2c8f}{getVictim} (\hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} set) const 
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \hyperlink{classPseudoLRUPolicy_a7715ac656545d5c327a5bbe21e48e4c1}{m\_\-effective\_\-assoc}
+\item 
+unsigned int \hyperlink{classPseudoLRUPolicy_a27b35e9f12570ea06bb2a060bba1ff6b}{m\_\-num\_\-levels}
+\item 
+\hyperlink{TypeDefines_8hh_a29940ae63ec06c9998bba873e25407ad}{uint64} $\ast$ \hyperlink{classPseudoLRUPolicy_ac97202b70d0180f4854d13627ce86978}{m\_\-trees}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Implementation of tree-\/based pseudo-\/LRU replacement
+
+Works for any associativity between 1 and 128.
+
+Also implements associativities that are not a power of 2 by ignoring paths that lead to a larger index (i.e. truncating the tree). Note that when this occurs, the algorithm becomes less fair, as it will favor indicies in the larger (by index) half of the associative set. This is most unfair when the nearest power of 2 is one below the associativy, and most fair when it is one above. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPseudoLRUPolicy_a586be6f6d9e79f655d6166c91088204d}{
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\subsubsection[{PseudoLRUPolicy}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PseudoLRUPolicy} ({\bf Index} {\em num\_\-sets}, \/  {\bf Index} {\em assoc})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPseudoLRUPolicy_a586be6f6d9e79f655d6166c91088204d}
+
+
+
+\begin{DoxyCode}
+65     : AbstractReplacementPolicy(num_sets, assoc)
+66 {
+67     // associativity cannot exceed capacity of tree representation
+68     assert(num_sets > 0 && assoc > 1 && assoc <= (Index) sizeof(uint64)*4);
+69 
+70     m_trees = NULL;
+71     m_num_levels = 0;
+72 
+73     m_effective_assoc = 1;
+74     while (m_effective_assoc < assoc) {
+75         // effective associativity is ceiling power of 2
+76         m_effective_assoc <<= 1;
+77     }
+78     assoc = m_effective_assoc;
+79     while (true) {
+80         assoc /= 2;
+81         if(!assoc) break;
+82         m_num_levels++;
+83     }
+84     assert(m_num_levels < sizeof(unsigned int)*4);
+85     m_trees = new uint64[m_num_sets];
+86     for (unsigned i = 0; i < m_num_sets; i++) {
+87         m_trees[i] = 0;
+88     }
+89 }
+\end{DoxyCode}
+\hypertarget{classPseudoLRUPolicy_a46c39a4b2f695e5fdc2d31a75e579d98}{
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!$\sim$PseudoLRUPolicy@{$\sim$PseudoLRUPolicy}}
+\index{$\sim$PseudoLRUPolicy@{$\sim$PseudoLRUPolicy}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\subsubsection[{$\sim$PseudoLRUPolicy}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf PseudoLRUPolicy} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classPseudoLRUPolicy_a46c39a4b2f695e5fdc2d31a75e579d98}
+
+
+
+\begin{DoxyCode}
+93 {
+94     if (m_trees != NULL)
+95         delete[] m_trees;
+96 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPseudoLRUPolicy_aad2c302009bdae8c2f86d7c4e0ed2c8f}{
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!getVictim@{getVictim}}
+\index{getVictim@{getVictim}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\subsubsection[{getVictim}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Index} getVictim ({\bf Index} {\em set}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classPseudoLRUPolicy_aad2c302009bdae8c2f86d7c4e0ed2c8f}
+
+
+\hyperlink{classAbstractReplacementPolicy_a100bd69954d47ece014cbd697a1f8d7f}{AbstractReplacementPolicy}を実装しています。
+
+
+\begin{DoxyCode}
+119 {
+120     // assert(m_assoc != 0);
+121     Index index = 0;
+122 
+123     int tree_index = 0;
+124     int node_val;
+125     for (unsigned i = 0; i < m_num_levels; i++){
+126         node_val = (m_trees[set] >> tree_index) & 1;
+127         index += node_val ? 0 : (m_effective_assoc >> (i + 1));
+128         tree_index = node_val ? (tree_index * 2) + 1 : (tree_index * 2) + 2;
+129     }
+130     assert(index >= 0 && index < m_effective_assoc);
+131 
+132     /* return either the found index or the max possible index */
+133     /* NOTE: this is not a fair replacement when assoc is not a power of 2 */
+134     return (index > (m_assoc - 1)) ? m_assoc - 1 : index;
+135 }
+\end{DoxyCode}
+\hypertarget{classPseudoLRUPolicy_a6d3ff52feacdaba90c7c0bfbe9f7f58a}{
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!touch@{touch}}
+\index{touch@{touch}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\subsubsection[{touch}]{\setlength{\rightskip}{0pt plus 5cm}void touch ({\bf Index} {\em set}, \/  {\bf Index} {\em way}, \/  {\bf Tick} {\em time})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classPseudoLRUPolicy_a6d3ff52feacdaba90c7c0bfbe9f7f58a}
+
+
+\hyperlink{classAbstractReplacementPolicy_a6354174153ace07b8cef20f36b20357a}{AbstractReplacementPolicy}を実装しています。
+
+
+\begin{DoxyCode}
+100 {
+101     assert(index >= 0 && index < m_assoc);
+102     assert(set >= 0 && set < m_num_sets);
+103 
+104     int tree_index = 0;
+105     int node_val;
+106     for (int i = m_num_levels - 1; i >= 0; i--) {
+107         node_val = (index >> i)&1;
+108         if (node_val)
+109             m_trees[set] |= node_val << tree_index;
+110         else
+111             m_trees[set] &= ~(1 << tree_index);
+112         tree_index = node_val ? (tree_index*2)+2 : (tree_index*2)+1;
+113     }
+114     m_last_ref_ptr[set][index] = time;
+115 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPseudoLRUPolicy_a7715ac656545d5c327a5bbe21e48e4c1}{
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!m\_\-effective\_\-assoc@{m\_\-effective\_\-assoc}}
+\index{m\_\-effective\_\-assoc@{m\_\-effective\_\-assoc}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\subsubsection[{m\_\-effective\_\-assoc}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf m\_\-effective\_\-assoc}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPseudoLRUPolicy_a7715ac656545d5c327a5bbe21e48e4c1}
+\hypertarget{classPseudoLRUPolicy_a27b35e9f12570ea06bb2a060bba1ff6b}{
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!m\_\-num\_\-levels@{m\_\-num\_\-levels}}
+\index{m\_\-num\_\-levels@{m\_\-num\_\-levels}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\subsubsection[{m\_\-num\_\-levels}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf m\_\-num\_\-levels}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPseudoLRUPolicy_a27b35e9f12570ea06bb2a060bba1ff6b}
+nearest (to ceiling) power of 2 \hypertarget{classPseudoLRUPolicy_ac97202b70d0180f4854d13627ce86978}{
+\index{PseudoLRUPolicy@{PseudoLRUPolicy}!m\_\-trees@{m\_\-trees}}
+\index{m\_\-trees@{m\_\-trees}!PseudoLRUPolicy@{PseudoLRUPolicy}}
+\subsubsection[{m\_\-trees}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint64}$\ast$ {\bf m\_\-trees}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPseudoLRUPolicy_ac97202b70d0180f4854d13627ce86978}
+number of levels in the tree 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/system/\hyperlink{PseudoLRUPolicy_8hh}{PseudoLRUPolicy.hh}\end{DoxyCompactItemize}

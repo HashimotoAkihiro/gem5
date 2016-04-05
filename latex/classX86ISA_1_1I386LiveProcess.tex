@@ -1,0 +1,312 @@
+\hypertarget{classX86ISA_1_1I386LiveProcess}{
+\section{クラス I386LiveProcess}
+\label{classX86ISA_1_1I386LiveProcess}\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}I386LiveProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classX86ISA_1_1I386LiveProcess}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classX86ISA_1_1I386LiveProcess_1_1VSyscallPage}{VSyscallPage}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classX86ISA_1_1I386LiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{argsInit} (int intSize, int pageSize)
+\item 
+void \hyperlink{classX86ISA_1_1I386LiveProcess_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\item 
+void \hyperlink{classX86ISA_1_1I386LiveProcess_a1ed38802271de4269c3adfa46c73e7e7}{syscall} (int64\_\-t callnum, \hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{namespaceX86ISA_a0e080577527fb3e9685399f75b5caf15}{X86ISA::IntReg} \hyperlink{classX86ISA_1_1I386LiveProcess_a6f33c62983b3e68106d1cdb43b9fc09c}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i)
+\item 
+\hyperlink{namespaceX86ISA_a0e080577527fb3e9685399f75b5caf15}{X86ISA::IntReg} \hyperlink{classX86ISA_1_1I386LiveProcess_afe872a4ad58edd7774a108ac2ff35d60}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i, int width)
+\item 
+void \hyperlink{classX86ISA_1_1I386LiveProcess_a834e8e05416e3487f87d942259506abe}{setSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int i, \hyperlink{namespaceX86ISA_a0e080577527fb3e9685399f75b5caf15}{X86ISA::IntReg} \hyperlink{namespaceX86ISA_ae13bf1250853ff6b72aabe3c79b587cc}{val})
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1I386LiveProcess_a6556f426be989188ef0a961836b3b490}{I386LiveProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile}, \hyperlink{classSyscallDesc}{SyscallDesc} $\ast$\_\-syscallDescs, int \_\-numSyscallDescs)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1I386LiveProcess_1_1VSyscallPage}{VSyscallPage} \hyperlink{classX86ISA_1_1I386LiveProcess_a9f7ed190dd32bddc3f1074ce39168abd}{vsyscallPage}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classX86ISA_1_1I386LiveProcess_a6556f426be989188ef0a961836b3b490}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!I386LiveProcess@{I386LiveProcess}}
+\index{I386LiveProcess@{I386LiveProcess}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{I386LiveProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf I386LiveProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile}, \/  {\bf SyscallDesc} $\ast$ {\em \_\-syscallDescs}, \/  int {\em \_\-numSyscallDescs})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1I386LiveProcess_a6556f426be989188ef0a961836b3b490}
+
+
+
+\begin{DoxyCode}
+132                               :
+133     X86LiveProcess(params, objFile, _syscallDescs, _numSyscallDescs)
+134 {
+135     _gdtStart = ULL(0xffffd000);
+136     _gdtSize = VMPageSize;
+137 
+138     vsyscallPage.base = 0xffffe000ULL;
+139     vsyscallPage.size = VMPageSize;
+140     vsyscallPage.vsyscallOffset = 0x400;
+141     vsyscallPage.vsysexitOffset = 0x410;
+142 
+143     stack_base = _gdtStart;
+144 
+145     // Set pointer for next thread stack.  Reserve 8M for main stack.
+146     next_thread_stack_base = stack_base - (8 * 1024 * 1024);
+147 
+148     // Set up region for mmaps. This was determined empirically and may not
+149     // always be correct.
+150     mmap_start = mmap_end = (Addr)0xf7ffe000ULL;
+151 }
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classX86ISA_1_1I386LiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!argsInit@{argsInit}}
+\index{argsInit@{argsInit}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{argsInit}]{\setlength{\rightskip}{0pt plus 5cm}void argsInit (int {\em intSize}, \/  int {\em pageSize})}}
+\label{classX86ISA_1_1I386LiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}
+
+
+
+\begin{DoxyCode}
+670 {
+671     std::vector<AuxVector<uint32_t> > extraAuxvs;
+672     //Tell the binary where the vsyscall part of the vsyscall page is.
+673     extraAuxvs.push_back(AuxVector<uint32_t>(M5_AT_SYSINFO,
+674                 vsyscallPage.base + vsyscallPage.vsyscallOffset));
+675     extraAuxvs.push_back(AuxVector<uint32_t>(M5_AT_SYSINFO_EHDR,
+676                 vsyscallPage.base));
+677     X86LiveProcess::argsInit<uint32_t>(pageSize, extraAuxvs);
+678 }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1I386LiveProcess_afe872a4ad58edd7774a108ac2ff35d60}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf X86ISA::IntReg} getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i}, \/  int {\em width})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1I386LiveProcess_afe872a4ad58edd7774a108ac2ff35d60}
+
+
+\hyperlink{classLiveProcess_a383f46521b8667b58a1275f2a3e2fda1}{LiveProcess}を再定義しています。
+
+
+\begin{DoxyCode}
+709 {
+710     assert(width == 32 || width == 64);
+711     assert(i < NumArgumentRegs);
+712     uint64_t retVal = tc->readIntReg(ArgumentReg32[i++]) & mask(32);
+713     if (width == 64)
+714         retVal |= ((uint64_t)tc->readIntReg(ArgumentReg[i++]) << 32);
+715     return retVal;
+716 }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1I386LiveProcess_a6f33c62983b3e68106d1cdb43b9fc09c}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf X86ISA::IntReg} getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1I386LiveProcess_a6f33c62983b3e68106d1cdb43b9fc09c}
+
+
+\hyperlink{classLiveProcess_aa001ff57ec460026facb89ba19c7bf96}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+702 {
+703     assert(i < NumArgumentRegs32);
+704     return tc->readIntReg(ArgumentReg32[i++]);
+705 }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1I386LiveProcess_a3c34ea9b29f410748d4435a667484924}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!initState@{initState}}
+\index{initState@{initState}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1I386LiveProcess_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classX86ISA_1_1I386LiveProcess_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classProcess_a3c34ea9b29f410748d4435a667484924}{Process}を再定義しています。
+
+
+\begin{DoxyCode}
+258 {
+259     X86LiveProcess::initState();
+260 
+261     argsInit(sizeof(uint32_t), VMPageSize);
+262 
+263     /* 
+264      * Set up a GDT for this process. The whole GDT wouldn't really be for
+265      * this process, but the only parts we care about are.
+266      */
+267     allocateMem(_gdtStart, _gdtSize);
+268     uint64_t zero = 0;
+269     assert(_gdtSize % sizeof(zero) == 0);
+270     for (Addr gdtCurrent = _gdtStart;
+271             gdtCurrent < _gdtStart + _gdtSize; gdtCurrent += sizeof(zero)) {
+272         initVirtMem.write(gdtCurrent, zero);
+273     }
+274 
+275     // Set up the vsyscall page for this process.
+276     allocateMem(vsyscallPage.base, vsyscallPage.size);
+277     uint8_t vsyscallBlob[] = {
+278         0x51,       // push %ecx
+279         0x52,       // push %edp
+280         0x55,       // push %ebp
+281         0x89, 0xe5, // mov %esp, %ebp
+282         0x0f, 0x34  // sysenter
+283     };
+284     initVirtMem.writeBlob(vsyscallPage.base + vsyscallPage.vsyscallOffset,
+285             vsyscallBlob, sizeof(vsyscallBlob));
+286 
+287     uint8_t vsysexitBlob[] = {
+288         0x5d,       // pop %ebp
+289         0x5a,       // pop %edx
+290         0x59,       // pop %ecx
+291         0xc3        // ret
+292     };
+293     initVirtMem.writeBlob(vsyscallPage.base + vsyscallPage.vsysexitOffset,
+294             vsysexitBlob, sizeof(vsysexitBlob));
+295 
+296     for (int i = 0; i < contextIds.size(); i++) {
+297         ThreadContext * tc = system->getThreadContext(contextIds[i]);
+298 
+299         SegAttr dataAttr = 0;
+300         dataAttr.dpl = 3;
+301         dataAttr.unusable = 0;
+302         dataAttr.defaultSize = 1;
+303         dataAttr.longMode = 0;
+304         dataAttr.avl = 0;
+305         dataAttr.granularity = 1;
+306         dataAttr.present = 1;
+307         dataAttr.type = 3;
+308         dataAttr.writable = 1;
+309         dataAttr.readable = 1;
+310         dataAttr.expandDown = 0;
+311         dataAttr.system = 1;
+312 
+313         //Initialize the segment registers.
+314         for(int seg = 0; seg < NUM_SEGMENTREGS; seg++) {
+315             tc->setMiscRegNoEffect(MISCREG_SEG_BASE(seg), 0);
+316             tc->setMiscRegNoEffect(MISCREG_SEG_EFF_BASE(seg), 0);
+317             tc->setMiscRegNoEffect(MISCREG_SEG_ATTR(seg), dataAttr);
+318             tc->setMiscRegNoEffect(MISCREG_SEG_SEL(seg), 0xB);
+319             tc->setMiscRegNoEffect(MISCREG_SEG_LIMIT(seg), (uint32_t)(-1));
+320         }
+321 
+322         SegAttr csAttr = 0;
+323         csAttr.dpl = 3;
+324         csAttr.unusable = 0;
+325         csAttr.defaultSize = 1;
+326         csAttr.longMode = 0;
+327         csAttr.avl = 0;
+328         csAttr.granularity = 1;
+329         csAttr.present = 1;
+330         csAttr.type = 0xa;
+331         csAttr.writable = 0;
+332         csAttr.readable = 1;
+333         csAttr.expandDown = 0;
+334         csAttr.system = 1;
+335 
+336         tc->setMiscRegNoEffect(MISCREG_CS_ATTR, csAttr);
+337 
+338         tc->setMiscRegNoEffect(MISCREG_TSG_BASE, _gdtStart);
+339         tc->setMiscRegNoEffect(MISCREG_TSG_EFF_BASE, _gdtStart);
+340         tc->setMiscRegNoEffect(MISCREG_TSG_LIMIT, _gdtStart + _gdtSize - 1);
+341 
+342         // Set the LDT selector to 0 to deactivate it.
+343         tc->setMiscRegNoEffect(MISCREG_TSL, 0);
+344 
+345         Efer efer = 0;
+346         efer.sce = 1; // Enable system call extensions.
+347         efer.lme = 1; // Enable long mode.
+348         efer.lma = 0; // Deactivate long mode.
+349         efer.nxe = 1; // Enable nx support.
+350         efer.svme = 0; // Disable svm support for now. It isn't implemented.
+351         efer.ffxsr = 1; // Turn on fast fxsave and fxrstor.
+352         tc->setMiscReg(MISCREG_EFER, efer);
+353 
+354         //Set up the registers that describe the operating mode.
+355         CR0 cr0 = 0;
+356         cr0.pg = 1; // Turn on paging.
+357         cr0.cd = 0; // Don't disable caching.
+358         cr0.nw = 0; // This is bit is defined to be ignored.
+359         cr0.am = 0; // No alignment checking
+360         cr0.wp = 0; // Supervisor mode can write read only pages
+361         cr0.ne = 1;
+362         cr0.et = 1; // This should always be 1
+363         cr0.ts = 0; // We don't do task switching, so causing fp exceptions
+364                     // would be pointless.
+365         cr0.em = 0; // Allow x87 instructions to execute natively.
+366         cr0.mp = 1; // This doesn't really matter, but the manual suggests
+367                     // setting it to one.
+368         cr0.pe = 1; // We're definitely in protected mode.
+369         tc->setMiscReg(MISCREG_CR0, cr0);
+370 
+371         tc->setMiscReg(MISCREG_MXCSR, 0x1f80);
+372     }
+373 }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1I386LiveProcess_a834e8e05416e3487f87d942259506abe}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!setSyscallArg@{setSyscallArg}}
+\index{setSyscallArg@{setSyscallArg}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{setSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em i}, \/  {\bf X86ISA::IntReg} {\em val})}}
+\label{classX86ISA_1_1I386LiveProcess_a834e8e05416e3487f87d942259506abe}
+
+
+
+\begin{DoxyCode}
+720 {
+721     assert(i < NumArgumentRegs);
+722     return tc->setIntReg(ArgumentReg[i], val);
+723 }
+\end{DoxyCode}
+\hypertarget{classX86ISA_1_1I386LiveProcess_a1ed38802271de4269c3adfa46c73e7e7}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!syscall@{syscall}}
+\index{syscall@{syscall}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{syscall}]{\setlength{\rightskip}{0pt plus 5cm}void syscall (int64\_\-t {\em callnum}, \/  {\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classX86ISA_1_1I386LiveProcess_a1ed38802271de4269c3adfa46c73e7e7}
+
+
+\hyperlink{classLiveProcess_a1ed38802271de4269c3adfa46c73e7e7}{LiveProcess}を再定義しています。
+
+
+\begin{DoxyCode}
+118 {
+119     TheISA::PCState pc = tc->pcState();
+120     Addr eip = pc.pc();
+121     if (eip >= vsyscallPage.base &&
+122             eip < vsyscallPage.base + vsyscallPage.size) {
+123         pc.npc(vsyscallPage.base + vsyscallPage.vsysexitOffset);
+124         tc->pcState(pc);
+125     }
+126     X86LiveProcess::syscall(callnum, tc);
+127 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classX86ISA_1_1I386LiveProcess_a9f7ed190dd32bddc3f1074ce39168abd}{
+\index{X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}!vsyscallPage@{vsyscallPage}}
+\index{vsyscallPage@{vsyscallPage}!X86ISA::I386LiveProcess@{X86ISA::I386LiveProcess}}
+\subsubsection[{vsyscallPage}]{\setlength{\rightskip}{0pt plus 5cm}{\bf VSyscallPage} {\bf vsyscallPage}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1I386LiveProcess_a9f7ed190dd32bddc3f1074ce39168abd}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/\hyperlink{arch_2x86_2process_8hh}{process.hh}\item 
+arch/x86/\hyperlink{arch_2x86_2process_8cc}{process.cc}\end{DoxyCompactItemize}

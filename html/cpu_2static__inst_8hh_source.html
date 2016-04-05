@@ -1,0 +1,249 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/static_inst.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/static_inst.hh</h1><a href="cpu_2static__inst_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2003-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00007"></a>00007 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00008"></a>00008 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00009"></a>00009 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00010"></a>00010 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00011"></a>00011 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00012"></a>00012 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00013"></a>00013 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00014"></a>00014 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00015"></a>00015 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00018"></a>00018 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00019"></a>00019 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00020"></a>00020 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00021"></a>00021 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00022"></a>00022 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00023"></a>00023 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00024"></a>00024 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00025"></a>00025 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00026"></a>00026 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00027"></a>00027 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * Authors: Steve Reinhardt</span>
+<a name="l00030"></a>00030 <span class="comment"> */</span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifndef __CPU_STATIC_INST_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_STATIC_INST_HH__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;bitset&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;arch/registers.hh&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;arch/types.hh&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="base_2misc_8hh.html">base/misc.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="refcnt_8hh.html">base/refcnt.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="op__class_8hh.html">cpu/op_class.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="static__inst__fwd_8hh.html">cpu/static_inst_fwd.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="thread__context_8hh.html">cpu/thread_context.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;enums/StaticInstFlags.hh&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="fault__fwd_8hh.html">sim/fault_fwd.hh</a>&quot;</span>
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="comment">// forward declarations</span>
+<a name="l00051"></a>00051 <span class="keyword">class </span><a class="code" href="classPacket.html">Packet</a>;
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="keyword">struct </span><a class="code" href="structO3CPUImpl.html">O3CPUImpl</a>;
+<a name="l00054"></a><a class="code" href="cpu_2static__inst_8hh.html#a091350ae6b1111b92f9a1174c552188f">00054</a> <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt; <span class="keyword">class </span><a class="code" href="classBaseO3DynInst.html">BaseO3DynInst</a>;
+<a name="l00055"></a>00055 <span class="keyword">typedef</span> <a class="code" href="classBaseO3DynInst.html">BaseO3DynInst&lt;O3CPUImpl&gt;</a> <a class="code" href="classBaseO3DynInst.html">O3DynInst</a>;
+<a name="l00056"></a>00056 <span class="keyword">class </span><a class="code" href="classInOrderDynInst.html">InOrderDynInst</a>;
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058 <span class="keyword">class </span><a class="code" href="classCheckerCPU.html">CheckerCPU</a>;
+<a name="l00059"></a>00059 <span class="keyword">class </span><a class="code" href="classAtomicSimpleCPU.html">AtomicSimpleCPU</a>;
+<a name="l00060"></a>00060 <span class="keyword">class </span><a class="code" href="classTimingSimpleCPU.html">TimingSimpleCPU</a>;
+<a name="l00061"></a>00061 <span class="keyword">class </span>InorderCPU;
+<a name="l00062"></a>00062 <span class="keyword">class </span><a class="code" href="classSymbolTable.html">SymbolTable</a>;
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064 <span class="keyword">namespace </span>Trace {
+<a name="l00065"></a>00065     <span class="keyword">class </span>InstRecord;
+<a name="l00066"></a>00066 }
+<a name="l00067"></a>00067 
+<a name="l00076"></a><a class="code" href="classStaticInst.html">00076</a> <span class="keyword">class </span><a class="code" href="classStaticInst.html">StaticInst</a> : <span class="keyword">public</span> <a class="code" href="classRefCounted.html">RefCounted</a>, <span class="keyword">public</span> StaticInstFlags
+<a name="l00077"></a>00077 {
+<a name="l00078"></a>00078   <span class="keyword">public</span>:
+<a name="l00080"></a><a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108">00080</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#aec686c38e40c7f794f1435591c15c275">TheISA::ExtMachInst</a> <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a>;
+<a name="l00082"></a><a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb">00082</a>     <span class="keyword">typedef</span> <a class="code" href="namespaceAlphaISA.html#a1c4e98d2e6a11a837bf9ccd20dd32f8a">TheISA::RegIndex</a> <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a>;
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084     <span class="keyword">enum</span> {
+<a name="l00085"></a><a class="code" href="classStaticInst.html#a16685eea158879e41b101ca3634de462a17b78fe104e3bf28fca535a040514084">00085</a>         <a class="code" href="classStaticInst.html#a16685eea158879e41b101ca3634de462a17b78fe104e3bf28fca535a040514084">MaxInstSrcRegs</a> = <a class="code" href="namespaceArmISA.html#a520799fb7436e81cf66cbad7b420b833">TheISA::MaxInstSrcRegs</a>,        <span class="comment">//&lt; Max source regs</span>
+<a name="l00086"></a><a class="code" href="classStaticInst.html#a16685eea158879e41b101ca3634de462a6a2e9b17a83d01eb4ee6bbdd739be9eb">00086</a>         <a class="code" href="classStaticInst.html#a16685eea158879e41b101ca3634de462a6a2e9b17a83d01eb4ee6bbdd739be9eb">MaxInstDestRegs</a> = TheISA::MaxInstDestRegs       <span class="comment">//&lt; Max dest regs</span>
+<a name="l00087"></a>00087     };
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089   <span class="keyword">protected</span>:
+<a name="l00090"></a>00090 
+<a name="l00092"></a><a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be">00092</a>     std::bitset&lt;Num_Flags&gt; <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>;
+<a name="l00093"></a>00093 
+<a name="l00095"></a><a class="code" href="classStaticInst.html#a4108a1bc5570a7db48a6ab73d0a636d0">00095</a>     OpClass <a class="code" href="classStaticInst.html#a4108a1bc5570a7db48a6ab73d0a636d0" title="See opClass().">_opClass</a>;
+<a name="l00096"></a>00096 
+<a name="l00098"></a><a class="code" href="classStaticInst.html#ad7220cef5373cc7d1be744c59cdb7f81">00098</a>     int8_t <a class="code" href="classStaticInst.html#ad7220cef5373cc7d1be744c59cdb7f81" title="See numSrcRegs().">_numSrcRegs</a>;
+<a name="l00099"></a>00099 
+<a name="l00101"></a><a class="code" href="classStaticInst.html#ad6de38545e1fa5e1883b18cc0c69f891">00101</a>     int8_t <a class="code" href="classStaticInst.html#ad6de38545e1fa5e1883b18cc0c69f891" title="See numDestRegs().">_numDestRegs</a>;
+<a name="l00102"></a>00102 
+<a name="l00105"></a>00105 
+<a name="l00106"></a><a class="code" href="classStaticInst.html#a4ec6cc7bec2115d9e9cf035b5f1a6417">00106</a>     int8_t <a class="code" href="classStaticInst.html#a4ec6cc7bec2115d9e9cf035b5f1a6417">_numFPDestRegs</a>;
+<a name="l00107"></a><a class="code" href="classStaticInst.html#a7dd9ab1fe854aac5dfc13be06af528a7">00107</a>     int8_t <a class="code" href="classStaticInst.html#a7dd9ab1fe854aac5dfc13be06af528a7">_numIntDestRegs</a>;
+<a name="l00108"></a><a class="code" href="classStaticInst.html#ae3670a4ffb2403a58b2d3ecc05cc5e38">00108</a>     int8_t <a class="code" href="classStaticInst.html#ae3670a4ffb2403a58b2d3ecc05cc5e38">_numCCDestRegs</a>;
+<a name="l00110"></a>00110 
+<a name="l00111"></a>00111   <span class="keyword">public</span>:
+<a name="l00112"></a>00112 
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119 
+<a name="l00120"></a><a class="code" href="classStaticInst.html#a3902ecc708a6f28e94ee9aa975692915">00120</a>     int8_t <a class="code" href="classStaticInst.html#a3902ecc708a6f28e94ee9aa975692915" title="Number of source registers.">numSrcRegs</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#ad7220cef5373cc7d1be744c59cdb7f81" title="See numSrcRegs().">_numSrcRegs</a>; }
+<a name="l00122"></a><a class="code" href="classStaticInst.html#ab7e23352b3d45a982dfeb799030f87d0">00122</a>     int8_t <a class="code" href="classStaticInst.html#ab7e23352b3d45a982dfeb799030f87d0" title="Number of destination registers.">numDestRegs</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#ad6de38545e1fa5e1883b18cc0c69f891" title="See numDestRegs().">_numDestRegs</a>; }
+<a name="l00124"></a><a class="code" href="classStaticInst.html#a7ec0ad00d322ae83bc5fae443ef04323">00124</a>     int8_t <a class="code" href="classStaticInst.html#a7ec0ad00d322ae83bc5fae443ef04323" title="Number of floating-point destination regs.">numFPDestRegs</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a4ec6cc7bec2115d9e9cf035b5f1a6417">_numFPDestRegs</a>; }
+<a name="l00126"></a><a class="code" href="classStaticInst.html#a3935410f8201e0afd0f8e459f838b463">00126</a>     int8_t <a class="code" href="classStaticInst.html#a3935410f8201e0afd0f8e459f838b463" title="Number of integer destination regs.">numIntDestRegs</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a7dd9ab1fe854aac5dfc13be06af528a7">_numIntDestRegs</a>; }
+<a name="l00128"></a>00128 
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134 
+<a name="l00135"></a><a class="code" href="classStaticInst.html#a45dbb9ace4c729e7bb701ce535fb1667">00135</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a45dbb9ace4c729e7bb701ce535fb1667">isNop</a>()<span class="keyword">          const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsNop]; }
+<a name="l00136"></a>00136 
+<a name="l00137"></a><a class="code" href="classStaticInst.html#a9b0f2cd082a656c4b5f369b5362c2f5b">00137</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a9b0f2cd082a656c4b5f369b5362c2f5b">isMemRef</a>()<span class="keyword">       const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsMemRef]; }
+<a name="l00138"></a>00138   <span class="comment">/*check*/</span>
+<a name="l00139"></a><a class="code" href="classStaticInst.html#afef57d32aae2e0d962889f6e0537bf31">00139</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#afef57d32aae2e0d962889f6e0537bf31">isLoad</a>()<span class="keyword">         const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsLoad]; }
+<a name="l00140"></a><a class="code" href="classStaticInst.html#a75d02c30242181ed8a68f61087c2242d">00140</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a75d02c30242181ed8a68f61087c2242d">isStore</a>()<span class="keyword">        const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsStore]; }
+<a name="l00141"></a>00141   <span class="comment">/*check*/</span>
+<a name="l00142"></a><a class="code" href="classStaticInst.html#a7023ade89206ed967e6af7397cb744f8">00142</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a7023ade89206ed967e6af7397cb744f8">isStoreConditional</a>()<span class="keyword">     const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsStoreConditional]; }
+<a name="l00143"></a><a class="code" href="classStaticInst.html#ab7deedfb63be4690f506acd0444dde3a">00143</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#ab7deedfb63be4690f506acd0444dde3a">isInstPrefetch</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsInstPrefetch]; }
+<a name="l00144"></a><a class="code" href="classStaticInst.html#abe301c4b09b8eb65bc2203905b1abf53">00144</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#abe301c4b09b8eb65bc2203905b1abf53">isDataPrefetch</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsDataPrefetch]; }
+<a name="l00145"></a><a class="code" href="classStaticInst.html#a1eef1bb814a1f77346aba1648fb6d1c9">00145</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a1eef1bb814a1f77346aba1648fb6d1c9">isPrefetch</a>()<span class="keyword">     const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#ab7deedfb63be4690f506acd0444dde3a">isInstPrefetch</a>() ||
+<a name="l00146"></a>00146                                          <a class="code" href="classStaticInst.html#abe301c4b09b8eb65bc2203905b1abf53">isDataPrefetch</a>(); }
+<a name="l00147"></a>00147 
+<a name="l00148"></a><a class="code" href="classStaticInst.html#a06625615adfaf28305767ac42b1ef0a4">00148</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a06625615adfaf28305767ac42b1ef0a4">isInteger</a>()<span class="keyword">      const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsInteger]; }
+<a name="l00149"></a><a class="code" href="classStaticInst.html#a58024ee3f69c53c47ec5b315b78a7302">00149</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a58024ee3f69c53c47ec5b315b78a7302">isFloating</a>()<span class="keyword">     const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsFloating]; }
+<a name="l00150"></a><a class="code" href="classStaticInst.html#aeede7bb34cb5eee4979cd2f6e9f361dc">00150</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#aeede7bb34cb5eee4979cd2f6e9f361dc">isCC</a>()<span class="keyword">           const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsCC]; }
+<a name="l00151"></a>00151 
+<a name="l00152"></a><a class="code" href="classStaticInst.html#a2ff117edfab9c8486802c441ac331086">00152</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a2ff117edfab9c8486802c441ac331086">isControl</a>()<span class="keyword">      const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsControl]; }
+<a name="l00153"></a><a class="code" href="classStaticInst.html#aa2317a020504e552097abb001847f74c">00153</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#aa2317a020504e552097abb001847f74c">isCall</a>()<span class="keyword">         const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsCall]; }
+<a name="l00154"></a><a class="code" href="classStaticInst.html#a56f87bc75115f1dcea77803b01f40d2c">00154</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a56f87bc75115f1dcea77803b01f40d2c">isReturn</a>()<span class="keyword">       const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsReturn]; }
+<a name="l00155"></a><a class="code" href="classStaticInst.html#ac218ba4230a8cd92999948288a54e14f">00155</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#ac218ba4230a8cd92999948288a54e14f">isDirectCtrl</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsDirectControl]; }
+<a name="l00156"></a><a class="code" href="classStaticInst.html#a5dfa427a48589c4c910416a67808510f">00156</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a5dfa427a48589c4c910416a67808510f">isIndirectCtrl</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsIndirectControl]; }
+<a name="l00157"></a><a class="code" href="classStaticInst.html#a941920262acf4437e241c7600b3007ff">00157</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a941920262acf4437e241c7600b3007ff">isCondCtrl</a>()<span class="keyword">     const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsCondControl]; }
+<a name="l00158"></a><a class="code" href="classStaticInst.html#af53002b2f11733681e8552aa6805a706">00158</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#af53002b2f11733681e8552aa6805a706">isUncondCtrl</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsUncondControl]; }
+<a name="l00159"></a><a class="code" href="classStaticInst.html#a50a12c82ee75e53f92c0852ae3ea71e8">00159</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a50a12c82ee75e53f92c0852ae3ea71e8">isCondDelaySlot</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsCondDelaySlot]; }
+<a name="l00160"></a>00160 
+<a name="l00161"></a><a class="code" href="classStaticInst.html#ae1376a5b7bbe66f8bcf8b3517802c85f">00161</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#ae1376a5b7bbe66f8bcf8b3517802c85f">isThreadSync</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsThreadSync]; }
+<a name="l00162"></a><a class="code" href="classStaticInst.html#a0b876c794e1ed62f664670215da8793f">00162</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a0b876c794e1ed62f664670215da8793f">isSerializing</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsSerializing] ||
+<a name="l00163"></a>00163                                       <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsSerializeBefore] ||
+<a name="l00164"></a>00164                                       <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsSerializeAfter]; }
+<a name="l00165"></a><a class="code" href="classStaticInst.html#aa350b74ea660b6821bd37cd139bd917b">00165</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#aa350b74ea660b6821bd37cd139bd917b">isSerializeBefore</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsSerializeBefore]; }
+<a name="l00166"></a><a class="code" href="classStaticInst.html#a4d1c24871e03e495a1841ea16d11a68f">00166</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a4d1c24871e03e495a1841ea16d11a68f">isSerializeAfter</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsSerializeAfter]; }
+<a name="l00167"></a><a class="code" href="classStaticInst.html#a11c92e1c9e4b69f9cb64a9794f1fef4c">00167</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a11c92e1c9e4b69f9cb64a9794f1fef4c">isSquashAfter</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsSquashAfter]; }
+<a name="l00168"></a><a class="code" href="classStaticInst.html#a8bcffaf6f3c61001c56f6199a3221221">00168</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a8bcffaf6f3c61001c56f6199a3221221">isMemBarrier</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsMemBarrier]; }
+<a name="l00169"></a><a class="code" href="classStaticInst.html#aadc753a9e3a0d5bb33b6551fb3ad5f7e">00169</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#aadc753a9e3a0d5bb33b6551fb3ad5f7e">isWriteBarrier</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsWriteBarrier]; }
+<a name="l00170"></a><a class="code" href="classStaticInst.html#af032774c8da8aea2d9d84d5f3f211a7f">00170</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#af032774c8da8aea2d9d84d5f3f211a7f">isNonSpeculative</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsNonSpeculative]; }
+<a name="l00171"></a><a class="code" href="classStaticInst.html#adc9467e7b34e8dff3964c85b66bb1b93">00171</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#adc9467e7b34e8dff3964c85b66bb1b93">isQuiesce</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsQuiesce]; }
+<a name="l00172"></a><a class="code" href="classStaticInst.html#aa201775c9e5befb0bf84cdd7b24519b3">00172</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#aa201775c9e5befb0bf84cdd7b24519b3">isIprAccess</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsIprAccess]; }
+<a name="l00173"></a><a class="code" href="classStaticInst.html#ae9cbcc655cf8d63153d0c3f8bbf59841">00173</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#ae9cbcc655cf8d63153d0c3f8bbf59841">isUnverifiable</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsUnverifiable]; }
+<a name="l00174"></a><a class="code" href="classStaticInst.html#afa3ec9c6fc7c50b26c6811c3bf1bb5f0">00174</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#afa3ec9c6fc7c50b26c6811c3bf1bb5f0">isSyscall</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsSyscall]; }
+<a name="l00175"></a><a class="code" href="classStaticInst.html#a1f7c99c1d36381c9aff41f00261d06df">00175</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a1f7c99c1d36381c9aff41f00261d06df">isMacroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsMacroop]; }
+<a name="l00176"></a><a class="code" href="classStaticInst.html#a19f74cdac8afa870418c056c72645187">00176</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a19f74cdac8afa870418c056c72645187">isMicroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsMicroop]; }
+<a name="l00177"></a><a class="code" href="classStaticInst.html#aebb2ebf9a7a910fcd247833ab88843b3">00177</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#aebb2ebf9a7a910fcd247833ab88843b3">isDelayedCommit</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsDelayedCommit]; }
+<a name="l00178"></a><a class="code" href="classStaticInst.html#ac600348c1afe65d9299c9635d6ea5773">00178</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#ac600348c1afe65d9299c9635d6ea5773">isLastMicroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsLastMicroop]; }
+<a name="l00179"></a><a class="code" href="classStaticInst.html#a937b23736e22f67d6b168c0c029deec4">00179</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a937b23736e22f67d6b168c0c029deec4">isFirstMicroop</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsFirstMicroop]; }
+<a name="l00180"></a>00180     <span class="comment">//This flag doesn&apos;t do anything yet</span>
+<a name="l00181"></a><a class="code" href="classStaticInst.html#a369f5792a76744815dbb1bcba6e25618">00181</a>     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a369f5792a76744815dbb1bcba6e25618">isMicroBranch</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsMicroBranch]; }
+<a name="l00183"></a>00183 
+<a name="l00184"></a><a class="code" href="classStaticInst.html#a1329ca2535b328d75f1cbedb80ec1e0e">00184</a>     <span class="keywordtype">void</span> <a class="code" href="classStaticInst.html#a1329ca2535b328d75f1cbedb80ec1e0e">setLastMicroop</a>() { <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsLastMicroop] = <span class="keyword">true</span>; }
+<a name="l00185"></a><a class="code" href="classStaticInst.html#a962e50e6bada636e2fee41feb5650da8">00185</a>     <span class="keywordtype">void</span> <a class="code" href="classStaticInst.html#a962e50e6bada636e2fee41feb5650da8">setDelayedCommit</a>() { <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[IsDelayedCommit] = <span class="keyword">true</span>; }
+<a name="l00186"></a><a class="code" href="classStaticInst.html#a5e243c09e123ab8dacf60d9bf8b12283">00186</a>     <span class="keywordtype">void</span> <a class="code" href="classStaticInst.html#a5e243c09e123ab8dacf60d9bf8b12283">setFlag</a>(<a class="code" href="classFlags.html">Flags</a> <a class="code" href="namespaceArmISA.html#ac1e4a6891d41a331cd7184329e5416ec">f</a>) { <a class="code" href="classStaticInst.html#a0bf9c8a3dba6ab3f4a4b1bee48ebd0be" title="Flag values for this instruction.">flags</a>[f] = <span class="keyword">true</span>; }
+<a name="l00187"></a>00187 
+<a name="l00189"></a><a class="code" href="classStaticInst.html#aa4919f97cae20d4d82391c1fc6d5fda6">00189</a>     OpClass <a class="code" href="classStaticInst.html#aa4919f97cae20d4d82391c1fc6d5fda6" title="Operation class. Used to select appropriate function unit in issue.">opClass</a>()<span class="keyword">     const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a4108a1bc5570a7db48a6ab73d0a636d0" title="See opClass().">_opClass</a>; }
+<a name="l00190"></a>00190 
+<a name="l00191"></a>00191 
+<a name="l00194"></a><a class="code" href="classStaticInst.html#ae5a1a6d72f40f715253b91e32b3caad2">00194</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classStaticInst.html#ae5a1a6d72f40f715253b91e32b3caad2">destRegIdx</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#a157015ade233f4258d3fc3a4febb14f8" title="See destRegIdx().">_destRegIdx</a>[i]; }
+<a name="l00195"></a>00195 
+<a name="l00198"></a><a class="code" href="classStaticInst.html#a9353aea3dfe673b88a4a96163d58759f">00198</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classStaticInst.html#a9353aea3dfe673b88a4a96163d58759f">srcRegIdx</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>)<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#aa053ba73e4ceeefc0fca46c6791e6a53" title="See srcRegIdx().">_srcRegIdx</a>[i]; }
+<a name="l00199"></a>00199 
+<a name="l00203"></a><a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">00203</a>     <span class="keyword">static</span> <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">nullStaticInstPtr</a>;
+<a name="l00204"></a>00204 
+<a name="l00211"></a>00211     <span class="keyword">virtual</span> <span class="keyword">const</span>
+<a name="l00212"></a><a class="code" href="classStaticInst.html#ad814fb0b7773dc1fae7dffac00156583">00212</a>     <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> &amp;<a class="code" href="classStaticInst.html#ad814fb0b7773dc1fae7dffac00156583">eaCompInst</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">nullStaticInstPtr</a>; }
+<a name="l00213"></a>00213 
+<a name="l00220"></a>00220     <span class="keyword">virtual</span> <span class="keyword">const</span>
+<a name="l00221"></a><a class="code" href="classStaticInst.html#ad80579a806c548f2fc2ec4fd12236f36">00221</a>     <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> &amp;<a class="code" href="classStaticInst.html#ad80579a806c548f2fc2ec4fd12236f36">memAccInst</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">nullStaticInstPtr</a>; }
+<a name="l00222"></a>00222 
+<a name="l00224"></a><a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4">00224</a>     <span class="keyword">const</span> <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>;
+<a name="l00225"></a>00225 
+<a name="l00226"></a>00226   <span class="keyword">protected</span>:
+<a name="l00227"></a>00227 
+<a name="l00229"></a><a class="code" href="classStaticInst.html#a157015ade233f4258d3fc3a4febb14f8">00229</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classStaticInst.html#a157015ade233f4258d3fc3a4febb14f8" title="See destRegIdx().">_destRegIdx</a>[<a class="code" href="classStaticInst.html#a16685eea158879e41b101ca3634de462a6a2e9b17a83d01eb4ee6bbdd739be9eb">MaxInstDestRegs</a>];
+<a name="l00231"></a><a class="code" href="classStaticInst.html#aa053ba73e4ceeefc0fca46c6791e6a53">00231</a>     <a class="code" href="classStaticInst.html#a36d25e03e43fa3bb4c5482cbefe5e0fb" title="Logical register index type.">RegIndex</a> <a class="code" href="classStaticInst.html#aa053ba73e4ceeefc0fca46c6791e6a53" title="See srcRegIdx().">_srcRegIdx</a>[<a class="code" href="classStaticInst.html#a16685eea158879e41b101ca3634de462a17b78fe104e3bf28fca535a040514084">MaxInstSrcRegs</a>];
+<a name="l00232"></a>00232 
+<a name="l00239"></a><a class="code" href="classStaticInst.html#adfacb526b8ab378bf36f1324303635d0">00239</a>     <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classStaticInst.html#adfacb526b8ab378bf36f1324303635d0">mnemonic</a>;
+<a name="l00240"></a>00240 
+<a name="l00245"></a><a class="code" href="classStaticInst.html#aca407a93c3360ff06d5d52f92583a6e1">00245</a>     <span class="keyword">mutable</span> std::string *<a class="code" href="classStaticInst.html#aca407a93c3360ff06d5d52f92583a6e1">cachedDisassembly</a>;
+<a name="l00246"></a>00246 
+<a name="l00250"></a>00250     <span class="keyword">virtual</span> std::string
+<a name="l00251"></a>00251     <a class="code" href="classStaticInst.html#ab4a569d2623620c04f8a52bbd91d63b9">generateDisassembly</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <span class="keyword">const</span> <a class="code" href="classSymbolTable.html">SymbolTable</a> *symtab) <span class="keyword">const</span> = 0;
+<a name="l00252"></a>00252 
+<a name="l00258"></a><a class="code" href="classStaticInst.html#ac0187fed42aee18cd56cec8a03699653">00258</a>     <a class="code" href="classStaticInst.html#ac0187fed42aee18cd56cec8a03699653">StaticInst</a>(<span class="keyword">const</span> <span class="keywordtype">char</span> *_mnemonic, <a class="code" href="classStaticInst.html#a5605d4fc727eae9e595325c90c0ec108" title="Binary extended machine instruction type.">ExtMachInst</a> _machInst, OpClass __opClass)
+<a name="l00259"></a>00259         : <a class="code" href="classStaticInst.html#a4108a1bc5570a7db48a6ab73d0a636d0" title="See opClass().">_opClass</a>(__opClass), <a class="code" href="classStaticInst.html#ad7220cef5373cc7d1be744c59cdb7f81" title="See numSrcRegs().">_numSrcRegs</a>(0), <a class="code" href="classStaticInst.html#ad6de38545e1fa5e1883b18cc0c69f891" title="See numDestRegs().">_numDestRegs</a>(0),
+<a name="l00260"></a>00260           <a class="code" href="classStaticInst.html#a4ec6cc7bec2115d9e9cf035b5f1a6417">_numFPDestRegs</a>(0), <a class="code" href="classStaticInst.html#a7dd9ab1fe854aac5dfc13be06af528a7">_numIntDestRegs</a>(0),
+<a name="l00261"></a>00261           <a class="code" href="classStaticInst.html#a744598b194ca3d4201d9414ce4cc4af4" title="The binary machine instruction.">machInst</a>(_machInst), <a class="code" href="classStaticInst.html#adfacb526b8ab378bf36f1324303635d0">mnemonic</a>(_mnemonic), <a class="code" href="classStaticInst.html#aca407a93c3360ff06d5d52f92583a6e1">cachedDisassembly</a>(0)
+<a name="l00262"></a>00262     { }
+<a name="l00263"></a>00263 
+<a name="l00264"></a>00264   <span class="keyword">public</span>:
+<a name="l00265"></a>00265     <span class="keyword">virtual</span> <a class="code" href="classStaticInst.html#ae03a0a2cb317b469b56cd94cf0a66f15">~StaticInst</a>();
+<a name="l00266"></a>00266 
+<a name="l00271"></a>00271 <span class="preprocessor">#include &quot;cpu/static_inst_exec_sigs.hh&quot;</span>
+<a name="l00272"></a>00272 
+<a name="l00273"></a>00273     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classStaticInst.html#afcd40c91dfbadd47b31d4ce2fc7fa777">advancePC</a>(<a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;pcState) <span class="keyword">const</span> = 0;
+<a name="l00274"></a>00274 
+<a name="l00279"></a>00279     <span class="keyword">virtual</span> <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> <a class="code" href="classStaticInst.html#aa5c7e6f7323850b84dbf5b8e47856173">fetchMicroop</a>(<a class="code" href="base_2types_8hh.html#adfb4d8b20c5abc8be73dd367b16f2d57">MicroPC</a> upc) <span class="keyword">const</span>;
+<a name="l00280"></a>00280 
+<a name="l00286"></a>00286     <span class="keyword">virtual</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classStaticInst.html#af76ec8f94f2e86f19e751e75cc39acaa">branchTarget</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>) <span class="keyword">const</span>;
+<a name="l00287"></a>00287 
+<a name="l00295"></a>00295     <span class="keyword">virtual</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> <a class="code" href="classStaticInst.html#af76ec8f94f2e86f19e751e75cc39acaa">branchTarget</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span>;
+<a name="l00296"></a>00296 
+<a name="l00301"></a>00301     <span class="keywordtype">bool</span> <a class="code" href="classStaticInst.html#a2db4eab463c2d474648251de42a1b5e6">hasBranchTarget</a>(<span class="keyword">const</span> <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;<a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00302"></a>00302                          <a class="code" href="namespaceAlphaISA.html#af780de49982ecf691215cac9b9dfc615">TheISA::PCState</a> &amp;tgt) <span class="keyword">const</span>;
+<a name="l00303"></a>00303 
+<a name="l00311"></a>00311     <span class="keyword">virtual</span> <span class="keyword">const</span> std::string &amp;<a class="code" href="classStaticInst.html#acce45da56f8154aec68848514c4f819f">disassemble</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="inorder__dyn__inst_8cc.html#a0c864f905330c0fe3ecc683b7bf8b793">pc</a>,
+<a name="l00312"></a>00312         <span class="keyword">const</span> <a class="code" href="classSymbolTable.html">SymbolTable</a> *symtab = 0) <span class="keyword">const</span>;
+<a name="l00313"></a>00313 
+<a name="l00318"></a>00318     <span class="keywordtype">void</span> <a class="code" href="classStaticInst.html#a075612781e45266370c86be07b9086f2">printFlags</a>(std::ostream &amp;outs, <span class="keyword">const</span> std::string &amp;separator) <span class="keyword">const</span>;
+<a name="l00319"></a>00319 
+<a name="l00321"></a><a class="code" href="classStaticInst.html#ac0fc966d4386ddb71d99361e3fccb311">00321</a>     std::string <a class="code" href="classStaticInst.html#ac0fc966d4386ddb71d99361e3fccb311" title="Return name of machine instruction.">getName</a>() { <span class="keywordflow">return</span> <a class="code" href="classStaticInst.html#adfacb526b8ab378bf36f1324303635d0">mnemonic</a>; }
+<a name="l00322"></a>00322 };
+<a name="l00323"></a>00323 
+<a name="l00324"></a>00324 <span class="preprocessor">#endif // __CPU_STATIC_INST_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

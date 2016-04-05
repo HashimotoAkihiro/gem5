@@ -1,0 +1,3867 @@
+\hypertarget{classInOrderCPU}{
+\section{クラス InOrderCPU}
+\label{classInOrderCPU}\index{InOrderCPU@{InOrderCPU}}
+}
+
+
+{\ttfamily \#include $<$cpu.hh$>$}InOrderCPUに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classInOrderCPU}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classInOrderCPU_1_1CachePort}{CachePort}
+\item 
+class \hyperlink{classInOrderCPU_1_1CPUEvent}{CPUEvent}
+\item 
+class \hyperlink{classInOrderCPU_1_1InOrderCPU}{InOrderCPU}
+\item 
+class \hyperlink{classInOrderCPU_1_1StageScheduler}{StageScheduler}
+\item 
+class \hyperlink{classInOrderCPU_1_1ThreadModel}{ThreadModel}
+\item 
+class \hyperlink{classInOrderCPU_1_1TickEvent}{TickEvent}
+\end{DoxyCompactItemize}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1}{ThreadModel} \{ \hyperlink{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1a68168ddfb80052045df470955d649258}{Single}, 
+\hyperlink{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1ad7ecd51555a027dd07c2d14f123bfe6c}{SMT}, 
+\hyperlink{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1af15b471f97b68795dc1ed6ca9cac5ebc}{SwitchOnCacheMiss}
+ \}
+\item 
+enum \hyperlink{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status} \{ \par
+\hyperlink{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb}{Running}, 
+\hyperlink{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19}{Idle}, 
+\hyperlink{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba185a75df63e845aec97632afd6a34d6a}{Halted}, 
+\hyperlink{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30}{Blocked}, 
+\par
+\hyperlink{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba2c25b24188e2b53c8706769167a82779}{SwitchedOut}
+ \}
+\item 
+enum \hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1ca}{CPUEventType} \{ \par
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa391f5669603c83ae987a98aa7e9603bf}{ActivateThread}, 
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad15fbcf08bb36f7edd64f89e13d76616}{ActivateNextReadyThread}, 
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad1ab56a875437119606fffcc25bbd970}{DeactivateThread}, 
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caafc4cce6b04821394a15b6531b958f6cc}{HaltThread}, 
+\par
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caac6f9fd02f217ce213280d2e09642e832}{SuspendThread}, 
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa178e499decd0c21272bc34e4b3056eab}{Trap}, 
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad2145e5e5c075863737dcea0a2060622}{Syscall}, 
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa1c9193ea2061c0841070f8d302f87220}{SquashFromMemStall}, 
+\par
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad365b9a495b45da54884ffdbbc99e40a}{UpdatePCs}, 
+\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa85f33d9118a810839bc9175f0f351076}{NumCPUEvents}
+ \}
+\item 
+enum \hyperlink{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197}{CPUEventPri} \{ \hyperlink{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a81856d43a7cea886b3eb88f1392ba3fb}{InOrderCPU\_\-Pri} =  Event::CPU\_\-Tick\_\-Pri, 
+\hyperlink{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a6857abbd38f98a454eb5b1e13d70cfa4}{Syscall\_\-Pri} =  Event::CPU\_\-Tick\_\-Pri + 9, 
+\hyperlink{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a3bb59ff5e590b6f8be858dae8cd29cf2}{ActivateNextReadyThread\_\-Pri} =  Event::CPU\_\-Tick\_\-Pri + 10
+ \}
+\item 
+typedef \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classInOrderCPU_a630137ef811336d3ee312e01adb43991}{SkedID}
+\item 
+typedef m5::hash\_\-map$<$ \hyperlink{classInOrderCPU_a630137ef811336d3ee312e01adb43991}{SkedID}, \hyperlink{classResourceSked}{ThePipeline::RSkedPtr} $>$::iterator \hyperlink{classInOrderCPU_ade41d453959a2fd39fc8e5ddeea16e0e}{SkedCacheIt}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classInOrderCPU_abde8e8c7dd0ec0e51d67cc1ae67798d3}{InOrderCPU} (\hyperlink{classInOrderCPU_aa14874985381292db0aea05d1c8a122c}{Params} $\ast$params)
+\item 
+\hyperlink{classInOrderCPU_a9b26cce2959103d12295be716fe47b10}{$\sim$InOrderCPU} ()
+\item 
+void \hyperlink{classInOrderCPU_ae2e1ccebe596a180f8105d57f9a93645}{verifyMemoryMode} () const 
+\item 
+virtual \hyperlink{classMasterPort}{MasterPort} \& \hyperlink{classInOrderCPU_aeea6b55ae1c4be53c21dbee434b221d4}{getDataPort} ()
+\item 
+virtual \hyperlink{classMasterPort}{MasterPort} \& \hyperlink{classInOrderCPU_a40da530cb5dd380fd7fc0d786e94d5eb}{getInstPort} ()
+\item 
+int \hyperlink{classInOrderCPU_a65e0754207768ee6d2d6145cb0c5e3a5}{readCpuId} ()
+\item 
+void \hyperlink{classInOrderCPU_afb191a3765c6e41fbaf116d196312ad8}{setCpuId} (int val)
+\item 
+void \hyperlink{classInOrderCPU_a7b7130cac388c6a2fd896ba0f6b7b87a}{scheduleCpuEvent} (\hyperlink{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1ca}{CPUEventType} cpu\_\-event, \hyperlink{classRefCountingPtr}{Fault} fault, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{classRefCountingPtr}{DynInstPtr} inst, \hyperlink{classCycles}{Cycles} delay=\hyperlink{classCycles}{Cycles}(0), \hyperlink{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197}{CPUEventPri} event\_\-pri=InOrderCPU\_\-Pri)
+\item 
+TheISA::TLB $\ast$ \hyperlink{classInOrderCPU_aec8d740c4f6e13264bb6bcb0a2f95a5a}{getITBPtr} ()
+\item 
+TheISA::TLB $\ast$ \hyperlink{classInOrderCPU_a295c8ef68d34e6e430da35d8b4b5bd81}{getDTBPtr} ()
+\item 
+TheISA::Decoder $\ast$ \hyperlink{classInOrderCPU_a3c58d1da1d6e12bae2927d14cd7289ad}{getDecoderPtr} (unsigned tid)
+\item 
+void \hyperlink{classInOrderCPU_a51ed27cba133db18c3a632cf6f04a56e}{addToSkedCache} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst, \hyperlink{classResourceSked}{ThePipeline::RSkedPtr} inst\_\-sked)
+\item 
+\hyperlink{classResourceSked}{ThePipeline::RSkedPtr} \hyperlink{classInOrderCPU_aa8266c7a3d7b7965c585f9826c0d48f4}{lookupSked} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst)
+\item 
+\hyperlink{classInOrderCPU_a630137ef811336d3ee312e01adb43991}{SkedID} \hyperlink{classInOrderCPU_a1c1ffb2917eb8fd5d147568b3a9ed49d}{genSkedID} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst)
+\item 
+\hyperlink{classResourceSked}{ThePipeline::RSkedPtr} \hyperlink{classInOrderCPU_a58dbbb906338dea36ff442d23c1e576d}{createFrontEndSked} ()
+\item 
+\hyperlink{classResourceSked}{ThePipeline::RSkedPtr} \hyperlink{classInOrderCPU_ab4e3b37bc6ae8d0dde3a66c9a8b28874}{createFaultSked} ()
+\item 
+\hyperlink{classResourceSked}{ThePipeline::RSkedPtr} \hyperlink{classInOrderCPU_a431a92852eabc4329954c5f2ad9c5cf5}{createBackEndSked} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst)
+\item 
+void \hyperlink{classInOrderCPU_a4dc637449366fcdfc4e764cdf12d9b11}{regStats} ()
+\item 
+void \hyperlink{classInOrderCPU_a873dd91783f9efb4a590aded1f70d6b0}{tick} ()
+\item 
+void \hyperlink{classInOrderCPU_a02fd73d861ef2e4aabb38c0c9ff82947}{init} ()
+\item 
+\hyperlink{classRefCountingPtr}{Fault} \hyperlink{classInOrderCPU_a3820de4f7e76b56c6d795f27bf49c097}{hwrei} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+bool \hyperlink{classInOrderCPU_a875eebdeba298f450fe84b0a05349afe}{simPalCheck} (int palFunc, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_afc6b0526014df091373ec2c850508a55}{checkForInterrupts} ()
+\item 
+\hyperlink{classRefCountingPtr}{Fault} \hyperlink{classInOrderCPU_aa2bbcc75bdfc0f2355cd06731e6f5d69}{getInterrupts} ()
+\item 
+void \hyperlink{classInOrderCPU_ac3b13f31ae4a2de2b647e09c37a10822}{processInterrupts} (\hyperlink{classRefCountingPtr}{Fault} interrupt)
+\item 
+void \hyperlink{classInOrderCPU_ade0430439247877006d7df950f94918a}{halt} ()
+\item 
+bool \hyperlink{classInOrderCPU_af5f6a59bc2ed83b0cf9203ba8c63bf34}{validInstAddr} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr)
+\item 
+bool \hyperlink{classInOrderCPU_afe01e4cef8897b8a4ff99d575875c9db}{validDataAddr} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr)
+\item 
+void \hyperlink{classInOrderCPU_a37f2ec6a00b1cd18aaf408f5a2d3a9f7}{syscallContext} (\hyperlink{classRefCountingPtr}{Fault} fault, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{classRefCountingPtr}{DynInstPtr} inst, \hyperlink{classCycles}{Cycles} delay=\hyperlink{classCycles}{Cycles}(0))
+\item 
+void \hyperlink{classInOrderCPU_a2d6a2bbae85e604392f43b3418cdec97}{syscall} (int64\_\-t callnum, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a89e3462bf1fe289c9196b20b1d4a907e}{trapContext} (\hyperlink{classRefCountingPtr}{Fault} fault, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{classRefCountingPtr}{DynInstPtr} inst, \hyperlink{classCycles}{Cycles} delay=\hyperlink{classCycles}{Cycles}(0))
+\item 
+void \hyperlink{classInOrderCPU_abf76d6d245f7d3b17d26ea8dcc0cf36f}{trap} (\hyperlink{classRefCountingPtr}{Fault} fault, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{classRefCountingPtr}{DynInstPtr} inst)
+\item 
+void \hyperlink{classInOrderCPU_ad1c701dd98d725950e539f84f9faa8ec}{activateContext} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{classCycles}{Cycles} delay=\hyperlink{classCycles}{Cycles}(0))
+\item 
+void \hyperlink{classInOrderCPU_a687aa4600423bb30ecf3bb1da6cd6000}{activateThread} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a1bd67266499bbc86c4c378d3e7d9256e}{activateThreadInPipeline} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a067a25ab186d028e9c581a68903f5e32}{activateNextReadyContext} (\hyperlink{classCycles}{Cycles} delay=\hyperlink{classCycles}{Cycles}(0))
+\item 
+void \hyperlink{classInOrderCPU_a74bc9652a3caf0d2554213837f7ddb3f}{activateNextReadyThread} ()
+\item 
+void \hyperlink{classInOrderCPU_adec8c3e8de71e0e066f2104e29ced591}{deactivateContext} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{classCycles}{Cycles} delay=\hyperlink{classCycles}{Cycles}(0))
+\item 
+void \hyperlink{classInOrderCPU_ad11d9216ad92d9036ebf37844cf6e706}{deactivateThread} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_aed2e2b9af515a66bdde61b85f150856a}{suspendContext} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_aee7a498a20266fbfbc6aa3f165577b68}{suspendThread} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_ac2156e0955d5e1ef6e06cd0e2ab218e4}{haltContext} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a79e607a97980c07fc8d6d0b42a6ee225}{haltThread} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a3b9652a69ff2d5c02c1b696c1007ac9d}{squashFromMemStall} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{classCycles}{Cycles} delay=\hyperlink{classCycles}{Cycles}(0))
+\item 
+void \hyperlink{classInOrderCPU_a302751e3ba3d567b01c7446f9227a2da}{squashDueToMemStall} (int stage\_\-num, \hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} seq\_\-num, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_ace0d67fcac674ca759a8b0bc3acc7a05}{removePipelineStalls} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a53bed7b6c73f79636a1c6b918eb08f35}{squashThreadInPipeline} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a7c7508de9bcbfd4fa1fafd285a8f3930}{squashBehindMemStall} (int stage\_\-num, \hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} seq\_\-num, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{classPipelineStage}{PipelineStage} $\ast$ \hyperlink{classInOrderCPU_a4354c88eea8c78cc39d43d8c5f4c6b46}{getPipeStage} (int stage\_\-num)
+\item 
+int \hyperlink{classInOrderCPU_ac67c5e8e61fd7fe48edb5d70cb7aa490}{contextId} ()
+\item 
+void \hyperlink{classInOrderCPU_a00247488696e6ff608a2a44673578094}{updateThreadPriority} ()
+\item 
+void \hyperlink{classInOrderCPU_a20899487e4c954b6f0af2a5fc0a6cc6b}{switchToActive} (int stage\_\-idx)
+\item 
+\hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} \hyperlink{classInOrderCPU_a67230d0effe2bb65efc346f6bf296bdb}{getAndIncrementInstSeq} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} \hyperlink{classInOrderCPU_a5e508adfef98ea6ed53f25edcd5c9397}{nextInstSeqNum} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a411801cd4260db351142d4605f987203}{incrInstSeqNum} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a2d2e753e619aace6b421a932dd5f257f}{setInstSeqNum} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid, \hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} seq\_\-num)
+\item 
+\hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} \hyperlink{classInOrderCPU_ad382338533a75c038ece93a49091c9ca}{getNextEventNum} ()
+\item 
+uint64\_\-t \hyperlink{classInOrderCPU_a01d90b889dc598239bda63243ef365cf}{readIntReg} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{classInOrderCPU_a75484259f1855aabc8d74c6eb1cfe186}{FloatReg} \hyperlink{classInOrderCPU_aea9ee1636d5a4ee41fc873ab782096e5}{readFloatReg} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{classInOrderCPU_aab5eeae86499f9bfe15ef79360eccc64}{FloatRegBits} \hyperlink{classInOrderCPU_a29376f1c5a0787ea5f829651454f9205}{readFloatRegBits} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{classInOrderCPU_a0c9de550a32808e6a25b54b6c791d5ab}{CCReg} \hyperlink{classInOrderCPU_a958ede16b12c16df2d69b1614381edf1}{readCCReg} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_ae1dce5b4f3b791b6bf420cfba9d5c316}{setIntReg} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, uint64\_\-t val, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a60a2b6d8c0ac76cc653e44d1f228e173}{setFloatReg} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{classInOrderCPU_a75484259f1855aabc8d74c6eb1cfe186}{FloatReg} val, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_aeb40857aa08ef89112654eb05a7abdec}{setFloatRegBits} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{classInOrderCPU_aab5eeae86499f9bfe15ef79360eccc64}{FloatRegBits} val, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a54f8b635e27b3a845dd71124a4784951}{setCCReg} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{classInOrderCPU_a0c9de550a32808e6a25b54b6c791d5ab}{CCReg} val, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{classInOrderCPU_a4d739dee63b39a75eca478db2f8091bf}{flattenRegIdx} (\hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} reg\_\-idx, \hyperlink{reg__class_8hh_a3ed1e3c98353f2cc926e9d2b2a527cc0}{RegClass} \&reg\_\-type, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}{MiscReg} \hyperlink{classInOrderCPU_af2ec8925148a53b9bddefb7fb65a7223}{readMiscRegNoEffect} (int misc\_\-reg, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid=0)
+\item 
+\hyperlink{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}{MiscReg} \hyperlink{classInOrderCPU_a71d44ee14eeab530a09bc7d68d97ece2}{readMiscReg} (int misc\_\-reg, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid=0)
+\item 
+void \hyperlink{classInOrderCPU_ab8dd4afdd4e652ca191b235505691f68}{setMiscRegNoEffect} (int misc\_\-reg, const \hyperlink{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}{MiscReg} \&val, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid=0)
+\item 
+void \hyperlink{classInOrderCPU_a9b618db833e56fbb32246fe25716846f}{setMiscReg} (int misc\_\-reg, const \hyperlink{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}{MiscReg} \&val, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid=0)
+\item 
+uint64\_\-t \hyperlink{classInOrderCPU_ab5092ae128090a3cac51e6f84c458e62}{readRegOtherThread} (unsigned misc\_\-reg, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid=\hyperlink{base_2types_8hh_a192b210a26f038691d0f095d85dc0953}{InvalidThreadID})
+\item 
+void \hyperlink{classInOrderCPU_aeefa734eaa86cd9ffcbd59f4554b32a2}{setRegOtherThread} (unsigned misc\_\-reg, const \hyperlink{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}{MiscReg} \&val, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+TheISA::PCState \hyperlink{classInOrderCPU_af486ac7476906f63fc6696b3e76a411b}{pcState} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a992a623bd3e0d79c4a361ee71c9d642d}{pcState} (const TheISA::PCState \&newPC, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classInOrderCPU_afae6152cf4b3a51162d6e64247c1ac09}{instAddr} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classInOrderCPU_af1caba1f04cf2802d742d1a16b961e79}{nextInstAddr} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{base_2types_8hh_adfb4d8b20c5abc8be73dd367b16f2d57}{MicroPC} \hyperlink{classInOrderCPU_aa295441afc0fa8f449dc1a0cb7c7b994}{microPC} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+\hyperlink{classInOrderCPU_a184cb829e22cc656acb41864f68f51ea}{ListIt} \hyperlink{classInOrderCPU_ad6588087f5ab8be4ed4bf3b86cbcd577}{addInst} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst)
+\item 
+\hyperlink{classInOrderCPU_a184cb829e22cc656acb41864f68f51ea}{ListIt} \hyperlink{classInOrderCPU_ac5d1854609f029a63ef2374408a1e499}{findInst} (\hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} seq\_\-num, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a6b50b034099bb08ba363dfacf1ff4955}{instDone} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a73933add1d7cb3776676ca829cc5e7ed}{addToRemoveList} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst)
+\item 
+void \hyperlink{classInOrderCPU_ada01a7a7568c85b0f98b9f0946be8635}{removeInst} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst)
+\item 
+void \hyperlink{classInOrderCPU_a79f7e36d4bd89fe4528b665a949a0023}{removeInstsUntil} (const \hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} \&seq\_\-num, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a7a98b3e8dc082558dcf225e49588c70a}{squashInstIt} (const \hyperlink{classInOrderCPU_a184cb829e22cc656acb41864f68f51ea}{ListIt} inst\_\-it, \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+void \hyperlink{classInOrderCPU_a7bc351a2a79efb6dc9f88f8a6a2ed33c}{cleanUpRemovedInsts} ()
+\item 
+void \hyperlink{classInOrderCPU_a39643f756fba31f4194c22164dce65cd}{cleanUpRemovedEvents} ()
+\item 
+void \hyperlink{classInOrderCPU_a80587b4fe043bbe1995536cb3b361588}{dumpInsts} ()
+\item 
+\hyperlink{classRefCountingPtr}{Fault} \hyperlink{classInOrderCPU_ac48fe45ef23fddfa02b5136cda4c060e}{read} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, uint8\_\-t $\ast$data, unsigned size, unsigned flags)
+\item 
+\hyperlink{classRefCountingPtr}{Fault} \hyperlink{classInOrderCPU_aa5c5cc302819b0824df50495f6ffd319}{write} (\hyperlink{classRefCountingPtr}{DynInstPtr} inst, uint8\_\-t $\ast$data, unsigned size, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, unsigned flags, uint64\_\-t $\ast$write\_\-res=NULL)
+\item 
+\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} \hyperlink{classInOrderCPU_a8e60aca1dc5b29bde283a916f34bc944}{numActiveThreads} ()
+\item 
+\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} \hyperlink{classInOrderCPU_afd3a99df15e8ddc77ec8615ca02fcb4a}{activeThreadId} ()
+\item 
+void \hyperlink{classInOrderCPU_ad7e5c2506873e8dc8c71740ac6dabb23}{activityThisCycle} ()
+\item 
+void \hyperlink{classInOrderCPU_a9039dad8d295c41b50eba0342e6c11c0}{activateStage} (const int idx)
+\item 
+void \hyperlink{classInOrderCPU_a4d73bea02eaf6f93e267391592556fe7}{deactivateStage} (const int idx)
+\item 
+void \hyperlink{classInOrderCPU_abce3a63b123f84972e4df7962f9b870e}{wakeCPU} ()
+\item 
+virtual void \hyperlink{classInOrderCPU_ae674290a26ecbd622c5160e38e8a4fe9}{wakeup} ()
+\item 
+\hyperlink{classThreadContext}{ThreadContext} $\ast$ \hyperlink{classInOrderCPU_a1f4a6bd6bfbb29196452b0dfa68b1c9e}{tcBase} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid=0)
+\item 
+virtual \hyperlink{base_2types_8hh_ae1475755791765b8e6f6a8bb091e273e}{Counter} \hyperlink{classInOrderCPU_abdcc0de01ff3d8d22a40e0b966acb463}{totalInsts} () const 
+\item 
+virtual \hyperlink{base_2types_8hh_ae1475755791765b8e6f6a8bb091e273e}{Counter} \hyperlink{classInOrderCPU_adfb528b512cf037ade8dc8e22bf8a7bd}{totalOps} () const 
+\item 
+void \hyperlink{classInOrderCPU_a18e33751f284bf73d45d25224e93e6a0}{updateContextSwitchStats} ()
+\item 
+void \hyperlink{classInOrderCPU_a8f020d3237536fe007fc488c4125c5d8}{drainResume} ()
+\item 
+virtual void \hyperlink{classInOrderCPU_a05f299b443f8cc73a93d61572edc0218}{switchOut} ()
+\item 
+virtual void \hyperlink{classInOrderCPU_a9d27673c51f2406024ca1ce8ff2de4fb}{takeOverFrom} (\hyperlink{classBaseCPU_1_1BaseCPU}{BaseCPU} $\ast$oldCPU)
+\item 
+void \hyperlink{classInOrderCPU_a26221581dfe16c4d345ea2913d5d4d2f}{tickThreadStats} ()
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{classInOrderCPU_af34f33b8a6a96ac6ee8b68b7ecd34ba9}{cpu\_\-id}
+\item 
+\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} \hyperlink{classInOrderCPU_a74d3a6e6aba6f28d4cb2e95b45b75f67}{asid} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+std::string \hyperlink{classInOrderCPU_a558887e3416d99727765dad3be5354d7}{coreType}
+\item 
+\hyperlink{classInOrderCPU_1_1ThreadModel}{ThreadModel} \hyperlink{classInOrderCPU_af190f1a05b1875acfda59f02e59e2fe0}{threadModel}
+\item 
+\hyperlink{classInOrderCPU_aa14874985381292db0aea05d1c8a122c}{Params} $\ast$ \hyperlink{classInOrderCPU_abd8a4a05c67ac6b36a477d4243ce9681}{cpu\_\-params}
+\item 
+\hyperlink{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70b}{Status} \hyperlink{classInOrderCPU_a6cdf6e6db875a442f3ab6db542bd2bb5}{\_\-status}
+\item 
+int \hyperlink{classInOrderCPU_a60be67c646e9cf5778b1eb73436194dc}{stageWidth}
+\item 
+\hyperlink{classResourcePool}{ResourcePool} $\ast$ \hyperlink{classInOrderCPU_a2979f0f9689d1d8615cacdc85c65e11f}{resPool}
+\item 
+\hyperlink{classRefCountingPtr}{DynInstPtr} \hyperlink{classInOrderCPU_a8f57f75c5150b34b12a0d461a8941704}{dummyInst} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{classRefCountingPtr}{DynInstPtr} \hyperlink{classInOrderCPU_a09dc4a08ace7d6e74531ffff1ba5d905}{dummyBufferInst}
+\item 
+\hyperlink{classRefCountingPtr}{DynInstPtr} \hyperlink{classInOrderCPU_aee70a76b5dfeedede656757791734420}{dummyReqInst}
+\item 
+\hyperlink{classRefCountingPtr}{DynInstPtr} \hyperlink{classInOrderCPU_a102452fdf27d60fc9d2520e37b358be1}{dummyTrapInst} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{classResourceRequest}{ResourceRequest} $\ast$ \hyperlink{classInOrderCPU_a5366ca890575a006d6c51690c157a959}{dummyReq} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{classPipelineStage}{PipelineStage} $\ast$ \hyperlink{classInOrderCPU_aae220dcd072e514a6cf72df0abf36d42}{pipelineStage} \mbox{[}\hyperlink{namespaceThePipeline_a6918d1731267e5f56969bfb5c240be85}{ThePipeline::NumStages}\mbox{]}
+\item 
+TheISA::PCState \hyperlink{classInOrderCPU_a61bb24b7355c86288cba2cd9d51ad1ed}{pc} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+TheISA::PCState \hyperlink{classInOrderCPU_a2a4351147bb2df83bee5c60edc50165f}{lastCommittedPC} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+union \{\\
+\>\hyperlink{classInOrderCPU_a75484259f1855aabc8d74c6eb1cfe186}{FloatReg} \hyperlink{classInOrderCPU_a527f4207ae79fbe77bddd111013c163e}{f} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumFloatRegs\mbox{]}\\
+\>\hyperlink{classInOrderCPU_aab5eeae86499f9bfe15ef79360eccc64}{FloatRegBits} \hyperlink{classInOrderCPU_a6a5c774a90c1d03f1cfc418f4c9876e2}{i} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumFloatRegs\mbox{]}\\
+\} \hyperlink{classInOrderCPU_ad85bf1756055c7ee62e445619cdb3750}{floatRegs}\\
+
+\end{tabbing}\item 
+TheISA::IntReg \hyperlink{classInOrderCPU_a66f502f952354c9e141e6de6fd8c1d17}{intRegs} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumIntRegs\mbox{]}
+\item 
+TheISA::CCReg \hyperlink{classInOrderCPU_ae25728fd5ca9042b3ef3db1d5f39fccc}{ccRegs} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumCCRegs\mbox{]}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ TheISA::ISA $\ast$ $>$ \hyperlink{classInOrderCPU_aa0d8dc5e214b94342d1f730e4e34ae82}{isa}
+\item 
+\hyperlink{classRegDepMap}{RegDepMap} \hyperlink{classInOrderCPU_ab1f63e202ba966be3f297aa2124537a8}{archRegDepMap} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{classTimeBuffer}{TimeBuffer}$<$ \hyperlink{structTimeStruct}{TimeStruct} $>$ \hyperlink{classInOrderCPU_ad72b6568a4a40f54d071c31bef16bf2e}{timeBuffer}
+\item 
+\hyperlink{classTimeBuffer}{StageQueue} $\ast$ \hyperlink{classInOrderCPU_a410cb84ca396b18b7b6cd9b5999bc9c8}{stageQueue} \mbox{[}\hyperlink{namespaceThePipeline_a6918d1731267e5f56969bfb5c240be85}{ThePipeline::NumStages}-\/1\mbox{]}
+\item 
+\hyperlink{classInOrderCPU_ade41d453959a2fd39fc8e5ddeea16e0e}{SkedCacheIt} \hyperlink{classInOrderCPU_ae38b3e563def292648d9f34e094f8cc8}{endOfSkedIt}
+\item 
+\hyperlink{classResourceSked}{ThePipeline::RSkedPtr} \hyperlink{classInOrderCPU_a03c10522156687013f75c1bdaa96d04f}{frontEndSked}
+\item 
+\hyperlink{classResourceSked}{ThePipeline::RSkedPtr} \hyperlink{classInOrderCPU_a74928ed9838a0cd492269c937268ec16}{faultSked}
+\item 
+\hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{classRefCountingPtr}{DynInstPtr} $>$ \hyperlink{classInOrderCPU_a407a202e9777af8f3aca683ff7257693}{instList} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+std::queue$<$ \hyperlink{classInOrderCPU_a184cb829e22cc656acb41864f68f51ea}{ListIt} $>$ \hyperlink{classInOrderCPU_a574cb1bed7660bb2bb6940365f6a3315}{removeList}
+\item 
+bool \hyperlink{classInOrderCPU_ab7c4ed509aab4ab66a4d1c212dab659c}{trapPending} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+std::queue$<$ \hyperlink{classEvent}{Event} $\ast$ $>$ \hyperlink{classInOrderCPU_a27f6e838bf5d421831ac5e451e61ccce}{cpuEventRemoveList}
+\item 
+bool \hyperlink{classInOrderCPU_a2825a91132fe292d64dca3c61fd07410}{removeInstsThisCycle}
+\item 
+bool \hyperlink{classInOrderCPU_aae470a34ceb26576a60c1e6ed0d6e2e4}{nonSpecInstActive} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} \hyperlink{classInOrderCPU_a4ae669709931556f7ab17a0380eed72c}{nonSpecSeqNum} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} \hyperlink{classInOrderCPU_a8c48389ee147811c1be413cdd4be4b68}{squashSeqNum} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classInOrderCPU_a07ac7fa00a59be2904eaa76d4735681e}{lastSquashCycle} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} $>$ \hyperlink{classInOrderCPU_a22a54b30ea66b2e4740a1a3d55de098f}{fetchPriorityList}
+\item 
+\hyperlink{classSystem}{System} $\ast$ \hyperlink{classInOrderCPU_af27ccd765f13a4b7bd119dc7579e2746}{system}
+\item 
+\hyperlink{inst__seq_8hh_a258d93d98edaedee089435c19ea2ea2e}{InstSeqNum} \hyperlink{classInOrderCPU_a7df535223a2576eed74b77ef2e59a657}{globalSeqNum} \mbox{[}\hyperlink{namespaceThePipeline_ac9c0bbe9cf27d93e08ea8ccc4096e633}{ThePipeline::MaxThreads}\mbox{]}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classInOrderCPU_a6ef203de76af61b4babb98f152867401}{lockAddr}
+\item 
+bool \hyperlink{classInOrderCPU_aa062c7f3423632ca66107fdbb9d38131}{lockFlag}
+\item 
+int \hyperlink{classInOrderCPU_a91cd9b9d8a8f3793796b9eff33e0ffeb}{drainCount}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classInOrderThreadState}{Thread} $\ast$ $>$ \hyperlink{classInOrderCPU_afe9da004c5a3f37cbb72fa3763d4c0d1}{thread}
+\item 
+bool \hyperlink{classInOrderCPU_a202139c46c2d06ae2263b4d3bfc27f1a}{stageTracing}
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classInOrderCPU_a55a1507086425a12c25953d6061af80c}{lastRunningCycle}
+\item 
+unsigned \hyperlink{classInOrderCPU_aa5fa9dd1c64f901b65487ef9c44ba4c1}{instsPerSwitch}
+\item 
+\hyperlink{classStats_1_1Average}{Stats::Average} \hyperlink{classInOrderCPU_a057e08ddcb9e612ce7e273a324fd2a31}{instsPerCtxtSwitch}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_aa26707fae717bb36afa9b658f895d8d2}{numCtxtSwitches}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classInOrderCPU_a102b6d2d89b9006b8ac3bd3fe69284f0}{threadCycles}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_a1ad677a4636a45f2352c8e0e7b2e3b05}{smtCycles}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_a174dbfb3c7b892914a54cec44ed2eeaf}{timesIdled}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_a42e0f4c18fdb8ef7504f5c45d697fb14}{idleCycles}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_af9addd340a133c2f4add363a3055b019}{runCycles}
+\item 
+\hyperlink{classStats_1_1Formula}{Stats::Formula} \hyperlink{classInOrderCPU_acaf6f85dd1ae8aa79c075d446098f5b1}{activity}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_ad1256d43890e80b4ef9d1d6fd2ee2286}{comLoads}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_a371b0215b84c06c3ec41dccbe2a7988b}{comStores}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_afe1814e3fca0fc42be2257c61d7047b3}{comBranches}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_a60adec944be46cf99b376a9c146ab51f}{comNops}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_ac2b81fdbc0cd90a375b12b796c582cf8}{comNonSpec}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_a0414c26e057889c01ab11e1f0a6cb01b}{comInts}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_a2ac44abc59509ccec79a76bb16812848}{comFloats}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classInOrderCPU_a45901e46dca5846ddd857aecbee16645}{committedInsts}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classInOrderCPU_a16789fd9e4f632e091d740c772094f80}{committedOps}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classInOrderCPU_ab248e5224d70f89e3a901480b5170d8e}{smtCommittedInsts}
+\item 
+\hyperlink{classStats_1_1Scalar}{Stats::Scalar} \hyperlink{classInOrderCPU_aec59f0599a86f88751992e5825e25c22}{totalCommittedInsts}
+\item 
+\hyperlink{classStats_1_1Formula}{Stats::Formula} \hyperlink{classInOrderCPU_af68d211cace2daa3df90471d7af93ad8}{cpi}
+\item 
+\hyperlink{classStats_1_1Formula}{Stats::Formula} \hyperlink{classInOrderCPU_a1d87e3c89d12e8b8a87c71af10ece177}{smtCpi}
+\item 
+\hyperlink{classStats_1_1Formula}{Stats::Formula} \hyperlink{classInOrderCPU_a5bd2f06c271dd03138cad92251716f5d}{totalCpi}
+\item 
+\hyperlink{classStats_1_1Formula}{Stats::Formula} \hyperlink{classInOrderCPU_a6f168a31ee4084b6167d6761a4124014}{ipc}
+\item 
+\hyperlink{classStats_1_1Formula}{Stats::Formula} \hyperlink{classInOrderCPU_a022f90f00731c9b5399eddfda76c6d6b}{smtIpc}
+\item 
+\hyperlink{classStats_1_1Formula}{Stats::Formula} \hyperlink{classInOrderCPU_ae8551f10097f4b2e5ed3febf0d9417e3}{totalIpc}
+\end{DoxyCompactItemize}
+\subsection*{Static Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+static std::string \hyperlink{classInOrderCPU_a3e78f2c15e35e19acb51c1a41fc51130}{eventNames} \mbox{[}NumCPUEvents\mbox{]}
+\item 
+static m5::hash\_\-map$<$ \hyperlink{classInOrderCPU_a630137ef811336d3ee312e01adb43991}{SkedID}, \hyperlink{classResourceSked}{ThePipeline::RSkedPtr} $>$ \hyperlink{classInOrderCPU_ac3bde2239116735c8de364fb6c64df5f}{skedCache}
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_ab0689a51017f8422cab595aed96c6a1a}{INST\_\-OPCLASS} = 26
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_a5b3806af6c911af84cd16d860f4436b2}{INST\_\-LOAD} = 25
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_a85aa6196492bed8f13431a172f09b83b}{INST\_\-STORE} = 24
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_a202c5d802fb841a0c3faf2f36737ecd8}{INST\_\-CONTROL} = 23
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_a079fa8746c9fa2240354d5e9c476bb24}{INST\_\-NONSPEC} = 22
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_a89c9d4d44bcca23c206e33116684b91e}{INST\_\-DEST\_\-REGS} = 18
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_af24bafb407b963ae82732cf776cf40c4}{INST\_\-SRC\_\-REGS} = 14
+\item 
+static const uint8\_\-t \hyperlink{classInOrderCPU_aadbdb3acfa734a87e0e26c5da208bf11}{INST\_\-SPLIT\_\-DATA} = 13
+\end{DoxyCompactItemize}
+\subsection*{Protected 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{namespaceThePipeline_ab62ca16eeca26566ad2422b5df4943ce}{ThePipeline::Params} \hyperlink{classInOrderCPU_aa14874985381292db0aea05d1c8a122c}{Params}
+\item 
+typedef \hyperlink{classInOrderThreadState}{InOrderThreadState} \hyperlink{classInOrderCPU_a71082c68d1af09b939b47c729ab022e2}{Thread}
+\item 
+typedef TheISA::IntReg \hyperlink{classInOrderCPU_a1355cb78d031430d4d70eb5080267604}{IntReg}
+\item 
+typedef TheISA::FloatReg \hyperlink{classInOrderCPU_a75484259f1855aabc8d74c6eb1cfe186}{FloatReg}
+\item 
+typedef TheISA::FloatRegBits \hyperlink{classInOrderCPU_aab5eeae86499f9bfe15ef79360eccc64}{FloatRegBits}
+\item 
+typedef TheISA::CCReg \hyperlink{classInOrderCPU_a0c9de550a32808e6a25b54b6c791d5ab}{CCReg}
+\item 
+typedef TheISA::MiscReg \hyperlink{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}{MiscReg}
+\item 
+typedef TheISA::RegIndex \hyperlink{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex}
+\item 
+typedef \hyperlink{classRefCountingPtr}{ThePipeline::DynInstPtr} \hyperlink{classInOrderCPU_af9d0c8a46736ba6aa2d8bb94da1a5e73}{DynInstPtr}
+\item 
+typedef \hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{classRefCountingPtr}{DynInstPtr} $>$::iterator \hyperlink{classInOrderCPU_a184cb829e22cc656acb41864f68f51ea}{ListIt}
+\item 
+typedef \hyperlink{classTimeBuffer}{TimeBuffer}$<$ \hyperlink{structInterStageStruct}{InterStageStruct} $>$ \hyperlink{classInOrderCPU_a2dd1ce49bce6a9a8c83156a21ca638a0}{StageQueue}
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classInOrderCPU_aa5e706e11748c9fefd1c679848d0bd44}{isThreadActive} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+bool \hyperlink{classInOrderCPU_a410e64fde8cec544412d687a0904efb1}{isThreadReady} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\item 
+bool \hyperlink{classInOrderCPU_ac32ab10fb7199c0ae6000cb07a19b94f}{isThreadSuspended} (\hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} tid)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} $>$ \hyperlink{classInOrderCPU_ae8939711cc7f6e9c795d16df91f9f258}{activeThreads}
+\item 
+\hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} $>$ \hyperlink{classInOrderCPU_afcee8801ebda6ab96f79e89b9618fc31}{readyThreads}
+\item 
+\hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} $>$ \hyperlink{classInOrderCPU_adee15257888edfe2927ee23593ff44bb}{suspendedThreads}
+\item 
+\hyperlink{classstd_1_1list}{std::list}$<$ \hyperlink{base_2types_8hh_ab39b1a4f9dad884694c7a74ed69e6a6b}{ThreadID} $>$ \hyperlink{classInOrderCPU_ac4a971a8b09e053f4bf9bfcd6748995d}{haltedThreads}
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classInOrderCPU_a71eb9ea7b25032de341033111b946dfc}{scheduleTickEvent} (\hyperlink{classCycles}{Cycles} delay)
+\item 
+void \hyperlink{classInOrderCPU_ad819e7898bd94721d107a35fde764390}{unscheduleTickEvent} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classInOrderCPU_1_1TickEvent}{TickEvent} \hyperlink{classInOrderCPU_aa36b8e894416f0ec98f701ab08f2ac22}{tickEvent}
+\item 
+\hyperlink{classInOrderCPU_1_1CachePort}{CachePort} \hyperlink{classInOrderCPU_a8e4a84e6f2b11310fbb12e5b7598947f}{dataPort}
+\item 
+\hyperlink{classInOrderCPU_1_1CachePort}{CachePort} \hyperlink{classInOrderCPU_a170c2f44ce8ed65aee6cf1da2a0e6296}{instPort}
+\item 
+\hyperlink{classActivityRecorder}{ActivityRecorder} \hyperlink{classInOrderCPU_ae5ad3ebe67382e7fbc7fddcf48ae9c6c}{activityRec}
+\end{DoxyCompactItemize}
+\subsection*{フレンド}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classInOrderCPU_a0ebbdc315d2466b93b663656f9d9ab44}{Resource}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classInOrderCPU_a0c9de550a32808e6a25b54b6c791d5ab}{
+\index{InOrderCPU@{InOrderCPU}!CCReg@{CCReg}}
+\index{CCReg@{CCReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{CCReg}]{\setlength{\rightskip}{0pt plus 5cm}typedef TheISA::CCReg {\bf CCReg}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a0c9de550a32808e6a25b54b6c791d5ab}
+\hypertarget{classInOrderCPU_af9d0c8a46736ba6aa2d8bb94da1a5e73}{
+\index{InOrderCPU@{InOrderCPU}!DynInstPtr@{DynInstPtr}}
+\index{DynInstPtr@{DynInstPtr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{DynInstPtr}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf ThePipeline::DynInstPtr} {\bf DynInstPtr}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_af9d0c8a46736ba6aa2d8bb94da1a5e73}
+\hypertarget{classInOrderCPU_a75484259f1855aabc8d74c6eb1cfe186}{
+\index{InOrderCPU@{InOrderCPU}!FloatReg@{FloatReg}}
+\index{FloatReg@{FloatReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{FloatReg}]{\setlength{\rightskip}{0pt plus 5cm}typedef TheISA::FloatReg {\bf FloatReg}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a75484259f1855aabc8d74c6eb1cfe186}
+\hypertarget{classInOrderCPU_aab5eeae86499f9bfe15ef79360eccc64}{
+\index{InOrderCPU@{InOrderCPU}!FloatRegBits@{FloatRegBits}}
+\index{FloatRegBits@{FloatRegBits}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{FloatRegBits}]{\setlength{\rightskip}{0pt plus 5cm}typedef TheISA::FloatRegBits {\bf FloatRegBits}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_aab5eeae86499f9bfe15ef79360eccc64}
+\hypertarget{classInOrderCPU_a1355cb78d031430d4d70eb5080267604}{
+\index{InOrderCPU@{InOrderCPU}!IntReg@{IntReg}}
+\index{IntReg@{IntReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{IntReg}]{\setlength{\rightskip}{0pt plus 5cm}typedef TheISA::IntReg {\bf IntReg}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a1355cb78d031430d4d70eb5080267604}
+\hypertarget{classInOrderCPU_a184cb829e22cc656acb41864f68f51ea}{
+\index{InOrderCPU@{InOrderCPU}!ListIt@{ListIt}}
+\index{ListIt@{ListIt}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{ListIt}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf std::list}$<${\bf DynInstPtr}$>$::iterator {\bf ListIt}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a184cb829e22cc656acb41864f68f51ea}
+\hypertarget{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}{
+\index{InOrderCPU@{InOrderCPU}!MiscReg@{MiscReg}}
+\index{MiscReg@{MiscReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{MiscReg}]{\setlength{\rightskip}{0pt plus 5cm}typedef TheISA::MiscReg {\bf MiscReg}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_aaf5f073a387db0556d1db4bcc45428bc}
+\hypertarget{classInOrderCPU_aa14874985381292db0aea05d1c8a122c}{
+\index{InOrderCPU@{InOrderCPU}!Params@{Params}}
+\index{Params@{Params}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf ThePipeline::Params} {\bf Params}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_aa14874985381292db0aea05d1c8a122c}
+\hypertarget{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}{
+\index{InOrderCPU@{InOrderCPU}!RegIndex@{RegIndex}}
+\index{RegIndex@{RegIndex}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{RegIndex}]{\setlength{\rightskip}{0pt plus 5cm}typedef TheISA::RegIndex {\bf RegIndex}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a36d25e03e43fa3bb4c5482cbefe5e0fb}
+\hypertarget{classInOrderCPU_ade41d453959a2fd39fc8e5ddeea16e0e}{
+\index{InOrderCPU@{InOrderCPU}!SkedCacheIt@{SkedCacheIt}}
+\index{SkedCacheIt@{SkedCacheIt}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{SkedCacheIt}]{\setlength{\rightskip}{0pt plus 5cm}typedef m5::hash\_\-map$<${\bf SkedID}, {\bf ThePipeline::RSkedPtr}$>$::iterator {\bf SkedCacheIt}}}
+\label{classInOrderCPU_ade41d453959a2fd39fc8e5ddeea16e0e}
+\hypertarget{classInOrderCPU_a630137ef811336d3ee312e01adb43991}{
+\index{InOrderCPU@{InOrderCPU}!SkedID@{SkedID}}
+\index{SkedID@{SkedID}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{SkedID}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf uint32\_\-t} {\bf SkedID}}}
+\label{classInOrderCPU_a630137ef811336d3ee312e01adb43991}
+Accessor Type for the SkedCache \hypertarget{classInOrderCPU_a2dd1ce49bce6a9a8c83156a21ca638a0}{
+\index{InOrderCPU@{InOrderCPU}!StageQueue@{StageQueue}}
+\index{StageQueue@{StageQueue}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{StageQueue}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf TimeBuffer}$<${\bf InterStageStruct}$>$ {\bf StageQueue}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a2dd1ce49bce6a9a8c83156a21ca638a0}
+\hypertarget{classInOrderCPU_a71082c68d1af09b939b47c729ab022e2}{
+\index{InOrderCPU@{InOrderCPU}!Thread@{Thread}}
+\index{Thread@{Thread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{Thread}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf InOrderThreadState} {\bf Thread}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a71082c68d1af09b939b47c729ab022e2}
+
+
+\subsection{列挙型}
+\hypertarget{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197}{
+\index{InOrderCPU@{InOrderCPU}!CPUEventPri@{CPUEventPri}}
+\index{CPUEventPri@{CPUEventPri}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{CPUEventPri}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf CPUEventPri}}}
+\label{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{InOrderCPU\_\-Pri@{InOrderCPU\_\-Pri}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!InOrderCPU\_\-Pri@{InOrderCPU\_\-Pri}}\item[{\em 
+\hypertarget{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a81856d43a7cea886b3eb88f1392ba3fb}{
+InOrderCPU\_\-Pri}
+\label{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a81856d43a7cea886b3eb88f1392ba3fb}
+}]\index{Syscall\_\-Pri@{Syscall\_\-Pri}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Syscall\_\-Pri@{Syscall\_\-Pri}}\item[{\em 
+\hypertarget{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a6857abbd38f98a454eb5b1e13d70cfa4}{
+Syscall\_\-Pri}
+\label{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a6857abbd38f98a454eb5b1e13d70cfa4}
+}]\index{ActivateNextReadyThread\_\-Pri@{ActivateNextReadyThread\_\-Pri}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!ActivateNextReadyThread\_\-Pri@{ActivateNextReadyThread\_\-Pri}}\item[{\em 
+\hypertarget{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a3bb59ff5e590b6f8be858dae8cd29cf2}{
+ActivateNextReadyThread\_\-Pri}
+\label{classInOrderCPU_a4381feb1878b9c1ea6f5dd3eed8d3197a3bb59ff5e590b6f8be858dae8cd29cf2}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+245                      {
+246         InOrderCPU_Pri                 = Event::CPU_Tick_Pri,
+247         Syscall_Pri                    = Event::CPU_Tick_Pri + 9,
+248         ActivateNextReadyThread_Pri    = Event::CPU_Tick_Pri + 10
+249     };
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1ca}{
+\index{InOrderCPU@{InOrderCPU}!CPUEventType@{CPUEventType}}
+\index{CPUEventType@{CPUEventType}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{CPUEventType}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf CPUEventType}}}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1ca}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{ActivateThread@{ActivateThread}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!ActivateThread@{ActivateThread}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa391f5669603c83ae987a98aa7e9603bf}{
+ActivateThread}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa391f5669603c83ae987a98aa7e9603bf}
+}]\index{ActivateNextReadyThread@{ActivateNextReadyThread}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!ActivateNextReadyThread@{ActivateNextReadyThread}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad15fbcf08bb36f7edd64f89e13d76616}{
+ActivateNextReadyThread}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad15fbcf08bb36f7edd64f89e13d76616}
+}]\index{DeactivateThread@{DeactivateThread}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!DeactivateThread@{DeactivateThread}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad1ab56a875437119606fffcc25bbd970}{
+DeactivateThread}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad1ab56a875437119606fffcc25bbd970}
+}]\index{HaltThread@{HaltThread}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!HaltThread@{HaltThread}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caafc4cce6b04821394a15b6531b958f6cc}{
+HaltThread}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caafc4cce6b04821394a15b6531b958f6cc}
+}]\index{SuspendThread@{SuspendThread}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!SuspendThread@{SuspendThread}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caac6f9fd02f217ce213280d2e09642e832}{
+SuspendThread}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caac6f9fd02f217ce213280d2e09642e832}
+}]\index{Trap@{Trap}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Trap@{Trap}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa178e499decd0c21272bc34e4b3056eab}{
+Trap}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa178e499decd0c21272bc34e4b3056eab}
+}]\index{Syscall@{Syscall}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Syscall@{Syscall}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad2145e5e5c075863737dcea0a2060622}{
+Syscall}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad2145e5e5c075863737dcea0a2060622}
+}]\index{SquashFromMemStall@{SquashFromMemStall}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!SquashFromMemStall@{SquashFromMemStall}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa1c9193ea2061c0841070f8d302f87220}{
+SquashFromMemStall}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa1c9193ea2061c0841070f8d302f87220}
+}]\index{UpdatePCs@{UpdatePCs}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!UpdatePCs@{UpdatePCs}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad365b9a495b45da54884ffdbbc99e40a}{
+UpdatePCs}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caad365b9a495b45da54884ffdbbc99e40a}
+}]\index{NumCPUEvents@{NumCPUEvents}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!NumCPUEvents@{NumCPUEvents}}\item[{\em 
+\hypertarget{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa85f33d9118a810839bc9175f0f351076}{
+NumCPUEvents}
+\label{classInOrderCPU_aedc081b7a3ef1b1568e62dec4a64c1caa85f33d9118a810839bc9175f0f351076}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+230                       {
+231         ActivateThread,
+232         ActivateNextReadyThread,
+233         DeactivateThread,
+234         HaltThread,
+235         SuspendThread,
+236         Trap,
+237         Syscall,
+238         SquashFromMemStall,
+239         UpdatePCs,
+240         NumCPUEvents
+241     };
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70b}{
+\index{InOrderCPU@{InOrderCPU}!Status@{Status}}
+\index{Status@{Status}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{Status}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf Status}}}
+\label{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70b}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{Running@{Running}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Running@{Running}}\item[{\em 
+\hypertarget{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb}{
+Running}
+\label{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba2f5f2c4a8c4f4f0519d503dcdfbf55cb}
+}]\index{Idle@{Idle}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Idle@{Idle}}\item[{\em 
+\hypertarget{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19}{
+Idle}
+\label{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70bad3fa9ae9431d6cb1772f9d9df48cab19}
+}]\index{Halted@{Halted}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Halted@{Halted}}\item[{\em 
+\hypertarget{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba185a75df63e845aec97632afd6a34d6a}{
+Halted}
+\label{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba185a75df63e845aec97632afd6a34d6a}
+}]\index{Blocked@{Blocked}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Blocked@{Blocked}}\item[{\em 
+\hypertarget{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30}{
+Blocked}
+\label{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba9463ee9b8700258a1019b4b9d2d77a30}
+}]\index{SwitchedOut@{SwitchedOut}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!SwitchedOut@{SwitchedOut}}\item[{\em 
+\hypertarget{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba2c25b24188e2b53c8706769167a82779}{
+SwitchedOut}
+\label{classInOrderCPU_a67a0db04d321a74b7e7fcfd3f1a3f70ba2c25b24188e2b53c8706769167a82779}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+149                 {
+150         Running,
+151         Idle,
+152         Halted,
+153         Blocked,
+154         SwitchedOut
+155     };
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1}{
+\index{InOrderCPU@{InOrderCPU}!ThreadModel@{ThreadModel}}
+\index{ThreadModel@{ThreadModel}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{ThreadModel}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf ThreadModel}}}
+\label{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{Single@{Single}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!Single@{Single}}\item[{\em 
+\hypertarget{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1a68168ddfb80052045df470955d649258}{
+Single}
+\label{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1a68168ddfb80052045df470955d649258}
+}]\index{SMT@{SMT}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!SMT@{SMT}}\item[{\em 
+\hypertarget{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1ad7ecd51555a027dd07c2d14f123bfe6c}{
+SMT}
+\label{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1ad7ecd51555a027dd07c2d14f123bfe6c}
+}]\index{SwitchOnCacheMiss@{SwitchOnCacheMiss}!InOrderCPU@{InOrderCPU}}\index{InOrderCPU@{InOrderCPU}!SwitchOnCacheMiss@{SwitchOnCacheMiss}}\item[{\em 
+\hypertarget{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1af15b471f97b68795dc1ed6ca9cac5ebc}{
+SwitchOnCacheMiss}
+\label{classInOrderCPU_a27fc31cad7f14b3f31546056efddeaf1af15b471f97b68795dc1ed6ca9cac5ebc}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+134                      {
+135         Single,
+136         SMT,
+137         SwitchOnCacheMiss
+138     };
+\end{DoxyCode}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classInOrderCPU_abde8e8c7dd0ec0e51d67cc1ae67798d3}{
+\index{InOrderCPU@{InOrderCPU}!InOrderCPU@{InOrderCPU}}
+\index{InOrderCPU@{InOrderCPU}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{InOrderCPU}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InOrderCPU} ({\bf Params} $\ast$ {\em params})}}
+\label{classInOrderCPU_abde8e8c7dd0ec0e51d67cc1ae67798d3}
+Constructs a CPU with the given parameters. 
+
+
+\begin{DoxyCode}
+229     : BaseCPU(params),
+230       cpu_id(params->cpu_id),
+231       coreType("default"),
+232       _status(Idle),
+233       tickEvent(this),
+234       stageWidth(params->stageWidth),
+235       resPool(new ResourcePool(this, params)),
+236       isa(numThreads, NULL),
+237       timeBuffer(2 , 2),
+238       dataPort(resPool->getDataUnit(), ".dcache_port"),
+239       instPort(resPool->getInstUnit(), ".icache_port"),
+240       removeInstsThisCycle(false),
+241       activityRec(params->name, NumStages, 10, params->activity),
+242       system(params->system),
+243 #ifdef DEBUG
+244       cpuEventNum(0),
+245       resReqCount(0),
+246 #endif // DEBUG
+247       drainCount(0),
+248       stageTracing(params->stageTracing),
+249       lastRunningCycle(0),
+250       instsPerSwitch(0)
+251 {    
+252     cpu_params = params;
+253 
+254     // Resize for Multithreading CPUs
+255     thread.resize(numThreads);
+256 
+257     ThreadID active_threads = params->workload.size();
+258     if (FullSystem) {
+259         active_threads = 1;
+260     } else {
+261         active_threads = params->workload.size();
+262 
+263         if (active_threads > MaxThreads) {
+264             panic("Workload Size too large. Increase the 'MaxThreads'"
+265                   "in your InOrder implementation or "
+266                   "edit your workload size.");
+267         }
+268 
+269 
+270         if (active_threads > 1) {
+271             threadModel = (InOrderCPU::ThreadModel) params->threadModel;
+272 
+273             if (threadModel == SMT) {
+274                 DPRINTF(InOrderCPU, "Setting Thread Model to SMT.\n");
+275             } else if (threadModel == SwitchOnCacheMiss) {
+276                 DPRINTF(InOrderCPU, "Setting Thread Model to "
+277                         "Switch On Cache Miss\n");
+278             }
+279 
+280         } else {
+281             threadModel = Single;
+282         }
+283     }
+284 
+285     for (ThreadID tid = 0; tid < numThreads; ++tid) {
+286         isa[tid] = params->isa[tid];
+287         pc[tid].set(0);
+288         lastCommittedPC[tid].set(0);
+289 
+290         if (FullSystem) {
+291             // SMT is not supported in FS mode yet.
+292             assert(numThreads == 1);
+293             thread[tid] = new Thread(this, 0, NULL);
+294         } else {
+295             if (tid < (ThreadID)params->workload.size()) {
+296                 DPRINTF(InOrderCPU, "Workload[%i] process is %#x\n",
+297                         tid, params->workload[tid]->progName());
+298                 thread[tid] =
+299                     new Thread(this, tid, params->workload[tid]);
+300             } else {
+301                 //Allocate Empty thread so M5 can use later
+302                 //when scheduling threads to CPU
+303                 Process* dummy_proc = params->workload[0];
+304                 thread[tid] = new Thread(this, tid, dummy_proc);
+305             }
+306 
+307             // Eventually set this with parameters...
+308             asid[tid] = tid;
+309         }
+310 
+311         // Setup the TC that will serve as the interface to the threads/CPU.
+312         InOrderThreadContext *tc = new InOrderThreadContext;
+313         tc->cpu = this;
+314         tc->thread = thread[tid];
+315 
+316         // Setup quiesce event.
+317         this->thread[tid]->quiesceEvent = new EndQuiesceEvent(tc);
+318 
+319         // Give the thread the TC.
+320         thread[tid]->tc = tc;
+321         thread[tid]->setFuncExeInst(0);
+322         globalSeqNum[tid] = 1;
+323 
+324         // Add the TC to the CPU's list of TC's.
+325         this->threadContexts.push_back(tc);
+326     }
+327 
+328     // Initialize TimeBuffer Stage Queues
+329     for (int stNum=0; stNum < NumStages - 1; stNum++) {
+330         stageQueue[stNum] = new StageQueue(NumStages, NumStages);
+331         stageQueue[stNum]->id(stNum);
+332     }
+333 
+334 
+335     // Set Up Pipeline Stages
+336     for (int stNum=0; stNum < NumStages; stNum++) {
+337         if (stNum == 0)
+338             pipelineStage[stNum] = new FirstStage(params, stNum);
+339         else
+340             pipelineStage[stNum] = new PipelineStage(params, stNum);
+341 
+342         pipelineStage[stNum]->setCPU(this);
+343         pipelineStage[stNum]->setActiveThreads(&activeThreads);
+344         pipelineStage[stNum]->setTimeBuffer(&timeBuffer);
+345 
+346         // Take Care of 1st/Nth stages
+347         if (stNum > 0)
+348             pipelineStage[stNum]->setPrevStageQueue(stageQueue[stNum - 1]);
+349         if (stNum < NumStages - 1)
+350             pipelineStage[stNum]->setNextStageQueue(stageQueue[stNum]);
+351     }
+352 
+353     // Initialize thread specific variables
+354     for (ThreadID tid = 0; tid < numThreads; tid++) {
+355         archRegDepMap[tid].setCPU(this);
+356 
+357         nonSpecInstActive[tid] = false;
+358         nonSpecSeqNum[tid] = 0;
+359 
+360         squashSeqNum[tid] = MaxAddr;
+361         lastSquashCycle[tid] = 0;
+362 
+363         memset(intRegs[tid], 0, sizeof(intRegs[tid]));
+364         memset(floatRegs.i[tid], 0, sizeof(floatRegs.i[tid]));
+365 #ifdef ISA_HAS_CC_REGS
+366         memset(ccRegs[tid], 0, sizeof(ccRegs[tid]));
+367 #endif
+368         isa[tid]->clear();
+369 
+370         // Define dummy instructions and resource requests to be used.
+371         dummyInst[tid] = new InOrderDynInst(this, 
+372                                             thread[tid], 
+373                                             0, 
+374                                             tid, 
+375                                             asid[tid]);
+376 
+377         dummyReq[tid] = new ResourceRequest(resPool->getResource(0));
+378 
+379 
+380         if (FullSystem) {
+381             // Use this dummy inst to force squashing behind every instruction
+382             // in pipeline
+383             dummyTrapInst[tid] = new InOrderDynInst(this, NULL, 0, 0, 0);
+384             dummyTrapInst[tid]->seqNum = 0;
+385             dummyTrapInst[tid]->squashSeqNum = 0;
+386             dummyTrapInst[tid]->setTid(tid);
+387         }
+388 
+389         trapPending[tid] = false;
+390 
+391     }
+392 
+393     // InOrderCPU always requires an interrupt controller.
+394     if (!params->switched_out && !interrupts) {
+395         fatal("InOrderCPU %s has no interrupt controller.\n"
+396               "Ensure createInterruptController() is called.\n", name());
+397     }
+398 
+399     dummyReqInst = new InOrderDynInst(this, NULL, 0, 0, 0);
+400     dummyReqInst->setSquashed();
+401     dummyReqInst->resetInstCount();
+402 
+403     dummyBufferInst = new InOrderDynInst(this, NULL, 0, 0, 0);
+404     dummyBufferInst->setSquashed();
+405     dummyBufferInst->resetInstCount();
+406 
+407     endOfSkedIt = skedCache.end();
+408     frontEndSked = createFrontEndSked();
+409     faultSked = createFaultSked();
+410 
+411     lastRunningCycle = curCycle();
+412 
+413     lockAddr = 0;
+414     lockFlag = false;
+415     
+416     // Schedule First Tick Event, CPU will reschedule itself from here on out.
+417     scheduleTickEvent(Cycles(0));
+418 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a9b26cce2959103d12295be716fe47b10}{
+\index{InOrderCPU@{InOrderCPU}!$\sim$InOrderCPU@{$\sim$InOrderCPU}}
+\index{$\sim$InOrderCPU@{$\sim$InOrderCPU}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{$\sim$InOrderCPU}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf InOrderCPU} ()}}
+\label{classInOrderCPU_a9b26cce2959103d12295be716fe47b10}
+
+
+
+\begin{DoxyCode}
+421 {
+422     delete resPool;
+423 
+424     SkedCacheIt sked_it = skedCache.begin();
+425     SkedCacheIt sked_end = skedCache.end();
+426 
+427     while (sked_it != sked_end) {
+428         delete (*sked_it).second;
+429         sked_it++;
+430     }
+431     skedCache.clear();
+432 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classInOrderCPU_ad1c701dd98d725950e539f84f9faa8ec}{
+\index{InOrderCPU@{InOrderCPU}!activateContext@{activateContext}}
+\index{activateContext@{activateContext}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activateContext}]{\setlength{\rightskip}{0pt plus 5cm}void activateContext ({\bf ThreadID} {\em tid}, \/  {\bf Cycles} {\em delay} = {\ttfamily {\bf Cycles}(0)})}}
+\label{classInOrderCPU_ad1c701dd98d725950e539f84f9faa8ec}
+Schedule thread activation on the CPU 
+
+
+\begin{DoxyCode}
+1176 {
+1177     DPRINTF(InOrderCPU,"[tid:%i]: Activating ...\n", tid);
+1178 
+1179     
+1180     scheduleCpuEvent(ActivateThread, NoFault, tid, dummyInst[tid], delay);
+1181 
+1182     // Be sure to signal that there's some activity so the CPU doesn't
+1183     // deschedule itself.
+1184     activityRec.activity();
+1185 
+1186     _status = Running;
+1187 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a067a25ab186d028e9c581a68903f5e32}{
+\index{InOrderCPU@{InOrderCPU}!activateNextReadyContext@{activateNextReadyContext}}
+\index{activateNextReadyContext@{activateNextReadyContext}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activateNextReadyContext}]{\setlength{\rightskip}{0pt plus 5cm}void activateNextReadyContext ({\bf Cycles} {\em delay} = {\ttfamily {\bf Cycles}(0)})}}
+\label{classInOrderCPU_a067a25ab186d028e9c581a68903f5e32}
+Schedule Thread Activation from Ready List 
+
+
+\begin{DoxyCode}
+1191 {
+1192     DPRINTF(InOrderCPU,"Activating next ready thread\n");
+1193 
+1194     scheduleCpuEvent(ActivateNextReadyThread, NoFault, 0/*tid*/, dummyInst[0], 
+1195                      delay, ActivateNextReadyThread_Pri);
+1196 
+1197     // Be sure to signal that there's some activity so the CPU doesn't
+1198     // deschedule itself.
+1199     activityRec.activity();
+1200 
+1201     _status = Running;
+1202 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a74bc9652a3caf0d2554213837f7ddb3f}{
+\index{InOrderCPU@{InOrderCPU}!activateNextReadyThread@{activateNextReadyThread}}
+\index{activateNextReadyThread@{activateNextReadyThread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activateNextReadyThread}]{\setlength{\rightskip}{0pt plus 5cm}void activateNextReadyThread ()}}
+\label{classInOrderCPU_a74bc9652a3caf0d2554213837f7ddb3f}
+Add Thread From Ready List to Active Threads List. 
+
+
+\begin{DoxyCode}
+1021 {
+1022     if (readyThreads.size() >= 1) {          
+1023         ThreadID ready_tid = readyThreads.front();
+1024         
+1025         // Activate in Pipeline
+1026         activateThread(ready_tid);                        
+1027         
+1028         // Activate in Resource Pool
+1029         resPool->activateThread(ready_tid);
+1030         
+1031         list<ThreadID>::iterator ready_it =
+1032             std::find(readyThreads.begin(), readyThreads.end(), ready_tid);
+1033         readyThreads.erase(ready_it);                        
+1034     } else {
+1035         DPRINTF(InOrderCPU,
+1036                 "Attempting to activate new thread, but No Ready Threads to"
+1037                 "activate.\n");
+1038         DPRINTF(InOrderCPU,
+1039                 "Unable to switch to next active thread.\n");
+1040     }        
+1041 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a9039dad8d295c41b50eba0342e6c11c0}{
+\index{InOrderCPU@{InOrderCPU}!activateStage@{activateStage}}
+\index{activateStage@{activateStage}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activateStage}]{\setlength{\rightskip}{0pt plus 5cm}void activateStage (const int {\em idx})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a9039dad8d295c41b50eba0342e6c11c0}
+Changes a stage's status to active within the activity recorder. 
+
+
+\begin{DoxyCode}
+788     { activityRec.activateStage(idx); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a687aa4600423bb30ecf3bb1da6cd6000}{
+\index{InOrderCPU@{InOrderCPU}!activateThread@{activateThread}}
+\index{activateThread@{activateThread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activateThread}]{\setlength{\rightskip}{0pt plus 5cm}void activateThread ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a687aa4600423bb30ecf3bb1da6cd6000}
+Add Thread to Active Threads List. 
+
+
+\begin{DoxyCode}
+1045 {
+1046     if (isThreadSuspended(tid)) {
+1047         DPRINTF(InOrderCPU,
+1048                 "Removing [tid:%i] from suspended threads list.\n", tid);
+1049 
+1050         list<ThreadID>::iterator susp_it =
+1051             std::find(suspendedThreads.begin(), suspendedThreads.end(), 
+1052                       tid);
+1053         suspendedThreads.erase(susp_it);                        
+1054     }
+1055 
+1056     if (threadModel == SwitchOnCacheMiss &&
+1057         numActiveThreads() == 1) {
+1058         DPRINTF(InOrderCPU,
+1059                 "Ignoring activation of [tid:%i], since [tid:%i] is "
+1060                 "already running.\n", tid, activeThreadId());
+1061         
+1062         DPRINTF(InOrderCPU,"Placing [tid:%i] on ready threads list\n", 
+1063                 tid);        
+1064 
+1065         readyThreads.push_back(tid);
+1066         
+1067     } else if (!isThreadActive(tid)) {                
+1068         DPRINTF(InOrderCPU,
+1069                 "Adding [tid:%i] to active threads list.\n", tid);
+1070         activeThreads.push_back(tid);
+1071         
+1072         activateThreadInPipeline(tid);
+1073 
+1074         thread[tid]->lastActivate = curTick();            
+1075 
+1076         tcBase(tid)->setStatus(ThreadContext::Active);    
+1077 
+1078         wakeCPU();
+1079 
+1080         numCtxtSwitches++;        
+1081     }
+1082 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a1bd67266499bbc86c4c378d3e7d9256e}{
+\index{InOrderCPU@{InOrderCPU}!activateThreadInPipeline@{activateThreadInPipeline}}
+\index{activateThreadInPipeline@{activateThreadInPipeline}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activateThreadInPipeline}]{\setlength{\rightskip}{0pt plus 5cm}void activateThreadInPipeline ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a1bd67266499bbc86c4c378d3e7d9256e}
+Activate Thread In Each Pipeline Stage 
+
+
+\begin{DoxyCode}
+1086 {
+1087     for (int stNum=0; stNum < NumStages; stNum++) {
+1088         pipelineStage[stNum]->activateThread(tid);
+1089     }    
+1090 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_afd3a99df15e8ddc77ec8615ca02fcb4a}{
+\index{InOrderCPU@{InOrderCPU}!activeThreadId@{activeThreadId}}
+\index{activeThreadId@{activeThreadId}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activeThreadId}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadID} activeThreadId ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_afd3a99df15e8ddc77ec8615ca02fcb4a}
+Thread id of active thread Only used for SwitchOnCacheMiss model. Assumes only 1 thread active 
+
+
+\begin{DoxyCode}
+775     { 
+776         if (numActiveThreads() > 0)
+777             return activeThreads.front();
+778         else
+779             return InvalidThreadID;
+780     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ad7e5c2506873e8dc8c71740ac6dabb23}{
+\index{InOrderCPU@{InOrderCPU}!activityThisCycle@{activityThisCycle}}
+\index{activityThisCycle@{activityThisCycle}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activityThisCycle}]{\setlength{\rightskip}{0pt plus 5cm}void activityThisCycle ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_ad7e5c2506873e8dc8c71740ac6dabb23}
+Records that there was time buffer activity this cycle. 
+
+
+\begin{DoxyCode}
+784 { activityRec.activity(); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ad6588087f5ab8be4ed4bf3b86cbcd577}{
+\index{InOrderCPU@{InOrderCPU}!addInst@{addInst}}
+\index{addInst@{addInst}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{addInst}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InOrderCPU::ListIt} addInst ({\bf DynInstPtr} {\em inst})}}
+\label{classInOrderCPU_ad6588087f5ab8be4ed4bf3b86cbcd577}
+Function to add instruction onto the head of the list of the instructions. Used when new instructions are fetched. 
+
+
+\begin{DoxyCode}
+1460 {
+1461     ThreadID tid = inst->readTid();
+1462 
+1463     instList[tid].push_back(inst);
+1464 
+1465     return --(instList[tid].end());
+1466 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a73933add1d7cb3776676ca829cc5e7ed}{
+\index{InOrderCPU@{InOrderCPU}!addToRemoveList@{addToRemoveList}}
+\index{addToRemoveList@{addToRemoveList}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{addToRemoveList}]{\setlength{\rightskip}{0pt plus 5cm}void addToRemoveList ({\bf DynInstPtr} {\em inst})}}
+\label{classInOrderCPU_a73933add1d7cb3776676ca829cc5e7ed}
+Add Instructions to the CPU Remove List 
+
+
+\begin{DoxyCode}
+1645 {
+1646     removeInstsThisCycle = true;
+1647     if (!inst->isRemoveList()) {            
+1648         DPRINTF(InOrderCPU, "Pushing instruction [tid:%i] PC %s "
+1649                 "[sn:%lli] to remove list\n",
+1650                 inst->threadNumber, inst->pcState(), inst->seqNum);
+1651         inst->setRemoveList();        
+1652         removeList.push(inst->getInstListIt());
+1653     }  else {
+1654         DPRINTF(InOrderCPU, "Ignoring instruction removal for [tid:%i] PC %s "
+1655                 "[sn:%lli], already remove list\n",
+1656                 inst->threadNumber, inst->pcState(), inst->seqNum);
+1657     }
+1658     
+1659 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a51ed27cba133db18c3a632cf6f04a56e}{
+\index{InOrderCPU@{InOrderCPU}!addToSkedCache@{addToSkedCache}}
+\index{addToSkedCache@{addToSkedCache}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{addToSkedCache}]{\setlength{\rightskip}{0pt plus 5cm}void addToSkedCache ({\bf DynInstPtr} {\em inst}, \/  {\bf ThePipeline::RSkedPtr} {\em inst\_\-sked})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a51ed27cba133db18c3a632cf6f04a56e}
+Add a new instruction schedule to the schedule cache 
+
+
+\begin{DoxyCode}
+371     {
+372         SkedID sked_id = genSkedID(inst);
+373         assert(skedCache.find(sked_id) == skedCache.end());
+374         skedCache[sked_id] = inst_sked;
+375     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_afc6b0526014df091373ec2c850508a55}{
+\index{InOrderCPU@{InOrderCPU}!checkForInterrupts@{checkForInterrupts}}
+\index{checkForInterrupts@{checkForInterrupts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{checkForInterrupts}]{\setlength{\rightskip}{0pt plus 5cm}void checkForInterrupts ()}}
+\label{classInOrderCPU_afc6b0526014df091373ec2c850508a55}
+
+
+
+\begin{DoxyCode}
+869 {
+870     for (int i = 0; i < threadContexts.size(); i++) {
+871         ThreadContext *tc = threadContexts[i];
+872 
+873         if (interrupts->checkInterrupts(tc)) {
+874             Fault interrupt = interrupts->getInterrupt(tc);
+875 
+876             if (interrupt != NoFault) {
+877                 DPRINTF(Interrupt, "Processing Intterupt for [tid:%i].\n",
+878                         tc->threadId());
+879 
+880                 ThreadID tid = tc->threadId();
+881                 interrupts->updateIntrInfo(tc);
+882 
+883                 // Squash from Last Stage in Pipeline
+884                 unsigned last_stage = NumStages - 1;
+885                 dummyTrapInst[tid]->squashingStage = last_stage;
+886                 pipelineStage[last_stage]->setupSquash(dummyTrapInst[tid],
+887                                                        tid);
+888 
+889                 // By default, setupSquash will always squash from stage + 1
+890                 pipelineStage[BackEndStartStage - 1]->setupSquash(dummyTrapInst[t
+      id],
+891                                                                   tid);
+892 
+893                 // Schedule Squash Through-out Resource Pool
+894                 resPool->scheduleEvent(
+895                     (InOrderCPU::CPUEventType)ResourcePool::SquashAll,
+896                     dummyTrapInst[tid], Cycles(0));
+897 
+898                 // Finally, Setup Trap to happen at end of cycle
+899                 trapContext(interrupt, tid, dummyTrapInst[tid]);
+900             }
+901         }
+902     }
+903 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a39643f756fba31f4194c22164dce65cd}{
+\index{InOrderCPU@{InOrderCPU}!cleanUpRemovedEvents@{cleanUpRemovedEvents}}
+\index{cleanUpRemovedEvents@{cleanUpRemovedEvents}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{cleanUpRemovedEvents}]{\setlength{\rightskip}{0pt plus 5cm}void cleanUpRemovedEvents ()}}
+\label{classInOrderCPU_a39643f756fba31f4194c22164dce65cd}
+Cleans up all events on the CPU event remove list. 
+
+
+\begin{DoxyCode}
+1782 {
+1783     while (!cpuEventRemoveList.empty()) {
+1784         Event *cpu_event = cpuEventRemoveList.front();
+1785         cpuEventRemoveList.pop();
+1786         delete cpu_event;
+1787     }
+1788 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a7bc351a2a79efb6dc9f88f8a6a2ed33c}{
+\index{InOrderCPU@{InOrderCPU}!cleanUpRemovedInsts@{cleanUpRemovedInsts}}
+\index{cleanUpRemovedInsts@{cleanUpRemovedInsts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{cleanUpRemovedInsts}]{\setlength{\rightskip}{0pt plus 5cm}void cleanUpRemovedInsts ()}}
+\label{classInOrderCPU_a7bc351a2a79efb6dc9f88f8a6a2ed33c}
+Cleans up all instructions on the instruction remove list. 
+
+
+\begin{DoxyCode}
+1749 {
+1750     while (!removeList.empty()) {
+1751         DPRINTF(InOrderCPU, "Removing instruction, "
+1752                 "[tid:%i] [sn:%lli] PC %s\n",
+1753                 (*removeList.front())->threadNumber,
+1754                 (*removeList.front())->seqNum,
+1755                (*removeList.front())->pcState());
+1756 
+1757         DynInstPtr inst = *removeList.front();
+1758         ThreadID tid = inst->threadNumber;
+1759 
+1760         // Remove From Register Dependency Map, If Necessary
+1761         // archRegDepMap[tid].remove(inst);
+1762 
+1763         // Clear if Non-Speculative
+1764         if (inst->staticInst &&
+1765             inst->seqNum == nonSpecSeqNum[tid] &&
+1766             nonSpecInstActive[tid]) {
+1767             nonSpecInstActive[tid] = false;
+1768         }
+1769 
+1770         inst->onInstList = false;
+1771 
+1772         instList[tid].erase(removeList.front());
+1773 
+1774         removeList.pop();
+1775     }
+1776 
+1777     removeInstsThisCycle = false;
+1778 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ac67c5e8e61fd7fe48edb5d70cb7aa490}{
+\index{InOrderCPU@{InOrderCPU}!contextId@{contextId}}
+\index{contextId@{contextId}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{contextId}]{\setlength{\rightskip}{0pt plus 5cm}int contextId ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_ac67c5e8e61fd7fe48edb5d70cb7aa490}
+
+
+
+\begin{DoxyCode}
+551     {
+552         hack_once("return a bogus context id");
+553         return 0;
+554     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a431a92852eabc4329954c5f2ad9c5cf5}{
+\index{InOrderCPU@{InOrderCPU}!createBackEndSked@{createBackEndSked}}
+\index{createBackEndSked@{createBackEndSked}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{createBackEndSked}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RSkedPtr} createBackEndSked ({\bf DynInstPtr} {\em inst})}}
+\label{classInOrderCPU_a431a92852eabc4329954c5f2ad9c5cf5}
+
+
+
+\begin{DoxyCode}
+472 {
+473     RSkedPtr res_sked = lookupSked(inst);
+474     if (res_sked != NULL) {
+475         DPRINTF(SkedCache, "Found %s in sked cache.\n",
+476                 inst->instName());
+477         return res_sked;
+478     } else {
+479         res_sked = new ResourceSked();
+480     }
+481 
+482     int stage_num = ThePipeline::BackEndStartStage;
+483     StageScheduler X(res_sked, stage_num++);
+484     StageScheduler M(res_sked, stage_num++);
+485     StageScheduler W(res_sked, stage_num++);
+486 
+487     if (!inst->staticInst) {
+488         warn_once("Static Instruction Object Not Set. Can't Create"
+489                   " Back End Schedule");
+490         return NULL;
+491     }
+492 
+493     // EXECUTE
+494     X.needs(RegManager, UseDefUnit::MarkDestRegs);
+495     for (int idx=0; idx < inst->numSrcRegs(); idx++) {
+496         if (!idx || !inst->isStore()) {
+497             X.needs(RegManager, UseDefUnit::ReadSrcReg, idx);
+498         }
+499     }
+500 
+501     //@todo: schedule non-spec insts to operate on this cycle
+502     // as long as all previous insts are done
+503     if ( inst->isNonSpeculative() ) {
+504         // skip execution of non speculative insts until later
+505     } else if ( inst->isMemRef() ) {
+506         if ( inst->isLoad() ) {
+507             X.needs(AGEN, AGENUnit::GenerateAddr);
+508         }
+509     } else if (inst->opClass() == IntMultOp || inst->opClass() == IntDivOp) {
+510         X.needs(MDU, MultDivUnit::StartMultDiv);
+511     } else {
+512         X.needs(ExecUnit, ExecutionUnit::ExecuteInst);
+513     }
+514 
+515     // MEMORY
+516     if (!inst->isNonSpeculative()) {
+517         if (inst->opClass() == IntMultOp || inst->opClass() == IntDivOp) {
+518             M.needs(MDU, MultDivUnit::EndMultDiv);
+519         }
+520 
+521         if ( inst->isLoad() ) {
+522             M.needs(DCache, CacheUnit::InitiateReadData);
+523             if (inst->splitInst)
+524                 M.needs(DCache, CacheUnit::InitSecondSplitRead);
+525         } else if ( inst->isStore() ) {
+526             for (int i = 1; i < inst->numSrcRegs(); i++ ) {
+527                 M.needs(RegManager, UseDefUnit::ReadSrcReg, i);
+528             }
+529             M.needs(AGEN, AGENUnit::GenerateAddr);
+530             M.needs(DCache, CacheUnit::InitiateWriteData);
+531             if (inst->splitInst)
+532                 M.needs(DCache, CacheUnit::InitSecondSplitWrite);
+533         }
+534     }
+535 
+536     // WRITEBACK
+537     if (!inst->isNonSpeculative()) {
+538         if ( inst->isLoad() ) {
+539             W.needs(DCache, CacheUnit::CompleteReadData);
+540             if (inst->splitInst)
+541                 W.needs(DCache, CacheUnit::CompleteSecondSplitRead);
+542         } else if ( inst->isStore() ) {
+543             W.needs(DCache, CacheUnit::CompleteWriteData);
+544             if (inst->splitInst)
+545                 W.needs(DCache, CacheUnit::CompleteSecondSplitWrite);
+546         }
+547     } else {
+548         // Finally, Execute Speculative Data
+549         if (inst->isMemRef()) {
+550             if (inst->isLoad()) {
+551                 W.needs(AGEN, AGENUnit::GenerateAddr);
+552                 W.needs(DCache, CacheUnit::InitiateReadData);
+553                 if (inst->splitInst)
+554                     W.needs(DCache, CacheUnit::InitSecondSplitRead);
+555                 W.needs(DCache, CacheUnit::CompleteReadData);
+556                 if (inst->splitInst)
+557                     W.needs(DCache, CacheUnit::CompleteSecondSplitRead);
+558             } else if (inst->isStore()) {
+559                 if ( inst->numSrcRegs() >= 2 ) {
+560                     W.needs(RegManager, UseDefUnit::ReadSrcReg, 1);
+561                 }
+562                 W.needs(AGEN, AGENUnit::GenerateAddr);
+563                 W.needs(DCache, CacheUnit::InitiateWriteData);
+564                 if (inst->splitInst)
+565                     W.needs(DCache, CacheUnit::InitSecondSplitWrite);
+566                 W.needs(DCache, CacheUnit::CompleteWriteData);
+567                 if (inst->splitInst)
+568                     W.needs(DCache, CacheUnit::CompleteSecondSplitWrite);
+569             }
+570         } else {
+571             W.needs(ExecUnit, ExecutionUnit::ExecuteInst);
+572         }
+573     }
+574 
+575     W.needs(Grad, GraduationUnit::CheckFault);
+576 
+577     for (int idx=0; idx < inst->numDestRegs(); idx++) {
+578         W.needs(RegManager, UseDefUnit::WriteDestReg, idx);
+579     }
+580 
+581     if (inst->isControl())
+582         W.needs(BPred, BranchPredictor::UpdatePredictor);
+583 
+584     W.needs(Grad, GraduationUnit::GraduateInst);
+585 
+586     // Insert Back Schedule into our cache of
+587     // resource schedules
+588     addToSkedCache(inst, res_sked);
+589 
+590     DPRINTF(SkedCache, "Back End Sked Created for instruction: %s (%08p)\n",
+591             inst->instName(), inst->getMachInst());
+592     res_sked->print();
+593 
+594     return res_sked;
+595 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ab4e3b37bc6ae8d0dde3a66c9a8b28874}{
+\index{InOrderCPU@{InOrderCPU}!createFaultSked@{createFaultSked}}
+\index{createFaultSked@{createFaultSked}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{createFaultSked}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RSkedPtr} createFaultSked ()}}
+\label{classInOrderCPU_ab4e3b37bc6ae8d0dde3a66c9a8b28874}
+
+
+
+\begin{DoxyCode}
+462 {
+463     RSkedPtr res_sked = new ResourceSked();
+464     StageScheduler W(res_sked, NumStages - 1);
+465     W.needs(Grad, GraduationUnit::CheckFault);
+466     DPRINTF(SkedCache, "Resource Sked created for instruction Faults\n");
+467     return res_sked;
+468 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a58dbbb906338dea36ff442d23c1e576d}{
+\index{InOrderCPU@{InOrderCPU}!createFrontEndSked@{createFrontEndSked}}
+\index{createFrontEndSked@{createFrontEndSked}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{createFrontEndSked}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RSkedPtr} createFrontEndSked ()}}
+\label{classInOrderCPU_a58dbbb906338dea36ff442d23c1e576d}
+
+
+
+\begin{DoxyCode}
+438 {
+439     RSkedPtr res_sked = new ResourceSked();
+440     int stage_num = 0;
+441     StageScheduler F(res_sked, stage_num++);
+442     StageScheduler D(res_sked, stage_num++);
+443 
+444     // FETCH
+445     F.needs(FetchSeq, FetchSeqUnit::AssignNextPC);
+446     F.needs(ICache, FetchUnit::InitiateFetch);
+447 
+448     // DECODE
+449     D.needs(ICache, FetchUnit::CompleteFetch);
+450     D.needs(Decode, DecodeUnit::DecodeInst);
+451     D.needs(BPred, BranchPredictor::PredictBranch);
+452     D.needs(FetchSeq, FetchSeqUnit::UpdateTargetPC);
+453 
+454 
+455     DPRINTF(SkedCache, "Resource Sked created for instruction Front End\n");
+456 
+457     return res_sked;
+458 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_adec8c3e8de71e0e066f2104e29ced591}{
+\index{InOrderCPU@{InOrderCPU}!deactivateContext@{deactivateContext}}
+\index{deactivateContext@{deactivateContext}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{deactivateContext}]{\setlength{\rightskip}{0pt plus 5cm}void deactivateContext ({\bf ThreadID} {\em tid}, \/  {\bf Cycles} {\em delay} = {\ttfamily {\bf Cycles}(0)})}}
+\label{classInOrderCPU_adec8c3e8de71e0e066f2104e29ced591}
+Schedule a thread deactivation on the CPU 
+
+
+\begin{DoxyCode}
+1094 {
+1095     DPRINTF(InOrderCPU,"[tid:%i]: Deactivating ...\n", tid);
+1096 
+1097     scheduleCpuEvent(DeactivateThread, NoFault, tid, dummyInst[tid], delay);
+1098 
+1099     // Be sure to signal that there's some activity so the CPU doesn't
+1100     // deschedule itself.
+1101     activityRec.activity();
+1102 
+1103     _status = Running;
+1104 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a4d73bea02eaf6f93e267391592556fe7}{
+\index{InOrderCPU@{InOrderCPU}!deactivateStage@{deactivateStage}}
+\index{deactivateStage@{deactivateStage}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{deactivateStage}]{\setlength{\rightskip}{0pt plus 5cm}void deactivateStage (const int {\em idx})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a4d73bea02eaf6f93e267391592556fe7}
+Changes a stage's status to inactive within the activity recorder. 
+
+
+\begin{DoxyCode}
+792     { activityRec.deactivateStage(idx); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ad11d9216ad92d9036ebf37844cf6e706}{
+\index{InOrderCPU@{InOrderCPU}!deactivateThread@{deactivateThread}}
+\index{deactivateThread@{deactivateThread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{deactivateThread}]{\setlength{\rightskip}{0pt plus 5cm}void deactivateThread ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_ad11d9216ad92d9036ebf37844cf6e706}
+Remove from Active Thread List 
+
+
+\begin{DoxyCode}
+1108 {
+1109     DPRINTF(InOrderCPU, "[tid:%i]: Calling deactivate thread.\n", tid);
+1110 
+1111     if (isThreadActive(tid)) {
+1112         DPRINTF(InOrderCPU,"[tid:%i]: Removing from active threads list\n",
+1113                 tid);
+1114         list<ThreadID>::iterator thread_it =
+1115             std::find(activeThreads.begin(), activeThreads.end(), tid);
+1116 
+1117         removePipelineStalls(*thread_it);
+1118 
+1119         activeThreads.erase(thread_it);
+1120 
+1121         // Ideally, this should be triggered from the
+1122         // suspendContext/Thread functions
+1123         tcBase(tid)->setStatus(ThreadContext::Suspended);    
+1124     }
+1125 
+1126     assert(!isThreadActive(tid));    
+1127 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a8f020d3237536fe007fc488c4125c5d8}{
+\index{InOrderCPU@{InOrderCPU}!drainResume@{drainResume}}
+\index{drainResume@{drainResume}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{drainResume}]{\setlength{\rightskip}{0pt plus 5cm}void drainResume ()}}
+\label{classInOrderCPU_a8f020d3237536fe007fc488c4125c5d8}
+Resumes execution after a drain. 
+
+
+\begin{DoxyCode}
+1497 {
+1498     setDrainState(Drainable::Running);
+1499     if (switchedOut())
+1500         return;
+1501 
+1502     DPRINTF(Drain, "Resuming...\n");
+1503     verifyMemoryMode();
+1504 
+1505     assert(!tickEvent.scheduled());
+1506 
+1507     // Activate threads and also signal the resource pool to activate
+1508     // the thread on all resources.
+1509     _status = Idle;
+1510     for (ThreadID i = 0; i < thread.size(); i++) {
+1511         if (thread[i]->status() == ThreadContext::Active) {
+1512             DPRINTF(Drain, "Activating thread: %i\n", i);
+1513             activateThread(i);
+1514             resPool->activateThread(i);
+1515             _status = Running;
+1516         }
+1517     }
+1518 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a80587b4fe043bbe1995536cb3b361588}{
+\index{InOrderCPU@{InOrderCPU}!dumpInsts@{dumpInsts}}
+\index{dumpInsts@{dumpInsts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{dumpInsts}]{\setlength{\rightskip}{0pt plus 5cm}void dumpInsts ()}}
+\label{classInOrderCPU_a80587b4fe043bbe1995536cb3b361588}
+\hyperlink{namespaceDebug}{Debug} function to print all instructions on the list. 
+
+
+\begin{DoxyCode}
+1793 {
+1794     int num = 0;
+1795 
+1796     ListIt inst_list_it = instList[0].begin();
+1797 
+1798     cprintf("Dumping Instruction List\n");
+1799 
+1800     while (inst_list_it != instList[0].end()) {
+1801         cprintf("Instruction:%i\nPC:%s\n[tid:%i]\n[sn:%lli]\nIssued:%i\n"
+1802                 "Squashed:%i\n\n",
+1803                 num, (*inst_list_it)->pcState(),
+1804                 (*inst_list_it)->threadNumber,
+1805                 (*inst_list_it)->seqNum, (*inst_list_it)->isIssued(),
+1806                 (*inst_list_it)->isSquashed());
+1807         inst_list_it++;
+1808         ++num;
+1809     }
+1810 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ac5d1854609f029a63ef2374408a1e499}{
+\index{InOrderCPU@{InOrderCPU}!findInst@{findInst}}
+\index{findInst@{findInst}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{findInst}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InOrderCPU::ListIt} findInst ({\bf InstSeqNum} {\em seq\_\-num}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_ac5d1854609f029a63ef2374408a1e499}
+Find instruction on instruction list 
+
+
+\begin{DoxyCode}
+1470 {
+1471     ListIt it = instList[tid].begin();
+1472     ListIt end = instList[tid].end();
+1473 
+1474     while (it != end) {
+1475         if ((*it)->seqNum == seq_num)
+1476             return it;
+1477         else if ((*it)->seqNum > seq_num)
+1478             break;
+1479 
+1480         it++;
+1481     }
+1482 
+1483     return instList[tid].end();
+1484 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a4d739dee63b39a75eca478db2f8091bf}{
+\index{InOrderCPU@{InOrderCPU}!flattenRegIdx@{flattenRegIdx}}
+\index{flattenRegIdx@{flattenRegIdx}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{flattenRegIdx}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegIndex} flattenRegIdx ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf RegClass} \& {\em reg\_\-type}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a4d739dee63b39a75eca478db2f8091bf}
+
+
+
+\begin{DoxyCode}
+1265 {
+1266     RegIndex rel_idx;
+1267 
+1268     reg_type = regIdxToClass(reg_idx, &rel_idx);
+1269 
+1270     switch (reg_type) {
+1271       case IntRegClass:
+1272         return isa[tid]->flattenIntIndex(rel_idx);
+1273 
+1274       case FloatRegClass:
+1275         return isa[tid]->flattenFloatIndex(rel_idx);
+1276 
+1277       case MiscRegClass:
+1278         return rel_idx;
+1279 
+1280       default:
+1281         panic("register %d out of range\n", reg_idx);
+1282     }
+1283 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a1c1ffb2917eb8fd5d147568b3a9ed49d}{
+\index{InOrderCPU@{InOrderCPU}!genSkedID@{genSkedID}}
+\index{genSkedID@{genSkedID}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{genSkedID}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SkedID} genSkedID ({\bf DynInstPtr} {\em inst})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a1c1ffb2917eb8fd5d147568b3a9ed49d}
+
+
+
+\begin{DoxyCode}
+401     {
+402         SkedID id = 0;
+403         id = (inst->opClass() << INST_OPCLASS) |
+404             (inst->isLoad() << INST_LOAD) |
+405             (inst->isStore() << INST_STORE) |
+406             (inst->isControl() << INST_CONTROL) |
+407             (inst->isNonSpeculative() << INST_NONSPEC) |
+408             (inst->numDestRegs() << INST_DEST_REGS) |
+409             (inst->numSrcRegs() << INST_SRC_REGS) |
+410             (inst->splitInst << INST_SPLIT_DATA);
+411         return id;
+412     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a67230d0effe2bb65efc346f6bf296bdb}{
+\index{InOrderCPU@{InOrderCPU}!getAndIncrementInstSeq@{getAndIncrementInstSeq}}
+\index{getAndIncrementInstSeq@{getAndIncrementInstSeq}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getAndIncrementInstSeq}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InstSeqNum} getAndIncrementInstSeq ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a67230d0effe2bb65efc346f6bf296bdb}
+Get the current instruction sequence number, and increment it. 
+
+
+\begin{DoxyCode}
+565     { return globalSeqNum[tid]++; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aeea6b55ae1c4be53c21dbee434b221d4}{
+\index{InOrderCPU@{InOrderCPU}!getDataPort@{getDataPort}}
+\index{getDataPort@{getDataPort}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getDataPort}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf MasterPort}\& getDataPort ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classInOrderCPU_aeea6b55ae1c4be53c21dbee434b221d4}
+Return a reference to the data port. 
+
+
+\begin{DoxyCode}
+119 { return dataPort; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a3c58d1da1d6e12bae2927d14cd7289ad}{
+\index{InOrderCPU@{InOrderCPU}!getDecoderPtr@{getDecoderPtr}}
+\index{getDecoderPtr@{getDecoderPtr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getDecoderPtr}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::Decoder $\ast$ getDecoderPtr (unsigned {\em tid})}}
+\label{classInOrderCPU_a3c58d1da1d6e12bae2927d14cd7289ad}
+
+
+
+\begin{DoxyCode}
+1905 {
+1906     return resPool->getInstUnit()->decoder[tid];
+1907 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a295c8ef68d34e6e430da35d8b4b5bd81}{
+\index{InOrderCPU@{InOrderCPU}!getDTBPtr@{getDTBPtr}}
+\index{getDTBPtr@{getDTBPtr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getDTBPtr}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::TLB $\ast$ getDTBPtr ()}}
+\label{classInOrderCPU_a295c8ef68d34e6e430da35d8b4b5bd81}
+
+
+
+\begin{DoxyCode}
+1899 {
+1900     return resPool->getDataUnit()->tlb();
+1901 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a40da530cb5dd380fd7fc0d786e94d5eb}{
+\index{InOrderCPU@{InOrderCPU}!getInstPort@{getInstPort}}
+\index{getInstPort@{getInstPort}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getInstPort}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf MasterPort}\& getInstPort ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classInOrderCPU_a40da530cb5dd380fd7fc0d786e94d5eb}
+Return a reference to the instruction port. 
+
+
+\begin{DoxyCode}
+122 { return instPort; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aa2bbcc75bdfc0f2355cd06731e6f5d69}{
+\index{InOrderCPU@{InOrderCPU}!getInterrupts@{getInterrupts}}
+\index{getInterrupts@{getInterrupts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getInterrupts}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} getInterrupts ()}}
+\label{classInOrderCPU_aa2bbcc75bdfc0f2355cd06731e6f5d69}
+Returns the Fault for any valid interrupt. 
+
+
+\begin{DoxyCode}
+907 {
+908     // Check if there are any outstanding interrupts
+909     return interrupts->getInterrupt(threadContexts[0]);
+910 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aec8d740c4f6e13264bb6bcb0a2f95a5a}{
+\index{InOrderCPU@{InOrderCPU}!getITBPtr@{getITBPtr}}
+\index{getITBPtr@{getITBPtr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getITBPtr}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::TLB $\ast$ getITBPtr ()}}
+\label{classInOrderCPU_aec8d740c4f6e13264bb6bcb0a2f95a5a}
+
+
+
+\begin{DoxyCode}
+1891 {
+1892     CacheUnit *itb_res = resPool->getInstUnit();
+1893     return itb_res->tlb();
+1894 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ad382338533a75c038ece93a49091c9ca}{
+\index{InOrderCPU@{InOrderCPU}!getNextEventNum@{getNextEventNum}}
+\index{getNextEventNum@{getNextEventNum}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getNextEventNum}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InstSeqNum} getNextEventNum ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_ad382338533a75c038ece93a49091c9ca}
+Get \& Update Next \hyperlink{classEvent}{Event} Number 
+
+
+\begin{DoxyCode}
+583     {
+584 #ifdef DEBUG
+585         return cpuEventNum++;
+586 #else
+587         return 0;
+588 #endif
+589     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a4354c88eea8c78cc39d43d8c5f4c6b46}{
+\index{InOrderCPU@{InOrderCPU}!getPipeStage@{getPipeStage}}
+\index{getPipeStage@{getPipeStage}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{getPipeStage}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PipelineStage} $\ast$ getPipeStage (int {\em stage\_\-num})}}
+\label{classInOrderCPU_a4354c88eea8c78cc39d43d8c5f4c6b46}
+
+
+
+\begin{DoxyCode}
+1258 {
+1259     return pipelineStage[stage_num];
+1260 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ade0430439247877006d7df950f94918a}{
+\index{InOrderCPU@{InOrderCPU}!halt@{halt}}
+\index{halt@{halt}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{halt}]{\setlength{\rightskip}{0pt plus 5cm}void halt ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_ade0430439247877006d7df950f94918a}
+Halts the CPU. 
+
+
+\begin{DoxyCode}
+478 { panic("Halt not implemented!\n"); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ac2156e0955d5e1ef6e06cd0e2ab218e4}{
+\index{InOrderCPU@{InOrderCPU}!haltContext@{haltContext}}
+\index{haltContext@{haltContext}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{haltContext}]{\setlength{\rightskip}{0pt plus 5cm}void haltContext ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_ac2156e0955d5e1ef6e06cd0e2ab218e4}
+Schedule a thread halt on the CPU 
+
+
+\begin{DoxyCode}
+1206 {
+1207     DPRINTF(InOrderCPU, "[tid:%i]: Calling Halt Context...\n", tid);
+1208 
+1209     scheduleCpuEvent(HaltThread, NoFault, tid, dummyInst[tid]);
+1210 
+1211     activityRec.activity();
+1212 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a79e607a97980c07fc8d6d0b42a6ee225}{
+\index{InOrderCPU@{InOrderCPU}!haltThread@{haltThread}}
+\index{haltThread@{haltThread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{haltThread}]{\setlength{\rightskip}{0pt plus 5cm}void haltThread ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a79e607a97980c07fc8d6d0b42a6ee225}
+Halt Thread, Remove from Active Thread List, Place Thread on Halted Threads List 
+
+
+\begin{DoxyCode}
+1216 {
+1217     DPRINTF(InOrderCPU, "[tid:%i]: Placing on Halted Threads List...\n", tid);
+1218     deactivateThread(tid);
+1219     squashThreadInPipeline(tid);   
+1220     haltedThreads.push_back(tid);    
+1221 
+1222     tcBase(tid)->setStatus(ThreadContext::Halted);    
+1223 
+1224     if (threadModel == SwitchOnCacheMiss) {        
+1225         activateNextReadyContext();    
+1226     }
+1227 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a3820de4f7e76b56c6d795f27bf49c097}{
+\index{InOrderCPU@{InOrderCPU}!hwrei@{hwrei}}
+\index{hwrei@{hwrei}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{hwrei}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} hwrei ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a3820de4f7e76b56c6d795f27bf49c097}
+HW return from error interrupt. 
+
+
+\begin{DoxyCode}
+829 {
+830 #if THE_ISA == ALPHA_ISA
+831     // Need to clear the lock flag upon returning from an interrupt.
+832     setMiscRegNoEffect(AlphaISA::MISCREG_LOCKFLAG, false, tid);
+833 
+834     thread[tid]->kernelStats->hwrei();
+835     // FIXME: XXX check for interrupts? XXX
+836 #endif
+837     
+838     return NoFault;
+839 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a411801cd4260db351142d4605f987203}{
+\index{InOrderCPU@{InOrderCPU}!incrInstSeqNum@{incrInstSeqNum}}
+\index{incrInstSeqNum@{incrInstSeqNum}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{incrInstSeqNum}]{\setlength{\rightskip}{0pt plus 5cm}void incrInstSeqNum ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a411801cd4260db351142d4605f987203}
+Increment Instruction Sequence Number 
+
+
+\begin{DoxyCode}
+573     { globalSeqNum[tid]++; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a02fd73d861ef2e4aabb38c0c9ff82947}{
+\index{InOrderCPU@{InOrderCPU}!init@{init}}
+\index{init@{init}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{init}]{\setlength{\rightskip}{0pt plus 5cm}void init ()}}
+\label{classInOrderCPU_a02fd73d861ef2e4aabb38c0c9ff82947}
+Initialize the CPU 
+
+
+\begin{DoxyCode}
+792 {
+793     BaseCPU::init();
+794 
+795     for (ThreadID tid = 0; tid < numThreads; ++tid) {
+796         // Set noSquashFromTC so that the CPU doesn't squash when initially
+797         // setting up registers.
+798         thread[tid]->noSquashFromTC = true;
+799         // Initialise the ThreadContext's memory proxies
+800         thread[tid]->initMemProxies(thread[tid]->getTC());
+801     }
+802 
+803     if (FullSystem && !params()->switched_out) {
+804         for (ThreadID tid = 0; tid < numThreads; tid++) {
+805             ThreadContext *src_tc = threadContexts[tid];
+806             TheISA::initCPU(src_tc, src_tc->contextId());
+807         }
+808     }
+809 
+810     // Clear noSquashFromTC.
+811     for (ThreadID tid = 0; tid < numThreads; ++tid)
+812         thread[tid]->noSquashFromTC = false;
+813 
+814     // Call Initializiation Routine for Resource Pool
+815     resPool->init();
+816 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_afae6152cf4b3a51162d6e64247c1ac09}{
+\index{InOrderCPU@{InOrderCPU}!instAddr@{instAddr}}
+\index{instAddr@{instAddr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{instAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} instAddr ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_afae6152cf4b3a51162d6e64247c1ac09}
+
+
+
+\begin{DoxyCode}
+654 { return pc[tid].instAddr(); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a6b50b034099bb08ba363dfacf1ff4955}{
+\index{InOrderCPU@{InOrderCPU}!instDone@{instDone}}
+\index{instDone@{instDone}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{instDone}]{\setlength{\rightskip}{0pt plus 5cm}void instDone ({\bf DynInstPtr} {\em inst}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a6b50b034099bb08ba363dfacf1ff4955}
+Function to tell the CPU that an instruction has completed. 
+
+
+\begin{DoxyCode}
+1558 {
+1559     // Set the nextPC to be fetched if this is the last instruction
+1560     // committed
+1561     // ========
+1562     // This contributes to the precise state of the CPU
+1563     // which can be used when restoring a thread to the CPU after after any
+1564     // type of context switching activity (fork, exception, etc.)
+1565     TheISA::PCState comm_pc = inst->pcState();
+1566     lastCommittedPC[tid] = comm_pc;
+1567     TheISA::advancePC(comm_pc, inst->staticInst);
+1568     pcState(comm_pc, tid);
+1569 
+1570     //@todo: may be unnecessary with new-ISA-specific branch handling code
+1571     if (inst->isControl()) {
+1572         thread[tid]->lastGradIsBranch = true;
+1573         thread[tid]->lastBranchPC = inst->pcState();
+1574         TheISA::advancePC(thread[tid]->lastBranchPC, inst->staticInst);
+1575     } else {
+1576         thread[tid]->lastGradIsBranch = false;
+1577     }
+1578         
+1579 
+1580     // Finalize Trace Data For Instruction
+1581     if (inst->traceData) {
+1582         //inst->traceData->setCycle(curTick());
+1583         inst->traceData->setFetchSeq(inst->seqNum);
+1584         //inst->traceData->setCPSeq(cpu->tcBase(tid)->numInst);
+1585         inst->traceData->dump();
+1586         delete inst->traceData;
+1587         inst->traceData = NULL;
+1588     }
+1589 
+1590     // Increment active thread's instruction count
+1591     instsPerSwitch++;
+1592     
+1593     // Increment thread-state's instruction count
+1594     thread[tid]->numInst++;
+1595     thread[tid]->numOp++;
+1596 
+1597     // Increment thread-state's instruction stats
+1598     thread[tid]->numInsts++;
+1599     thread[tid]->numOps++;
+1600 
+1601     // Count committed insts per thread stats
+1602     if (!inst->isMicroop() || inst->isLastMicroop()) {
+1603         committedInsts[tid]++;
+1604 
+1605         // Count total insts committed stat
+1606         totalCommittedInsts++;
+1607     }
+1608 
+1609     committedOps[tid]++;
+1610 
+1611     // Count SMT-committed insts per thread stat
+1612     if (numActiveThreads() > 1) {
+1613         if (!inst->isMicroop() || inst->isLastMicroop())
+1614             smtCommittedInsts[tid]++;
+1615     }
+1616 
+1617     // Instruction-Mix Stats
+1618     if (inst->isLoad()) {
+1619         comLoads++;
+1620     } else if (inst->isStore()) {
+1621         comStores++;
+1622     } else if (inst->isControl()) {
+1623         comBranches++;
+1624     } else if (inst->isNop()) {
+1625         comNops++;
+1626     } else if (inst->isNonSpeculative()) {
+1627         comNonSpec++;
+1628     } else if (inst->isInteger()) {
+1629         comInts++;
+1630     } else if (inst->isFloating()) {
+1631         comFloats++;
+1632     }
+1633 
+1634     // Check for instruction-count-based events.
+1635     comInstEventQueue[tid]->serviceEvents(thread[tid]->numOp);
+1636 
+1637     // Finally, remove instruction from CPU
+1638     removeInst(inst);
+1639 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aa5e706e11748c9fefd1c679848d0bd44}{
+\index{InOrderCPU@{InOrderCPU}!isThreadActive@{isThreadActive}}
+\index{isThreadActive@{isThreadActive}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{isThreadActive}]{\setlength{\rightskip}{0pt plus 5cm}bool isThreadActive ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_aa5e706e11748c9fefd1c679848d0bd44}
+Thread Status Functions 
+
+
+\begin{DoxyCode}
+994 {
+995   list<ThreadID>::iterator isActive =
+996       std::find(activeThreads.begin(), activeThreads.end(), tid);
+997 
+998     return (isActive != activeThreads.end());
+999 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a410e64fde8cec544412d687a0904efb1}{
+\index{InOrderCPU@{InOrderCPU}!isThreadReady@{isThreadReady}}
+\index{isThreadReady@{isThreadReady}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{isThreadReady}]{\setlength{\rightskip}{0pt plus 5cm}bool isThreadReady ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_a410e64fde8cec544412d687a0904efb1}
+
+
+
+\begin{DoxyCode}
+1003 {
+1004   list<ThreadID>::iterator isReady =
+1005       std::find(readyThreads.begin(), readyThreads.end(), tid);
+1006 
+1007     return (isReady != readyThreads.end());
+1008 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ac32ab10fb7199c0ae6000cb07a19b94f}{
+\index{InOrderCPU@{InOrderCPU}!isThreadSuspended@{isThreadSuspended}}
+\index{isThreadSuspended@{isThreadSuspended}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{isThreadSuspended}]{\setlength{\rightskip}{0pt plus 5cm}bool isThreadSuspended ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_ac32ab10fb7199c0ae6000cb07a19b94f}
+
+
+
+\begin{DoxyCode}
+1012 {
+1013   list<ThreadID>::iterator isSuspended =
+1014       std::find(suspendedThreads.begin(), suspendedThreads.end(), tid);
+1015 
+1016     return (isSuspended != suspendedThreads.end());
+1017 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aa8266c7a3d7b7965c585f9826c0d48f4}{
+\index{InOrderCPU@{InOrderCPU}!lookupSked@{lookupSked}}
+\index{lookupSked@{lookupSked}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{lookupSked}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThePipeline::RSkedPtr} lookupSked ({\bf DynInstPtr} {\em inst})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_aa8266c7a3d7b7965c585f9826c0d48f4}
+Find a instruction schedule 
+
+
+\begin{DoxyCode}
+380     {
+381         SkedID sked_id = genSkedID(inst);
+382         SkedCacheIt lookup_it = skedCache.find(sked_id);
+383 
+384         if (lookup_it != endOfSkedIt) {
+385             return (*lookup_it).second;
+386         } else {
+387             return NULL;
+388         }
+389     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aa295441afc0fa8f449dc1a0cb7c7b994}{
+\index{InOrderCPU@{InOrderCPU}!microPC@{microPC}}
+\index{microPC@{microPC}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{microPC}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MicroPC} microPC ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_aa295441afc0fa8f449dc1a0cb7c7b994}
+
+
+
+\begin{DoxyCode}
+656 { return pc[tid].microPC(); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_af1caba1f04cf2802d742d1a16b961e79}{
+\index{InOrderCPU@{InOrderCPU}!nextInstAddr@{nextInstAddr}}
+\index{nextInstAddr@{nextInstAddr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{nextInstAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} nextInstAddr ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_af1caba1f04cf2802d742d1a16b961e79}
+
+
+
+\begin{DoxyCode}
+655 { return pc[tid].nextInstAddr(); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a5e508adfef98ea6ed53f25edcd5c9397}{
+\index{InOrderCPU@{InOrderCPU}!nextInstSeqNum@{nextInstSeqNum}}
+\index{nextInstSeqNum@{nextInstSeqNum}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{nextInstSeqNum}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InstSeqNum} nextInstSeqNum ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a5e508adfef98ea6ed53f25edcd5c9397}
+Get the current instruction sequence number, and increment it. 
+
+
+\begin{DoxyCode}
+569     { return globalSeqNum[tid]; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a8e60aca1dc5b29bde283a916f34bc944}{
+\index{InOrderCPU@{InOrderCPU}!numActiveThreads@{numActiveThreads}}
+\index{numActiveThreads@{numActiveThreads}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{numActiveThreads}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadID} numActiveThreads ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a8e60aca1dc5b29bde283a916f34bc944}
+Number of Active Threads in the CPU 
+
+
+\begin{DoxyCode}
+768 { return activeThreads.size(); }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a992a623bd3e0d79c4a361ee71c9d642d}{
+\index{InOrderCPU@{InOrderCPU}!pcState@{pcState}}
+\index{pcState@{pcState}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{pcState}]{\setlength{\rightskip}{0pt plus 5cm}void pcState (const TheISA::PCState \& {\em newPC}, \/  {\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a992a623bd3e0d79c4a361ee71c9d642d}
+Sets the commit PC of a specific thread. 
+
+
+\begin{DoxyCode}
+650     {
+651         pc[tid] = newPC;
+652     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_af486ac7476906f63fc6696b3e76a411b}{
+\index{InOrderCPU@{InOrderCPU}!pcState@{pcState}}
+\index{pcState@{pcState}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{pcState}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::PCState pcState ({\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_af486ac7476906f63fc6696b3e76a411b}
+Reads the commit PC of a specific thread. 
+
+
+\begin{DoxyCode}
+643     {
+644         return pc[tid];
+645     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ac3b13f31ae4a2de2b647e09c37a10822}{
+\index{InOrderCPU@{InOrderCPU}!processInterrupts@{processInterrupts}}
+\index{processInterrupts@{processInterrupts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{processInterrupts}]{\setlength{\rightskip}{0pt plus 5cm}void processInterrupts ({\bf Fault} {\em interrupt})}}
+\label{classInOrderCPU_ac3b13f31ae4a2de2b647e09c37a10822}
+Processes any an interrupt fault. 
+
+
+\begin{DoxyCode}
+914 {
+915     // Check for interrupts here.  For now can copy the code that
+916     // exists within isa_fullsys_traits.hh.  Also assume that thread 0
+917     // is the one that handles the interrupts.
+918     // @todo: Possibly consolidate the interrupt checking code.
+919     // @todo: Allow other threads to handle interrupts.
+920 
+921     assert(interrupt != NoFault);
+922     interrupts->updateIntrInfo(threadContexts[0]);
+923 
+924     DPRINTF(InOrderCPU, "Interrupt %s being handled\n", interrupt->name());
+925 
+926     // Note: Context ID ok here? Impl. of FS mode needs to revisit this
+927     trap(interrupt, threadContexts[0]->contextId(), dummyBufferInst);
+928 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ac48fe45ef23fddfa02b5136cda4c060e}{
+\index{InOrderCPU@{InOrderCPU}!read@{read}}
+\index{read@{read}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} read ({\bf DynInstPtr} {\em inst}, \/  {\bf Addr} {\em addr}, \/  uint8\_\-t $\ast$ {\em data}, \/  unsigned {\em size}, \/  unsigned {\em flags})}}
+\label{classInOrderCPU_ac48fe45ef23fddfa02b5136cda4c060e}
+Forwards an instruction read to the appropriate data resource (indexes into \hyperlink{classResource}{Resource} Pool thru \char`\"{}dataPortIdx\char`\"{}) 
+
+
+\begin{DoxyCode}
+1912 {
+1913     return resPool->getDataUnit()->read(inst, addr, data, size, flags);
+1914 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a958ede16b12c16df2d69b1614381edf1}{
+\index{InOrderCPU@{InOrderCPU}!readCCReg@{readCCReg}}
+\index{readCCReg@{readCCReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readCCReg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CCReg} readCCReg ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a958ede16b12c16df2d69b1614381edf1}
+
+
+
+\begin{DoxyCode}
+1314 {
+1315 #ifdef ISA_HAS_CC_REGS
+1316     DPRINTF(CCRegs, "[tid:%i]: Reading CC. Reg %i as %x\n",
+1317             tid, reg_idx, ccRegs[tid][reg_idx]);
+1318 
+1319     return ccRegs[tid][reg_idx];
+1320 #else
+1321     panic("readCCReg: ISA does not have CC regs\n");
+1322 #endif
+1323 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a65e0754207768ee6d2d6145cb0c5e3a5}{
+\index{InOrderCPU@{InOrderCPU}!readCpuId@{readCpuId}}
+\index{readCpuId@{readCpuId}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readCpuId}]{\setlength{\rightskip}{0pt plus 5cm}int readCpuId ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a65e0754207768ee6d2d6145cb0c5e3a5}
+
+
+
+\begin{DoxyCode}
+142 { return cpu_id; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aea9ee1636d5a4ee41fc873ab782096e5}{
+\index{InOrderCPU@{InOrderCPU}!readFloatReg@{readFloatReg}}
+\index{readFloatReg@{readFloatReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readFloatReg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FloatReg} readFloatReg ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_aea9ee1636d5a4ee41fc873ab782096e5}
+
+
+
+\begin{DoxyCode}
+1296 {
+1297     DPRINTF(FloatRegs, "[tid:%i]: Reading Float Reg %i as %x, %08f\n",
+1298             tid, reg_idx, floatRegs.i[tid][reg_idx], floatRegs.f[tid][reg_idx]);
+1299 
+1300     return floatRegs.f[tid][reg_idx];
+1301 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a29376f1c5a0787ea5f829651454f9205}{
+\index{InOrderCPU@{InOrderCPU}!readFloatRegBits@{readFloatRegBits}}
+\index{readFloatRegBits@{readFloatRegBits}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readFloatRegBits}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FloatRegBits} readFloatRegBits ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a29376f1c5a0787ea5f829651454f9205}
+
+
+
+\begin{DoxyCode}
+1305 {
+1306     DPRINTF(FloatRegs, "[tid:%i]: Reading Float Reg %i as %x, %08f\n",
+1307             tid, reg_idx, floatRegs.i[tid][reg_idx], floatRegs.f[tid][reg_idx]);
+1308 
+1309     return floatRegs.i[tid][reg_idx];
+1310 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a01d90b889dc598239bda63243ef365cf}{
+\index{InOrderCPU@{InOrderCPU}!readIntReg@{readIntReg}}
+\index{readIntReg@{readIntReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readIntReg}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t readIntReg ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a01d90b889dc598239bda63243ef365cf}
+\hyperlink{classRegister}{Register} file accessors 
+
+
+\begin{DoxyCode}
+1287 {
+1288     DPRINTF(IntRegs, "[tid:%i]: Reading Int. Reg %i as %x\n",
+1289             tid, reg_idx, intRegs[tid][reg_idx]);
+1290 
+1291     return intRegs[tid][reg_idx];
+1292 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a71d44ee14eeab530a09bc7d68d97ece2}{
+\index{InOrderCPU@{InOrderCPU}!readMiscReg@{readMiscReg}}
+\index{readMiscReg@{readMiscReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readMiscReg}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MiscReg} readMiscReg (int {\em misc\_\-reg}, \/  {\bf ThreadID} {\em tid} = {\ttfamily 0})}}
+\label{classInOrderCPU_a71d44ee14eeab530a09bc7d68d97ece2}
+Reads a misc. register, including any side effects the read might have as defined by the architecture. 
+
+
+\begin{DoxyCode}
+1441 {
+1442     return isa[tid]->readMiscReg(misc_reg, tcBase(tid));
+1443 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_af2ec8925148a53b9bddefb7fb65a7223}{
+\index{InOrderCPU@{InOrderCPU}!readMiscRegNoEffect@{readMiscRegNoEffect}}
+\index{readMiscRegNoEffect@{readMiscRegNoEffect}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readMiscRegNoEffect}]{\setlength{\rightskip}{0pt plus 5cm}{\bf MiscReg} readMiscRegNoEffect (int {\em misc\_\-reg}, \/  {\bf ThreadID} {\em tid} = {\ttfamily 0})}}
+\label{classInOrderCPU_af2ec8925148a53b9bddefb7fb65a7223}
+Reads a miscellaneous register. 
+
+
+\begin{DoxyCode}
+1435 {
+1436     return isa[tid]->readMiscRegNoEffect(misc_reg);
+1437 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ab5092ae128090a3cac51e6f84c458e62}{
+\index{InOrderCPU@{InOrderCPU}!readRegOtherThread@{readRegOtherThread}}
+\index{readRegOtherThread@{readRegOtherThread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readRegOtherThread}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t readRegOtherThread (unsigned {\em misc\_\-reg}, \/  {\bf ThreadID} {\em tid} = {\ttfamily {\bf InvalidThreadID}})}}
+\label{classInOrderCPU_ab5092ae128090a3cac51e6f84c458e62}
+Reads a int/fp/misc reg. from another thread depending on ISA-\/defined target thread 
+
+
+\begin{DoxyCode}
+1378 {
+1379     // If Default value is set, then retrieve target thread
+1380     if (tid == InvalidThreadID) {
+1381         tid = TheISA::getTargetThread(tcBase(tid));
+1382     }
+1383 
+1384     RegIndex rel_idx;
+1385 
+1386     switch (regIdxToClass(reg_idx, &rel_idx)) {
+1387       case IntRegClass:
+1388         // Integer Register File
+1389         return readIntReg(rel_idx, tid);
+1390 
+1391       case FloatRegClass:
+1392         // Float Register File
+1393         return readFloatRegBits(rel_idx, tid);
+1394 
+1395       case MiscRegClass:
+1396         return readMiscReg(rel_idx, tid);  // Misc. Register File
+1397 
+1398       default:
+1399         panic("register %d out of range\n", reg_idx);
+1400     }
+1401 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a4dc637449366fcdfc4e764cdf12d9b11}{
+\index{InOrderCPU@{InOrderCPU}!regStats@{regStats}}
+\index{regStats@{regStats}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{regStats}]{\setlength{\rightskip}{0pt plus 5cm}void regStats ()}}
+\label{classInOrderCPU_a4dc637449366fcdfc4e764cdf12d9b11}
+Registers statistics. 
+
+
+\begin{DoxyCode}
+599 {
+600     /* Register the Resource Pool's stats here.*/
+601     resPool->regStats();
+602 
+603     /* Register for each Pipeline Stage */
+604     for (int stage_num=0; stage_num < ThePipeline::NumStages; stage_num++) {
+605         pipelineStage[stage_num]->regStats();
+606     }
+607 
+608     /* Register any of the InOrderCPU's stats here.*/
+609     instsPerCtxtSwitch
+610         .name(name() + ".instsPerContextSwitch")
+611         .desc("Instructions Committed Per Context Switch")
+612         .prereq(instsPerCtxtSwitch);
+613     
+614     numCtxtSwitches
+615         .name(name() + ".contextSwitches")
+616         .desc("Number of context switches");
+617 
+618     comLoads
+619         .name(name() + ".comLoads")
+620         .desc("Number of Load instructions committed");
+621 
+622     comStores
+623         .name(name() + ".comStores")
+624         .desc("Number of Store instructions committed");
+625 
+626     comBranches
+627         .name(name() + ".comBranches")
+628         .desc("Number of Branches instructions committed");
+629 
+630     comNops
+631         .name(name() + ".comNops")
+632         .desc("Number of Nop instructions committed");
+633 
+634     comNonSpec
+635         .name(name() + ".comNonSpec")
+636         .desc("Number of Non-Speculative instructions committed");
+637 
+638     comInts
+639         .name(name() + ".comInts")
+640         .desc("Number of Integer instructions committed");
+641 
+642     comFloats
+643         .name(name() + ".comFloats")
+644         .desc("Number of Floating Point instructions committed");
+645             
+646     timesIdled
+647         .name(name() + ".timesIdled")
+648         .desc("Number of times that the entire CPU went into an idle state and"
+649               " unscheduled itself")
+650         .prereq(timesIdled);
+651 
+652     idleCycles
+653         .name(name() + ".idleCycles")
+654         .desc("Number of cycles cpu's stages were not processed");
+655 
+656     runCycles
+657         .name(name() + ".runCycles")
+658         .desc("Number of cycles cpu stages are processed.");
+659 
+660     activity
+661         .name(name() + ".activity")
+662         .desc("Percentage of cycles cpu is active")
+663         .precision(6);
+664     activity = (runCycles / numCycles) * 100;
+665 
+666     threadCycles
+667         .init(numThreads)
+668         .name(name() + ".threadCycles")
+669         .desc("Total Number of Cycles A Thread Was Active in CPU (Per-Thread)");
+670 
+671     smtCycles
+672         .name(name() + ".smtCycles")
+673         .desc("Total number of cycles that the CPU was in SMT-mode");
+674 
+675     committedInsts
+676         .init(numThreads)
+677         .name(name() + ".committedInsts")
+678         .desc("Number of Instructions committed (Per-Thread)");
+679 
+680     committedOps
+681         .init(numThreads)
+682         .name(name() + ".committedOps")
+683         .desc("Number of Ops committed (Per-Thread)");
+684 
+685     smtCommittedInsts
+686         .init(numThreads)
+687         .name(name() + ".smtCommittedInsts")
+688         .desc("Number of SMT Instructions committed (Per-Thread)");
+689 
+690     totalCommittedInsts
+691         .name(name() + ".committedInsts_total")
+692         .desc("Number of Instructions committed (Total)");
+693 
+694     cpi
+695         .name(name() + ".cpi")
+696         .desc("CPI: Cycles Per Instruction (Per-Thread)")
+697         .precision(6);
+698     cpi = numCycles / committedInsts;
+699 
+700     smtCpi
+701         .name(name() + ".smt_cpi")
+702         .desc("CPI: Total SMT-CPI")
+703         .precision(6);
+704     smtCpi = smtCycles / smtCommittedInsts;
+705 
+706     totalCpi
+707         .name(name() + ".cpi_total")
+708         .desc("CPI: Total CPI of All Threads")
+709         .precision(6);
+710     totalCpi = numCycles / totalCommittedInsts;
+711 
+712     ipc
+713         .name(name() + ".ipc")
+714         .desc("IPC: Instructions Per Cycle (Per-Thread)")
+715         .precision(6);
+716     ipc =  committedInsts / numCycles;
+717 
+718     smtIpc
+719         .name(name() + ".smt_ipc")
+720         .desc("IPC: Total SMT-IPC")
+721         .precision(6);
+722     smtIpc = smtCommittedInsts / smtCycles;
+723 
+724     totalIpc
+725         .name(name() + ".ipc_total")
+726         .desc("IPC: Total IPC of All Threads")
+727         .precision(6);
+728         totalIpc =  totalCommittedInsts / numCycles;
+729 
+730     BaseCPU::regStats();
+731 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ada01a7a7568c85b0f98b9f0946be8635}{
+\index{InOrderCPU@{InOrderCPU}!removeInst@{removeInst}}
+\index{removeInst@{removeInst}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{removeInst}]{\setlength{\rightskip}{0pt plus 5cm}void removeInst ({\bf DynInstPtr} {\em inst})}}
+\label{classInOrderCPU_ada01a7a7568c85b0f98b9f0946be8635}
+Remove an instruction from CPU 
+
+
+\begin{DoxyCode}
+1663 {
+1664     DPRINTF(InOrderCPU, "Removing graduated instruction [tid:%i] PC %s "
+1665             "[sn:%lli]\n",
+1666             inst->threadNumber, inst->pcState(), inst->seqNum);
+1667 
+1668     removeInstsThisCycle = true;
+1669 
+1670     // Remove the instruction.
+1671     if (!inst->isRemoveList()) {            
+1672         DPRINTF(InOrderCPU, "Pushing instruction [tid:%i] PC %s "
+1673                 "[sn:%lli] to remove list\n",
+1674                 inst->threadNumber, inst->pcState(), inst->seqNum);
+1675         inst->setRemoveList();        
+1676         removeList.push(inst->getInstListIt());
+1677     } else {
+1678         DPRINTF(InOrderCPU, "Ignoring instruction removal for [tid:%i] PC %s "
+1679                 "[sn:%lli], already on remove list\n",
+1680                 inst->threadNumber, inst->pcState(), inst->seqNum);
+1681     }
+1682 
+1683 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a79f7e36d4bd89fe4528b665a949a0023}{
+\index{InOrderCPU@{InOrderCPU}!removeInstsUntil@{removeInstsUntil}}
+\index{removeInstsUntil@{removeInstsUntil}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{removeInstsUntil}]{\setlength{\rightskip}{0pt plus 5cm}void removeInstsUntil (const {\bf InstSeqNum} \& {\em seq\_\-num}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a79f7e36d4bd89fe4528b665a949a0023}
+Remove all instructions younger than the given sequence number. 
+
+
+\begin{DoxyCode}
+1687 {
+1688     //assert(!instList[tid].empty());
+1689 
+1690     removeInstsThisCycle = true;
+1691 
+1692     ListIt inst_iter = instList[tid].end();
+1693 
+1694     inst_iter--;
+1695 
+1696     DPRINTF(InOrderCPU, "Squashing instructions from CPU instruction "
+1697             "list that are from [tid:%i] and above [sn:%lli] (end=%lli).\n",
+1698             tid, seq_num, (*inst_iter)->seqNum);
+1699 
+1700     while ((*inst_iter)->seqNum > seq_num) {
+1701 
+1702         bool break_loop = (inst_iter == instList[tid].begin());
+1703 
+1704         squashInstIt(inst_iter, tid);
+1705 
+1706         inst_iter--;
+1707 
+1708         if (break_loop)
+1709             break;
+1710     }
+1711 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ace0d67fcac674ca759a8b0bc3acc7a05}{
+\index{InOrderCPU@{InOrderCPU}!removePipelineStalls@{removePipelineStalls}}
+\index{removePipelineStalls@{removePipelineStalls}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{removePipelineStalls}]{\setlength{\rightskip}{0pt plus 5cm}void removePipelineStalls ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_ace0d67fcac674ca759a8b0bc3acc7a05}
+
+
+
+\begin{DoxyCode}
+1131 {
+1132     DPRINTF(InOrderCPU,"[tid:%i]: Removing all pipeline stalls\n",
+1133             tid);
+1134 
+1135     for (int stNum = 0; stNum < NumStages ; stNum++) {
+1136         pipelineStage[stNum]->removeStalls(tid);
+1137     }
+1138 
+1139 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a7b7130cac388c6a2fd896ba0f6b7b87a}{
+\index{InOrderCPU@{InOrderCPU}!scheduleCpuEvent@{scheduleCpuEvent}}
+\index{scheduleCpuEvent@{scheduleCpuEvent}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{scheduleCpuEvent}]{\setlength{\rightskip}{0pt plus 5cm}void scheduleCpuEvent ({\bf CPUEventType} {\em cpu\_\-event}, \/  {\bf Fault} {\em fault}, \/  {\bf ThreadID} {\em tid}, \/  {\bf DynInstPtr} {\em inst}, \/  {\bf Cycles} {\em delay} = {\ttfamily {\bf Cycles}(0)}, \/  {\bf CPUEventPri} {\em event\_\-pri} = {\ttfamily InOrderCPU\_\-Pri})}}
+\label{classInOrderCPU_a7b7130cac388c6a2fd896ba0f6b7b87a}
+Schedule a CPU \hyperlink{classEvent}{Event} 
+
+
+\begin{DoxyCode}
+976 {
+977     CPUEvent *cpu_event = new CPUEvent(this, c_event, fault, tid, inst,
+978                                        event_pri);
+979 
+980     Tick sked_tick = clockEdge(delay);
+981     DPRINTF(InOrderCPU, "Scheduling CPU Event (%s) for cycle %i, [tid:%i].\n",
+982             eventNames[c_event], curTick() + delay, tid);
+983     schedule(cpu_event, sked_tick);
+984 
+985     // Broadcast event to the Resource Pool
+986     // Need to reset tid just in case this is a dummy instruction
+987     inst->setTid(tid);        
+988     // @todo: Is this really right? Should the delay not be passed on?
+989     resPool->scheduleEvent(c_event, inst, Cycles(0), 0, tid);
+990 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a71eb9ea7b25032de341033111b946dfc}{
+\index{InOrderCPU@{InOrderCPU}!scheduleTickEvent@{scheduleTickEvent}}
+\index{scheduleTickEvent@{scheduleTickEvent}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{scheduleTickEvent}]{\setlength{\rightskip}{0pt plus 5cm}void scheduleTickEvent ({\bf Cycles} {\em delay})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classInOrderCPU_a71eb9ea7b25032de341033111b946dfc}
+Schedule tick event, regardless of its current state. 
+
+
+\begin{DoxyCode}
+211     {
+212         assert(!tickEvent.scheduled() || tickEvent.squashed());
+213         reschedule(&tickEvent, clockEdge(delay), true);
+214     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a54f8b635e27b3a845dd71124a4784951}{
+\index{InOrderCPU@{InOrderCPU}!setCCReg@{setCCReg}}
+\index{setCCReg@{setCCReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setCCReg}]{\setlength{\rightskip}{0pt plus 5cm}void setCCReg ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf CCReg} {\em val}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a54f8b635e27b3a845dd71124a4784951}
+
+
+
+\begin{DoxyCode}
+1366 {
+1367 #ifdef ISA_HAS_CC_REGS
+1368     DPRINTF(CCRegs, "[tid:%i]: Setting CC. Reg %i to %x\n",
+1369             tid, reg_idx, val);
+1370     ccRegs[tid][reg_idx] = val;
+1371 #else
+1372     panic("readCCReg: ISA does not have CC regs\n");
+1373 #endif
+1374 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_afb191a3765c6e41fbaf116d196312ad8}{
+\index{InOrderCPU@{InOrderCPU}!setCpuId@{setCpuId}}
+\index{setCpuId@{setCpuId}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setCpuId}]{\setlength{\rightskip}{0pt plus 5cm}void setCpuId (int {\em val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_afb191a3765c6e41fbaf116d196312ad8}
+
+
+
+\begin{DoxyCode}
+144 { cpu_id = val; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a60a2b6d8c0ac76cc653e44d1f228e173}{
+\index{InOrderCPU@{InOrderCPU}!setFloatReg@{setFloatReg}}
+\index{setFloatReg@{setFloatReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setFloatReg}]{\setlength{\rightskip}{0pt plus 5cm}void setFloatReg ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf FloatReg} {\em val}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a60a2b6d8c0ac76cc653e44d1f228e173}
+
+
+
+\begin{DoxyCode}
+1343 {
+1344     floatRegs.f[tid][reg_idx] = val;
+1345     DPRINTF(FloatRegs, "[tid:%i]: Setting Float. Reg %i bits to "
+1346             "%x, %08f\n",
+1347             tid, reg_idx,
+1348             floatRegs.i[tid][reg_idx],
+1349             floatRegs.f[tid][reg_idx]);
+1350 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aeb40857aa08ef89112654eb05a7abdec}{
+\index{InOrderCPU@{InOrderCPU}!setFloatRegBits@{setFloatRegBits}}
+\index{setFloatRegBits@{setFloatRegBits}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setFloatRegBits}]{\setlength{\rightskip}{0pt plus 5cm}void setFloatRegBits ({\bf RegIndex} {\em reg\_\-idx}, \/  {\bf FloatRegBits} {\em val}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_aeb40857aa08ef89112654eb05a7abdec}
+
+
+
+\begin{DoxyCode}
+1355 {
+1356     floatRegs.i[tid][reg_idx] = val;
+1357     DPRINTF(FloatRegs, "[tid:%i]: Setting Float. Reg %i bits to "
+1358             "%x, %08f\n",
+1359             tid, reg_idx,
+1360             floatRegs.i[tid][reg_idx],
+1361             floatRegs.f[tid][reg_idx]);
+1362 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a2d2e753e619aace6b421a932dd5f257f}{
+\index{InOrderCPU@{InOrderCPU}!setInstSeqNum@{setInstSeqNum}}
+\index{setInstSeqNum@{setInstSeqNum}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setInstSeqNum}]{\setlength{\rightskip}{0pt plus 5cm}void setInstSeqNum ({\bf ThreadID} {\em tid}, \/  {\bf InstSeqNum} {\em seq\_\-num})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a2d2e753e619aace6b421a932dd5f257f}
+\hyperlink{classSet}{Set} Instruction Sequence Number 
+
+
+\begin{DoxyCode}
+577     {
+578         globalSeqNum[tid] = seq_num;
+579     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ae1dce5b4f3b791b6bf420cfba9d5c316}{
+\index{InOrderCPU@{InOrderCPU}!setIntReg@{setIntReg}}
+\index{setIntReg@{setIntReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setIntReg}]{\setlength{\rightskip}{0pt plus 5cm}void setIntReg ({\bf RegIndex} {\em reg\_\-idx}, \/  uint64\_\-t {\em val}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_ae1dce5b4f3b791b6bf420cfba9d5c316}
+
+
+
+\begin{DoxyCode}
+1327 {
+1328     if (reg_idx == TheISA::ZeroReg) {
+1329         DPRINTF(IntRegs, "[tid:%i]: Ignoring Setting of ISA-ZeroReg "
+1330                 "(Int. Reg %i) to %x\n", tid, reg_idx, val);
+1331         return;
+1332     } else {
+1333         DPRINTF(IntRegs, "[tid:%i]: Setting Int. Reg %i to %x\n",
+1334                 tid, reg_idx, val);
+1335 
+1336         intRegs[tid][reg_idx] = val;
+1337     }
+1338 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a9b618db833e56fbb32246fe25716846f}{
+\index{InOrderCPU@{InOrderCPU}!setMiscReg@{setMiscReg}}
+\index{setMiscReg@{setMiscReg}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setMiscReg}]{\setlength{\rightskip}{0pt plus 5cm}void setMiscReg (int {\em misc\_\-reg}, \/  const {\bf MiscReg} \& {\em val}, \/  {\bf ThreadID} {\em tid} = {\ttfamily 0})}}
+\label{classInOrderCPU_a9b618db833e56fbb32246fe25716846f}
+Sets a misc. register, including any side effects the write might have as defined by the architecture. 
+
+
+\begin{DoxyCode}
+1453 {
+1454     isa[tid]->setMiscReg(misc_reg, val, tcBase(tid));
+1455 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ab8dd4afdd4e652ca191b235505691f68}{
+\index{InOrderCPU@{InOrderCPU}!setMiscRegNoEffect@{setMiscRegNoEffect}}
+\index{setMiscRegNoEffect@{setMiscRegNoEffect}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setMiscRegNoEffect}]{\setlength{\rightskip}{0pt plus 5cm}void setMiscRegNoEffect (int {\em misc\_\-reg}, \/  const {\bf MiscReg} \& {\em val}, \/  {\bf ThreadID} {\em tid} = {\ttfamily 0})}}
+\label{classInOrderCPU_ab8dd4afdd4e652ca191b235505691f68}
+Sets a miscellaneous register. 
+
+
+\begin{DoxyCode}
+1447 {
+1448     isa[tid]->setMiscRegNoEffect(misc_reg, val);
+1449 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aeefa734eaa86cd9ffcbd59f4554b32a2}{
+\index{InOrderCPU@{InOrderCPU}!setRegOtherThread@{setRegOtherThread}}
+\index{setRegOtherThread@{setRegOtherThread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{setRegOtherThread}]{\setlength{\rightskip}{0pt plus 5cm}void setRegOtherThread (unsigned {\em misc\_\-reg}, \/  const {\bf MiscReg} \& {\em val}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_aeefa734eaa86cd9ffcbd59f4554b32a2}
+Sets a int/fp/misc reg. from another thread depending on an ISA-\/defined target thread 
+
+
+\begin{DoxyCode}
+1406 {
+1407     // If Default value is set, then retrieve target thread
+1408     if (tid == InvalidThreadID) {
+1409         tid = TheISA::getTargetThread(tcBase(tid));
+1410     }
+1411 
+1412     RegIndex rel_idx;
+1413 
+1414     switch (regIdxToClass(reg_idx, &rel_idx)) {
+1415       case IntRegClass:
+1416         setIntReg(rel_idx, val, tid);
+1417         break;
+1418 
+1419       case FloatRegClass:
+1420         setFloatRegBits(rel_idx, val, tid);
+1421         break;
+1422 
+1423       case CCRegClass:
+1424         setCCReg(rel_idx, val, tid);
+1425         break;
+1426 
+1427       case MiscRegClass:
+1428         setMiscReg(rel_idx, val, tid); // Misc. Register File
+1429         break;
+1430     }
+1431 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a875eebdeba298f450fe84b0a05349afe}{
+\index{InOrderCPU@{InOrderCPU}!simPalCheck@{simPalCheck}}
+\index{simPalCheck@{simPalCheck}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{simPalCheck}]{\setlength{\rightskip}{0pt plus 5cm}bool simPalCheck (int {\em palFunc}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a875eebdeba298f450fe84b0a05349afe}
+
+
+
+\begin{DoxyCode}
+844 {
+845 #if THE_ISA == ALPHA_ISA
+846     if (this->thread[tid]->kernelStats)
+847         this->thread[tid]->kernelStats->callpal(palFunc,
+848                                                 this->threadContexts[tid]);
+849 
+850     switch (palFunc) {
+851       case PAL::halt:
+852         halt();
+853         if (--System::numSystemsRunning == 0)
+854             exitSimLoop("all cpus halted");
+855         break;
+856 
+857       case PAL::bpt:
+858       case PAL::bugchk:
+859         if (this->system->breakpoint())
+860             return false;
+861         break;
+862     }
+863 #endif
+864     return true;
+865 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a7c7508de9bcbfd4fa1fafd285a8f3930}{
+\index{InOrderCPU@{InOrderCPU}!squashBehindMemStall@{squashBehindMemStall}}
+\index{squashBehindMemStall@{squashBehindMemStall}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{squashBehindMemStall}]{\setlength{\rightskip}{0pt plus 5cm}void squashBehindMemStall (int {\em stage\_\-num}, \/  {\bf InstSeqNum} {\em seq\_\-num}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a7c7508de9bcbfd4fa1fafd285a8f3930}
+\hypertarget{classInOrderCPU_a302751e3ba3d567b01c7446f9227a2da}{
+\index{InOrderCPU@{InOrderCPU}!squashDueToMemStall@{squashDueToMemStall}}
+\index{squashDueToMemStall@{squashDueToMemStall}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{squashDueToMemStall}]{\setlength{\rightskip}{0pt plus 5cm}void squashDueToMemStall (int {\em stage\_\-num}, \/  {\bf InstSeqNum} {\em seq\_\-num}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a302751e3ba3d567b01c7446f9227a2da}
+
+
+
+\begin{DoxyCode}
+956 {
+957     DPRINTF(InOrderCPU, "Squashing Pipeline Stages Due to Memory Stall...\n");
+958         
+959     // Squash all instructions in each stage including 
+960     // instruction that caused the squash (seq_num - 1)
+961     // NOTE: The stage bandwidth needs to be cleared so thats why
+962     //       the stalling instruction is squashed as well. The stalled
+963     //       instruction is previously placed in another intermediate buffer
+964     //       while it's stall is being handled.
+965     InstSeqNum squash_seq_num = seq_num - 1;
+966     
+967     for (int stNum=stage_num; stNum >= 0 ; stNum--) {
+968         pipelineStage[stNum]->squashDueToMemStall(squash_seq_num, tid);
+969     }
+970 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a3b9652a69ff2d5c02c1b696c1007ac9d}{
+\index{InOrderCPU@{InOrderCPU}!squashFromMemStall@{squashFromMemStall}}
+\index{squashFromMemStall@{squashFromMemStall}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{squashFromMemStall}]{\setlength{\rightskip}{0pt plus 5cm}void squashFromMemStall ({\bf DynInstPtr} {\em inst}, \/  {\bf ThreadID} {\em tid}, \/  {\bf Cycles} {\em delay} = {\ttfamily {\bf Cycles}(0)})}}
+\label{classInOrderCPU_a3b9652a69ff2d5c02c1b696c1007ac9d}
+\hyperlink{classInOrderCPU_a3b9652a69ff2d5c02c1b696c1007ac9d}{squashFromMemStall()} -\/ sets up a squash event \hyperlink{classInOrderCPU_a302751e3ba3d567b01c7446f9227a2da}{squashDueToMemStall()} -\/ squashes pipeline \begin{DoxyNote}{覚え書き}
+: maybe squashContext/squashThread would be better? 
+\end{DoxyNote}
+
+
+
+\begin{DoxyCode}
+948 {
+949     scheduleCpuEvent(SquashFromMemStall, NoFault, tid, inst, delay);
+950 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a7a98b3e8dc082558dcf225e49588c70a}{
+\index{InOrderCPU@{InOrderCPU}!squashInstIt@{squashInstIt}}
+\index{squashInstIt@{squashInstIt}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{squashInstIt}]{\setlength{\rightskip}{0pt plus 5cm}void squashInstIt (const {\bf ListIt} {\em inst\_\-it}, \/  {\bf ThreadID} {\em tid})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a7a98b3e8dc082558dcf225e49588c70a}
+Removes the instruction pointed to by the iterator. 
+
+
+\begin{DoxyCode}
+1716 {
+1717     DynInstPtr inst = (*inst_it);
+1718     if (inst->threadNumber == tid) {
+1719         DPRINTF(InOrderCPU, "Squashing instruction, "
+1720                 "[tid:%i] [sn:%lli] PC %s\n",
+1721                 inst->threadNumber,
+1722                 inst->seqNum,
+1723                 inst->pcState());
+1724 
+1725         inst->setSquashed();
+1726         archRegDepMap[tid].remove(inst);
+1727 
+1728         if (!inst->isRemoveList()) {
+1729             DPRINTF(InOrderCPU, "Pushing instruction [tid:%i] PC %s "
+1730                     "[sn:%lli] to remove list\n",
+1731                     inst->threadNumber, inst->pcState(),
+1732                     inst->seqNum);
+1733             inst->setRemoveList();
+1734             removeList.push(inst_it);
+1735         } else {
+1736             DPRINTF(InOrderCPU, "Ignoring instruction removal for [tid:%i]"
+1737                     " PC %s [sn:%lli], already on remove list\n",
+1738                     inst->threadNumber, inst->pcState(),
+1739                     inst->seqNum);
+1740         }
+1741     
+1742     }
+1743     
+1744 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a53bed7b6c73f79636a1c6b918eb08f35}{
+\index{InOrderCPU@{InOrderCPU}!squashThreadInPipeline@{squashThreadInPipeline}}
+\index{squashThreadInPipeline@{squashThreadInPipeline}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{squashThreadInPipeline}]{\setlength{\rightskip}{0pt plus 5cm}void squashThreadInPipeline ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a53bed7b6c73f79636a1c6b918eb08f35}
+
+
+
+\begin{DoxyCode}
+1249 {
+1250     //Squash all instructions in each stage
+1251     for (int stNum=NumStages - 1; stNum >= 0 ; stNum--) {
+1252         pipelineStage[stNum]->squash(0 /*seq_num*/, tid);
+1253     }
+1254 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aed2e2b9af515a66bdde61b85f150856a}{
+\index{InOrderCPU@{InOrderCPU}!suspendContext@{suspendContext}}
+\index{suspendContext@{suspendContext}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{suspendContext}]{\setlength{\rightskip}{0pt plus 5cm}void suspendContext ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_aed2e2b9af515a66bdde61b85f150856a}
+Schedule a thread suspension on the CPU 
+
+
+\begin{DoxyCode}
+1231 {
+1232     scheduleCpuEvent(SuspendThread, NoFault, tid, dummyInst[tid]);
+1233 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aee7a498a20266fbfbc6aa3f165577b68}{
+\index{InOrderCPU@{InOrderCPU}!suspendThread@{suspendThread}}
+\index{suspendThread@{suspendThread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{suspendThread}]{\setlength{\rightskip}{0pt plus 5cm}void suspendThread ({\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_aee7a498a20266fbfbc6aa3f165577b68}
+Suspend Thread, Remove from Active Threads List, Add to Suspend List 
+
+
+\begin{DoxyCode}
+1237 {
+1238     DPRINTF(InOrderCPU, "[tid:%i]: Placing on Suspended Threads List...\n",
+1239             tid);
+1240     deactivateThread(tid);
+1241     suspendedThreads.push_back(tid);    
+1242     thread[tid]->lastSuspend = curTick();    
+1243 
+1244     tcBase(tid)->setStatus(ThreadContext::Suspended);    
+1245 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a05f299b443f8cc73a93d61572edc0218}{
+\index{InOrderCPU@{InOrderCPU}!switchOut@{switchOut}}
+\index{switchOut@{switchOut}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{switchOut}]{\setlength{\rightskip}{0pt plus 5cm}void switchOut ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classInOrderCPU_a05f299b443f8cc73a93d61572edc0218}
+Switches out this CPU. 
+
+
+\begin{DoxyCode}
+1522 {
+1523     DPRINTF(InOrderCPU, "Switching out\n");
+1524     BaseCPU::switchOut();
+1525 
+1526     activityRec.reset();
+1527 
+1528     _status = SwitchedOut;
+1529 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a20899487e4c954b6f0af2a5fc0a6cc6b}{
+\index{InOrderCPU@{InOrderCPU}!switchToActive@{switchToActive}}
+\index{switchToActive@{switchToActive}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{switchToActive}]{\setlength{\rightskip}{0pt plus 5cm}void switchToActive (int {\em stage\_\-idx})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a20899487e4c954b6f0af2a5fc0a6cc6b}
+Switches a Pipeline Stage to Active. (Unused currently) 
+
+
+\begin{DoxyCode}
+561     { /*pipelineStage[stage_idx]->switchToActive();*/ }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a2d6a2bbae85e604392f43b3418cdec97}{
+\index{InOrderCPU@{InOrderCPU}!syscall@{syscall}}
+\index{syscall@{syscall}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{syscall}]{\setlength{\rightskip}{0pt plus 5cm}void syscall (int64\_\-t {\em callnum}, \/  {\bf ThreadID} {\em tid})}}
+\label{classInOrderCPU_a2d6a2bbae85e604392f43b3418cdec97}
+Executes a syscall. 
+
+
+\begin{DoxyCode}
+1869 {
+1870     DPRINTF(InOrderCPU, "[tid:%i] Executing syscall().\n\n", tid);
+1871 
+1872     DPRINTF(Activity,"Activity: syscall() called.\n");
+1873 
+1874     // Temporarily increase this by one to account for the syscall
+1875     // instruction.
+1876     ++(this->thread[tid]->funcExeInst);
+1877 
+1878     // Execute the actual syscall.
+1879     this->thread[tid]->syscall(callnum);
+1880 
+1881     // Decrease funcExeInst by one as the normal commit will handle
+1882     // incrementing it.
+1883     --(this->thread[tid]->funcExeInst);
+1884 
+1885     // Clear Non-Speculative Block Variable
+1886     nonSpecInstActive[tid] = false;
+1887 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a37f2ec6a00b1cd18aaf408f5a2d3a9f7}{
+\index{InOrderCPU@{InOrderCPU}!syscallContext@{syscallContext}}
+\index{syscallContext@{syscallContext}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{syscallContext}]{\setlength{\rightskip}{0pt plus 5cm}void syscallContext ({\bf Fault} {\em fault}, \/  {\bf ThreadID} {\em tid}, \/  {\bf DynInstPtr} {\em inst}, \/  {\bf Cycles} {\em delay} = {\ttfamily {\bf Cycles}(0)})}}
+\label{classInOrderCPU_a37f2ec6a00b1cd18aaf408f5a2d3a9f7}
+Schedule a syscall on the CPU 
+
+
+\begin{DoxyCode}
+1852 {
+1853     // Syscall must be non-speculative, so squash from last stage
+1854     unsigned squash_stage = NumStages - 1;
+1855     inst->setSquashInfo(squash_stage);
+1856 
+1857     // Squash In Pipeline Stage
+1858     pipelineStage[squash_stage]->setupSquash(inst, tid);
+1859 
+1860     // Schedule Squash Through-out Resource Pool
+1861     resPool->scheduleEvent(
+1862         (InOrderCPU::CPUEventType)ResourcePool::SquashAll, inst,
+1863         Cycles(0));
+1864     scheduleCpuEvent(Syscall, fault, tid, inst, delay, Syscall_Pri);
+1865 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a9d27673c51f2406024ca1ce8ff2de4fb}{
+\index{InOrderCPU@{InOrderCPU}!takeOverFrom@{takeOverFrom}}
+\index{takeOverFrom@{takeOverFrom}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{takeOverFrom}]{\setlength{\rightskip}{0pt plus 5cm}virtual void takeOverFrom ({\bf BaseCPU} $\ast$ {\em oldCPU})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classInOrderCPU_a9d27673c51f2406024ca1ce8ff2de4fb}
+Takes over from another CPU. \hypertarget{classInOrderCPU_a1f4a6bd6bfbb29196452b0dfa68b1c9e}{
+\index{InOrderCPU@{InOrderCPU}!tcBase@{tcBase}}
+\index{tcBase@{tcBase}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{tcBase}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadContext}$\ast$ tcBase ({\bf ThreadID} {\em tid} = {\ttfamily 0})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a1f4a6bd6bfbb29196452b0dfa68b1c9e}
+Returns a pointer to a thread context. 
+
+
+\begin{DoxyCode}
+811     {
+812         return thread[tid]->getTC();
+813     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a873dd91783f9efb4a590aded1f70d6b0}{
+\index{InOrderCPU@{InOrderCPU}!tick@{tick}}
+\index{tick@{tick}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{tick}]{\setlength{\rightskip}{0pt plus 5cm}void tick ()}}
+\label{classInOrderCPU_a873dd91783f9efb4a590aded1f70d6b0}
+Ticks CPU, calling \hyperlink{classInOrderCPU_a873dd91783f9efb4a590aded1f70d6b0}{tick()} on each stage, and checking the overall activity to see if the CPU should deschedule itself. 
+
+
+\begin{DoxyCode}
+736 {
+737     DPRINTF(InOrderCPU, "\n\nInOrderCPU: Ticking main, InOrderCPU.\n");
+738 
+739     ++numCycles;
+740 
+741     checkForInterrupts();
+742 
+743     bool pipes_idle = true;
+744     //Tick each of the stages
+745     for (int stNum=NumStages - 1; stNum >= 0 ; stNum--) {
+746         pipelineStage[stNum]->tick();
+747 
+748         pipes_idle = pipes_idle && pipelineStage[stNum]->idle;
+749     }
+750 
+751     if (pipes_idle)
+752         idleCycles++;
+753     else
+754         runCycles++;
+755     
+756     // Now advance the time buffers one tick
+757     timeBuffer.advance();
+758     for (int sqNum=0; sqNum < NumStages - 1; sqNum++) {
+759         stageQueue[sqNum]->advance();
+760     }
+761     activityRec.advance();
+762    
+763     // Any squashed events, or insts then remove them now
+764     cleanUpRemovedEvents();
+765     cleanUpRemovedInsts();
+766 
+767     // Re-schedule CPU for this cycle
+768     if (!tickEvent.scheduled()) {
+769         if (_status == SwitchedOut) {
+770             // increment stat
+771             lastRunningCycle = curCycle();
+772         } else if (!activityRec.active()) {
+773             DPRINTF(InOrderCPU, "sleeping CPU.\n");
+774             lastRunningCycle = curCycle();
+775             timesIdled++;
+776         } else {
+777             //Tick next_tick = curTick() + cycles(1);
+778             //tickEvent.schedule(next_tick);
+779             schedule(&tickEvent, clockEdge(Cycles(1)));
+780             DPRINTF(InOrderCPU, "Scheduled CPU for next tick @ %i.\n", 
+781                     clockEdge(Cycles(1)));
+782         }
+783     }
+784 
+785     tickThreadStats();
+786     updateThreadPriority();
+787 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a26221581dfe16c4d345ea2913d5d4d2f}{
+\index{InOrderCPU@{InOrderCPU}!tickThreadStats@{tickThreadStats}}
+\index{tickThreadStats@{tickThreadStats}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{tickThreadStats}]{\setlength{\rightskip}{0pt plus 5cm}void tickThreadStats ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_a26221581dfe16c4d345ea2913d5d4d2f}
+Update Thread , used for statistic purposes 
+
+Keep track of cycles that each thread is active 
+
+
+\begin{DoxyCode}
+1160 {
+1162     list<ThreadID>::iterator thread_it = activeThreads.begin();
+1163     while (thread_it != activeThreads.end()) {
+1164         threadCycles[*thread_it]++;
+1165         thread_it++;
+1166     }
+1167 
+1168     // Keep track of cycles where SMT is active
+1169     if (activeThreads.size() > 1) {
+1170         smtCycles++;
+1171     }
+1172 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_abdcc0de01ff3d8d22a40e0b966acb463}{
+\index{InOrderCPU@{InOrderCPU}!totalInsts@{totalInsts}}
+\index{totalInsts@{totalInsts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{totalInsts}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf Counter} totalInsts () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classInOrderCPU_abdcc0de01ff3d8d22a40e0b966acb463}
+Count the Total Instructions Committed in the CPU. 
+
+
+\begin{DoxyCode}
+817     {
+818         Counter total(0);
+819 
+820         for (ThreadID tid = 0; tid < (ThreadID)thread.size(); tid++)
+821             total += thread[tid]->numInst;
+822 
+823         return total;
+824     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_adfb528b512cf037ade8dc8e22bf8a7bd}{
+\index{InOrderCPU@{InOrderCPU}!totalOps@{totalOps}}
+\index{totalOps@{totalOps}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{totalOps}]{\setlength{\rightskip}{0pt plus 5cm}virtual {\bf Counter} totalOps () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classInOrderCPU_adfb528b512cf037ade8dc8e22bf8a7bd}
+Count the Total Ops Committed in the CPU. 
+
+
+\begin{DoxyCode}
+828     {
+829         Counter total(0);
+830 
+831         for (ThreadID tid = 0; tid < (ThreadID)thread.size(); tid++)
+832             total += thread[tid]->numOp;
+833 
+834         return total;
+835     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_abf76d6d245f7d3b17d26ea8dcc0cf36f}{
+\index{InOrderCPU@{InOrderCPU}!trap@{trap}}
+\index{trap@{trap}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{trap}]{\setlength{\rightskip}{0pt plus 5cm}void trap ({\bf Fault} {\em fault}, \/  {\bf ThreadID} {\em tid}, \/  {\bf DynInstPtr} {\em inst})}}
+\label{classInOrderCPU_abf76d6d245f7d3b17d26ea8dcc0cf36f}
+Perform trap to Handle Given Fault 
+
+
+\begin{DoxyCode}
+940 {
+941     fault->invoke(tcBase(tid), inst->staticInst);
+942     removePipelineStalls(tid);
+943 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a89e3462bf1fe289c9196b20b1d4a907e}{
+\index{InOrderCPU@{InOrderCPU}!trapContext@{trapContext}}
+\index{trapContext@{trapContext}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{trapContext}]{\setlength{\rightskip}{0pt plus 5cm}void trapContext ({\bf Fault} {\em fault}, \/  {\bf ThreadID} {\em tid}, \/  {\bf DynInstPtr} {\em inst}, \/  {\bf Cycles} {\em delay} = {\ttfamily {\bf Cycles}(0)})}}
+\label{classInOrderCPU_a89e3462bf1fe289c9196b20b1d4a907e}
+Schedule a trap on the CPU 
+
+
+\begin{DoxyCode}
+933 {
+934     scheduleCpuEvent(Trap, fault, tid, inst, delay);
+935     trapPending[tid] = true;
+936 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ad819e7898bd94721d107a35fde764390}{
+\index{InOrderCPU@{InOrderCPU}!unscheduleTickEvent@{unscheduleTickEvent}}
+\index{unscheduleTickEvent@{unscheduleTickEvent}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{unscheduleTickEvent}]{\setlength{\rightskip}{0pt plus 5cm}void unscheduleTickEvent ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classInOrderCPU_ad819e7898bd94721d107a35fde764390}
+Unschedule tick event, regardless of its current state. 
+
+
+\begin{DoxyCode}
+218     {
+219         if (tickEvent.scheduled())
+220             tickEvent.squash();
+221     }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a18e33751f284bf73d45d25224e93e6a0}{
+\index{InOrderCPU@{InOrderCPU}!updateContextSwitchStats@{updateContextSwitchStats}}
+\index{updateContextSwitchStats@{updateContextSwitchStats}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{updateContextSwitchStats}]{\setlength{\rightskip}{0pt plus 5cm}void updateContextSwitchStats ()}}
+\label{classInOrderCPU_a18e33751f284bf73d45d25224e93e6a0}
+
+
+
+\begin{DoxyCode}
+1488 {
+1489     // Set Average Stat Here, then reset to 0    
+1490     instsPerCtxtSwitch = instsPerSwitch;
+1491     instsPerSwitch = 0;
+1492 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a00247488696e6ff608a2a44673578094}{
+\index{InOrderCPU@{InOrderCPU}!updateThreadPriority@{updateThreadPriority}}
+\index{updateThreadPriority@{updateThreadPriority}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{updateThreadPriority}]{\setlength{\rightskip}{0pt plus 5cm}void updateThreadPriority ()}}
+\label{classInOrderCPU_a00247488696e6ff608a2a44673578094}
+Update The Order In Which We \hyperlink{classProcess}{Process} Threads. 
+
+
+\begin{DoxyCode}
+1143 {
+1144     if (activeThreads.size() > 1)
+1145     {
+1146         //DEFAULT TO ROUND ROBIN SCHEME
+1147         //e.g. Move highest priority to end of thread list
+1148         list<ThreadID>::iterator list_begin = activeThreads.begin();
+1149 
+1150         unsigned high_thread = *list_begin;
+1151 
+1152         activeThreads.erase(list_begin);
+1153 
+1154         activeThreads.push_back(high_thread);
+1155     }
+1156 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_afe01e4cef8897b8a4ff99d575875c9db}{
+\index{InOrderCPU@{InOrderCPU}!validDataAddr@{validDataAddr}}
+\index{validDataAddr@{validDataAddr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{validDataAddr}]{\setlength{\rightskip}{0pt plus 5cm}bool validDataAddr ({\bf Addr} {\em addr})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_afe01e4cef8897b8a4ff99d575875c9db}
+\hyperlink{classCheck}{Check} if this address is a valid data address. 
+
+
+\begin{DoxyCode}
+484 { return true; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_af5f6a59bc2ed83b0cf9203ba8c63bf34}{
+\index{InOrderCPU@{InOrderCPU}!validInstAddr@{validInstAddr}}
+\index{validInstAddr@{validInstAddr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{validInstAddr}]{\setlength{\rightskip}{0pt plus 5cm}bool validInstAddr ({\bf Addr} {\em addr})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classInOrderCPU_af5f6a59bc2ed83b0cf9203ba8c63bf34}
+\hyperlink{classCheck}{Check} if this address is a valid instruction address. 
+
+
+\begin{DoxyCode}
+481 { return true; }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ae2e1ccebe596a180f8105d57f9a93645}{
+\index{InOrderCPU@{InOrderCPU}!verifyMemoryMode@{verifyMemoryMode}}
+\index{verifyMemoryMode@{verifyMemoryMode}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{verifyMemoryMode}]{\setlength{\rightskip}{0pt plus 5cm}void verifyMemoryMode () const}}
+\label{classInOrderCPU_ae2e1ccebe596a180f8105d57f9a93645}
+
+
+
+\begin{DoxyCode}
+820 {
+821     if (!system->isTimingMode()) {
+822         fatal("The in-order CPU requires the memory system to be in "
+823               "'timing' mode.\n");
+824     }
+825 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_abce3a63b123f84972e4df7962f9b870e}{
+\index{InOrderCPU@{InOrderCPU}!wakeCPU@{wakeCPU}}
+\index{wakeCPU@{wakeCPU}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{wakeCPU}]{\setlength{\rightskip}{0pt plus 5cm}void wakeCPU ()}}
+\label{classInOrderCPU_abce3a63b123f84972e4df7962f9b870e}
+Wakes the CPU, rescheduling the CPU if it's not already active. 
+
+
+\begin{DoxyCode}
+1814 {
+1815     if (/*activityRec.active() || */tickEvent.scheduled()) {
+1816         DPRINTF(Activity, "CPU already running.\n");
+1817         return;
+1818     }
+1819 
+1820     DPRINTF(Activity, "Waking up CPU\n");
+1821 
+1822     Tick extra_cycles = curCycle() - lastRunningCycle;
+1823     if (extra_cycles != 0)
+1824         --extra_cycles;
+1825 
+1826     idleCycles += extra_cycles;    
+1827     for (int stage_num = 0; stage_num < NumStages; stage_num++) {
+1828         pipelineStage[stage_num]->idleCycles += extra_cycles;
+1829     }    
+1830 
+1831     numCycles += extra_cycles;
+1832 
+1833     schedule(&tickEvent, clockEdge());
+1834 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_ae674290a26ecbd622c5160e38e8a4fe9}{
+\index{InOrderCPU@{InOrderCPU}!wakeup@{wakeup}}
+\index{wakeup@{wakeup}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{wakeup}]{\setlength{\rightskip}{0pt plus 5cm}void wakeup ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classInOrderCPU_ae674290a26ecbd622c5160e38e8a4fe9}
+
+
+\hyperlink{classBaseCPU_a75101f8aee74078c8c3c1d1f3617f7cc}{BaseCPU}を再定義しています。
+
+
+\begin{DoxyCode}
+1839 {
+1840     if (thread[0]->status() != ThreadContext::Suspended)
+1841         return;
+1842 
+1843     wakeCPU();
+1844 
+1845     DPRINTF(Quiesce, "Suspended Processor woken\n");
+1846     threadContexts[0]->activate();
+1847 }
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_aa5c5cc302819b0824df50495f6ffd319}{
+\index{InOrderCPU@{InOrderCPU}!write@{write}}
+\index{write@{write}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Fault} write ({\bf DynInstPtr} {\em inst}, \/  uint8\_\-t $\ast$ {\em data}, \/  unsigned {\em size}, \/  {\bf Addr} {\em addr}, \/  unsigned {\em flags}, \/  uint64\_\-t $\ast$ {\em write\_\-res} = {\ttfamily NULL})}}
+\label{classInOrderCPU_aa5c5cc302819b0824df50495f6ffd319}
+Forwards an instruction write. to the appropriate data resource (indexes into \hyperlink{classResource}{Resource} Pool thru \char`\"{}dataPortIdx\char`\"{}) 
+
+
+\begin{DoxyCode}
+1921 {
+1922     return resPool->getDataUnit()->write(inst, data, size, addr, flags,
+1923                                          write_res);
+1924 }
+\end{DoxyCode}
+
+
+\subsection{フレンドと関連する関数}
+\hypertarget{classInOrderCPU_a0ebbdc315d2466b93b663656f9d9ab44}{
+\index{InOrderCPU@{InOrderCPU}!Resource@{Resource}}
+\index{Resource@{Resource}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{Resource}]{\setlength{\rightskip}{0pt plus 5cm}friend class {\bf Resource}\hspace{0.3cm}{\ttfamily  \mbox{[}friend\mbox{]}}}}
+\label{classInOrderCPU_a0ebbdc315d2466b93b663656f9d9ab44}
+
+
+\subsection{変数}
+\hypertarget{classInOrderCPU_a6cdf6e6db875a442f3ab6db542bd2bb5}{
+\index{InOrderCPU@{InOrderCPU}!\_\-status@{\_\-status}}
+\index{\_\-status@{\_\-status}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{\_\-status}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Status} {\bf \_\-status}}}
+\label{classInOrderCPU_a6cdf6e6db875a442f3ab6db542bd2bb5}
+Overall CPU status. \hypertarget{classInOrderCPU_ae8939711cc7f6e9c795d16df91f9f258}{
+\index{InOrderCPU@{InOrderCPU}!activeThreads@{activeThreads}}
+\index{activeThreads@{activeThreads}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activeThreads}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::list}$<${\bf ThreadID}$>$ {\bf activeThreads}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_ae8939711cc7f6e9c795d16df91f9f258}
+Active Threads List \hypertarget{classInOrderCPU_acaf6f85dd1ae8aa79c075d446098f5b1}{
+\index{InOrderCPU@{InOrderCPU}!activity@{activity}}
+\index{activity@{activity}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activity}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Formula} {\bf activity}}}
+\label{classInOrderCPU_acaf6f85dd1ae8aa79c075d446098f5b1}
+Percentage of cycles a stage was active \hypertarget{classInOrderCPU_ae5ad3ebe67382e7fbc7fddcf48ae9c6c}{
+\index{InOrderCPU@{InOrderCPU}!activityRec@{activityRec}}
+\index{activityRec@{activityRec}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{activityRec}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ActivityRecorder} {\bf activityRec}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInOrderCPU_ae5ad3ebe67382e7fbc7fddcf48ae9c6c}
+The activity recorder; used to tell if the CPU has any activity remaining or if it can go to idle and deschedule itself. \hypertarget{classInOrderCPU_ab1f63e202ba966be3f297aa2124537a8}{
+\index{InOrderCPU@{InOrderCPU}!archRegDepMap@{archRegDepMap}}
+\index{archRegDepMap@{archRegDepMap}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{archRegDepMap}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegDepMap} {\bf archRegDepMap}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_ab1f63e202ba966be3f297aa2124537a8}
+Dependency Tracker for Integer \& Floating Point Regs \hypertarget{classInOrderCPU_a74d3a6e6aba6f28d4cb2e95b45b75f67}{
+\index{InOrderCPU@{InOrderCPU}!asid@{asid}}
+\index{asid@{asid}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{asid}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadID} {\bf asid}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a74d3a6e6aba6f28d4cb2e95b45b75f67}
+\hypertarget{classInOrderCPU_ae25728fd5ca9042b3ef3db1d5f39fccc}{
+\index{InOrderCPU@{InOrderCPU}!ccRegs@{ccRegs}}
+\index{ccRegs@{ccRegs}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{ccRegs}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::CCReg {\bf ccRegs}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumCCRegs\mbox{]}}}
+\label{classInOrderCPU_ae25728fd5ca9042b3ef3db1d5f39fccc}
+\hypertarget{classInOrderCPU_afe1814e3fca0fc42be2257c61d7047b3}{
+\index{InOrderCPU@{InOrderCPU}!comBranches@{comBranches}}
+\index{comBranches@{comBranches}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{comBranches}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf comBranches}}}
+\label{classInOrderCPU_afe1814e3fca0fc42be2257c61d7047b3}
+\hypertarget{classInOrderCPU_a2ac44abc59509ccec79a76bb16812848}{
+\index{InOrderCPU@{InOrderCPU}!comFloats@{comFloats}}
+\index{comFloats@{comFloats}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{comFloats}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf comFloats}}}
+\label{classInOrderCPU_a2ac44abc59509ccec79a76bb16812848}
+\hypertarget{classInOrderCPU_a0414c26e057889c01ab11e1f0a6cb01b}{
+\index{InOrderCPU@{InOrderCPU}!comInts@{comInts}}
+\index{comInts@{comInts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{comInts}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf comInts}}}
+\label{classInOrderCPU_a0414c26e057889c01ab11e1f0a6cb01b}
+\hypertarget{classInOrderCPU_ad1256d43890e80b4ef9d1d6fd2ee2286}{
+\index{InOrderCPU@{InOrderCPU}!comLoads@{comLoads}}
+\index{comLoads@{comLoads}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{comLoads}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf comLoads}}}
+\label{classInOrderCPU_ad1256d43890e80b4ef9d1d6fd2ee2286}
+Instruction Mix \hyperlink{namespaceStats}{Stats} \hypertarget{classInOrderCPU_a45901e46dca5846ddd857aecbee16645}{
+\index{InOrderCPU@{InOrderCPU}!committedInsts@{committedInsts}}
+\index{committedInsts@{committedInsts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{committedInsts}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf committedInsts}}}
+\label{classInOrderCPU_a45901e46dca5846ddd857aecbee16645}
+Stat for the number of committed instructions per thread. \hypertarget{classInOrderCPU_a16789fd9e4f632e091d740c772094f80}{
+\index{InOrderCPU@{InOrderCPU}!committedOps@{committedOps}}
+\index{committedOps@{committedOps}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{committedOps}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf committedOps}}}
+\label{classInOrderCPU_a16789fd9e4f632e091d740c772094f80}
+Stat for the number of committed ops per thread. \hypertarget{classInOrderCPU_ac2b81fdbc0cd90a375b12b796c582cf8}{
+\index{InOrderCPU@{InOrderCPU}!comNonSpec@{comNonSpec}}
+\index{comNonSpec@{comNonSpec}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{comNonSpec}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf comNonSpec}}}
+\label{classInOrderCPU_ac2b81fdbc0cd90a375b12b796c582cf8}
+\hypertarget{classInOrderCPU_a60adec944be46cf99b376a9c146ab51f}{
+\index{InOrderCPU@{InOrderCPU}!comNops@{comNops}}
+\index{comNops@{comNops}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{comNops}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf comNops}}}
+\label{classInOrderCPU_a60adec944be46cf99b376a9c146ab51f}
+\hypertarget{classInOrderCPU_a371b0215b84c06c3ec41dccbe2a7988b}{
+\index{InOrderCPU@{InOrderCPU}!comStores@{comStores}}
+\index{comStores@{comStores}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{comStores}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf comStores}}}
+\label{classInOrderCPU_a371b0215b84c06c3ec41dccbe2a7988b}
+\hypertarget{classInOrderCPU_a558887e3416d99727765dad3be5354d7}{
+\index{InOrderCPU@{InOrderCPU}!coreType@{coreType}}
+\index{coreType@{coreType}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{coreType}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf coreType}}}
+\label{classInOrderCPU_a558887e3416d99727765dad3be5354d7}
+Type of core that this is \hypertarget{classInOrderCPU_af68d211cace2daa3df90471d7af93ad8}{
+\index{InOrderCPU@{InOrderCPU}!cpi@{cpi}}
+\index{cpi@{cpi}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{cpi}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Formula} {\bf cpi}}}
+\label{classInOrderCPU_af68d211cace2daa3df90471d7af93ad8}
+Stat for the CPI per thread. \hypertarget{classInOrderCPU_af34f33b8a6a96ac6ee8b68b7ecd34ba9}{
+\index{InOrderCPU@{InOrderCPU}!cpu\_\-id@{cpu\_\-id}}
+\index{cpu\_\-id@{cpu\_\-id}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{cpu\_\-id}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf cpu\_\-id}}}
+\label{classInOrderCPU_af34f33b8a6a96ac6ee8b68b7ecd34ba9}
+CPU ID 
+
+\hyperlink{classBaseCPU_a367f5d07843a54b9454fa6f733fd6d50}{BaseCPU}を再定義しています。\hypertarget{classInOrderCPU_abd8a4a05c67ac6b36a477d4243ce9681}{
+\index{InOrderCPU@{InOrderCPU}!cpu\_\-params@{cpu\_\-params}}
+\index{cpu\_\-params@{cpu\_\-params}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{cpu\_\-params}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Params}$\ast$ {\bf cpu\_\-params}}}
+\label{classInOrderCPU_abd8a4a05c67ac6b36a477d4243ce9681}
+\hypertarget{classInOrderCPU_a27f6e838bf5d421831ac5e451e61ccce}{
+\index{InOrderCPU@{InOrderCPU}!cpuEventRemoveList@{cpuEventRemoveList}}
+\index{cpuEventRemoveList@{cpuEventRemoveList}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{cpuEventRemoveList}]{\setlength{\rightskip}{0pt plus 5cm}std::queue$<${\bf Event}$\ast$$>$ {\bf cpuEventRemoveList}}}
+\label{classInOrderCPU_a27f6e838bf5d421831ac5e451e61ccce}
+List of all the cpu event requests that will be removed at the end of the current cycle. \hypertarget{classInOrderCPU_a8e4a84e6f2b11310fbb12e5b7598947f}{
+\index{InOrderCPU@{InOrderCPU}!dataPort@{dataPort}}
+\index{dataPort@{dataPort}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{dataPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CachePort} {\bf dataPort}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInOrderCPU_a8e4a84e6f2b11310fbb12e5b7598947f}
+Data port. Note that it has to appear after the resPool. \hypertarget{classInOrderCPU_a91cd9b9d8a8f3793796b9eff33e0ffeb}{
+\index{InOrderCPU@{InOrderCPU}!drainCount@{drainCount}}
+\index{drainCount@{drainCount}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{drainCount}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf drainCount}}}
+\label{classInOrderCPU_a91cd9b9d8a8f3793796b9eff33e0ffeb}
+Counter of how many stages have completed draining \hypertarget{classInOrderCPU_a09dc4a08ace7d6e74531ffff1ba5d905}{
+\index{InOrderCPU@{InOrderCPU}!dummyBufferInst@{dummyBufferInst}}
+\index{dummyBufferInst@{dummyBufferInst}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{dummyBufferInst}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DynInstPtr} {\bf dummyBufferInst}}}
+\label{classInOrderCPU_a09dc4a08ace7d6e74531ffff1ba5d905}
+\hypertarget{classInOrderCPU_a8f57f75c5150b34b12a0d461a8941704}{
+\index{InOrderCPU@{InOrderCPU}!dummyInst@{dummyInst}}
+\index{dummyInst@{dummyInst}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{dummyInst}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DynInstPtr} {\bf dummyInst}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a8f57f75c5150b34b12a0d461a8941704}
+Instruction used to signify that there is no $\ast$real$\ast$ instruction in buffer slot \hypertarget{classInOrderCPU_a5366ca890575a006d6c51690c157a959}{
+\index{InOrderCPU@{InOrderCPU}!dummyReq@{dummyReq}}
+\index{dummyReq@{dummyReq}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{dummyReq}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ResourceRequest}$\ast$ {\bf dummyReq}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a5366ca890575a006d6c51690c157a959}
+Used by resources to signify a denied access to a resource. \hypertarget{classInOrderCPU_aee70a76b5dfeedede656757791734420}{
+\index{InOrderCPU@{InOrderCPU}!dummyReqInst@{dummyReqInst}}
+\index{dummyReqInst@{dummyReqInst}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{dummyReqInst}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DynInstPtr} {\bf dummyReqInst}}}
+\label{classInOrderCPU_aee70a76b5dfeedede656757791734420}
+\hypertarget{classInOrderCPU_a102452fdf27d60fc9d2520e37b358be1}{
+\index{InOrderCPU@{InOrderCPU}!dummyTrapInst@{dummyTrapInst}}
+\index{dummyTrapInst@{dummyTrapInst}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{dummyTrapInst}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DynInstPtr} {\bf dummyTrapInst}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a102452fdf27d60fc9d2520e37b358be1}
+\hypertarget{classInOrderCPU_ae38b3e563def292648d9f34e094f8cc8}{
+\index{InOrderCPU@{InOrderCPU}!endOfSkedIt@{endOfSkedIt}}
+\index{endOfSkedIt@{endOfSkedIt}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{endOfSkedIt}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SkedCacheIt} {\bf endOfSkedIt}}}
+\label{classInOrderCPU_ae38b3e563def292648d9f34e094f8cc8}
+Initialized to last iterator in map, signifying a invalid entry on map searches \hypertarget{classInOrderCPU_a3e78f2c15e35e19acb51c1a41fc51130}{
+\index{InOrderCPU@{InOrderCPU}!eventNames@{eventNames}}
+\index{eventNames@{eventNames}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{eventNames}]{\setlength{\rightskip}{0pt plus 5cm}std::string {\bf eventNames}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_a3e78f2c15e35e19acb51c1a41fc51130}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+
+{
+    "ActivateThread",
+    "ActivateNextReadyThread",
+    "DeactivateThread",
+    "HaltThread",
+    "SuspendThread",
+    "Trap",
+    "Syscall",
+    "SquashFromMemStall",
+    "UpdatePCs"
+}
+\end{DoxyCode}
+\hypertarget{classInOrderCPU_a527f4207ae79fbe77bddd111013c163e}{
+\index{InOrderCPU@{InOrderCPU}!f@{f}}
+\index{f@{f}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{f}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FloatReg} {\bf f}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumFloatRegs\mbox{]}}}
+\label{classInOrderCPU_a527f4207ae79fbe77bddd111013c163e}
+\hypertarget{classInOrderCPU_a74928ed9838a0cd492269c937268ec16}{
+\index{InOrderCPU@{InOrderCPU}!faultSked@{faultSked}}
+\index{faultSked@{faultSked}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{faultSked}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThePipeline::RSkedPtr} {\bf faultSked}}}
+\label{classInOrderCPU_a74928ed9838a0cd492269c937268ec16}
+\hypertarget{classInOrderCPU_a22a54b30ea66b2e4740a1a3d55de098f}{
+\index{InOrderCPU@{InOrderCPU}!fetchPriorityList@{fetchPriorityList}}
+\index{fetchPriorityList@{fetchPriorityList}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{fetchPriorityList}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::list}$<${\bf ThreadID}$>$ {\bf fetchPriorityList}}}
+\label{classInOrderCPU_a22a54b30ea66b2e4740a1a3d55de098f}
+\hypertarget{classInOrderCPU_ad85bf1756055c7ee62e445619cdb3750}{
+\index{InOrderCPU@{InOrderCPU}!floatRegs@{floatRegs}}
+\index{floatRegs@{floatRegs}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{floatRegs}]{\setlength{\rightskip}{0pt plus 5cm}union \{ ... \}   {\bf floatRegs}}}
+\label{classInOrderCPU_ad85bf1756055c7ee62e445619cdb3750}
+The \hyperlink{classRegister}{Register} File for the CPU \hypertarget{classInOrderCPU_a03c10522156687013f75c1bdaa96d04f}{
+\index{InOrderCPU@{InOrderCPU}!frontEndSked@{frontEndSked}}
+\index{frontEndSked@{frontEndSked}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{frontEndSked}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThePipeline::RSkedPtr} {\bf frontEndSked}}}
+\label{classInOrderCPU_a03c10522156687013f75c1bdaa96d04f}
+\hypertarget{classInOrderCPU_a7df535223a2576eed74b77ef2e59a657}{
+\index{InOrderCPU@{InOrderCPU}!globalSeqNum@{globalSeqNum}}
+\index{globalSeqNum@{globalSeqNum}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{globalSeqNum}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InstSeqNum} {\bf globalSeqNum}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a7df535223a2576eed74b77ef2e59a657}
+The global sequence number counter. \hypertarget{classInOrderCPU_ac4a971a8b09e053f4bf9bfcd6748995d}{
+\index{InOrderCPU@{InOrderCPU}!haltedThreads@{haltedThreads}}
+\index{haltedThreads@{haltedThreads}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{haltedThreads}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::list}$<${\bf ThreadID}$>$ {\bf haltedThreads}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_ac4a971a8b09e053f4bf9bfcd6748995d}
+Halted Threads List \hypertarget{classInOrderCPU_a6a5c774a90c1d03f1cfc418f4c9876e2}{
+\index{InOrderCPU@{InOrderCPU}!i@{i}}
+\index{i@{i}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{i}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FloatRegBits} {\bf i}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumFloatRegs\mbox{]}}}
+\label{classInOrderCPU_a6a5c774a90c1d03f1cfc418f4c9876e2}
+\hypertarget{classInOrderCPU_a42e0f4c18fdb8ef7504f5c45d697fb14}{
+\index{InOrderCPU@{InOrderCPU}!idleCycles@{idleCycles}}
+\index{idleCycles@{idleCycles}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{idleCycles}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf idleCycles}}}
+\label{classInOrderCPU_a42e0f4c18fdb8ef7504f5c45d697fb14}
+Stat for total number of cycles the CPU spends descheduled or no stages active. \hypertarget{classInOrderCPU_a202c5d802fb841a0c3faf2f36737ecd8}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-CONTROL@{INST\_\-CONTROL}}
+\index{INST\_\-CONTROL@{INST\_\-CONTROL}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-CONTROL}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-CONTROL} = 23\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_a202c5d802fb841a0c3faf2f36737ecd8}
+\hypertarget{classInOrderCPU_a89c9d4d44bcca23c206e33116684b91e}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-DEST\_\-REGS@{INST\_\-DEST\_\-REGS}}
+\index{INST\_\-DEST\_\-REGS@{INST\_\-DEST\_\-REGS}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-DEST\_\-REGS}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-DEST\_\-REGS} = 18\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_a89c9d4d44bcca23c206e33116684b91e}
+\hypertarget{classInOrderCPU_a5b3806af6c911af84cd16d860f4436b2}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-LOAD@{INST\_\-LOAD}}
+\index{INST\_\-LOAD@{INST\_\-LOAD}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-LOAD}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-LOAD} = 25\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_a5b3806af6c911af84cd16d860f4436b2}
+\hypertarget{classInOrderCPU_a079fa8746c9fa2240354d5e9c476bb24}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-NONSPEC@{INST\_\-NONSPEC}}
+\index{INST\_\-NONSPEC@{INST\_\-NONSPEC}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-NONSPEC}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-NONSPEC} = 22\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_a079fa8746c9fa2240354d5e9c476bb24}
+\hypertarget{classInOrderCPU_ab0689a51017f8422cab595aed96c6a1a}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-OPCLASS@{INST\_\-OPCLASS}}
+\index{INST\_\-OPCLASS@{INST\_\-OPCLASS}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-OPCLASS}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-OPCLASS} = 26\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_ab0689a51017f8422cab595aed96c6a1a}
+\hypertarget{classInOrderCPU_aadbdb3acfa734a87e0e26c5da208bf11}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-SPLIT\_\-DATA@{INST\_\-SPLIT\_\-DATA}}
+\index{INST\_\-SPLIT\_\-DATA@{INST\_\-SPLIT\_\-DATA}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-SPLIT\_\-DATA}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-SPLIT\_\-DATA} = 13\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_aadbdb3acfa734a87e0e26c5da208bf11}
+\hypertarget{classInOrderCPU_af24bafb407b963ae82732cf776cf40c4}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-SRC\_\-REGS@{INST\_\-SRC\_\-REGS}}
+\index{INST\_\-SRC\_\-REGS@{INST\_\-SRC\_\-REGS}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-SRC\_\-REGS}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-SRC\_\-REGS} = 14\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_af24bafb407b963ae82732cf776cf40c4}
+\hypertarget{classInOrderCPU_a85aa6196492bed8f13431a172f09b83b}{
+\index{InOrderCPU@{InOrderCPU}!INST\_\-STORE@{INST\_\-STORE}}
+\index{INST\_\-STORE@{INST\_\-STORE}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{INST\_\-STORE}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf INST\_\-STORE} = 24\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_a85aa6196492bed8f13431a172f09b83b}
+\hypertarget{classInOrderCPU_a407a202e9777af8f3aca683ff7257693}{
+\index{InOrderCPU@{InOrderCPU}!instList@{instList}}
+\index{instList@{instList}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{instList}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::list}$<${\bf DynInstPtr}$>$ {\bf instList}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a407a202e9777af8f3aca683ff7257693}
+Per-\/Thread List of all the instructions in flight. \hypertarget{classInOrderCPU_a170c2f44ce8ed65aee6cf1da2a0e6296}{
+\index{InOrderCPU@{InOrderCPU}!instPort@{instPort}}
+\index{instPort@{instPort}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{instPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CachePort} {\bf instPort}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInOrderCPU_a170c2f44ce8ed65aee6cf1da2a0e6296}
+Instruction port. Note that it has to appear after the resPool. \hypertarget{classInOrderCPU_a057e08ddcb9e612ce7e273a324fd2a31}{
+\index{InOrderCPU@{InOrderCPU}!instsPerCtxtSwitch@{instsPerCtxtSwitch}}
+\index{instsPerCtxtSwitch@{instsPerCtxtSwitch}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{instsPerCtxtSwitch}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Average} {\bf instsPerCtxtSwitch}}}
+\label{classInOrderCPU_a057e08ddcb9e612ce7e273a324fd2a31}
+\hypertarget{classInOrderCPU_aa5fa9dd1c64f901b65487ef9c44ba4c1}{
+\index{InOrderCPU@{InOrderCPU}!instsPerSwitch@{instsPerSwitch}}
+\index{instsPerSwitch@{instsPerSwitch}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{instsPerSwitch}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf instsPerSwitch}}}
+\label{classInOrderCPU_aa5fa9dd1c64f901b65487ef9c44ba4c1}
+\hypertarget{classInOrderCPU_a66f502f952354c9e141e6de6fd8c1d17}{
+\index{InOrderCPU@{InOrderCPU}!intRegs@{intRegs}}
+\index{intRegs@{intRegs}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{intRegs}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::IntReg {\bf intRegs}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}\mbox{[}TheISA::NumIntRegs\mbox{]}}}
+\label{classInOrderCPU_a66f502f952354c9e141e6de6fd8c1d17}
+\hypertarget{classInOrderCPU_a6f168a31ee4084b6167d6761a4124014}{
+\index{InOrderCPU@{InOrderCPU}!ipc@{ipc}}
+\index{ipc@{ipc}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{ipc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Formula} {\bf ipc}}}
+\label{classInOrderCPU_a6f168a31ee4084b6167d6761a4124014}
+Stat for the IPC per thread. \hypertarget{classInOrderCPU_aa0d8dc5e214b94342d1f730e4e34ae82}{
+\index{InOrderCPU@{InOrderCPU}!isa@{isa}}
+\index{isa@{isa}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{isa}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<$TheISA::ISA $\ast$$>$ {\bf isa}}}
+\label{classInOrderCPU_aa0d8dc5e214b94342d1f730e4e34ae82}
+@ should add the 4 integer register ISA state 
+
+\hyperlink{classBaseCPU_a6d1804c8bb7cb5ff7f700541100052c4}{BaseCPU}を再定義しています。\hypertarget{classInOrderCPU_a2a4351147bb2df83bee5c60edc50165f}{
+\index{InOrderCPU@{InOrderCPU}!lastCommittedPC@{lastCommittedPC}}
+\index{lastCommittedPC@{lastCommittedPC}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{lastCommittedPC}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::PCState {\bf lastCommittedPC}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a2a4351147bb2df83bee5c60edc50165f}
+Last Committed PC \hypertarget{classInOrderCPU_a55a1507086425a12c25953d6061af80c}{
+\index{InOrderCPU@{InOrderCPU}!lastRunningCycle@{lastRunningCycle}}
+\index{lastRunningCycle@{lastRunningCycle}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{lastRunningCycle}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} {\bf lastRunningCycle}}}
+\label{classInOrderCPU_a55a1507086425a12c25953d6061af80c}
+The cycle that the CPU was last running, used for statistics. \hypertarget{classInOrderCPU_a07ac7fa00a59be2904eaa76d4735681e}{
+\index{InOrderCPU@{InOrderCPU}!lastSquashCycle@{lastSquashCycle}}
+\index{lastSquashCycle@{lastSquashCycle}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{lastSquashCycle}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} {\bf lastSquashCycle}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a07ac7fa00a59be2904eaa76d4735681e}
+Last Cycle that the CPU squashed instruction end. \hypertarget{classInOrderCPU_a6ef203de76af61b4babb98f152867401}{
+\index{InOrderCPU@{InOrderCPU}!lockAddr@{lockAddr}}
+\index{lockAddr@{lockAddr}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{lockAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf lockAddr}}}
+\label{classInOrderCPU_a6ef203de76af61b4babb98f152867401}
+\hypertarget{classInOrderCPU_aa062c7f3423632ca66107fdbb9d38131}{
+\index{InOrderCPU@{InOrderCPU}!lockFlag@{lockFlag}}
+\index{lockFlag@{lockFlag}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{lockFlag}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf lockFlag}}}
+\label{classInOrderCPU_aa062c7f3423632ca66107fdbb9d38131}
+Temporary fix for the lock flag, works in the UP case. \hypertarget{classInOrderCPU_aae470a34ceb26576a60c1e6ed0d6e2e4}{
+\index{InOrderCPU@{InOrderCPU}!nonSpecInstActive@{nonSpecInstActive}}
+\index{nonSpecInstActive@{nonSpecInstActive}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{nonSpecInstActive}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf nonSpecInstActive}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_aae470a34ceb26576a60c1e6ed0d6e2e4}
+True if there is non-\/speculative Inst Active In Pipeline. Lets any execution unit know, NOT to execute while the instruction is active. \hypertarget{classInOrderCPU_a4ae669709931556f7ab17a0380eed72c}{
+\index{InOrderCPU@{InOrderCPU}!nonSpecSeqNum@{nonSpecSeqNum}}
+\index{nonSpecSeqNum@{nonSpecSeqNum}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{nonSpecSeqNum}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InstSeqNum} {\bf nonSpecSeqNum}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a4ae669709931556f7ab17a0380eed72c}
+Instruction Seq. Num of current non-\/speculative instruction. \hypertarget{classInOrderCPU_aa26707fae717bb36afa9b658f895d8d2}{
+\index{InOrderCPU@{InOrderCPU}!numCtxtSwitches@{numCtxtSwitches}}
+\index{numCtxtSwitches@{numCtxtSwitches}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{numCtxtSwitches}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf numCtxtSwitches}}}
+\label{classInOrderCPU_aa26707fae717bb36afa9b658f895d8d2}
+\hypertarget{classInOrderCPU_a61bb24b7355c86288cba2cd9d51ad1ed}{
+\index{InOrderCPU@{InOrderCPU}!pc@{pc}}
+\index{pc@{pc}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{pc}]{\setlength{\rightskip}{0pt plus 5cm}TheISA::PCState {\bf pc}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a61bb24b7355c86288cba2cd9d51ad1ed}
+Program Counters \hypertarget{classInOrderCPU_aae220dcd072e514a6cf72df0abf36d42}{
+\index{InOrderCPU@{InOrderCPU}!pipelineStage@{pipelineStage}}
+\index{pipelineStage@{pipelineStage}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{pipelineStage}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PipelineStage}$\ast$ {\bf pipelineStage}\mbox{[}{\bf ThePipeline::NumStages}\mbox{]}}}
+\label{classInOrderCPU_aae220dcd072e514a6cf72df0abf36d42}
+The Pipeline Stages for the CPU \hypertarget{classInOrderCPU_afcee8801ebda6ab96f79e89b9618fc31}{
+\index{InOrderCPU@{InOrderCPU}!readyThreads@{readyThreads}}
+\index{readyThreads@{readyThreads}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{readyThreads}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::list}$<${\bf ThreadID}$>$ {\bf readyThreads}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_afcee8801ebda6ab96f79e89b9618fc31}
+Ready Threads List \hypertarget{classInOrderCPU_a2825a91132fe292d64dca3c61fd07410}{
+\index{InOrderCPU@{InOrderCPU}!removeInstsThisCycle@{removeInstsThisCycle}}
+\index{removeInstsThisCycle@{removeInstsThisCycle}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{removeInstsThisCycle}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf removeInstsThisCycle}}}
+\label{classInOrderCPU_a2825a91132fe292d64dca3c61fd07410}
+Records if instructions need to be removed this cycle due to being retired or squashed. \hypertarget{classInOrderCPU_a574cb1bed7660bb2bb6940365f6a3315}{
+\index{InOrderCPU@{InOrderCPU}!removeList@{removeList}}
+\index{removeList@{removeList}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{removeList}]{\setlength{\rightskip}{0pt plus 5cm}std::queue$<${\bf ListIt}$>$ {\bf removeList}}}
+\label{classInOrderCPU_a574cb1bed7660bb2bb6940365f6a3315}
+List of all the instructions that will be removed at the end of this cycle. \hypertarget{classInOrderCPU_a2979f0f9689d1d8615cacdc85c65e11f}{
+\index{InOrderCPU@{InOrderCPU}!resPool@{resPool}}
+\index{resPool@{resPool}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{resPool}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ResourcePool}$\ast$ {\bf resPool}}}
+\label{classInOrderCPU_a2979f0f9689d1d8615cacdc85c65e11f}
+Interface between the CPU and CPU resources. \hypertarget{classInOrderCPU_af9addd340a133c2f4add363a3055b019}{
+\index{InOrderCPU@{InOrderCPU}!runCycles@{runCycles}}
+\index{runCycles@{runCycles}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{runCycles}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf runCycles}}}
+\label{classInOrderCPU_af9addd340a133c2f4add363a3055b019}
+Stat for total number of cycles the CPU is active. \hypertarget{classInOrderCPU_ac3bde2239116735c8de364fb6c64df5f}{
+\index{InOrderCPU@{InOrderCPU}!skedCache@{skedCache}}
+\index{skedCache@{skedCache}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{skedCache}]{\setlength{\rightskip}{0pt plus 5cm}m5::hash\_\-map$<$ {\bf InOrderCPU::SkedID}, {\bf ThePipeline::RSkedPtr} $>$ {\bf skedCache}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classInOrderCPU_ac3bde2239116735c8de364fb6c64df5f}
+\hyperlink{classCache}{Cache} of Instruction Schedule using the instruction's name as a key \hypertarget{classInOrderCPU_ab248e5224d70f89e3a901480b5170d8e}{
+\index{InOrderCPU@{InOrderCPU}!smtCommittedInsts@{smtCommittedInsts}}
+\index{smtCommittedInsts@{smtCommittedInsts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{smtCommittedInsts}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf smtCommittedInsts}}}
+\label{classInOrderCPU_ab248e5224d70f89e3a901480b5170d8e}
+Stat for the number of committed instructions per thread. \hypertarget{classInOrderCPU_a1d87e3c89d12e8b8a87c71af10ece177}{
+\index{InOrderCPU@{InOrderCPU}!smtCpi@{smtCpi}}
+\index{smtCpi@{smtCpi}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{smtCpi}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Formula} {\bf smtCpi}}}
+\label{classInOrderCPU_a1d87e3c89d12e8b8a87c71af10ece177}
+Stat for the SMT-\/CPI per thread. \hypertarget{classInOrderCPU_a1ad677a4636a45f2352c8e0e7b2e3b05}{
+\index{InOrderCPU@{InOrderCPU}!smtCycles@{smtCycles}}
+\index{smtCycles@{smtCycles}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{smtCycles}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf smtCycles}}}
+\label{classInOrderCPU_a1ad677a4636a45f2352c8e0e7b2e3b05}
+Tick for SMT \hypertarget{classInOrderCPU_a022f90f00731c9b5399eddfda76c6d6b}{
+\index{InOrderCPU@{InOrderCPU}!smtIpc@{smtIpc}}
+\index{smtIpc@{smtIpc}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{smtIpc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Formula} {\bf smtIpc}}}
+\label{classInOrderCPU_a022f90f00731c9b5399eddfda76c6d6b}
+Stat for the total IPC. \hypertarget{classInOrderCPU_a8c48389ee147811c1be413cdd4be4b68}{
+\index{InOrderCPU@{InOrderCPU}!squashSeqNum@{squashSeqNum}}
+\index{squashSeqNum@{squashSeqNum}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{squashSeqNum}]{\setlength{\rightskip}{0pt plus 5cm}{\bf InstSeqNum} {\bf squashSeqNum}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_a8c48389ee147811c1be413cdd4be4b68}
+Instruction Seq. Num of last instruction squashed in pipeline \hypertarget{classInOrderCPU_a410cb84ca396b18b7b6cd9b5999bc9c8}{
+\index{InOrderCPU@{InOrderCPU}!stageQueue@{stageQueue}}
+\index{stageQueue@{stageQueue}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{stageQueue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf StageQueue}$\ast$ {\bf stageQueue}\mbox{[}{\bf ThePipeline::NumStages}-\/1\mbox{]}}}
+\label{classInOrderCPU_a410cb84ca396b18b7b6cd9b5999bc9c8}
+Communication structure that sits in between pipeline stages \hypertarget{classInOrderCPU_a202139c46c2d06ae2263b4d3bfc27f1a}{
+\index{InOrderCPU@{InOrderCPU}!stageTracing@{stageTracing}}
+\index{stageTracing@{stageTracing}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{stageTracing}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf stageTracing}}}
+\label{classInOrderCPU_a202139c46c2d06ae2263b4d3bfc27f1a}
+Per-\/Stage Instruction Tracing \hypertarget{classInOrderCPU_a60be67c646e9cf5778b1eb73436194dc}{
+\index{InOrderCPU@{InOrderCPU}!stageWidth@{stageWidth}}
+\index{stageWidth@{stageWidth}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{stageWidth}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf stageWidth}}}
+\label{classInOrderCPU_a60be67c646e9cf5778b1eb73436194dc}
+Width (processing bandwidth) of each stage \hypertarget{classInOrderCPU_adee15257888edfe2927ee23593ff44bb}{
+\index{InOrderCPU@{InOrderCPU}!suspendedThreads@{suspendedThreads}}
+\index{suspendedThreads@{suspendedThreads}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{suspendedThreads}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::list}$<${\bf ThreadID}$>$ {\bf suspendedThreads}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classInOrderCPU_adee15257888edfe2927ee23593ff44bb}
+Suspended Threads List \hypertarget{classInOrderCPU_af27ccd765f13a4b7bd119dc7579e2746}{
+\index{InOrderCPU@{InOrderCPU}!system@{system}}
+\index{system@{system}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{system}]{\setlength{\rightskip}{0pt plus 5cm}{\bf System}$\ast$ {\bf system}}}
+\label{classInOrderCPU_af27ccd765f13a4b7bd119dc7579e2746}
+Pointer to the system. 
+
+\hyperlink{classBaseCPU_ab737471139f5a296e5b26e8a0e1b0744}{BaseCPU}を再定義しています。\hypertarget{classInOrderCPU_afe9da004c5a3f37cbb72fa3763d4c0d1}{
+\index{InOrderCPU@{InOrderCPU}!thread@{thread}}
+\index{thread@{thread}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{thread}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf Thread} $\ast$$>$ {\bf thread}}}
+\label{classInOrderCPU_afe9da004c5a3f37cbb72fa3763d4c0d1}
+Pointers to all of the threads in the CPU. \hypertarget{classInOrderCPU_a102b6d2d89b9006b8ac3bd3fe69284f0}{
+\index{InOrderCPU@{InOrderCPU}!threadCycles@{threadCycles}}
+\index{threadCycles@{threadCycles}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{threadCycles}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf threadCycles}}}
+\label{classInOrderCPU_a102b6d2d89b9006b8ac3bd3fe69284f0}
+Per-\/Thread Tick \hypertarget{classInOrderCPU_af190f1a05b1875acfda59f02e59e2fe0}{
+\index{InOrderCPU@{InOrderCPU}!threadModel@{threadModel}}
+\index{threadModel@{threadModel}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{threadModel}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadModel} {\bf threadModel}}}
+\label{classInOrderCPU_af190f1a05b1875acfda59f02e59e2fe0}
+\hypertarget{classInOrderCPU_aa36b8e894416f0ec98f701ab08f2ac22}{
+\index{InOrderCPU@{InOrderCPU}!tickEvent@{tickEvent}}
+\index{tickEvent@{tickEvent}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{tickEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TickEvent} {\bf tickEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classInOrderCPU_aa36b8e894416f0ec98f701ab08f2ac22}
+The tick event used for scheduling CPU ticks. \hypertarget{classInOrderCPU_ad72b6568a4a40f54d071c31bef16bf2e}{
+\index{InOrderCPU@{InOrderCPU}!timeBuffer@{timeBuffer}}
+\index{timeBuffer@{timeBuffer}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{timeBuffer}]{\setlength{\rightskip}{0pt plus 5cm}{\bf TimeBuffer}$<${\bf TimeStruct}$>$ {\bf timeBuffer}}}
+\label{classInOrderCPU_ad72b6568a4a40f54d071c31bef16bf2e}
+Global communication structure \hypertarget{classInOrderCPU_a174dbfb3c7b892914a54cec44ed2eeaf}{
+\index{InOrderCPU@{InOrderCPU}!timesIdled@{timesIdled}}
+\index{timesIdled@{timesIdled}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{timesIdled}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf timesIdled}}}
+\label{classInOrderCPU_a174dbfb3c7b892914a54cec44ed2eeaf}
+Stat for total number of times the CPU is descheduled. \hypertarget{classInOrderCPU_aec59f0599a86f88751992e5825e25c22}{
+\index{InOrderCPU@{InOrderCPU}!totalCommittedInsts@{totalCommittedInsts}}
+\index{totalCommittedInsts@{totalCommittedInsts}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{totalCommittedInsts}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Scalar} {\bf totalCommittedInsts}}}
+\label{classInOrderCPU_aec59f0599a86f88751992e5825e25c22}
+Stat for the total number of committed instructions. \hypertarget{classInOrderCPU_a5bd2f06c271dd03138cad92251716f5d}{
+\index{InOrderCPU@{InOrderCPU}!totalCpi@{totalCpi}}
+\index{totalCpi@{totalCpi}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{totalCpi}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Formula} {\bf totalCpi}}}
+\label{classInOrderCPU_a5bd2f06c271dd03138cad92251716f5d}
+Stat for the total CPI. \hypertarget{classInOrderCPU_ae8551f10097f4b2e5ed3febf0d9417e3}{
+\index{InOrderCPU@{InOrderCPU}!totalIpc@{totalIpc}}
+\index{totalIpc@{totalIpc}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{totalIpc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Formula} {\bf totalIpc}}}
+\label{classInOrderCPU_ae8551f10097f4b2e5ed3febf0d9417e3}
+Stat for the total IPC. \hypertarget{classInOrderCPU_ab7c4ed509aab4ab66a4d1c212dab659c}{
+\index{InOrderCPU@{InOrderCPU}!trapPending@{trapPending}}
+\index{trapPending@{trapPending}!InOrderCPU@{InOrderCPU}}
+\subsubsection[{trapPending}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf trapPending}\mbox{[}{\bf ThePipeline::MaxThreads}\mbox{]}}}
+\label{classInOrderCPU_ab7c4ed509aab4ab66a4d1c212dab659c}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/inorder/\hyperlink{inorder_2cpu_8hh}{cpu.hh}\item 
+cpu/inorder/\hyperlink{inorder_2cpu_8cc}{cpu.cc}\end{DoxyCompactItemize}

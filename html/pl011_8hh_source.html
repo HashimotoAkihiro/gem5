@@ -1,0 +1,173 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/arm/pl011.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/arm/pl011.hh</h1><a href="pl011_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 
+<a name="l00048"></a>00048 <span class="preprocessor">#ifndef __DEV_ARM_PL011_H__</span>
+<a name="l00049"></a>00049 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_ARM_PL011_H__</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="bitfield_8hh.html">base/bitfield.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="bitunion_8hh.html">base/bitunion.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="amba__device_8hh.html">dev/arm/amba_device.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="io__device_8hh.html">dev/io_device.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="uart_8hh.html">dev/uart.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;params/Pl011.hh&quot;</span>
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058 <span class="keyword">class </span><a class="code" href="classBaseGic.html">BaseGic</a>;
+<a name="l00059"></a>00059 
+<a name="l00060"></a><a class="code" href="classPl011.html">00060</a> <span class="keyword">class </span><a class="code" href="classPl011.html">Pl011</a> : <span class="keyword">public</span> <a class="code" href="classUart_1_1Uart.html">Uart</a>, <span class="keyword">public</span> <a class="code" href="classAmbaDevice.html">AmbaDevice</a>
+<a name="l00061"></a>00061 {
+<a name="l00062"></a>00062   <span class="keyword">protected</span>:
+<a name="l00063"></a><a class="code" href="classPl011.html#ae438dff5177bb7a98567cd94061edab4">00063</a>     <span class="keyword">static</span> <span class="keyword">const</span> uint64_t <a class="code" href="classPl011.html#ae438dff5177bb7a98567cd94061edab4">AMBA_ID</a> = <a class="code" href="base_2types_8hh.html#adcc3cf526a71c0dfaae020d432c78b83">ULL</a>(0xb105f00d00341011);
+<a name="l00064"></a><a class="code" href="classPl011.html#af74662958d5fcdb285fdf0d3b167eaaa">00064</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#af74662958d5fcdb285fdf0d3b167eaaa">UART_DR</a> = 0x000;
+<a name="l00065"></a><a class="code" href="classPl011.html#afc10d1e9648d43b45f74ab80f2fe0fd9">00065</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#afc10d1e9648d43b45f74ab80f2fe0fd9">UART_FR</a> = 0x018;
+<a name="l00066"></a><a class="code" href="classPl011.html#a38ebcfd24146cdf0bf0988abdf067605">00066</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#a38ebcfd24146cdf0bf0988abdf067605">UART_FR_CTS</a>  = 0x001;
+<a name="l00067"></a><a class="code" href="classPl011.html#a425fb28a4829a73986a5c01ea46190f7">00067</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#a425fb28a4829a73986a5c01ea46190f7">UART_FR_TXFE</a> = 0x080;
+<a name="l00068"></a><a class="code" href="classPl011.html#aeaf4ab07df0ff276fbf18e8a61c82ec4">00068</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#aeaf4ab07df0ff276fbf18e8a61c82ec4">UART_FR_RXFE</a> = 0x010;
+<a name="l00069"></a><a class="code" href="classPl011.html#ace2f31c665cd2161671782939a9e2f1c">00069</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#ace2f31c665cd2161671782939a9e2f1c">UART_IBRD</a> = 0x024;
+<a name="l00070"></a><a class="code" href="classPl011.html#a53ef29b47cbfbab3001682bb55198786">00070</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#a53ef29b47cbfbab3001682bb55198786">UART_FBRD</a> = 0x028;
+<a name="l00071"></a><a class="code" href="classPl011.html#aedd23dee902f909a96497e6a46cfe4d1">00071</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#aedd23dee902f909a96497e6a46cfe4d1">UART_LCRH</a> = 0x02C;
+<a name="l00072"></a><a class="code" href="classPl011.html#a6d01092295215e1cb41f34d2ed083816">00072</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#a6d01092295215e1cb41f34d2ed083816">UART_CR</a>   = 0x030;
+<a name="l00073"></a><a class="code" href="classPl011.html#acc821871663cd6db6ee0b11dd16937a7">00073</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#acc821871663cd6db6ee0b11dd16937a7">UART_IFLS</a> = 0x034;
+<a name="l00074"></a><a class="code" href="classPl011.html#ac02f58b5ec88452b14e2f0f89e0172ee">00074</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#ac02f58b5ec88452b14e2f0f89e0172ee">UART_IMSC</a> = 0x038;
+<a name="l00075"></a><a class="code" href="classPl011.html#a3ae85c77ab71dda8e8249f9081be71d8">00075</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#a3ae85c77ab71dda8e8249f9081be71d8">UART_RIS</a>  = 0x03C;
+<a name="l00076"></a><a class="code" href="classPl011.html#a41e42222af27e9de2191fd946e13e55a">00076</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#a41e42222af27e9de2191fd946e13e55a">UART_MIS</a>  = 0x040;
+<a name="l00077"></a><a class="code" href="classPl011.html#ae4724cf215001c72eac36b98b5a09787">00077</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classPl011.html#ae4724cf215001c72eac36b98b5a09787">UART_ICR</a>  = 0x044;
+<a name="l00078"></a>00078 
+<a name="l00079"></a><a class="code" href="classPl011.html#a10e251ca482543ec4f81f4006b000aed">00079</a>     uint16_t <a class="code" href="classPl011.html#a10e251ca482543ec4f81f4006b000aed">control</a>;
+<a name="l00080"></a>00080 
+<a name="l00083"></a><a class="code" href="classPl011.html#aa3ac821540cc12f9e0436651df0b1642">00083</a>     uint16_t <a class="code" href="classPl011.html#aa3ac821540cc12f9e0436651df0b1642">fbrd</a>;
+<a name="l00084"></a>00084 
+<a name="l00087"></a><a class="code" href="classPl011.html#a2be86c72c0a31f12141cb12224bc04b8">00087</a>     uint16_t <a class="code" href="classPl011.html#a2be86c72c0a31f12141cb12224bc04b8">ibrd</a>;
+<a name="l00088"></a>00088 
+<a name="l00091"></a><a class="code" href="classPl011.html#a56614119b1851bb3386d42f108644601">00091</a>     uint16_t <a class="code" href="classPl011.html#a56614119b1851bb3386d42f108644601">lcrh</a>;
+<a name="l00092"></a>00092 
+<a name="l00095"></a><a class="code" href="classPl011.html#a832059b95a1d4d0dc403ccf467926370">00095</a>     uint16_t <a class="code" href="classPl011.html#a832059b95a1d4d0dc403ccf467926370">ifls</a>;
+<a name="l00096"></a>00096 
+<a name="l00097"></a>00097     <a class="code" href="classPl011.html#a0afce67c547c76c56a13cfc7323fe124">BitUnion16</a>(INTREG)
+<a name="l00098"></a>00098         Bitfield&lt;0&gt; rimim;
+<a name="l00099"></a><a class="code" href="classPl011.html#ac6a6841bbd78ac1a329c8e1e6a6dd51b">00099</a>         Bitfield&lt;1&gt; <a class="code" href="classPl011.html#ac6a6841bbd78ac1a329c8e1e6a6dd51b">ctsmim</a>;
+<a name="l00100"></a><a class="code" href="classPl011.html#a40464feb8779903fa2eb809556b2c537">00100</a>         Bitfield&lt;2&gt; <a class="code" href="classPl011.html#a40464feb8779903fa2eb809556b2c537">dcdmim</a>;
+<a name="l00101"></a><a class="code" href="classPl011.html#abdf5197925837e4ab21e9342961419d6">00101</a>         Bitfield&lt;3&gt; <a class="code" href="classPl011.html#abdf5197925837e4ab21e9342961419d6">dsrmim</a>;
+<a name="l00102"></a><a class="code" href="classPl011.html#a38bbcf2758baf4ae6295a663465f65ce">00102</a>         Bitfield&lt;4&gt; <a class="code" href="classPl011.html#a38bbcf2758baf4ae6295a663465f65ce">rxim</a>;
+<a name="l00103"></a><a class="code" href="classPl011.html#a36c89652928b36336c1a9d4957e2813b">00103</a>         Bitfield&lt;5&gt; <a class="code" href="classPl011.html#a36c89652928b36336c1a9d4957e2813b">txim</a>;
+<a name="l00104"></a><a class="code" href="classPl011.html#a1f3d61050228be20dfe8ed8b9b94090d">00104</a>         Bitfield&lt;6&gt; <a class="code" href="classPl011.html#a1f3d61050228be20dfe8ed8b9b94090d">rtim</a>;
+<a name="l00105"></a><a class="code" href="classPl011.html#a705d2bcd8e859d1b15dd6e128533b295">00105</a>         Bitfield&lt;7&gt; <a class="code" href="classPl011.html#a705d2bcd8e859d1b15dd6e128533b295">feim</a>;
+<a name="l00106"></a><a class="code" href="classPl011.html#ab3404a9d5be230ce73a00d31bdf777a0">00106</a>         Bitfield&lt;8&gt; <a class="code" href="classPl011.html#ab3404a9d5be230ce73a00d31bdf777a0">peim</a>;
+<a name="l00107"></a><a class="code" href="classPl011.html#a8a3f2c2dd111d2dffbb1c54cbdc11e48">00107</a>         Bitfield&lt;9&gt; <a class="code" href="classPl011.html#a8a3f2c2dd111d2dffbb1c54cbdc11e48">beim</a>;
+<a name="l00108"></a><a class="code" href="classPl011.html#aea5955c20392fa25a1c7a1359bcfc123">00108</a>         Bitfield&lt;10&gt; <a class="code" href="classPl011.html#aea5955c20392fa25a1c7a1359bcfc123">oeim</a>;
+<a name="l00109"></a><a class="code" href="classPl011.html#a996c37eb2080c15ad39204ff8bb4c6dd">00109</a>         Bitfield&lt;15,11&gt; <a class="code" href="classPl011.html#a996c37eb2080c15ad39204ff8bb4c6dd">rsvd</a>;
+<a name="l00110"></a>00110     <a class="code" href="classPl011.html#a0b479d35b44ed7045fe0849fc06ee395">EndBitUnion</a>(INTREG)
+<a name="l00111"></a>00111 
+<a name="l00113"></a>00113     INTREG imsc;
+<a name="l00114"></a>00114 
+<a name="l00116"></a><a class="code" href="classPl011.html#ae2da020b580eb106d7e66a6b058a9e6d">00116</a>     INTREG <a class="code" href="classPl011.html#ae2da020b580eb106d7e66a6b058a9e6d">rawInt</a>;
+<a name="l00117"></a>00117 
+<a name="l00119"></a><a class="code" href="classPl011.html#adca828df6ee9e8b800f1b5b229476304">00119</a>     INTREG <a class="code" href="classPl011.html#adca828df6ee9e8b800f1b5b229476304">maskInt</a>;
+<a name="l00120"></a>00120 
+<a name="l00122"></a><a class="code" href="classPl011.html#a9bd4d49b818d8cf1a6dee0576d2ff039">00122</a>     <span class="keywordtype">int</span> <a class="code" href="classPl011.html#a9bd4d49b818d8cf1a6dee0576d2ff039">intNum</a>;
+<a name="l00123"></a>00123 
+<a name="l00125"></a><a class="code" href="classPl011.html#a2e2266dca56928f63667e994933169ee">00125</a>     <a class="code" href="classBaseGic.html">BaseGic</a> *<a class="code" href="classPl011.html#a2e2266dca56928f63667e994933169ee">gic</a>;
+<a name="l00126"></a>00126 
+<a name="l00128"></a><a class="code" href="classPl011.html#aad163d2d82e9b9e707ca4da55b667c1e">00128</a>     <span class="keywordtype">bool</span> <a class="code" href="classPl011.html#aad163d2d82e9b9e707ca4da55b667c1e">endOnEOT</a>;
+<a name="l00129"></a>00129 
+<a name="l00131"></a><a class="code" href="classPl011.html#a0dad0b6dbada03eb5daf9c1ed859d62e">00131</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPl011.html#a0dad0b6dbada03eb5daf9c1ed859d62e">intDelay</a>;
+<a name="l00132"></a>00132 
+<a name="l00134"></a>00134     <span class="keywordtype">void</span> <a class="code" href="classPl011.html#ab251ef5c4d9e1f0239542a9d8aa0dc3e">generateInterrupt</a>();
+<a name="l00135"></a>00135 
+<a name="l00137"></a><a class="code" href="classPl011.html#a2d115d060cc035b8f10239e7bcc104f0">00137</a>     <a class="code" href="classEventWrapper.html">EventWrapper</a>&lt;<a class="code" href="classPl011.html">Pl011</a>, &amp;Pl011::generateInterrupt&gt; <a class="code" href="classPl011.html#a2d115d060cc035b8f10239e7bcc104f0">intEvent</a>;
+<a name="l00138"></a>00138 
+<a name="l00139"></a>00139   public:
+<a name="l00140"></a><a class="code" href="classPl011.html#a7c50120eadc91b7f8522e0e4f1398769">00140</a>    typedef Pl011Params <a class="code" href="classPl011.html#a7c50120eadc91b7f8522e0e4f1398769">Params</a>;
+<a name="l00141"></a>00141    const Params *
+<a name="l00142"></a><a class="code" href="classPl011.html#acd3c3feb78ae7a8f88fe0f110a718dff">00142</a>     <a class="code" href="classPl011.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00143"></a>00143 <span class="keyword">    </span>{
+<a name="l00144"></a>00144         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span>Params *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00145"></a>00145     }
+<a name="l00146"></a>00146     <a class="code" href="classPl011.html#ade5d2e96a72a0f063620be79a21dd12e">Pl011</a>(<span class="keyword">const</span> <a class="code" href="classPl011.html#a7c50120eadc91b7f8522e0e4f1398769">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00147"></a>00147 
+<a name="l00148"></a>00148     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPl011.html#a613ec7d5e1ec64f8d21fec78ae8e568e">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00149"></a>00149     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classPl011.html#a4cefab464e72b5dd42c003a0a4341802">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00150"></a>00150 
+<a name="l00154"></a>00154     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classPl011.html#a603e184f4f31471b76cff54303262aa8">dataAvailable</a>();
+<a name="l00155"></a>00155 
+<a name="l00156"></a>00156 
+<a name="l00162"></a><a class="code" href="classPl011.html#a57f9c26cb4108beccb35bb1938990932">00162</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classPl011.html#a57f9c26cb4108beccb35bb1938990932">intStatus</a>() { <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classPl011.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00165"></a>00165     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classPl011.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167 };
+<a name="l00168"></a>00168 
+<a name="l00169"></a>00169 <span class="preprocessor">#endif //__DEV_ARM_PL011_H__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

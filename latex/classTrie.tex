@@ -1,0 +1,395 @@
+\hypertarget{classTrie}{
+\section{クラス テンプレート Trie$<$ Key, Value $>$}
+\label{classTrie}\index{Trie@{Trie}}
+}
+
+
+{\ttfamily \#include $<$trie.hh$>$}\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structTrie_1_1Node}{Node}
+\end{DoxyCompactItemize}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{structTrie_1_1Node}{Node} $\ast$ \hyperlink{classTrie_a9c85d428a12b0d5a24c678a5a010b97e}{Handle}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTrie_afa1796b4255b39148352d11b224a13dc}{Trie} ()
+\item 
+\hyperlink{structTrie_1_1Node}{Handle} \hyperlink{classTrie_ae59d2fa56f1f1cdc960689dd80bd1dbb}{insert} (Key key, unsigned width, Value $\ast$val)
+\item 
+Value $\ast$ \hyperlink{classTrie_acb9c4b2b263f23de8efe4c043e82ea38}{lookup} (Key key)
+\item 
+Value $\ast$ \hyperlink{classTrie_a9c941ee8c8702adb12e3e404fc275edb}{remove} (\hyperlink{structTrie_1_1Node}{Handle} handle)
+\item 
+Value $\ast$ \hyperlink{classTrie_a0a3ff133d42acb848a9bb45b85b0ba93}{remove} (Key key)
+\item 
+void \hyperlink{classTrie_ac8bb3912a3ce86b15842e79d0b421204}{clear} ()
+\item 
+void \hyperlink{classTrie_acf136bb7c799dc0e3c697a19cc2a61e8}{dump} (const char $\ast$title)
+\end{DoxyCompactItemize}
+\subsection*{Static Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+static const unsigned \hyperlink{classTrie_a053e1542a5279ab920fa8fa174e9eda9}{MaxBits} = sizeof(Key) $\ast$ 8
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structTrie_1_1Node}{Node} \hyperlink{classTrie_ab0204d8f12b6e8896928382d5274cab0}{head}
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classTrie_a119d09ea5d42aaac788297a445aa0e70}{goesAfter} (\hyperlink{structTrie_1_1Node}{Node} $\ast$$\ast$parent, \hyperlink{structTrie_1_1Node}{Node} $\ast$kid, Key key, Key new\_\-mask)
+\item 
+Key \hyperlink{classTrie_a09c7054156a02051d58b05d11555150a}{extendMask} (Key orig)
+\item 
+\hyperlink{structTrie_1_1Node}{Handle} \hyperlink{classTrie_a23b4df3a07bf7a4232b88548df7689ce}{lookupHandle} (Key key)
+\end{DoxyCompactItemize}
+\subsubsection*{template$<$class Key, class Value$>$ class Trie$<$ Key, Value $>$}
+
+
+
+\subsection{型定義}
+\hypertarget{classTrie_a9c85d428a12b0d5a24c678a5a010b97e}{
+\index{Trie@{Trie}!Handle@{Handle}}
+\index{Handle@{Handle}!Trie@{Trie}}
+\subsubsection[{Handle}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf Node}$\ast$ {\bf Handle}}}
+\label{classTrie_a9c85d428a12b0d5a24c678a5a010b97e}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTrie_afa1796b4255b39148352d11b224a13dc}{
+\index{Trie@{Trie}!Trie@{Trie}}
+\index{Trie@{Trie}!Trie@{Trie}}
+\subsubsection[{Trie}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Trie} ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrie_afa1796b4255b39148352d11b224a13dc}
+
+
+
+\begin{DoxyCode}
+108            : head(0, 0, NULL)
+109     {}
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTrie_ac8bb3912a3ce86b15842e79d0b421204}{
+\index{Trie@{Trie}!clear@{clear}}
+\index{clear@{clear}!Trie@{Trie}}
+\subsubsection[{clear}]{\setlength{\rightskip}{0pt plus 5cm}void clear ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrie_ac8bb3912a3ce86b15842e79d0b421204}
+A method which removes all key/value pairs from the trie. This is more efficient than trying to remove elements individually. 
+
+
+\begin{DoxyCode}
+341     {
+342         head.clear();
+343     }
+\end{DoxyCode}
+\hypertarget{classTrie_acf136bb7c799dc0e3c697a19cc2a61e8}{
+\index{Trie@{Trie}!dump@{dump}}
+\index{dump@{dump}!Trie@{Trie}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}void dump (const char $\ast$ {\em title})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrie_acf136bb7c799dc0e3c697a19cc2a61e8}
+A debugging method which prints the contents of this trie. 
+\begin{DoxyParams}{引数}
+\item[{\em title}]An identifying title to put in the dump header. \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+351     {
+352         cprintf("**************************************************\n");
+353         cprintf("*** Start of Trie: %s\n", title);
+354         cprintf("*** (parent, me, key, mask, value pointer)\n");
+355         cprintf("**************************************************\n");
+356         head.dump(0);
+357     }
+\end{DoxyCode}
+\hypertarget{classTrie_a09c7054156a02051d58b05d11555150a}{
+\index{Trie@{Trie}!extendMask@{extendMask}}
+\index{extendMask@{extendMask}!Trie@{Trie}}
+\subsubsection[{extendMask}]{\setlength{\rightskip}{0pt plus 5cm}Key extendMask (Key {\em orig})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classTrie_a09c7054156a02051d58b05d11555150a}
+A utility method which extends a mask value one more bit towards the lsb. This is almost just a signed right shift, except that the shifted in bits are technically undefined. This is also slightly complicated by the zero case. 
+\begin{DoxyParams}{引数}
+\item[{\em orig}]The original mask to extend. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+The extended mask. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+145     {
+146         // Just in case orig was 0.
+147         const Key msb = ULL(1) << (MaxBits - 1);
+148         return orig | (orig >> 1) | msb;
+149     }
+\end{DoxyCode}
+\hypertarget{classTrie_a119d09ea5d42aaac788297a445aa0e70}{
+\index{Trie@{Trie}!goesAfter@{goesAfter}}
+\index{goesAfter@{goesAfter}!Trie@{Trie}}
+\subsubsection[{goesAfter}]{\setlength{\rightskip}{0pt plus 5cm}bool goesAfter ({\bf Node} $\ast$$\ast$ {\em parent}, \/  {\bf Node} $\ast$ {\em kid}, \/  Key {\em key}, \/  Key {\em new\_\-mask})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classTrie_a119d09ea5d42aaac788297a445aa0e70}
+A utility method which checks whether the key being looked up lies beyond the \hyperlink{structTrie_1_1Node}{Node} being examined. If so, it returns true and advances the node being examined. 
+\begin{DoxyParams}{引数}
+\item[{\em parent}]The node we're currently \char`\"{}at\char`\"{}, which can be updated. \item[{\em kid}]The node we may want to move to. \item[{\em key}]The key we're looking for. \item[{\em new\_\-mask}]The mask to use when matching against the key. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Whether the current \hyperlink{structTrie_1_1Node}{Node} was advanced. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+126     {
+127         if (kid && kid->matches(key) && (kid->mask & new_mask) == kid->mask) {
+128             *parent = kid;
+129             return true;
+130         } else {
+131             return false;
+132         }
+133     }
+\end{DoxyCode}
+\hypertarget{classTrie_ae59d2fa56f1f1cdc960689dd80bd1dbb}{
+\index{Trie@{Trie}!insert@{insert}}
+\index{insert@{insert}!Trie@{Trie}}
+\subsubsection[{insert}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Handle} insert (Key {\em key}, \/  unsigned {\em width}, \/  Value $\ast$ {\em val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrie_ae59d2fa56f1f1cdc960689dd80bd1dbb}
+Method which inserts a key/value pair into the trie. 
+\begin{DoxyParams}{引数}
+\item[{\em key}]The key which can later be used to look up this value. \item[{\em width}]How many bits of the key (from msb) should be used. \item[{\em val}]A pointer to the value to store in the trie. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+A Handle corresponding to this value. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+187     {
+188         // Build a mask which masks off all the bits we don't care about.
+189         Key new_mask = ~(Key)0;
+190         if (width < MaxBits)
+191             new_mask <<= (MaxBits - width);
+192         // Use it to tidy up the key.
+193         key &= new_mask;
+194 
+195         // Walk past all the nodes this new node will be inserted after. They
+196         // can be ignored for the purposes of this function.
+197         Node *node = &head;
+198         while (goesAfter(&node, node->kids[0], key, new_mask) ||
+199                goesAfter(&node, node->kids[1], key, new_mask))
+200         {}
+201         assert(node);
+202 
+203         Key cur_mask = node->mask;
+204         // If we're already where the value needs to be...
+205         if (cur_mask == new_mask) {
+206             assert(!node->value);
+207             node->value = val;
+208             return node;
+209         }
+210 
+211         for (unsigned int i = 0; i < 2; i++) {
+212             Node *&kid = node->kids[i];
+213             Node *new_node;
+214             if (!kid) {
+215                 // No kid. Add a new one.
+216                 new_node = new Node(key, new_mask, val);
+217                 new_node->parent = node;
+218                 kid = new_node;
+219                 return new_node;
+220             }
+221 
+222             // Walk down the leg until something doesn't match or we run out
+223             // of bits.
+224             Key last_mask;
+225             bool done;
+226             do {
+227                 last_mask = cur_mask;
+228                 cur_mask = extendMask(cur_mask);
+229                 done = ((key & cur_mask) != (kid->key & cur_mask)) ||
+230                     last_mask == new_mask;
+231             } while (!done);
+232             cur_mask = last_mask;
+233 
+234             // If this isn't the right leg to go down at all, skip it.
+235             if (cur_mask == node->mask)
+236                 continue;
+237 
+238             // At the point we walked to above, add a new node.
+239             new_node = new Node(key, cur_mask, NULL);
+240             new_node->parent = node;
+241             kid->parent = new_node;
+242             new_node->kids[0] = kid;
+243             kid = new_node;
+244 
+245             // If we ran out of bits, the value goes right here.
+246             if (cur_mask == new_mask) {
+247                 new_node->value = val;
+248                 return new_node;
+249             }
+250 
+251             // Still more bits to deal with, so add a new node for that path.
+252             new_node = new Node(key, new_mask, val);
+253             new_node->parent = kid;
+254             kid->kids[1] = new_node;
+255             return new_node;
+256         }
+257 
+258         panic("Reached the end of the Trie insert function!\n");
+259         return NULL;
+260     }
+\end{DoxyCode}
+\hypertarget{classTrie_acb9c4b2b263f23de8efe4c043e82ea38}{
+\index{Trie@{Trie}!lookup@{lookup}}
+\index{lookup@{lookup}!Trie@{Trie}}
+\subsubsection[{lookup}]{\setlength{\rightskip}{0pt plus 5cm}Value$\ast$ lookup (Key {\em key})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrie_acb9c4b2b263f23de8efe4c043e82ea38}
+Method which looks up the Value corresponding to a particular key. 
+\begin{DoxyParams}{引数}
+\item[{\em key}]The key to look up. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+The first Value matching this key, or NULL if none was found. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+269     {
+270         Node *node = lookupHandle(key);
+271         if (node)
+272             return node->value;
+273         else
+274             return NULL;
+275     }
+\end{DoxyCode}
+\hypertarget{classTrie_a23b4df3a07bf7a4232b88548df7689ce}{
+\index{Trie@{Trie}!lookupHandle@{lookupHandle}}
+\index{lookupHandle@{lookupHandle}!Trie@{Trie}}
+\subsubsection[{lookupHandle}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Handle} lookupHandle (Key {\em key})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classTrie_a23b4df3a07bf7a4232b88548df7689ce}
+Method which looks up the Handle corresponding to a particular key. This is useful if you want to delete the Handle corresponding to a key since the \char`\"{}remove\char`\"{} function takes a Handle as its argument. 
+\begin{DoxyParams}{引数}
+\item[{\em key}]The key to look up. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+The first Handle matching this key, or NULL if none was found. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+160     {
+161         Node *node = &head;
+162         while (node) {
+163             if (node->value)
+164                 return node;
+165 
+166             if (node->kids[0] && node->kids[0]->matches(key))
+167                 node = node->kids[0];
+168             else if (node->kids[1] && node->kids[1]->matches(key))
+169                 node = node->kids[1];
+170             else
+171                 node = NULL;
+172         }
+173 
+174         return NULL;
+175     }
+\end{DoxyCode}
+\hypertarget{classTrie_a0a3ff133d42acb848a9bb45b85b0ba93}{
+\index{Trie@{Trie}!remove@{remove}}
+\index{remove@{remove}!Trie@{Trie}}
+\subsubsection[{remove}]{\setlength{\rightskip}{0pt plus 5cm}Value$\ast$ remove (Key {\em key})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrie_a0a3ff133d42acb848a9bb45b85b0ba93}
+Method to lookup a value from the trie and then delete it. 
+\begin{DoxyParams}{引数}
+\item[{\em key}]The key to look up and then remove. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+The Value pointer from the removed entry, if any. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+328     {
+329         Handle handle = lookupHandle(key);
+330         if (!handle)
+331             return NULL;
+332         return remove(handle);
+333     }
+\end{DoxyCode}
+\hypertarget{classTrie_a9c941ee8c8702adb12e3e404fc275edb}{
+\index{Trie@{Trie}!remove@{remove}}
+\index{remove@{remove}!Trie@{Trie}}
+\subsubsection[{remove}]{\setlength{\rightskip}{0pt plus 5cm}Value$\ast$ remove ({\bf Handle} {\em handle})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classTrie_a9c941ee8c8702adb12e3e404fc275edb}
+Method to delete a value from the trie. 
+\begin{DoxyParams}{引数}
+\item[{\em node}]A Handle to remove. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+The Value pointer from the removed entry. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+284     {
+285         Node *node = handle;
+286         Value *val = node->value;
+287         if (node->kids[1]) {
+288             assert(node->value);
+289             node->value = NULL;
+290             return val;
+291         }
+292         if (!node->parent)
+293             panic("Trie: Can't remove root node.\n");
+294 
+295         Node *parent = node->parent;
+296 
+297         // If there's a kid, fix up it's parent pointer.
+298         if (node->kids[0])
+299             node->kids[0]->parent = parent;
+300         // Figure out which kid we are, and update our parent's pointers.
+301         if (parent->kids[0] == node)
+302             parent->kids[0] = node->kids[0];
+303         else if (parent->kids[1] == node)
+304             parent->kids[1] = node->kids[0];
+305         else
+306             panic("Trie: Inconsistent parent/kid relationship.\n");
+307         // Make sure if the parent only has one kid, it's kid[0].
+308         if (parent->kids[1] && !parent->kids[0]) {
+309             parent->kids[0] = parent->kids[1];
+310             parent->kids[1] = NULL;
+311         }
+312 
+313         // If the parent has less than two kids and no cargo and isn't the
+314         // root, delete it too.
+315         if (!parent->kids[1] && !parent->value && parent->parent)
+316             remove(parent);
+317         delete node;
+318         return val;
+319     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classTrie_ab0204d8f12b6e8896928382d5274cab0}{
+\index{Trie@{Trie}!head@{head}}
+\index{head@{head}!Trie@{Trie}}
+\subsubsection[{head}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Node} {\bf head}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrie_ab0204d8f12b6e8896928382d5274cab0}
+\hypertarget{classTrie_a053e1542a5279ab920fa8fa174e9eda9}{
+\index{Trie@{Trie}!MaxBits@{MaxBits}}
+\index{MaxBits@{MaxBits}!Trie@{Trie}}
+\subsubsection[{MaxBits}]{\setlength{\rightskip}{0pt plus 5cm}const unsigned {\bf MaxBits} = sizeof(Key) $\ast$ 8\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classTrie_a053e1542a5279ab920fa8fa174e9eda9}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{trie_8hh}{trie.hh}\end{DoxyCompactItemize}

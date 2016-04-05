@@ -1,0 +1,120 @@
+\hypertarget{refcnttest_8cc}{
+\section{unittest/refcnttest.cc}
+\label{refcnttest_8cc}\index{unittest/refcnttest.cc@{unittest/refcnttest.cc}}
+}
+{\ttfamily \#include $<$cassert$>$}\par
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include $<$list$>$}\par
+{\ttfamily \#include \char`\"{}base/cprintf.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/refcnt.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}unittest/unittest.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{refcnttest_8cc_ae66f6b31b5ad750f1fe042a706a4e3d4}{main} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{refcnttest_8cc_ae66f6b31b5ad750f1fe042a706a4e3d4}{
+\index{refcnttest.cc@{refcnttest.cc}!main@{main}}
+\index{main@{main}!refcnttest.cc@{refcnttest.cc}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main ()}}
+\label{refcnttest_8cc_ae66f6b31b5ad750f1fe042a706a4e3d4}
+
+
+
+\begin{DoxyCode}
+103 {
+104     assert(live() == 0);
+105     assert(liveChange() == 0);
+106 
+107     // Create an empty Ptr and verify it's data pointer is NULL.
+108     setCase("NULL check");
+109     Ptr nullCheck;
+110     EXPECT_EQ(nullCheck.get(), NULL);
+111 
+112     EXPECT_EQ(liveChange(), 0);
+113 
+114     // Construct a Ptr from a TestRC pointer.
+115     setCase("construction from pointer");
+116     Ptr constFromPointer = new TestRC("construction from pointer");
+117 
+118     EXPECT_EQ(liveChange(), 1);
+119 
+120     // Construct a Ptr from an existing Ptr.
+121     setCase("construction from a Ptr");
+122     Ptr constFromPtr = constFromPointer;
+123 
+124     EXPECT_EQ(liveChange(), 0);
+125 
+126     // Test a Ptr being destroyed.
+127     setCase("destroying a Ptr");
+128     Ptr *ptrPtr = new Ptr(new TestRC("destroying a ptr"));
+129     EXPECT_EQ(liveChange(), 1);
+130     delete ptrPtr;
+131     EXPECT_EQ(liveChange(), -1);
+132 
+133     // Test assignment from a pointer and from a Ptr.
+134     setCase("assignment operators");
+135     Ptr assignmentTarget;
+136     TestRC *assignmentSourcePointer = new TestRC("assignment source 1");
+137     EXPECT_EQ(liveChange(), 1);
+138     assignmentTarget = assignmentSourcePointer;
+139     EXPECT_EQ(liveChange(), 0);
+140     assignmentTarget = NULL;
+141     EXPECT_EQ(liveChange(), -1);
+142     Ptr assignmentSourcePtr(new TestRC("assignment source 2"));
+143     EXPECT_EQ(liveChange(), 1);
+144     assignmentTarget = assignmentSourcePtr;
+145     EXPECT_EQ(liveChange(), 0);
+146     assignmentSourcePtr = NULL;
+147     EXPECT_EQ(liveChange(), 0);
+148     assignmentTarget = NULL;
+149     EXPECT_EQ(liveChange(), -1);
+150 
+151     // Test access to members of the pointed to class and dereferencing.
+152     setCase("access to members");
+153     TestRC *accessTest = new TestRC("access test");
+154     Ptr accessTestPtr = accessTest;
+155     accessTest->testVal = 1;
+156     EXPECT_EQ(accessTestPtr->testVal, 1);
+157     EXPECT_EQ((*accessTestPtr).testVal, 1);
+158     accessTest->testVal = 2;
+159     EXPECT_EQ(accessTestPtr->testVal, 2);
+160     EXPECT_EQ((*accessTestPtr).testVal, 2);
+161     accessTestPtr->testVal = 3;
+162     EXPECT_EQ(accessTest->testVal, 3);
+163     (*accessTestPtr).testVal = 4;
+164     EXPECT_EQ(accessTest->testVal, 4);
+165     accessTestPtr = NULL;
+166     accessTest = NULL;
+167     EXPECT_EQ(liveChange(), 0);
+168 
+169     // Test bool and ! operator overloads.
+170     setCase("conversion to bool and ! overload");
+171     Ptr boolTest = new TestRC("bool test");
+172     EXPECT_EQ(boolTest, true);
+173     EXPECT_EQ(!boolTest, false);
+174     boolTest = NULL;
+175     EXPECT_EQ(boolTest, false);
+176     EXPECT_EQ(!boolTest, true);
+177     EXPECT_EQ(liveChange(), 0);
+178 
+179     // Test the equality operators.
+180     setCase("equality operators");
+181     TestRC *equalTestA = new TestRC("equal test a");
+182     Ptr equalTestAPtr = equalTestA;
+183     Ptr equalTestAPtr2 = equalTestA;
+184     TestRC *equalTestB = new TestRC("equal test b");
+185     Ptr equalTestBPtr = equalTestB;
+186     EXPECT_TRUE(equalTestA == equalTestAPtr);
+187     EXPECT_TRUE(equalTestAPtr == equalTestA);
+188     EXPECT_TRUE(equalTestAPtr == equalTestAPtr2);
+189     EXPECT_TRUE(equalTestA != equalTestBPtr);
+190     EXPECT_TRUE(equalTestAPtr != equalTestB);
+191     EXPECT_TRUE(equalTestAPtr != equalTestBPtr);
+192 
+193     return UnitTest::printResults();
+194 }
+\end{DoxyCode}

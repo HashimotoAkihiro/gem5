@@ -1,0 +1,102 @@
+\hypertarget{simulate_8hh}{
+\section{sim/simulate.hh}
+\label{simulate_8hh}\index{sim/simulate.hh@{sim/simulate.hh}}
+}
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-events.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classGlobalSimLoopExitEvent}{GlobalSimLoopExitEvent} $\ast$ \hyperlink{simulate_8hh_ad45dde1b8c7dd383b7534bcc6ed456ec}{simulate} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} num\_\-cycles=\hyperlink{base_2types_8hh_abe940b1b328825e234da719447e15ca5}{MaxTick})
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{simulate_8hh_ad45dde1b8c7dd383b7534bcc6ed456ec}{
+\index{simulate.hh@{simulate.hh}!simulate@{simulate}}
+\index{simulate@{simulate}!simulate.hh@{simulate.hh}}
+\subsubsection[{simulate}]{\setlength{\rightskip}{0pt plus 5cm}{\bf GlobalSimLoopExitEvent}$\ast$ simulate ({\bf Tick} {\em num\_\-cycles})}}
+\label{simulate_8hh_ad45dde1b8c7dd383b7534bcc6ed456ec}
+Simulate for num\_\-cycles additional cycles. If num\_\-cycles is -\/1 (the default), do not limit simulation; some other event must terminate the loop. Exported to Python via SWIG. \begin{DoxyReturn}{戻り値}
+The SimLoopExitEvent that caused the loop to exit. 
+\end{DoxyReturn}
+
+
+Delete the simulation quantum event. 
+
+
+\begin{DoxyCode}
+81 {
+82     // The first time simulate() is called from the Python code, we need to
+83     // create a thread for each of event queues referenced by the
+84     // instantiated sim objects.
+85     static bool threads_initialized = false;
+86     static std::vector<std::thread *> threads;
+87 
+88     if (!threads_initialized) {
+89         threadBarrier = new Barrier(numMainEventQueues);
+90 
+91         // the main thread (the one we're currently running on)
+92         // handles queue 0, so we only need to allocate new threads
+93         // for queues 1..N-1.  We'll call these the "subordinate" threads.
+94         for (uint32_t i = 1; i < numMainEventQueues; i++) {
+95             threads.push_back(new std::thread(thread_loop, mainEventQueue[i]));
+96         }
+97 
+98         threads_initialized = true;
+99     }
+100 
+101     inform("Entering event queue @ %d.  Starting simulation...\n", curTick());
+102 
+103     if (num_cycles < MaxTick - curTick())
+104         num_cycles = curTick() + num_cycles;
+105     else // counter would roll over or be set to MaxTick anyhow
+106         num_cycles = MaxTick;
+107 
+108     GlobalEvent *limit_event = new GlobalSimLoopExitEvent(num_cycles,
+109                                 "simulate() limit reached", 0, 0);
+110 
+111     GlobalSyncEvent *quantum_event = NULL;
+112     if (numMainEventQueues > 1) {
+113         if (simQuantum == 0) {
+114             fatal("Quantum for multi-eventq simulation not specified");
+115         }
+116 
+117         quantum_event = new GlobalSyncEvent(curTick() + simQuantum, simQuantum,
+118                             EventBase::Progress_Event_Pri, 0);
+119 
+120         inParallelMode = true;
+121     }
+122 
+123     // all subordinate (created) threads should be waiting on the
+124     // barrier; the arrival of the main thread here will satisfy the
+125     // barrier, and all threads will enter doSimLoop in parallel
+126     threadBarrier->wait();
+127     Event *local_event = doSimLoop(mainEventQueue[0]);
+128     assert(local_event != NULL);
+129 
+130     inParallelMode = false;
+131 
+132     // locate the global exit event and return it to Python
+133     BaseGlobalEvent *global_event = local_event->globalEvent();
+134     assert(global_event != NULL);
+135 
+136     GlobalSimLoopExitEvent *global_exit_event =
+137         dynamic_cast<GlobalSimLoopExitEvent *>(global_event);
+138     assert(global_exit_event != NULL);
+139 
+140     // if we didn't hit limit_event, delete it.
+141     if (global_exit_event != limit_event) {
+142         assert(limit_event->scheduled());
+143         limit_event->deschedule();
+144         delete limit_event;
+145     }
+146 
+148     if (quantum_event != NULL) {
+149         quantum_event->deschedule();
+150         delete quantum_event;
+151     }
+152 
+153     return global_exit_event;
+154 }
+\end{DoxyCode}

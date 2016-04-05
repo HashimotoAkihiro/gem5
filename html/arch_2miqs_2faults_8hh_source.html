@@ -1,0 +1,341 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/miqs/faults.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/miqs/faults.hh</h1><a href="arch_2miqs_2faults_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2003-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2007 MIPS Technologies, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00007"></a>00007 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00008"></a>00008 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00009"></a>00009 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00010"></a>00010 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00011"></a>00011 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00012"></a>00012 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00013"></a>00013 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00014"></a>00014 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00015"></a>00015 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00018"></a>00018 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00019"></a>00019 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00020"></a>00020 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00021"></a>00021 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00022"></a>00022 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00023"></a>00023 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00024"></a>00024 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00025"></a>00025 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00026"></a>00026 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00027"></a>00027 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00030"></a>00030 <span class="comment"> *          Korey Sewell</span>
+<a name="l00031"></a>00031 <span class="comment"> *          Jaidev Patwardhan</span>
+<a name="l00032"></a>00032 <span class="comment"> *          Zhengxing Li</span>
+<a name="l00033"></a>00033 <span class="comment"> *          Deyuan Guo</span>
+<a name="l00034"></a>00034 <span class="comment"> */</span>
+<a name="l00035"></a>00035 
+<a name="l00036"></a>00036 <span class="preprocessor">#ifndef __MIPS_FAULTS_HH__</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span><span class="preprocessor">#define __MIPS_FAULTS_HH__</span>
+<a name="l00038"></a>00038 <span class="preprocessor"></span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="mips_2pra__constants_8hh.html">arch/mips/pra_constants.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="thread__context_8hh.html">cpu/thread_context.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;debug/MipsPRA.hh&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="sim_2faults_8hh.html">sim/faults.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="full__system_8hh.html">sim/full_system.hh</a>&quot;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="keyword">namespace </span>MipsISA
+<a name="l00046"></a>00046 {
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="keyword">typedef</span> <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#a5c26c9764cc05486454998efadf79833">FaultVect</a>;
+<a name="l00049"></a>00049 
+<a name="l00050"></a><a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">00050</a> <span class="keyword">enum</span> <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">ExcCode</a> {
+<a name="l00051"></a>00051     <span class="comment">// A dummy value to use when the code isn&apos;t defined or doesn&apos;t matter.</span>
+<a name="l00052"></a>00052     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4ae755cb1bc5837466d3b27bd12b5c06b3">ExcCodeDummy</a> = 0,
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a3c943598c12d27984a15e1af7b4aa238">ExcCodeInt</a> = 0,
+<a name="l00055"></a>00055     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a22ded6b1dd00d5387929ac2d357e0c62">ExcCodeMod</a> = 1,
+<a name="l00056"></a>00056     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4aead7e6d68e9e4bb0b9da34c0639c7574">ExcCodeTlbL</a> = 2,
+<a name="l00057"></a>00057     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a5b4d5d68f22c53c153e4043d7814eeb4">ExcCodeTlbS</a> = 3,
+<a name="l00058"></a>00058     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a88c8626de76621519043428a669f8428">ExcCodeAdEL</a> = 4,
+<a name="l00059"></a>00059     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4abedfbe894e97dcc3af2409032d2f41a0">ExcCodeAdES</a> = 5,
+<a name="l00060"></a>00060     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4aa6c6e25047e2925aa1dac5fb15016ba1">ExcCodeIBE</a> = 6,
+<a name="l00061"></a>00061     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a85f2ac2cb1fdd0c42a93e51ed4246189">ExcCodeDBE</a> = 7,
+<a name="l00062"></a>00062     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4af3d90d688c82f9748f512de065d11867">ExcCodeSys</a> = 8,
+<a name="l00063"></a>00063     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a7b3697d781cd0db707834b2bb53bd827">ExcCodeBp</a> = 9,
+<a name="l00064"></a>00064     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4ac4e1012c7a50bac4f77659aa1d74f7b6">ExcCodeRI</a> = 10,
+<a name="l00065"></a>00065     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a551171a5da226246b5531b81b1b004d1">ExcCodeCpU</a> = 11,
+<a name="l00066"></a>00066     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a03cfe0fdb20fb915a732611a1fb1fcd6">ExcCodeOv</a> = 12,
+<a name="l00067"></a>00067     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a44790335bbdd6c0676c33451ea06cab8">ExcCodeTr</a> = 13,
+<a name="l00068"></a>00068     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a58a6a6e65e3e3b00d734aad8a31f0494">ExcCodeC2E</a> = 18,
+<a name="l00069"></a>00069     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4ae01827ff47490fa5c78b0db611874a8b">ExcCodeMDMX</a> = 22,
+<a name="l00070"></a>00070     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a4e56fc38462753d0857a59296f0adaee">ExcCodeWatch</a> = 23,
+<a name="l00071"></a>00071     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a7ad9e166669807776748fa26d5d0be13">ExcCodeMCheck</a> = 24,
+<a name="l00072"></a>00072     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a023acb7f13ba7dbffe8164269a921f40">ExcCodeThread</a> = 25,
+<a name="l00073"></a>00073     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4af2545e394c9e9232ba11ed2e4987c51c">ExcCodeCacheErr</a> = 30
+<a name="l00074"></a>00074 };
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076 <span class="keyword">class </span>MipsFaultBase : <span class="keyword">public</span> <a class="code" href="classFaultBase.html">FaultBase</a>
+<a name="l00077"></a>00077 {
+<a name="l00078"></a>00078   <span class="keyword">public</span>:
+<a name="l00079"></a>00079     <span class="keyword">struct </span><a class="code" href="namespaceMipsISA.html#a76768ab93f86c2f9bfab9c40269382e7">FaultVals</a>
+<a name="l00080"></a>00080     {
+<a name="l00081"></a>00081         <span class="keyword">const</span> <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="structMipsISA_1_1MipsFaultBase_1_1FaultVals.html#a4d488474632193509a5a7521b4cf58f4">name</a>;
+<a name="l00082"></a>00082         <span class="keyword">const</span> <a class="code" href="namespaceMipsISA.html#a5c26c9764cc05486454998efadf79833">FaultVect</a> <a class="code" href="structMipsISA_1_1MipsFaultBase_1_1FaultVals.html#adad67944c52549a8b44faffafaa9c48f">offset</a>;
+<a name="l00083"></a>00083         <span class="keyword">const</span> <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">ExcCode</a> <a class="code" href="structMipsISA_1_1MipsFaultBase_1_1FaultVals.html#a6aa6b7adf49ca7d5de189897465cfccd">code</a>;
+<a name="l00084"></a>00084     };
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086     <span class="keywordtype">void</span> <a class="code" href="classMipsISA_1_1MipsFaultBase.html#a8254d2aa7a98db60b019665d8542442c">setExceptionState</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *, uint8_t);
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088     <span class="keyword">virtual</span> <a class="code" href="namespaceMipsISA.html#a5c26c9764cc05486454998efadf79833">FaultVect</a> <a class="code" href="classMipsISA_1_1MipsFaultBase.html#abc58e13990620c35409a5eaf15679c3c">offset</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) <span class="keyword">const</span> = 0;
+<a name="l00089"></a>00089     <span class="keyword">virtual</span> <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">ExcCode</a> <a class="code" href="classMipsISA_1_1MipsFaultBase.html#a61bd3af5e2aa0d5447807e9fe98769be">code</a>() <span class="keyword">const</span> = 0;
+<a name="l00090"></a><a class="code" href="classMipsISA_1_1MipsFaultBase.html#aeffc2acfc2e831414e517e76995fc6d5">00090</a>     <span class="keyword">virtual</span> <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classMipsISA_1_1MipsFaultBase.html#aeffc2acfc2e831414e517e76995fc6d5">base</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const</span>
+<a name="l00091"></a>00091 <span class="keyword">    </span>{
+<a name="l00092"></a>00092         StatusReg <a class="code" href="namespaceArmISA.html#a566327436c4c7e7a63ab9ac137e9d50e">status</a> = tc-&gt;<a class="code" href="classThreadContext.html#a6888f4bff21e34892e59654ea80073b2">readMiscReg</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67a60c18a64af42f01df36fbc004844c7e2">MISCREG_STATUS</a>);
+<a name="l00093"></a>00093         <span class="keywordflow">if</span> (!status.bev)
+<a name="l00094"></a>00094             <span class="keywordflow">return</span> tc-&gt;<a class="code" href="classThreadContext.html#a6888f4bff21e34892e59654ea80073b2">readMiscReg</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67a89237c2272298bb0d6e0f02a0cc67b70">MISCREG_EBASE</a>);
+<a name="l00095"></a>00095         <span class="keywordflow">else</span>
+<a name="l00096"></a>00096             <span class="keywordflow">return</span> 0xbfc00200;
+<a name="l00097"></a>00097     }
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a>
+<a name="l00100"></a><a class="code" href="classMipsISA_1_1MipsFaultBase.html#a1052109661a1cc9f7847b80b8b98450b">00100</a>     <a class="code" href="classMipsISA_1_1MipsFaultBase.html#a1052109661a1cc9f7847b80b8b98450b">vect</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const</span>
+<a name="l00101"></a>00101 <span class="keyword">    </span>{
+<a name="l00102"></a>00102         <span class="keywordflow">return</span> <a class="code" href="classMipsISA_1_1MipsFaultBase.html#aeffc2acfc2e831414e517e76995fc6d5">base</a>(tc) + <a class="code" href="classMipsISA_1_1MipsFaultBase.html#abc58e13990620c35409a5eaf15679c3c">offset</a>(tc);
+<a name="l00103"></a>00103     }
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classMipsISA_1_1MipsFaultBase.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00106"></a>00106             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00107"></a>00107 };
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
+<a name="l00110"></a>00110 <span class="keyword">class </span>MipsFault : <span class="keyword">public</span> MipsFaultBase
+<a name="l00111"></a>00111 {
+<a name="l00112"></a>00112   <span class="keyword">protected</span>:
+<a name="l00113"></a>00113     <span class="keyword">static</span> <a class="code" href="namespaceMipsISA.html#a76768ab93f86c2f9bfab9c40269382e7">FaultVals</a> <a class="code" href="classMipsISA_1_1MipsFault.html#a8b3c2006cfd550d551232a82b397bbca">vals</a>;
+<a name="l00114"></a>00114   <span class="keyword">public</span>:
+<a name="l00115"></a><a class="code" href="classMipsISA_1_1MipsFault.html#a73adb23259baf912a81683a9790a303f">00115</a>     <a class="code" href="sim_2faults_8hh.html#abb196df64725e5c2568c900cf130d8d7">FaultName</a> <a class="code" href="classMipsISA_1_1MipsFault.html#a73adb23259baf912a81683a9790a303f">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classMipsISA_1_1MipsFault.html#a8b3c2006cfd550d551232a82b397bbca">vals</a>.<a class="code" href="structMipsISA_1_1MipsFaultBase_1_1FaultVals.html#a4d488474632193509a5a7521b4cf58f4">name</a>; }
+<a name="l00116"></a><a class="code" href="classMipsISA_1_1MipsFault.html#a9c059b781f653170e9da1d520c6d96b1">00116</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a> <a class="code" href="classMipsISA_1_1MipsFault.html#a9c059b781f653170e9da1d520c6d96b1">offset</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classMipsISA_1_1MipsFault.html#a8b3c2006cfd550d551232a82b397bbca">vals</a>.<a class="code" href="structMipsISA_1_1MipsFaultBase_1_1FaultVals.html#adad67944c52549a8b44faffafaa9c48f">offset</a>; }
+<a name="l00117"></a><a class="code" href="classMipsISA_1_1MipsFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">00117</a>     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">ExcCode</a> <a class="code" href="classMipsISA_1_1MipsFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">code</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classMipsISA_1_1MipsFault.html#a8b3c2006cfd550d551232a82b397bbca">vals</a>.<a class="code" href="structMipsISA_1_1MipsFaultBase_1_1FaultVals.html#a6aa6b7adf49ca7d5de189897465cfccd">code</a>; }
+<a name="l00118"></a>00118 };
+<a name="l00119"></a>00119 
+<a name="l00120"></a>00120 <span class="keyword">class </span>SystemCallFault : <span class="keyword">public</span> MipsFault&lt;SystemCallFault&gt; {};
+<a name="l00121"></a>00121 <span class="keyword">class </span>ReservedInstructionFault : <span class="keyword">public</span> MipsFault&lt;ReservedInstructionFault&gt; {};
+<a name="l00122"></a>00122 <span class="keyword">class </span>ThreadFault : <span class="keyword">public</span> MipsFault&lt;ThreadFault&gt; {};
+<a name="l00123"></a>00123 <span class="keyword">class </span>IntegerOverflowFault : <span class="keyword">public</span> MipsFault&lt;IntegerOverflowFault&gt; {};
+<a name="l00124"></a>00124 <span class="keyword">class </span>TrapFault : <span class="keyword">public</span> MipsFault&lt;TrapFault&gt; {};
+<a name="l00125"></a>00125 <span class="keyword">class </span>BreakpointFault : <span class="keyword">public</span> MipsFault&lt;BreakpointFault&gt; {};
+<a name="l00126"></a>00126 <span class="keyword">class </span>DspStateDisabledFault : <span class="keyword">public</span> MipsFault&lt;DspStateDisabledFault&gt; {};
+<a name="l00127"></a>00127 
+<a name="l00128"></a>00128 <span class="keyword">class </span>MachineCheckFault : <span class="keyword">public</span> MipsFault&lt;MachineCheckFault&gt;
+<a name="l00129"></a>00129 {
+<a name="l00130"></a>00130   <span class="keyword">public</span>:
+<a name="l00131"></a><a class="code" href="classMipsISA_1_1MachineCheckFault.html#aeb744a50ac5af95578632b1024bded5e">00131</a>     <span class="keywordtype">bool</span> <a class="code" href="classMipsISA_1_1MachineCheckFault.html#aeb744a50ac5af95578632b1024bded5e">isMachineCheckFault</a>() { <span class="keywordflow">return</span> <span class="keyword">true</span>; }
+<a name="l00132"></a>00132 };
+<a name="l00133"></a>00133 
+<a name="l00134"></a>00134 <span class="keyword">class </span>ResetFault : <span class="keyword">public</span> MipsFault&lt;ResetFault&gt;
+<a name="l00135"></a>00135 {
+<a name="l00136"></a>00136   <span class="keyword">public</span>:
+<a name="l00137"></a>00137     <span class="keywordtype">void</span> <a class="code" href="classMipsISA_1_1ResetFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00138"></a>00138             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00139"></a>00139 
+<a name="l00140"></a>00140 };
+<a name="l00141"></a>00141 
+<a name="l00142"></a>00142 <span class="keyword">class </span>SoftResetFault : <span class="keyword">public</span> MipsFault&lt;SoftResetFault&gt;
+<a name="l00143"></a>00143 {
+<a name="l00144"></a>00144   <span class="keyword">public</span>:
+<a name="l00145"></a>00145     <span class="keywordtype">void</span> <a class="code" href="classMipsISA_1_1SoftResetFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00146"></a>00146             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00147"></a>00147 };
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149 <span class="keyword">class </span>NonMaskableInterrupt : <span class="keyword">public</span> MipsFault&lt;NonMaskableInterrupt&gt;
+<a name="l00150"></a>00150 {
+<a name="l00151"></a>00151   <span class="keyword">public</span>:
+<a name="l00152"></a>00152     <span class="keywordtype">void</span> <a class="code" href="classMipsISA_1_1NonMaskableInterrupt.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00153"></a>00153             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>);
+<a name="l00154"></a>00154 };
+<a name="l00155"></a>00155 
+<a name="l00156"></a>00156 <span class="keyword">class </span>CoprocessorUnusableFault : <span class="keyword">public</span> MipsFault&lt;CoprocessorUnusableFault&gt;
+<a name="l00157"></a>00157 {
+<a name="l00158"></a>00158   <span class="keyword">protected</span>:
+<a name="l00159"></a>00159     <span class="keywordtype">int</span> <a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a29d755205150fee078e98a57e96d2ca1">coProcID</a>;
+<a name="l00160"></a>00160   <span class="keyword">public</span>:
+<a name="l00161"></a><a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a54e55aef7779800eaf4b25f8f6fc571a">00161</a>     <a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a54e55aef7779800eaf4b25f8f6fc571a">CoprocessorUnusableFault</a>(<span class="keywordtype">int</span> _procid) : <a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a29d755205150fee078e98a57e96d2ca1">coProcID</a>(_procid)
+<a name="l00162"></a>00162     {}
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164     <span class="keywordtype">void</span>
+<a name="l00165"></a><a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a2bd783b42262278d41157d428e1f8d6f">00165</a>     <a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00166"></a>00166             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>)
+<a name="l00167"></a>00167     {
+<a name="l00168"></a>00168         <a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a2bd783b42262278d41157d428e1f8d6f">MipsFault&lt;CoprocessorUnusableFault&gt;::invoke</a>(tc, inst);
+<a name="l00169"></a>00169         <span class="keywordflow">if</span> (<a class="code" href="full__system_8hh.html#af929576af6f85c8849704b66d04b8370">FullSystem</a>) {
+<a name="l00170"></a>00170             CauseReg cause = tc-&gt;<a class="code" href="classThreadContext.html#a6888f4bff21e34892e59654ea80073b2">readMiscReg</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67adedba9e24de31d1067d91b43d2ec51ae">MISCREG_CAUSE</a>);
+<a name="l00171"></a>00171             cause.ce = <a class="code" href="classMipsISA_1_1CoprocessorUnusableFault.html#a29d755205150fee078e98a57e96d2ca1">coProcID</a>;
+<a name="l00172"></a>00172             tc-&gt;<a class="code" href="classThreadContext.html#a2987c1ff22ebdf6cdf354a31462bdbfb">setMiscRegNoEffect</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67adedba9e24de31d1067d91b43d2ec51ae">MISCREG_CAUSE</a>, cause);
+<a name="l00173"></a>00173         }
+<a name="l00174"></a>00174     }
+<a name="l00175"></a>00175 };
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177 <span class="keyword">class </span>InterruptFault : <span class="keyword">public</span> MipsFault&lt;InterruptFault&gt;
+<a name="l00178"></a>00178 {
+<a name="l00179"></a>00179   <span class="keyword">public</span>:
+<a name="l00180"></a>00180     <a class="code" href="namespaceMipsISA.html#a5c26c9764cc05486454998efadf79833">FaultVect</a>
+<a name="l00181"></a><a class="code" href="classMipsISA_1_1InterruptFault.html#a9c059b781f653170e9da1d520c6d96b1">00181</a>     <a class="code" href="classMipsISA_1_1InterruptFault.html#a9c059b781f653170e9da1d520c6d96b1">offset</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const</span>
+<a name="l00182"></a>00182 <span class="keyword">    </span>{
+<a name="l00183"></a>00183         CauseReg cause = tc-&gt;<a class="code" href="classThreadContext.html#a93c9c97261cb7289d5976b8222f70c4c">readMiscRegNoEffect</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67adedba9e24de31d1067d91b43d2ec51ae">MISCREG_CAUSE</a>);
+<a name="l00184"></a>00184         <span class="comment">// offset 0x200 for release 2, 0x180 for release 1.</span>
+<a name="l00185"></a>00185         <span class="keywordflow">return</span> cause.iv ? 0x200 : 0x180;
+<a name="l00186"></a>00186     }
+<a name="l00187"></a>00187 };
+<a name="l00188"></a>00188 
+<a name="l00189"></a>00189 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
+<a name="l00190"></a>00190 <span class="keyword">class </span>AddressFault : <span class="keyword">public</span> MipsFault&lt;T&gt;
+<a name="l00191"></a>00191 {
+<a name="l00192"></a>00192   <span class="keyword">protected</span>:
+<a name="l00193"></a>00193     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classMipsISA_1_1AddressFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>;
+<a name="l00194"></a>00194     <span class="keywordtype">bool</span> <a class="code" href="classMipsISA_1_1AddressFault.html#a86c0e52eeb2243d66bc032096c160a0b">store</a>;
+<a name="l00195"></a>00195 
+<a name="l00196"></a><a class="code" href="classMipsISA_1_1AddressFault.html#a41d5cd77142b61159baea077490c4101">00196</a>     <a class="code" href="classMipsISA_1_1AddressFault.html#a41d5cd77142b61159baea077490c4101">AddressFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _vaddr, <span class="keywordtype">bool</span> _store) : <a class="code" href="classMipsISA_1_1AddressFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>(_vaddr), <a class="code" href="classMipsISA_1_1AddressFault.html#a86c0e52eeb2243d66bc032096c160a0b">store</a>(_store)
+<a name="l00197"></a>00197     {}
+<a name="l00198"></a>00198 
+<a name="l00199"></a>00199     <span class="keywordtype">void</span>
+<a name="l00200"></a><a class="code" href="classMipsISA_1_1AddressFault.html#a2bd783b42262278d41157d428e1f8d6f">00200</a>     <a class="code" href="classMipsISA_1_1AddressFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00201"></a>00201             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>)
+<a name="l00202"></a>00202     {
+<a name="l00203"></a>00203         <a class="code" href="classMipsISA_1_1AddressFault.html#a2bd783b42262278d41157d428e1f8d6f">MipsFault&lt;T&gt;::invoke</a>(tc, inst);
+<a name="l00204"></a>00204         <span class="keywordflow">if</span> (<a class="code" href="full__system_8hh.html#af929576af6f85c8849704b66d04b8370">FullSystem</a>)
+<a name="l00205"></a>00205             tc-&gt;<a class="code" href="classThreadContext.html#a2987c1ff22ebdf6cdf354a31462bdbfb">setMiscRegNoEffect</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67aca0cfef2309f73b14525d1a2e8f7b1d3">MISCREG_BADVADDR</a>, <a class="code" href="classMipsISA_1_1AddressFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>);
+<a name="l00206"></a>00206     }
+<a name="l00207"></a>00207 };
+<a name="l00208"></a>00208 
+<a name="l00209"></a>00209 <span class="keyword">class </span>AddressErrorFault : <span class="keyword">public</span> AddressFault&lt;AddressErrorFault&gt;
+<a name="l00210"></a>00210 {
+<a name="l00211"></a>00211   <span class="keyword">public</span>:
+<a name="l00212"></a><a class="code" href="classMipsISA_1_1AddressErrorFault.html#a63571998d6c69ae9fc079f7bded37b9d">00212</a>     <a class="code" href="classMipsISA_1_1AddressErrorFault.html#a63571998d6c69ae9fc079f7bded37b9d">AddressErrorFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _vaddr, <span class="keywordtype">bool</span> _store) :
+<a name="l00213"></a>00213         <a class="code" href="classMipsISA_1_1AddressFault.html">AddressFault</a>&lt;<a class="code" href="classMipsISA_1_1AddressErrorFault.html">AddressErrorFault</a>&gt;(_vaddr, _store)
+<a name="l00214"></a>00214     {}
+<a name="l00215"></a>00215 
+<a name="l00216"></a>00216     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">ExcCode</a>
+<a name="l00217"></a><a class="code" href="classMipsISA_1_1AddressErrorFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">00217</a>     <a class="code" href="classMipsISA_1_1AddressErrorFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">code</a>()<span class="keyword"> const</span>
+<a name="l00218"></a>00218 <span class="keyword">    </span>{
+<a name="l00219"></a>00219         <span class="keywordflow">return</span> <a class="code" href="classMipsISA_1_1AddressFault.html#a86c0e52eeb2243d66bc032096c160a0b">store</a> ? <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4abedfbe894e97dcc3af2409032d2f41a0">ExcCodeAdES</a> : <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a88c8626de76621519043428a669f8428">ExcCodeAdEL</a>;
+<a name="l00220"></a>00220     }
+<a name="l00221"></a>00221 
+<a name="l00222"></a>00222 };
+<a name="l00223"></a>00223 
+<a name="l00224"></a>00224 <span class="keyword">template</span> &lt;<span class="keyword">typename</span> T&gt;
+<a name="l00225"></a>00225 <span class="keyword">class </span>TlbFault : <span class="keyword">public</span> AddressFault&lt;T&gt;
+<a name="l00226"></a>00226 {
+<a name="l00227"></a>00227   <span class="keyword">protected</span>:
+<a name="l00228"></a>00228     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#a3bd75b410169a5c0e356fda4d021e49c">asid</a>;
+<a name="l00229"></a>00229     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a>;
+<a name="l00230"></a>00230 
+<a name="l00231"></a><a class="code" href="classMipsISA_1_1TlbFault.html#ad6702f244bca94847f8907ae0084f7cc">00231</a>     <a class="code" href="classMipsISA_1_1TlbFault.html#ad6702f244bca94847f8907ae0084f7cc">TlbFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _asid, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _vaddr, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _vpn, <span class="keywordtype">bool</span> _store) :
+<a name="l00232"></a>00232         <a class="code" href="classMipsISA_1_1AddressFault.html">AddressFault</a>&lt;T&gt;(_vaddr, _store), <a class="code" href="classMipsISA_1_1TlbFault.html#a3bd75b410169a5c0e356fda4d021e49c">asid</a>(_asid), <a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a>(_vpn)
+<a name="l00233"></a>00233     {}
+<a name="l00234"></a>00234 
+<a name="l00235"></a>00235     <span class="keywordtype">void</span>
+<a name="l00236"></a><a class="code" href="classMipsISA_1_1TlbFault.html#a063e32df265a515397ce13a84a741fed">00236</a>     <a class="code" href="classMipsISA_1_1TlbFault.html#a063e32df265a515397ce13a84a741fed">setTlbExceptionState</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, uint8_t <a class="code" href="namespaceMipsISA.html#a9125816703baa612f861e8efd7a5d567">excCode</a>)
+<a name="l00237"></a>00237     {
+<a name="l00238"></a>00238         this-&gt;<a class="code" href="classMipsISA_1_1MipsFaultBase.html#a8254d2aa7a98db60b019665d8542442c">setExceptionState</a>(tc, excCode);
+<a name="l00239"></a>00239 
+<a name="l00240"></a>00240         tc-&gt;<a class="code" href="classThreadContext.html#a2987c1ff22ebdf6cdf354a31462bdbfb">setMiscRegNoEffect</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67aca0cfef2309f73b14525d1a2e8f7b1d3">MISCREG_BADVADDR</a>, this-&gt;<a class="code" href="classMipsISA_1_1AddressFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>);
+<a name="l00241"></a>00241         EntryHiReg entryHi = tc-&gt;<a class="code" href="classThreadContext.html#a6888f4bff21e34892e59654ea80073b2">readMiscReg</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67a4d8b8c68724b622e10a58b4c9d516dec">MISCREG_ENTRYHI</a>);
+<a name="l00242"></a>00242         entryHi.asid = this-&gt;<a class="code" href="classMipsISA_1_1TlbFault.html#a3bd75b410169a5c0e356fda4d021e49c">asid</a>;
+<a name="l00243"></a>00243         entryHi.vpn2 = this-&gt;<a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a> &gt;&gt; 2;
+<a name="l00244"></a>00244         entryHi.vpn2x = this-&gt;<a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a> &amp; 0x3;
+<a name="l00245"></a>00245         tc-&gt;<a class="code" href="classThreadContext.html#a2987c1ff22ebdf6cdf354a31462bdbfb">setMiscRegNoEffect</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67a4d8b8c68724b622e10a58b4c9d516dec">MISCREG_ENTRYHI</a>, entryHi);
+<a name="l00246"></a>00246 
+<a name="l00247"></a>00247         ContextReg context = tc-&gt;<a class="code" href="classThreadContext.html#a6888f4bff21e34892e59654ea80073b2">readMiscReg</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67a28c03d19a35270b3434ec27f78166bfc">MISCREG_CONTEXT</a>);
+<a name="l00248"></a>00248         context.badVPN2 = this-&gt;<a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a> &gt;&gt; 2;
+<a name="l00249"></a>00249         tc-&gt;<a class="code" href="classThreadContext.html#a2987c1ff22ebdf6cdf354a31462bdbfb">setMiscRegNoEffect</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67a28c03d19a35270b3434ec27f78166bfc">MISCREG_CONTEXT</a>, context);
+<a name="l00250"></a>00250     }
+<a name="l00251"></a>00251 
+<a name="l00252"></a>00252     <span class="keywordtype">void</span>
+<a name="l00253"></a><a class="code" href="classMipsISA_1_1TlbFault.html#a2bd783b42262278d41157d428e1f8d6f">00253</a>     <a class="code" href="classMipsISA_1_1TlbFault.html#a2bd783b42262278d41157d428e1f8d6f">invoke</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> * <a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00254"></a>00254             <a class="code" href="classRefCountingPtr.html">StaticInstPtr</a> inst = <a class="code" href="classStaticInst.html#aa793d9793af735f09096369fb17567b6">StaticInst::nullStaticInstPtr</a>)
+<a name="l00255"></a>00255     {
+<a name="l00256"></a>00256         <span class="keywordflow">if</span> (<a class="code" href="full__system_8hh.html#af929576af6f85c8849704b66d04b8370">FullSystem</a>) {
+<a name="l00257"></a>00257             <a class="code" href="trace_8hh.html#aefe58fddf89e41edd783bf4c3e31d2c3">DPRINTF</a>(MipsPRA, <span class="stringliteral">&quot;Fault %s encountered.\n&quot;</span>, this-&gt;<a class="code" href="classMipsISA_1_1MipsFault.html#a73adb23259baf912a81683a9790a303f">name</a>());
+<a name="l00258"></a>00258             <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1MipsFaultBase.html#a1052109661a1cc9f7847b80b8b98450b">vect</a> = this-&gt;<a class="code" href="classMipsISA_1_1MipsFaultBase.html#a1052109661a1cc9f7847b80b8b98450b">vect</a>(tc);
+<a name="l00259"></a>00259             <a class="code" href="classMipsISA_1_1TlbFault.html#a063e32df265a515397ce13a84a741fed">setTlbExceptionState</a>(tc, this-&gt;<a class="code" href="classMipsISA_1_1TlbFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">code</a>());
+<a name="l00260"></a>00260             tc-&gt;<a class="code" href="classThreadContext.html#a1aaca26c0732d2191edbde1477d7ec13">pcState</a>(vect);
+<a name="l00261"></a>00261         } <span class="keywordflow">else</span> {
+<a name="l00262"></a>00262             <a class="code" href="classMipsISA_1_1TlbFault.html#a2bd783b42262278d41157d428e1f8d6f">AddressFault&lt;T&gt;::invoke</a>(tc, inst);
+<a name="l00263"></a>00263         }
+<a name="l00264"></a>00264     }
+<a name="l00265"></a>00265 
+<a name="l00266"></a>00266     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">ExcCode</a>
+<a name="l00267"></a><a class="code" href="classMipsISA_1_1TlbFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">00267</a>     <a class="code" href="classMipsISA_1_1TlbFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">code</a>()<span class="keyword"> const</span>
+<a name="l00268"></a>00268 <span class="keyword">    </span>{
+<a name="l00269"></a>00269         <span class="keywordflow">return</span> this-&gt;<a class="code" href="classMipsISA_1_1AddressFault.html#a86c0e52eeb2243d66bc032096c160a0b">store</a> ? <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4a5b4d5d68f22c53c153e4043d7814eeb4">ExcCodeTlbS</a> : <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4aead7e6d68e9e4bb0b9da34c0639c7574">ExcCodeTlbL</a>;
+<a name="l00270"></a>00270     }
+<a name="l00271"></a>00271 };
+<a name="l00272"></a>00272 
+<a name="l00273"></a>00273 <span class="keyword">class </span>TlbRefillFault : <span class="keyword">public</span> TlbFault&lt;TlbRefillFault&gt;
+<a name="l00274"></a>00274 {
+<a name="l00275"></a>00275   <span class="keyword">public</span>:
+<a name="l00276"></a><a class="code" href="classMipsISA_1_1TlbRefillFault.html#a299c6b91a14baa1c8fbcc2b2f003e2bc">00276</a>     <a class="code" href="classMipsISA_1_1TlbRefillFault.html#a299c6b91a14baa1c8fbcc2b2f003e2bc">TlbRefillFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#a3bd75b410169a5c0e356fda4d021e49c">asid</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1AddressFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a>, <span class="keywordtype">bool</span> <a class="code" href="classMipsISA_1_1AddressFault.html#a86c0e52eeb2243d66bc032096c160a0b">store</a>) :
+<a name="l00277"></a>00277         <a class="code" href="classMipsISA_1_1TlbFault.html">TlbFault</a>&lt;<a class="code" href="classMipsISA_1_1TlbRefillFault.html">TlbRefillFault</a>&gt;(asid, vaddr, vpn, store)
+<a name="l00278"></a>00278     {}
+<a name="l00279"></a>00279 
+<a name="l00280"></a>00280     <a class="code" href="classm5_1_1params_1_1Addr.html">FaultVect</a>
+<a name="l00281"></a><a class="code" href="classMipsISA_1_1TlbRefillFault.html#a9c059b781f653170e9da1d520c6d96b1">00281</a>     <a class="code" href="classMipsISA_1_1TlbRefillFault.html#a9c059b781f653170e9da1d520c6d96b1">offset</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>)<span class="keyword"> const</span>
+<a name="l00282"></a>00282 <span class="keyword">    </span>{
+<a name="l00283"></a>00283         StatusReg <a class="code" href="namespaceArmISA.html#a566327436c4c7e7a63ab9ac137e9d50e">status</a> = tc-&gt;<a class="code" href="classThreadContext.html#a6888f4bff21e34892e59654ea80073b2">readMiscReg</a>(<a class="code" href="namespaceMipsISA.html#a1e522017e015d4c7efd6b2360143aa67a60c18a64af42f01df36fbc004844c7e2">MISCREG_STATUS</a>);
+<a name="l00284"></a>00284         <span class="keywordflow">return</span> status.exl ? 0x180 : 0x000;
+<a name="l00285"></a>00285     }
+<a name="l00286"></a>00286 };
+<a name="l00287"></a>00287 
+<a name="l00288"></a>00288 <span class="keyword">class </span>TlbInvalidFault : <span class="keyword">public</span> TlbFault&lt;TlbInvalidFault&gt;
+<a name="l00289"></a>00289 {
+<a name="l00290"></a>00290   <span class="keyword">public</span>:
+<a name="l00291"></a><a class="code" href="classMipsISA_1_1TlbInvalidFault.html#a814c2ca9e5a3f551b9c44ef56e3f2e73">00291</a>     <a class="code" href="classMipsISA_1_1TlbInvalidFault.html#a814c2ca9e5a3f551b9c44ef56e3f2e73">TlbInvalidFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#a3bd75b410169a5c0e356fda4d021e49c">asid</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1AddressFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a>, <span class="keywordtype">bool</span> <a class="code" href="classMipsISA_1_1AddressFault.html#a86c0e52eeb2243d66bc032096c160a0b">store</a>) :
+<a name="l00292"></a>00292         <a class="code" href="classMipsISA_1_1TlbFault.html">TlbFault</a>&lt;<a class="code" href="classMipsISA_1_1TlbInvalidFault.html">TlbInvalidFault</a>&gt;(asid, vaddr, vpn, store)
+<a name="l00293"></a>00293     {}
+<a name="l00294"></a>00294 };
+<a name="l00295"></a>00295 
+<a name="l00296"></a>00296 <span class="keyword">class </span>TlbModifiedFault : <span class="keyword">public</span> TlbFault&lt;TlbModifiedFault&gt;
+<a name="l00297"></a>00297 {
+<a name="l00298"></a>00298   <span class="keyword">public</span>:
+<a name="l00299"></a><a class="code" href="classMipsISA_1_1TlbModifiedFault.html#ab261557a8ae48a09a85999d0ddccfead">00299</a>     <a class="code" href="classMipsISA_1_1TlbModifiedFault.html#ab261557a8ae48a09a85999d0ddccfead">TlbModifiedFault</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#a3bd75b410169a5c0e356fda4d021e49c">asid</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1AddressFault.html#a9f933b300ef63eea367ca82f8da31025">vaddr</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="classMipsISA_1_1TlbFault.html#ad378f7d20675898b2a5994600528fa9a">vpn</a>) :
+<a name="l00300"></a>00300         <a class="code" href="classMipsISA_1_1TlbFault.html">TlbFault</a>&lt;<a class="code" href="classMipsISA_1_1TlbModifiedFault.html">TlbModifiedFault</a>&gt;(asid, vaddr, vpn, false)
+<a name="l00301"></a>00301     {}
+<a name="l00302"></a>00302 
+<a name="l00303"></a><a class="code" href="classMipsISA_1_1TlbModifiedFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">00303</a>     <a class="code" href="namespaceMipsISA.html#abcc8a7c57cd8becefbfd621dbff5ffd4">ExcCode</a> <a class="code" href="classMipsISA_1_1TlbModifiedFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">code</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classMipsISA_1_1TlbModifiedFault.html#a1dd20a2460d7723d3eaa287b7cc07e79">MipsFault&lt;TlbModifiedFault&gt;::code</a>(); }
+<a name="l00304"></a>00304 };
+<a name="l00305"></a>00305 
+<a name="l00306"></a>00306 } <span class="comment">// namespace MipsISA</span>
+<a name="l00307"></a>00307 
+<a name="l00308"></a>00308 <span class="preprocessor">#endif // __MIPS_FAULTS_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

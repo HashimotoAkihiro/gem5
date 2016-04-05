@@ -1,0 +1,245 @@
+\hypertarget{classBaseGlobalEvent}{
+\section{クラス BaseGlobalEvent}
+\label{classBaseGlobalEvent}\index{BaseGlobalEvent@{BaseGlobalEvent}}
+}
+
+
+{\ttfamily \#include $<$global\_\-event.hh$>$}BaseGlobalEventに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3.25203cm]{classBaseGlobalEvent}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classBaseGlobalEvent_1_1BarrierEvent}{BarrierEvent}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBaseGlobalEvent_adb528c92040920c5f2c51468230da763}{BaseGlobalEvent} (\hyperlink{classEventBase_a6d92f7ee8144a5911ed46d85a89a4934}{Priority} p, \hyperlink{classFlags}{Flags} f)
+\item 
+virtual \hyperlink{classBaseGlobalEvent_aedd3366fd398048fa2ac79e1a5d7b297}{$\sim$BaseGlobalEvent} ()
+\item 
+virtual void \hyperlink{classBaseGlobalEvent_a142b75b68a6291400e20fb0dd905b1c8}{process} ()=0
+\item 
+virtual const char $\ast$ \hyperlink{classBaseGlobalEvent_aaf0ee88413e805ebda5569f5c13d847f}{description} () const =0
+\item 
+void \hyperlink{classBaseGlobalEvent_a5220ca6f213232cef86e6fba80ba9a70}{schedule} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} when)
+\item 
+bool \hyperlink{classBaseGlobalEvent_a9cd69a6b10cb037550943f177a0da688}{scheduled} () const 
+\item 
+\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classBaseGlobalEvent_a1883243a0117678c5695f2435dcabbdc}{when} () const 
+\item 
+void \hyperlink{classBaseGlobalEvent_a210ef248fbe7c0e13a3497711c2a5e0f}{deschedule} ()
+\item 
+void \hyperlink{classBaseGlobalEvent_afe2a0f92341ee6efef34e3d8eeea299d}{reschedule} (\hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} when)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBarrier}{Barrier} $\ast$ \hyperlink{classBaseGlobalEvent_aa7d3601dfe4f1448143811e57bd9ca46}{barrier}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classBaseGlobalEvent_1_1BarrierEvent}{BarrierEvent} $\ast$ $>$ \hyperlink{classBaseGlobalEvent_a40d3227f068698be5d711619183aedb5}{barrierEvent}
+\begin{DoxyCompactList}\small\item\em The individual local event instances (one per thread/event queue). \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+static std::mutex \hyperlink{classBaseGlobalEvent_ab8876bd0359e5a02d1d6abe4b489c9cc}{globalQMutex}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Common base class for \hyperlink{classGlobalEvent}{GlobalEvent} and \hyperlink{classGlobalSyncEvent}{GlobalSyncEvent}. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classBaseGlobalEvent_adb528c92040920c5f2c51468230da763}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!BaseGlobalEvent@{BaseGlobalEvent}}
+\index{BaseGlobalEvent@{BaseGlobalEvent}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{BaseGlobalEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BaseGlobalEvent} ({\bf Priority} {\em p}, \/  {\bf Flags} {\em f})}}
+\label{classBaseGlobalEvent_adb528c92040920c5f2c51468230da763}
+
+
+
+\begin{DoxyCode}
+37 {
+38     barrierEvent.resize(numMainEventQueues);
+39     barrier = new Barrier(numMainEventQueues);
+40 }
+\end{DoxyCode}
+\hypertarget{classBaseGlobalEvent_aedd3366fd398048fa2ac79e1a5d7b297}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!$\sim$BaseGlobalEvent@{$\sim$BaseGlobalEvent}}
+\index{$\sim$BaseGlobalEvent@{$\sim$BaseGlobalEvent}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{$\sim$BaseGlobalEvent}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf BaseGlobalEvent} ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classBaseGlobalEvent_aedd3366fd398048fa2ac79e1a5d7b297}
+
+
+
+\begin{DoxyCode}
+44 {
+45     // see GlobalEvent::BarrierEvent::~BarrierEvent() comments
+46     if (barrierEvent[0] != NULL) {
+47         for (int i = 0; i < numMainEventQueues; ++i)
+48             delete barrierEvent[i];
+49     }
+50 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classBaseGlobalEvent_a210ef248fbe7c0e13a3497711c2a5e0f}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!deschedule@{deschedule}}
+\index{deschedule@{deschedule}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{deschedule}]{\setlength{\rightskip}{0pt plus 5cm}void deschedule ()}}
+\label{classBaseGlobalEvent_a210ef248fbe7c0e13a3497711c2a5e0f}
+
+
+
+\begin{DoxyCode}
+85 {
+86     EventQueue *q = curEventQueue();
+87     for (uint32_t i = 0; i < numMainEventQueues; ++i) {
+88         if (barrierEvent[i]->scheduled()) {
+89             curEventQueue(mainEventQueue[i]);
+90             mainEventQueue[i]->deschedule(barrierEvent[i]);
+91         }
+92     }
+93 
+94     curEventQueue(q);
+95 }
+\end{DoxyCode}
+\hypertarget{classBaseGlobalEvent_aaf0ee88413e805ebda5569f5c13d847f}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!description@{description}}
+\index{description@{description}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{description}]{\setlength{\rightskip}{0pt plus 5cm}virtual const char$\ast$ description () const\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
+\label{classBaseGlobalEvent_aaf0ee88413e805ebda5569f5c13d847f}
+
+
+\hyperlink{structDebugBreakEvent_a5a14fe478e2393ff51f02e9b7be27e00}{DebugBreakEvent}, \hyperlink{classGlobalSyncEvent_a5a14fe478e2393ff51f02e9b7be27e00}{GlobalSyncEvent}, \hyperlink{classGlobalSimLoopExitEvent_a5a14fe478e2393ff51f02e9b7be27e00}{GlobalSimLoopExitEvent}, と \hyperlink{classStats_1_1StatEvent_a2bd90422eece9190794479e08092a252}{StatEvent}で実装されています。\hypertarget{classBaseGlobalEvent_a142b75b68a6291400e20fb0dd905b1c8}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!process@{process}}
+\index{process@{process}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}virtual void process ()\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
+\label{classBaseGlobalEvent_a142b75b68a6291400e20fb0dd905b1c8}
+
+
+\hyperlink{structDebugBreakEvent_a2e9c5136d19b1a95fc427e0852deab5c}{DebugBreakEvent}, \hyperlink{classGlobalEvent_a142b75b68a6291400e20fb0dd905b1c8}{GlobalEvent}, \hyperlink{classGlobalSyncEvent_a2e9c5136d19b1a95fc427e0852deab5c}{GlobalSyncEvent}, \hyperlink{classGlobalSimLoopExitEvent_a2e9c5136d19b1a95fc427e0852deab5c}{GlobalSimLoopExitEvent}, と \hyperlink{classStats_1_1StatEvent_a6780fc1879338e1ff38faf7279ec6a0b}{StatEvent}で実装されています。\hypertarget{classBaseGlobalEvent_afe2a0f92341ee6efef34e3d8eeea299d}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!reschedule@{reschedule}}
+\index{reschedule@{reschedule}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{reschedule}]{\setlength{\rightskip}{0pt plus 5cm}void reschedule ({\bf Tick} {\em when})}}
+\label{classBaseGlobalEvent_afe2a0f92341ee6efef34e3d8eeea299d}
+
+
+
+\begin{DoxyCode}
+98 {
+99     // Read the comment in the schedule() function above.
+100     globalQMutex.lock();
+101 
+102     for (uint32_t i = 0; i < numMainEventQueues; ++i) {
+103         if (barrierEvent[i]->scheduled())
+104             mainEventQueue[i]->reschedule(barrierEvent[i], when);
+105         else
+106             mainEventQueue[i]->schedule(barrierEvent[i], when, true);
+107     }
+108 
+109     globalQMutex.unlock();
+110 }
+\end{DoxyCode}
+\hypertarget{classBaseGlobalEvent_a5220ca6f213232cef86e6fba80ba9a70}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!schedule@{schedule}}
+\index{schedule@{schedule}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{schedule}]{\setlength{\rightskip}{0pt plus 5cm}void schedule ({\bf Tick} {\em when})}}
+\label{classBaseGlobalEvent_a5220ca6f213232cef86e6fba80ba9a70}
+
+
+
+\begin{DoxyCode}
+54 {
+55     // This function is scheduling a global event, which actually is a
+56     // set of local events, one event on each eventq. Global events need
+57     // to have a total order. A thread cannot start executing events that
+58     // follow a global event till all other threads have executed that global
+59     // event as well. If global events were not in a total order, a deadlock
+60     // would occur for there will be two threads who would be waiting for
+61     // each other to execute the global events they themselves have executed.
+62     //
+63     // To ensure this total order, we do two things.
+64     // First, before scheduling any global event, a thread needs to acquire
+65     // the lock globalQMutex. This ensures that only one thread can schedule
+66     // global events at any given time.
+67     // Second, the local events corresponding to a global event are always
+68     // first inserted in to the asyncq, irrespective of whether or not the
+69     // thread scheduling the event owns the eventq on which the event is
+70     // being scheduled. Thus global events have the same order in the asyncq
+71     // of each thread. When they are inserted in the actual eventq, the
+72     // comparators in the Event class ensure that the total order is
+73     // maintained.
+74 
+75     globalQMutex.lock();
+76 
+77     for (int i = 0; i < numMainEventQueues; ++i) {
+78         mainEventQueue[i]->schedule(barrierEvent[i], when, true);
+79     }
+80 
+81     globalQMutex.unlock();
+82 }
+\end{DoxyCode}
+\hypertarget{classBaseGlobalEvent_a9cd69a6b10cb037550943f177a0da688}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!scheduled@{scheduled}}
+\index{scheduled@{scheduled}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{scheduled}]{\setlength{\rightskip}{0pt plus 5cm}bool scheduled () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classBaseGlobalEvent_a9cd69a6b10cb037550943f177a0da688}
+
+
+
+\begin{DoxyCode}
+129     {
+130         bool sched = false;
+131         for (uint32_t i = 0; i < numMainEventQueues; ++i) {
+132             sched = sched || barrierEvent[i]->scheduled();
+133         }
+134 
+135         return sched;
+136     }
+\end{DoxyCode}
+\hypertarget{classBaseGlobalEvent_a1883243a0117678c5695f2435dcabbdc}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!when@{when}}
+\index{when@{when}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{when}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} when () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classBaseGlobalEvent_a1883243a0117678c5695f2435dcabbdc}
+
+
+
+\begin{DoxyCode}
+139     {
+140         assert(numMainEventQueues > 0);
+141         return barrierEvent[0]->when();
+142     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classBaseGlobalEvent_aa7d3601dfe4f1448143811e57bd9ca46}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!barrier@{barrier}}
+\index{barrier@{barrier}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{barrier}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Barrier}$\ast$ {\bf barrier}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classBaseGlobalEvent_aa7d3601dfe4f1448143811e57bd9ca46}
+The barrier that all threads wait on before performing the global event. \hypertarget{classBaseGlobalEvent_a40d3227f068698be5d711619183aedb5}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!barrierEvent@{barrierEvent}}
+\index{barrierEvent@{barrierEvent}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{barrierEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf BarrierEvent} $\ast$$>$ {\bf barrierEvent}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classBaseGlobalEvent_a40d3227f068698be5d711619183aedb5}
+
+
+The individual local event instances (one per thread/event queue). \hypertarget{classBaseGlobalEvent_ab8876bd0359e5a02d1d6abe4b489c9cc}{
+\index{BaseGlobalEvent@{BaseGlobalEvent}!globalQMutex@{globalQMutex}}
+\index{globalQMutex@{globalQMutex}!BaseGlobalEvent@{BaseGlobalEvent}}
+\subsubsection[{globalQMutex}]{\setlength{\rightskip}{0pt plus 5cm}std::mutex {\bf globalQMutex}\hspace{0.3cm}{\ttfamily  \mbox{[}static, private\mbox{]}}}}
+\label{classBaseGlobalEvent_ab8876bd0359e5a02d1d6abe4b489c9cc}
+Mutex variable for providing exculsive right to schedule global events. This is necessary so that a total order can be maintained amongst the global events. Without ensuring the total order, it is possible that threads execute global events in different orders, which can result in a deadlock. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+sim/\hyperlink{global__event_8hh}{global\_\-event.hh}\item 
+sim/\hyperlink{global__event_8cc}{global\_\-event.cc}\end{DoxyCompactItemize}

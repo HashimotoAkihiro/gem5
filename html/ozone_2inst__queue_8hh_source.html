@@ -1,0 +1,378 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/ozone/inst_queue.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/ozone/inst_queue.hh</h1><a href="ozone_2inst__queue_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __CPU_OZONE_INST_QUEUE_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_OZONE_INST_QUEUE_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;map&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00038"></a>00038 
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="timebuf_8hh.html">cpu/timebuf.hh</a>&quot;</span>
+<a name="l00043"></a>00043 
+<a name="l00044"></a>00044 <span class="keyword">class </span><a class="code" href="classFUPool.html">FUPool</a>;
+<a name="l00045"></a>00045 <span class="keyword">class </span>MemInterface;
+<a name="l00046"></a>00046 
+<a name="l00064"></a>00064 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00065"></a><a class="code" href="classInstQueue.html">00065</a> <span class="keyword">class </span><a class="code" href="classInstQueue.html">InstQueue</a>
+<a name="l00066"></a>00066 {
+<a name="l00067"></a>00067   <span class="keyword">public</span>:
+<a name="l00068"></a>00068     <span class="comment">//Typedefs from the Impl.</span>
+<a name="l00069"></a><a class="code" href="classInstQueue.html#a90ba84e54618cc07f2e8f05e046cb5ce">00069</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classInstQueue.html#a0b1390899d1d55620476dd762bd7ac6c">Impl::FullCPU</a> <a class="code" href="classInstQueue.html#a90ba84e54618cc07f2e8f05e046cb5ce">FullCPU</a>;
+<a name="l00070"></a><a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">00070</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00071"></a><a class="code" href="classInstQueue.html#a818e103eae798a24a06a0a34631849ea">00071</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#ab62ca16eeca26566ad2422b5df4943ce">Impl::Params</a> <a class="code" href="classInstQueue.html#a818e103eae798a24a06a0a34631849ea">Params</a>;
+<a name="l00072"></a><a class="code" href="classInstQueue.html#a568c86f6403070f1cb743e994405ba8b">00072</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::IssueStruct <a class="code" href="structIssueStruct.html">IssueStruct</a>;
+<a name="l00073"></a>00073 <span class="comment">/*</span>
+<a name="l00074"></a>00074 <span class="comment">    typedef typename Impl::CPUPol::IEW IEW;</span>
+<a name="l00075"></a>00075 <span class="comment">    typedef typename Impl::CPUPol::MemDepUnit MemDepUnit;</span>
+<a name="l00076"></a>00076 <span class="comment">    typedef typename Impl::CPUPol::IssueStruct IssueStruct;</span>
+<a name="l00077"></a>00077 <span class="comment">    typedef typename Impl::CPUPol::TimeStruct TimeStruct;</span>
+<a name="l00078"></a>00078 <span class="comment">*/</span>
+<a name="l00079"></a>00079     <span class="comment">// Typedef of iterator through the list of instructions.</span>
+<a name="l00080"></a><a class="code" href="classInstQueue.html#a184cb829e22cc656acb41864f68f51ea">00080</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classInstQueue.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a>;
+<a name="l00081"></a>00081 
+<a name="l00082"></a><a class="code" href="classInstQueue.html#a0b1390899d1d55620476dd762bd7ac6c">00082</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classInstQueue.html#a0b1390899d1d55620476dd762bd7ac6c">Impl::FullCPU</a>;
+<a name="l00083"></a>00083 <span class="preprocessor">#if 0</span>
+<a name="l00084"></a>00084 <span class="preprocessor"></span>
+<a name="l00085"></a>00085     <span class="keyword">class </span>FUCompletion : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a> {
+<a name="l00086"></a>00086       <span class="keyword">private</span>:
+<a name="l00088"></a>00088         <a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> inst;
+<a name="l00089"></a>00089 
+<a name="l00091"></a>00091         <span class="keywordtype">int</span> fuIdx;
+<a name="l00092"></a>00092 
+<a name="l00094"></a>00094         <a class="code" href="classInstQueue.html">InstQueue&lt;Impl&gt;</a> *iqPtr;
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096       <span class="keyword">public</span>:
+<a name="l00098"></a>00098         FUCompletion(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;_inst, <span class="keywordtype">int</span> fu_idx,
+<a name="l00099"></a>00099                      <a class="code" href="classInstQueue.html">InstQueue&lt;Impl&gt;</a> *iq_ptr);
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101         <span class="keyword">virtual</span> <span class="keywordtype">void</span> process();
+<a name="l00102"></a>00102         <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *description() <span class="keyword">const</span>;
+<a name="l00103"></a>00103     };
+<a name="l00104"></a>00104 <span class="preprocessor">#endif</span>
+<a name="l00105"></a>00105 <span class="preprocessor"></span>
+<a name="l00106"></a>00106     <a class="code" href="classInstQueue.html#a679ee5512f178ea331ab7cd3ebf2aa78">InstQueue</a>(<a class="code" href="classInstQueue.html#a818e103eae798a24a06a0a34631849ea">Params</a> *params);
+<a name="l00107"></a>00107 
+<a name="l00109"></a>00109     <a class="code" href="classInstQueue.html#aac3885a1c3df6261e14208fc83713c17">~InstQueue</a>();
+<a name="l00110"></a>00110 
+<a name="l00112"></a>00112     std::string <a class="code" href="classInstQueue.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>() <span class="keyword">const</span>;
+<a name="l00113"></a>00113 
+<a name="l00115"></a>00115     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00116"></a>00116 
+<a name="l00118"></a><a class="code" href="classInstQueue.html#aa783e99c55fd8695cb33c087d14bece0">00118</a>     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#aa783e99c55fd8695cb33c087d14bece0">setCPU</a>(<a class="code" href="classInstQueue.html#a90ba84e54618cc07f2e8f05e046cb5ce">FullCPU</a> *_cpu) { <a class="code" href="classInstQueue.html#a766385c2941cd46525f4d9dff90200a2">cpu</a> = _cpu; }
+<a name="l00119"></a>00119 <span class="preprocessor">#if 0</span>
+<a name="l00120"></a>00120 <span class="preprocessor"></span>
+<a name="l00121"></a>00121     <span class="keywordtype">void</span> setActiveThreads(list&lt;unsigned&gt; *at_ptr);
+<a name="l00122"></a>00122 
+<a name="l00124"></a>00124     <span class="keywordtype">void</span> setIEW(IEW *iew_ptr) { iewStage = iew_ptr; }
+<a name="l00125"></a>00125 <span class="preprocessor">#endif</span>
+<a name="l00126"></a>00126 <span class="preprocessor"></span>
+<a name="l00127"></a>00127     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a7cbe625b8c47621898e7ca92d70c826b">setIssueToExecuteQueue</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IssueStruct&gt;</a> *i2eQueue);
+<a name="l00128"></a>00128 <span class="preprocessor">#if 0</span>
+<a name="l00129"></a>00129 <span class="preprocessor"></span>
+<a name="l00130"></a>00130     <span class="keywordtype">void</span> setTimeBuffer(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *tb_ptr);
+<a name="l00131"></a>00131 
+<a name="l00133"></a>00133     <span class="keywordtype">int</span> entryAmount(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> num_threads);
+<a name="l00134"></a>00134 
+<a name="l00136"></a>00136     <span class="keywordtype">void</span> resetEntries();
+<a name="l00137"></a>00137 <span class="preprocessor">#endif</span>
+<a name="l00138"></a>00138 <span class="preprocessor"></span>
+<a name="l00139"></a>00139     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#a028971a565aca048c67ea1c36a6a9d51">numFreeEntries</a>();
+<a name="l00140"></a>00140 
+<a name="l00142"></a>00142     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#a028971a565aca048c67ea1c36a6a9d51">numFreeEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00143"></a>00143 
+<a name="l00145"></a>00145     <span class="keywordtype">bool</span> <a class="code" href="classInstQueue.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>();
+<a name="l00146"></a>00146 
+<a name="l00148"></a>00148     <span class="keywordtype">bool</span> <a class="code" href="classInstQueue.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00149"></a>00149 
+<a name="l00151"></a>00151     <span class="keywordtype">bool</span> <a class="code" href="classInstQueue.html#ae59aad9cee1e45b5817a9d96553e4567">hasReadyInsts</a>();
+<a name="l00152"></a>00152 
+<a name="l00154"></a>00154     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a786595aecf8ab7aae40868b5ac4a79a7">insert</a>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00155"></a>00155 
+<a name="l00157"></a>00157     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a4f7523e76440d88096a4eac14f2e0dd3">insertNonSpec</a>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00158"></a>00158 <span class="preprocessor">#if 0</span>
+<a name="l00159"></a>00159 <span class="preprocessor"></span>
+<a name="l00164"></a>00164     <span class="keywordtype">void</span> advanceTail(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00165"></a>00165 
+<a name="l00167"></a>00167     <span class="keywordtype">void</span> processFUCompletion(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst, <span class="keywordtype">int</span> fu_idx);
+<a name="l00168"></a>00168 <span class="preprocessor">#endif</span>
+<a name="l00169"></a>00169 <span class="preprocessor"></span>
+<a name="l00173"></a>00173     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a3694e72427d3a616808797f9343d1fc4">scheduleReadyInsts</a>();
+<a name="l00174"></a>00174 
+<a name="l00176"></a>00176     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a15ca5aaeab5bd4c2169ed41bbc7fb79c">scheduleNonSpec</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;inst);
+<a name="l00177"></a>00177 
+<a name="l00182"></a>00182     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a04f8d2acf3cd0b90a1efc69b528f91bc">commit</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;inst, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0);
+<a name="l00183"></a>00183 
+<a name="l00185"></a>00185     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#ab9afe94d332a563b9485d1bb9acd68b4">wakeDependents</a>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;completed_inst);
+<a name="l00186"></a>00186 
+<a name="l00188"></a>00188     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a76bcc078140b3e79923f7b5be8b302fb">addReadyMemInst</a>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;ready_inst);
+<a name="l00189"></a>00189 <span class="preprocessor">#if 0</span>
+<a name="l00190"></a>00190 <span class="preprocessor"></span>
+<a name="l00194"></a>00194     <span class="keywordtype">void</span> rescheduleMemInst(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;resched_inst);
+<a name="l00195"></a>00195 
+<a name="l00197"></a>00197     <span class="keywordtype">void</span> replayMemInst(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;replay_inst);
+<a name="l00198"></a>00198 <span class="preprocessor">#endif</span>
+<a name="l00199"></a>00199 <span class="preprocessor"></span>
+<a name="l00200"></a>00200     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#aad2715729f71f220e9cf9b99515384ca">completeMemInst</a>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;completed_inst);
+<a name="l00201"></a>00201 <span class="preprocessor">#if 0</span>
+<a name="l00202"></a>00202 <span class="preprocessor"></span>
+<a name="l00203"></a>00203     <span class="keywordtype">void</span> violation(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;store, <a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;faulting_load);
+<a name="l00204"></a>00204 <span class="preprocessor">#endif</span>
+<a name="l00205"></a>00205 <span class="preprocessor"></span>
+<a name="l00209"></a>00209     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#ad33d65c18c323d90695d7c2355b49af9">squash</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid); <span class="comment">// Probably want the ISN</span>
+<a name="l00210"></a>00210 
+<a name="l00212"></a><a class="code" href="classInstQueue.html#aaf7eb96b7ab2a8240d043b7d82494d15">00212</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#aaf7eb96b7ab2a8240d043b7d82494d15">getCount</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid) { <span class="keywordflow">return</span> <a class="code" href="classInstQueue.html#ac638062ba1de6609f143c5ee3a601109">count</a>[tid]; };
+<a name="l00213"></a>00213 
+<a name="l00215"></a><a class="code" href="classInstQueue.html#a358bf0d85e8cd8b606877b341c518b5e">00215</a>     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a358bf0d85e8cd8b606877b341c518b5e">updateFreeEntries</a>(<span class="keywordtype">int</span> num) { <a class="code" href="classInstQueue.html#ac2281ff630f82397bda33269f4ee8796">freeEntries</a> += num; }
+<a name="l00216"></a>00216 
+<a name="l00218"></a>00218     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#afc9c0c90c27fe0dc8bd4da915596bc21">printInsts</a>();
+<a name="l00219"></a>00219 
+<a name="l00220"></a>00220   <span class="keyword">private</span>:
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a06cf52c4f09162bea03ec848f247151a">doSquash</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00223"></a>00223 
+<a name="l00225"></a>00225     <span class="comment">// Various pointers</span>
+<a name="l00227"></a>00227 <span class="comment"></span>
+<a name="l00229"></a><a class="code" href="classInstQueue.html#a766385c2941cd46525f4d9dff90200a2">00229</a>     <a class="code" href="classInstQueue.html#a90ba84e54618cc07f2e8f05e046cb5ce">FullCPU</a> *<a class="code" href="classInstQueue.html#a766385c2941cd46525f4d9dff90200a2">cpu</a>;
+<a name="l00230"></a>00230 
+<a name="l00232"></a><a class="code" href="classInstQueue.html#a22dc8294eecb144fbdd951d2e32e9330">00232</a>     MemInterface *<a class="code" href="classInstQueue.html#a22dc8294eecb144fbdd951d2e32e9330">dcacheInterface</a>;
+<a name="l00233"></a>00233 <span class="preprocessor">#if 0</span>
+<a name="l00234"></a>00234 <span class="preprocessor"></span>
+<a name="l00235"></a>00235     IEW *iewStage;
+<a name="l00236"></a>00236 
+<a name="l00240"></a>00240     <a class="code" href="classMemDepUnit.html">MemDepUnit</a> memDepUnit[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00241"></a>00241 <span class="preprocessor">#endif</span>
+<a name="l00242"></a>00242 <span class="preprocessor"></span>
+<a name="l00245"></a><a class="code" href="classInstQueue.html#af5c55240e63d9a13358eede4eb5352f1">00245</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IssueStruct&gt;</a> *<a class="code" href="classInstQueue.html#af5c55240e63d9a13358eede4eb5352f1">issueToExecuteQueue</a>;
+<a name="l00246"></a>00246 <span class="preprocessor">#if 0</span>
+<a name="l00247"></a>00247 <span class="preprocessor"></span>
+<a name="l00248"></a>00248     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *timeBuffer;
+<a name="l00249"></a>00249 
+<a name="l00251"></a>00251     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;::wire</a> fromCommit;
+<a name="l00252"></a>00252 
+<a name="l00254"></a>00254     <a class="code" href="classFUPool.html">FUPool</a> *fuPool;
+<a name="l00255"></a>00255 <span class="preprocessor">#endif</span>
+<a name="l00257"></a>00257 <span class="preprocessor">    // Instruction lists, ready queues, and ordering</span>
+<a name="l00259"></a>00259 <span class="preprocessor"></span>
+<a name="l00260"></a>00260 <span class="preprocessor"></span>
+<a name="l00261"></a><a class="code" href="classInstQueue.html#a7f2828a4f877a4a4d4b85a6788536b82">00261</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classInstQueue.html#a7f2828a4f877a4a4d4b85a6788536b82">instList</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00262"></a>00262 
+<a name="l00269"></a><a class="code" href="structInstQueue_1_1pqCompare.html">00269</a>     <span class="keyword">struct </span><a class="code" href="structInstQueue_1_1pqCompare.html">pqCompare</a> {
+<a name="l00270"></a><a class="code" href="structInstQueue_1_1pqCompare.html#aa171c804e811b84fcefef511a9031fb6">00270</a>         <span class="keywordtype">bool</span> <a class="code" href="structInstQueue_1_1pqCompare.html#aa171c804e811b84fcefef511a9031fb6">operator() </a>(<span class="keyword">const</span> <a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;lhs, <span class="keyword">const</span> <a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;rhs)<span class="keyword"> const</span>
+<a name="l00271"></a>00271 <span class="keyword">        </span>{
+<a name="l00272"></a>00272             <span class="keywordflow">return</span> lhs-&gt;seqNum &gt; rhs-&gt;seqNum;
+<a name="l00273"></a>00273         }
+<a name="l00274"></a>00274     };
+<a name="l00275"></a>00275 
+<a name="l00280"></a><a class="code" href="structInstQueue_1_1IQEntry.html">00280</a>     <span class="keyword">struct </span><a class="code" href="structInstQueue_1_1IQEntry.html">IQEntry</a> {
+<a name="l00281"></a><a class="code" href="structInstQueue_1_1IQEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">00281</a>         <a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="structInstQueue_1_1IQEntry.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>;
+<a name="l00282"></a><a class="code" href="structInstQueue_1_1IQEntry.html#a0deec4d5d0af5df075f848b721260166">00282</a>         <a class="code" href="classInstQueue.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> <a class="code" href="structInstQueue_1_1IQEntry.html#a0deec4d5d0af5df075f848b721260166">iqIt</a>;
+<a name="l00283"></a>00283     };
+<a name="l00284"></a>00284 
+<a name="l00285"></a>00285     <span class="keyword">typedef</span> std::priority_queue&lt;DynInstPtr, std::vector&lt;DynInstPtr&gt;, <a class="code" href="structInstQueue_1_1pqCompare.html">pqCompare</a>&gt;
+<a name="l00286"></a><a class="code" href="classInstQueue.html#a60636ae8f3b649078c4f1bdd3b20dcad">00286</a>     <a class="code" href="classInstQueue.html#a60636ae8f3b649078c4f1bdd3b20dcad">ReadyInstQueue</a>;
+<a name="l00287"></a>00287 
+<a name="l00288"></a><a class="code" href="classInstQueue.html#afca3a0ab9af7309428eb77c726724000">00288</a>     <span class="keyword">typedef</span> std::map&lt;DynInstPtr, pqCompare&gt; <a class="code" href="classInstQueue.html#afca3a0ab9af7309428eb77c726724000">ReadyInstMap</a>;
+<a name="l00289"></a><a class="code" href="classInstQueue.html#a2ab2a44e2b7c4b408ceda3a9a2422ecb">00289</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> std::map&lt;DynInstPtr, pqCompare&gt;::iterator <a class="code" href="classInstQueue.html#a2ab2a44e2b7c4b408ceda3a9a2422ecb">ReadyMapIt</a>;
+<a name="l00290"></a>00290 
+<a name="l00293"></a><a class="code" href="classInstQueue.html#a73e22f052c708ca5c198bd0a01eb3604">00293</a>     <a class="code" href="classInstQueue.html#a60636ae8f3b649078c4f1bdd3b20dcad">ReadyInstQueue</a> <a class="code" href="classInstQueue.html#a73e22f052c708ca5c198bd0a01eb3604">readyInsts</a>;
+<a name="l00294"></a>00294 
+<a name="l00302"></a><a class="code" href="classInstQueue.html#ac0ba4d07026aaf6386c001a68d059cbf">00302</a>     std::map&lt;InstSeqNum, DynInstPtr&gt; <a class="code" href="classInstQueue.html#ac0ba4d07026aaf6386c001a68d059cbf">nonSpecInsts</a>;
+<a name="l00303"></a>00303 
+<a name="l00304"></a><a class="code" href="classInstQueue.html#a0e9597437fae9e60d5449933949416ec">00304</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> std::map&lt;InstSeqNum, DynInstPtr&gt;::iterator <a class="code" href="classInstQueue.html#a0e9597437fae9e60d5449933949416ec">NonSpecMapIt</a>;
+<a name="l00305"></a>00305 <span class="preprocessor">#if 0</span>
+<a name="l00306"></a>00306 <span class="preprocessor"></span>
+<a name="l00307"></a>00307     <span class="keyword">struct </span>ListOrderEntry {
+<a name="l00308"></a>00308         OpClass queueType;
+<a name="l00309"></a>00309         <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> oldestInst;
+<a name="l00310"></a>00310     };
+<a name="l00311"></a>00311 
+<a name="l00316"></a>00316     <a class="code" href="classstd_1_1list.html">std::list&lt;ListOrderEntry&gt;</a> listOrder;
+<a name="l00317"></a>00317 
+<a name="l00318"></a>00318     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;ListOrderEntry&gt;::iterator</a> ListOrderIt;
+<a name="l00319"></a>00319 
+<a name="l00321"></a>00321     <span class="keywordtype">bool</span> queueOnList[<a class="code" href="op__class_8hh.html#a5e0e351c8afca390ef0a05a7dbb68b1b">Num_OpClasses</a>];
+<a name="l00322"></a>00322 
+<a name="l00326"></a>00326     ListOrderIt readyIt[<a class="code" href="op__class_8hh.html#a5e0e351c8afca390ef0a05a7dbb68b1b">Num_OpClasses</a>];
+<a name="l00327"></a>00327 
+<a name="l00329"></a>00329     <span class="keywordtype">void</span> addToOrderList(OpClass op_class);
+<a name="l00330"></a>00330 
+<a name="l00335"></a>00335     <span class="keywordtype">void</span> moveToYoungerInst(ListOrderIt age_order_it);
+<a name="l00336"></a>00336 <span class="preprocessor">#endif</span>
+<a name="l00338"></a>00338 <span class="preprocessor">    // Various parameters</span>
+<a name="l00340"></a>00340 <span class="preprocessor">#if 0</span>
+<a name="l00341"></a>00341 <span class="preprocessor"></span>
+<a name="l00342"></a>00342     <span class="keyword">enum</span> IQPolicy {
+<a name="l00343"></a>00343         Dynamic,
+<a name="l00344"></a>00344         Partitioned,
+<a name="l00345"></a>00345         Threshold
+<a name="l00346"></a>00346     };
+<a name="l00347"></a>00347 
+<a name="l00349"></a>00349     IQPolicy iqPolicy;
+<a name="l00350"></a>00350 <span class="preprocessor">#endif</span>
+<a name="l00351"></a>00351 <span class="preprocessor"></span>
+<a name="l00352"></a><a class="code" href="classInstQueue.html#a792311f13ea91008a88e902ef13b0341">00352</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#a792311f13ea91008a88e902ef13b0341">numThreads</a>;
+<a name="l00353"></a>00353 <span class="preprocessor">#if 0</span>
+<a name="l00354"></a>00354 <span class="preprocessor"></span>
+<a name="l00355"></a>00355     list&lt;unsigned&gt; *activeThreads;
+<a name="l00356"></a>00356 <span class="preprocessor">#endif</span>
+<a name="l00357"></a>00357 <span class="preprocessor"></span>
+<a name="l00358"></a><a class="code" href="classInstQueue.html#ac638062ba1de6609f143c5ee3a601109">00358</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#ac638062ba1de6609f143c5ee3a601109">count</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00359"></a>00359 
+<a name="l00361"></a><a class="code" href="classInstQueue.html#a51e5f9f0cb40d61e95b1518f1be90b73">00361</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#a51e5f9f0cb40d61e95b1518f1be90b73">maxEntries</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00362"></a>00362 
+<a name="l00364"></a><a class="code" href="classInstQueue.html#ac2281ff630f82397bda33269f4ee8796">00364</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#ac2281ff630f82397bda33269f4ee8796">freeEntries</a>;
+<a name="l00365"></a>00365 
+<a name="l00367"></a><a class="code" href="classInstQueue.html#a325de474a9f6652329339d9fc2ea09c0">00367</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#a325de474a9f6652329339d9fc2ea09c0">numEntries</a>;
+<a name="l00368"></a>00368 
+<a name="l00370"></a><a class="code" href="classInstQueue.html#ab3c3a8cd00248d9cd6acad330da902a7">00370</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#ab3c3a8cd00248d9cd6acad330da902a7">totalWidth</a>;
+<a name="l00371"></a>00371 <span class="preprocessor">#if 0</span>
+<a name="l00372"></a>00372 <span class="preprocessor"></span>
+<a name="l00373"></a>00373     <span class="keywordtype">unsigned</span> numPhysRegs;
+<a name="l00374"></a>00374 
+<a name="l00376"></a>00376     <span class="keywordtype">unsigned</span> numPhysIntRegs;
+<a name="l00377"></a>00377 
+<a name="l00379"></a>00379     <span class="keywordtype">unsigned</span> numPhysFloatRegs;
+<a name="l00380"></a>00380 <span class="preprocessor">#endif</span>
+<a name="l00381"></a>00381 <span class="preprocessor"></span>
+<a name="l00384"></a><a class="code" href="classInstQueue.html#a92c8d68d5f0e17758f89daa2647196f5">00384</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstQueue.html#a92c8d68d5f0e17758f89daa2647196f5">commitToIEWDelay</a>;
+<a name="l00385"></a>00385 
+<a name="l00387"></a>00387     <span class="comment">// Variables needed for squashing</span>
+<a name="l00389"></a>00389 <span class="comment"></span>
+<a name="l00391"></a><a class="code" href="classInstQueue.html#a97d5a7e4630ad1d017909f7504b9ec32">00391</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classInstQueue.html#a97d5a7e4630ad1d017909f7504b9ec32">squashedSeqNum</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00392"></a>00392 
+<a name="l00396"></a><a class="code" href="classInstQueue.html#a76b506d03788e72757da427226e10356">00396</a>     <a class="code" href="classInstQueue.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a> <a class="code" href="classInstQueue.html#a76b506d03788e72757da427226e10356">squashIt</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00397"></a>00397 <span class="preprocessor">#if 0</span>
+<a name="l00399"></a>00399 <span class="preprocessor">    // Dependency graph stuff</span>
+<a name="l00401"></a>00401 <span class="preprocessor"></span>
+<a name="l00402"></a>00402 <span class="preprocessor"></span>    <span class="keyword">class </span><a class="code" href="classDependencyEntry.html">DependencyEntry</a>
+<a name="l00403"></a>00403     {
+<a name="l00404"></a>00404       <span class="keyword">public</span>:
+<a name="l00405"></a>00405         <a class="code" href="classDependencyEntry.html">DependencyEntry</a>()
+<a name="l00406"></a>00406             : inst(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>), next(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>)
+<a name="l00407"></a>00407         { }
+<a name="l00408"></a>00408 
+<a name="l00409"></a>00409         <a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> inst;
+<a name="l00410"></a>00410         <span class="comment">//Might want to include data about what arch. register the</span>
+<a name="l00411"></a>00411         <span class="comment">//dependence is waiting on.</span>
+<a name="l00412"></a>00412         <a class="code" href="classDependencyEntry.html">DependencyEntry</a> *next;
+<a name="l00413"></a>00413 
+<a name="l00414"></a>00414         <span class="comment">//This function, and perhaps this whole class, stand out a little</span>
+<a name="l00415"></a>00415         <span class="comment">//bit as they don&apos;t fit a classification well.  I want access</span>
+<a name="l00416"></a>00416         <span class="comment">//to the underlying structure of the linked list, yet at</span>
+<a name="l00417"></a>00417         <span class="comment">//the same time it feels like this should be something abstracted</span>
+<a name="l00418"></a>00418         <span class="comment">//away.  So for now it will sit here, within the IQ, until</span>
+<a name="l00419"></a>00419         <span class="comment">//a better implementation is decided upon.</span>
+<a name="l00420"></a>00420         <span class="comment">// This function probably shouldn&apos;t be within the entry...</span>
+<a name="l00421"></a>00421         <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a786595aecf8ab7aae40868b5ac4a79a7">insert</a>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00422"></a>00422 
+<a name="l00423"></a>00423         <span class="keywordtype">void</span> <span class="keyword">remove</span>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst_to_remove);
+<a name="l00424"></a>00424 
+<a name="l00425"></a>00425         <span class="comment">// Debug variable, remove when done testing.</span>
+<a name="l00426"></a>00426         <span class="keyword">static</span> <span class="keywordtype">unsigned</span> mem_alloc_counter;
+<a name="l00427"></a>00427     };
+<a name="l00428"></a>00428 
+<a name="l00435"></a>00435     <a class="code" href="classDependencyEntry.html">DependencyEntry</a> *dependGraph;
+<a name="l00436"></a>00436 
+<a name="l00443"></a>00443     vector&lt;bool&gt; regScoreboard;
+<a name="l00444"></a>00444 
+<a name="l00446"></a>00446     <span class="keywordtype">bool</span> addToDependents(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00447"></a>00447 
+<a name="l00449"></a>00449     <span class="keywordtype">void</span> createDependency(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00450"></a>00450 <span class="preprocessor">#endif</span>
+<a name="l00451"></a>00451 <span class="preprocessor"></span>
+<a name="l00452"></a>00452     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a7e3f1fa43ca939ed6fd9b3abcc47f06e">addIfReady</a>(<a class="code" href="classInstQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00453"></a>00453 
+<a name="l00458"></a>00458     <span class="keywordtype">int</span> <a class="code" href="classInstQueue.html#ab654970f03abd90f0c397bba8e218bc9">countInsts</a>();
+<a name="l00459"></a>00459 <span class="preprocessor">#if 0</span>
+<a name="l00460"></a>00460 <span class="preprocessor"></span>
+<a name="l00462"></a>00462     <span class="keywordtype">void</span> dumpDependGraph();
+<a name="l00463"></a>00463 <span class="preprocessor">#endif</span>
+<a name="l00464"></a>00464 <span class="preprocessor"></span>
+<a name="l00468"></a>00468     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a3d1dae45e8e0b5cf7c1f4f8c796d070e">dumpLists</a>();
+<a name="l00469"></a>00469 
+<a name="l00473"></a>00473     <span class="keywordtype">void</span> <a class="code" href="classInstQueue.html#a80587b4fe043bbe1995536cb3b361588">dumpInsts</a>();
+<a name="l00474"></a>00474 
+<a name="l00476"></a><a class="code" href="classInstQueue.html#a435e1ce10c3a7f54a60941e583adeb09">00476</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#a435e1ce10c3a7f54a60941e583adeb09">iqInstsAdded</a>;
+<a name="l00478"></a><a class="code" href="classInstQueue.html#adf890a08fae50ea8249171b07c40adac">00478</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#adf890a08fae50ea8249171b07c40adac">iqNonSpecInstsAdded</a>;
+<a name="l00479"></a>00479 <span class="comment">//    Stats::Scalar iqIntInstsAdded;</span>
+<a name="l00481"></a><a class="code" href="classInstQueue.html#a735f2023e70e53b7889a3a316bd3d57f">00481</a> <span class="comment"></span>    <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#a735f2023e70e53b7889a3a316bd3d57f">iqIntInstsIssued</a>;
+<a name="l00482"></a>00482 <span class="comment">//    Stats::Scalar iqFloatInstsAdded;</span>
+<a name="l00484"></a><a class="code" href="classInstQueue.html#aa9f2fa124c9f0b4b22461b6717449d9a">00484</a> <span class="comment"></span>    <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#aa9f2fa124c9f0b4b22461b6717449d9a">iqFloatInstsIssued</a>;
+<a name="l00485"></a>00485 <span class="comment">//    Stats::Scalar iqBranchInstsAdded;</span>
+<a name="l00487"></a><a class="code" href="classInstQueue.html#a928f22a2c6ce592adc40e5242c9d6572">00487</a> <span class="comment"></span>    <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#a928f22a2c6ce592adc40e5242c9d6572">iqBranchInstsIssued</a>;
+<a name="l00488"></a>00488 <span class="comment">//    Stats::Scalar iqMemInstsAdded;</span>
+<a name="l00490"></a><a class="code" href="classInstQueue.html#a5e7d55d3f07e86e389ca3a715766e108">00490</a> <span class="comment"></span>    <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#a5e7d55d3f07e86e389ca3a715766e108">iqMemInstsIssued</a>;
+<a name="l00491"></a>00491 <span class="comment">//    Stats::Scalar iqMiscInstsAdded;</span>
+<a name="l00493"></a><a class="code" href="classInstQueue.html#ad234890bc414fffe7ed71840c51be5cb">00493</a> <span class="comment"></span>    <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#ad234890bc414fffe7ed71840c51be5cb">iqMiscInstsIssued</a>;
+<a name="l00495"></a><a class="code" href="classInstQueue.html#ac91799c895e5aff3af0afdbd7691a163">00495</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#ac91799c895e5aff3af0afdbd7691a163">iqSquashedInstsIssued</a>;
+<a name="l00497"></a><a class="code" href="classInstQueue.html#a8312e8984bcfab5a77de40e1738103db">00497</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#a8312e8984bcfab5a77de40e1738103db">iqSquashedInstsExamined</a>;
+<a name="l00501"></a><a class="code" href="classInstQueue.html#a4398b6005b81008bd163bbba78dfd929">00501</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#a4398b6005b81008bd163bbba78dfd929">iqSquashedOperandsExamined</a>;
+<a name="l00504"></a><a class="code" href="classInstQueue.html#a6c0b47431b6e84536fd9bb61624d6d97">00504</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstQueue.html#a6c0b47431b6e84536fd9bb61624d6d97">iqSquashedNonSpecRemoved</a>;
+<a name="l00505"></a>00505 
+<a name="l00506"></a>00506 };
+<a name="l00507"></a>00507 
+<a name="l00508"></a>00508 <span class="preprocessor">#endif //__CPU_OZONE_INST_QUEUE_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

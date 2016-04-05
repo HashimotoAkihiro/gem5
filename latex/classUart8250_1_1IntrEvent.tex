@@ -1,0 +1,127 @@
+\hypertarget{classUart8250_1_1IntrEvent}{
+\section{クラス IntrEvent}
+\label{classUart8250_1_1IntrEvent}\index{Uart8250::IntrEvent@{Uart8250::IntrEvent}}
+}
+
+
+{\ttfamily \#include $<$uart8250.hh$>$}IntrEventに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classUart8250_1_1IntrEvent}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classUart8250_1_1IntrEvent_a9cb7bf0a580aa77d3175ccadf585457a}{IntrEvent} (\hyperlink{classUart_1_1Uart8250}{Uart8250} $\ast$u, int bit)
+\item 
+virtual void \hyperlink{classUart8250_1_1IntrEvent_a2e9c5136d19b1a95fc427e0852deab5c}{process} ()
+\item 
+virtual const char $\ast$ \hyperlink{classUart8250_1_1IntrEvent_a5a14fe478e2393ff51f02e9b7be27e00}{description} () const 
+\item 
+void \hyperlink{classUart8250_1_1IntrEvent_a5300e17e5d721149683cb2bac69c7571}{scheduleIntr} ()
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classUart_1_1Uart8250}{Uart8250} $\ast$ \hyperlink{classUart8250_1_1IntrEvent_a79b2735a14e67de20ff110606a1c3997}{uart}
+\item 
+int \hyperlink{classUart8250_1_1IntrEvent_a32a4c55ff711c0b90d74b75e1d54ebce}{intrBit}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classUart8250_1_1IntrEvent_a9cb7bf0a580aa77d3175ccadf585457a}{
+\index{Uart8250::IntrEvent@{Uart8250::IntrEvent}!IntrEvent@{IntrEvent}}
+\index{IntrEvent@{IntrEvent}!Uart8250::IntrEvent@{Uart8250::IntrEvent}}
+\subsubsection[{IntrEvent}]{\setlength{\rightskip}{0pt plus 5cm}{\bf IntrEvent} ({\bf Uart8250} $\ast$ {\em u}, \/  int {\em bit})}}
+\label{classUart8250_1_1IntrEvent_a9cb7bf0a580aa77d3175ccadf585457a}
+
+
+
+\begin{DoxyCode}
+53     : uart(u)
+54 {
+55     DPRINTF(Uart, "UART Interrupt Event Initilizing\n");
+56     intrBit = bit;
+57 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classUart8250_1_1IntrEvent_a5a14fe478e2393ff51f02e9b7be27e00}{
+\index{Uart8250::IntrEvent@{Uart8250::IntrEvent}!description@{description}}
+\index{description@{description}!Uart8250::IntrEvent@{Uart8250::IntrEvent}}
+\subsubsection[{description}]{\setlength{\rightskip}{0pt plus 5cm}const char $\ast$ description () const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classUart8250_1_1IntrEvent_a5a14fe478e2393ff51f02e9b7be27e00}
+Return a C string describing the event. This string should not$\ast$ be dynamically allocated; just a const char array describing the event class. 
+
+\hyperlink{classEvent_a130ddddf003422b413e2e891b1b80e8f}{Event}を再定義しています。
+
+
+\begin{DoxyCode}
+61 {
+62     return "uart interrupt delay";
+63 }
+\end{DoxyCode}
+\hypertarget{classUart8250_1_1IntrEvent_a2e9c5136d19b1a95fc427e0852deab5c}{
+\index{Uart8250::IntrEvent@{Uart8250::IntrEvent}!process@{process}}
+\index{process@{process}!Uart8250::IntrEvent@{Uart8250::IntrEvent}}
+\subsubsection[{process}]{\setlength{\rightskip}{0pt plus 5cm}void process ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classUart8250_1_1IntrEvent_a2e9c5136d19b1a95fc427e0852deab5c}
+
+
+\hyperlink{classEvent_a142b75b68a6291400e20fb0dd905b1c8}{Event}を実装しています。
+
+
+\begin{DoxyCode}
+67 {
+68     if (intrBit & uart->IER) {
+69        DPRINTF(Uart, "UART InterEvent, interrupting\n");
+70        uart->platform->postConsoleInt();
+71        uart->status |= intrBit;
+72        uart->lastTxInt = curTick();
+73     }
+74     else
+75        DPRINTF(Uart, "UART InterEvent, not interrupting\n");
+76 
+77 }
+\end{DoxyCode}
+\hypertarget{classUart8250_1_1IntrEvent_a5300e17e5d721149683cb2bac69c7571}{
+\index{Uart8250::IntrEvent@{Uart8250::IntrEvent}!scheduleIntr@{scheduleIntr}}
+\index{scheduleIntr@{scheduleIntr}!Uart8250::IntrEvent@{Uart8250::IntrEvent}}
+\subsubsection[{scheduleIntr}]{\setlength{\rightskip}{0pt plus 5cm}void scheduleIntr ()}}
+\label{classUart8250_1_1IntrEvent_a5300e17e5d721149683cb2bac69c7571}
+
+
+
+\begin{DoxyCode}
+93 {
+94     static const Tick interval = 225 * SimClock::Int::ns;
+95     DPRINTF(Uart, "Scheduling IER interrupt for %#x, at cycle %lld\n", intrBit,
+96             curTick() + interval);
+97     if (!scheduled())
+98         uart->schedule(this, curTick() + interval);
+99     else
+100         uart->reschedule(this, curTick() + interval);
+101 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classUart8250_1_1IntrEvent_a32a4c55ff711c0b90d74b75e1d54ebce}{
+\index{Uart8250::IntrEvent@{Uart8250::IntrEvent}!intrBit@{intrBit}}
+\index{intrBit@{intrBit}!Uart8250::IntrEvent@{Uart8250::IntrEvent}}
+\subsubsection[{intrBit}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf intrBit}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classUart8250_1_1IntrEvent_a32a4c55ff711c0b90d74b75e1d54ebce}
+\hypertarget{classUart8250_1_1IntrEvent_a79b2735a14e67de20ff110606a1c3997}{
+\index{Uart8250::IntrEvent@{Uart8250::IntrEvent}!uart@{uart}}
+\index{uart@{uart}!Uart8250::IntrEvent@{Uart8250::IntrEvent}}
+\subsubsection[{uart}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Uart8250}$\ast$ {\bf uart}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classUart8250_1_1IntrEvent_a79b2735a14e67de20ff110606a1c3997}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/\hyperlink{uart8250_8hh}{uart8250.hh}\item 
+dev/\hyperlink{uart8250_8cc}{uart8250.cc}\end{DoxyCompactItemize}

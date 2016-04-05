@@ -1,0 +1,93 @@
+\hypertarget{classArmISA_1_1Interrupt}{
+\section{クラス Interrupt}
+\label{classArmISA_1_1Interrupt}\index{ArmISA::Interrupt@{ArmISA::Interrupt}}
+}
+
+
+{\ttfamily \#include $<$faults.hh$>$}Interruptに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classArmISA_1_1Interrupt}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classArmISA_1_1Interrupt_afd7a21fdb010230ad53094254739dde8}{routeToMonitor} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\item 
+bool \hyperlink{classArmISA_1_1Interrupt_a16facd13ba8e6d15d2b865882c379d5f}{routeToHyp} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\item 
+bool \hyperlink{classArmISA_1_1Interrupt_a92a741baab278ed029d84b0fe979e1b8}{abortDisable} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc})
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classArmISA_1_1Interrupt_a92a741baab278ed029d84b0fe979e1b8}{
+\index{ArmISA::Interrupt@{ArmISA::Interrupt}!abortDisable@{abortDisable}}
+\index{abortDisable@{abortDisable}!ArmISA::Interrupt@{ArmISA::Interrupt}}
+\subsubsection[{abortDisable}]{\setlength{\rightskip}{0pt plus 5cm}bool abortDisable ({\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1Interrupt_a92a741baab278ed029d84b0fe979e1b8}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_a1f1a5b662b9a505415dd5ef1f52892f3}{ArmFaultVals$<$ Interrupt $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1276 {
+1277     if (ArmSystem::haveSecurity(tc)) {
+1278         SCR scr = tc->readMiscRegNoEffect(MISCREG_SCR);
+1279         return (!scr.ns || scr.aw);
+1280     }
+1281     return true;
+1282 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1Interrupt_a16facd13ba8e6d15d2b865882c379d5f}{
+\index{ArmISA::Interrupt@{ArmISA::Interrupt}!routeToHyp@{routeToHyp}}
+\index{routeToHyp@{routeToHyp}!ArmISA::Interrupt@{ArmISA::Interrupt}}
+\subsubsection[{routeToHyp}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToHyp ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1Interrupt_a16facd13ba8e6d15d2b865882c379d5f}
+
+
+\hyperlink{classArmISA_1_1ArmFault_a6fa7b734487c2a8da04a28ace414a355}{ArmFault}を再定義しています。
+
+
+\begin{DoxyCode}
+1262 {
+1263     bool toHyp;
+1264 
+1265     SCR  scr  = tc->readMiscRegNoEffect(MISCREG_SCR);
+1266     HCR  hcr  = tc->readMiscRegNoEffect(MISCREG_HCR);
+1267     CPSR cpsr = tc->readMiscRegNoEffect(MISCREG_CPSR);
+1268     // Determine whether IRQs are routed to Hyp mode.
+1269     toHyp = (!scr.irq && hcr.imo && !inSecureState(scr, cpsr)) ||
+1270             (cpsr.mode == MODE_HYP);
+1271     return toHyp;
+1272 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1Interrupt_afd7a21fdb010230ad53094254739dde8}{
+\index{ArmISA::Interrupt@{ArmISA::Interrupt}!routeToMonitor@{routeToMonitor}}
+\index{routeToMonitor@{routeToMonitor}!ArmISA::Interrupt@{ArmISA::Interrupt}}
+\subsubsection[{routeToMonitor}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToMonitor ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1Interrupt_afd7a21fdb010230ad53094254739dde8}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_a9a0a467b98f43890c1d89d1d59a5923c}{ArmFaultVals$<$ Interrupt $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1250 {
+1251     assert(ArmSystem::haveSecurity(tc));
+1252     SCR scr = 0;
+1253     if (from64)
+1254         scr = tc->readMiscRegNoEffect(MISCREG_SCR_EL3);
+1255     else
+1256         scr = tc->readMiscRegNoEffect(MISCREG_SCR);
+1257     return scr.irq;
+1258 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8hh}{faults.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

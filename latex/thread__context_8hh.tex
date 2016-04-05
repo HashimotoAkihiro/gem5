@@ -1,0 +1,166 @@
+\hypertarget{thread__context_8hh}{
+\section{cpu/thread\_\-context.hh}
+\label{thread__context_8hh}\index{cpu/thread\_\-context.hh@{cpu/thread\_\-context.hh}}
+}
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include \char`\"{}arch/registers.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}config/the\_\-isa.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classThreadContext}{ThreadContext}
+\item 
+class \hyperlink{classProxyThreadContext}{ProxyThreadContext$<$ TC $>$}
+\end{DoxyCompactItemize}
+\subsection*{ネームスペース}
+\begin{DoxyCompactItemize}
+\item 
+namespace \hyperlink{namespaceTheISA}{TheISA}
+\item 
+namespace \hyperlink{namespaceTheISA_1_1Kernel}{TheISA::Kernel}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{thread__context_8hh_a5f8808341daf3a8e3d0deb3852b1855f}{takeOverFrom} (\hyperlink{classThreadContext}{ThreadContext} \&new\_\-tc, \hyperlink{classThreadContext}{ThreadContext} \&old\_\-tc)
+\end{DoxyCompactItemize}
+\begin{Indent}{\bf }\par
+{\em \label{_amgrpd41d8cd98f00b204e9800998ecf8427e}
+ }\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{thread__context_8hh_a40792bd7060f1fdd6c31469ce46d0a95}{serialize} (\hyperlink{classThreadContext}{ThreadContext} \&tc, std::ostream \&os)
+\item 
+void \hyperlink{thread__context_8hh_aab2bbbf3710db70a2886ed6c49038af7}{unserialize} (\hyperlink{classThreadContext}{ThreadContext} \&tc, \hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const std::string \&section)
+\end{DoxyCompactItemize}
+\end{Indent}
+
+
+\subsection{関数}
+\hypertarget{thread__context_8hh_a40792bd7060f1fdd6c31469ce46d0a95}{
+\index{thread\_\-context.hh@{thread\_\-context.hh}!serialize@{serialize}}
+\index{serialize@{serialize}!thread_context.hh@{thread\_\-context.hh}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize ({\bf ThreadContext} \& {\em tc}, \/  std::ostream \& {\em os})}}
+\label{thread__context_8hh_a40792bd7060f1fdd6c31469ce46d0a95}
+Thread context serialization helpers
+
+These helper functions provide a way to the data in a \hyperlink{classThreadContext}{ThreadContext}. They are provided as separate helper function since implementing them as members of the \hyperlink{classThreadContext}{ThreadContext} interface would be confusing when the \hyperlink{classThreadContext}{ThreadContext} is exported via a proxy. 
+
+
+\begin{DoxyCode}
+108 {
+109     using namespace TheISA;
+110 
+111     FloatRegBits floatRegs[NumFloatRegs];
+112     for (int i = 0; i < NumFloatRegs; ++i)
+113         floatRegs[i] = tc.readFloatRegBitsFlat(i);
+114     // This is a bit ugly, but needed to maintain backwards
+115     // compatibility.
+116     arrayParamOut(os, "floatRegs.i", floatRegs, NumFloatRegs);
+117 
+118     IntReg intRegs[NumIntRegs];
+119     for (int i = 0; i < NumIntRegs; ++i)
+120         intRegs[i] = tc.readIntRegFlat(i);
+121     SERIALIZE_ARRAY(intRegs, NumIntRegs);
+122 
+123 #ifdef ISA_HAS_CC_REGS
+124     CCReg ccRegs[NumCCRegs];
+125     for (int i = 0; i < NumCCRegs; ++i)
+126         ccRegs[i] = tc.readCCRegFlat(i);
+127     SERIALIZE_ARRAY(ccRegs, NumCCRegs);
+128 #endif
+129 
+130     tc.pcState().serialize(os);
+131 
+132     // thread_num and cpu_id are deterministic from the config
+133 }
+\end{DoxyCode}
+\hypertarget{thread__context_8hh_a5f8808341daf3a8e3d0deb3852b1855f}{
+\index{thread\_\-context.hh@{thread\_\-context.hh}!takeOverFrom@{takeOverFrom}}
+\index{takeOverFrom@{takeOverFrom}!thread_context.hh@{thread\_\-context.hh}}
+\subsubsection[{takeOverFrom}]{\setlength{\rightskip}{0pt plus 5cm}void takeOverFrom ({\bf ThreadContext} \& {\em new\_\-tc}, \/  {\bf ThreadContext} \& {\em old\_\-tc})}}
+\label{thread__context_8hh_a5f8808341daf3a8e3d0deb3852b1855f}
+Copy state between thread contexts in preparation for CPU handover.
+
+\begin{DoxyNote}{覚え書き}
+This method modifies the old thread contexts as well as the new thread context. The old thread context will have its quiesce event descheduled if it is scheduled and its status set to halted.
+\end{DoxyNote}
+
+\begin{DoxyParams}{引数}
+\item[{\em new\_\-tc}]Destination \hyperlink{classThreadContext}{ThreadContext}. \item[{\em old\_\-tc}]Source \hyperlink{classThreadContext}{ThreadContext}. \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+168 {
+169     assert(ntc.getProcessPtr() == otc.getProcessPtr());
+170 
+171     ntc.setStatus(otc.status());
+172     ntc.copyArchRegs(&otc);
+173     ntc.setContextId(otc.contextId());
+174     ntc.setThreadId(otc.threadId());
+175 
+176     if (FullSystem) {
+177         assert(ntc.getSystemPtr() == otc.getSystemPtr());
+178 
+179         BaseCPU *ncpu(ntc.getCpuPtr());
+180         assert(ncpu);
+181         EndQuiesceEvent *oqe(otc.getQuiesceEvent());
+182         assert(oqe);
+183         assert(oqe->tc == &otc);
+184 
+185         BaseCPU *ocpu(otc.getCpuPtr());
+186         assert(ocpu);
+187         EndQuiesceEvent *nqe(ntc.getQuiesceEvent());
+188         assert(nqe);
+189         assert(nqe->tc == &ntc);
+190 
+191         if (oqe->scheduled()) {
+192             ncpu->schedule(nqe, oqe->when());
+193             ocpu->deschedule(oqe);
+194         }
+195     }
+196 
+197     otc.setStatus(ThreadContext::Halted);
+198 }
+\end{DoxyCode}
+\hypertarget{thread__context_8hh_aab2bbbf3710db70a2886ed6c49038af7}{
+\index{thread\_\-context.hh@{thread\_\-context.hh}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!thread_context.hh@{thread\_\-context.hh}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}void unserialize ({\bf ThreadContext} \& {\em tc}, \/  {\bf Checkpoint} $\ast$ {\em cp}, \/  const std::string \& {\em section})}}
+\label{thread__context_8hh_aab2bbbf3710db70a2886ed6c49038af7}
+
+
+
+\begin{DoxyCode}
+137 {
+138     using namespace TheISA;
+139 
+140     FloatRegBits floatRegs[NumFloatRegs];
+141     // This is a bit ugly, but needed to maintain backwards
+142     // compatibility.
+143     arrayParamIn(cp, section, "floatRegs.i", floatRegs, NumFloatRegs);
+144     for (int i = 0; i < NumFloatRegs; ++i)
+145         tc.setFloatRegBitsFlat(i, floatRegs[i]);
+146 
+147     IntReg intRegs[NumIntRegs];
+148     UNSERIALIZE_ARRAY(intRegs, NumIntRegs);
+149     for (int i = 0; i < NumIntRegs; ++i)
+150         tc.setIntRegFlat(i, intRegs[i]);
+151 
+152 #ifdef ISA_HAS_CC_REGS
+153     CCReg ccRegs[NumCCRegs];
+154     UNSERIALIZE_ARRAY(ccRegs, NumCCRegs);
+155     for (int i = 0; i < NumCCRegs; ++i)
+156         tc.setCCRegFlat(i, ccRegs[i]);
+157 #endif
+158 
+159     PCState pcState;
+160     pcState.unserialize(cp, section);
+161     tc.pcState(pcState);
+162 
+163     // thread_num and cpu_id are deterministic from the config
+164 }
+\end{DoxyCode}

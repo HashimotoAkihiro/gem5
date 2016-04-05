@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/system/CacheMemory.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/system/CacheMemory.hh</h1><a href="CacheMemory_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 1999-2012 Mark D. Hill and David A. Wood</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> */</span>
+<a name="l00028"></a>00028 
+<a name="l00029"></a>00029 <span class="preprocessor">#ifndef __MEM_RUBY_SYSTEM_CACHEMEMORY_HH__</span>
+<a name="l00030"></a>00030 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_SYSTEM_CACHEMEMORY_HH__</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span>
+<a name="l00032"></a>00032 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;<a class="code" href="hashmap_8hh.html">base/hashmap.hh</a>&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;mem/protocol/CacheResourceType.hh&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;mem/protocol/CacheRequestType.hh&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;mem/protocol/RubyRequest.hh&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="DataBlock_8hh.html">mem/ruby/common/DataBlock.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="CacheRecorder_8hh.html">mem/ruby/recorder/CacheRecorder.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="AbstractCacheEntry_8hh.html">mem/ruby/slicc_interface/AbstractCacheEntry.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="RubySlicc__ComponentMapping_8hh.html">mem/ruby/slicc_interface/RubySlicc_ComponentMapping.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="BankedArray_8hh.html">mem/ruby/system/BankedArray.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="LRUPolicy_8hh.html">mem/ruby/system/LRUPolicy.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="PseudoLRUPolicy_8hh.html">mem/ruby/system/PseudoLRUPolicy.hh</a>&quot;</span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;params/RubyCache.hh&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00049"></a>00049 
+<a name="l00050"></a><a class="code" href="classCacheMemory.html">00050</a> <span class="keyword">class </span><a class="code" href="classCacheMemory.html">CacheMemory</a> : <span class="keyword">public</span> <a class="code" href="classSimObject.html">SimObject</a>
+<a name="l00051"></a>00051 {
+<a name="l00052"></a>00052   <span class="keyword">public</span>:
+<a name="l00053"></a><a class="code" href="classCacheMemory.html#ae5279e63669c110c0bd87dca490f126d">00053</a>     <span class="keyword">typedef</span> RubyCacheParams <a class="code" href="classCacheMemory.html#ae5279e63669c110c0bd87dca490f126d">Params</a>;
+<a name="l00054"></a>00054     <a class="code" href="classCacheMemory.html#a6d47aa204a76f4d2c72e64478e365f80">CacheMemory</a>(<span class="keyword">const</span> <a class="code" href="classCacheMemory.html#ae5279e63669c110c0bd87dca490f126d">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00055"></a>00055     <a class="code" href="classCacheMemory.html#a331251b11e8dca3018962c8209d79385">~CacheMemory</a>();
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059     <span class="comment">// Public Methods</span>
+<a name="l00060"></a>00060     <span class="comment">// perform a cache access and see if we hit or not.  Return true on a hit.</span>
+<a name="l00061"></a>00061     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#acfc92479973bfd11ae0191fd798ba44c">tryCacheAccess</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, RubyRequestType <a class="code" href="namespaceX86ISA.html#ad805db903f6899f960fd9a982272096a">type</a>,
+<a name="l00062"></a>00062                         <a class="code" href="classDataBlock.html">DataBlock</a>*&amp; data_ptr);
+<a name="l00063"></a>00063 
+<a name="l00064"></a>00064     <span class="comment">// similar to above, but doesn&apos;t require full access check</span>
+<a name="l00065"></a>00065     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#aba82772b79ad7b17d20d195979043473">testCacheAccess</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, RubyRequestType <a class="code" href="namespaceX86ISA.html#ad805db903f6899f960fd9a982272096a">type</a>,
+<a name="l00066"></a>00066                          <a class="code" href="classDataBlock.html">DataBlock</a>*&amp; data_ptr);
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068     <span class="comment">// tests to see if an address is present in the cache</span>
+<a name="l00069"></a>00069     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#a38231bf6d0b58d2b0319faa5af3135ca">isTagPresent</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address) <span class="keyword">const</span>;
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071     <span class="comment">// Returns true if there is:</span>
+<a name="l00072"></a>00072     <span class="comment">//   a) a tag match on this address or there is</span>
+<a name="l00073"></a>00073     <span class="comment">//   b) an unused line in the same cache &quot;way&quot;</span>
+<a name="l00074"></a>00074     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#add6ef1702fc19966e797bbebabf3cefa">cacheAvail</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address) <span class="keyword">const</span>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076     <span class="comment">// find an unused entry and sets the tag appropriate for the address</span>
+<a name="l00077"></a>00077     <a class="code" href="classAbstractCacheEntry.html">AbstractCacheEntry</a>* <a class="code" href="classCacheMemory.html#a3318e163b565401bb192c21040097d88">allocate</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, <a class="code" href="classAbstractCacheEntry.html">AbstractCacheEntry</a>* new_entry);
+<a name="l00078"></a><a class="code" href="classCacheMemory.html#a97904b9885a944606b8d74fe48fa427a">00078</a>     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#a97904b9885a944606b8d74fe48fa427a">allocateVoid</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address, <a class="code" href="classAbstractCacheEntry.html">AbstractCacheEntry</a>* new_entry)
+<a name="l00079"></a>00079     {
+<a name="l00080"></a>00080         <a class="code" href="classCacheMemory.html#a3318e163b565401bb192c21040097d88">allocate</a>(address, new_entry);
+<a name="l00081"></a>00081     }
+<a name="l00082"></a>00082 
+<a name="l00083"></a>00083     <span class="comment">// Explicitly free up this address</span>
+<a name="l00084"></a>00084     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#ad1a3e4943cc214363839148c7d94d6a4">deallocate</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086     <span class="comment">// Returns with the physical address of the conflicting cache line</span>
+<a name="l00087"></a>00087     <a class="code" href="classAddress.html">Address</a> <a class="code" href="classCacheMemory.html#ab7017a4e3b3db35ecd4f778ec0f61cdf">cacheProbe</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address) <span class="keyword">const</span>;
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089     <span class="comment">// looks an address up in the cache</span>
+<a name="l00090"></a>00090     <a class="code" href="classAbstractCacheEntry.html">AbstractCacheEntry</a>* <a class="code" href="classCacheMemory.html#a0c6ae9fa65dfd9c0786e2e5a39be4a1e">lookup</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00091"></a>00091     <span class="keyword">const</span> <a class="code" href="classAbstractCacheEntry.html">AbstractCacheEntry</a>* <a class="code" href="classCacheMemory.html#a0c6ae9fa65dfd9c0786e2e5a39be4a1e">lookup</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address) <span class="keyword">const</span>;
+<a name="l00092"></a>00092 
+<a name="l00093"></a><a class="code" href="classCacheMemory.html#ae69a59f28f0cfd099bf798cb6bb76356">00093</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classCacheMemory.html#ae69a59f28f0cfd099bf798cb6bb76356">getLatency</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classCacheMemory.html#a7599697a6c831356525c7d97604edd31">m_latency</a>; }
+<a name="l00094"></a>00094 
+<a name="l00095"></a>00095     <span class="comment">// Hook for checkpointing the contents of the cache</span>
+<a name="l00096"></a>00096     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#aa6672e5328a3421c133ea5590f4b562d">recordCacheContents</a>(<span class="keywordtype">int</span> cntrl, <a class="code" href="classCacheRecorder.html">CacheRecorder</a>* tr) <span class="keyword">const</span>;
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098     <span class="comment">// Set this address to most recently used</span>
+<a name="l00099"></a>00099     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#a82f197cef10db015c46d8e9f71275f47">setMRU</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address);
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#a046beba265922d99b46eb407d30fa14a">setLocked</a> (<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">int</span> context);
+<a name="l00102"></a>00102     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#abd16aaa7623b6ed38e15bde2b210f88a">clearLocked</a> (<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00103"></a>00103     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#aeb3a7f627af8ca6e8c5f9a878a01ea6f">isLocked</a> (<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>, <span class="keywordtype">int</span> context);
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105     <span class="comment">// Print cache contents</span>
+<a name="l00106"></a>00106     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#ac55fe386a101fbae38c716067c9966a0">print</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00107"></a>00107     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#a82b5740a65950cb6ba001dc852567da7">printData</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00110"></a>00110     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#a89094cea0857bcf3a16b429c0b3f8bfe">checkResourceAvailable</a>(CacheResourceType res, <a class="code" href="classAddress.html">Address</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>);
+<a name="l00111"></a>00111     <span class="keywordtype">void</span> <a class="code" href="classCacheMemory.html#a4798ec530ab14c83a290b9d372e31a9d">recordRequestType</a>(CacheRequestType requestType);
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113   <span class="keyword">public</span>:
+<a name="l00114"></a><a class="code" href="classCacheMemory.html#a47c68eff474df127a7e5e36b40965bdc">00114</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a47c68eff474df127a7e5e36b40965bdc">m_demand_hits</a>;
+<a name="l00115"></a><a class="code" href="classCacheMemory.html#a3f24c5bd8e3da8dbb584cf70d3de4f09">00115</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a3f24c5bd8e3da8dbb584cf70d3de4f09">m_demand_misses</a>;
+<a name="l00116"></a><a class="code" href="classCacheMemory.html#a6d06da3f5d70180680054f20a4862051">00116</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classCacheMemory.html#a6d06da3f5d70180680054f20a4862051">m_demand_accesses</a>;
+<a name="l00117"></a>00117 
+<a name="l00118"></a><a class="code" href="classCacheMemory.html#af2b41944a982febf9af12d438f137b87">00118</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#af2b41944a982febf9af12d438f137b87">m_sw_prefetches</a>;
+<a name="l00119"></a><a class="code" href="classCacheMemory.html#a5ae5fe863837358e6e9a60e0b702fb94">00119</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a5ae5fe863837358e6e9a60e0b702fb94">m_hw_prefetches</a>;
+<a name="l00120"></a><a class="code" href="classCacheMemory.html#a549248150d50bed3e4d815869edee7de">00120</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classCacheMemory.html#a549248150d50bed3e4d815869edee7de">m_prefetches</a>;
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="classCacheMemory.html#a83d90a771e3ee60100ef1730f1a118b1">00122</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classCacheMemory.html#a83d90a771e3ee60100ef1730f1a118b1">m_accessModeType</a>;
+<a name="l00123"></a>00123 
+<a name="l00124"></a><a class="code" href="classCacheMemory.html#a0f63a1bbaf1dee7c23ab3ac06a80d775">00124</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a0f63a1bbaf1dee7c23ab3ac06a80d775">numDataArrayReads</a>;
+<a name="l00125"></a><a class="code" href="classCacheMemory.html#a97557f8d2f957731bdea9fd4537a140e">00125</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a97557f8d2f957731bdea9fd4537a140e">numDataArrayWrites</a>;
+<a name="l00126"></a><a class="code" href="classCacheMemory.html#a3e723404e0119a13e13ca25460179249">00126</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a3e723404e0119a13e13ca25460179249">numTagArrayReads</a>;
+<a name="l00127"></a><a class="code" href="classCacheMemory.html#a3e43debd337a55436570324681b20000">00127</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a3e43debd337a55436570324681b20000">numTagArrayWrites</a>;
+<a name="l00128"></a>00128 
+<a name="l00129"></a><a class="code" href="classCacheMemory.html#aa8cfd5b3d3480062677e2229d8573483">00129</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#aa8cfd5b3d3480062677e2229d8573483">numTagArrayStalls</a>;
+<a name="l00130"></a><a class="code" href="classCacheMemory.html#a4034a29f6d2be3493f40aaa13ca6c77a">00130</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classCacheMemory.html#a4034a29f6d2be3493f40aaa13ca6c77a">numDataArrayStalls</a>;
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132   <span class="keyword">private</span>:
+<a name="l00133"></a>00133     <span class="comment">// convert a Address to its location in the cache</span>
+<a name="l00134"></a>00134     <a class="code" href="TypeDefines_8hh.html#a39642de41f3574937f399f4fab25ba18">Index</a> <a class="code" href="classCacheMemory.html#ab8af076beefca7ea17d6ffbf639456db">addressToCacheSet</a>(<span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; address) <span class="keyword">const</span>;
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136     <span class="comment">// Given a cache tag: returns the index of the tag in a set.</span>
+<a name="l00137"></a>00137     <span class="comment">// returns -1 if the tag is not found.</span>
+<a name="l00138"></a>00138     <span class="keywordtype">int</span> <a class="code" href="classCacheMemory.html#ac32dac48596332a7537a1e3c31cfd3c0">findTagInSet</a>(<a class="code" href="TypeDefines_8hh.html#a39642de41f3574937f399f4fab25ba18">Index</a> line, <span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; tag) <span class="keyword">const</span>;
+<a name="l00139"></a>00139     <span class="keywordtype">int</span> <a class="code" href="classCacheMemory.html#ad7d6ceb226fbf63dc2c91a61aa57d98a">findTagInSetIgnorePermissions</a>(<a class="code" href="TypeDefines_8hh.html#a39642de41f3574937f399f4fab25ba18">Index</a> cacheSet,
+<a name="l00140"></a>00140                                       <span class="keyword">const</span> <a class="code" href="classAddress.html">Address</a>&amp; tag) <span class="keyword">const</span>;
+<a name="l00141"></a>00141 
+<a name="l00142"></a>00142     <span class="comment">// Private copy constructor and assignment operator</span>
+<a name="l00143"></a>00143     <a class="code" href="classCacheMemory.html#a6d47aa204a76f4d2c72e64478e365f80">CacheMemory</a>(<span class="keyword">const</span> <a class="code" href="classCacheMemory.html">CacheMemory</a>&amp; obj);
+<a name="l00144"></a>00144     <a class="code" href="classCacheMemory.html">CacheMemory</a>&amp; <a class="code" href="classCacheMemory.html#a3ba0e3a7cc49aede911aa79977fc4128">operator=</a>(<span class="keyword">const</span> <a class="code" href="classCacheMemory.html">CacheMemory</a>&amp; obj);
+<a name="l00145"></a>00145 
+<a name="l00146"></a>00146   <span class="keyword">private</span>:
+<a name="l00147"></a><a class="code" href="classCacheMemory.html#a7599697a6c831356525c7d97604edd31">00147</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classCacheMemory.html#a7599697a6c831356525c7d97604edd31">m_latency</a>;
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149     <span class="comment">// Data Members (m_prefix)</span>
+<a name="l00150"></a><a class="code" href="classCacheMemory.html#a0c3e90f32ef2e92b91ca006d44c12374">00150</a>     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#a0c3e90f32ef2e92b91ca006d44c12374">m_is_instruction_only_cache</a>;
+<a name="l00151"></a>00151 
+<a name="l00152"></a>00152     <span class="comment">// The first index is the # of cache lines.</span>
+<a name="l00153"></a>00153     <span class="comment">// The second index is the the amount associativity.</span>
+<a name="l00154"></a><a class="code" href="classCacheMemory.html#a546a29030c6970bfbc1197ae75826bc4">00154</a>     m5::hash_map&lt;Address, int&gt; <a class="code" href="classCacheMemory.html#a546a29030c6970bfbc1197ae75826bc4">m_tag_index</a>;
+<a name="l00155"></a><a class="code" href="classCacheMemory.html#a07906f5e66f388186af8b84540922dcd">00155</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::vector&lt;AbstractCacheEntry*&gt;</a> &gt; <a class="code" href="classCacheMemory.html#a07906f5e66f388186af8b84540922dcd">m_cache</a>;
+<a name="l00156"></a>00156 
+<a name="l00157"></a><a class="code" href="classCacheMemory.html#a37cdae2a2fe6c2b1a976cf8b3ae19f18">00157</a>     <a class="code" href="classAbstractReplacementPolicy.html">AbstractReplacementPolicy</a> *<a class="code" href="classCacheMemory.html#a37cdae2a2fe6c2b1a976cf8b3ae19f18">m_replacementPolicy_ptr</a>;
+<a name="l00158"></a>00158 
+<a name="l00159"></a><a class="code" href="classCacheMemory.html#a3fe8de4d2516b188e76e11c5213d8eaf">00159</a>     <a class="code" href="classBankedArray.html">BankedArray</a> <a class="code" href="classCacheMemory.html#a3fe8de4d2516b188e76e11c5213d8eaf">dataArray</a>;
+<a name="l00160"></a><a class="code" href="classCacheMemory.html#a68d742104ef77f83fee4d7832cc873fe">00160</a>     <a class="code" href="classBankedArray.html">BankedArray</a> <a class="code" href="classCacheMemory.html#a68d742104ef77f83fee4d7832cc873fe">tagArray</a>;
+<a name="l00161"></a>00161 
+<a name="l00162"></a><a class="code" href="classCacheMemory.html#a378c30d8d9ca0215ac61ea0974082ca0">00162</a>     <span class="keywordtype">int</span> <a class="code" href="classCacheMemory.html#a378c30d8d9ca0215ac61ea0974082ca0">m_cache_size</a>;
+<a name="l00163"></a><a class="code" href="classCacheMemory.html#a89cf1f810dd6f5f9da8a2d588418ec49">00163</a>     std::string <a class="code" href="classCacheMemory.html#a89cf1f810dd6f5f9da8a2d588418ec49">m_policy</a>;
+<a name="l00164"></a><a class="code" href="classCacheMemory.html#a8773f9a442fa00b24f4c65c86dcd25d6">00164</a>     <span class="keywordtype">int</span> <a class="code" href="classCacheMemory.html#a8773f9a442fa00b24f4c65c86dcd25d6">m_cache_num_sets</a>;
+<a name="l00165"></a><a class="code" href="classCacheMemory.html#a6b2e7aa0964d945df6b08fbbdd316f47">00165</a>     <span class="keywordtype">int</span> <a class="code" href="classCacheMemory.html#a6b2e7aa0964d945df6b08fbbdd316f47">m_cache_num_set_bits</a>;
+<a name="l00166"></a><a class="code" href="classCacheMemory.html#a0dcca2db5987fbc671fc1fef4169ebed">00166</a>     <span class="keywordtype">int</span> <a class="code" href="classCacheMemory.html#a0dcca2db5987fbc671fc1fef4169ebed">m_cache_assoc</a>;
+<a name="l00167"></a><a class="code" href="classCacheMemory.html#ab350a6d3428acab3678b17bbd2d00c4b">00167</a>     <span class="keywordtype">int</span> <a class="code" href="classCacheMemory.html#ab350a6d3428acab3678b17bbd2d00c4b">m_start_index_bit</a>;
+<a name="l00168"></a><a class="code" href="classCacheMemory.html#aa08c2cb7bf60a80e6be95267b1060509">00168</a>     <span class="keywordtype">bool</span> <a class="code" href="classCacheMemory.html#aa08c2cb7bf60a80e6be95267b1060509">m_resource_stalls</a>;
+<a name="l00169"></a>00169 };
+<a name="l00170"></a>00170 
+<a name="l00171"></a>00171 std::ostream&amp; <a class="code" href="namespaceGenericISA.html#a960fce0270870fc775ac34cc401036ba">operator&lt;&lt;</a>(std::ostream&amp; out, <span class="keyword">const</span> <a class="code" href="classCacheMemory.html">CacheMemory</a>&amp; obj);
+<a name="l00172"></a>00172 
+<a name="l00173"></a>00173 <span class="preprocessor">#endif // __MEM_RUBY_SYSTEM_CACHEMEMORY_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

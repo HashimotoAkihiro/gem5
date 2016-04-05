@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/mips/tlb.cc</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>arch/mips/tlb.cc</h1><code>#include &lt;string&gt;</code><br/>
+<code>#include &lt;vector&gt;</code><br/>
+<code>#include &quot;<a class="el" href="arch_2mips_2faults_8hh_source.html">arch/mips/faults.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="mips_2pagetable_8hh_source.html">arch/mips/pagetable.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="mips_2pra__constants_8hh_source.html">arch/mips/pra_constants.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="arch_2mips_2tlb_8hh_source.html">arch/mips/tlb.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="mips_2utility_8hh_source.html">arch/mips/utility.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="inifile_8hh_source.html">base/inifile.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="str_8hh_source.html">base/str.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="trace_8hh_source.html">base/trace.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="thread__context_8hh_source.html">cpu/thread_context.hh</a>&quot;</code><br/>
+<code>#include &quot;debug/MipsPRA.hh&quot;</code><br/>
+<code>#include &quot;debug/TLB.hh&quot;</code><br/>
+<code>#include &quot;<a class="el" href="page__table_8hh_source.html">mem/page_table.hh</a>&quot;</code><br/>
+<code>#include &quot;params/MipsTLB.hh&quot;</code><br/>
+<code>#include &quot;<a class="el" href="sim_2process_8hh_source.html">sim/process.hh</a>&quot;</code><br/>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2"><h2>関数</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top">static <a class="el" href="namespaceMipsISA.html#a19269c193c0c4866cdc4e5abd433f9fc">mode_type</a>&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="arch_2mips_2tlb_8cc.html#a93694b9783585edb92630e3c59fa5a46">getOperatingMode</a> (MiscReg Stat)</td></tr>
+</table>
+<hr/><h2>関数</h2>
+<a class="anchor" id="a93694b9783585edb92630e3c59fa5a46"></a><!-- doxytag: member="tlb.cc::getOperatingMode" ref="a93694b9783585edb92630e3c59fa5a46" args="(MiscReg Stat)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">static <a class="el" href="namespaceMipsISA.html#a19269c193c0c4866cdc4e5abd433f9fc">mode_type</a> getOperatingMode </td>
+          <td>(</td>
+          <td class="paramtype">MiscReg&nbsp;</td>
+          <td class="paramname"> <em>Stat</em></td>
+          <td>&nbsp;)&nbsp;</td>
+          <td><code> [inline, static]</code></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p><div class="fragment"><pre class="fragment"><a name="l00064"></a>00064 {
+<a name="l00065"></a>00065     <span class="keywordflow">if</span> ((Stat &amp; 0x10000006) != 0 || (Stat &amp; 0x18) ==0) {
+<a name="l00066"></a>00066         <span class="keywordflow">return</span> <a class="code" href="namespaceAlphaISA.html#a19269c193c0c4866cdc4e5abd433f9fcaf24dd055e83953a0eac0581789b006d0">mode_kernel</a>;
+<a name="l00067"></a>00067     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((Stat &amp; 0x18) == 0x8) {
+<a name="l00068"></a>00068         <span class="keywordflow">return</span> <a class="code" href="namespaceAlphaISA.html#a19269c193c0c4866cdc4e5abd433f9fcaba0f60b6ad51837713241f76e66422c1">mode_supervisor</a>;
+<a name="l00069"></a>00069     } <span class="keywordflow">else</span> <span class="keywordflow">if</span> ((Stat &amp; 0x18) == 0x10) {
+<a name="l00070"></a>00070         <span class="keywordflow">return</span> <a class="code" href="namespaceAlphaISA.html#a19269c193c0c4866cdc4e5abd433f9fcac1644b8fa5c8123b58d6ca56eda84972">mode_user</a>;
+<a name="l00071"></a>00071     } <span class="keywordflow">else</span> {
+<a name="l00072"></a>00072         <span class="keywordflow">return</span> <a class="code" href="namespaceAlphaISA.html#a19269c193c0c4866cdc4e5abd433f9fca83ebd1b275cc6ddc8dfea9c58297859b">mode_number</a>;
+<a name="l00073"></a>00073     }
+<a name="l00074"></a>00074 }
+</pre></div></p>
+
+</div>
+</div>
+</div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/etherlink.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/etherlink.hh</h1><a href="etherlink_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="comment">/* @file</span>
+<a name="l00032"></a>00032 <span class="comment"> * Device module for modelling a fixed bandwidth full duplex ethernet link</span>
+<a name="l00033"></a>00033 <span class="comment"> */</span>
+<a name="l00034"></a>00034 
+<a name="l00035"></a>00035 <span class="preprocessor">#ifndef __DEV_ETHERLINK_HH__</span>
+<a name="l00036"></a>00036 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_ETHERLINK_HH__</span>
+<a name="l00037"></a>00037 <span class="preprocessor"></span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="etherint_8hh.html">dev/etherint.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="etherobject_8hh.html">dev/etherobject.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="etherpkt_8hh.html">dev/etherpkt.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;params/EtherLink.hh&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="keyword">class </span><a class="code" href="classEtherDump.html">EtherDump</a>;
+<a name="l00047"></a>00047 <span class="keyword">class </span><a class="code" href="classCheckpoint.html">Checkpoint</a>;
+<a name="l00048"></a>00048 <span class="comment">/*</span>
+<a name="l00049"></a>00049 <span class="comment"> * Model for a fixed bandwidth full duplex ethernet link</span>
+<a name="l00050"></a>00050 <span class="comment"> */</span>
+<a name="l00051"></a><a class="code" href="classEtherLink.html">00051</a> <span class="keyword">class </span><a class="code" href="classEtherLink.html">EtherLink</a> : <span class="keyword">public</span> <a class="code" href="classEtherObject.html">EtherObject</a>
+<a name="l00052"></a>00052 {
+<a name="l00053"></a>00053   <span class="keyword">protected</span>:
+<a name="l00054"></a><a class="code" href="classEtherLink.html#ae08a8e78387040792a618717ab8c6332">00054</a>     <span class="keyword">class </span><a class="code" href="classEtherLink_1_1Interface.html">Interface</a>;
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classLinkDelayEvent.html">LinkDelayEvent</a>;
+<a name="l00057"></a>00057      <span class="comment">/*</span>
+<a name="l00058"></a>00058 <span class="comment">      * Model for a single uni-directional link</span>
+<a name="l00059"></a>00059 <span class="comment">      */</span>
+<a name="l00060"></a><a class="code" href="classEtherLink_1_1Link.html">00060</a>     <span class="keyword">class </span><a class="code" href="classEtherLink_1_1Link.html">Link</a>
+<a name="l00061"></a>00061     {
+<a name="l00062"></a>00062       <span class="keyword">protected</span>:
+<a name="l00063"></a><a class="code" href="classEtherLink_1_1Link.html#acdd07b78b47375ca2a51a7a956b1697f">00063</a>         std::string <a class="code" href="classEtherLink_1_1Link.html#acdd07b78b47375ca2a51a7a956b1697f">objName</a>;
+<a name="l00064"></a>00064 
+<a name="l00065"></a><a class="code" href="classEtherLink_1_1Link.html#a1fab3300fd90e77f99da75330c48ea73">00065</a>         <a class="code" href="classEtherLink.html">EtherLink</a> *<a class="code" href="classEtherLink_1_1Link.html#a1fab3300fd90e77f99da75330c48ea73">parent</a>;
+<a name="l00066"></a><a class="code" href="classEtherLink_1_1Link.html#a7106e2abc437ad981830d14176d15f09">00066</a>         <span class="keywordtype">int</span> <a class="code" href="classEtherLink_1_1Link.html#a7106e2abc437ad981830d14176d15f09">number</a>;
+<a name="l00067"></a>00067 
+<a name="l00068"></a><a class="code" href="classEtherLink_1_1Link.html#a2bd49a849a4ba011c246866c28d079c2">00068</a>         <a class="code" href="classEtherLink_1_1Interface.html">Interface</a> *<a class="code" href="classEtherLink_1_1Link.html#a2bd49a849a4ba011c246866c28d079c2">txint</a>;
+<a name="l00069"></a><a class="code" href="classEtherLink_1_1Link.html#a7af3399cea116d5b38428072fe507c10">00069</a>         <a class="code" href="classEtherLink_1_1Interface.html">Interface</a> *<a class="code" href="classEtherLink_1_1Link.html#a7af3399cea116d5b38428072fe507c10">rxint</a>;
+<a name="l00070"></a>00070 
+<a name="l00071"></a><a class="code" href="classEtherLink_1_1Link.html#ab03ddf4a7f12da61f07e2e0c644ef06c">00071</a>         <span class="keywordtype">double</span> <a class="code" href="classEtherLink_1_1Link.html#ab03ddf4a7f12da61f07e2e0c644ef06c">ticksPerByte</a>;
+<a name="l00072"></a><a class="code" href="classEtherLink_1_1Link.html#aa852d273392d09176609c253d66e4848">00072</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEtherLink_1_1Link.html#aa852d273392d09176609c253d66e4848">linkDelay</a>;
+<a name="l00073"></a><a class="code" href="classEtherLink_1_1Link.html#a8a7e67d4dbdb187bf31e657e093a27a6">00073</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classEtherLink_1_1Link.html#a8a7e67d4dbdb187bf31e657e093a27a6">delayVar</a>;
+<a name="l00074"></a><a class="code" href="classEtherLink_1_1Link.html#ad5a0f1baca11c9598fdb6996bd03ac8c">00074</a>         <a class="code" href="classEtherDump.html">EtherDump</a> *<a class="code" href="classEtherLink_1_1Link.html#ad5a0f1baca11c9598fdb6996bd03ac8c">dump</a>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076       <span class="keyword">protected</span>:
+<a name="l00077"></a>00077         <span class="comment">/*</span>
+<a name="l00078"></a>00078 <span class="comment">         * Transfer is complete</span>
+<a name="l00079"></a>00079 <span class="comment">         */</span>
+<a name="l00080"></a><a class="code" href="classEtherLink_1_1Link.html#a8bd0d3f7eb9e8d7189c7027028a5fac0">00080</a>         <a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> <a class="code" href="classEtherLink_1_1Link.html#a8bd0d3f7eb9e8d7189c7027028a5fac0">packet</a>;
+<a name="l00081"></a>00081         <span class="keywordtype">void</span> <a class="code" href="classEtherLink_1_1Link.html#ac06188e141ad966d9d760cfcfc258587">txDone</a>();
+<a name="l00082"></a><a class="code" href="classEtherLink_1_1Link.html#ad78ef1129ed0f85428598d01a78019f3">00082</a>         <span class="keyword">typedef</span> <a class="code" href="classEventWrapper.html">EventWrapper&lt;Link, &amp;Link::txDone&gt;</a> <a class="code" href="classEventWrapper.html">DoneEvent</a>;
+<a name="l00083"></a>00083         <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code" href="classEventWrapper.html#a2e9c5136d19b1a95fc427e0852deab5c">DoneEvent::process</a>();
+<a name="l00084"></a><a class="code" href="classEtherLink_1_1Link.html#a26b1662898553a34788c05e358c985ad">00084</a>         <a class="code" href="classEventWrapper.html">DoneEvent</a> <a class="code" href="classEtherLink_1_1Link.html#a26b1662898553a34788c05e358c985ad">doneEvent</a>;
+<a name="l00085"></a>00085 
+<a name="l00086"></a><a class="code" href="classEtherLink_1_1Link.html#ae08a8e78387040792a618717ab8c6332">00086</a>         <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classLinkDelayEvent.html">LinkDelayEvent</a>;
+<a name="l00087"></a>00087         <span class="keywordtype">void</span> <a class="code" href="classEtherLink_1_1Link.html#adbafd80b139f69d1879a399e64f4dda2">txComplete</a>(<a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> <a class="code" href="classEtherLink_1_1Link.html#a8bd0d3f7eb9e8d7189c7027028a5fac0">packet</a>);
+<a name="l00088"></a>00088 
+<a name="l00089"></a>00089       <span class="keyword">public</span>:
+<a name="l00090"></a>00090         <a class="code" href="classEtherLink_1_1Link.html#a008072dca8221a9e8633f7a692bf8529">Link</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="classEtherLink_1_1Link.html#a6490f765a824ced1cc94979609fe7e07">name</a>, <a class="code" href="classEtherLink.html">EtherLink</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>, <span class="keywordtype">int</span> num,
+<a name="l00091"></a>00091              <span class="keywordtype">double</span> rate, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> delay, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> delay_var, <a class="code" href="classEtherDump.html">EtherDump</a> *<a class="code" href="classEtherLink_1_1Link.html#ad5a0f1baca11c9598fdb6996bd03ac8c">dump</a>);
+<a name="l00092"></a><a class="code" href="classEtherLink_1_1Link.html#a2b6c85429ae38a687fbffb017cc773b9">00092</a>         <a class="code" href="classEtherLink_1_1Link.html#a2b6c85429ae38a687fbffb017cc773b9">~Link</a>() {}
+<a name="l00093"></a>00093 
+<a name="l00094"></a><a class="code" href="classEtherLink_1_1Link.html#a6490f765a824ced1cc94979609fe7e07">00094</a>         <span class="keyword">const</span> std::string <a class="code" href="classEtherLink_1_1Link.html#a6490f765a824ced1cc94979609fe7e07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classEtherLink_1_1Link.html#acdd07b78b47375ca2a51a7a956b1697f">objName</a>; }
+<a name="l00095"></a>00095 
+<a name="l00096"></a><a class="code" href="classEtherLink_1_1Link.html#ab4dfde754c39017408feef7294770646">00096</a>         <span class="keywordtype">bool</span> <a class="code" href="classEtherLink_1_1Link.html#ab4dfde754c39017408feef7294770646">busy</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<span class="keywordtype">bool</span>)<a class="code" href="classEtherLink_1_1Link.html#a8bd0d3f7eb9e8d7189c7027028a5fac0">packet</a>; }
+<a name="l00097"></a>00097         <span class="keywordtype">bool</span> <a class="code" href="classEtherLink_1_1Link.html#a740c6672cf526da9b2acc1f438ac11c7">transmit</a>(<a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> <a class="code" href="classEtherLink_1_1Link.html#a8bd0d3f7eb9e8d7189c7027028a5fac0">packet</a>);
+<a name="l00098"></a>00098 
+<a name="l00099"></a><a class="code" href="classEtherLink_1_1Link.html#a47597f43046767553e7abc1b22851548">00099</a>         <span class="keywordtype">void</span> <a class="code" href="classEtherLink_1_1Link.html#a47597f43046767553e7abc1b22851548">setTxInt</a>(<a class="code" href="classEtherLink_1_1Interface.html">Interface</a> *<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) { assert(!<a class="code" href="classEtherLink_1_1Link.html#a2bd49a849a4ba011c246866c28d079c2">txint</a>); <a class="code" href="classEtherLink_1_1Link.html#a2bd49a849a4ba011c246866c28d079c2">txint</a> = i; }
+<a name="l00100"></a><a class="code" href="classEtherLink_1_1Link.html#a26ca203034b85f4ca99fae85c5cf5819">00100</a>         <span class="keywordtype">void</span> <a class="code" href="classEtherLink_1_1Link.html#a26ca203034b85f4ca99fae85c5cf5819">setRxInt</a>(<a class="code" href="classEtherLink_1_1Interface.html">Interface</a> *<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) { assert(!<a class="code" href="classEtherLink_1_1Link.html#a7af3399cea116d5b38428072fe507c10">rxint</a>); <a class="code" href="classEtherLink_1_1Link.html#a7af3399cea116d5b38428072fe507c10">rxint</a> = i; }
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102         <span class="keywordtype">void</span> <a class="code" href="classEtherLink_1_1Link.html#ab4138b21b48e3371a8e20df72b675a88">serialize</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00103"></a>00103         <span class="keywordtype">void</span> <a class="code" href="classEtherLink_1_1Link.html#a147c320e3d6506edf5587a40cd8e430d">unserialize</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="namespaceX86ISA.html#a22fd87812cbb48f6d80b6cc7957490cf">base</a>, <a class="code" href="classCheckpoint.html">Checkpoint</a> *cp,
+<a name="l00104"></a>00104                                  <span class="keyword">const</span> std::string &amp;section);
+<a name="l00105"></a>00105     };
+<a name="l00106"></a>00106 
+<a name="l00107"></a>00107     <span class="comment">/*</span>
+<a name="l00108"></a>00108 <span class="comment">     * Interface at each end of the link</span>
+<a name="l00109"></a>00109 <span class="comment">     */</span>
+<a name="l00110"></a><a class="code" href="classEtherLink_1_1Interface.html">00110</a>     <span class="keyword">class </span><a class="code" href="classEtherLink_1_1Interface.html">Interface</a> : <span class="keyword">public</span> <a class="code" href="classEtherInt.html">EtherInt</a>
+<a name="l00111"></a>00111     {
+<a name="l00112"></a>00112       <span class="keyword">private</span>:
+<a name="l00113"></a><a class="code" href="classEtherLink_1_1Interface.html#aeae29843b3b3a523bfc7a2d85563d63b">00113</a>         <a class="code" href="classEtherLink_1_1Link.html">Link</a> *<a class="code" href="classEtherLink_1_1Interface.html#aeae29843b3b3a523bfc7a2d85563d63b">txlink</a>;
+<a name="l00114"></a>00114 
+<a name="l00115"></a>00115       <span class="keyword">public</span>:
+<a name="l00116"></a>00116         <a class="code" href="classEtherLink_1_1Interface.html#ac65fdcafd3edde87ea220afaf9ab4fee">Interface</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="classEtherInt.html#a324e8c54c4c5161913681a1a52fef959">name</a>, <a class="code" href="classEtherLink_1_1Link.html">Link</a> *<a class="code" href="classEtherLink_1_1Interface.html#aeae29843b3b3a523bfc7a2d85563d63b">txlink</a>, <a class="code" href="classEtherLink_1_1Link.html">Link</a> *rxlink);
+<a name="l00117"></a><a class="code" href="classEtherLink_1_1Interface.html#ad54e71348f53dfb5444979e9bfaf3164">00117</a>         <span class="keywordtype">bool</span> <a class="code" href="classEtherLink_1_1Interface.html#ad54e71348f53dfb5444979e9bfaf3164">recvPacket</a>(<a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> packet) { <span class="keywordflow">return</span> <a class="code" href="classEtherLink_1_1Interface.html#aeae29843b3b3a523bfc7a2d85563d63b">txlink</a>-&gt;<a class="code" href="classEtherLink_1_1Link.html#a740c6672cf526da9b2acc1f438ac11c7">transmit</a>(packet); }
+<a name="l00118"></a><a class="code" href="classEtherLink_1_1Interface.html#aa1f5a3f61e2513049769a9ca8b16ea2d">00118</a>         <span class="keywordtype">void</span> <a class="code" href="classEtherLink_1_1Interface.html#aa1f5a3f61e2513049769a9ca8b16ea2d">sendDone</a>() { <a class="code" href="classEtherInt.html#a9360307b9d65714e054bd693e249cf51">peer</a>-&gt;<a class="code" href="classEtherInt.html#a5a2f0c04ee61250a128bc992d2118390">sendDone</a>(); }
+<a name="l00119"></a><a class="code" href="classEtherLink_1_1Interface.html#a108b650255e1fff7409a075681e6f46b">00119</a>         <span class="keywordtype">bool</span> <a class="code" href="classEtherLink_1_1Interface.html#a108b650255e1fff7409a075681e6f46b">isBusy</a>() { <span class="keywordflow">return</span> <a class="code" href="classEtherLink_1_1Interface.html#aeae29843b3b3a523bfc7a2d85563d63b">txlink</a>-&gt;<a class="code" href="classEtherLink_1_1Link.html#ab4dfde754c39017408feef7294770646">busy</a>(); }
+<a name="l00120"></a>00120     };
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="classEtherLink.html#a50d0cd7994bfc3d687f328f1e292c7ab">00122</a>     <a class="code" href="classEtherLink_1_1Link.html">Link</a> *<a class="code" href="classEtherLink.html#a50d0cd7994bfc3d687f328f1e292c7ab">link</a>[2];
+<a name="l00123"></a><a class="code" href="classEtherLink.html#ac7117d0bc6bfdce6b73ab381c847909a">00123</a>     <a class="code" href="classEtherLink_1_1Interface.html">Interface</a> *<a class="code" href="classEtherLink.html#ac7117d0bc6bfdce6b73ab381c847909a">interface</a>[2];
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125   <span class="keyword">public</span>:
+<a name="l00126"></a><a class="code" href="classEtherLink.html#ae2a807ee6467a63dfb496f847857b7df">00126</a>     <span class="keyword">typedef</span> EtherLinkParams <a class="code" href="classEtherLink.html#ae2a807ee6467a63dfb496f847857b7df">Params</a>;
+<a name="l00127"></a>00127     <a class="code" href="classEtherLink.html#aff68549aceac9fb85c892f8c57b5b0cb">EtherLink</a>(<span class="keyword">const</span> <a class="code" href="classEtherLink.html#ae2a807ee6467a63dfb496f847857b7df">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00128"></a>00128     <span class="keyword">virtual</span> <a class="code" href="classEtherLink.html#a4e767b432033b81f3bd4352f8c9b046e">~EtherLink</a>();
+<a name="l00129"></a>00129 
+<a name="l00130"></a>00130     <span class="keyword">const</span> <a class="code" href="classEtherLink.html#ae2a807ee6467a63dfb496f847857b7df">Params</a> *
+<a name="l00131"></a><a class="code" href="classEtherLink.html#acd3c3feb78ae7a8f88fe0f110a718dff">00131</a>     <a class="code" href="classEtherLink.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00132"></a>00132 <span class="keyword">    </span>{
+<a name="l00133"></a>00133         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classEtherLink.html#ae2a807ee6467a63dfb496f847857b7df">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00134"></a>00134     }
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136     <span class="keyword">virtual</span> <a class="code" href="classEtherInt.html">EtherInt</a> *<a class="code" href="classEtherLink.html#a10260c5a583c0894dcdcd1ced50a53ae">getEthPort</a>(<span class="keyword">const</span> std::string &amp;if_name, <span class="keywordtype">int</span> idx);
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEtherLink.html#ad6272f80ae37e8331e3969b3f072a801">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00139"></a>00139     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classEtherLink.html#af100c4e9feabf3cd918619c88c718387">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00140"></a>00140 
+<a name="l00141"></a>00141 };
+<a name="l00142"></a>00142 
+<a name="l00143"></a>00143 <span class="preprocessor">#endif // __ETHERLINK_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

@@ -1,0 +1,124 @@
+\hypertarget{trietest_8cc}{
+\section{unittest/trietest.cc}
+\label{trietest_8cc}\index{unittest/trietest.cc@{unittest/trietest.cc}}
+}
+{\ttfamily \#include $<$cassert$>$}\par
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include \char`\"{}base/cprintf.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trie.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}unittest/unittest.hh\char`\"{}}\par
+\subsection*{型定義}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classTrie}{Trie}$<$ \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr}, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} $>$ \hyperlink{trietest_8cc_a82c6b4de8cc19d28ebbce9e503387103}{TestTrie}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{trietest_8cc_ae66f6b31b5ad750f1fe042a706a4e3d4}{main} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{trietest_8cc_a82c6b4de8cc19d28ebbce9e503387103}{
+\index{trietest.cc@{trietest.cc}!TestTrie@{TestTrie}}
+\index{TestTrie@{TestTrie}!trietest.cc@{trietest.cc}}
+\subsubsection[{TestTrie}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf Trie}$<${\bf Addr}, {\bf uint32\_\-t}$>$ {\bf TestTrie}}}
+\label{trietest_8cc_a82c6b4de8cc19d28ebbce9e503387103}
+
+
+\subsection{関数}
+\hypertarget{trietest_8cc_ae66f6b31b5ad750f1fe042a706a4e3d4}{
+\index{trietest.cc@{trietest.cc}!main@{main}}
+\index{main@{main}!trietest.cc@{trietest.cc}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main ()}}
+\label{trietest_8cc_ae66f6b31b5ad750f1fe042a706a4e3d4}
+
+
+
+\begin{DoxyCode}
+45 {
+46     // Create an empty Ptr and verify it's data pointer is NULL.
+47     setCase("An empty trie.");
+48     TestTrie trie1;
+49     trie1.dump("Empty");
+50     cprintf("\n\n");
+51 
+52     setCase("A single entry.");
+53     trie1.insert(0x0123456789abcdef, 40, (uint32_t *)(uintptr_t)(1));
+54     trie1.dump("One entry");
+55     cprintf("\n\n");
+56 
+57     setCase("Two entries, one on the way to the other.");
+58     TestTrie trie2;
+59     trie2.insert(0x0123456789abcdef, 40, (uint32_t *)(uintptr_t)(1));
+60     trie2.insert(0x0123456789abcdef, 36, (uint32_t *)(uintptr_t)(2));
+61     trie2.dump("Two entries inline v1");
+62     cprintf("\n\n");
+63 
+64     TestTrie trie3;
+65     trie3.insert(0x0123456789abcdef, 36, (uint32_t *)(uintptr_t)(2));
+66     trie3.insert(0x0123456789abcdef, 40, (uint32_t *)(uintptr_t)(1));
+67     trie3.dump("Two entries inline v2");
+68     cprintf("\n\n");
+69 
+70     setCase("Two entries on different paths.");
+71     TestTrie trie4;
+72     trie4.insert(0x0123456789abcdef, 40, (uint32_t *)(uintptr_t)(2));
+73     trie4.insert(0x0123456776543210, 40, (uint32_t *)(uintptr_t)(1));
+74     trie4.dump("Two split entries");
+75     cprintf("\n\n");
+76 
+77     setCase("Skipping past an entry but not two.");
+78     TestTrie trie5;
+79     trie5.insert(0x0123456789000000, 40, (uint32_t *)(uintptr_t)(4));
+80     trie5.insert(0x0123000000000000, 40, (uint32_t *)(uintptr_t)(1));
+81     trie5.insert(0x0123456780000000, 40, (uint32_t *)(uintptr_t)(3));
+82     trie5.insert(0x0123456700000000, 40, (uint32_t *)(uintptr_t)(2));
+83     trie5.dump("Complex insertion");
+84     cprintf("\n\n");
+85 
+86     setCase("Looking things up.");
+87     EXPECT_EQ((uintptr_t)trie5.lookup(0x0123000000000000), 1);
+88     EXPECT_EQ((uintptr_t)trie5.lookup(0x0123456700000000), 2);
+89     EXPECT_EQ((uintptr_t)trie5.lookup(0x0123456780000000), 3);
+90     EXPECT_EQ((uintptr_t)trie5.lookup(0x0123456789000000), 4);
+91 
+92     setCase("Removing entries.");
+93     TestTrie trie6;
+94     TestTrie::Handle node1, node2;
+95     trie6.insert(0x0123456789000000, 40, (uint32_t *)(uintptr_t)(4));
+96     trie6.insert(0x0123000000000000, 40, (uint32_t *)(uintptr_t)(1));
+97     trie6.insert(0x0123456780000000, 40, (uint32_t *)(uintptr_t)(3));
+98     node1 = trie6.insert(0x0123456700000000, 40, (uint32_t *)(uintptr_t)(2));
+99     node2 = trie6.insert(0x0123456700000000, 32, (uint32_t *)(uintptr_t)(10));
+100     trie6.dump("Fill before removal");
+101     cprintf("\n\n");
+102 
+103     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123000000000000), 1);
+104     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456700000000), 10);
+105     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456780000000), 10);
+106     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456789000000), 10);
+107 
+108     trie6.remove(node2);
+109     trie6.dump("One node removed");
+110     cprintf("\n\n");
+111 
+112     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123000000000000), 1);
+113     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456700000000), 2);
+114     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456780000000), 3);
+115     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456789000000), 4);
+116 
+117     trie6.remove(node1);
+118     trie6.dump("Two nodes removed");
+119     cprintf("\n\n");
+120 
+121     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123000000000000), 1);
+122     EXPECT_EQ(trie6.lookup(0x0123456700000000), NULL);
+123     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456780000000), 3);
+124     EXPECT_EQ((uintptr_t)trie6.lookup(0x0123456789000000), 4);
+125 
+126     return UnitTest::printResults();
+127 }
+\end{DoxyCode}

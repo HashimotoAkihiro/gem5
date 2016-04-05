@@ -1,0 +1,116 @@
+\hypertarget{classArmISA_1_1FastInterrupt}{
+\section{クラス FastInterrupt}
+\label{classArmISA_1_1FastInterrupt}\index{ArmISA::FastInterrupt@{ArmISA::FastInterrupt}}
+}
+
+
+{\ttfamily \#include $<$faults.hh$>$}FastInterruptに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classArmISA_1_1FastInterrupt}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classArmISA_1_1FastInterrupt_afd7a21fdb010230ad53094254739dde8}{routeToMonitor} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\item 
+bool \hyperlink{classArmISA_1_1FastInterrupt_a16facd13ba8e6d15d2b865882c379d5f}{routeToHyp} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc}) const 
+\item 
+bool \hyperlink{classArmISA_1_1FastInterrupt_a92a741baab278ed029d84b0fe979e1b8}{abortDisable} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc})
+\item 
+bool \hyperlink{classArmISA_1_1FastInterrupt_a5f03475ae417a13eb48c2593f9f5b5a6}{fiqDisable} (\hyperlink{classThreadContext}{ThreadContext} $\ast$\hyperlink{namespaceArmISA_a5aff829af55e65b802d83dfcef4e9dd0}{tc})
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classArmISA_1_1FastInterrupt_a92a741baab278ed029d84b0fe979e1b8}{
+\index{ArmISA::FastInterrupt@{ArmISA::FastInterrupt}!abortDisable@{abortDisable}}
+\index{abortDisable@{abortDisable}!ArmISA::FastInterrupt@{ArmISA::FastInterrupt}}
+\subsubsection[{abortDisable}]{\setlength{\rightskip}{0pt plus 5cm}bool abortDisable ({\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1FastInterrupt_a92a741baab278ed029d84b0fe979e1b8}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_a1f1a5b662b9a505415dd5ef1f52892f3}{ArmFaultVals$<$ FastInterrupt $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1315 {
+1316     if (ArmSystem::haveSecurity(tc)) {
+1317         SCR scr = tc->readMiscRegNoEffect(MISCREG_SCR);
+1318         return (!scr.ns || scr.aw);
+1319     }
+1320     return true;
+1321 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1FastInterrupt_a5f03475ae417a13eb48c2593f9f5b5a6}{
+\index{ArmISA::FastInterrupt@{ArmISA::FastInterrupt}!fiqDisable@{fiqDisable}}
+\index{fiqDisable@{fiqDisable}!ArmISA::FastInterrupt@{ArmISA::FastInterrupt}}
+\subsubsection[{fiqDisable}]{\setlength{\rightskip}{0pt plus 5cm}bool fiqDisable ({\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1FastInterrupt_a5f03475ae417a13eb48c2593f9f5b5a6}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_a554b3d306d50e92e5d8102124be41fe7}{ArmFaultVals$<$ FastInterrupt $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1325 {
+1326     if (ArmSystem::haveVirtualization(tc)) {
+1327         return true;
+1328     } else if (ArmSystem::haveSecurity(tc)) {
+1329         SCR scr = tc->readMiscRegNoEffect(MISCREG_SCR);
+1330         return (!scr.ns || scr.fw);
+1331     }
+1332     return true;
+1333 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1FastInterrupt_a16facd13ba8e6d15d2b865882c379d5f}{
+\index{ArmISA::FastInterrupt@{ArmISA::FastInterrupt}!routeToHyp@{routeToHyp}}
+\index{routeToHyp@{routeToHyp}!ArmISA::FastInterrupt@{ArmISA::FastInterrupt}}
+\subsubsection[{routeToHyp}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToHyp ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1FastInterrupt_a16facd13ba8e6d15d2b865882c379d5f}
+
+
+\hyperlink{classArmISA_1_1ArmFault_a6fa7b734487c2a8da04a28ace414a355}{ArmFault}を再定義しています。
+
+
+\begin{DoxyCode}
+1301 {
+1302     bool toHyp;
+1303 
+1304     SCR  scr  = tc->readMiscRegNoEffect(MISCREG_SCR);
+1305     HCR  hcr  = tc->readMiscRegNoEffect(MISCREG_HCR);
+1306     CPSR cpsr = tc->readMiscRegNoEffect(MISCREG_CPSR);
+1307     // Determine whether IRQs are routed to Hyp mode.
+1308     toHyp = (!scr.fiq && hcr.fmo && !inSecureState(scr, cpsr)) ||
+1309             (cpsr.mode == MODE_HYP);
+1310     return toHyp;
+1311 }
+\end{DoxyCode}
+\hypertarget{classArmISA_1_1FastInterrupt_afd7a21fdb010230ad53094254739dde8}{
+\index{ArmISA::FastInterrupt@{ArmISA::FastInterrupt}!routeToMonitor@{routeToMonitor}}
+\index{routeToMonitor@{routeToMonitor}!ArmISA::FastInterrupt@{ArmISA::FastInterrupt}}
+\subsubsection[{routeToMonitor}]{\setlength{\rightskip}{0pt plus 5cm}bool routeToMonitor ({\bf ThreadContext} $\ast$ {\em tc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmISA_1_1FastInterrupt_afd7a21fdb010230ad53094254739dde8}
+
+
+\hyperlink{classArmISA_1_1ArmFaultVals_a9a0a467b98f43890c1d89d1d59a5923c}{ArmFaultVals$<$ FastInterrupt $>$}を再定義しています。
+
+
+\begin{DoxyCode}
+1289 {
+1290     assert(ArmSystem::haveSecurity(tc));
+1291     SCR scr = 0;
+1292     if (from64)
+1293         scr = tc->readMiscRegNoEffect(MISCREG_SCR_EL3);
+1294     else
+1295         scr = tc->readMiscRegNoEffect(MISCREG_SCR);
+1296     return scr.fiq;
+1297 }
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8hh}{faults.hh}\item 
+arch/arm/\hyperlink{arch_2arm_2faults_8cc}{faults.cc}\end{DoxyCompactItemize}

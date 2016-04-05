@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/abstract_mem.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/abstract_mem.hh</h1><a href="abstract__mem_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2001-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Ron Dreslinski</span>
+<a name="l00041"></a>00041 <span class="comment"> *          Andreas Hansson</span>
+<a name="l00042"></a>00042 <span class="comment"> */</span>
+<a name="l00043"></a>00043 
+<a name="l00049"></a>00049 <span class="preprocessor">#ifndef __ABSTRACT_MEMORY_HH__</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span><span class="preprocessor">#define __ABSTRACT_MEMORY_HH__</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="mem__object_8hh.html">mem/mem_object.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;params/AbstractMemory.hh&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="stats_8hh.html">sim/stats.hh</a>&quot;</span>
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057 <span class="keyword">class </span><a class="code" href="classSystem.html">System</a>;
+<a name="l00058"></a>00058 
+<a name="l00063"></a><a class="code" href="classLockedAddr.html">00063</a> <span class="keyword">class </span><a class="code" href="classLockedAddr.html">LockedAddr</a> {
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065   <span class="keyword">private</span>:
+<a name="l00066"></a>00066 
+<a name="l00067"></a>00067     <span class="comment">// on alpha, minimum LL/SC granularity is 16 bytes, so lower</span>
+<a name="l00068"></a>00068     <span class="comment">// bits need to masked off.</span>
+<a name="l00069"></a><a class="code" href="classLockedAddr.html#a27195273cc64bf014d6a9273a2eabd78">00069</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLockedAddr.html#a27195273cc64bf014d6a9273a2eabd78">Addr_Mask</a> = 0xf;
+<a name="l00070"></a>00070 
+<a name="l00071"></a>00071   <span class="keyword">public</span>:
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073     <span class="comment">// locked address</span>
+<a name="l00074"></a><a class="code" href="classLockedAddr.html#a0bb77b4ba61e408313e1118250f9278c">00074</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLockedAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076     <span class="comment">// locking hw context</span>
+<a name="l00077"></a><a class="code" href="classLockedAddr.html#a4ec643fb866cd5b538447f3a670c1d27">00077</a>     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classLockedAddr.html#a4ec643fb866cd5b538447f3a670c1d27">contextId</a>;
+<a name="l00078"></a>00078 
+<a name="l00079"></a><a class="code" href="classLockedAddr.html#a9b993266e635c8e28d2bc0a5123351b1">00079</a>     <span class="keyword">static</span> <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classLockedAddr.html#a9b993266e635c8e28d2bc0a5123351b1">mask</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> paddr) { <span class="keywordflow">return</span> (paddr &amp; ~<a class="code" href="classLockedAddr.html#a27195273cc64bf014d6a9273a2eabd78">Addr_Mask</a>); }
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081     <span class="comment">// check for matching execution context</span>
+<a name="l00082"></a><a class="code" href="classLockedAddr.html#a9c8aa9df464f2067efb9cf2aeeb2a5c0">00082</a>     <span class="keywordtype">bool</span> <a class="code" href="classLockedAddr.html#a9c8aa9df464f2067efb9cf2aeeb2a5c0">matchesContext</a>(<a class="code" href="classRequest.html">Request</a> *req)<span class="keyword"> const</span>
+<a name="l00083"></a>00083 <span class="keyword">    </span>{
+<a name="l00084"></a>00084         <span class="keywordflow">return</span> (<a class="code" href="classLockedAddr.html#a4ec643fb866cd5b538447f3a670c1d27">contextId</a> == req-&gt;<a class="code" href="classRequest.html#a651d5d14e7a4e95ebe6d7f5b8ee5a107">contextId</a>());
+<a name="l00085"></a>00085     }
+<a name="l00086"></a>00086 
+<a name="l00087"></a><a class="code" href="classLockedAddr.html#a4a46255d3609634bae77118998fc49c6">00087</a>     <a class="code" href="classLockedAddr.html#a4a46255d3609634bae77118998fc49c6">LockedAddr</a>(<a class="code" href="classRequest.html">Request</a> *req) : <a class="code" href="classLockedAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>(<a class="code" href="classLockedAddr.html#a9b993266e635c8e28d2bc0a5123351b1">mask</a>(req-&gt;getPaddr())),
+<a name="l00088"></a>00088                                <a class="code" href="classLockedAddr.html#a4ec643fb866cd5b538447f3a670c1d27">contextId</a>(req-&gt;<a class="code" href="classLockedAddr.html#a4ec643fb866cd5b538447f3a670c1d27">contextId</a>())
+<a name="l00089"></a>00089     {}
+<a name="l00090"></a>00090 
+<a name="l00091"></a>00091     <span class="comment">// constructor for unserialization use</span>
+<a name="l00092"></a><a class="code" href="classLockedAddr.html#af218a9f6d520788d30200f2dfdbdd2fc">00092</a>     <a class="code" href="classLockedAddr.html#a4a46255d3609634bae77118998fc49c6">LockedAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> _addr, <span class="keywordtype">int</span> _cid) : <a class="code" href="classLockedAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>(_addr), <a class="code" href="classLockedAddr.html#a4ec643fb866cd5b538447f3a670c1d27">contextId</a>(_cid)
+<a name="l00093"></a>00093     {}
+<a name="l00094"></a>00094 };
+<a name="l00095"></a>00095 
+<a name="l00103"></a><a class="code" href="classAbstractMemory.html">00103</a> <span class="keyword">class </span><a class="code" href="classAbstractMemory_1_1AbstractMemory.html">AbstractMemory</a> : <span class="keyword">public</span> <a class="code" href="classMemObject_1_1MemObject.html">MemObject</a>
+<a name="l00104"></a>00104 {
+<a name="l00105"></a>00105   <span class="keyword">protected</span>:
+<a name="l00106"></a>00106 
+<a name="l00107"></a>00107     <span class="comment">// Address range of this memory</span>
+<a name="l00108"></a><a class="code" href="classAbstractMemory.html#a194876a072a83a9fd59dde82e5213f0d">00108</a>     <a class="code" href="classAddrRange.html">AddrRange</a> <a class="code" href="classAbstractMemory.html#a194876a072a83a9fd59dde82e5213f0d">range</a>;
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110     <span class="comment">// Pointer to host memory used to implement this memory</span>
+<a name="l00111"></a><a class="code" href="classAbstractMemory.html#a9f8ed24d8442f662831d51922e7fddd2">00111</a>     uint8_t* <a class="code" href="classAbstractMemory.html#a9f8ed24d8442f662831d51922e7fddd2">pmemAddr</a>;
+<a name="l00112"></a>00112 
+<a name="l00113"></a>00113     <span class="comment">// Enable specific memories to be reported to the configuration table</span>
+<a name="l00114"></a><a class="code" href="classAbstractMemory.html#adee792d6bf567779ea9c16640af42784">00114</a>     <span class="keywordtype">bool</span> <a class="code" href="classAbstractMemory.html#adee792d6bf567779ea9c16640af42784">confTableReported</a>;
+<a name="l00115"></a>00115 
+<a name="l00116"></a>00116     <span class="comment">// Should the memory appear in the global address map</span>
+<a name="l00117"></a><a class="code" href="classAbstractMemory.html#a7302c053380cdccd0bdf63b25f73cbc5">00117</a>     <span class="keywordtype">bool</span> <a class="code" href="classAbstractMemory.html#a7302c053380cdccd0bdf63b25f73cbc5">inAddrMap</a>;
+<a name="l00118"></a>00118 
+<a name="l00119"></a><a class="code" href="classAbstractMemory.html#af35631da2ae35079d76e07c46fe78565">00119</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;LockedAddr&gt;</a> <a class="code" href="classAbstractMemory.html#af35631da2ae35079d76e07c46fe78565">lockedAddrList</a>;
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121     <span class="comment">// helper function for checkLockedAddrs(): we really want to</span>
+<a name="l00122"></a>00122     <span class="comment">// inline a quick check for an empty locked addr list (hopefully</span>
+<a name="l00123"></a>00123     <span class="comment">// the common case), and do the full list search (if necessary) in</span>
+<a name="l00124"></a>00124     <span class="comment">// this out-of-line function</span>
+<a name="l00125"></a>00125     <span class="keywordtype">bool</span> <a class="code" href="classAbstractMemory.html#af088ed7a675d24827a3300bdbc62e96a">checkLockedAddrList</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00126"></a>00126 
+<a name="l00127"></a>00127     <span class="comment">// Record the address of a load-locked operation so that we can</span>
+<a name="l00128"></a>00128     <span class="comment">// clear the execution context&apos;s lock flag if a matching store is</span>
+<a name="l00129"></a>00129     <span class="comment">// performed</span>
+<a name="l00130"></a>00130     <span class="keywordtype">void</span> <a class="code" href="classAbstractMemory.html#ad317aec11d97a72993e653755fa1c003">trackLoadLocked</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132     <span class="comment">// Compare a store address with any locked addresses so we can</span>
+<a name="l00133"></a>00133     <span class="comment">// clear the lock flag appropriately.  Return value set to &apos;false&apos;</span>
+<a name="l00134"></a>00134     <span class="comment">// if store operation should be suppressed (because it was a</span>
+<a name="l00135"></a>00135     <span class="comment">// conditional store and the address was no longer locked by the</span>
+<a name="l00136"></a>00136     <span class="comment">// requesting execution context), &apos;true&apos; otherwise.  Note that</span>
+<a name="l00137"></a>00137     <span class="comment">// this method must be called on *all* stores since even</span>
+<a name="l00138"></a>00138     <span class="comment">// non-conditional stores must clear any matching lock addresses.</span>
+<a name="l00139"></a><a class="code" href="classAbstractMemory.html#ab1136219a28374092ad398d673bd23e0">00139</a>     <span class="keywordtype">bool</span> <a class="code" href="classAbstractMemory.html#ab1136219a28374092ad398d673bd23e0">writeOK</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) {
+<a name="l00140"></a>00140         <a class="code" href="classRequest.html">Request</a> *req = pkt-&gt;<a class="code" href="classPacket.html#a956cd41d82347558b9c0a5b0474903f2" title="A pointer to the original request.">req</a>;
+<a name="l00141"></a>00141         <span class="keywordflow">if</span> (<a class="code" href="classAbstractMemory.html#af35631da2ae35079d76e07c46fe78565">lockedAddrList</a>.empty()) {
+<a name="l00142"></a>00142             <span class="comment">// no locked addrs: nothing to check, store_conditional fails</span>
+<a name="l00143"></a>00143             <span class="keywordtype">bool</span> isLLSC = pkt-&gt;<a class="code" href="classPacket.html#a8965874e960faf91ad4b6af8dbf31875">isLLSC</a>();
+<a name="l00144"></a>00144             <span class="keywordflow">if</span> (isLLSC) {
+<a name="l00145"></a>00145                 req-&gt;<a class="code" href="classRequest.html#ac73800a0bae4776befb9d416e95ea6d9">setExtraData</a>(0);
+<a name="l00146"></a>00146             }
+<a name="l00147"></a>00147             <span class="keywordflow">return</span> !isLLSC; <span class="comment">// only do write if not an sc</span>
+<a name="l00148"></a>00148         } <span class="keywordflow">else</span> {
+<a name="l00149"></a>00149             <span class="comment">// iterate over list...</span>
+<a name="l00150"></a>00150             <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#af088ed7a675d24827a3300bdbc62e96a">checkLockedAddrList</a>(pkt);
+<a name="l00151"></a>00151         }
+<a name="l00152"></a>00152     }
+<a name="l00153"></a>00153 
+<a name="l00155"></a><a class="code" href="classAbstractMemory.html#aa36971a2ea8ddd9d82832059cbc1b21f">00155</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classAbstractMemory.html#aa36971a2ea8ddd9d82832059cbc1b21f">bytesRead</a>;
+<a name="l00157"></a><a class="code" href="classAbstractMemory.html#a5e52eb4a824c1fb452d77dae86dfa970">00157</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classAbstractMemory.html#a5e52eb4a824c1fb452d77dae86dfa970">bytesInstRead</a>;
+<a name="l00159"></a><a class="code" href="classAbstractMemory.html#ab89ec4a4876671ad5186d0e9c0e674ed">00159</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classAbstractMemory.html#ab89ec4a4876671ad5186d0e9c0e674ed">bytesWritten</a>;
+<a name="l00161"></a><a class="code" href="classAbstractMemory.html#a27f442fbcb7bc7661412cc1d96ca51e7">00161</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classAbstractMemory.html#a27f442fbcb7bc7661412cc1d96ca51e7">numReads</a>;
+<a name="l00163"></a><a class="code" href="classAbstractMemory.html#acfd6a97aa6c2de05417a7403369e71c2">00163</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classAbstractMemory.html#acfd6a97aa6c2de05417a7403369e71c2">numWrites</a>;
+<a name="l00165"></a><a class="code" href="classAbstractMemory.html#a52bafd014022e75d82b4e0de25d3faf7">00165</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classAbstractMemory.html#a52bafd014022e75d82b4e0de25d3faf7">numOther</a>;
+<a name="l00167"></a><a class="code" href="classAbstractMemory.html#a14a0a95f3cd104b70d5b5c19c3ee8099">00167</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classAbstractMemory.html#a14a0a95f3cd104b70d5b5c19c3ee8099">bwRead</a>;
+<a name="l00169"></a><a class="code" href="classAbstractMemory.html#a00512ebb77886b71a63bd1595828d592">00169</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classAbstractMemory.html#a00512ebb77886b71a63bd1595828d592">bwInstRead</a>;
+<a name="l00171"></a><a class="code" href="classAbstractMemory.html#a8077d31db9c4f4f9e78888def6de8430">00171</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classAbstractMemory.html#a8077d31db9c4f4f9e78888def6de8430">bwWrite</a>;
+<a name="l00173"></a><a class="code" href="classAbstractMemory.html#a678ff8c93c78d0be1884742ef8aa41e8">00173</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classAbstractMemory.html#a678ff8c93c78d0be1884742ef8aa41e8">bwTotal</a>;
+<a name="l00174"></a>00174 
+<a name="l00179"></a><a class="code" href="classAbstractMemory.html#a1da55f4024bf8a9b14b64054841148b8">00179</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classAbstractMemory.html#a1da55f4024bf8a9b14b64054841148b8">_system</a>;
+<a name="l00180"></a>00180 
+<a name="l00181"></a>00181 
+<a name="l00182"></a>00182   <span class="keyword">private</span>:
+<a name="l00183"></a>00183 
+<a name="l00184"></a>00184     <span class="comment">// Prevent copying</span>
+<a name="l00185"></a>00185     <a class="code" href="classAbstractMemory.html#abe7c4ad03729f9b3dd25d3dc43361103">AbstractMemory</a>(<span class="keyword">const</span> <a class="code" href="classAbstractMemory_1_1AbstractMemory.html">AbstractMemory</a>&amp;);
+<a name="l00186"></a>00186 
+<a name="l00187"></a>00187     <span class="comment">// Prevent assignment</span>
+<a name="l00188"></a>00188     <a class="code" href="classAbstractMemory_1_1AbstractMemory.html">AbstractMemory</a>&amp; <a class="code" href="classAbstractMemory.html#a8524c3be63882adac591f591519f3a3b">operator=</a>(<span class="keyword">const</span> <a class="code" href="classAbstractMemory_1_1AbstractMemory.html">AbstractMemory</a>&amp;);
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190   <span class="keyword">public</span>:
+<a name="l00191"></a>00191 
+<a name="l00192"></a><a class="code" href="classAbstractMemory.html#ab4fcbcbcfef78d6bc871995f8eca40eb">00192</a>     <span class="keyword">typedef</span> AbstractMemoryParams <a class="code" href="classAbstractMemory.html#ab4fcbcbcfef78d6bc871995f8eca40eb">Params</a>;
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194     <a class="code" href="classAbstractMemory.html#abe7c4ad03729f9b3dd25d3dc43361103">AbstractMemory</a>(<span class="keyword">const</span> <a class="code" href="classAbstractMemory.html#ab4fcbcbcfef78d6bc871995f8eca40eb">Params</a>* <a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00195"></a><a class="code" href="classAbstractMemory.html#a7cff70b609d2b2b8ac45e1fe12b7bc96">00195</a>     <span class="keyword">virtual</span> <a class="code" href="classAbstractMemory.html#a7cff70b609d2b2b8ac45e1fe12b7bc96">~AbstractMemory</a>() {}
+<a name="l00196"></a>00196 
+<a name="l00203"></a><a class="code" href="classAbstractMemory.html#ac02f2a4d7312eb91f40980adfd4e31b2">00203</a>     <span class="keywordtype">bool</span> <a class="code" href="classAbstractMemory.html#ac02f2a4d7312eb91f40980adfd4e31b2">isNull</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()-&gt;null; }
+<a name="l00204"></a>00204 
+<a name="l00211"></a>00211     <span class="keywordtype">void</span> <a class="code" href="classAbstractMemory.html#a2651a6edea3b7884410b1abefac8b2de">setBackingStore</a>(uint8_t* pmem_addr);
+<a name="l00212"></a>00212 
+<a name="l00216"></a><a class="code" href="classAbstractMemory.html#a5b569455e6a1bd8629737fa02564a9a8">00216</a>     <span class="keyword">const</span> <a class="code" href="classstd_1_1list.html">std::list&lt;LockedAddr&gt;</a>&amp; <a class="code" href="classAbstractMemory.html#a5b569455e6a1bd8629737fa02564a9a8">getLockedAddrList</a>()<span class="keyword"> const</span>
+<a name="l00217"></a>00217 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#af35631da2ae35079d76e07c46fe78565">lockedAddrList</a>; }
+<a name="l00218"></a>00218 
+<a name="l00222"></a><a class="code" href="classAbstractMemory.html#a41e2bc27bc88cc5c7d1d8c7a905e7cfc">00222</a>     <span class="keywordtype">void</span> <a class="code" href="classAbstractMemory.html#a41e2bc27bc88cc5c7d1d8c7a905e7cfc">addLockedAddr</a>(<a class="code" href="classLockedAddr.html">LockedAddr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) { <a class="code" href="classAbstractMemory.html#af35631da2ae35079d76e07c46fe78565">lockedAddrList</a>.push_back(addr); }
+<a name="l00223"></a>00223 
+<a name="l00227"></a><a class="code" href="classAbstractMemory.html#a83984c42bc765168929779ed9a37ebe8">00227</a>     <a class="code" href="classSystem.html">System</a>* <a class="code" href="classAbstractMemory.html#a83984c42bc765168929779ed9a37ebe8">system</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#a1da55f4024bf8a9b14b64054841148b8">_system</a>; }
+<a name="l00228"></a>00228 
+<a name="l00235"></a><a class="code" href="classAbstractMemory.html#ad086bdc3ed123ad02169847d658bf5cb">00235</a>     <span class="keywordtype">void</span> <a class="code" href="classAbstractMemory.html#ad086bdc3ed123ad02169847d658bf5cb">system</a>(<a class="code" href="classSystem.html">System</a> *sys) { <a class="code" href="classAbstractMemory.html#a1da55f4024bf8a9b14b64054841148b8">_system</a> = sys; }
+<a name="l00236"></a>00236 
+<a name="l00237"></a>00237     <span class="keyword">const</span> <a class="code" href="classAbstractMemory.html#ab4fcbcbcfef78d6bc871995f8eca40eb">Params</a> *
+<a name="l00238"></a><a class="code" href="classAbstractMemory.html#acd3c3feb78ae7a8f88fe0f110a718dff">00238</a>     <a class="code" href="classAbstractMemory.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00239"></a>00239 <span class="keyword">    </span>{
+<a name="l00240"></a>00240         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classAbstractMemory.html#ab4fcbcbcfef78d6bc871995f8eca40eb">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00241"></a>00241     }
+<a name="l00242"></a>00242 
+<a name="l00248"></a>00248     <a class="code" href="classAddrRange.html">AddrRange</a> <a class="code" href="classAbstractMemory.html#aa3df62a6c92a30a0ab9247f8ec9e6e7a">getAddrRange</a>() <span class="keyword">const</span>;
+<a name="l00249"></a>00249 
+<a name="l00255"></a><a class="code" href="classAbstractMemory.html#a0b6868dbef44fc07f11d050eb59e5f7e">00255</a>     uint64_t <a class="code" href="classAbstractMemory.html#a0b6868dbef44fc07f11d050eb59e5f7e">size</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#a194876a072a83a9fd59dde82e5213f0d">range</a>.<a class="code" href="classAddrRange.html#ade0faa4f478bf244b35fb208d640c648">size</a>(); }
+<a name="l00256"></a>00256 
+<a name="l00262"></a><a class="code" href="classAbstractMemory.html#a85325674b7aed05d6b4e40a48563189b">00262</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classAbstractMemory.html#a85325674b7aed05d6b4e40a48563189b">start</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#a194876a072a83a9fd59dde82e5213f0d">range</a>.<a class="code" href="classAddrRange.html#a85325674b7aed05d6b4e40a48563189b">start</a>(); }
+<a name="l00263"></a>00263 
+<a name="l00270"></a><a class="code" href="classAbstractMemory.html#aca224861e09cf94a49088bb51bb02350">00270</a>     <span class="keywordtype">bool</span> <a class="code" href="classAbstractMemory.html#aca224861e09cf94a49088bb51bb02350">isConfReported</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#adee792d6bf567779ea9c16640af42784">confTableReported</a>; }
+<a name="l00271"></a>00271 
+<a name="l00278"></a><a class="code" href="classAbstractMemory.html#ad89e9980a76342142d63ff15deb19497">00278</a>     <span class="keywordtype">bool</span> <a class="code" href="classAbstractMemory.html#ad89e9980a76342142d63ff15deb19497">isInAddrMap</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classAbstractMemory.html#a7302c053380cdccd0bdf63b25f73cbc5">inAddrMap</a>; }
+<a name="l00279"></a>00279 
+<a name="l00287"></a>00287     <span class="keywordtype">void</span> <a class="code" href="classAbstractMemory.html#aac5d96736802cb79fb2287135bcc1dff">access</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00288"></a>00288 
+<a name="l00297"></a>00297     <span class="keywordtype">void</span> <a class="code" href="classAbstractMemory.html#ace845b5316308e12fd958fa5df09a8e8">functionalAccess</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00298"></a>00298 
+<a name="l00302"></a>00302     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classAbstractMemory.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00303"></a>00303 
+<a name="l00304"></a>00304 };
+<a name="l00305"></a>00305 
+<a name="l00306"></a>00306 <span class="preprocessor">#endif //__ABSTRACT_MEMORY_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

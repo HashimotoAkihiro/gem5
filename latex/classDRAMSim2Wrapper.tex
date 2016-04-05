@@ -1,0 +1,327 @@
+\hypertarget{classDRAMSim2Wrapper}{
+\section{クラス DRAMSim2Wrapper}
+\label{classDRAMSim2Wrapper}\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+}
+
+
+{\ttfamily \#include $<$dramsim2\_\-wrapper.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDRAMSim2Wrapper_afb9d47202b904139c97115bb9b11a1f2}{DRAMSim2Wrapper} (const std::string \&config\_\-file, const std::string \&system\_\-file, const std::string \&working\_\-dir, const std::string \&trace\_\-file, unsigned int memory\_\-size\_\-mb, bool enable\_\-debug)
+\item 
+\hyperlink{classDRAMSim2Wrapper_ae3508f5d656008b2209e4455d1649428}{$\sim$DRAMSim2Wrapper} ()
+\item 
+void \hyperlink{classDRAMSim2Wrapper_a0beecd7e864561c9474bc80e993556bf}{printStats} ()
+\item 
+void \hyperlink{classDRAMSim2Wrapper_ae7cabadc2302c5b4899c5db3b66b2549}{setCallbacks} (DRAMSim::TransactionCompleteCB $\ast$read\_\-callback, DRAMSim::TransactionCompleteCB $\ast$write\_\-callback)
+\item 
+bool \hyperlink{classDRAMSim2Wrapper_a34b4e8ea869adbb57c71b30c55e6f5bd}{canAccept} () const 
+\item 
+void \hyperlink{classDRAMSim2Wrapper_ae247cb4ece9657b8730c721920c23ab7}{enqueue} (bool is\_\-write, uint64\_\-t addr)
+\item 
+double \hyperlink{classDRAMSim2Wrapper_a6efe80b239837bd53bf8d8694c665993}{clockPeriod} () const 
+\item 
+unsigned int \hyperlink{classDRAMSim2Wrapper_a667ea9ca9654bced2242c6ccd77599ee}{queueSize} () const 
+\item 
+unsigned int \hyperlink{classDRAMSim2Wrapper_ad4ebfa7de0b48f306bf4d5e736843d62}{burstSize} () const 
+\item 
+void \hyperlink{classDRAMSim2Wrapper_a873dd91783f9efb4a590aded1f70d6b0}{tick} ()
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$typename T $>$ }\\T \hyperlink{classDRAMSim2Wrapper_aafb8a8238026119400ee0c470e3f7695}{extractConfig} (const std::string \&field\_\-name, const std::string \&file\_\-name) const 
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+DRAMSim::MultiChannelMemorySystem $\ast$ \hyperlink{classDRAMSim2Wrapper_ab3fdccad236992bb048094aa3fb52893}{dramsim}
+\item 
+double \hyperlink{classDRAMSim2Wrapper_aba0cb71192619554d50451635e5d6a52}{\_\-clockPeriod}
+\item 
+unsigned int \hyperlink{classDRAMSim2Wrapper_a16dbba262c462bdaa1a3e55e1d69968c}{\_\-queueSize}
+\item 
+unsigned int \hyperlink{classDRAMSim2Wrapper_a5164bcd378cd3ca479f3df831726f5da}{\_\-burstSize}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Wrapper class to avoid having \hyperlink{classDRAMSim2}{DRAMSim2} names like \hyperlink{classClockDomain}{ClockDomain} etc clashing with the normal gem5 world. Many of the \hyperlink{classDRAMSim2}{DRAMSim2} headers do not make use of namespaces, and quite a few also open up \hyperlink{namespacestd}{std}. The only thing that needs to be exposed externally are the callbacks. This wrapper effectively avoids clashes by not including any of the conventional gem5 headers (e.g. \hyperlink{classPacket}{Packet} or \hyperlink{classSimObject}{SimObject}). 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classDRAMSim2Wrapper_afb9d47202b904139c97115bb9b11a1f2}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{DRAMSim2Wrapper}]{\setlength{\rightskip}{0pt plus 5cm}{\bf DRAMSim2Wrapper} (const std::string \& {\em config\_\-file}, \/  const std::string \& {\em system\_\-file}, \/  const std::string \& {\em working\_\-dir}, \/  const std::string \& {\em trace\_\-file}, \/  unsigned int {\em memory\_\-size\_\-mb}, \/  bool {\em enable\_\-debug})}}
+\label{classDRAMSim2Wrapper_afb9d47202b904139c97115bb9b11a1f2}
+Create an instance of the \hyperlink{classDRAMSim2}{DRAMSim2} multi-\/channel memory controller using a specific config and system description.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em config\_\-file}]Memory config file \item[{\em system\_\-file}]\hyperlink{namespaceController}{Controller} config file \item[{\em working\_\-dir}]Path pre-\/pended to config files \item[{\em trace\_\-file}]Output trace file \item[{\em memory\_\-size\_\-mb}]Total memory size in MByte \item[{\em enable\_\-debug}]Enable debug output \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+70                                                     :
+71     dramsim(new DRAMSim::MultiChannelMemorySystem(config_file, system_file,
+72                                                   working_dir, trace_file,
+73                                                   memory_size_mb, NULL, NULL)),
+74     _clockPeriod(0.0), _queueSize(0), _burstSize(0)
+75 {
+76     // tell DRAMSim2 to ignore its internal notion of a CPU frequency
+77     dramsim->setCPUClockSpeed(0);
+78 
+79     // switch on debug output if requested
+80     if (enable_debug)
+81         SHOW_SIM_OUTPUT = 1;
+82 
+83     // there is no way of getting DRAMSim2 to tell us what frequency
+84     // it is assuming, so we have to extract it ourselves
+85     _clockPeriod = extractConfig<double>("tCK=",
+86                                          working_dir + '/' + config_file);
+87 
+88     if (!_clockPeriod)
+89         fatal("DRAMSim2 wrapper failed to get clock\n");
+90 
+91     // we also need to know what transaction queue size DRAMSim2 is
+92     // using so we can stall when responses are blocked
+93    _queueSize = extractConfig<unsigned int>("TRANS_QUEUE_DEPTH=",
+94                                             working_dir + '/' + system_file);
+95 
+96     if (!_queueSize)
+97         fatal("DRAMSim2 wrapper failed to get queue size\n");
+98 
+99 
+100    // finally, get the data bus bits and burst length so we can add a
+101    // sanity check for the burst size
+102     unsigned int dataBusBits =
+103         extractConfig<unsigned int>("JEDEC_DATA_BUS_BITS=",
+104                                     working_dir + '/' + system_file);
+105    unsigned int burstLength =
+106        extractConfig<unsigned int>("BL=", working_dir + '/' + config_file);
+107 
+108    if (!dataBusBits || !burstLength)
+109        fatal("DRAMSim22 wrapper failed to get burst size\n");
+110 
+111    _burstSize = dataBusBits * burstLength / 8;
+112 }
+
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_ae3508f5d656008b2209e4455d1649428}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!$\sim$DRAMSim2Wrapper@{$\sim$DRAMSim2Wrapper}}
+\index{$\sim$DRAMSim2Wrapper@{$\sim$DRAMSim2Wrapper}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{$\sim$DRAMSim2Wrapper}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf DRAMSim2Wrapper} ()}}
+\label{classDRAMSim2Wrapper_ae3508f5d656008b2209e4455d1649428}
+
+
+
+\begin{DoxyCode}
+115 {
+116     delete dramsim;
+117 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classDRAMSim2Wrapper_ad4ebfa7de0b48f306bf4d5e736843d62}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!burstSize@{burstSize}}
+\index{burstSize@{burstSize}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{burstSize}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int burstSize () const}}
+\label{classDRAMSim2Wrapper_ad4ebfa7de0b48f306bf4d5e736843d62}
+Get the burst size in bytes used by \hyperlink{classDRAMSim2}{DRAMSim2}.
+
+\begin{DoxyReturn}{戻り値}
+The burst size in bytes (data width $\ast$ burst length) 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+191 {
+192     return _burstSize;
+193 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_a34b4e8ea869adbb57c71b30c55e6f5bd}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!canAccept@{canAccept}}
+\index{canAccept@{canAccept}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{canAccept}]{\setlength{\rightskip}{0pt plus 5cm}bool canAccept () const}}
+\label{classDRAMSim2Wrapper_a34b4e8ea869adbb57c71b30c55e6f5bd}
+Determine if the controller can accept a new packet or not.
+
+\begin{DoxyReturn}{戻り値}
+true if the controller can accept transactions 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+166 {
+167     return dramsim->willAcceptTransaction();
+168 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_a6efe80b239837bd53bf8d8694c665993}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!clockPeriod@{clockPeriod}}
+\index{clockPeriod@{clockPeriod}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{clockPeriod}]{\setlength{\rightskip}{0pt plus 5cm}double clockPeriod () const}}
+\label{classDRAMSim2Wrapper_a6efe80b239837bd53bf8d8694c665993}
+Get the internal clock period used by \hyperlink{classDRAMSim2}{DRAMSim2}, specified in ns.
+
+\begin{DoxyReturn}{戻り値}
+The clock period of the DRAM interface in ns 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+179 {
+180     return _clockPeriod;
+181 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_ae247cb4ece9657b8730c721920c23ab7}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!enqueue@{enqueue}}
+\index{enqueue@{enqueue}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{enqueue}]{\setlength{\rightskip}{0pt plus 5cm}void enqueue (bool {\em is\_\-write}, \/  uint64\_\-t {\em addr})}}
+\label{classDRAMSim2Wrapper_ae247cb4ece9657b8730c721920c23ab7}
+Enqueue a packet. This assumes that canAccept has returned true.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]\hyperlink{classPacket}{Packet} to turn into a \hyperlink{classDRAMSim2}{DRAMSim2} transaction \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+172 {
+173     bool success M5_VAR_USED = dramsim->addTransaction(is_write, addr);
+174     assert(success);
+175 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_aafb8a8238026119400ee0c470e3f7695}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!extractConfig@{extractConfig}}
+\index{extractConfig@{extractConfig}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{extractConfig}]{\setlength{\rightskip}{0pt plus 5cm}T extractConfig (const std::string \& {\em field\_\-name}, \/  const std::string \& {\em file\_\-name}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classDRAMSim2Wrapper_aafb8a8238026119400ee0c470e3f7695}
+
+
+
+\begin{DoxyCode}
+123 {
+124     std::ifstream file_stream(file_name.c_str(), ios::in);
+125 
+126     if (!file_stream.good())
+127         fatal("DRAMSim2 wrapper could not open %s for reading\n", file_name);
+128 
+129     bool found = false;
+130     T res;
+131     std::string line;
+132     while (!found && file_stream) {
+133         getline(file_stream, line);
+134         if (line.substr(0, field_name.size()) == field_name) {
+135             found = true;
+136             istringstream iss(line.substr(field_name.size()));
+137             iss >> res;
+138         }
+139     }
+140 
+141     file_stream.close();
+142 
+143     if (!found)
+144         fatal("DRAMSim2 wrapper could not find %s in %s\n", field_name,
+145               file_name);
+146 
+147     return res;
+148 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_a0beecd7e864561c9474bc80e993556bf}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!printStats@{printStats}}
+\index{printStats@{printStats}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{printStats}]{\setlength{\rightskip}{0pt plus 5cm}void printStats ()}}
+\label{classDRAMSim2Wrapper_a0beecd7e864561c9474bc80e993556bf}
+Print the stats gathered in DRAMsim2. 
+
+
+\begin{DoxyCode}
+152 {
+153     dramsim->printStats(true);
+154 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_a667ea9ca9654bced2242c6ccd77599ee}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!queueSize@{queueSize}}
+\index{queueSize@{queueSize}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{queueSize}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int queueSize () const}}
+\label{classDRAMSim2Wrapper_a667ea9ca9654bced2242c6ccd77599ee}
+Get the transaction queue size used by \hyperlink{classDRAMSim2}{DRAMSim2}.
+
+\begin{DoxyReturn}{戻り値}
+The queue size counted in number of transactions 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+185 {
+186     return _queueSize;
+187 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_ae7cabadc2302c5b4899c5db3b66b2549}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!setCallbacks@{setCallbacks}}
+\index{setCallbacks@{setCallbacks}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{setCallbacks}]{\setlength{\rightskip}{0pt plus 5cm}void setCallbacks (DRAMSim::TransactionCompleteCB $\ast$ {\em read\_\-callback}, \/  DRAMSim::TransactionCompleteCB $\ast$ {\em write\_\-callback})}}
+\label{classDRAMSim2Wrapper_ae7cabadc2302c5b4899c5db3b66b2549}
+\hyperlink{classSet}{Set} the callbacks to use for read and write completion.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em read\_\-callback}]\hyperlink{classCallback}{Callback} used for read completions \item[{\em write\_\-callback}]\hyperlink{classCallback}{Callback} used for write completions \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+159 {
+160     // simply pass it on, for now we ignore the power callback
+161     dramsim->RegisterCallbacks(read_callback, write_callback, NULL);
+162 }
+\end{DoxyCode}
+\hypertarget{classDRAMSim2Wrapper_a873dd91783f9efb4a590aded1f70d6b0}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!tick@{tick}}
+\index{tick@{tick}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{tick}]{\setlength{\rightskip}{0pt plus 5cm}void tick ()}}
+\label{classDRAMSim2Wrapper_a873dd91783f9efb4a590aded1f70d6b0}
+Progress the memory controller one cycle 
+
+
+\begin{DoxyCode}
+197 {
+198     dramsim->update();
+199 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classDRAMSim2Wrapper_a5164bcd378cd3ca479f3df831726f5da}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!\_\-burstSize@{\_\-burstSize}}
+\index{\_\-burstSize@{\_\-burstSize}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{\_\-burstSize}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf \_\-burstSize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDRAMSim2Wrapper_a5164bcd378cd3ca479f3df831726f5da}
+\hypertarget{classDRAMSim2Wrapper_aba0cb71192619554d50451635e5d6a52}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!\_\-clockPeriod@{\_\-clockPeriod}}
+\index{\_\-clockPeriod@{\_\-clockPeriod}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{\_\-clockPeriod}]{\setlength{\rightskip}{0pt plus 5cm}double {\bf \_\-clockPeriod}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDRAMSim2Wrapper_aba0cb71192619554d50451635e5d6a52}
+\hypertarget{classDRAMSim2Wrapper_a16dbba262c462bdaa1a3e55e1d69968c}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!\_\-queueSize@{\_\-queueSize}}
+\index{\_\-queueSize@{\_\-queueSize}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{\_\-queueSize}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf \_\-queueSize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDRAMSim2Wrapper_a16dbba262c462bdaa1a3e55e1d69968c}
+\hypertarget{classDRAMSim2Wrapper_ab3fdccad236992bb048094aa3fb52893}{
+\index{DRAMSim2Wrapper@{DRAMSim2Wrapper}!dramsim@{dramsim}}
+\index{dramsim@{dramsim}!DRAMSim2Wrapper@{DRAMSim2Wrapper}}
+\subsubsection[{dramsim}]{\setlength{\rightskip}{0pt plus 5cm}DRAMSim::MultiChannelMemorySystem$\ast$ {\bf dramsim}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDRAMSim2Wrapper_ab3fdccad236992bb048094aa3fb52893}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/\hyperlink{dramsim2__wrapper_8hh}{dramsim2\_\-wrapper.hh}\item 
+mem/\hyperlink{dramsim2__wrapper_8cc}{dramsim2\_\-wrapper.cc}\end{DoxyCompactItemize}

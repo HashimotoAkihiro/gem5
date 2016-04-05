@@ -1,0 +1,329 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/arm/tlb.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/arm/tlb.hh</h1><a href="arch_2arm_2tlb_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2001-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00041"></a>00041 <span class="comment"> */</span>
+<a name="l00042"></a>00042 
+<a name="l00043"></a>00043 <span class="preprocessor">#ifndef __ARCH_ARM_TLB_HH__</span>
+<a name="l00044"></a>00044 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ARM_TLB_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span>
+<a name="l00046"></a>00046 
+<a name="l00047"></a>00047 <span class="preprocessor">#include &quot;<a class="code" href="arm_2isa__traits_8hh.html">arch/arm/isa_traits.hh</a>&quot;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &quot;<a class="code" href="arm_2pagetable_8hh.html">arch/arm/pagetable.hh</a>&quot;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &quot;<a class="code" href="arm_2utility_8hh.html">arch/arm/utility.hh</a>&quot;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="arm_2vtophys_8hh.html">arch/arm/vtophys.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="dma__device_8hh.html">dev/dma_device.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="request_8hh.html">mem/request.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;params/ArmTLB.hh&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="fault__fwd_8hh.html">sim/fault_fwd.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="sim_2tlb_8hh.html">sim/tlb.hh</a>&quot;</span>
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060 <span class="keyword">namespace </span><a class="code" href="classArmISA_1_1ArmISA.html">ArmISA</a> {
+<a name="l00061"></a>00061 
+<a name="l00062"></a>00062 <span class="keyword">class </span><a class="code" href="classArmISA_1_1TableWalker.html">TableWalker</a>;
+<a name="l00063"></a>00063 <span class="keyword">class </span><a class="code" href="classArmISA_1_1Stage2LookUp.html">Stage2LookUp</a>;
+<a name="l00064"></a>00064 <span class="keyword">class </span><a class="code" href="classArmISA_1_1Stage2MMU.html">Stage2MMU</a>;
+<a name="l00065"></a>00065 
+<a name="l00066"></a><a class="code" href="classArmISA_1_1TLB.html">00066</a> <span class="keyword">class </span><a class="code" href="classArmISA_1_1TLB.html">TLB</a> : <span class="keyword">public</span> <a class="code" href="classBaseTLB.html">BaseTLB</a>
+<a name="l00067"></a>00067 {
+<a name="l00068"></a>00068   <span class="keyword">public</span>:
+<a name="l00069"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0d">00069</a>     <span class="keyword">enum</span> <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0d">ArmFlags</a> {
+<a name="l00070"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da811bb3ddcc5035211e497b863db3abd0">00070</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da811bb3ddcc5035211e497b863db3abd0">AlignmentMask</a> = 0x7,
+<a name="l00071"></a>00071 
+<a name="l00072"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da46a23507e5cc78facbca4f0aadb6106d">00072</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da46a23507e5cc78facbca4f0aadb6106d">AlignByte</a> = 0x0,
+<a name="l00073"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da78d8dffe4cfc46c93a011f6c18eb342f">00073</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da78d8dffe4cfc46c93a011f6c18eb342f">AlignHalfWord</a> = 0x1,
+<a name="l00074"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da7aed72b8cf399f281ad8558187fe6941">00074</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da7aed72b8cf399f281ad8558187fe6941">AlignWord</a> = 0x2,
+<a name="l00075"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0dad6e82eb48377344b7d9f32c3a488dc0e">00075</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0dad6e82eb48377344b7d9f32c3a488dc0e">AlignDoubleWord</a> = 0x3,
+<a name="l00076"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da9323e858587f025242511a85b969b287">00076</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da9323e858587f025242511a85b969b287">AlignQuadWord</a> = 0x4,
+<a name="l00077"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da9adcd9ee14d498ddb978852cae60d840">00077</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0da9adcd9ee14d498ddb978852cae60d840">AlignOctWord</a> = 0x5,
+<a name="l00078"></a>00078 
+<a name="l00079"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0dac6aa9917fe5880558d8ee22e2fbcbe58">00079</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0dac6aa9917fe5880558d8ee22e2fbcbe58">AllowUnaligned</a> = 0x8,
+<a name="l00080"></a>00080         <span class="comment">// Priv code operating as if it wasn&apos;t</span>
+<a name="l00081"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0dadcfc57d389e8e2bb30dc32135b6a92d0">00081</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0dadcfc57d389e8e2bb30dc32135b6a92d0">UserMode</a> = 0x10,
+<a name="l00082"></a>00082         <span class="comment">// Because zero otherwise looks like a valid setting and may be used</span>
+<a name="l00083"></a>00083         <span class="comment">// accidentally, this bit must be non-zero to show it was used on</span>
+<a name="l00084"></a>00084         <span class="comment">// purpose.</span>
+<a name="l00085"></a><a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0daf6e40c9fd5825f3b3a4f2d45d4a64c68">00085</a>         <a class="code" href="classArmISA_1_1TLB.html#a1e31c6b4a233c7e98a3e85eba0c84f0daf6e40c9fd5825f3b3a4f2d45d4a64c68">MustBeOne</a> = 0x40
+<a name="l00086"></a>00086     };
+<a name="l00087"></a>00087 
+<a name="l00088"></a><a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">00088</a>     <span class="keyword">enum</span> <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> {
+<a name="l00089"></a><a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08af17d21db71fd885f6cc71fb2d0e896ec">00089</a>         <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08af17d21db71fd885f6cc71fb2d0e896ec">NormalTran</a> = 0,
+<a name="l00090"></a><a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08a4ed07d4f5bb408945e5f4e9c7333b2d3">00090</a>         <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08a4ed07d4f5bb408945e5f4e9c7333b2d3">S1CTran</a> = 0x1,
+<a name="l00091"></a><a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08ae447e872ded0e6da22f91d2ccaf66afd">00091</a>         <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08ae447e872ded0e6da22f91d2ccaf66afd">HypMode</a> = 0x2,
+<a name="l00092"></a>00092         <span class="comment">// Secure code operating as if it wasn&apos;t (required by some Address</span>
+<a name="l00093"></a>00093         <span class="comment">// Translate operations)</span>
+<a name="l00094"></a><a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08ab8e7d202ad511f74c201e2bca94e83d6">00094</a>         <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08ab8e7d202ad511f74c201e2bca94e83d6">S1S2NsTran</a> = 0x4
+<a name="l00095"></a>00095     };
+<a name="l00096"></a>00096   <span class="keyword">protected</span>:
+<a name="l00097"></a><a class="code" href="classArmISA_1_1TLB.html#a434ae74dec9e8168e4f338aeb18d5931">00097</a>     <a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a>* <a class="code" href="classArmISA_1_1TLB.html#a434ae74dec9e8168e4f338aeb18d5931">table</a>;     <span class="comment">// the Page Table</span>
+<a name="l00098"></a><a class="code" href="classArmISA_1_1TLB.html#a439227feff9d7f55384e8780cfc2eb82">00098</a>     <span class="keywordtype">int</span> <a class="code" href="classArmISA_1_1TLB.html#a439227feff9d7f55384e8780cfc2eb82">size</a>;            <span class="comment">// TLB Size</span>
+<a name="l00099"></a><a class="code" href="classArmISA_1_1TLB.html#a07545f2ccf0498cfe71558779680f062">00099</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a07545f2ccf0498cfe71558779680f062">isStage2</a>;       <span class="comment">// Indicates this TLB is part of the second stage MMU</span>
+<a name="l00100"></a><a class="code" href="classArmISA_1_1TLB.html#a52120124577a3b7c28a4e8876cd36a8b">00100</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a52120124577a3b7c28a4e8876cd36a8b">stage2Req</a>;      <span class="comment">// Indicates whether a stage 2 lookup is also required</span>
+<a name="l00101"></a><a class="code" href="classArmISA_1_1TLB.html#a89972e483f89fb3a1694154f97ce2d9d">00101</a>     uint64_t <a class="code" href="classArmISA_1_1TLB.html#a89972e483f89fb3a1694154f97ce2d9d">_attr</a>;      <span class="comment">// Memory attributes for last accessed TLB entry</span>
+<a name="l00102"></a><a class="code" href="classArmISA_1_1TLB.html#a16c6c6799c68307c82bc6304cf0b27b4">00102</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a16c6c6799c68307c82bc6304cf0b27b4">directToStage2</a>; <span class="comment">// Indicates whether all translation requests should</span>
+<a name="l00103"></a>00103                          <span class="comment">// be routed directly to the stage 2 TLB</span>
+<a name="l00104"></a>00104 
+<a name="l00105"></a><a class="code" href="classArmISA_1_1TLB.html#ae4dec2d4d5730361d51d9f4b24dee89c">00105</a>     <a class="code" href="classArmISA_1_1TableWalker.html">TableWalker</a> *<a class="code" href="classArmISA_1_1TLB.html#ae4dec2d4d5730361d51d9f4b24dee89c">tableWalker</a>;
+<a name="l00106"></a><a class="code" href="classArmISA_1_1TLB.html#a2188cef93e9eb4ac6383c0ca4f44dc36">00106</a>     <a class="code" href="classArmISA_1_1TLB.html">TLB</a> *<a class="code" href="classArmISA_1_1TLB.html#a2188cef93e9eb4ac6383c0ca4f44dc36">stage2Tlb</a>;
+<a name="l00107"></a><a class="code" href="classArmISA_1_1TLB.html#a21ea64a0a6d9600fb09fff0854fd55d7">00107</a>     <a class="code" href="classArmISA_1_1Stage2MMU.html">Stage2MMU</a> *<a class="code" href="classArmISA_1_1TLB.html#a21ea64a0a6d9600fb09fff0854fd55d7">stage2Mmu</a>;
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109     <span class="comment">// Access Stats</span>
+<a name="l00110"></a><a class="code" href="classArmISA_1_1TLB.html#a6f516f4695aa8bb85a9a52e395689e1a">00110</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a6f516f4695aa8bb85a9a52e395689e1a">instHits</a>;
+<a name="l00111"></a><a class="code" href="classArmISA_1_1TLB.html#ae63ad13cb56fbd34a91d2093deaafad2">00111</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#ae63ad13cb56fbd34a91d2093deaafad2">instMisses</a>;
+<a name="l00112"></a><a class="code" href="classArmISA_1_1TLB.html#a36a79efeb718e4de41970178013dac63">00112</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a36a79efeb718e4de41970178013dac63">readHits</a>;
+<a name="l00113"></a><a class="code" href="classArmISA_1_1TLB.html#a262cd06e148f8dd362b73ee2a8c87ce0">00113</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a262cd06e148f8dd362b73ee2a8c87ce0">readMisses</a>;
+<a name="l00114"></a><a class="code" href="classArmISA_1_1TLB.html#a1d93d3754ee97de787330f7620867026">00114</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a1d93d3754ee97de787330f7620867026">writeHits</a>;
+<a name="l00115"></a><a class="code" href="classArmISA_1_1TLB.html#a607353d27be8640c6f48a295794322d6">00115</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a607353d27be8640c6f48a295794322d6">writeMisses</a>;
+<a name="l00116"></a><a class="code" href="classArmISA_1_1TLB.html#a98ccf1b183bddae403b637838f23fa49">00116</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a98ccf1b183bddae403b637838f23fa49">inserts</a>;
+<a name="l00117"></a><a class="code" href="classArmISA_1_1TLB.html#a14429a278d32a87d27c0d9df47269a12">00117</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a14429a278d32a87d27c0d9df47269a12">flushTlb</a>;
+<a name="l00118"></a><a class="code" href="classArmISA_1_1TLB.html#af504265daaa5a177333d30804fba83a8">00118</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#af504265daaa5a177333d30804fba83a8">flushTlbMva</a>;
+<a name="l00119"></a><a class="code" href="classArmISA_1_1TLB.html#a94bc002df9a21796ac29c74bc3ef8240">00119</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a94bc002df9a21796ac29c74bc3ef8240">flushTlbMvaAsid</a>;
+<a name="l00120"></a><a class="code" href="classArmISA_1_1TLB.html#a678e74ffba8318815627ae109f96b17e">00120</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a678e74ffba8318815627ae109f96b17e">flushTlbAsid</a>;
+<a name="l00121"></a><a class="code" href="classArmISA_1_1TLB.html#ad4c80b0aa999ae0403e2ffbc9a217aaa">00121</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#ad4c80b0aa999ae0403e2ffbc9a217aaa">flushedEntries</a>;
+<a name="l00122"></a><a class="code" href="classArmISA_1_1TLB.html#aaafbdf0bc49ea504814d314b5f51d47e">00122</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#aaafbdf0bc49ea504814d314b5f51d47e">alignFaults</a>;
+<a name="l00123"></a><a class="code" href="classArmISA_1_1TLB.html#a8d76399ea2182eaf505e54da078f5202">00123</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a8d76399ea2182eaf505e54da078f5202">prefetchFaults</a>;
+<a name="l00124"></a><a class="code" href="classArmISA_1_1TLB.html#a718b0dd709705b2b6cbf1c5e33c387fd">00124</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a718b0dd709705b2b6cbf1c5e33c387fd">domainFaults</a>;
+<a name="l00125"></a><a class="code" href="classArmISA_1_1TLB.html#a95307396029ef99d258ca5284cd8b284">00125</a>     <span class="keyword">mutable</span> <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classArmISA_1_1TLB.html#a95307396029ef99d258ca5284cd8b284">permsFaults</a>;
+<a name="l00126"></a>00126 
+<a name="l00127"></a><a class="code" href="classArmISA_1_1TLB.html#a1ebd2c58048a00cc55442a58e6782f35">00127</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classArmISA_1_1TLB.html#a1ebd2c58048a00cc55442a58e6782f35">readAccesses</a>;
+<a name="l00128"></a><a class="code" href="classArmISA_1_1TLB.html#aaf48f6b8c76d54c75a6156c32ac6405f">00128</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classArmISA_1_1TLB.html#aaf48f6b8c76d54c75a6156c32ac6405f">writeAccesses</a>;
+<a name="l00129"></a><a class="code" href="classArmISA_1_1TLB.html#a7268909f031909e2eab6994aa6406ae4">00129</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classArmISA_1_1TLB.html#a7268909f031909e2eab6994aa6406ae4">instAccesses</a>;
+<a name="l00130"></a><a class="code" href="classArmISA_1_1TLB.html#a224eed77bfb7a27359c9c3c1acbdbfaa">00130</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classArmISA_1_1TLB.html#a224eed77bfb7a27359c9c3c1acbdbfaa">hits</a>;
+<a name="l00131"></a><a class="code" href="classArmISA_1_1TLB.html#a4b8b96257f1e97cd5730673f38f9571c">00131</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classArmISA_1_1TLB.html#a4b8b96257f1e97cd5730673f38f9571c">misses</a>;
+<a name="l00132"></a><a class="code" href="classArmISA_1_1TLB.html#a1929e1032289676f78e07e4c6bc55369">00132</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classArmISA_1_1TLB.html#a1929e1032289676f78e07e4c6bc55369">accesses</a>;
+<a name="l00133"></a>00133 
+<a name="l00134"></a><a class="code" href="classArmISA_1_1TLB.html#a7450c3dc2cffd22401a23ddc29b0c036">00134</a>     <span class="keywordtype">int</span> <a class="code" href="classArmISA_1_1TLB.html#a7450c3dc2cffd22401a23ddc29b0c036">rangeMRU</a>; <span class="comment">//On lookup, only move entries ahead when outside rangeMRU</span>
+<a name="l00135"></a>00135 
+<a name="l00136"></a><a class="code" href="classArmISA_1_1TLB.html#a2ebef8e3741ddc1169a0a05e6a48052e">00136</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a2ebef8e3741ddc1169a0a05e6a48052e">bootUncacheability</a>;
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138   <span class="keyword">public</span>:
+<a name="l00139"></a>00139     <a class="code" href="classArmISA_1_1TLB.html#a072a0e1c517c70f5baf23c7bf1aae5c6">TLB</a>(<span class="keyword">const</span> ArmTLBParams *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00140"></a>00140     <a class="code" href="classArmISA_1_1TLB.html#a072a0e1c517c70f5baf23c7bf1aae5c6">TLB</a>(<span class="keyword">const</span> <a class="code" href="classSimObject.html#a0f0761d2db586a23bb2a2880b8f387bb">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>, <span class="keywordtype">int</span> _size, <a class="code" href="classArmISA_1_1TableWalker.html">TableWalker</a> *_walker);
+<a name="l00141"></a>00141 
+<a name="l00152"></a>00152     <a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a> *<a class="code" href="classArmISA_1_1TLB.html#a16c4d359f56a027d2e6afe6af85c81e4">lookup</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> vpn, uint16_t asn, uint8_t <a class="code" href="classArmISA_1_1TLB.html#add293169f7f2ac526b3fa14f950cf0bb">vmid</a>, <span class="keywordtype">bool</span> hyp,
+<a name="l00153"></a>00153                      <span class="keywordtype">bool</span> secure, <span class="keywordtype">bool</span> functional,
+<a name="l00154"></a>00154                      <span class="keywordtype">bool</span> ignore_asn, uint8_t target_el);
+<a name="l00155"></a>00155 
+<a name="l00156"></a>00156     <span class="keyword">virtual</span> <a class="code" href="classArmISA_1_1TLB.html#a18a1722ab7889997b15fd7b9fc33c7ff">~TLB</a>();
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a15b6c15c1be2ca4de3e65772a02aa29f">takeOverFrom</a>(<a class="code" href="classBaseTLB.html">BaseTLB</a> *otlb);
+<a name="l00159"></a>00159 
+<a name="l00161"></a>00161     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a02fd73d861ef2e4aabb38c0c9ff82947" title="setup all the back pointers">init</a>();
+<a name="l00162"></a>00162 
+<a name="l00163"></a>00163     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#ae888fc9d1a9bad8784469601dcf8d436">setMMU</a>(<a class="code" href="classArmISA_1_1Stage2MMU.html">Stage2MMU</a> *<a class="code" href="namespaceArmISA.html#afb747b54d0c5e3e4e1763be19ca9373b">m</a>);
+<a name="l00164"></a>00164 
+<a name="l00165"></a><a class="code" href="classArmISA_1_1TLB.html#ae121404a6cfcf714e05fe2231ce4c7fc">00165</a>     <span class="keywordtype">int</span> <a class="code" href="classArmISA_1_1TLB.html#ae121404a6cfcf714e05fe2231ce4c7fc">getsize</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1TLB.html#a439227feff9d7f55384e8780cfc2eb82">size</a>; }
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a0a32b96ef1142ca48fa347d06b5d2436">insert</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, <a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a> &amp;pte);
+<a name="l00168"></a>00168 
+<a name="l00169"></a>00169     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#acdb1ef6fa70ed231ff084dced51b91eb">getTE</a>(<a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a> **<a class="code" href="namespaceMipsISA.html#a49c5c4308a3fe2af210c807bd186b780">te</a>, <a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00170"></a>00170                 Translation *translation, <span class="keywordtype">bool</span> timing, <span class="keywordtype">bool</span> functional,
+<a name="l00171"></a>00171                 <span class="keywordtype">bool</span> is_secure, <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> tranType);
+<a name="l00172"></a>00172 
+<a name="l00173"></a>00173     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#a0743624c3e13c3dd3108be8847f8e488">getResultTe</a>(<a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a> **<a class="code" href="namespaceMipsISA.html#a49c5c4308a3fe2af210c807bd186b780">te</a>, <a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00174"></a>00174                       <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>, Translation *translation, <span class="keywordtype">bool</span> timing,
+<a name="l00175"></a>00175                       <span class="keywordtype">bool</span> functional, <a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a> *mergeTe);
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#a5a4e92c7787e92910f8ad62cb4f1bf5f">checkPermissions</a>(<a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a> *<a class="code" href="namespaceMipsISA.html#a49c5c4308a3fe2af210c807bd186b780">te</a>, <a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>);
+<a name="l00178"></a>00178     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#a1ba70376d3c5636e94c5fd6312f7b63e">checkPermissions64</a>(<a class="code" href="structArmISA_1_1TlbEntry.html">TlbEntry</a> *<a class="code" href="namespaceMipsISA.html#a49c5c4308a3fe2af210c807bd186b780">te</a>, <a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00179"></a>00179                              <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00180"></a>00180 
+<a name="l00181"></a>00181 
+<a name="l00185"></a>00185     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a5ef6c06c7267c792fec8972aef272b4e">flushAllSecurity</a>(<span class="keywordtype">bool</span> secure_lookup, uint8_t target_el,
+<a name="l00186"></a>00186                           <span class="keywordtype">bool</span> ignore_el = <span class="keyword">false</span>);
+<a name="l00187"></a>00187 
+<a name="l00192"></a>00192     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a7cd235aa813c35e4cb1b4efcdd1a407f">flushAllNs</a>(<span class="keywordtype">bool</span> hyp, uint8_t target_el, <span class="keywordtype">bool</span> ignore_el = <span class="keyword">false</span>);
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194 
+<a name="l00198"></a><a class="code" href="classArmISA_1_1TLB.html#aca1483a67aee5a91e442f7131d66bcbd">00198</a>     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#aca1483a67aee5a91e442f7131d66bcbd">flushAll</a>()
+<a name="l00199"></a>00199     {
+<a name="l00200"></a>00200         <a class="code" href="classArmISA_1_1TLB.html#a5ef6c06c7267c792fec8972aef272b4e">flushAllSecurity</a>(<span class="keyword">false</span>, 0, <span class="keyword">true</span>);
+<a name="l00201"></a>00201         <a class="code" href="classArmISA_1_1TLB.html#a5ef6c06c7267c792fec8972aef272b4e">flushAllSecurity</a>(<span class="keyword">true</span>, 0, <span class="keyword">true</span>);
+<a name="l00202"></a>00202     }
+<a name="l00203"></a>00203 
+<a name="l00209"></a>00209     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#afe44c2f5e54b8288d36b04cd77d18d54">flushMvaAsid</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> mva, uint64_t asn, <span class="keywordtype">bool</span> secure_lookup,
+<a name="l00210"></a>00210                       uint8_t target_el);
+<a name="l00211"></a>00211 
+<a name="l00216"></a>00216     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#ac8076054324beee773a8f801c3e6dfed">flushAsid</a>(uint64_t asn, <span class="keywordtype">bool</span> secure_lookup, uint8_t target_el);
+<a name="l00217"></a>00217 
+<a name="l00223"></a>00223     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a9ea15078537697a5208dea8e912d7a08">flushMva</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> mva, <span class="keywordtype">bool</span> secure_lookup, <span class="keywordtype">bool</span> hyp, uint8_t target_el);
+<a name="l00224"></a>00224 
+<a name="l00225"></a>00225     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#aa14d4829f5c7bce966547df0babb7487">trickBoxCheck</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>, <a class="code" href="structArmISA_1_1TlbEntry.html#a0595b41cfb7d03f18438f9c355a3469d">TlbEntry::DomainType</a> <a class="code" href="namespaceArmISA.html#ad0cc3566b56b49851f0996cbbe5000cf">domain</a>);
+<a name="l00226"></a>00226     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#a19bf31f32ec6125d85acc1feeee28e47">walkTrickBoxCheck</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceArmISA.html#aec59a1cc2e7438586cdc39f4b30b0061">pa</a>, <span class="keywordtype">bool</span> is_secure, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceArmISA.html#a441099e13f407fadb6bcb0447107de87">va</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> sz, <span class="keywordtype">bool</span> is_exec,
+<a name="l00227"></a>00227             <span class="keywordtype">bool</span> is_write, <a class="code" href="structArmISA_1_1TlbEntry.html#a0595b41cfb7d03f18438f9c355a3469d">TlbEntry::DomainType</a> <a class="code" href="namespaceArmISA.html#ad0cc3566b56b49851f0996cbbe5000cf">domain</a>, <a class="code" href="namespaceArmISA.html#aefa4213b348e38ee69f2a6109563a7bd">LookupLevel</a> lookup_level);
+<a name="l00228"></a>00228 
+<a name="l00229"></a>00229     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a48b5486ebf7c83e7c81025a032312ca6">printTlb</a>() <span class="keyword">const</span>;
+<a name="l00230"></a>00230 
+<a name="l00231"></a><a class="code" href="classArmISA_1_1TLB.html#a5fd1cb3fb8887f4bd6c1f982a23cc026">00231</a>     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a5fd1cb3fb8887f4bd6c1f982a23cc026">allCpusCaching</a>() { <a class="code" href="classArmISA_1_1TLB.html#a2ebef8e3741ddc1169a0a05e6a48052e">bootUncacheability</a> = <span class="keyword">true</span>; }
+<a name="l00232"></a><a class="code" href="classArmISA_1_1TLB.html#a2d698ff909513b48a1263f8a5440e067">00232</a>     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a2d698ff909513b48a1263f8a5440e067">demapPage</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, uint64_t asn)
+<a name="l00233"></a>00233     {
+<a name="l00234"></a>00234         <span class="comment">// needed for x86 only</span>
+<a name="l00235"></a>00235         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;demapPage() is not implemented.\n&quot;</span>);
+<a name="l00236"></a>00236     }
+<a name="l00237"></a>00237 
+<a name="l00238"></a>00238     <span class="keyword">static</span> <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a3e576c3e0d39dfca708baea44ebf0617">validVirtualAddress</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>);
+<a name="l00239"></a>00239 
+<a name="l00248"></a>00248     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a4871909ce80dc11f7ddffcd28214262e">translateFunctional</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> &amp;paddr);
+<a name="l00249"></a>00249 
+<a name="l00254"></a>00254     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#a4871909ce80dc11f7ddffcd28214262e">translateFunctional</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00255"></a>00255             <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> tranType = <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08af17d21db71fd885f6cc71fb2d0e896ec">NormalTran</a>);
+<a name="l00256"></a>00256 
+<a name="l00259"></a>00259     <span class="keywordtype">void</span>
+<a name="l00260"></a><a class="code" href="classArmISA_1_1TLB.html#af863223c2fa90b0bbb305626dc3bc604">00260</a>     <a class="code" href="classArmISA_1_1TLB.html#af863223c2fa90b0bbb305626dc3bc604">setAttr</a>(uint64_t <a class="code" href="namespaceArmISA.html#a710acfac10f0042826d2d6d9c213ae7b">attr</a>)
+<a name="l00261"></a>00261     {
+<a name="l00262"></a>00262         <a class="code" href="classArmISA_1_1TLB.html#a89972e483f89fb3a1694154f97ce2d9d">_attr</a> = attr;
+<a name="l00263"></a>00263     }
+<a name="l00264"></a>00264 
+<a name="l00265"></a>00265     uint64_t
+<a name="l00266"></a><a class="code" href="classArmISA_1_1TLB.html#abe784aff035154580e3b0fc0f5af8bd5">00266</a>     <a class="code" href="classArmISA_1_1TLB.html#abe784aff035154580e3b0fc0f5af8bd5">getAttr</a>()<span class="keyword"> const</span>
+<a name="l00267"></a>00267 <span class="keyword">    </span>{
+<a name="l00268"></a>00268         <span class="keywordflow">return</span> <a class="code" href="classArmISA_1_1TLB.html#a89972e483f89fb3a1694154f97ce2d9d">_attr</a>;
+<a name="l00269"></a>00269     }
+<a name="l00270"></a>00270 
+<a name="l00271"></a>00271     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#a3d876e306a41e194bda2747ea51982f8">translateFs</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00272"></a>00272             Translation *translation, <span class="keywordtype">bool</span> &amp;delay,
+<a name="l00273"></a>00273             <span class="keywordtype">bool</span> timing, <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> tranType, <span class="keywordtype">bool</span> functional = <span class="keyword">false</span>);
+<a name="l00274"></a>00274     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#a6ada13dabe05b90fee0464345cf0f654">translateSe</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00275"></a>00275             Translation *translation, <span class="keywordtype">bool</span> &amp;delay, <span class="keywordtype">bool</span> timing);
+<a name="l00276"></a>00276     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#ad9813aa5a0ed9ba84b634d9960006ed2">translateAtomic</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00277"></a>00277             <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> tranType = <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08af17d21db71fd885f6cc71fb2d0e896ec">NormalTran</a>);
+<a name="l00278"></a>00278     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#aece4eb62debdc9703b211d68ce771521">translateTiming</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00279"></a>00279             Translation *translation, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00280"></a>00280             <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> tranType = <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08af17d21db71fd885f6cc71fb2d0e896ec">NormalTran</a>);
+<a name="l00281"></a>00281     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#adc8f6be2e370d6ce03ae8044ff6f8709">translateComplete</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00282"></a>00282             Translation *translation, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>, <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> tranType,
+<a name="l00283"></a>00283             <span class="keywordtype">bool</span> callFromS2);
+<a name="l00284"></a>00284     <a class="code" href="classRefCountingPtr.html">Fault</a> <a class="code" href="classArmISA_1_1TLB.html#ae199d95c42e036851a8a0543c6d6d2e3">finalizePhysical</a>(<a class="code" href="classRequest.html">RequestPtr</a> req, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classBaseTLB.html#a46c8a310cf4c094f8c80e1cb8dc1f911">Mode</a> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>) <span class="keyword">const</span>;
+<a name="l00285"></a>00285 
+<a name="l00286"></a>00286     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00287"></a>00287 
+<a name="l00288"></a>00288     <span class="comment">// Checkpointing</span>
+<a name="l00289"></a>00289     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00290"></a>00290     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00291"></a>00291 
+<a name="l00292"></a>00292     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00293"></a>00293 
+<a name="l00304"></a>00304     <span class="keyword">virtual</span> <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a>* <a class="code" href="classArmISA_1_1TLB.html#a2ea87b216b1f58953a679590672be258">getMasterPort</a>();
+<a name="l00305"></a>00305 
+<a name="l00313"></a>00313     <a class="code" href="classDmaPort.html">DmaPort</a>&amp; <a class="code" href="classArmISA_1_1TLB.html#a3eca666205fdb5a79565d7520a5c97b9">getWalkerPort</a>();
+<a name="l00314"></a>00314 
+<a name="l00315"></a>00315     <span class="comment">// Caching misc register values here.</span>
+<a name="l00316"></a>00316     <span class="comment">// Writing to misc registers needs to invalidate them.</span>
+<a name="l00317"></a>00317     <span class="comment">// translateFunctional/translateSe/translateFs checks if they are</span>
+<a name="l00318"></a>00318     <span class="comment">// invalid and call updateMiscReg if necessary.</span>
+<a name="l00319"></a>00319 <span class="keyword">protected</span>:
+<a name="l00320"></a><a class="code" href="classArmISA_1_1TLB.html#a52c06c8a54293998f3e1f71cdbd916f7">00320</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a52c06c8a54293998f3e1f71cdbd916f7">aarch64</a>;
+<a name="l00321"></a><a class="code" href="classArmISA_1_1TLB.html#a658ce290954a428d8c5df11b8b5bd81b">00321</a>     <a class="code" href="namespaceArmISA.html#a16588a7a92eb985c3341b7f706c81dd5">ExceptionLevel</a> <a class="code" href="classArmISA_1_1TLB.html#a658ce290954a428d8c5df11b8b5bd81b">aarch64EL</a>;
+<a name="l00322"></a><a class="code" href="classArmISA_1_1TLB.html#a43c4d132ca97c6cc5358f7be3c2b5a69">00322</a>     SCTLR <a class="code" href="classArmISA_1_1TLB.html#a43c4d132ca97c6cc5358f7be3c2b5a69">sctlr</a>;
+<a name="l00323"></a><a class="code" href="classArmISA_1_1TLB.html#ace0bf26677706ecff809bd4c76d33c8c">00323</a>     SCR <a class="code" href="classArmISA_1_1TLB.html#ace0bf26677706ecff809bd4c76d33c8c">scr</a>;
+<a name="l00324"></a><a class="code" href="classArmISA_1_1TLB.html#ae5a4adef864b3b2b23001750a8a89499">00324</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#ae5a4adef864b3b2b23001750a8a89499">isPriv</a>;
+<a name="l00325"></a><a class="code" href="classArmISA_1_1TLB.html#a62bc84f4251f16cf0cfa0f8d96e00c37">00325</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a62bc84f4251f16cf0cfa0f8d96e00c37">isSecure</a>;
+<a name="l00326"></a><a class="code" href="classArmISA_1_1TLB.html#a104c09577173edc4f8ce6814cc33f0ae">00326</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a104c09577173edc4f8ce6814cc33f0ae">isHyp</a>;
+<a name="l00327"></a><a class="code" href="classArmISA_1_1TLB.html#ad6762be565087b4bfb87f5bcb42673e7">00327</a>     TTBCR <a class="code" href="classArmISA_1_1TLB.html#ad6762be565087b4bfb87f5bcb42673e7">ttbcr</a>;
+<a name="l00328"></a><a class="code" href="classArmISA_1_1TLB.html#a984a2dcfd9509ab586bee117bb2a7cfb">00328</a>     uint16_t <a class="code" href="classArmISA_1_1TLB.html#a984a2dcfd9509ab586bee117bb2a7cfb">asid</a>;
+<a name="l00329"></a><a class="code" href="classArmISA_1_1TLB.html#add293169f7f2ac526b3fa14f950cf0bb">00329</a>     uint8_t <a class="code" href="classArmISA_1_1TLB.html#add293169f7f2ac526b3fa14f950cf0bb">vmid</a>;
+<a name="l00330"></a><a class="code" href="classArmISA_1_1TLB.html#a06fc88abc8a8aa441c512ebb7531b3d7">00330</a>     PRRR <a class="code" href="classArmISA_1_1TLB.html#a06fc88abc8a8aa441c512ebb7531b3d7">prrr</a>;
+<a name="l00331"></a><a class="code" href="classArmISA_1_1TLB.html#a763ad3cda6c2782d46835a3b2c4b5515">00331</a>     NMRR <a class="code" href="classArmISA_1_1TLB.html#a763ad3cda6c2782d46835a3b2c4b5515">nmrr</a>;
+<a name="l00332"></a><a class="code" href="classArmISA_1_1TLB.html#ad0d8df2e2be956266458221c23763b4c">00332</a>     HCR <a class="code" href="classArmISA_1_1TLB.html#ad0d8df2e2be956266458221c23763b4c">hcr</a>;
+<a name="l00333"></a><a class="code" href="classArmISA_1_1TLB.html#a9d6f500564b7a3bf1ded6bc18b3d47db">00333</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classArmISA_1_1TLB.html#a9d6f500564b7a3bf1ded6bc18b3d47db">dacr</a>;
+<a name="l00334"></a><a class="code" href="classArmISA_1_1TLB.html#ab11476fda4a6785ee0b6096e2e50f30c">00334</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#ab11476fda4a6785ee0b6096e2e50f30c">miscRegValid</a>;
+<a name="l00335"></a><a class="code" href="classArmISA_1_1TLB.html#a23a689868acc5917efd41d7477757059">00335</a>     <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> <a class="code" href="classArmISA_1_1TLB.html#a23a689868acc5917efd41d7477757059">curTranType</a>;
+<a name="l00336"></a>00336 
+<a name="l00337"></a>00337     <span class="comment">// Cached copies of system-level properties</span>
+<a name="l00338"></a><a class="code" href="classArmISA_1_1TLB.html#a8e8469d916956ca8b9052ebd6f155e0b">00338</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a8e8469d916956ca8b9052ebd6f155e0b">haveLPAE</a>;
+<a name="l00339"></a><a class="code" href="classArmISA_1_1TLB.html#a48e6871d9ab14ff31b50307f0c617f95">00339</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a48e6871d9ab14ff31b50307f0c617f95">haveVirtualization</a>;
+<a name="l00340"></a><a class="code" href="classArmISA_1_1TLB.html#a3aea18414c83c86fa366401cb767e7ab">00340</a>     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a3aea18414c83c86fa366401cb767e7ab">haveLargeAsid64</a>;
+<a name="l00341"></a>00341 
+<a name="l00342"></a>00342     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a7eb66b75612ed7e8b075cd89dfd2b157">updateMiscReg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00343"></a>00343                        <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08">ArmTranslationType</a> tranType = <a class="code" href="classArmISA_1_1TLB.html#ad6f5d480df151d5bddeefc6271793f08af17d21db71fd885f6cc71fb2d0e896ec">NormalTran</a>);
+<a name="l00344"></a>00344 
+<a name="l00345"></a>00345 <span class="keyword">public</span>:
+<a name="l00346"></a>00346     <span class="keyword">const</span> <a class="code" href="classSimObject.html#a0f0761d2db586a23bb2a2880b8f387bb">Params</a> *
+<a name="l00347"></a><a class="code" href="classArmISA_1_1TLB.html#acd3c3feb78ae7a8f88fe0f110a718dff">00347</a>     <a class="code" href="classArmISA_1_1TLB.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00348"></a>00348 <span class="keyword">    </span>{
+<a name="l00349"></a>00349         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classSimObject.html#a0f0761d2db586a23bb2a2880b8f387bb">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00350"></a>00350     }
+<a name="l00351"></a><a class="code" href="classArmISA_1_1TLB.html#a97b2a677e1ca5219c876aa978a853c15">00351</a>     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#a97b2a677e1ca5219c876aa978a853c15">invalidateMiscReg</a>() { <a class="code" href="classArmISA_1_1TLB.html#ab11476fda4a6785ee0b6096e2e50f30c">miscRegValid</a> = <span class="keyword">false</span>; }
+<a name="l00352"></a>00352 
+<a name="l00353"></a>00353 <span class="keyword">private</span>:
+<a name="l00361"></a>00361     <span class="keywordtype">void</span> <a class="code" href="classArmISA_1_1TLB.html#ab44854fd690d81090e18a5a7ba3850be">_flushMva</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> mva, uint64_t asn, <span class="keywordtype">bool</span> secure_lookup,
+<a name="l00362"></a>00362                    <span class="keywordtype">bool</span> hyp, <span class="keywordtype">bool</span> ignore_asn, uint8_t target_el);
+<a name="l00363"></a>00363 
+<a name="l00364"></a>00364     <span class="keywordtype">bool</span> <a class="code" href="classArmISA_1_1TLB.html#a58d5b81b2c0a67f5780f391dfea47e3a">checkELMatch</a>(uint8_t target_el, uint8_t tentry_el, <span class="keywordtype">bool</span> ignore_el);
+<a name="l00365"></a>00365 };
+<a name="l00366"></a>00366 
+<a name="l00367"></a>00367 } <span class="comment">// namespace ArmISA</span>
+<a name="l00368"></a>00368 
+<a name="l00369"></a>00369 <span class="preprocessor">#endif // __ARCH_ARM_TLB_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

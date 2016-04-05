@@ -1,0 +1,148 @@
+\hypertarget{classBankedArray}{
+\section{クラス BankedArray}
+\label{classBankedArray}\index{BankedArray@{BankedArray}}
+}
+
+
+{\ttfamily \#include $<$BankedArray.hh$>$}\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classBankedArray_1_1AccessRecord}{AccessRecord}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classBankedArray_acc56123dfcfdbbbee495007c8f90d8a3}{BankedArray} (unsigned int \hyperlink{classBankedArray_af3bc5dde442d2943c967e6a619b651db}{banks}, \hyperlink{classCycles}{Cycles} \hyperlink{classBankedArray_a22569642d188db2401013daf3c1aaf80}{accessLatency}, unsigned int \hyperlink{classBankedArray_aaf805bffe08ab5ee80012f43977189b7}{startIndexBit})
+\item 
+bool \hyperlink{classBankedArray_aaa85fb1f3c3aa637e08af3002b00111d}{tryAccess} (\hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} idx)
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \hyperlink{classBankedArray_aab452493f7e91865f85df9ff3fe64bbc}{mapIndexToBank} (\hyperlink{TypeDefines_8hh_a39642de41f3574937f399f4fab25ba18}{Index} idx)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+unsigned int \hyperlink{classBankedArray_af3bc5dde442d2943c967e6a619b651db}{banks}
+\item 
+\hyperlink{classCycles}{Cycles} \hyperlink{classBankedArray_a22569642d188db2401013daf3c1aaf80}{accessLatency}
+\item 
+unsigned int \hyperlink{classBankedArray_a2061a8d117a013455257a1ac4159052a}{bankBits}
+\item 
+unsigned int \hyperlink{classBankedArray_aaf805bffe08ab5ee80012f43977189b7}{startIndexBit}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classBankedArray_1_1AccessRecord}{AccessRecord} $>$ \hyperlink{classBankedArray_a26ac330c6dbf83377648d992382927a4}{busyBanks}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classBankedArray_acc56123dfcfdbbbee495007c8f90d8a3}{
+\index{BankedArray@{BankedArray}!BankedArray@{BankedArray}}
+\index{BankedArray@{BankedArray}!BankedArray@{BankedArray}}
+\subsubsection[{BankedArray}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BankedArray} (unsigned int {\em banks}, \/  {\bf Cycles} {\em accessLatency}, \/  unsigned int {\em startIndexBit})}}
+\label{classBankedArray_acc56123dfcfdbbbee495007c8f90d8a3}
+
+
+
+\begin{DoxyCode}
+38 {
+39     this->banks = banks;
+40     this->accessLatency = accessLatency;
+41     this->startIndexBit = startIndexBit;
+42 
+43     if (banks != 0) {
+44         bankBits = floorLog2(banks);
+45     }
+46 
+47     busyBanks.resize(banks);
+48 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classBankedArray_aab452493f7e91865f85df9ff3fe64bbc}{
+\index{BankedArray@{BankedArray}!mapIndexToBank@{mapIndexToBank}}
+\index{mapIndexToBank@{mapIndexToBank}!BankedArray@{BankedArray}}
+\subsubsection[{mapIndexToBank}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int mapIndexToBank ({\bf Index} {\em idx})\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBankedArray_aab452493f7e91865f85df9ff3fe64bbc}
+
+
+
+\begin{DoxyCode}
+80 {
+81     if (banks == 1) {
+82         return 0;
+83     }
+84     return idx % banks;
+85 }
+\end{DoxyCode}
+\hypertarget{classBankedArray_aaa85fb1f3c3aa637e08af3002b00111d}{
+\index{BankedArray@{BankedArray}!tryAccess@{tryAccess}}
+\index{tryAccess@{tryAccess}!BankedArray@{BankedArray}}
+\subsubsection[{tryAccess}]{\setlength{\rightskip}{0pt plus 5cm}bool tryAccess ({\bf Index} {\em idx})}}
+\label{classBankedArray_aaa85fb1f3c3aa637e08af3002b00111d}
+
+
+
+\begin{DoxyCode}
+52 {
+53     if (accessLatency == 0)
+54         return true;
+55 
+56     unsigned int bank = mapIndexToBank(idx);
+57     assert(bank < banks);
+58 
+59     if (busyBanks[bank].endAccess >= curTick()) {
+60         if (!(busyBanks[bank].startAccess == curTick() &&
+61             busyBanks[bank].idx == idx)) {
+62             return false;
+63         } else {
+64             // We tried to allocate resources twice
+65             // in the same cycle for the same addr
+66             return true;
+67         }
+68     }
+69 
+70     busyBanks[bank].idx = idx;
+71     busyBanks[bank].startAccess = curTick();
+72     busyBanks[bank].endAccess = curTick() +
+73         (accessLatency-1) * g_system_ptr->clockPeriod();
+74 
+75     return true;
+76 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classBankedArray_a22569642d188db2401013daf3c1aaf80}{
+\index{BankedArray@{BankedArray}!accessLatency@{accessLatency}}
+\index{accessLatency@{accessLatency}!BankedArray@{BankedArray}}
+\subsubsection[{accessLatency}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cycles} {\bf accessLatency}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBankedArray_a22569642d188db2401013daf3c1aaf80}
+\hypertarget{classBankedArray_a2061a8d117a013455257a1ac4159052a}{
+\index{BankedArray@{BankedArray}!bankBits@{bankBits}}
+\index{bankBits@{bankBits}!BankedArray@{BankedArray}}
+\subsubsection[{bankBits}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf bankBits}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBankedArray_a2061a8d117a013455257a1ac4159052a}
+\hypertarget{classBankedArray_af3bc5dde442d2943c967e6a619b651db}{
+\index{BankedArray@{BankedArray}!banks@{banks}}
+\index{banks@{banks}!BankedArray@{BankedArray}}
+\subsubsection[{banks}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf banks}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBankedArray_af3bc5dde442d2943c967e6a619b651db}
+\hypertarget{classBankedArray_a26ac330c6dbf83377648d992382927a4}{
+\index{BankedArray@{BankedArray}!busyBanks@{busyBanks}}
+\index{busyBanks@{busyBanks}!BankedArray@{BankedArray}}
+\subsubsection[{busyBanks}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf AccessRecord}$>$ {\bf busyBanks}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBankedArray_a26ac330c6dbf83377648d992382927a4}
+\hypertarget{classBankedArray_aaf805bffe08ab5ee80012f43977189b7}{
+\index{BankedArray@{BankedArray}!startIndexBit@{startIndexBit}}
+\index{startIndexBit@{startIndexBit}!BankedArray@{BankedArray}}
+\subsubsection[{startIndexBit}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int {\bf startIndexBit}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classBankedArray_aaf805bffe08ab5ee80012f43977189b7}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/ruby/system/\hyperlink{BankedArray_8hh}{BankedArray.hh}\item 
+mem/ruby/system/\hyperlink{BankedArray_8cc}{BankedArray.cc}\end{DoxyCompactItemize}

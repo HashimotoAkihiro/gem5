@@ -1,0 +1,591 @@
+\hypertarget{serialize_8cc}{
+\section{sim/serialize.cc}
+\label{serialize_8cc}\index{sim/serialize.cc@{sim/serialize.cc}}
+}
+{\ttfamily \#include $<$sys/stat.h$>$}\par
+{\ttfamily \#include $<$sys/time.h$>$}\par
+{\ttfamily \#include $<$sys/types.h$>$}\par
+{\ttfamily \#include $<$cerrno$>$}\par
+{\ttfamily \#include $<$fstream$>$}\par
+{\ttfamily \#include $<$list$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include \char`\"{}base/inifile.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/output.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/str.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/eventq.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/serialize.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-events.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-exit.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/sim\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/stat\_\-control.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classGlobals}{Globals}
+\end{DoxyCompactItemize}
+\subsection*{マクロ定義}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{serialize_8cc_a6630aaf1a80f9cf01cc097e1b6440bc8}{INSTANTIATE\_\-PARAM\_\-TEMPLATES}(type)
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSimObject}{SimObject} $\ast$ \hyperlink{serialize_8cc_af3e098881297d7c415e668e57d9249ff}{resolveSimObject} (const string \&)
+\item 
+{\footnotesize template$<$class T $>$ }\\bool \hyperlink{serialize_8cc_a9b295a66528e91856a55dd090bea82f0}{parseParam} (const string \&s, T \&value)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_acbd11f99e2fd99f37edd78b73fc2213f}{showParam} (ostream \&os, const T \&value)
+\item 
+{\footnotesize template$<$$>$ }\\void \hyperlink{serialize_8cc_abf77fb3793bf9cd5cf62044efa15c29b}{showParam} (ostream \&os, const char \&value)
+\item 
+{\footnotesize template$<$$>$ }\\void \hyperlink{serialize_8cc_ad241e56bd8b6611dfff48aa1ec759203}{showParam} (ostream \&os, const signed char \&value)
+\item 
+{\footnotesize template$<$$>$ }\\void \hyperlink{serialize_8cc_a19f7ce371c8245619ca6f98331247ff4}{showParam} (ostream \&os, const unsigned char \&value)
+\item 
+{\footnotesize template$<$$>$ }\\bool \hyperlink{serialize_8cc_a6c3022fd5e7f3b8094842f55a196bba4}{parseParam} (const string \&s, float \&value)
+\item 
+{\footnotesize template$<$$>$ }\\bool \hyperlink{serialize_8cc_adbdd98818c92fe75a2fdce4169bdf4de}{parseParam} (const string \&s, double \&value)
+\item 
+{\footnotesize template$<$$>$ }\\bool \hyperlink{serialize_8cc_ad9ac0c96522a68f528376f2b0851dcd8}{parseParam} (const string \&s, bool \&value)
+\item 
+{\footnotesize template$<$$>$ }\\void \hyperlink{serialize_8cc_ae7efcd8667261e61d3fa5d2529b1b2a9}{showParam} (ostream \&os, const bool \&value)
+\item 
+{\footnotesize template$<$$>$ }\\bool \hyperlink{serialize_8cc_ad5f0d86739736d745965ef4962614921}{parseParam} (const string \&s, string \&value)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_ac7fcd9e303fdb694bccaadd9c06bd182}{paramOut} (ostream \&os, const string \&name, const T \&param)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_a1dfe0fd5d936a18e30db1851b378bb41}{arrayParamOut} (ostream \&os, const string \&name, const \hyperlink{classstd_1_1vector}{vector}$<$ T $>$ \&param)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_a4c0c64219bf77d9668e15bc02f1eae96}{arrayParamOut} (ostream \&os, const string \&name, const \hyperlink{classstd_1_1list}{list}$<$ T $>$ \&param)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_a87f6cb95a289f5dbea72bd9889efa343}{paramIn} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const string \&section, const string \&name, T \&param)
+\item 
+{\footnotesize template$<$class T $>$ }\\bool \hyperlink{serialize_8cc_a1e3e094c96bda34fb816eb26db7e1469}{optParamIn} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const string \&section, const string \&name, T \&param)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_aba567166ac47c93b1a65c2774f82f275}{arrayParamOut} (ostream \&os, const string \&name, const T $\ast$param, unsigned size)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_a20ca99a4b0b51976ea5acc22dbf034b1}{arrayParamIn} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const string \&section, const string \&name, T $\ast$param, unsigned size)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_a8c6cdc6f6906ad4dfe8927c3a6e6bfb0}{arrayParamIn} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const string \&section, const string \&name, \hyperlink{classstd_1_1vector}{vector}$<$ T $>$ \&param)
+\item 
+{\footnotesize template$<$class T $>$ }\\void \hyperlink{serialize_8cc_a7d1c33bb6cf19da89f0757560d53a0d8}{arrayParamIn} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const string \&section, const string \&name, \hyperlink{classstd_1_1list}{list}$<$ T $>$ \&param)
+\item 
+void \hyperlink{serialize_8cc_aa31c5d6abdfc8e578caf72525d81173d}{objParamIn} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const string \&section, const string \&name, \hyperlink{classSimObject}{SimObject} $\ast$\&param)
+\item 
+void \hyperlink{serialize_8cc_acedaac6148d754a245424af5ed3fa827}{debug\_\-serialize} (const string \&cpt\_\-dir)
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classGlobals}{Globals} \hyperlink{serialize_8cc_adb42fa9b21c333bcafc5cf7d7aac4f97}{globals}
+\begin{DoxyCompactList}\small\item\em The one and only instance of the \hyperlink{classGlobals}{Globals} class. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{マクロ定義}
+\hypertarget{serialize_8cc_a6630aaf1a80f9cf01cc097e1b6440bc8}{
+\index{serialize.cc@{serialize.cc}!INSTANTIATE\_\-PARAM\_\-TEMPLATES@{INSTANTIATE\_\-PARAM\_\-TEMPLATES}}
+\index{INSTANTIATE\_\-PARAM\_\-TEMPLATES@{INSTANTIATE\_\-PARAM\_\-TEMPLATES}!serialize.cc@{serialize.cc}}
+\subsubsection[{INSTANTIATE\_\-PARAM\_\-TEMPLATES}]{\setlength{\rightskip}{0pt plus 5cm}\#define INSTANTIATE\_\-PARAM\_\-TEMPLATES(type)}}
+\label{serialize_8cc_a6630aaf1a80f9cf01cc097e1b6440bc8}
+{\bfseries 値:}
+\begin{DoxyCode}
+template void                                                           \
+paramOut(ostream &os, const string &name, type const &param);           \
+template void                                                           \
+paramIn(Checkpoint *cp, const string &section,                          \
+        const string &name, type & param);                              \
+template bool                                                           \
+optParamIn(Checkpoint *cp, const string &section,                       \
+        const string &name, type & param);                              \
+template void                                                           \
+arrayParamOut(ostream &os, const string &name,                          \
+              type const *param, unsigned size);                        \
+template void                                                           \
+arrayParamIn(Checkpoint *cp, const string &section,                     \
+             const string &name, type *param, unsigned size);           \
+template void                                                           \
+arrayParamOut(ostream &os, const string &name,                          \
+              const vector<type> &param);                               \
+template void                                                           \
+arrayParamIn(Checkpoint *cp, const string &section,                     \
+             const string &name, vector<type> &param);                  \
+template void                                                           \
+arrayParamOut(ostream &os, const string &name,                          \
+              const list<type> &param);                                 \
+template void                                                           \
+arrayParamIn(Checkpoint *cp, const string &section,                     \
+             const string &name, list<type> &param);
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{serialize_8cc_a7d1c33bb6cf19da89f0757560d53a0d8}{
+\index{serialize.cc@{serialize.cc}!arrayParamIn@{arrayParamIn}}
+\index{arrayParamIn@{arrayParamIn}!serialize.cc@{serialize.cc}}
+\subsubsection[{arrayParamIn}]{\setlength{\rightskip}{0pt plus 5cm}void arrayParamIn ({\bf Checkpoint} $\ast$ {\em cp}, \/  const string \& {\em section}, \/  const string \& {\em name}, \/  {\bf list}$<$ T $>$ \& {\em param})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a7d1c33bb6cf19da89f0757560d53a0d8}
+
+
+
+\begin{DoxyCode}
+352 {
+353     string str;
+354     if (!cp->find(section, name, str)) {
+355         fatal("Can't unserialize '%s:%s'\n", section, name);
+356     }
+357     param.clear();
+358 
+359     vector<string> tokens;
+360     tokenize(tokens, str, ' ');
+361 
+362     for (vector<string>::size_type i = 0; i < tokens.size(); i++) {
+363         T scalar_value = 0;
+364         if (!parseParam(tokens[i], scalar_value)) {
+365             string err("could not parse \"");
+366 
+367             err += str;
+368             err += "\"";
+369 
+370             fatal(err);
+371         }
+372 
+373         // assign parsed value to vector
+374         param.push_back(scalar_value);
+375     }
+376 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a8c6cdc6f6906ad4dfe8927c3a6e6bfb0}{
+\index{serialize.cc@{serialize.cc}!arrayParamIn@{arrayParamIn}}
+\index{arrayParamIn@{arrayParamIn}!serialize.cc@{serialize.cc}}
+\subsubsection[{arrayParamIn}]{\setlength{\rightskip}{0pt plus 5cm}void arrayParamIn ({\bf Checkpoint} $\ast$ {\em cp}, \/  const string \& {\em section}, \/  const string \& {\em name}, \/  {\bf vector}$<$ T $>$ \& {\em param})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a8c6cdc6f6906ad4dfe8927c3a6e6bfb0}
+
+
+
+\begin{DoxyCode}
+310 {
+311     string str;
+312     if (!cp->find(section, name, str)) {
+313         fatal("Can't unserialize '%s:%s'\n", section, name);
+314     }
+315 
+316     // code below stolen from VectorParam<T>::parse().
+317     // it would be nice to unify these somehow...
+318 
+319     vector<string> tokens;
+320 
+321     tokenize(tokens, str, ' ');
+322 
+323     // Need this if we were doing a vector
+324     // value.resize(tokens.size());
+325 
+326     param.resize(tokens.size());
+327 
+328     for (vector<string>::size_type i = 0; i < tokens.size(); i++) {
+329         // need to parse into local variable to handle vector<bool>,
+330         // for which operator[] returns a special reference class
+331         // that's not the same as 'bool&', (since it's a packed
+332         // vector)
+333         T scalar_value = 0;
+334         if (!parseParam(tokens[i], scalar_value)) {
+335             string err("could not parse \"");
+336 
+337             err += str;
+338             err += "\"";
+339 
+340             fatal(err);
+341         }
+342 
+343         // assign parsed value to vector
+344         param[i] = scalar_value;
+345     }
+346 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a20ca99a4b0b51976ea5acc22dbf034b1}{
+\index{serialize.cc@{serialize.cc}!arrayParamIn@{arrayParamIn}}
+\index{arrayParamIn@{arrayParamIn}!serialize.cc@{serialize.cc}}
+\subsubsection[{arrayParamIn}]{\setlength{\rightskip}{0pt plus 5cm}void arrayParamIn ({\bf Checkpoint} $\ast$ {\em cp}, \/  const string \& {\em section}, \/  const string \& {\em name}, \/  T $\ast$ {\em param}, \/  unsigned {\em size})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a20ca99a4b0b51976ea5acc22dbf034b1}
+
+
+
+\begin{DoxyCode}
+266 {
+267     string str;
+268     if (!cp->find(section, name, str)) {
+269         fatal("Can't unserialize '%s:%s'\n", section, name);
+270     }
+271 
+272     // code below stolen from VectorParam<T>::parse().
+273     // it would be nice to unify these somehow...
+274 
+275     vector<string> tokens;
+276 
+277     tokenize(tokens, str, ' ');
+278 
+279     // Need this if we were doing a vector
+280     // value.resize(tokens.size());
+281 
+282     if (tokens.size() != size) {
+283         fatal("Array size mismatch on %s:%s'\n", section, name);
+284     }
+285 
+286     for (vector<string>::size_type i = 0; i < tokens.size(); i++) {
+287         // need to parse into local variable to handle vector<bool>,
+288         // for which operator[] returns a special reference class
+289         // that's not the same as 'bool&', (since it's a packed
+290         // vector)
+291         T scalar_value = 0;
+292         if (!parseParam(tokens[i], scalar_value)) {
+293             string err("could not parse \"");
+294 
+295             err += str;
+296             err += "\"";
+297 
+298             fatal(err);
+299         }
+300 
+301         // assign parsed value to vector
+302         param[i] = scalar_value;
+303     }
+304 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_aba567166ac47c93b1a65c2774f82f275}{
+\index{serialize.cc@{serialize.cc}!arrayParamOut@{arrayParamOut}}
+\index{arrayParamOut@{arrayParamOut}!serialize.cc@{serialize.cc}}
+\subsubsection[{arrayParamOut}]{\setlength{\rightskip}{0pt plus 5cm}void arrayParamOut (ostream \& {\em os}, \/  const string \& {\em name}, \/  const T $\ast$ {\em param}, \/  unsigned {\em size})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_aba567166ac47c93b1a65c2774f82f275}
+
+
+
+\begin{DoxyCode}
+250 {
+251     os << name << "=";
+252     if (size > 0)
+253         showParam(os, param[0]);
+254     for (unsigned i = 1; i < size; ++i) {
+255         os << " ";
+256         showParam(os, param[i]);
+257     }
+258     os << "\n";
+259 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a4c0c64219bf77d9668e15bc02f1eae96}{
+\index{serialize.cc@{serialize.cc}!arrayParamOut@{arrayParamOut}}
+\index{arrayParamOut@{arrayParamOut}!serialize.cc@{serialize.cc}}
+\subsubsection[{arrayParamOut}]{\setlength{\rightskip}{0pt plus 5cm}void arrayParamOut (ostream \& {\em os}, \/  const string \& {\em name}, \/  const {\bf list}$<$ T $>$ \& {\em param})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a4c0c64219bf77d9668e15bc02f1eae96}
+
+
+
+\begin{DoxyCode}
+209 {
+210     typename list<T>::const_iterator it = param.begin();
+211 
+212     os << name << "=";
+213     if (param.size() > 0)
+214         showParam(os, *it);
+215     it++;
+216     while (it != param.end()) {
+217         os << " ";
+218         showParam(os, *it);
+219         it++;
+220     }
+221     os << "\n";
+222 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a1dfe0fd5d936a18e30db1851b378bb41}{
+\index{serialize.cc@{serialize.cc}!arrayParamOut@{arrayParamOut}}
+\index{arrayParamOut@{arrayParamOut}!serialize.cc@{serialize.cc}}
+\subsubsection[{arrayParamOut}]{\setlength{\rightskip}{0pt plus 5cm}void arrayParamOut (ostream \& {\em os}, \/  const string \& {\em name}, \/  const {\bf vector}$<$ T $>$ \& {\em param})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a1dfe0fd5d936a18e30db1851b378bb41}
+
+
+
+\begin{DoxyCode}
+194 {
+195     typename vector<T>::size_type size = param.size();
+196     os << name << "=";
+197     if (size > 0)
+198         showParam(os, param[0]);
+199     for (typename vector<T>::size_type i = 1; i < size; ++i) {
+200         os << " ";
+201         showParam(os, param[i]);
+202     }
+203     os << "\n";
+204 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_acedaac6148d754a245424af5ed3fa827}{
+\index{serialize.cc@{serialize.cc}!debug\_\-serialize@{debug\_\-serialize}}
+\index{debug\_\-serialize@{debug\_\-serialize}!serialize.cc@{serialize.cc}}
+\subsubsection[{debug\_\-serialize}]{\setlength{\rightskip}{0pt plus 5cm}void debug\_\-serialize (const string \& {\em cpt\_\-dir})}}
+\label{serialize_8cc_acedaac6148d754a245424af5ed3fa827}
+
+
+
+\begin{DoxyCode}
+526 {
+527     Serializable::serializeAll(cpt_dir);
+528 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_aa31c5d6abdfc8e578caf72525d81173d}{
+\index{serialize.cc@{serialize.cc}!objParamIn@{objParamIn}}
+\index{objParamIn@{objParamIn}!serialize.cc@{serialize.cc}}
+\subsubsection[{objParamIn}]{\setlength{\rightskip}{0pt plus 5cm}void objParamIn ({\bf Checkpoint} $\ast$ {\em cp}, \/  const string \& {\em section}, \/  const string \& {\em name}, \/  {\bf SimObject} $\ast$\& {\em param})}}
+\label{serialize_8cc_aa31c5d6abdfc8e578caf72525d81173d}
+
+
+
+\begin{DoxyCode}
+382 {
+383     if (!cp->findObj(section, name, param)) {
+384         fatal("Can't unserialize '%s:%s'\n", section, name);
+385     }
+386 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a1e3e094c96bda34fb816eb26db7e1469}{
+\index{serialize.cc@{serialize.cc}!optParamIn@{optParamIn}}
+\index{optParamIn@{optParamIn}!serialize.cc@{serialize.cc}}
+\subsubsection[{optParamIn}]{\setlength{\rightskip}{0pt plus 5cm}bool optParamIn ({\bf Checkpoint} $\ast$ {\em cp}, \/  const string \& {\em section}, \/  const string \& {\em name}, \/  T \& {\em param})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a1e3e094c96bda34fb816eb26db7e1469}
+
+
+
+\begin{DoxyCode}
+237 {
+238     string str;
+239     if (!cp->find(section, name, str) || !parseParam(str, param)) {
+240         warn("optional parameter %s:%s not present\n", section, name);
+241         return false;
+242     } else {
+243         return true;
+244     }
+245 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a87f6cb95a289f5dbea72bd9889efa343}{
+\index{serialize.cc@{serialize.cc}!paramIn@{paramIn}}
+\index{paramIn@{paramIn}!serialize.cc@{serialize.cc}}
+\subsubsection[{paramIn}]{\setlength{\rightskip}{0pt plus 5cm}void paramIn ({\bf Checkpoint} $\ast$ {\em cp}, \/  const string \& {\em section}, \/  const string \& {\em name}, \/  T \& {\em param})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a87f6cb95a289f5dbea72bd9889efa343}
+
+
+
+\begin{DoxyCode}
+227 {
+228     string str;
+229     if (!cp->find(section, name, str) || !parseParam(str, param)) {
+230         fatal("Can't unserialize '%s:%s'\n", section, name);
+231     }
+232 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_ac7fcd9e303fdb694bccaadd9c06bd182}{
+\index{serialize.cc@{serialize.cc}!paramOut@{paramOut}}
+\index{paramOut@{paramOut}!serialize.cc@{serialize.cc}}
+\subsubsection[{paramOut}]{\setlength{\rightskip}{0pt plus 5cm}void paramOut (ostream \& {\em os}, \/  const string \& {\em name}, \/  const T \& {\em param})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_ac7fcd9e303fdb694bccaadd9c06bd182}
+
+
+
+\begin{DoxyCode}
+185 {
+186     os << name << "=";
+187     showParam(os, param);
+188     os << "\n";
+189 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_ad5f0d86739736d745965ef4962614921}{
+\index{serialize.cc@{serialize.cc}!parseParam@{parseParam}}
+\index{parseParam@{parseParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{parseParam}]{\setlength{\rightskip}{0pt plus 5cm}bool parseParam (const string \& {\em s}, \/  string \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_ad5f0d86739736d745965ef4962614921}
+
+
+
+\begin{DoxyCode}
+161 {
+162     value = s;
+163     return true;
+164 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_ad9ac0c96522a68f528376f2b0851dcd8}{
+\index{serialize.cc@{serialize.cc}!parseParam@{parseParam}}
+\index{parseParam@{parseParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{parseParam}]{\setlength{\rightskip}{0pt plus 5cm}bool parseParam (const string \& {\em s}, \/  bool \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_ad9ac0c96522a68f528376f2b0851dcd8}
+
+
+
+\begin{DoxyCode}
+132 {
+133     const string &ls = to_lower(s);
+134 
+135     if (ls == "true") {
+136         value = true;
+137         return true;
+138     }
+139 
+140     if (ls == "false") {
+141         value = false;
+142         return true;
+143     }
+144 
+145     return false;
+146 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_adbdd98818c92fe75a2fdce4169bdf4de}{
+\index{serialize.cc@{serialize.cc}!parseParam@{parseParam}}
+\index{parseParam@{parseParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{parseParam}]{\setlength{\rightskip}{0pt plus 5cm}bool parseParam (const string \& {\em s}, \/  double \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_adbdd98818c92fe75a2fdce4169bdf4de}
+
+
+
+\begin{DoxyCode}
+125 {
+126     return (sscanf(s.c_str(), "%lf", &value) == 1);
+127 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a6c3022fd5e7f3b8094842f55a196bba4}{
+\index{serialize.cc@{serialize.cc}!parseParam@{parseParam}}
+\index{parseParam@{parseParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{parseParam}]{\setlength{\rightskip}{0pt plus 5cm}bool parseParam (const string \& {\em s}, \/  float \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a6c3022fd5e7f3b8094842f55a196bba4}
+
+
+
+\begin{DoxyCode}
+118 {
+119     return (sscanf(s.c_str(), "%f", &value) == 1);
+120 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a9b295a66528e91856a55dd090bea82f0}{
+\index{serialize.cc@{serialize.cc}!parseParam@{parseParam}}
+\index{parseParam@{parseParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{parseParam}]{\setlength{\rightskip}{0pt plus 5cm}bool parseParam (const string \& {\em s}, \/  T \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a9b295a66528e91856a55dd090bea82f0}
+
+
+
+\begin{DoxyCode}
+70 {
+71     return to_number(s, value);
+72 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_af3e098881297d7c415e668e57d9249ff}{
+\index{serialize.cc@{serialize.cc}!resolveSimObject@{resolveSimObject}}
+\index{resolveSimObject@{resolveSimObject}!serialize.cc@{serialize.cc}}
+\subsubsection[{resolveSimObject}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SimObject}$\ast$ resolveSimObject (const string \&)}}
+\label{serialize_8cc_af3e098881297d7c415e668e57d9249ff}
+
+
+
+\begin{DoxyCode}
+141 {
+142     PyObject *module = PyImport_ImportModule(PCC("m5.SimObject"));
+143     if (module == NULL)
+144         panic("Could not import m5.SimObject");
+145 
+146     PyObject *resolver =
+147         PyObject_GetAttrString(module, PCC("resolveSimObject"));
+148     if (resolver == NULL) {
+149         PyErr_Print();
+150         panic("resolveSimObject: failed to find resolveSimObject");
+151     }
+152 
+153     PyObject *ptr = PyObject_CallFunction(resolver, PCC("(s)"), name.c_str());
+154     if (ptr == NULL) {
+155         PyErr_Print();
+156         panic("resolveSimObject: failure on call to Python for %s", name);
+157     }
+158 
+159     SimObject *obj = convertSwigSimObjectPtr(ptr);
+160     if (obj == NULL)
+161         panic("resolveSimObject: failure on pointer conversion for %s", name);
+162 
+163     Py_DECREF(module);
+164     Py_DECREF(resolver);
+165     Py_DECREF(ptr);
+166 
+167     return obj;
+168 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_ae7efcd8667261e61d3fa5d2529b1b2a9}{
+\index{serialize.cc@{serialize.cc}!showParam@{showParam}}
+\index{showParam@{showParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{showParam}]{\setlength{\rightskip}{0pt plus 5cm}void showParam (ostream \& {\em os}, \/  const bool \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_ae7efcd8667261e61d3fa5d2529b1b2a9}
+
+
+
+\begin{DoxyCode}
+152 {
+153     os << (value ? "true" : "false");
+154 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_a19f7ce371c8245619ca6f98331247ff4}{
+\index{serialize.cc@{serialize.cc}!showParam@{showParam}}
+\index{showParam@{showParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{showParam}]{\setlength{\rightskip}{0pt plus 5cm}void showParam (ostream \& {\em os}, \/  const unsigned char \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_a19f7ce371c8245619ca6f98331247ff4}
+
+
+
+\begin{DoxyCode}
+109 {
+110     os << (unsigned int)value;
+111 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_ad241e56bd8b6611dfff48aa1ec759203}{
+\index{serialize.cc@{serialize.cc}!showParam@{showParam}}
+\index{showParam@{showParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{showParam}]{\setlength{\rightskip}{0pt plus 5cm}void showParam (ostream \& {\em os}, \/  const signed char \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_ad241e56bd8b6611dfff48aa1ec759203}
+
+
+
+\begin{DoxyCode}
+101 {
+102     os << (int)value;
+103 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_abf77fb3793bf9cd5cf62044efa15c29b}{
+\index{serialize.cc@{serialize.cc}!showParam@{showParam}}
+\index{showParam@{showParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{showParam}]{\setlength{\rightskip}{0pt plus 5cm}void showParam (ostream \& {\em os}, \/  const char \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_abf77fb3793bf9cd5cf62044efa15c29b}
+
+
+
+\begin{DoxyCode}
+93 {
+94     os << (int)value;
+95 }
+\end{DoxyCode}
+\hypertarget{serialize_8cc_acbd11f99e2fd99f37edd78b73fc2213f}{
+\index{serialize.cc@{serialize.cc}!showParam@{showParam}}
+\index{showParam@{showParam}!serialize.cc@{serialize.cc}}
+\subsubsection[{showParam}]{\setlength{\rightskip}{0pt plus 5cm}void showParam (ostream \& {\em os}, \/  const T \& {\em value})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{serialize_8cc_acbd11f99e2fd99f37edd78b73fc2213f}
+
+
+
+\begin{DoxyCode}
+77 {
+78     os << value;
+79 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{serialize_8cc_adb42fa9b21c333bcafc5cf7d7aac4f97}{
+\index{serialize.cc@{serialize.cc}!globals@{globals}}
+\index{globals@{globals}!serialize.cc@{serialize.cc}}
+\subsubsection[{globals}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Globals} {\bf globals}}}
+\label{serialize_8cc_adb42fa9b21c333bcafc5cf7d7aac4f97}
+
+
+The one and only instance of the \hyperlink{classGlobals}{Globals} class. 

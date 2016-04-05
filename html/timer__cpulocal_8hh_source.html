@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/arm/timer_cpulocal.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/arm/timer_cpulocal.hh</h1><a href="timer__cpulocal_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2010-2011 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Ali Saidi</span>
+<a name="l00038"></a>00038 <span class="comment"> *          Geoffrey Blake</span>
+<a name="l00039"></a>00039 <span class="comment"> */</span>
+<a name="l00040"></a>00040 
+<a name="l00041"></a>00041 <span class="preprocessor">#ifndef __DEV_ARM_LOCALTIMER_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_ARM_LOCALTIMER_HH__</span>
+<a name="l00043"></a>00043 <span class="preprocessor"></span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="bitunion_8hh.html">base/bitunion.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="io__device_8hh.html">dev/io_device.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;params/CpuLocalTimer.hh&quot;</span>
+<a name="l00047"></a>00047 
+<a name="l00053"></a>00053 <span class="keyword">class </span><a class="code" href="classBaseGic.html">BaseGic</a>;
+<a name="l00054"></a>00054 
+<a name="l00055"></a><a class="code" href="classCpuLocalTimer.html">00055</a> <span class="keyword">class </span><a class="code" href="classCpuLocalTimer.html">CpuLocalTimer</a> : <span class="keyword">public</span> <a class="code" href="classBasicPioDevice.html">BasicPioDevice</a>
+<a name="l00056"></a>00056 {
+<a name="l00057"></a>00057   <span class="keyword">protected</span>:
+<a name="l00058"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html">00058</a>     <span class="keyword">class </span><a class="code" href="classCpuLocalTimer_1_1Timer.html">Timer</a>
+<a name="l00059"></a>00059     {
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061       <span class="keyword">public</span>:
+<a name="l00062"></a>00062         <span class="keyword">enum</span> {
+<a name="l00063"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a6329979acc2f49e2090efa3349ad4881">00063</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a6329979acc2f49e2090efa3349ad4881">TimerLoadReg</a>           = 0x00,
+<a name="l00064"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a26222a8335f9b4227754aaacd2f9de44">00064</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a26222a8335f9b4227754aaacd2f9de44">TimerCounterReg</a>        = 0x04,
+<a name="l00065"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a8a51f6f1feb5d1a1b7602ad2ffb850b9">00065</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a8a51f6f1feb5d1a1b7602ad2ffb850b9">TimerControlReg</a>        = 0x08,
+<a name="l00066"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a06003210905c03a2c2459cf873c71b9f">00066</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a06003210905c03a2c2459cf873c71b9f">TimerIntStatusReg</a>      = 0x0C,
+<a name="l00067"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122ac1814e9dfd788d5640ca9506b03c85a0">00067</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122ac1814e9dfd788d5640ca9506b03c85a0">WatchdogLoadReg</a>        = 0x20,
+<a name="l00068"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a8af2a43f30e408306616e962221402a2">00068</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a8af2a43f30e408306616e962221402a2">WatchdogCounterReg</a>     = 0x24,
+<a name="l00069"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a73a6c5160af9be63e314823ae32b6855">00069</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a73a6c5160af9be63e314823ae32b6855">WatchdogControlReg</a>     = 0x28,
+<a name="l00070"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a325db532cd3eca9430deeb58fe2ab77b">00070</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a325db532cd3eca9430deeb58fe2ab77b">WatchdogIntStatusReg</a>   = 0x2C,
+<a name="l00071"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122ad477167210086367c39fd4a56aa2647a">00071</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122ad477167210086367c39fd4a56aa2647a">WatchdogResetStatusReg</a> = 0x30,
+<a name="l00072"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a0ae0b381c018c42495f41553ff2451cc">00072</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122a0ae0b381c018c42495f41553ff2451cc">WatchdogDisableReg</a>     = 0x34,
+<a name="l00073"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122aff9abf2b1a689f70a77a18da50c01d9f">00073</a>             <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1fb9092bcdeada2d206bdc74afbbe122aff9abf2b1a689f70a77a18da50c01d9f">Size</a>                   = 0x38
+<a name="l00074"></a>00074         };
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076         <a class="code" href="classCpuLocalTimer_1_1Timer.html#aeae80462edd494698c490d195af1cf9f">BitUnion32</a>(TimerCtrl)
+<a name="l00077"></a>00077             Bitfield&lt;0&gt;   <a class="code" href="namespaceX86ISA.html#a240abf52b962b44d8f18aad15edace65">enable</a>;
+<a name="l00078"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#af2069279e2e43fd85f34f715adebf04f">00078</a>             Bitfield&lt;1&gt;   <a class="code" href="classCpuLocalTimer_1_1Timer.html#af2069279e2e43fd85f34f715adebf04f">autoReload</a>;
+<a name="l00079"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#afb07a713bfa971861404c19f9563279a">00079</a>             Bitfield&lt;2&gt;   <a class="code" href="classCpuLocalTimer_1_1Timer.html#afb07a713bfa971861404c19f9563279a">intEnable</a>;
+<a name="l00080"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a39eaeaf2a0051b75fa1583c0b5c156a0">00080</a>             Bitfield&lt;7,3&gt; <a class="code" href="classCpuLocalTimer_1_1Timer.html#a39eaeaf2a0051b75fa1583c0b5c156a0">reserved</a>;
+<a name="l00081"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#af8a4a2ed9062ccf29845771bd30398a4">00081</a>             Bitfield&lt;15,8&gt; <a class="code" href="classCpuLocalTimer_1_1Timer.html#af8a4a2ed9062ccf29845771bd30398a4">prescalar</a>;
+<a name="l00082"></a>00082         <a class="code" href="classCpuLocalTimer_1_1Timer.html#a4ac1bc7cc3873c99b8469db37f16e565">EndBitUnion</a>(TimerCtrl)
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084         <a class="code" href="classCpuLocalTimer_1_1Timer.html#aeae80462edd494698c490d195af1cf9f">BitUnion32</a>(WatchdogCtrl)
+<a name="l00085"></a>00085             Bitfield&lt;0&gt;   enable;
+<a name="l00086"></a>00086             Bitfield&lt;1&gt;   autoReload;
+<a name="l00087"></a>00087             Bitfield&lt;2&gt;   intEnable;
+<a name="l00088"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#abe0a1c55d5d90dbe169c060ef1cfb9a1">00088</a>             Bitfield&lt;3&gt;   <a class="code" href="classCpuLocalTimer_1_1Timer.html#abe0a1c55d5d90dbe169c060ef1cfb9a1">watchdogMode</a>;
+<a name="l00089"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a6df0c214646b1e43905ffbeea4e8d438">00089</a>             Bitfield&lt;7,4&gt; <a class="code" href="classCpuLocalTimer_1_1Timer.html#a39eaeaf2a0051b75fa1583c0b5c156a0">reserved</a>;
+<a name="l00090"></a>00090             Bitfield&lt;15,8&gt; <a class="code" href="classCpuLocalTimer_1_1Timer.html#af8a4a2ed9062ccf29845771bd30398a4">prescalar</a>;
+<a name="l00091"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a91fc2d2ffb2ff7ef97b6aed0a032ba23">00091</a>         <a class="code" href="classCpuLocalTimer_1_1Timer.html#a4ac1bc7cc3873c99b8469db37f16e565">EndBitUnion</a>(WatchdogCtrl)
+<a name="l00092"></a>00092 
+<a name="l00093"></a>00093       protected:
+<a name="l00094"></a>00094         std::<span class="keywordtype">string</span> _name;
+<a name="l00095"></a>00095 
+<a name="l00097"></a>00097         <a class="code" href="classCpuLocalTimer.html">CpuLocalTimer</a> *<a class="code" href="classCpuLocalTimer_1_1Timer.html#a91fc2d2ffb2ff7ef97b6aed0a032ba23">parent</a>;
+<a name="l00098"></a>00098 
+<a name="l00100"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1e2451c323e162d521f8538f07983f06">00100</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1e2451c323e162d521f8538f07983f06">intNumTimer</a>;
+<a name="l00101"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a7be8312de67b0bdb2313091b3ece8d63">00101</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a7be8312de67b0bdb2313091b3ece8d63">intNumWatchdog</a>;
+<a name="l00102"></a>00102 
+<a name="l00104"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a8cf4cb95ac9b99db5f9990d16cd6593b">00104</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a8cf4cb95ac9b99db5f9990d16cd6593b">cpuNum</a>;
+<a name="l00105"></a>00105 
+<a name="l00107"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a8a303fd4c61e6f2ad203b3996137bf29">00107</a>         TimerCtrl <a class="code" href="classCpuLocalTimer_1_1Timer.html#a8a303fd4c61e6f2ad203b3996137bf29">timerControl</a>;
+<a name="l00108"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a650e1bd041426285d219374bb934b21d">00108</a>         WatchdogCtrl <a class="code" href="classCpuLocalTimer_1_1Timer.html#a650e1bd041426285d219374bb934b21d">watchdogControl</a>;
+<a name="l00109"></a>00109 
+<a name="l00112"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#acae15a5a0ab8900fb06f11e079cf6de2">00112</a>         <span class="keywordtype">bool</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#acae15a5a0ab8900fb06f11e079cf6de2">rawIntTimer</a>;
+<a name="l00113"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#aa79f4b5f49e12748ddccff650ac434d2">00113</a>         <span class="keywordtype">bool</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#aa79f4b5f49e12748ddccff650ac434d2">rawIntWatchdog</a>;
+<a name="l00114"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a891d61f784db1e83addbb06b7487079e">00114</a>         <span class="keywordtype">bool</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a891d61f784db1e83addbb06b7487079e">rawResetWatchdog</a>;
+<a name="l00115"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a51372d5fcba85069b5e5bba466ec6832">00115</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a51372d5fcba85069b5e5bba466ec6832">watchdogDisableReg</a>;
+<a name="l00116"></a>00116 
+<a name="l00119"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a357b071730029e981be07c885c7ec91d">00119</a>         <span class="keywordtype">bool</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a357b071730029e981be07c885c7ec91d">pendingIntTimer</a>;
+<a name="l00120"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a663bde1c5f669163f0ca90a9042455f9">00120</a>         <span class="keywordtype">bool</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a663bde1c5f669163f0ca90a9042455f9">pendingIntWatchdog</a>;
+<a name="l00121"></a>00121 
+<a name="l00123"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#ab938cbb5083da16d0b1be708229eca72">00123</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classCpuLocalTimer_1_1Timer.html#ab938cbb5083da16d0b1be708229eca72">timerLoadValue</a>;
+<a name="l00124"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1bc95b558c126e9393d024f8f7631549">00124</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a1bc95b558c126e9393d024f8f7631549">watchdogLoadValue</a>;
+<a name="l00125"></a>00125 
+<a name="l00127"></a>00127         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a84a1ec7607453e04aa1cdada60013803">timerAtZero</a>();
+<a name="l00128"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#aef3335c9e81dcad22a8575d136b7f21a">00128</a>         <a class="code" href="classEventWrapper.html">EventWrapper</a>&lt;<a class="code" href="classCpuLocalTimer_1_1Timer.html">Timer</a>, &amp;Timer::timerAtZero&gt; <a class="code" href="classCpuLocalTimer_1_1Timer.html#aef3335c9e81dcad22a8575d136b7f21a">timerZeroEvent</a>;
+<a name="l00129"></a>00129 
+<a name="l00130"></a>00130         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a76d03f76bc4ae7f6d6671b6ac0cd2f7e">watchdogAtZero</a>();
+<a name="l00131"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a6129a6827c6187d04c345125489dda09">00131</a>         <a class="code" href="classEventWrapper.html">EventWrapper</a>&lt;Timer, &amp;Timer::watchdogAtZero&gt; <a class="code" href="classCpuLocalTimer_1_1Timer.html#a6129a6827c6187d04c345125489dda09">watchdogZeroEvent</a>;
+<a name="l00132"></a>00132       public:
+<a name="l00135"></a>00135         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a520062c40a7a6907757be6a19ee1c0b7">restartTimerCounter</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00136"></a>00136         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a88d47ac274ae3a0b35888ac8fa88fb78">restartWatchdogCounter</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> val);
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138         Timer();
+<a name="l00139"></a>00139 
+<a name="l00140"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a37627d5d5bba7f4a8690c71c2ab3cb07">00140</a>         std::<span class="keywordtype">string</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> _name; }
+<a name="l00141"></a>00141 
+<a name="l00143"></a>00143         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a6ecbcc960e1c0cd0a0f4c64e7ae58d14">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr);
+<a name="l00144"></a>00144 
+<a name="l00146"></a>00146         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a26d6a1d80de386690a8ad73932f83d96">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr);
+<a name="l00147"></a>00147 
+<a name="l00148"></a>00148         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00149"></a>00149         <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer_1_1Timer.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00150"></a>00150 
+<a name="l00151"></a><a class="code" href="classCpuLocalTimer_1_1Timer.html#a1253a9bb7a93e1c7e63e736285a35c2f">00151</a>         <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classCpuLocalTimer.html">CpuLocalTimer</a>;
+<a name="l00152"></a>00152     };
+<a name="l00153"></a>00153 
+<a name="l00154"></a><a class="code" href="classCpuLocalTimer.html#a4b102c882c8ecd5172c3f918fcde9c6d">00154</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classCpuLocalTimer.html#a4b102c882c8ecd5172c3f918fcde9c6d">CPU_MAX</a> = 8;
+<a name="l00155"></a>00155 
+<a name="l00157"></a><a class="code" href="classCpuLocalTimer.html#a2e2266dca56928f63667e994933169ee">00157</a>     <a class="code" href="classBaseGic.html">BaseGic</a> *<a class="code" href="classCpuLocalTimer.html#a2e2266dca56928f63667e994933169ee">gic</a>;
+<a name="l00158"></a>00158 
+<a name="l00160"></a><a class="code" href="classCpuLocalTimer.html#ad9495d6ed4425c81f8f33c7df84a0ada">00160</a>     <a class="code" href="classCpuLocalTimer_1_1Timer.html">Timer</a> <a class="code" href="classCpuLocalTimer.html#ad9495d6ed4425c81f8f33c7df84a0ada">localTimer</a>[<a class="code" href="classCpuLocalTimer.html#a4b102c882c8ecd5172c3f918fcde9c6d">CPU_MAX</a>];
+<a name="l00161"></a>00161 
+<a name="l00162"></a>00162   <span class="keyword">public</span>:
+<a name="l00163"></a><a class="code" href="classCpuLocalTimer.html#a2abacbbb646e91ed1ef591d6ce81f4e3">00163</a>     <span class="keyword">typedef</span> CpuLocalTimerParams <a class="code" href="classCpuLocalTimer.html#a2abacbbb646e91ed1ef591d6ce81f4e3">Params</a>;
+<a name="l00164"></a>00164     <span class="keyword">const</span> <a class="code" href="classCpuLocalTimer.html#a2abacbbb646e91ed1ef591d6ce81f4e3">Params</a> *
+<a name="l00165"></a><a class="code" href="classCpuLocalTimer.html#acd3c3feb78ae7a8f88fe0f110a718dff">00165</a>     <a class="code" href="classCpuLocalTimer.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00166"></a>00166 <span class="keyword">    </span>{
+<a name="l00167"></a>00167         <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classCpuLocalTimer.html#a2abacbbb646e91ed1ef591d6ce81f4e3">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>);
+<a name="l00168"></a>00168     }
+<a name="l00173"></a>00173     <a class="code" href="classCpuLocalTimer.html#ae7c3cd295b79e672e3294e726eb27f61">CpuLocalTimer</a>(<a class="code" href="classCpuLocalTimer.html#a2abacbbb646e91ed1ef591d6ce81f4e3">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00174"></a>00174 
+<a name="l00180"></a>00180     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCpuLocalTimer.html#a613ec7d5e1ec64f8d21fec78ae8e568e">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00181"></a>00181 
+<a name="l00187"></a>00187     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classCpuLocalTimer.html#a4cefab464e72b5dd42c003a0a4341802">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00188"></a>00188 
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00191"></a>00191     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classCpuLocalTimer.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00192"></a>00192 };
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194 
+<a name="l00195"></a>00195 <span class="preprocessor">#endif // __DEV_ARM_SP804_HH__</span>
+<a name="l00196"></a>00196 <span class="preprocessor"></span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

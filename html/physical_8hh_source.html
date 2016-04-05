@@ -1,0 +1,147 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/physical.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/physical.hh</h1><a href="physical_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Andreas Hansson</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __PHYSICAL_MEMORY_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __PHYSICAL_MEMORY_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="addr__range__map_8hh.html">base/addr_range_map.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="port_8hh.html">mem/port.hh</a>&quot;</span>
+<a name="l00045"></a>00045 
+<a name="l00049"></a>00049 <span class="keyword">class </span><a class="code" href="classAbstractMemory.html">AbstractMemory</a>;
+<a name="l00050"></a>00050 
+<a name="l00067"></a><a class="code" href="classPhysicalMemory.html">00067</a> <span class="keyword">class </span><a class="code" href="classPhysicalMemory.html">PhysicalMemory</a> : <span class="keyword">public</span> <a class="code" href="classSerializable.html">Serializable</a>
+<a name="l00068"></a>00068 {
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070   <span class="keyword">private</span>:
+<a name="l00071"></a>00071 
+<a name="l00072"></a>00072     <span class="comment">// Name for debugging</span>
+<a name="l00073"></a><a class="code" href="classPhysicalMemory.html#aaf2ed934b37cbbd236fdd1b01a5f5005">00073</a>     std::string <a class="code" href="classPhysicalMemory.html#aaf2ed934b37cbbd236fdd1b01a5f5005">_name</a>;
+<a name="l00074"></a>00074 
+<a name="l00075"></a>00075     <span class="comment">// Global address map</span>
+<a name="l00076"></a><a class="code" href="classPhysicalMemory.html#ab5cfae3fb0ca282c337c30f0f36ea8d5">00076</a>     <a class="code" href="classAddrRangeMap.html">AddrRangeMap&lt;AbstractMemory*&gt;</a> <a class="code" href="classPhysicalMemory.html#ab5cfae3fb0ca282c337c30f0f36ea8d5">addrMap</a>;
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078     <span class="comment">// a mutable cache for the last range that matched an address</span>
+<a name="l00079"></a><a class="code" href="classPhysicalMemory.html#a356adf3dbde22587d20fa428473a00d6">00079</a>     <span class="keyword">mutable</span> <a class="code" href="classAddrRange.html">AddrRange</a> <a class="code" href="classPhysicalMemory.html#a356adf3dbde22587d20fa428473a00d6">rangeCache</a>;
+<a name="l00080"></a>00080 
+<a name="l00081"></a>00081     <span class="comment">// All address-mapped memories</span>
+<a name="l00082"></a><a class="code" href="classPhysicalMemory.html#a4c874036afca619454444242943675f4">00082</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;AbstractMemory*&gt;</a> <a class="code" href="classPhysicalMemory.html#a4c874036afca619454444242943675f4">memories</a>;
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084     <span class="comment">// The total memory size</span>
+<a name="l00085"></a><a class="code" href="classPhysicalMemory.html#af931a8871310b4dad23f0f0b0f623560">00085</a>     uint64_t <a class="code" href="classPhysicalMemory.html#af931a8871310b4dad23f0f0b0f623560">size</a>;
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087     <span class="comment">// The physical memory used to provide the memory in the simulated</span>
+<a name="l00088"></a>00088     <span class="comment">// system</span>
+<a name="l00089"></a><a class="code" href="classPhysicalMemory.html#a0c347314a9f0b468ed498abaf77bbe44">00089</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::pair&lt;AddrRange, uint8_t*&gt;</a> &gt; <a class="code" href="classPhysicalMemory.html#a0c347314a9f0b468ed498abaf77bbe44">backingStore</a>;
+<a name="l00090"></a>00090 
+<a name="l00091"></a>00091     <span class="comment">// Prevent copying</span>
+<a name="l00092"></a>00092     <a class="code" href="classPhysicalMemory.html#a5247a8a9ca8b14d01253a6861b8b3bf2">PhysicalMemory</a>(<span class="keyword">const</span> <a class="code" href="classPhysicalMemory.html">PhysicalMemory</a>&amp;);
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094     <span class="comment">// Prevent assignment</span>
+<a name="l00095"></a>00095     <a class="code" href="classPhysicalMemory.html">PhysicalMemory</a>&amp; <a class="code" href="classPhysicalMemory.html#a3ce2a36a848a843e660964c9bc4237e8">operator=</a>(<span class="keyword">const</span> <a class="code" href="classPhysicalMemory.html">PhysicalMemory</a>&amp;);
+<a name="l00096"></a>00096 
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classPhysicalMemory.html#a4a205bfc337649ce4e62fe5cb5c7579a">createBackingStore</a>(<a class="code" href="classAddrRange.html">AddrRange</a> range,
+<a name="l00106"></a>00106                             <span class="keyword">const</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;AbstractMemory*&gt;</a>&amp; _memories);
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108   <span class="keyword">public</span>:
+<a name="l00109"></a>00109 
+<a name="l00113"></a>00113     <a class="code" href="classPhysicalMemory.html#a5247a8a9ca8b14d01253a6861b8b3bf2">PhysicalMemory</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classPhysicalMemory.html#aaf2ed934b37cbbd236fdd1b01a5f5005">_name</a>,
+<a name="l00114"></a>00114                    <span class="keyword">const</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;AbstractMemory*&gt;</a>&amp; _memories);
+<a name="l00115"></a>00115 
+<a name="l00119"></a>00119     <a class="code" href="classPhysicalMemory.html#ad6a6b96cf5b3ed869b4a6f06429fd4eb">~PhysicalMemory</a>();
+<a name="l00120"></a>00120 
+<a name="l00125"></a><a class="code" href="classPhysicalMemory.html#a6490f765a824ced1cc94979609fe7e07">00125</a>     <span class="keyword">const</span> std::string <a class="code" href="classPhysicalMemory.html#a6490f765a824ced1cc94979609fe7e07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classPhysicalMemory.html#aaf2ed934b37cbbd236fdd1b01a5f5005">_name</a>; }
+<a name="l00126"></a>00126 
+<a name="l00134"></a>00134     <span class="keywordtype">bool</span> <a class="code" href="classPhysicalMemory.html#a0faeadf06436f8123c7bda01087bb222">isMemAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span>;
+<a name="l00135"></a>00135 
+<a name="l00144"></a>00144     <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classPhysicalMemory.html#a564b079bb27347c8bd8430f009539623">getConfAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00145"></a>00145 
+<a name="l00151"></a><a class="code" href="classPhysicalMemory.html#a990c48a7ad4a4821fe4f04a1e58845a6">00151</a>     uint64_t <a class="code" href="classPhysicalMemory.html#a990c48a7ad4a4821fe4f04a1e58845a6">totalSize</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classPhysicalMemory.html#af931a8871310b4dad23f0f0b0f623560">size</a>; }
+<a name="l00152"></a>00152 
+<a name="l00165"></a><a class="code" href="classPhysicalMemory.html#a57d8785b312d1d1a53c4beb67a019d46">00165</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::pair&lt;AddrRange, uint8_t*&gt;</a> &gt; <a class="code" href="classPhysicalMemory.html#a57d8785b312d1d1a53c4beb67a019d46">getBackingStore</a>()<span class="keyword"> const</span>
+<a name="l00166"></a>00166 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="classPhysicalMemory.html#a0c347314a9f0b468ed498abaf77bbe44">backingStore</a>; }
+<a name="l00167"></a>00167 
+<a name="l00175"></a>00175     <span class="keywordtype">void</span> <a class="code" href="classPhysicalMemory.html#aac5d96736802cb79fb2287135bcc1dff">access</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00176"></a>00176 
+<a name="l00185"></a>00185     <span class="keywordtype">void</span> <a class="code" href="classPhysicalMemory.html#ace845b5316308e12fd958fa5df09a8e8">functionalAccess</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00186"></a>00186 
+<a name="l00195"></a>00195     <span class="keywordtype">void</span> <a class="code" href="classPhysicalMemory.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream&amp; <a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00196"></a>00196 
+<a name="l00204"></a>00204     <span class="keywordtype">void</span> <a class="code" href="classPhysicalMemory.html#adda88c8306de32c98ea608a0a85c3dcd">serializeStore</a>(std::ostream&amp; <a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> store_id,
+<a name="l00205"></a>00205                         <a class="code" href="classAddrRange.html">AddrRange</a> range, uint8_t* pmem);
+<a name="l00206"></a>00206 
+<a name="l00212"></a>00212     <span class="keywordtype">void</span> <a class="code" href="classPhysicalMemory.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a>* cp, <span class="keyword">const</span> std::string&amp; section);
+<a name="l00213"></a>00213 
+<a name="l00217"></a>00217     <span class="keywordtype">void</span> <a class="code" href="classPhysicalMemory.html#ad180e1b910a31a4f7e6ad1a701c8a286">unserializeStore</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a>* cp, <span class="keyword">const</span> std::string&amp; section);
+<a name="l00218"></a>00218 
+<a name="l00219"></a>00219 };
+<a name="l00220"></a>00220 
+<a name="l00221"></a>00221 <span class="preprocessor">#endif //__PHYSICAL_MEMORY_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

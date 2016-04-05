@@ -1,0 +1,491 @@
+\hypertarget{classCopyEngine}{
+\section{クラス CopyEngine}
+\label{classCopyEngine}\index{CopyEngine@{CopyEngine}}
+}
+
+
+{\ttfamily \#include $<$copy\_\-engine.hh$>$}CopyEngineに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=8cm]{classCopyEngine}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classCopyEngine_1_1CopyEngine}{CopyEngine}
+\item 
+class \hyperlink{classCopyEngine_1_1CopyEngineChannel}{CopyEngineChannel}
+\end{DoxyCompactItemize}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef CopyEngineParams \hyperlink{classCopyEngine_a0b0580d58d6a0384646682653aefb97a}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classCopyEngine_a0b0580d58d6a0384646682653aefb97a}{Params} $\ast$ \hyperlink{classCopyEngine_acd3c3feb78ae7a8f88fe0f110a718dff}{params} () const 
+\item 
+\hyperlink{classCopyEngine_a7042a20ebc60002d8be8c1dd2cc77d24}{CopyEngine} (const \hyperlink{classCopyEngine_a0b0580d58d6a0384646682653aefb97a}{Params} $\ast$params)
+\item 
+\hyperlink{classCopyEngine_a1e9353806b1e8062eac347916ca32ac7}{$\sim$CopyEngine} ()
+\item 
+void \hyperlink{classCopyEngine_a4dc637449366fcdfc4e764cdf12d9b11}{regStats} ()
+\item 
+virtual \hyperlink{classBaseMasterPort}{BaseMasterPort} \& \hyperlink{classCopyEngine_adc4e675e51defbdd1e354dac729d0703}{getMasterPort} (const std::string \&if\_\-name, \hyperlink{base_2types_8hh_acef4d7d41cb21fdc252e20c04cd7bb8e}{PortID} idx=\hyperlink{base_2types_8hh_a65bf40f138cf863f0c5e2d8ca1144126}{InvalidPortID})
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classCopyEngine_a613ec7d5e1ec64f8d21fec78ae8e568e}{read} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classCopyEngine_a4cefab464e72b5dd42c003a0a4341802}{write} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual void \hyperlink{classCopyEngine_a53e036786d17361be4c7320d39c99b84}{serialize} (std::ostream \&os)
+\item 
+virtual void \hyperlink{classCopyEngine_af22e5d6d660b97db37003ac61ac4ee49}{unserialize} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const std::string \&section)
+\item 
+unsigned int \hyperlink{classCopyEngine_a6bf479c521c7c3eb473822d953275b26}{drain} (\hyperlink{classDrainManager}{DrainManager} $\ast$drainManger)
+\item 
+void \hyperlink{classCopyEngine_a8f020d3237536fe007fc488c4125c5d8}{drainResume} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classCopyEngine_a25b7da20ae9cf014c7806abf1bf929b3}{bytesCopied}
+\item 
+\hyperlink{classStats_1_1Vector}{Stats::Vector} \hyperlink{classCopyEngine_a2c7c96445b0cb37f72b61dae4d2c541d}{copiesProcessed}
+\item 
+\hyperlink{structCopyEngineReg_1_1Regs}{CopyEngineReg::Regs} \hyperlink{classCopyEngine_ac3a32787c71b25fdee473de0804efa29}{regs}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classCopyEngine_1_1CopyEngineChannel}{CopyEngineChannel} $\ast$ $>$ \hyperlink{classCopyEngine_a2fa0132c83d16e1e404f54278dcf94c4}{chan}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classCopyEngine_a0b0580d58d6a0384646682653aefb97a}{
+\index{CopyEngine@{CopyEngine}!Params@{Params}}
+\index{Params@{Params}!CopyEngine@{CopyEngine}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef CopyEngineParams {\bf Params}}}
+\label{classCopyEngine_a0b0580d58d6a0384646682653aefb97a}
+
+
+\hyperlink{classPciDevice_aefbfd3f2d9daf3173b779eeff32e8112}{PciDevice}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCopyEngine_a7042a20ebc60002d8be8c1dd2cc77d24}{
+\index{CopyEngine@{CopyEngine}!CopyEngine@{CopyEngine}}
+\index{CopyEngine@{CopyEngine}!CopyEngine@{CopyEngine}}
+\subsubsection[{CopyEngine}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CopyEngine} (const {\bf Params} $\ast$ {\em params})}}
+\label{classCopyEngine_a7042a20ebc60002d8be8c1dd2cc77d24}
+
+
+
+\begin{DoxyCode}
+63     : PciDevice(p)
+64 {
+65     // All Reg regs are initialized to 0 by default
+66     regs.chanCount = p->ChanCnt;
+67     regs.xferCap = findMsbSet(p->XferCap);
+68     regs.attnStatus = 0;
+69 
+70     if (regs.chanCount > 64)
+71         fatal("CopyEngine interface doesn't support more than 64 DMA engines\n");
+      
+72 
+73     for (int x = 0; x < regs.chanCount; x++) {
+74         CopyEngineChannel *ch = new CopyEngineChannel(this, x);
+75         chan.push_back(ch);
+76     }
+77 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_a1e9353806b1e8062eac347916ca32ac7}{
+\index{CopyEngine@{CopyEngine}!$\sim$CopyEngine@{$\sim$CopyEngine}}
+\index{$\sim$CopyEngine@{$\sim$CopyEngine}!CopyEngine@{CopyEngine}}
+\subsubsection[{$\sim$CopyEngine}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf CopyEngine} ()}}
+\label{classCopyEngine_a1e9353806b1e8062eac347916ca32ac7}
+
+
+
+\begin{DoxyCode}
+101 {
+102     for (int x = 0; x < chan.size(); x++) {
+103         delete chan[x];
+104     }
+105 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classCopyEngine_a6bf479c521c7c3eb473822d953275b26}{
+\index{CopyEngine@{CopyEngine}!drain@{drain}}
+\index{drain@{drain}!CopyEngine@{CopyEngine}}
+\subsubsection[{drain}]{\setlength{\rightskip}{0pt plus 5cm}unsigned int drain ({\bf DrainManager} $\ast$ {\em drainManger})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_a6bf479c521c7c3eb473822d953275b26}
+Provide a default implementation of the drain interface that simply returns 0 (draining completed) and sets the drain state to Drained. 
+
+\hyperlink{classPciDevice_aa8a18d230dba7a674ac8a0b4f35bc36a}{PciDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+665 {
+666     unsigned int count;
+667     count = pioPort.drain(dm) + dmaPort.drain(dm) + configPort.drain(dm);
+668     for (int x = 0;x < chan.size(); x++)
+669         count += chan[x]->drain(dm);
+670 
+671     if (count)
+672         setDrainState(Draining);
+673     else
+674         setDrainState(Drained);
+675 
+676     DPRINTF(Drain, "CopyEngine not drained\n");
+677     return count;
+678 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_a8f020d3237536fe007fc488c4125c5d8}{
+\index{CopyEngine@{CopyEngine}!drainResume@{drainResume}}
+\index{drainResume@{drainResume}!CopyEngine@{CopyEngine}}
+\subsubsection[{drainResume}]{\setlength{\rightskip}{0pt plus 5cm}void drainResume ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_a8f020d3237536fe007fc488c4125c5d8}
+Resume execution after a successful drain.
+
+\begin{DoxyNote}{覚え書き}
+This method is normally only called from the simulation scripts. 
+\end{DoxyNote}
+
+
+\hyperlink{classDrainable_a8f020d3237536fe007fc488c4125c5d8}{Drainable}を再定義しています。
+
+
+\begin{DoxyCode}
+764 {
+765     Drainable::drainResume();
+766     for (int x = 0;x < chan.size(); x++)
+767         chan[x]->drainResume();
+768 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_adc4e675e51defbdd1e354dac729d0703}{
+\index{CopyEngine@{CopyEngine}!getMasterPort@{getMasterPort}}
+\index{getMasterPort@{getMasterPort}!CopyEngine@{CopyEngine}}
+\subsubsection[{getMasterPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BaseMasterPort} \& getMasterPort (const std::string \& {\em if\_\-name}, \/  {\bf PortID} {\em idx} = {\ttfamily {\bf InvalidPortID}})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_adc4e675e51defbdd1e354dac729d0703}
+Get a master port with a given name and index. This is used at binding time and returns a reference to a protocol-\/agnostic base master port.
+
+
+\begin{DoxyParams}{引数}
+\item[{\em if\_\-name}]\hyperlink{classPort}{Port} name \item[{\em idx}]Index in the case of a VectorPort\end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+A reference to the given port 
+\end{DoxyReturn}
+
+
+\hyperlink{classDmaDevice_adc4e675e51defbdd1e354dac729d0703}{DmaDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+115 {
+116     if (if_name != "dma") {
+117         // pass it along to our super class
+118         return PciDevice::getMasterPort(if_name, idx);
+119     } else {
+120         if (idx >= static_cast<int>(chan.size())) {
+121             panic("CopyEngine::getMasterPort: unknown index %d\n", idx);
+122         }
+123 
+124         return chan[idx]->getMasterPort();
+125     }
+126 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_acd3c3feb78ae7a8f88fe0f110a718dff}{
+\index{CopyEngine@{CopyEngine}!params@{params}}
+\index{params@{params}!CopyEngine@{CopyEngine}}
+\subsubsection[{params}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Params}$\ast$ params () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCopyEngine_acd3c3feb78ae7a8f88fe0f110a718dff}
+
+
+\hyperlink{classPciDevice_acd3c3feb78ae7a8f88fe0f110a718dff}{PciDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+194     {
+195         return dynamic_cast<const Params *>(_params);
+196     }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_a613ec7d5e1ec64f8d21fec78ae8e568e}{
+\index{CopyEngine@{CopyEngine}!read@{read}}
+\index{read@{read}!CopyEngine@{CopyEngine}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} read ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_a613ec7d5e1ec64f8d21fec78ae8e568e}
+Pure virtual function that the device must implement. Called when a read command is recieved by the port. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]\hyperlink{classPacket}{Packet} describing this request \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+number of ticks it took to complete 
+\end{DoxyReturn}
+
+
+Handle read of register here
+
+Channel registers are handled here
+
+\hyperlink{classPioDevice_a842312590432036092c422c87a442358}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+167 {
+168     int bar;
+169     Addr daddr;
+170 
+171     if (!getBAR(pkt->getAddr(), bar, daddr))
+172         panic("Invalid PCI memory access to unmapped memory.\n");
+173 
+174     // Only Memory register BAR is allowed
+175     assert(bar == 0);
+176 
+177     int size = pkt->getSize();
+178     if (size != sizeof(uint64_t) && size != sizeof(uint32_t) &&
+179         size != sizeof(uint16_t) && size != sizeof(uint8_t)) {
+180         panic("Unknown size for MMIO access: %d\n", pkt->getSize());
+181     }
+182 
+183     DPRINTF(DMACopyEngine, "Read device register %#X size: %d\n", daddr, size);
+184 
+185     pkt->allocate();
+186 
+190 
+191     if (daddr < 0x80) {
+192         switch (daddr) {
+193           case GEN_CHANCOUNT:
+194             assert(size == sizeof(regs.chanCount));
+195             pkt->set<uint8_t>(regs.chanCount);
+196             break;
+197           case GEN_XFERCAP:
+198             assert(size == sizeof(regs.xferCap));
+199             pkt->set<uint8_t>(regs.xferCap);
+200             break;
+201           case GEN_INTRCTRL:
+202             assert(size == sizeof(uint8_t));
+203             pkt->set<uint8_t>(regs.intrctrl());
+204             regs.intrctrl.master_int_enable(0);
+205             break;
+206           case GEN_ATTNSTATUS:
+207             assert(size == sizeof(regs.attnStatus));
+208             pkt->set<uint32_t>(regs.attnStatus);
+209             regs.attnStatus = 0;
+210             break;
+211           default:
+212             panic("Read request to unknown register number: %#x\n", daddr);
+213         }
+214         pkt->makeAtomicResponse();
+215         return pioDelay;
+216     }
+217 
+218 
+219     // Find which channel we're accessing
+220     int chanid = 0;
+221     daddr -= 0x80;
+222     while (daddr >= 0x80) {
+223         chanid++;
+224         daddr -= 0x80;
+225     }
+226 
+227     if (chanid >= regs.chanCount)
+228         panic("Access to channel %d (device only configured for %d channels)",
+229                 chanid, regs.chanCount);
+230 
+234     chan[chanid]->channelRead(pkt, daddr, size);
+235 
+236     pkt->makeAtomicResponse();
+237     return pioDelay;
+238 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_a4dc637449366fcdfc4e764cdf12d9b11}{
+\index{CopyEngine@{CopyEngine}!regStats@{regStats}}
+\index{regStats@{regStats}!CopyEngine@{CopyEngine}}
+\subsubsection[{regStats}]{\setlength{\rightskip}{0pt plus 5cm}void regStats ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_a4dc637449366fcdfc4e764cdf12d9b11}
+\hyperlink{classRegister}{Register} statistics for this object. 
+
+\hyperlink{classSimObject_a4dc637449366fcdfc4e764cdf12d9b11}{SimObject}を再定義しています。
+
+
+\begin{DoxyCode}
+428 {
+429     using namespace Stats;
+430     bytesCopied
+431         .init(regs.chanCount)
+432         .name(name() + ".bytes_copied")
+433         .desc("Number of bytes copied by each engine")
+434         .flags(total)
+435         ;
+436     copiesProcessed
+437         .init(regs.chanCount)
+438         .name(name() + ".copies_processed")
+439         .desc("Number of copies processed by each engine")
+440         .flags(total)
+441         ;
+442 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_a53e036786d17361be4c7320d39c99b84}{
+\index{CopyEngine@{CopyEngine}!serialize@{serialize}}
+\index{serialize@{serialize}!CopyEngine@{CopyEngine}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize (std::ostream \& {\em os})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_a53e036786d17361be4c7320d39c99b84}
+Serialize this object to the given output stream. 
+\begin{DoxyParams}{引数}
+\item[{\em os}]The stream to serialize to. \end{DoxyParams}
+
+
+\hyperlink{classPciDevice_a53e036786d17361be4c7320d39c99b84}{PciDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+682 {
+683     PciDevice::serialize(os);
+684     regs.serialize(os);
+685     for (int x =0; x < chan.size(); x++) {
+686         nameOut(os, csprintf("%s.channel%d", name(), x));
+687         chan[x]->serialize(os);
+688     }
+689 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_af22e5d6d660b97db37003ac61ac4ee49}{
+\index{CopyEngine@{CopyEngine}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!CopyEngine@{CopyEngine}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}void unserialize ({\bf Checkpoint} $\ast$ {\em cp}, \/  const std::string \& {\em section})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_af22e5d6d660b97db37003ac61ac4ee49}
+Reconstruct the state of this object from a checkpoint. 
+\begin{DoxyParams}{引数}
+\item[{\em \hyperlink{namespacecp}{cp}}]The checkpoint use. \item[{\em section}]The section name of this object \end{DoxyParams}
+
+
+\hyperlink{classPciDevice_af22e5d6d660b97db37003ac61ac4ee49}{PciDevice}を再定義しています。
+
+
+\begin{DoxyCode}
+693 {
+694     PciDevice::unserialize(cp, section);
+695     regs.unserialize(cp, section);
+696     for (int x = 0; x < chan.size(); x++)
+697         chan[x]->unserialize(cp, csprintf("%s.channel%d", section, x));
+698 }
+\end{DoxyCode}
+\hypertarget{classCopyEngine_a4cefab464e72b5dd42c003a0a4341802}{
+\index{CopyEngine@{CopyEngine}!write@{write}}
+\index{write@{write}!CopyEngine@{CopyEngine}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} write ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classCopyEngine_a4cefab464e72b5dd42c003a0a4341802}
+Pure virtual function that the device must implement. Called when a write command is recieved by the port. 
+\begin{DoxyParams}{引数}
+\item[{\em pkt}]\hyperlink{classPacket}{Packet} describing this request \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+number of ticks it took to complete 
+\end{DoxyReturn}
+
+
+Handle write of register here
+
+Channel registers are handled here
+
+\hyperlink{classPioDevice_afe8371668d023bb2516b286e5e399b6f}{PioDevice}を実装しています。
+
+
+\begin{DoxyCode}
+292 {
+293     int bar;
+294     Addr daddr;
+295 
+296 
+297     if (!getBAR(pkt->getAddr(), bar, daddr))
+298         panic("Invalid PCI memory access to unmapped memory.\n");
+299 
+300     // Only Memory register BAR is allowed
+301     assert(bar == 0);
+302 
+303     int size = pkt->getSize();
+304 
+308 
+309     if (size == sizeof(uint64_t)) {
+310         uint64_t val M5_VAR_USED = pkt->get<uint64_t>();
+311         DPRINTF(DMACopyEngine, "Wrote device register %#X value %#X\n", daddr, 
+      val);
+312     } else if (size == sizeof(uint32_t)) {
+313         uint32_t val M5_VAR_USED = pkt->get<uint32_t>();
+314         DPRINTF(DMACopyEngine, "Wrote device register %#X value %#X\n", daddr, 
+      val);
+315     } else if (size == sizeof(uint16_t)) {
+316         uint16_t val M5_VAR_USED = pkt->get<uint16_t>();
+317         DPRINTF(DMACopyEngine, "Wrote device register %#X value %#X\n", daddr, 
+      val);
+318     } else if (size == sizeof(uint8_t)) {
+319         uint8_t val M5_VAR_USED = pkt->get<uint8_t>();
+320         DPRINTF(DMACopyEngine, "Wrote device register %#X value %#X\n", daddr, 
+      val);
+321     } else {
+322         panic("Unknown size for MMIO access: %d\n", size);
+323     }
+324 
+325     if (daddr < 0x80) {
+326         switch (daddr) {
+327           case GEN_CHANCOUNT:
+328           case GEN_XFERCAP:
+329           case GEN_ATTNSTATUS:
+330             DPRINTF(DMACopyEngine, "Warning, ignorning write to register %x\n",
+331                     daddr);
+332             break;
+333           case GEN_INTRCTRL:
+334             regs.intrctrl.master_int_enable(bits(pkt->get<uint8_t>(),0,1));
+335             break;
+336           default:
+337             panic("Read request to unknown register number: %#x\n", daddr);
+338         }
+339         pkt->makeAtomicResponse();
+340         return pioDelay;
+341     }
+342 
+343     // Find which channel we're accessing
+344     int chanid = 0;
+345     daddr -= 0x80;
+346     while (daddr >= 0x80) {
+347         chanid++;
+348         daddr -= 0x80;
+349     }
+350 
+351     if (chanid >= regs.chanCount)
+352         panic("Access to channel %d (device only configured for %d channels)",
+353                 chanid, regs.chanCount);
+354 
+358     chan[chanid]->channelWrite(pkt, daddr, size);
+359 
+360     pkt->makeAtomicResponse();
+361     return pioDelay;
+362 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCopyEngine_a25b7da20ae9cf014c7806abf1bf929b3}{
+\index{CopyEngine@{CopyEngine}!bytesCopied@{bytesCopied}}
+\index{bytesCopied@{bytesCopied}!CopyEngine@{CopyEngine}}
+\subsubsection[{bytesCopied}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf bytesCopied}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCopyEngine_a25b7da20ae9cf014c7806abf1bf929b3}
+\hypertarget{classCopyEngine_a2fa0132c83d16e1e404f54278dcf94c4}{
+\index{CopyEngine@{CopyEngine}!chan@{chan}}
+\index{chan@{chan}!CopyEngine@{CopyEngine}}
+\subsubsection[{chan}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf CopyEngineChannel}$\ast$$>$ {\bf chan}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCopyEngine_a2fa0132c83d16e1e404f54278dcf94c4}
+\hypertarget{classCopyEngine_a2c7c96445b0cb37f72b61dae4d2c541d}{
+\index{CopyEngine@{CopyEngine}!copiesProcessed@{copiesProcessed}}
+\index{copiesProcessed@{copiesProcessed}!CopyEngine@{CopyEngine}}
+\subsubsection[{copiesProcessed}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Stats::Vector} {\bf copiesProcessed}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCopyEngine_a2c7c96445b0cb37f72b61dae4d2c541d}
+\hypertarget{classCopyEngine_ac3a32787c71b25fdee473de0804efa29}{
+\index{CopyEngine@{CopyEngine}!regs@{regs}}
+\index{regs@{regs}!CopyEngine@{CopyEngine}}
+\subsubsection[{regs}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CopyEngineReg::Regs} {\bf regs}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classCopyEngine_ac3a32787c71b25fdee473de0804efa29}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/\hyperlink{copy__engine_8hh}{copy\_\-engine.hh}\item 
+dev/\hyperlink{copy__engine_8cc}{copy\_\-engine.cc}\end{DoxyCompactItemize}

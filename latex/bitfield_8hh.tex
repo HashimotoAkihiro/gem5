@@ -1,0 +1,213 @@
+\hypertarget{bitfield_8hh}{
+\section{base/bitfield.hh}
+\label{bitfield_8hh}\index{base/bitfield.hh@{base/bitfield.hh}}
+}
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+uint64\_\-t \hyperlink{bitfield_8hh_a8c8532a71d351341a5f90d44e4b40c64}{mask} (int nbits)
+\item 
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{bitfield_8hh_a4ee0dc0723e11679c52429d5f8e05123}{bits} (T val, int first, int last)
+\item 
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{bitfield_8hh_aabcb6224f8edd34a75739bf5df0e75fb}{bits} (T val, int bit)
+\item 
+{\footnotesize template$<$class T $>$ }\\T \hyperlink{bitfield_8hh_acaa3c424fec3407f14a01fe1ec22c2d4}{mbits} (T val, int first, int last)
+\item 
+uint64\_\-t \hyperlink{bitfield_8hh_abf6e0f9b301b3adfd6698a71071d96ba}{mask} (int first, int last)
+\item 
+{\footnotesize template$<$int N$>$ }\\int64\_\-t \hyperlink{bitfield_8hh_af08692f68db7334df1b150e57ef92c9f}{sext} (uint64\_\-t val)
+\item 
+{\footnotesize template$<$class T , class B $>$ }\\T \hyperlink{bitfield_8hh_a2aa7004e37a8c54bf3e5ce81c3125075}{insertBits} (T val, int first, int last, B bit\_\-val)
+\item 
+{\footnotesize template$<$class T , class B $>$ }\\T \hyperlink{bitfield_8hh_a6b2467118ee42515d4fbaee66ddb72c2}{insertBits} (T val, int bit, B bit\_\-val)
+\item 
+{\footnotesize template$<$class T , class B $>$ }\\void \hyperlink{bitfield_8hh_a00870999cf02f3961e51279ceb09d1bc}{replaceBits} (T \&val, int first, int last, B bit\_\-val)
+\item 
+{\footnotesize template$<$class T , class B $>$ }\\void \hyperlink{bitfield_8hh_a25693bbb200981ae04c9607cab995223}{replaceBits} (T \&val, int bit, B bit\_\-val)
+\item 
+int \hyperlink{bitfield_8hh_aa8f1ff3b89ba9c337baeef12d161580f}{findMsbSet} (uint64\_\-t val)
+\item 
+int \hyperlink{bitfield_8hh_a224a4f55757322870a3fa87b5d5254ee}{findLsbSet} (uint64\_\-t val)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{bitfield_8hh_aabcb6224f8edd34a75739bf5df0e75fb}{
+\index{bitfield.hh@{bitfield.hh}!bits@{bits}}
+\index{bits@{bits}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{bits}]{\setlength{\rightskip}{0pt plus 5cm}T bits (T {\em val}, \/  int {\em bit})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_aabcb6224f8edd34a75739bf5df0e75fb}
+Extract the bit from this position from 'val' and right justify it. 
+
+
+\begin{DoxyCode}
+68 {
+69     return bits(val, bit, bit);
+70 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_a4ee0dc0723e11679c52429d5f8e05123}{
+\index{bitfield.hh@{bitfield.hh}!bits@{bits}}
+\index{bits@{bits}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{bits}]{\setlength{\rightskip}{0pt plus 5cm}T bits (T {\em val}, \/  int {\em first}, \/  int {\em last})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_a4ee0dc0723e11679c52429d5f8e05123}
+Extract the bitfield from position 'first' to 'last' (inclusive) from 'val' and right justify it. MSB is numbered 63, LSB is 0. 
+
+
+\begin{DoxyCode}
+56 {
+57     int nbits = first - last + 1;
+58     return (val >> last) & mask(nbits);
+59 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_a224a4f55757322870a3fa87b5d5254ee}{
+\index{bitfield.hh@{bitfield.hh}!findLsbSet@{findLsbSet}}
+\index{findLsbSet@{findLsbSet}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{findLsbSet}]{\setlength{\rightskip}{0pt plus 5cm}int findLsbSet (uint64\_\-t {\em val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_a224a4f55757322870a3fa87b5d5254ee}
+Returns the bit position of the LSB that is set in the input 
+
+
+\begin{DoxyCode}
+168                          {
+169     int lsb = 0;
+170     if (!val)
+171         return sizeof(val) * 8;
+172     if (!bits(val, 31,0)) { lsb += 32; val >>= 32; }
+173     if (!bits(val, 15,0)) { lsb += 16; val >>= 16; }
+174     if (!bits(val, 7,0))  { lsb += 8;  val >>= 8;  }
+175     if (!bits(val, 3,0))  { lsb += 4;  val >>= 4;  }
+176     if (!bits(val, 1,0))  { lsb += 2;  val >>= 2;  }
+177     if (!bits(val, 0,0))  { lsb += 1; }
+178     return lsb;
+179 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_aa8f1ff3b89ba9c337baeef12d161580f}{
+\index{bitfield.hh@{bitfield.hh}!findMsbSet@{findMsbSet}}
+\index{findMsbSet@{findMsbSet}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{findMsbSet}]{\setlength{\rightskip}{0pt plus 5cm}int findMsbSet (uint64\_\-t {\em val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_aa8f1ff3b89ba9c337baeef12d161580f}
+Returns the bit position of the MSB that is set in the input 
+
+
+\begin{DoxyCode}
+151                          {
+152     int msb = 0;
+153     if (!val)
+154         return 0;
+155     if (bits(val, 63,32)) { msb += 32; val >>= 32; }
+156     if (bits(val, 31,16)) { msb += 16; val >>= 16; }
+157     if (bits(val, 15,8))  { msb += 8;  val >>= 8;  }
+158     if (bits(val, 7,4))   { msb += 4;  val >>= 4;  }
+159     if (bits(val, 3,2))   { msb += 2;  val >>= 2;  }
+160     if (bits(val, 1,1))   { msb += 1; }
+161     return msb;
+162 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_a6b2467118ee42515d4fbaee66ddb72c2}{
+\index{bitfield.hh@{bitfield.hh}!insertBits@{insertBits}}
+\index{insertBits@{insertBits}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{insertBits}]{\setlength{\rightskip}{0pt plus 5cm}T insertBits (T {\em val}, \/  int {\em bit}, \/  B {\em bit\_\-val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_a6b2467118ee42515d4fbaee66ddb72c2}
+Overloaded for access to only one bit in value 
+
+
+\begin{DoxyCode}
+122 {
+123     return insertBits(val, bit, bit, bit_val);
+124 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_a2aa7004e37a8c54bf3e5ce81c3125075}{
+\index{bitfield.hh@{bitfield.hh}!insertBits@{insertBits}}
+\index{insertBits@{insertBits}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{insertBits}]{\setlength{\rightskip}{0pt plus 5cm}T insertBits (T {\em val}, \/  int {\em first}, \/  int {\em last}, \/  B {\em bit\_\-val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_a2aa7004e37a8c54bf3e5ce81c3125075}
+Return val with bits first to last set to bit\_\-val 
+
+
+\begin{DoxyCode}
+109 {
+110     T t_bit_val = bit_val;
+111     T bmask = mask(first - last + 1) << last;
+112     return ((t_bit_val << last) & bmask) | (val & ~bmask);
+113 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_abf6e0f9b301b3adfd6698a71071d96ba}{
+\index{bitfield.hh@{bitfield.hh}!mask@{mask}}
+\index{mask@{mask}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{mask}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t mask (int {\em first}, \/  int {\em last})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_abf6e0f9b301b3adfd6698a71071d96ba}
+
+
+
+\begin{DoxyCode}
+86 {
+87     return mbits((uint64_t)-1LL, first, last);
+88 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_a8c8532a71d351341a5f90d44e4b40c64}{
+\index{bitfield.hh@{bitfield.hh}!mask@{mask}}
+\index{mask@{mask}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{mask}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t mask (int {\em nbits})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_a8c8532a71d351341a5f90d44e4b40c64}
+Generate a 64-\/bit mask of 'nbits' 1s, right justified. 
+
+
+\begin{DoxyCode}
+42 {
+43     return (nbits == 64) ? (uint64_t)-1LL : (1ULL << nbits) - 1;
+44 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_acaa3c424fec3407f14a01fe1ec22c2d4}{
+\index{bitfield.hh@{bitfield.hh}!mbits@{mbits}}
+\index{mbits@{mbits}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{mbits}]{\setlength{\rightskip}{0pt plus 5cm}T mbits (T {\em val}, \/  int {\em first}, \/  int {\em last})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_acaa3c424fec3407f14a01fe1ec22c2d4}
+Mask off the given bits in place like \hyperlink{bitfield_8hh_a4ee0dc0723e11679c52429d5f8e05123}{bits()} but without shifting. msb = 63, lsb = 0 
+
+
+\begin{DoxyCode}
+80 {
+81     return val & (mask(first+1) & ~mask(last));
+82 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_a25693bbb200981ae04c9607cab995223}{
+\index{bitfield.hh@{bitfield.hh}!replaceBits@{replaceBits}}
+\index{replaceBits@{replaceBits}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{replaceBits}]{\setlength{\rightskip}{0pt plus 5cm}void replaceBits (T \& {\em val}, \/  int {\em bit}, \/  B {\em bit\_\-val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_a25693bbb200981ae04c9607cab995223}
+Overloaded function to allow to access only 1 bit 
+
+
+\begin{DoxyCode}
+143 {
+144     val = insertBits(val, bit, bit, bit_val);
+145 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_a00870999cf02f3961e51279ceb09d1bc}{
+\index{bitfield.hh@{bitfield.hh}!replaceBits@{replaceBits}}
+\index{replaceBits@{replaceBits}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{replaceBits}]{\setlength{\rightskip}{0pt plus 5cm}void replaceBits (T \& {\em val}, \/  int {\em first}, \/  int {\em last}, \/  B {\em bit\_\-val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_a00870999cf02f3961e51279ceb09d1bc}
+A convenience function to replace bits first to last of val with bit\_\-val in place. 
+
+
+\begin{DoxyCode}
+134 {
+135     val = insertBits(val, first, last, bit_val);
+136 }
+\end{DoxyCode}
+\hypertarget{bitfield_8hh_af08692f68db7334df1b150e57ef92c9f}{
+\index{bitfield.hh@{bitfield.hh}!sext@{sext}}
+\index{sext@{sext}!bitfield.hh@{bitfield.hh}}
+\subsubsection[{sext}]{\setlength{\rightskip}{0pt plus 5cm}int64\_\-t sext (uint64\_\-t {\em val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{bitfield_8hh_af08692f68db7334df1b150e57ef92c9f}
+Sign-\/extend an N-\/bit value to 64 bits. 
+
+
+\begin{DoxyCode}
+97 {
+98     int sign_bit = bits(val, N-1, N-1);
+99     return sign_bit ? (val | ~mask(N)) : val;
+100 }
+\end{DoxyCode}

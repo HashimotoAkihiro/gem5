@@ -1,0 +1,455 @@
+\hypertarget{classFUPool}{
+\section{クラス FUPool}
+\label{classFUPool}\index{FUPool@{FUPool}}
+}
+
+
+{\ttfamily \#include $<$fu\_\-pool.hh$>$}FUPoolに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=3cm]{classFUPool}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classFUPool_1_1DefaultFUPool}{DefaultFUPool}
+\item 
+class \hyperlink{classFUPool_1_1FUIdxQueue}{FUIdxQueue}
+\item 
+class \hyperlink{classFUPool_1_1FUPool}{FUPool}
+\end{DoxyCompactItemize}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef FUPoolParams \hyperlink{classFUPool_a9d3633c4c2cf6388d3099abc3b5c8eb2}{Params}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classFUPool_aba08c56e41f112e5044ca90734506bef}{FUPool} (const \hyperlink{classFUPool_a9d3633c4c2cf6388d3099abc3b5c8eb2}{Params} $\ast$p)
+\item 
+\hyperlink{classFUPool_acab5c3e76b336f001a3d89b08394f0f9}{$\sim$FUPool} ()
+\item 
+void \hyperlink{classFUPool_a59e607411e1d22642856849eff50ea12}{annotateMemoryUnits} (\hyperlink{classCycles}{Cycles} hit\_\-latency)
+\item 
+int \hyperlink{classFUPool_afe4fb1c0e25607723658c1051ff3b0bf}{getUnit} (OpClass capability)
+\item 
+void \hyperlink{classFUPool_acc1a8526665e1f0cc2c346754ab30f4f}{freeUnitNextCycle} (int fu\_\-idx)
+\item 
+void \hyperlink{classFUPool_a1bcdcf502cf9d45b221bd0ddfd98e1dc}{processFreeUnits} ()
+\item 
+int \hyperlink{classFUPool_af4b57d21919c42d55af03391f91a1c08}{size} ()
+\item 
+void \hyperlink{classFUPool_accd2600060dbaee3a3b41aed4034c63c}{dump} ()
+\item 
+\hyperlink{classCycles}{Cycles} \hyperlink{classFUPool_af6d130ca8a17818dbea697b65927e9ec}{getOpLatency} (OpClass capability)
+\item 
+\hyperlink{classCycles}{Cycles} \hyperlink{classFUPool_a99e4f990eca3fd57c7728cfdb6c95b4c}{getIssueLatency} (OpClass capability)
+\item 
+bool \hyperlink{classFUPool_adf5473c18a3d7c1e88c4a2072bce5526}{isDrained} () const 
+\item 
+void \hyperlink{classFUPool_a8674059ce345e23aac5086b2c3e24a43}{takeOverFrom} ()
+\end{DoxyCompactItemize}
+\subsection*{Private 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classFuncUnit}{FuncUnit} $\ast$ $>$::iterator \hyperlink{classFUPool_a3e016eb9543b88309e1309f75f1c388c}{fuListIterator}
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCycles}{Cycles} \hyperlink{classFUPool_ac999d6f818bb8f54b6519e85a5369e25}{maxOpLatencies} \mbox{[}\hyperlink{op__class_8hh_a5e0e351c8afca390ef0a05a7dbb68b1b}{Num\_\-OpClasses}\mbox{]}
+\item 
+\hyperlink{classCycles}{Cycles} \hyperlink{classFUPool_ae3464c4dc458673d68839affdb919eeb}{maxIssueLatencies} \mbox{[}\hyperlink{op__class_8hh_a5e0e351c8afca390ef0a05a7dbb68b1b}{Num\_\-OpClasses}\mbox{]}
+\item 
+std::bitset$<$ \hyperlink{op__class_8hh_a5e0e351c8afca390ef0a05a7dbb68b1b}{Num\_\-OpClasses} $>$ \hyperlink{classFUPool_a7539c2a37351472e37845fdde96e3d37}{capabilityList}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ bool $>$ \hyperlink{classFUPool_a3161f36ae7f93643b75fc37c7a1b0e23}{unitBusy}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ int $>$ \hyperlink{classFUPool_aa2972d7a97b76cc15ec7bbd38e5c9da5}{unitsToBeFreed}
+\item 
+\hyperlink{classFUPool_1_1FUIdxQueue}{FUIdxQueue} \hyperlink{classFUPool_a50bef5b8a540cb33884057b9771c4c44}{fuPerCapList} \mbox{[}\hyperlink{op__class_8hh_a5e0e351c8afca390ef0a05a7dbb68b1b}{Num\_\-OpClasses}\mbox{]}
+\item 
+int \hyperlink{classFUPool_ae0b3cf4db09e8c26c2ab03dbe18bfb19}{numFU}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classFuncUnit}{FuncUnit} $\ast$ $>$ \hyperlink{classFUPool_a65261caecadb9b5cbf48625e3c64330d}{funcUnits}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Pool of FU's, specific to the new CPU model. The old FU pool had lists of free units and busy units, and whenever a FU was needed it would iterate through the free units to find a FU that provided the capability. This pool has lists of units specific to each of the capabilities, and whenever a FU is needed, it iterates through that list to find a free unit. The previous FU pool would have to be ticked each cycle to update which units became free. This FU pool lets the IEW stage handle freeing units, which frees them as their scheduled execution events complete. This limits units in this model to either have identical issue and op latencies, or 1 cycle issue latencies. 
+
+\subsection{型定義}
+\hypertarget{classFUPool_a3e016eb9543b88309e1309f75f1c388c}{
+\index{FUPool@{FUPool}!fuListIterator@{fuListIterator}}
+\index{fuListIterator@{fuListIterator}!FUPool@{FUPool}}
+\subsubsection[{fuListIterator}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf std::vector}$<${\bf FuncUnit} $\ast$$>$::iterator {\bf fuListIterator}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_a3e016eb9543b88309e1309f75f1c388c}
+\hypertarget{classFUPool_a9d3633c4c2cf6388d3099abc3b5c8eb2}{
+\index{FUPool@{FUPool}!Params@{Params}}
+\index{Params@{Params}!FUPool@{FUPool}}
+\subsubsection[{Params}]{\setlength{\rightskip}{0pt plus 5cm}typedef FUPoolParams {\bf Params}}}
+\label{classFUPool_a9d3633c4c2cf6388d3099abc3b5c8eb2}
+
+
+\hyperlink{classSimObject_a0f0761d2db586a23bb2a2880b8f387bb}{SimObject}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classFUPool_aba08c56e41f112e5044ca90734506bef}{
+\index{FUPool@{FUPool}!FUPool@{FUPool}}
+\index{FUPool@{FUPool}!FUPool@{FUPool}}
+\subsubsection[{FUPool}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FUPool} (const {\bf Params} $\ast$ {\em p})}}
+\label{classFUPool_aba08c56e41f112e5044ca90734506bef}
+Constructs a FU pool. 
+
+
+\begin{DoxyCode}
+84     : SimObject(p)
+85 {
+86     numFU = 0;
+87 
+88     funcUnits.clear();
+89 
+90     for (int i = 0; i < Num_OpClasses; ++i) {
+91         maxOpLatencies[i] = Cycles(0);
+92         maxIssueLatencies[i] = Cycles(0);
+93     }
+94 
+95     //
+96     //  Iterate through the list of FUDescData structures
+97     //
+98     const vector<FUDesc *> &paramList =  p->FUList;
+99     for (FUDDiterator i = paramList.begin(); i != paramList.end(); ++i) {
+100 
+101         //
+102         //  Don't bother with this if we're not going to create any FU's
+103         //
+104         if ((*i)->number) {
+105             //
+106             //  Create the FuncUnit object from this structure
+107             //   - add the capabilities listed in the FU's operation
+108             //     description
+109             //
+110             //  We create the first unit, then duplicate it as needed
+111             //
+112             FuncUnit *fu = new FuncUnit;
+113 
+114             OPDDiterator j = (*i)->opDescList.begin();
+115             OPDDiterator end = (*i)->opDescList.end();
+116             for (; j != end; ++j) {
+117                 // indicate that this pool has this capability
+118                 capabilityList.set((*j)->opClass);
+119 
+120                 // Add each of the FU's that will have this capability to the
+121                 // appropriate queue.
+122                 for (int k = 0; k < (*i)->number; ++k)
+123                     fuPerCapList[(*j)->opClass].addFU(numFU + k);
+124 
+125                 // indicate that this FU has the capability
+126                 fu->addCapability((*j)->opClass, (*j)->opLat, (*j)->issueLat);
+127 
+128                 if ((*j)->opLat > maxOpLatencies[(*j)->opClass])
+129                     maxOpLatencies[(*j)->opClass] = (*j)->opLat;
+130 
+131                 if ((*j)->issueLat > maxIssueLatencies[(*j)->opClass])
+132                     maxIssueLatencies[(*j)->opClass] = (*j)->issueLat;
+133             }
+134 
+135             numFU++;
+136 
+137             //  Add the appropriate number of copies of this FU to the list
+138             fu->name = (*i)->name() + "(0)";
+139             funcUnits.push_back(fu);
+140 
+141             for (int c = 1; c < (*i)->number; ++c) {
+142                 ostringstream s;
+143                 numFU++;
+144                 FuncUnit *fu2 = new FuncUnit(*fu);
+145 
+146                 s << (*i)->name() << "(" << c << ")";
+147                 fu2->name = s.str();
+148                 funcUnits.push_back(fu2);
+149             }
+150         }
+151     }
+152 
+153     unitBusy.resize(numFU);
+154 
+155     for (int i = 0; i < numFU; i++) {
+156         unitBusy[i] = false;
+157     }
+158 }
+\end{DoxyCode}
+\hypertarget{classFUPool_acab5c3e76b336f001a3d89b08394f0f9}{
+\index{FUPool@{FUPool}!$\sim$FUPool@{$\sim$FUPool}}
+\index{$\sim$FUPool@{$\sim$FUPool}!FUPool@{FUPool}}
+\subsubsection[{$\sim$FUPool}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf FUPool} ()}}
+\label{classFUPool_acab5c3e76b336f001a3d89b08394f0f9}
+
+
+
+\begin{DoxyCode}
+74 {
+75     fuListIterator i = funcUnits.begin();
+76     fuListIterator end = funcUnits.end();
+77     for (; i != end; ++i)
+78         delete *i;
+79 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classFUPool_a59e607411e1d22642856849eff50ea12}{
+\index{FUPool@{FUPool}!annotateMemoryUnits@{annotateMemoryUnits}}
+\index{annotateMemoryUnits@{annotateMemoryUnits}!FUPool@{FUPool}}
+\subsubsection[{annotateMemoryUnits}]{\setlength{\rightskip}{0pt plus 5cm}void annotateMemoryUnits ({\bf Cycles} {\em hit\_\-latency})}}
+\label{classFUPool_a59e607411e1d22642856849eff50ea12}
+Annotates units that provide memory operations. Included only because old FU pool provided this function. 
+
+
+\begin{DoxyCode}
+162 {
+163     maxOpLatencies[MemReadOp] = hit_latency;
+164 
+165     fuListIterator i = funcUnits.begin();
+166     fuListIterator iend = funcUnits.end();
+167     for (; i != iend; ++i) {
+168         if ((*i)->provides(MemReadOp))
+169             (*i)->opLatency(MemReadOp) = hit_latency;
+170 
+171         if ((*i)->provides(MemWriteOp))
+172             (*i)->opLatency(MemWriteOp) = hit_latency;
+173     }
+174 }
+\end{DoxyCode}
+\hypertarget{classFUPool_accd2600060dbaee3a3b41aed4034c63c}{
+\index{FUPool@{FUPool}!dump@{dump}}
+\index{dump@{dump}!FUPool@{FUPool}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}void dump ()}}
+\label{classFUPool_accd2600060dbaee3a3b41aed4034c63c}
+Debugging function used to dump FU information. 
+
+
+\begin{DoxyCode}
+226 {
+227     cout << "Function Unit Pool (" << name() << ")\n";
+228     cout << "======================================\n";
+229     cout << "Free List:\n";
+230 
+231     for (int i = 0; i < numFU; ++i) {
+232         if (unitBusy[i]) {
+233             continue;
+234         }
+235 
+236         cout << "  [" << i << "] : ";
+237 
+238         cout << funcUnits[i]->name << " ";
+239 
+240         cout << "\n";
+241     }
+242 
+243     cout << "======================================\n";
+244     cout << "Busy List:\n";
+245     for (int i = 0; i < numFU; ++i) {
+246         if (!unitBusy[i]) {
+247             continue;
+248         }
+249 
+250         cout << "  [" << i << "] : ";
+251 
+252         cout << funcUnits[i]->name << " ";
+253 
+254         cout << "\n";
+255     }
+256 }
+\end{DoxyCode}
+\hypertarget{classFUPool_acc1a8526665e1f0cc2c346754ab30f4f}{
+\index{FUPool@{FUPool}!freeUnitNextCycle@{freeUnitNextCycle}}
+\index{freeUnitNextCycle@{freeUnitNextCycle}!FUPool@{FUPool}}
+\subsubsection[{freeUnitNextCycle}]{\setlength{\rightskip}{0pt plus 5cm}void freeUnitNextCycle (int {\em fu\_\-idx})}}
+\label{classFUPool_acc1a8526665e1f0cc2c346754ab30f4f}
+Frees a FU at the end of this cycle. 
+
+
+\begin{DoxyCode}
+206 {
+207     assert(unitBusy[fu_idx]);
+208     unitsToBeFreed.push_back(fu_idx);
+209 }
+\end{DoxyCode}
+\hypertarget{classFUPool_a99e4f990eca3fd57c7728cfdb6c95b4c}{
+\index{FUPool@{FUPool}!getIssueLatency@{getIssueLatency}}
+\index{getIssueLatency@{getIssueLatency}!FUPool@{FUPool}}
+\subsubsection[{getIssueLatency}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cycles} getIssueLatency (OpClass {\em capability})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classFUPool_a99e4f990eca3fd57c7728cfdb6c95b4c}
+Returns the issue latency of the given capability. 
+
+
+\begin{DoxyCode}
+168                                                {
+169         return maxIssueLatencies[capability];
+170     }
+\end{DoxyCode}
+\hypertarget{classFUPool_af6d130ca8a17818dbea697b65927e9ec}{
+\index{FUPool@{FUPool}!getOpLatency@{getOpLatency}}
+\index{getOpLatency@{getOpLatency}!FUPool@{FUPool}}
+\subsubsection[{getOpLatency}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cycles} getOpLatency (OpClass {\em capability})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classFUPool_af6d130ca8a17818dbea697b65927e9ec}
+Returns the operation execution latency of the given capability. 
+
+
+\begin{DoxyCode}
+163                                             {
+164         return maxOpLatencies[capability];
+165     }
+\end{DoxyCode}
+\hypertarget{classFUPool_afe4fb1c0e25607723658c1051ff3b0bf}{
+\index{FUPool@{FUPool}!getUnit@{getUnit}}
+\index{getUnit@{getUnit}!FUPool@{FUPool}}
+\subsubsection[{getUnit}]{\setlength{\rightskip}{0pt plus 5cm}int getUnit (OpClass {\em capability})}}
+\label{classFUPool_afe4fb1c0e25607723658c1051ff3b0bf}
+Gets a FU providing the requested capability. Will mark the unit as busy, but leaves the freeing of the unit up to the IEW stage. 
+\begin{DoxyParams}{引数}
+\item[{\em capability}]The capability requested. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Returns -\/2 if the FU pool does not have the capability, -\/1 if there is no free FU, and the FU's index otherwise. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+178 {
+179     //  If this pool doesn't have the specified capability,
+180     //  return this information to the caller
+181     if (!capabilityList[capability])
+182         return -2;
+183 
+184     int fu_idx = fuPerCapList[capability].getFU();
+185     int start_idx = fu_idx;
+186 
+187     // Iterate through the circular queue if needed, stopping if we've reached
+188     // the first element again.
+189     while (unitBusy[fu_idx]) {
+190         fu_idx = fuPerCapList[capability].getFU();
+191         if (fu_idx == start_idx) {
+192             // No FU available
+193             return -1;
+194         }
+195     }
+196 
+197     assert(fu_idx < numFU);
+198 
+199     unitBusy[fu_idx] = true;
+200 
+201     return fu_idx;
+202 }
+\end{DoxyCode}
+\hypertarget{classFUPool_adf5473c18a3d7c1e88c4a2072bce5526}{
+\index{FUPool@{FUPool}!isDrained@{isDrained}}
+\index{isDrained@{isDrained}!FUPool@{FUPool}}
+\subsubsection[{isDrained}]{\setlength{\rightskip}{0pt plus 5cm}bool isDrained () const}}
+\label{classFUPool_adf5473c18a3d7c1e88c4a2072bce5526}
+Have all the FUs drained? 
+
+
+\begin{DoxyCode}
+260 {
+261     bool is_drained = true;
+262     for (int i = 0; i < numFU; i++)
+263         is_drained = is_drained && !unitBusy[i];
+264 
+265     return is_drained;
+266 }
+\end{DoxyCode}
+\hypertarget{classFUPool_a1bcdcf502cf9d45b221bd0ddfd98e1dc}{
+\index{FUPool@{FUPool}!processFreeUnits@{processFreeUnits}}
+\index{processFreeUnits@{processFreeUnits}!FUPool@{FUPool}}
+\subsubsection[{processFreeUnits}]{\setlength{\rightskip}{0pt plus 5cm}void processFreeUnits ()}}
+\label{classFUPool_a1bcdcf502cf9d45b221bd0ddfd98e1dc}
+Frees all FUs on the list. 
+
+
+\begin{DoxyCode}
+213 {
+214     while (!unitsToBeFreed.empty()) {
+215         int fu_idx = unitsToBeFreed.back();
+216         unitsToBeFreed.pop_back();
+217 
+218         assert(unitBusy[fu_idx]);
+219 
+220         unitBusy[fu_idx] = false;
+221     }
+222 }
+\end{DoxyCode}
+\hypertarget{classFUPool_af4b57d21919c42d55af03391f91a1c08}{
+\index{FUPool@{FUPool}!size@{size}}
+\index{size@{size}!FUPool@{FUPool}}
+\subsubsection[{size}]{\setlength{\rightskip}{0pt plus 5cm}int size ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classFUPool_af4b57d21919c42d55af03391f91a1c08}
+Returns the total number of FUs. 
+
+
+\begin{DoxyCode}
+157 { return numFU; }
+\end{DoxyCode}
+\hypertarget{classFUPool_a8674059ce345e23aac5086b2c3e24a43}{
+\index{FUPool@{FUPool}!takeOverFrom@{takeOverFrom}}
+\index{takeOverFrom@{takeOverFrom}!FUPool@{FUPool}}
+\subsubsection[{takeOverFrom}]{\setlength{\rightskip}{0pt plus 5cm}void takeOverFrom ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classFUPool_a8674059ce345e23aac5086b2c3e24a43}
+Takes over from another CPU's thread. 
+
+
+\begin{DoxyCode}
+176 {};
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classFUPool_a7539c2a37351472e37845fdde96e3d37}{
+\index{FUPool@{FUPool}!capabilityList@{capabilityList}}
+\index{capabilityList@{capabilityList}!FUPool@{FUPool}}
+\subsubsection[{capabilityList}]{\setlength{\rightskip}{0pt plus 5cm}std::bitset$<${\bf Num\_\-OpClasses}$>$ {\bf capabilityList}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_a7539c2a37351472e37845fdde96e3d37}
+Bitvector listing capabilities of this FU pool. \hypertarget{classFUPool_a65261caecadb9b5cbf48625e3c64330d}{
+\index{FUPool@{FUPool}!funcUnits@{funcUnits}}
+\index{funcUnits@{funcUnits}!FUPool@{FUPool}}
+\subsubsection[{funcUnits}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf FuncUnit} $\ast$$>$ {\bf funcUnits}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_a65261caecadb9b5cbf48625e3c64330d}
+Functional units. \hypertarget{classFUPool_a50bef5b8a540cb33884057b9771c4c44}{
+\index{FUPool@{FUPool}!fuPerCapList@{fuPerCapList}}
+\index{fuPerCapList@{fuPerCapList}!FUPool@{FUPool}}
+\subsubsection[{fuPerCapList}]{\setlength{\rightskip}{0pt plus 5cm}{\bf FUIdxQueue} {\bf fuPerCapList}\mbox{[}{\bf Num\_\-OpClasses}\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_a50bef5b8a540cb33884057b9771c4c44}
+Per op class queues of FUs that provide that capability. \hypertarget{classFUPool_ae3464c4dc458673d68839affdb919eeb}{
+\index{FUPool@{FUPool}!maxIssueLatencies@{maxIssueLatencies}}
+\index{maxIssueLatencies@{maxIssueLatencies}!FUPool@{FUPool}}
+\subsubsection[{maxIssueLatencies}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cycles} {\bf maxIssueLatencies}\mbox{[}{\bf Num\_\-OpClasses}\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_ae3464c4dc458673d68839affdb919eeb}
+Maximum issue latencies, per op class. \hypertarget{classFUPool_ac999d6f818bb8f54b6519e85a5369e25}{
+\index{FUPool@{FUPool}!maxOpLatencies@{maxOpLatencies}}
+\index{maxOpLatencies@{maxOpLatencies}!FUPool@{FUPool}}
+\subsubsection[{maxOpLatencies}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Cycles} {\bf maxOpLatencies}\mbox{[}{\bf Num\_\-OpClasses}\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_ac999d6f818bb8f54b6519e85a5369e25}
+Maximum op execution latencies, per op class. \hypertarget{classFUPool_ae0b3cf4db09e8c26c2ab03dbe18bfb19}{
+\index{FUPool@{FUPool}!numFU@{numFU}}
+\index{numFU@{numFU}!FUPool@{FUPool}}
+\subsubsection[{numFU}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf numFU}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_ae0b3cf4db09e8c26c2ab03dbe18bfb19}
+Number of FUs. \hypertarget{classFUPool_a3161f36ae7f93643b75fc37c7a1b0e23}{
+\index{FUPool@{FUPool}!unitBusy@{unitBusy}}
+\index{unitBusy@{unitBusy}!FUPool@{FUPool}}
+\subsubsection[{unitBusy}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<$bool$>$ {\bf unitBusy}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_a3161f36ae7f93643b75fc37c7a1b0e23}
+Bitvector listing which FUs are busy. \hypertarget{classFUPool_aa2972d7a97b76cc15ec7bbd38e5c9da5}{
+\index{FUPool@{FUPool}!unitsToBeFreed@{unitsToBeFreed}}
+\index{unitsToBeFreed@{unitsToBeFreed}!FUPool@{FUPool}}
+\subsubsection[{unitsToBeFreed}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<$int$>$ {\bf unitsToBeFreed}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classFUPool_aa2972d7a97b76cc15ec7bbd38e5c9da5}
+List of units to be freed at the end of this cycle. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/o3/\hyperlink{fu__pool_8hh}{fu\_\-pool.hh}\item 
+cpu/o3/\hyperlink{fu__pool_8cc}{fu\_\-pool.cc}\end{DoxyCompactItemize}

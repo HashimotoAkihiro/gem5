@@ -1,0 +1,151 @@
+\hypertarget{classArmLinuxProcess32}{
+\section{クラス ArmLinuxProcess32}
+\label{classArmLinuxProcess32}\index{ArmLinuxProcess32@{ArmLinuxProcess32}}
+}
+
+
+A process with emulated Arm/Linux syscalls.  
+
+
+{\ttfamily \#include $<$process.hh$>$}ArmLinuxProcess32に対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classArmLinuxProcess32}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmLinuxProcess32_a9ee1b5be9a1dc6fb85f2980dda11a967}{ArmLinuxProcess32} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile}, \hyperlink{classObjectFile_a0ac03ab06a859320a9072002bdf3aa0f}{ObjectFile::Arch} \_\-arch)
+\item 
+void \hyperlink{classArmLinuxProcess32_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\item 
+\hyperlink{classSyscallDesc}{SyscallDesc} $\ast$ \hyperlink{classArmLinuxProcess32_aebbff609a7235342925445690acf5ee8}{getDesc} (int callnum)
+\end{DoxyCompactItemize}
+\subsection*{Static Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+static const \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classArmLinuxProcess32_adf050b09797e4c45baae408354f3ee1c}{commPage} = 0xffff0000
+\begin{DoxyCompactList}\small\item\em A page to hold \char`\"{}kernel\char`\"{} provided functions. The name might be wrong. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+A process with emulated Arm/Linux syscalls. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmLinuxProcess32_a9ee1b5be9a1dc6fb85f2980dda11a967}{
+\index{ArmLinuxProcess32@{ArmLinuxProcess32}!ArmLinuxProcess32@{ArmLinuxProcess32}}
+\index{ArmLinuxProcess32@{ArmLinuxProcess32}!ArmLinuxProcess32@{ArmLinuxProcess32}}
+\subsubsection[{ArmLinuxProcess32}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ArmLinuxProcess32} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile}, \/  {\bf ObjectFile::Arch} {\em \_\-arch})}}
+\label{classArmLinuxProcess32_a9ee1b5be9a1dc6fb85f2980dda11a967}
+
+
+
+\begin{DoxyCode}
+1592     : ArmLiveProcess32(params, objFile, _arch)
+1593 {
+1594     SyscallTable table;
+1595 
+1596     table.descs = syscallDescs32;
+1597     table.size = sizeof(syscallDescs32) / sizeof(SyscallDesc);
+1598     table.base = 0;
+1599     syscallTables.push_back(table);
+1600     table.base = 0x900000;
+1601     syscallTables.push_back(table);
+1602 
+1603     table.descs = privSyscallDescs32;
+1604     table.size = sizeof(privSyscallDescs32) / sizeof(SyscallDesc);
+1605     table.base = 0xf0001;
+1606     syscallTables.push_back(table);
+1607 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classArmLinuxProcess32_aebbff609a7235342925445690acf5ee8}{
+\index{ArmLinuxProcess32@{ArmLinuxProcess32}!getDesc@{getDesc}}
+\index{getDesc@{getDesc}!ArmLinuxProcess32@{ArmLinuxProcess32}}
+\subsubsection[{getDesc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf SyscallDesc} $\ast$ getDesc (int {\em callnum})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmLinuxProcess32_aebbff609a7235342925445690acf5ee8}
+
+
+\hyperlink{classLiveProcess_a478f396f8895ef7728d26866a00121d7}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+1655 {
+1656     return getLinuxDesc(callnum);
+1657 }
+\end{DoxyCode}
+\hypertarget{classArmLinuxProcess32_a3c34ea9b29f410748d4435a667484924}{
+\index{ArmLinuxProcess32@{ArmLinuxProcess32}!initState@{initState}}
+\index{initState@{initState}!ArmLinuxProcess32@{ArmLinuxProcess32}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classArmLinuxProcess32_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classArmLinuxProcess32_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classArmLiveProcess32_a3c34ea9b29f410748d4435a667484924}{ArmLiveProcess32}を再定義しています。
+
+
+\begin{DoxyCode}
+1667 {
+1668     ArmLiveProcess32::initState();
+1669     allocateMem(commPage, PageBytes);
+1670     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+1671 
+1672     uint8_t swiNeg1[] = {
+1673         0xff, 0xff, 0xff, 0xef  // swi -1
+1674     };
+1675 
+1676     // Fill this page with swi -1 so we'll no if we land in it somewhere.
+1677     for (Addr addr = 0; addr < PageBytes; addr += sizeof(swiNeg1)) {
+1678         tc->getMemProxy().writeBlob(commPage + addr,
+1679                                     swiNeg1, sizeof(swiNeg1));
+1680     }
+1681 
+1682     uint8_t memory_barrier[] =
+1683     {
+1684         0x5f, 0xf0, 0x7f, 0xf5, // dmb
+1685         0x0e, 0xf0, 0xa0, 0xe1  // return
+1686     };
+1687     tc->getMemProxy().writeBlob(commPage + 0x0fa0, memory_barrier,
+1688                                 sizeof(memory_barrier));
+1689 
+1690     uint8_t cmpxchg[] =
+1691     {
+1692         0x9f, 0x3f, 0x92, 0xe1,  // ldrex    r3, [r2]
+1693         0x00, 0x30, 0x53, 0xe0,  // subs     r3, r3, r0
+1694         0x91, 0x3f, 0x82, 0x01,  // strexeq  r3, r1, [r2]
+1695         0x01, 0x00, 0x33, 0x03,  // teqeq    r3, #1
+1696         0xfa, 0xff, 0xff, 0x0a,  // beq 1b
+1697         0x00, 0x00, 0x73, 0xe2,  // rsbs r0, r3, #0
+1698         0x5f, 0xf0, 0x7f, 0xf5,  // dmb
+1699         0x0e, 0xf0, 0xa0, 0xe1   // return
+1700     };
+1701     tc->getMemProxy().writeBlob(commPage + 0x0fc0, cmpxchg, sizeof(cmpxchg));
+1702 
+1703     uint8_t get_tls[] =
+1704     {
+1705                                 // read user read-only thread id register
+1706         0x70, 0x0f, 0x1d, 0xee, // mrc p15, 0, r0, c13, c0, 3
+1707         0x0e, 0xf0, 0xa0, 0xe1  // return
+1708     };
+1709     tc->getMemProxy().writeBlob(commPage + 0x0fe0, get_tls, sizeof(get_tls));
+1710 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classArmLinuxProcess32_adf050b09797e4c45baae408354f3ee1c}{
+\index{ArmLinuxProcess32@{ArmLinuxProcess32}!commPage@{commPage}}
+\index{commPage@{commPage}!ArmLinuxProcess32@{ArmLinuxProcess32}}
+\subsubsection[{commPage}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf Addr} {\bf commPage} = 0xffff0000\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classArmLinuxProcess32_adf050b09797e4c45baae408354f3ee1c}
+
+
+A page to hold \char`\"{}kernel\char`\"{} provided functions. The name might be wrong. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/linux/\hyperlink{arch_2arm_2linux_2process_8hh}{process.hh}\item 
+arch/arm/linux/\hyperlink{arch_2arm_2linux_2process_8cc}{process.cc}\end{DoxyCompactItemize}

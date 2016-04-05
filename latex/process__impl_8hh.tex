@@ -1,0 +1,41 @@
+\hypertarget{process__impl_8hh}{
+\section{sim/process\_\-impl.hh}
+\label{process__impl_8hh}\index{sim/process\_\-impl.hh@{sim/process\_\-impl.hh}}
+}
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include \char`\"{}mem/se\_\-translating\_\-port\_\-proxy.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/byteswap.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$class AddrType $>$ }\\void \hyperlink{process__impl_8hh_abbc13c6dc8f22fc451cf7a52ce997572}{copyStringArray} (\hyperlink{classstd_1_1vector}{std::vector}$<$ std::string $>$ \&\hyperlink{circletest_8cc_a899c0fa2b3c57dba6154c77de83c8d39}{strings}, AddrType array\_\-ptr, AddrType data\_\-ptr, \hyperlink{classSETranslatingPortProxy}{SETranslatingPortProxy} \&memProxy)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{process__impl_8hh_abbc13c6dc8f22fc451cf7a52ce997572}{
+\index{process\_\-impl.hh@{process\_\-impl.hh}!copyStringArray@{copyStringArray}}
+\index{copyStringArray@{copyStringArray}!process_impl.hh@{process\_\-impl.hh}}
+\subsubsection[{copyStringArray}]{\setlength{\rightskip}{0pt plus 5cm}void copyStringArray ({\bf std::vector}$<$ std::string $>$ \& {\em strings}, \/  AddrType {\em array\_\-ptr}, \/  AddrType {\em data\_\-ptr}, \/  {\bf SETranslatingPortProxy} \& {\em memProxy})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{process__impl_8hh_abbc13c6dc8f22fc451cf7a52ce997572}
+
+
+
+\begin{DoxyCode}
+47 {
+48     AddrType data_ptr_swap;
+49     for (std::vector<std::string>::size_type i = 0; i < strings.size(); ++i) {
+50         data_ptr_swap = TheISA::htog(data_ptr);
+51         memProxy.writeBlob(array_ptr, (uint8_t*)&data_ptr_swap,
+52                 sizeof(AddrType));
+53         memProxy.writeString(data_ptr, strings[i].c_str());
+54         array_ptr += sizeof(AddrType);
+55         data_ptr += strings[i].size() + 1;
+56     }
+57     // add NULL terminator
+58     data_ptr = 0;
+59 
+60     memProxy.writeBlob(array_ptr, (uint8_t*)&data_ptr, sizeof(AddrType));
+61 }
+\end{DoxyCode}

@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/network/garnet/flexible-pipeline/Router.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/network/garnet/flexible-pipeline/Router.hh</h1><a href="Router_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2008 Princeton University</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Niket Agarwal</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __MEM_RUBY_NETWORK_GARNET_FLEXIBLE_PIPELINE_ROUTER_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_NETWORK_GARNET_FLEXIBLE_PIPELINE_ROUTER_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="NetDest_8hh.html">mem/ruby/common/NetDest.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="BasicRouter_8hh.html">mem/ruby/network/BasicRouter.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="FlexibleConsumer_8hh.html">mem/ruby/network/garnet/flexible-pipeline/FlexibleConsumer.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="GarnetNetwork_8hh.html">mem/ruby/network/garnet/flexible-pipeline/GarnetNetwork.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="InVcState_8hh.html">mem/ruby/network/garnet/flexible-pipeline/InVcState.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="NetworkLink_8hh.html">mem/ruby/network/garnet/flexible-pipeline/NetworkLink.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="OutVcState_8hh.html">mem/ruby/network/garnet/flexible-pipeline/OutVcState.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="flitBuffer_8hh.html">mem/ruby/network/garnet/flexible-pipeline/flitBuffer.hh</a>&quot;</span>
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="NetworkHeader_8hh.html">mem/ruby/network/garnet/NetworkHeader.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;params/GarnetRouter.hh&quot;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="keyword">class </span><a class="code" href="classVCarbiter.html">VCarbiter</a>;
+<a name="l00049"></a>00049 
+<a name="l00050"></a><a class="code" href="classRouter.html">00050</a> <span class="keyword">class </span><a class="code" href="classRouter.html">Router</a> : <span class="keyword">public</span> <a class="code" href="classBasicRouter_1_1BasicRouter.html">BasicRouter</a>, <span class="keyword">public</span> <a class="code" href="classFlexibleConsumer.html">FlexibleConsumer</a>
+<a name="l00051"></a>00051 {
+<a name="l00052"></a>00052   <span class="keyword">public</span>:
+<a name="l00053"></a><a class="code" href="classRouter.html#aefbd30db7d0c203dbe4553fdfe3c2b0e">00053</a>     <span class="keyword">typedef</span> GarnetRouterParams <a class="code" href="classRouter.html#aefbd30db7d0c203dbe4553fdfe3c2b0e">Params</a>;
+<a name="l00054"></a>00054     <a class="code" href="classRouter.html#a08e8916427569b37de6a373acb130e0d">Router</a>(<span class="keyword">const</span> <a class="code" href="classRouter.html#aefbd30db7d0c203dbe4553fdfe3c2b0e">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056     <a class="code" href="classRouter.html#ae646b52cde146755b62e42fbcf59a309">~Router</a>();
+<a name="l00057"></a>00057 
+<a name="l00058"></a>00058     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#a861b99bda673a31b1b48132ed9369f28">addInPort</a>(<a class="code" href="classNetworkLink.html">NetworkLink</a> *in_link);
+<a name="l00059"></a>00059     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#a8958cd696038e2c830e9ab3445bb1ae5">addOutPort</a>(<a class="code" href="classNetworkLink.html">NetworkLink</a> *out_link, <span class="keyword">const</span> <a class="code" href="classNetDest.html">NetDest</a>&amp; routing_table_entry,
+<a name="l00060"></a>00060                     <span class="keywordtype">int</span> link_weight);
+<a name="l00061"></a>00061     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#ae674290a26ecbd622c5160e38e8a4fe9">wakeup</a>();
+<a name="l00062"></a>00062     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#ac2db714adfe0dfd2c3ac2b88bd6a5308">request_vc</a>(<span class="keywordtype">int</span> in_vc, <span class="keywordtype">int</span> in_port, <a class="code" href="classNetDest.html">NetDest</a> <a class="code" href="namespaceX86ISA.html#a78018be0196ca47c5ce84ad62a0d4dba">destination</a>,
+<a name="l00063"></a>00063                     <a class="code" href="classCycles.html">Cycles</a> request_time);
+<a name="l00064"></a>00064     <span class="keywordtype">bool</span> <a class="code" href="classRouter.html#af3465adbf20f8764ea878ce2d28d2bc8">isBufferNotFull</a>(<span class="keywordtype">int</span> vc, <span class="keywordtype">int</span> inport);
+<a name="l00065"></a>00065     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#af90fb6c473130244fe64e30e61b714f6">grant_vc</a>(<span class="keywordtype">int</span> out_port, <span class="keywordtype">int</span> vc, <a class="code" href="classCycles.html">Cycles</a> grant_time);
+<a name="l00066"></a>00066     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#adced7fd7d25eb0d6a869fff14085e8c3">release_vc</a>(<span class="keywordtype">int</span> out_port, <span class="keywordtype">int</span> vc, <a class="code" href="classCycles.html">Cycles</a> release_time);
+<a name="l00067"></a>00067     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#a3e82da716c2557efa2e6a293843b4d0a">vc_arbitrate</a>();
+<a name="l00068"></a>00068     <span class="keywordtype">int</span> <a class="code" href="classRouter.html#ae73de77352867d272505f41222809e17">get_vnet</a>(<span class="keywordtype">int</span> vc);
+<a name="l00069"></a>00069 
+<a name="l00070"></a>00070     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#ac55fe386a101fbae38c716067c9966a0">print</a>(std::ostream&amp; out) <span class="keyword">const</span>;
+<a name="l00071"></a>00071 
+<a name="l00072"></a><a class="code" href="classRouter.html#ab5da6a3c41f86ad2993eb11f4894ef00">00072</a>     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#ab5da6a3c41f86ad2993eb11f4894ef00">init_net_ptr</a>(<a class="code" href="classGarnetNetwork.html">GarnetNetwork</a>* net_ptr) 
+<a name="l00073"></a>00073     { 
+<a name="l00074"></a>00074         <a class="code" href="classRouter.html#a6f69c0ff922be798fa1cfce69f83244e">m_net_ptr</a> = net_ptr; 
+<a name="l00075"></a>00075     }
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077     <span class="keywordtype">bool</span> <a class="code" href="classRouter.html#a6db56c593ee28a561c47e75a859300dd">functionalRead</a>(<a class="code" href="classPacket.html">Packet</a> *);
+<a name="l00078"></a>00078     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classRouter.html#aba9037f662122b5f2e85647d35670e5c">functionalWrite</a>(<a class="code" href="classPacket.html">Packet</a> *);
+<a name="l00079"></a>00079 
+<a name="l00080"></a>00080   <span class="keyword">private</span>:
+<a name="l00081"></a><a class="code" href="classRouter.html#af4cc96182e80059859793d92cb3dd769">00081</a>     <span class="keywordtype">int</span> <a class="code" href="classRouter.html#af4cc96182e80059859793d92cb3dd769">m_virtual_networks</a>, <a class="code" href="classRouter.html#a2e1a9213321dfa0386cdedaf6fc22996">m_num_vcs</a>, <a class="code" href="classRouter.html#a2d66b8cad5144408ed492eeff4d37c2f">m_vc_per_vnet</a>;
+<a name="l00082"></a><a class="code" href="classRouter.html#a6f69c0ff922be798fa1cfce69f83244e">00082</a>     <a class="code" href="classGarnetNetwork.html">GarnetNetwork</a> *<a class="code" href="classRouter.html#a6f69c0ff922be798fa1cfce69f83244e">m_net_ptr</a>;
+<a name="l00083"></a><a class="code" href="classRouter.html#aac15a2e45cd3199aa6645027c3c49f29">00083</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classRouter.html#aac15a2e45cd3199aa6645027c3c49f29">m_vc_round_robin</a>; <span class="comment">// For scheduling of out source queues</span>
+<a name="l00084"></a><a class="code" href="classRouter.html#af4ca19e1a3ce236185490cf7e67f86d3">00084</a>     <span class="keywordtype">int</span> <a class="code" href="classRouter.html#a0c263ebf781383b8d6c95870cfaf076d">m_round_robin_inport</a>, <a class="code" href="classRouter.html#af4ca19e1a3ce236185490cf7e67f86d3">m_round_robin_start</a>; <span class="comment">// for vc arbitration</span>
+<a name="l00085"></a><a class="code" href="classRouter.html#a0445a5ec24b4ba3c94bfaac14bdff561">00085</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classRouter.html#a0445a5ec24b4ba3c94bfaac14bdff561">m_round_robin_invc</a>; <span class="comment">// For vc arbitration of each outport</span>
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087     <span class="comment">// These are essentially output buffers</span>
+<a name="l00088"></a><a class="code" href="classRouter.html#acb8a77bcc0e2cbc61f9b60cfa443acf0">00088</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::vector&lt;flitBuffer *&gt;</a> &gt; <a class="code" href="classRouter.html#acb8a77bcc0e2cbc61f9b60cfa443acf0">m_router_buffers</a>;
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090     <span class="comment">// These are source queues for the output link</span>
+<a name="l00091"></a><a class="code" href="classRouter.html#a1022c5b57cefcbc48cc2b28e5b15f12e">00091</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;flitBuffer *&gt;</a> <a class="code" href="classRouter.html#a1022c5b57cefcbc48cc2b28e5b15f12e">m_out_src_queue</a>;
+<a name="l00092"></a>00092 
+<a name="l00093"></a><a class="code" href="classRouter.html#a4ff3f0c2e50626b517ea98c165c9a0c3">00093</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;NetworkLink *&gt;</a> <a class="code" href="classRouter.html#a4ff3f0c2e50626b517ea98c165c9a0c3">m_in_link</a>;
+<a name="l00094"></a><a class="code" href="classRouter.html#a2c9a37a8e348b31100b016ef9b51b235">00094</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;NetworkLink *&gt;</a> <a class="code" href="classRouter.html#a2c9a37a8e348b31100b016ef9b51b235">m_out_link</a>;
+<a name="l00095"></a><a class="code" href="classRouter.html#a9d8dfe7ed8a1027af42c383e180b8023">00095</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::vector&lt;InVcState *&gt;</a> &gt; <a class="code" href="classRouter.html#a9d8dfe7ed8a1027af42c383e180b8023">m_in_vc_state</a>;
+<a name="l00096"></a><a class="code" href="classRouter.html#ac42fe6cf02410262c5525a2abcc921b6">00096</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::vector&lt;OutVcState *&gt;</a> &gt; <a class="code" href="classRouter.html#ac42fe6cf02410262c5525a2abcc921b6">m_out_vc_state</a>;
+<a name="l00097"></a><a class="code" href="classRouter.html#adce3e392ac98699a80750fa4a4aa9b40">00097</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;NetDest&gt;</a> <a class="code" href="classRouter.html#adce3e392ac98699a80750fa4a4aa9b40">m_routing_table</a>;
+<a name="l00098"></a><a class="code" href="classRouter.html#a0894e57ab5d2ddc0e8c5d60a53a27cff">00098</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classRouter.html#a0894e57ab5d2ddc0e8c5d60a53a27cff">m_link_weights</a>;
+<a name="l00099"></a><a class="code" href="classRouter.html#a03eb166814fcfceb112402a09259cae7">00099</a>     <a class="code" href="classVCarbiter.html">VCarbiter</a> *<a class="code" href="classRouter.html#a03eb166814fcfceb112402a09259cae7">m_vc_arbiter</a>;
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101     <span class="keywordtype">int</span> <a class="code" href="classRouter.html#a2e327aa228d7975550910a9dfc67e222">getRoute</a>(<a class="code" href="classNetDest.html">NetDest</a> <a class="code" href="namespaceX86ISA.html#a78018be0196ca47c5ce84ad62a0d4dba">destination</a>);
+<a name="l00102"></a>00102     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classRouter.html#a1a1889612585bf284775701c742a8449">get_valid_vcs</a>(<span class="keywordtype">int</span> invc);
+<a name="l00103"></a>00103     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#aeb1ad1b60d443efcb72a73917e20bbd1">routeCompute</a>(<a class="code" href="classflit.html">flit</a> *m_flit, <span class="keywordtype">int</span> inport);
+<a name="l00104"></a>00104     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#af954e8e2150e2ce2e1b87081bbd9c678">checkReschedule</a>();
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#a16c0664c8f37fe80b30fd3e7cd90fa33">check_arbiter_reschedule</a>();
+<a name="l00106"></a>00106     <span class="keywordtype">void</span> <a class="code" href="classRouter.html#a4a8dc105bd8d06865d65c708e3e21188">scheduleOutputLinks</a>();
+<a name="l00107"></a>00107 };
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109 <span class="preprocessor">#endif // __MEM_RUBY_NETWORK_GARNET_FLEXIBLE_PIPELINE_ROUTER_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

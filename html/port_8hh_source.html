@@ -1,0 +1,271 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/port.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/port.hh</h1><a href="port_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011-2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Ron Dreslinski</span>
+<a name="l00041"></a>00041 <span class="comment"> *          Andreas Hansson</span>
+<a name="l00042"></a>00042 <span class="comment"> *          William Wang</span>
+<a name="l00043"></a>00043 <span class="comment"> */</span>
+<a name="l00044"></a>00044 
+<a name="l00050"></a>00050 <span class="preprocessor">#ifndef __MEM_PORT_HH__</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_PORT_HH__</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="addr__range_8hh.html">base/addr_range.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="packet_8hh.html">mem/packet.hh</a>&quot;</span>
+<a name="l00057"></a>00057 
+<a name="l00065"></a><a class="code" href="port_8hh.html#a8f73751754cd29dbff43400e751325c0">00065</a> <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;AddrRange&gt;</a> <a class="code" href="classstd_1_1list.html">AddrRangeList</a>;
+<a name="l00066"></a><a class="code" href="port_8hh.html#a5f27b286a946c7b1f93f37faecf43476">00066</a> <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;AddrRange&gt;::iterator</a> <a class="code" href="port_8hh.html#a5f27b286a946c7b1f93f37faecf43476">AddrRangeIter</a>;
+<a name="l00067"></a><a class="code" href="port_8hh.html#a0f4385f0a7bf93ed2e39e1a630b291b0">00067</a> <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;AddrRange&gt;::const_iterator</a> <a class="code" href="port_8hh.html#a0f4385f0a7bf93ed2e39e1a630b291b0">AddrRangeConstIter</a>;
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069 <span class="keyword">class </span><a class="code" href="classMemObject.html">MemObject</a>;
+<a name="l00070"></a>00070 
+<a name="l00076"></a><a class="code" href="classPort.html">00076</a> <span class="keyword">class </span><a class="code" href="classPort.html">Port</a>
+<a name="l00077"></a>00077 {
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079   <span class="keyword">private</span>:
+<a name="l00080"></a>00080 
+<a name="l00082"></a><a class="code" href="classPort.html#a3ba70989fe75b76393da3cbc6bdcf196">00082</a>     std::string <a class="code" href="classPort.html#a3ba70989fe75b76393da3cbc6bdcf196">portName</a>;
+<a name="l00083"></a>00083 
+<a name="l00084"></a>00084   <span class="keyword">protected</span>:
+<a name="l00085"></a>00085 
+<a name="l00090"></a><a class="code" href="classPort.html#a0a67444fc1c33a60fe4a92bfff05d0cb">00090</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <a class="code" href="classPort.html#a0a67444fc1c33a60fe4a92bfff05d0cb">id</a>;
+<a name="l00091"></a>00091 
+<a name="l00093"></a><a class="code" href="classPort.html#aba966efb6c1df4b015be3a396df6c318">00093</a>     <a class="code" href="classMemObject.html">MemObject</a>&amp; <a class="code" href="classPort.html#aba966efb6c1df4b015be3a396df6c318">owner</a>;
+<a name="l00094"></a>00094 
+<a name="l00102"></a>00102     <a class="code" href="classPort.html#a569024a47504e9445c2030bd4b7f7b46">Port</a>(<span class="keyword">const</span> std::string&amp; _name, <a class="code" href="classMemObject.html">MemObject</a>&amp; _owner, <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> _id);
+<a name="l00103"></a>00103 
+<a name="l00107"></a>00107     <span class="keyword">virtual</span> <a class="code" href="classPort.html#ace19edfecfdf1557637d8d5bb9f91501">~Port</a>();
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109   <span class="keyword">public</span>:
+<a name="l00110"></a>00110 
+<a name="l00112"></a><a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">00112</a>     <span class="keyword">const</span> std::string <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classPort.html#a3ba70989fe75b76393da3cbc6bdcf196">portName</a>; }
+<a name="l00113"></a>00113 
+<a name="l00115"></a><a class="code" href="classPort.html#ad95169ead4fa2bd3241b2bbb1bc7b420">00115</a>     <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <a class="code" href="classPort.html#ad95169ead4fa2bd3241b2bbb1bc7b420">getId</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classPort.html#a0a67444fc1c33a60fe4a92bfff05d0cb">id</a>; }
+<a name="l00116"></a>00116 
+<a name="l00117"></a>00117 };
+<a name="l00118"></a>00118 
+<a name="l00120"></a>00120 <span class="keyword">class </span><a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>;
+<a name="l00121"></a>00121 
+<a name="l00128"></a><a class="code" href="classBaseMasterPort.html">00128</a> <span class="keyword">class </span><a class="code" href="classBaseMasterPort.html">BaseMasterPort</a> : <span class="keyword">public</span> <a class="code" href="classPort.html">Port</a>
+<a name="l00129"></a>00129 {
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131   <span class="keyword">protected</span>:
+<a name="l00132"></a>00132 
+<a name="l00133"></a><a class="code" href="classBaseMasterPort.html#a5b9273661ccc0128fc9505529741c91d">00133</a>     <a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>* <a class="code" href="classBaseMasterPort.html#a5b9273661ccc0128fc9505529741c91d">_baseSlavePort</a>;
+<a name="l00134"></a>00134 
+<a name="l00135"></a>00135     <a class="code" href="classBaseMasterPort.html#ac7ad9c573dec4e547b3c45154b965d55">BaseMasterPort</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>, <a class="code" href="classMemObject.html">MemObject</a>* <a class="code" href="classPort.html#aba966efb6c1df4b015be3a396df6c318">owner</a>,
+<a name="l00136"></a>00136                    <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <span class="keywordtype">id</span> = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00137"></a>00137     <span class="keyword">virtual</span> <a class="code" href="classBaseMasterPort.html#a078b3172e1cb6a5dd1b1608a051ee38b">~BaseMasterPort</a>();
+<a name="l00138"></a>00138 
+<a name="l00139"></a>00139   <span class="keyword">public</span>:
+<a name="l00140"></a>00140 
+<a name="l00141"></a>00141     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseMasterPort.html#a55647ab861a1f8cf8d26df2f402188d7">bind</a>(<a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>&amp; slave_port) = 0;
+<a name="l00142"></a>00142     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classBaseMasterPort.html#a406c5430a4a46c0068050632b9d3e765">unbind</a>() = 0;
+<a name="l00143"></a>00143     <a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>&amp; <a class="code" href="classBaseMasterPort.html#a557fc10dd63c603dbcb8304d845dd077">getSlavePort</a>() <span class="keyword">const</span>;
+<a name="l00144"></a>00144     <span class="keywordtype">bool</span> <a class="code" href="classBaseMasterPort.html#a180fa55a4bf36580963bed9e3e09c227">isConnected</a>() <span class="keyword">const</span>;
+<a name="l00145"></a>00145 
+<a name="l00146"></a>00146 };
+<a name="l00147"></a>00147 
+<a name="l00152"></a><a class="code" href="classBaseSlavePort.html">00152</a> <span class="keyword">class </span><a class="code" href="classBaseSlavePort.html">BaseSlavePort</a> : <span class="keyword">public</span> <a class="code" href="classPort.html">Port</a>
+<a name="l00153"></a>00153 {
+<a name="l00154"></a>00154 
+<a name="l00155"></a>00155   <span class="keyword">protected</span>:
+<a name="l00156"></a>00156 
+<a name="l00157"></a><a class="code" href="classBaseSlavePort.html#ad5f452d3408bb62d2df1e46d11070b9a">00157</a>     <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a>* <a class="code" href="classBaseSlavePort.html#ad5f452d3408bb62d2df1e46d11070b9a">_baseMasterPort</a>;
+<a name="l00158"></a>00158 
+<a name="l00159"></a>00159     <a class="code" href="classBaseSlavePort.html#a414cdc348be270fd5d327495492317f3">BaseSlavePort</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>, <a class="code" href="classMemObject.html">MemObject</a>* <a class="code" href="classPort.html#aba966efb6c1df4b015be3a396df6c318">owner</a>,
+<a name="l00160"></a>00160                   <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <span class="keywordtype">id</span> = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00161"></a>00161     <span class="keyword">virtual</span> <a class="code" href="classBaseSlavePort.html#af5de8ca1b8bfbd68a5fe3795a7b4d1ec">~BaseSlavePort</a>();
+<a name="l00162"></a>00162 
+<a name="l00163"></a>00163   <span class="keyword">public</span>:
+<a name="l00164"></a>00164 
+<a name="l00165"></a>00165     <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a>&amp; <a class="code" href="classBaseSlavePort.html#a0ac9bcda7a99ed66768dfe5c4a8b7e5f">getMasterPort</a>() <span class="keyword">const</span>;
+<a name="l00166"></a>00166     <span class="keywordtype">bool</span> <a class="code" href="classBaseSlavePort.html#a180fa55a4bf36580963bed9e3e09c227">isConnected</a>() <span class="keyword">const</span>;
+<a name="l00167"></a>00167 
+<a name="l00168"></a>00168 };
+<a name="l00169"></a>00169 
+<a name="l00171"></a>00171 <span class="keyword">class </span><a class="code" href="classSlavePort.html">SlavePort</a>;
+<a name="l00172"></a>00172 
+<a name="l00180"></a><a class="code" href="classMasterPort.html">00180</a> <span class="keyword">class </span><a class="code" href="classMasterPort.html">MasterPort</a> : <span class="keyword">public</span> <a class="code" href="classBaseMasterPort.html">BaseMasterPort</a>
+<a name="l00181"></a>00181 {
+<a name="l00182"></a>00182 
+<a name="l00183"></a><a class="code" href="classMasterPort.html#a5344d902f61e69b03cd4d737c6375ce3">00183</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classSlavePort.html">SlavePort</a>;
+<a name="l00184"></a>00184 
+<a name="l00185"></a>00185   <span class="keyword">private</span>:
+<a name="l00186"></a>00186 
+<a name="l00187"></a><a class="code" href="classMasterPort.html#a33e3b01a66e2118c0e01887bd905e904">00187</a>     <a class="code" href="classSlavePort.html">SlavePort</a>* <a class="code" href="classMasterPort.html#a33e3b01a66e2118c0e01887bd905e904">_slavePort</a>;
+<a name="l00188"></a>00188 
+<a name="l00189"></a>00189   <span class="keyword">public</span>:
+<a name="l00190"></a>00190 
+<a name="l00191"></a>00191     <a class="code" href="classMasterPort.html#a4a4ccf1d4533ae4ce5ac9bf88a7edfd5">MasterPort</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>, <a class="code" href="classMemObject.html">MemObject</a>* <a class="code" href="classPort.html#aba966efb6c1df4b015be3a396df6c318">owner</a>,
+<a name="l00192"></a>00192                <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <span class="keywordtype">id</span> = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00193"></a>00193     <span class="keyword">virtual</span> <a class="code" href="classMasterPort.html#a5e846fe2c65dea8caa0c62564ce24f9f">~MasterPort</a>();
+<a name="l00194"></a>00194 
+<a name="l00199"></a>00199     <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#a5035def22faf23d50855716f8c9602e2">bind</a>(<a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>&amp; slave_port);
+<a name="l00200"></a>00200 
+<a name="l00204"></a>00204     <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#af294915156f1e30f1d2e574dccc87945">unbind</a>();
+<a name="l00205"></a>00205 
+<a name="l00215"></a>00215     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classMasterPort.html#a49fe5ebde5a0349bff76527b969b7643">sendAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00216"></a>00216 
+<a name="l00224"></a>00224     <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#aef8a57d30c0da6a2d2a599a14a9b8751">sendFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00225"></a>00225 
+<a name="l00237"></a>00237     <span class="keywordtype">bool</span> <a class="code" href="classMasterPort.html#aafaf979005392447714384794f1a8610">sendTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00238"></a>00238 
+<a name="l00248"></a>00248     <span class="keywordtype">bool</span> <a class="code" href="classMasterPort.html#a4853cc2d61a4dee331dfaeaa54f64fcb">sendTimingSnoopResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00249"></a>00249 
+<a name="l00254"></a>00254     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#a6172657b944e32a722d90a20c5896bb7">sendRetry</a>();
+<a name="l00255"></a>00255 
+<a name="l00265"></a><a class="code" href="classMasterPort.html#a32602a6a3c3d66a639455036d6c08dd6">00265</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classMasterPort.html#a32602a6a3c3d66a639455036d6c08dd6">isSnooping</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00266"></a>00266 
+<a name="l00270"></a>00270     <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classMasterPort.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00271"></a>00271 
+<a name="l00275"></a>00275     <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#a88aa41e2693dd0091afae2604eba9bed">printAddr</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>);
+<a name="l00276"></a>00276 
+<a name="l00277"></a>00277   <span class="keyword">protected</span>:
+<a name="l00278"></a>00278 
+<a name="l00282"></a><a class="code" href="classMasterPort.html#ae1160d8f94f042aba1dc9a07a72e1e82">00282</a>     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classMasterPort.html#ae1160d8f94f042aba1dc9a07a72e1e82">recvAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00283"></a>00283     {
+<a name="l00284"></a>00284         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;%s was not expecting an atomic snoop request\n&quot;</span>, <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>());
+<a name="l00285"></a>00285         <span class="keywordflow">return</span> 0;
+<a name="l00286"></a>00286     }
+<a name="l00287"></a>00287 
+<a name="l00291"></a><a class="code" href="classMasterPort.html#af5b15bc08781cf0ba6190efc37d5b67e">00291</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#af5b15bc08781cf0ba6190efc37d5b67e">recvFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00292"></a>00292     {
+<a name="l00293"></a>00293         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;%s was not expecting a functional snoop request\n&quot;</span>, <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>());
+<a name="l00294"></a>00294     }
+<a name="l00295"></a>00295 
+<a name="l00299"></a>00299     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classMasterPort.html#abd323548d6c93f8b0543f1fe3a86ca35">recvTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) = 0;
+<a name="l00300"></a>00300 
+<a name="l00304"></a><a class="code" href="classMasterPort.html#ae43c73eff109f907118829fcfa9e7096">00304</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#ae43c73eff109f907118829fcfa9e7096">recvTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00305"></a>00305     {
+<a name="l00306"></a>00306         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;%s was not expecting a timing snoop request\n&quot;</span>, <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>());
+<a name="l00307"></a>00307     }
+<a name="l00308"></a>00308 
+<a name="l00315"></a>00315     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#ac1ccc3bcf7ebabb20b57fab99b2be5b0">recvRetry</a>() = 0;
+<a name="l00316"></a>00316 
+<a name="l00324"></a><a class="code" href="classMasterPort.html#af60d9c2c17fb4c9ebc5384a7e0c9f289">00324</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMasterPort.html#af60d9c2c17fb4c9ebc5384a7e0c9f289">recvRangeChange</a>() { }
+<a name="l00325"></a>00325 };
+<a name="l00326"></a>00326 
+<a name="l00333"></a><a class="code" href="classSlavePort.html">00333</a> <span class="keyword">class </span><a class="code" href="classSlavePort.html">SlavePort</a> : <span class="keyword">public</span> <a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>
+<a name="l00334"></a>00334 {
+<a name="l00335"></a>00335 
+<a name="l00336"></a><a class="code" href="classSlavePort.html#a6c830d413286a218b881eaca621285e4">00336</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classMasterPort.html">MasterPort</a>;
+<a name="l00337"></a>00337 
+<a name="l00338"></a>00338   <span class="keyword">private</span>:
+<a name="l00339"></a>00339 
+<a name="l00340"></a><a class="code" href="classSlavePort.html#a5e0f39f8e39e5b4c3dcf0991c627489b">00340</a>     <a class="code" href="classMasterPort.html">MasterPort</a>* <a class="code" href="classSlavePort.html#a5e0f39f8e39e5b4c3dcf0991c627489b">_masterPort</a>;
+<a name="l00341"></a>00341 
+<a name="l00342"></a>00342   <span class="keyword">public</span>:
+<a name="l00343"></a>00343 
+<a name="l00344"></a>00344     <a class="code" href="classSlavePort.html#a7f3816163b85700b0d74c0c275d030c9">SlavePort</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>, <a class="code" href="classMemObject.html">MemObject</a>* <a class="code" href="classPort.html#aba966efb6c1df4b015be3a396df6c318">owner</a>,
+<a name="l00345"></a>00345               <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> <span class="keywordtype">id</span> = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00346"></a>00346     <span class="keyword">virtual</span> <a class="code" href="classSlavePort.html#a4756d4cc1faf925dc00225c5e66c8394">~SlavePort</a>();
+<a name="l00347"></a>00347 
+<a name="l00357"></a>00357     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSlavePort.html#a4cc4d76bd3aaf333980c232125c8acc8">sendAtomicSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00358"></a>00358 
+<a name="l00366"></a>00366     <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#a821cf873ae00e77f71d77505a63cfed7">sendFunctionalSnoop</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00367"></a>00367 
+<a name="l00379"></a>00379     <span class="keywordtype">bool</span> <a class="code" href="classSlavePort.html#a0c021b2778a3358d110bd8700fe85732">sendTimingResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00380"></a>00380 
+<a name="l00388"></a>00388     <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#a44317ff11e2c240ae72ca2f5f1d9076d">sendTimingSnoopReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00389"></a>00389 
+<a name="l00395"></a>00395     <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#a6172657b944e32a722d90a20c5896bb7">sendRetry</a>();
+<a name="l00396"></a>00396 
+<a name="l00402"></a><a class="code" href="classSlavePort.html#a5ce11b7a254d3cb756d94568f7cbc25d">00402</a>     <span class="keywordtype">bool</span> <a class="code" href="classSlavePort.html#a5ce11b7a254d3cb756d94568f7cbc25d">isSnooping</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classSlavePort.html#a5e0f39f8e39e5b4c3dcf0991c627489b">_masterPort</a>-&gt;<a class="code" href="classMasterPort.html#a32602a6a3c3d66a639455036d6c08dd6">isSnooping</a>(); }
+<a name="l00403"></a>00403 
+<a name="l00407"></a><a class="code" href="classSlavePort.html#afb438cc39c4c679860c791bcef6dc7f3">00407</a>     <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#afb438cc39c4c679860c791bcef6dc7f3">sendRangeChange</a>()<span class="keyword"> const </span>{ <a class="code" href="classSlavePort.html#a5e0f39f8e39e5b4c3dcf0991c627489b">_masterPort</a>-&gt;<a class="code" href="classMasterPort.html#af60d9c2c17fb4c9ebc5384a7e0c9f289">recvRangeChange</a>(); }
+<a name="l00408"></a>00408 
+<a name="l00416"></a>00416     <span class="keyword">virtual</span> <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classSlavePort.html#a6e967f8921e80748eb2be35b6b481a7e">getAddrRanges</a>() <span class="keyword">const</span> = 0;
+<a name="l00417"></a>00417 
+<a name="l00418"></a>00418   <span class="keyword">protected</span>:
+<a name="l00419"></a>00419 
+<a name="l00424"></a>00424     <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#af294915156f1e30f1d2e574dccc87945">unbind</a>();
+<a name="l00425"></a>00425 
+<a name="l00430"></a>00430     <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#ad7992aad912bd9f1bf4774673a7980e1">bind</a>(<a class="code" href="classMasterPort.html">MasterPort</a>&amp; master_port);
+<a name="l00431"></a>00431 
+<a name="l00435"></a>00435     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSlavePort.html#a428ab07671bc9372dc44a2487b12a726">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) = 0;
+<a name="l00436"></a>00436 
+<a name="l00440"></a>00440     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#a6a3d6f2e5dab6bed16d53d9e7c17378d">recvFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) = 0;
+<a name="l00441"></a>00441 
+<a name="l00445"></a>00445     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSlavePort.html#abcece77e42f88ee41af8d3d01bb48253">recvTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt) = 0;
+<a name="l00446"></a>00446 
+<a name="l00450"></a><a class="code" href="classSlavePort.html#ae808ca0180bf333d9072270ed66f17fe">00450</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSlavePort.html#ae808ca0180bf333d9072270ed66f17fe">recvTimingSnoopResp</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt)
+<a name="l00451"></a>00451     {
+<a name="l00452"></a>00452         <a class="code" href="base_2misc_8hh.html#a1445e207e36c97ff84c54b47288cea19">panic</a>(<span class="stringliteral">&quot;%s was not expecting a timing snoop response\n&quot;</span>, <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>());
+<a name="l00453"></a>00453     }
+<a name="l00454"></a>00454 
+<a name="l00460"></a>00460     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSlavePort.html#ac1ccc3bcf7ebabb20b57fab99b2be5b0">recvRetry</a>() = 0;
+<a name="l00461"></a>00461 
+<a name="l00462"></a>00462 };
+<a name="l00463"></a>00463 
+<a name="l00464"></a>00464 <span class="preprocessor">#endif //__MEM_PORT_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

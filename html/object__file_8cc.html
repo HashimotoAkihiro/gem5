@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: base/loader/object_file.cc</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+</div>
+<div class="contents">
+<h1>base/loader/object_file.cc</h1><code>#include &lt;sys/mman.h&gt;</code><br/>
+<code>#include &lt;sys/types.h&gt;</code><br/>
+<code>#include &lt;fcntl.h&gt;</code><br/>
+<code>#include &lt;unistd.h&gt;</code><br/>
+<code>#include &lt;cstdio&gt;</code><br/>
+<code>#include &lt;list&gt;</code><br/>
+<code>#include &lt;string&gt;</code><br/>
+<code>#include &quot;<a class="el" href="aout__object_8hh_source.html">base/loader/aout_object.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="dtb__object_8hh_source.html">base/loader/dtb_object.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="ecoff__object_8hh_source.html">base/loader/ecoff_object.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="elf__object_8hh_source.html">base/loader/elf_object.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="object__file_8hh_source.html">base/loader/object_file.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="raw__object_8hh_source.html">base/loader/raw_object.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="symtab_8hh_source.html">base/loader/symtab.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="cprintf_8hh_source.html">base/cprintf.hh</a>&quot;</code><br/>
+<code>#include &quot;<a class="el" href="port__proxy_8hh_source.html">mem/port_proxy.hh</a>&quot;</code><br/>
+<table border="0" cellpadding="0" cellspacing="0">
+<tr><td colspan="2"><h2>関数</h2></td></tr>
+<tr><td class="memItemLeft" align="right" valign="top"><a class="el" href="classObjectFile.html">ObjectFile</a> *&nbsp;</td><td class="memItemRight" valign="bottom"><a class="el" href="object__file_8cc.html#af9c937baadd807efe7819a5214ca652f">createObjectFile</a> (const string &amp;fname, bool raw)</td></tr>
+</table>
+<hr/><h2>関数</h2>
+<a class="anchor" id="af9c937baadd807efe7819a5214ca652f"></a><!-- doxytag: member="object_file.cc::createObjectFile" ref="af9c937baadd807efe7819a5214ca652f" args="(const string &amp;fname, bool raw)" -->
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname"><a class="el" href="classObjectFile.html">ObjectFile</a>* createObjectFile </td>
+          <td>(</td>
+          <td class="paramtype">const string &amp;&nbsp;</td>
+          <td class="paramname"> <em>fname</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&nbsp;</td>
+          <td class="paramname"> <em>raw</em></td><td>&nbsp;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td><td></td>
+        </tr>
+      </table>
+</div>
+<div class="memdoc">
+
+<p><div class="fragment"><pre class="fragment"><a name="l00111"></a>00111 {
+<a name="l00112"></a>00112     <span class="comment">// open the file</span>
+<a name="l00113"></a>00113     <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a87001e8063b8b1b5dc88f5a4b43b2a5a">fd</a> = open(fname.c_str(), O_RDONLY);
+<a name="l00114"></a>00114     <span class="keywordflow">if</span> (fd &lt; 0) {
+<a name="l00115"></a>00115         <span class="keywordflow">return</span> <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00116"></a>00116     }
+<a name="l00117"></a>00117 
+<a name="l00118"></a>00118     <span class="comment">// find the length of the file by seeking to the end</span>
+<a name="l00119"></a>00119     <span class="keywordtype">size_t</span> <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a> = (size_t)lseek(fd, 0, SEEK_END);
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121     <span class="comment">// mmap the whole shebang</span>
+<a name="l00122"></a>00122     uint8_t *fileData =
+<a name="l00123"></a>00123         (uint8_t *)mmap(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>, len, PROT_READ, MAP_SHARED, fd, 0);
+<a name="l00124"></a>00124     <span class="keywordflow">if</span> (fileData == MAP_FAILED) {
+<a name="l00125"></a>00125         close(fd);
+<a name="l00126"></a>00126         <span class="keywordflow">return</span> <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00127"></a>00127     }
+<a name="l00128"></a>00128 
+<a name="l00129"></a>00129     <a class="code" href="classObjectFile.html">ObjectFile</a> *fileObj = <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131     <span class="comment">// figure out what we have here</span>
+<a name="l00132"></a>00132     <span class="keywordflow">if</span> ((fileObj = <a class="code" href="classEcoffObject.html#af96c4ced69d653731f78ba9d9006e251">EcoffObject::tryFile</a>(fname, fd, len, fileData)) != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) {
+<a name="l00133"></a>00133         <span class="keywordflow">return</span> fileObj;
+<a name="l00134"></a>00134     }
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136     <span class="keywordflow">if</span> ((fileObj = <a class="code" href="classAoutObject.html#af96c4ced69d653731f78ba9d9006e251">AoutObject::tryFile</a>(fname, fd, len, fileData)) != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) {
+<a name="l00137"></a>00137         <span class="keywordflow">return</span> fileObj;
+<a name="l00138"></a>00138     }
+<a name="l00139"></a>00139 
+<a name="l00140"></a>00140     <span class="keywordflow">if</span> ((fileObj = <a class="code" href="classElfObject.html#af96c4ced69d653731f78ba9d9006e251">ElfObject::tryFile</a>(fname, fd, len, fileData)) != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) {
+<a name="l00141"></a>00141         <span class="keywordflow">return</span> fileObj;
+<a name="l00142"></a>00142     }
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144     <span class="keywordflow">if</span> ((fileObj = <a class="code" href="classDtbObject.html#a3b119de4852833fdf74dbb4b8e1e1eba">DtbObject::tryFile</a>(fname, fd, len, fileData)) != <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>) {
+<a name="l00145"></a>00145         <span class="keywordflow">return</span> fileObj;
+<a name="l00146"></a>00146     }
+<a name="l00147"></a>00147 
+<a name="l00148"></a>00148     <span class="keywordflow">if</span> (raw)
+<a name="l00149"></a>00149         <span class="keywordflow">return</span> <a class="code" href="classRawObject.html#a3b119de4852833fdf74dbb4b8e1e1eba">RawObject::tryFile</a>(fname, fd, len, fileData);
+<a name="l00150"></a>00150 
+<a name="l00151"></a>00151     <span class="comment">// don&apos;t know what it is</span>
+<a name="l00152"></a>00152     close(fd);
+<a name="l00153"></a>00153     munmap((<span class="keywordtype">char</span>*)fileData, len);
+<a name="l00154"></a>00154     <span class="keywordflow">return</span> <a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>;
+<a name="l00155"></a>00155 }
+</pre></div></p>
+
+</div>
+</div>
+</div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

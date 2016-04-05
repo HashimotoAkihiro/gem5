@@ -1,0 +1,153 @@
+\hypertarget{Topology_8cc}{
+\section{mem/ruby/network/Topology.cc}
+\label{Topology_8cc}\index{mem/ruby/network/Topology.cc@{mem/ruby/network/Topology.cc}}
+}
+{\ttfamily \#include $<$cassert$>$}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/RubyNetwork.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/ruby/common/NetDest.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/ruby/network/BasicLink.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/ruby/network/Topology.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/ruby/slicc\_\-interface/AbstractController.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{Topology_8cc_ac9730bfec6c51d328b1efb6f28f13776}{extend\_\-shortest\_\-path} (\hyperlink{classstd_1_1vector}{Matrix} \&current\_\-dist, \hyperlink{classstd_1_1vector}{Matrix} \&latencies, \hyperlink{classstd_1_1vector}{Matrix} \&inter\_\-switches)
+\item 
+\hyperlink{classstd_1_1vector}{Matrix} \hyperlink{Topology_8cc_a1171b8fbbe647907f37c781e6cd8c35a}{shortest\_\-path} (const \hyperlink{classstd_1_1vector}{Matrix} \&weights, \hyperlink{classstd_1_1vector}{Matrix} \&latencies, \hyperlink{classstd_1_1vector}{Matrix} \&inter\_\-switches)
+\item 
+bool \hyperlink{Topology_8cc_a5682566d601544b63450eeab2272e194}{link\_\-is\_\-shortest\_\-path\_\-to\_\-node} (\hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} src, \hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} next, \hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} final, const \hyperlink{classstd_1_1vector}{Matrix} \&weights, const \hyperlink{classstd_1_1vector}{Matrix} \&dist)
+\item 
+\hyperlink{classNetDest}{NetDest} \hyperlink{Topology_8cc_abf86316b99d59ceba03e61b8f1bdd3e3}{shortest\_\-path\_\-to\_\-node} (\hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} src, \hyperlink{TypeDefines_8hh_ac925a332c83eaf1e40e056e7a20ebcd8}{SwitchID} next, const \hyperlink{classstd_1_1vector}{Matrix} \&weights, const \hyperlink{classstd_1_1vector}{Matrix} \&dist)
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+const int \hyperlink{Topology_8cc_a7992fc7fce22bc8f0a770e3bfba8c67b}{INFINITE\_\-LATENCY} = 10000
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{Topology_8cc_ac9730bfec6c51d328b1efb6f28f13776}{
+\index{Topology.cc@{Topology.cc}!extend\_\-shortest\_\-path@{extend\_\-shortest\_\-path}}
+\index{extend\_\-shortest\_\-path@{extend\_\-shortest\_\-path}!Topology.cc@{Topology.cc}}
+\subsubsection[{extend\_\-shortest\_\-path}]{\setlength{\rightskip}{0pt plus 5cm}void extend\_\-shortest\_\-path ({\bf Matrix} \& {\em current\_\-dist}, \/  {\bf Matrix} \& {\em latencies}, \/  {\bf Matrix} \& {\em inter\_\-switches})}}
+\label{Topology_8cc_ac9730bfec6c51d328b1efb6f28f13776}
+
+
+
+\begin{DoxyCode}
+248 {
+249     bool change = true;
+250     int nodes = current_dist.size();
+251 
+252     while (change) {
+253         change = false;
+254         for (int i = 0; i < nodes; i++) {
+255             for (int j = 0; j < nodes; j++) {
+256                 int minimum = current_dist[i][j];
+257                 int previous_minimum = minimum;
+258                 int intermediate_switch = -1;
+259                 for (int k = 0; k < nodes; k++) {
+260                     minimum = min(minimum,
+261                         current_dist[i][k] + current_dist[k][j]);
+262                     if (previous_minimum != minimum) {
+263                         intermediate_switch = k;
+264                         inter_switches[i][j] =
+265                             inter_switches[i][k] +
+266                             inter_switches[k][j] + 1;
+267                     }
+268                     previous_minimum = minimum;
+269                 }
+270                 if (current_dist[i][j] != minimum) {
+271                     change = true;
+272                     current_dist[i][j] = minimum;
+273                     assert(intermediate_switch >= 0);
+274                     assert(intermediate_switch < latencies[i].size());
+275                     latencies[i][j] = latencies[i][intermediate_switch] +
+276                         latencies[intermediate_switch][j];
+277                 }
+278             }
+279         }
+280     }
+281 }
+\end{DoxyCode}
+\hypertarget{Topology_8cc_a5682566d601544b63450eeab2272e194}{
+\index{Topology.cc@{Topology.cc}!link\_\-is\_\-shortest\_\-path\_\-to\_\-node@{link\_\-is\_\-shortest\_\-path\_\-to\_\-node}}
+\index{link\_\-is\_\-shortest\_\-path\_\-to\_\-node@{link\_\-is\_\-shortest\_\-path\_\-to\_\-node}!Topology.cc@{Topology.cc}}
+\subsubsection[{link\_\-is\_\-shortest\_\-path\_\-to\_\-node}]{\setlength{\rightskip}{0pt plus 5cm}bool link\_\-is\_\-shortest\_\-path\_\-to\_\-node ({\bf SwitchID} {\em src}, \/  {\bf SwitchID} {\em next}, \/  {\bf SwitchID} {\em final}, \/  const {\bf Matrix} \& {\em weights}, \/  const {\bf Matrix} \& {\em dist})}}
+\label{Topology_8cc_a5682566d601544b63450eeab2272e194}
+
+
+
+\begin{DoxyCode}
+294 {
+295     return weights[src][next] + dist[next][final] == dist[src][final];
+296 }
+\end{DoxyCode}
+\hypertarget{Topology_8cc_a1171b8fbbe647907f37c781e6cd8c35a}{
+\index{Topology.cc@{Topology.cc}!shortest\_\-path@{shortest\_\-path}}
+\index{shortest\_\-path@{shortest\_\-path}!Topology.cc@{Topology.cc}}
+\subsubsection[{shortest\_\-path}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Matrix} shortest\_\-path (const {\bf Matrix} \& {\em weights}, \/  {\bf Matrix} \& {\em latencies}, \/  {\bf Matrix} \& {\em inter\_\-switches})}}
+\label{Topology_8cc_a1171b8fbbe647907f37c781e6cd8c35a}
+
+
+
+\begin{DoxyCode}
+285 {
+286     Matrix dist = weights;
+287     extend_shortest_path(dist, latencies, inter_switches);
+288     return dist;
+289 }
+\end{DoxyCode}
+\hypertarget{Topology_8cc_abf86316b99d59ceba03e61b8f1bdd3e3}{
+\index{Topology.cc@{Topology.cc}!shortest\_\-path\_\-to\_\-node@{shortest\_\-path\_\-to\_\-node}}
+\index{shortest\_\-path\_\-to\_\-node@{shortest\_\-path\_\-to\_\-node}!Topology.cc@{Topology.cc}}
+\subsubsection[{shortest\_\-path\_\-to\_\-node}]{\setlength{\rightskip}{0pt plus 5cm}{\bf NetDest} shortest\_\-path\_\-to\_\-node ({\bf SwitchID} {\em src}, \/  {\bf SwitchID} {\em next}, \/  const {\bf Matrix} \& {\em weights}, \/  const {\bf Matrix} \& {\em dist})}}
+\label{Topology_8cc_abf86316b99d59ceba03e61b8f1bdd3e3}
+
+
+
+\begin{DoxyCode}
+301 {
+302     NetDest result;
+303     int d = 0;
+304     int machines;
+305     int max_machines;
+306 
+307     machines = MachineType_NUM;
+308     max_machines = MachineType_base_number(MachineType_NUM);
+309 
+310     for (int m = 0; m < machines; m++) {
+311         for (NodeID i = 0; i < MachineType_base_count((MachineType)m); i++) {
+312             // we use "d+max_machines" below since the "destination"
+313             // switches for the machines are numbered
+314             // [MachineType_base_number(MachineType_NUM)...
+315             //  2*MachineType_base_number(MachineType_NUM)-1] for the
+316             // component network
+317             if (link_is_shortest_path_to_node(src, next, d + max_machines,
+318                     weights, dist)) {
+319                 MachineID mach = {(MachineType)m, i};
+320                 result.add(mach);
+321             }
+322             d++;
+323         }
+324     }
+325 
+326     DPRINTF(RubyNetwork, "Returning shortest path\n"
+327             "(src-(2*max_machines)): %d, (next-(2*max_machines)): %d, "
+328             "src: %d, next: %d, result: %s\n",
+329             (src-(2*max_machines)), (next-(2*max_machines)),
+330             src, next, result);
+331 
+332     return result;
+333 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{Topology_8cc_a7992fc7fce22bc8f0a770e3bfba8c67b}{
+\index{Topology.cc@{Topology.cc}!INFINITE\_\-LATENCY@{INFINITE\_\-LATENCY}}
+\index{INFINITE\_\-LATENCY@{INFINITE\_\-LATENCY}!Topology.cc@{Topology.cc}}
+\subsubsection[{INFINITE\_\-LATENCY}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf INFINITE\_\-LATENCY} = 10000}}
+\label{Topology_8cc_a7992fc7fce22bc8f0a770e3bfba8c67b}

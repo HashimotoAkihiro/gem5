@@ -1,0 +1,259 @@
+\hypertarget{classPollQueue}{
+\section{クラス PollQueue}
+\label{classPollQueue}\index{PollQueue@{PollQueue}}
+}
+
+
+{\ttfamily \#include $<$pollevent.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPollQueue_a70b9f304ac808c76af92b819c8a1f2b8}{PollQueue} ()
+\item 
+\hyperlink{classPollQueue_a39f4757a20213ab29760d486254dab55}{$\sim$PollQueue} ()
+\item 
+void \hyperlink{classPollQueue_aaa6c087511a52e64fc9ad92820c7c0a8}{copy} ()
+\item 
+void \hyperlink{classPollQueue_a4b43e98813c26772adf0d7488dfa1887}{remove} (\hyperlink{classPollEvent}{PollEvent} $\ast$event)
+\item 
+void \hyperlink{classPollQueue_a3f09bc14c53cce046dfdc7d11c96bb72}{schedule} (\hyperlink{classPollEvent}{PollEvent} $\ast$event)
+\item 
+void \hyperlink{classPollQueue_a365151ef4fcb2b1052b77c2d493399d3}{service} ()
+\end{DoxyCompactItemize}
+\subsection*{Static Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+static void \hyperlink{classPollQueue_a146cc6e8e860e0fba81d4ed2b58432c7}{setupAsyncIO} (int fd, bool set)
+\end{DoxyCompactItemize}
+\subsection*{Private 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classPollEvent}{PollEvent} $\ast$ $>$ \hyperlink{classPollQueue_a00fb40260dd4f32af4f844fc9f4dfcc0}{eventvec\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classstd_1_1vector}{eventvec\_\-t} \hyperlink{classPollQueue_a0d7a0c13fa669886380eca2fe79bf0ad}{events}
+\item 
+pollfd $\ast$ \hyperlink{classPollQueue_aee8bf4d1604933fa62865d958c61a35c}{poll\_\-fds}
+\item 
+int \hyperlink{classPollQueue_a98ca8117bc73d9d7520727c4ce8772e6}{max\_\-size}
+\item 
+int \hyperlink{classPollQueue_a87fdf770430098f0bf2a4e540804aaf2}{num\_\-fds}
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{classPollQueue_a00fb40260dd4f32af4f844fc9f4dfcc0}{
+\index{PollQueue@{PollQueue}!eventvec\_\-t@{eventvec\_\-t}}
+\index{eventvec\_\-t@{eventvec\_\-t}!PollQueue@{PollQueue}}
+\subsubsection[{eventvec\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf std::vector}$<${\bf PollEvent} $\ast$$>$ {\bf eventvec\_\-t}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPollQueue_a00fb40260dd4f32af4f844fc9f4dfcc0}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPollQueue_a70b9f304ac808c76af92b819c8a1f2b8}{
+\index{PollQueue@{PollQueue}!PollQueue@{PollQueue}}
+\index{PollQueue@{PollQueue}!PollQueue@{PollQueue}}
+\subsubsection[{PollQueue}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PollQueue} ()}}
+\label{classPollQueue_a70b9f304ac808c76af92b819c8a1f2b8}
+
+
+
+\begin{DoxyCode}
+107     : poll_fds(NULL), max_size(0), num_fds(0)
+108 { }
+\end{DoxyCode}
+\hypertarget{classPollQueue_a39f4757a20213ab29760d486254dab55}{
+\index{PollQueue@{PollQueue}!$\sim$PollQueue@{$\sim$PollQueue}}
+\index{$\sim$PollQueue@{$\sim$PollQueue}!PollQueue@{PollQueue}}
+\subsubsection[{$\sim$PollQueue}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf PollQueue} ()}}
+\label{classPollQueue_a39f4757a20213ab29760d486254dab55}
+
+
+
+\begin{DoxyCode}
+111 {
+112     for (int i = 0; i < num_fds; i++)
+113         setupAsyncIO(poll_fds[0].fd, false);
+114 
+115     delete [] poll_fds;
+116 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPollQueue_aaa6c087511a52e64fc9ad92820c7c0a8}{
+\index{PollQueue@{PollQueue}!copy@{copy}}
+\index{copy@{copy}!PollQueue@{PollQueue}}
+\subsubsection[{copy}]{\setlength{\rightskip}{0pt plus 5cm}void copy ()}}
+\label{classPollQueue_aaa6c087511a52e64fc9ad92820c7c0a8}
+
+
+
+\begin{DoxyCode}
+120 {
+121     eventvec_t::iterator i = events.begin();
+122     eventvec_t::iterator end = events.end();
+123 
+124     num_fds = 0;
+125 
+126     while (i < end) {
+127         if ((*i)->enabled)
+128             poll_fds[num_fds++] = (*i)->pfd;
+129         ++i;
+130     }
+131 }
+\end{DoxyCode}
+\hypertarget{classPollQueue_a4b43e98813c26772adf0d7488dfa1887}{
+\index{PollQueue@{PollQueue}!remove@{remove}}
+\index{remove@{remove}!PollQueue@{PollQueue}}
+\subsubsection[{remove}]{\setlength{\rightskip}{0pt plus 5cm}void remove ({\bf PollEvent} $\ast$ {\em event})}}
+\label{classPollQueue_a4b43e98813c26772adf0d7488dfa1887}
+
+
+
+\begin{DoxyCode}
+135 {
+136     eventvec_t::iterator i = events.begin();
+137     eventvec_t::iterator end = events.end();
+138 
+139     while (i < end) {
+140         if (*i == event) {
+141            events.erase(i);
+142            copy();
+143            event->queue = NULL;
+144            return;
+145         }
+146 
+147         ++i;
+148     }
+149 
+150     panic("Event does not exist.  Cannot remove.");
+151 }
+\end{DoxyCode}
+\hypertarget{classPollQueue_a3f09bc14c53cce046dfdc7d11c96bb72}{
+\index{PollQueue@{PollQueue}!schedule@{schedule}}
+\index{schedule@{schedule}!PollQueue@{PollQueue}}
+\subsubsection[{schedule}]{\setlength{\rightskip}{0pt plus 5cm}void schedule ({\bf PollEvent} $\ast$ {\em event})}}
+\label{classPollQueue_a3f09bc14c53cce046dfdc7d11c96bb72}
+
+
+
+\begin{DoxyCode}
+155 {
+156     if (event->queue)
+157         panic("Event already scheduled!");
+158 
+159     event->queue = this;
+160     events.push_back(event);
+161     setupAsyncIO(event->pfd.fd, true);
+162 
+163     // if we ran out of space in the fd array, double the capacity
+164     // if this is the first time that we've scheduled an event, create
+165     // the array with an initial size of 16
+166     if (++num_fds > max_size) {
+167         if (max_size > 0) {
+168             delete [] poll_fds;
+169             max_size *= 2;
+170         } else {
+171             max_size = 16;
+172         }
+173 
+174         poll_fds = new pollfd[max_size];
+175     }
+176 
+177     copy();
+178 }
+\end{DoxyCode}
+\hypertarget{classPollQueue_a365151ef4fcb2b1052b77c2d493399d3}{
+\index{PollQueue@{PollQueue}!service@{service}}
+\index{service@{service}!PollQueue@{PollQueue}}
+\subsubsection[{service}]{\setlength{\rightskip}{0pt plus 5cm}void service ()}}
+\label{classPollQueue_a365151ef4fcb2b1052b77c2d493399d3}
+
+
+
+\begin{DoxyCode}
+182 {
+183     int ret = poll(poll_fds, num_fds, 0);
+184 
+185     if (ret <= 0)
+186         return;
+187 
+188     for (int i = 0; i < num_fds; i++) {
+189         int revents = poll_fds[i].revents;
+190         if (revents) {
+191             events[i]->process(revents);
+192             if (--ret <= 0)
+193                 break;
+194         }
+195     }
+196 }
+\end{DoxyCode}
+\hypertarget{classPollQueue_a146cc6e8e860e0fba81d4ed2b58432c7}{
+\index{PollQueue@{PollQueue}!setupAsyncIO@{setupAsyncIO}}
+\index{setupAsyncIO@{setupAsyncIO}!PollQueue@{PollQueue}}
+\subsubsection[{setupAsyncIO}]{\setlength{\rightskip}{0pt plus 5cm}void setupAsyncIO (int {\em fd}, \/  bool {\em set})\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{classPollQueue_a146cc6e8e860e0fba81d4ed2b58432c7}
+
+
+
+\begin{DoxyCode}
+200 {
+201     int flags = fcntl(fd, F_GETFL);
+202     if (flags == -1)
+203         panic("Could not set up async IO");
+204 
+205     if (set)
+206         flags |= FASYNC;
+207     else
+208         flags &= ~(FASYNC);
+209 
+210     if (set) {
+211       if (fcntl(fd, F_SETOWN, getpid()) == -1)
+212         panic("Could not set up async IO");
+213     }
+214 
+215     if (fcntl(fd, F_SETFL, flags) == -1)
+216         panic("Could not set up async IO");
+217 
+218     // The file descriptor might already have events pending. We won't
+219     // see them if they occurred before we set the FASYNC
+220     // flag. Simulate a SIGIO to ensure that the FD will be polled in
+221     // next iteration of the simulation loop. We could just poll it,
+222     // but this is much simpler.
+223     if (set) {
+224         async_event = true;
+225         async_io = true;
+226     }
+227 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPollQueue_a0d7a0c13fa669886380eca2fe79bf0ad}{
+\index{PollQueue@{PollQueue}!events@{events}}
+\index{events@{events}!PollQueue@{PollQueue}}
+\subsubsection[{events}]{\setlength{\rightskip}{0pt plus 5cm}{\bf eventvec\_\-t} {\bf events}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPollQueue_a0d7a0c13fa669886380eca2fe79bf0ad}
+\hypertarget{classPollQueue_a98ca8117bc73d9d7520727c4ce8772e6}{
+\index{PollQueue@{PollQueue}!max\_\-size@{max\_\-size}}
+\index{max\_\-size@{max\_\-size}!PollQueue@{PollQueue}}
+\subsubsection[{max\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf max\_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPollQueue_a98ca8117bc73d9d7520727c4ce8772e6}
+\hypertarget{classPollQueue_a87fdf770430098f0bf2a4e540804aaf2}{
+\index{PollQueue@{PollQueue}!num\_\-fds@{num\_\-fds}}
+\index{num\_\-fds@{num\_\-fds}!PollQueue@{PollQueue}}
+\subsubsection[{num\_\-fds}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf num\_\-fds}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPollQueue_a87fdf770430098f0bf2a4e540804aaf2}
+\hypertarget{classPollQueue_aee8bf4d1604933fa62865d958c61a35c}{
+\index{PollQueue@{PollQueue}!poll\_\-fds@{poll\_\-fds}}
+\index{poll\_\-fds@{poll\_\-fds}!PollQueue@{PollQueue}}
+\subsubsection[{poll\_\-fds}]{\setlength{\rightskip}{0pt plus 5cm}pollfd$\ast$ {\bf poll\_\-fds}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classPollQueue_aee8bf4d1604933fa62865d958c61a35c}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{pollevent_8hh}{pollevent.hh}\item 
+base/\hyperlink{pollevent_8cc}{pollevent.cc}\end{DoxyCompactItemize}

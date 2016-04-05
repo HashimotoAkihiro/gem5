@@ -1,0 +1,354 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/o3/inst_queue.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/o3/inst_queue.hh</h1><a href="o3_2inst__queue_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011-2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2013 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00007"></a>00007 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00008"></a>00008 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00009"></a>00009 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00010"></a>00010 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00011"></a>00011 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00012"></a>00012 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00013"></a>00013 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00014"></a>00014 <span class="comment"> *</span>
+<a name="l00015"></a>00015 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00016"></a>00016 <span class="comment"> * All rights reserved.</span>
+<a name="l00017"></a>00017 <span class="comment"> *</span>
+<a name="l00018"></a>00018 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00019"></a>00019 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00020"></a>00020 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00021"></a>00021 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00022"></a>00022 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00023"></a>00023 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00024"></a>00024 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00025"></a>00025 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00026"></a>00026 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00027"></a>00027 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00028"></a>00028 <span class="comment"> *</span>
+<a name="l00029"></a>00029 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00030"></a>00030 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00032"></a>00032 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00033"></a>00033 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00034"></a>00034 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00035"></a>00035 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00036"></a>00036 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00037"></a>00037 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00038"></a>00038 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00039"></a>00039 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00040"></a>00040 <span class="comment"> *</span>
+<a name="l00041"></a>00041 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00042"></a>00042 <span class="comment"> */</span>
+<a name="l00043"></a>00043 
+<a name="l00044"></a>00044 <span class="preprocessor">#ifndef __CPU_O3_INST_QUEUE_HH__</span>
+<a name="l00045"></a>00045 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_O3_INST_QUEUE_HH__</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span>
+<a name="l00047"></a>00047 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &lt;map&gt;</span>
+<a name="l00049"></a>00049 <span class="preprocessor">#include &lt;queue&gt;</span>
+<a name="l00050"></a>00050 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00051"></a>00051 
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="dep__graph_8hh.html">cpu/o3/dep_graph.hh</a>&quot;</span>
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="inst__seq_8hh.html">cpu/inst_seq.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;<a class="code" href="op__class_8hh.html">cpu/op_class.hh</a>&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;<a class="code" href="timebuf_8hh.html">cpu/timebuf.hh</a>&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00059"></a>00059 
+<a name="l00060"></a>00060 <span class="keyword">struct </span>DerivO3CPUParams;
+<a name="l00061"></a>00061 <span class="keyword">class </span><a class="code" href="classFUPool.html">FUPool</a>;
+<a name="l00062"></a>00062 <span class="keyword">class </span>MemInterface;
+<a name="l00063"></a>00063 
+<a name="l00081"></a>00081 <span class="keyword">template</span> &lt;<span class="keyword">class</span> Impl&gt;
+<a name="l00082"></a><a class="code" href="classInstructionQueue.html">00082</a> <span class="keyword">class </span><a class="code" href="classInstructionQueue.html">InstructionQueue</a>
+<a name="l00083"></a>00083 {
+<a name="l00084"></a>00084   <span class="keyword">public</span>:
+<a name="l00085"></a>00085     <span class="comment">//Typedefs from the Impl.</span>
+<a name="l00086"></a><a class="code" href="classInstructionQueue.html#a44622cf06940413482836cb62931ac3f">00086</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::O3CPU <a class="code" href="classInstructionQueue.html#a44622cf06940413482836cb62931ac3f">O3CPU</a>;
+<a name="l00087"></a><a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">00087</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="namespaceThePipeline.html#a992959fefcd659c6ba422aa4de14677c">Impl::DynInstPtr</a> <a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a>;
+<a name="l00088"></a>00088 
+<a name="l00089"></a><a class="code" href="classInstructionQueue.html#a23f60a4095b5240dfcb18a4ec40210a9">00089</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUPol::IEW <a class="code" href="classInstructionQueue.html#a23f60a4095b5240dfcb18a4ec40210a9">IEW</a>;
+<a name="l00090"></a><a class="code" href="classInstructionQueue.html#a2e16eb5b46c2a1d3fed4c6bd5f99e368">00090</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUPol::MemDepUnit <a class="code" href="classMemDepUnit.html">MemDepUnit</a>;
+<a name="l00091"></a><a class="code" href="classInstructionQueue.html#aa56c7524890b3a6337668c507be0f272">00091</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUPol::IssueStruct <a class="code" href="structIssueStruct.html">IssueStruct</a>;
+<a name="l00092"></a><a class="code" href="classInstructionQueue.html#ab6d04a6276f6c61ee6a3a74902e7681b">00092</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> Impl::CPUPol::TimeStruct <a class="code" href="structTimeStruct.html">TimeStruct</a>;
+<a name="l00093"></a>00093 
+<a name="l00094"></a>00094     <span class="comment">// Typedef of iterator through the list of instructions.</span>
+<a name="l00095"></a><a class="code" href="classInstructionQueue.html#a184cb829e22cc656acb41864f68f51ea">00095</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;::iterator</a> <a class="code" href="classInstructionQueue.html#a184cb829e22cc656acb41864f68f51ea">ListIt</a>;
+<a name="l00096"></a>00096 
+<a name="l00098"></a><a class="code" href="classInstructionQueue_1_1FUCompletion.html">00098</a>     <span class="keyword">class </span><a class="code" href="classInstructionQueue_1_1FUCompletion.html">FUCompletion</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a> {
+<a name="l00099"></a>00099       <span class="keyword">private</span>:
+<a name="l00101"></a><a class="code" href="classInstructionQueue_1_1FUCompletion.html#af5d4fb974eeb4507d4c837d365d0cefc">00101</a>         <a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classInstructionQueue_1_1FUCompletion.html#af5d4fb974eeb4507d4c837d365d0cefc">inst</a>;
+<a name="l00102"></a>00102 
+<a name="l00104"></a><a class="code" href="classInstructionQueue_1_1FUCompletion.html#ae76a7e2adfb158874f48a23c71690db3">00104</a>         <span class="keywordtype">int</span> <a class="code" href="classInstructionQueue_1_1FUCompletion.html#ae76a7e2adfb158874f48a23c71690db3">fuIdx</a>;
+<a name="l00105"></a>00105 
+<a name="l00107"></a><a class="code" href="classInstructionQueue_1_1FUCompletion.html#ae1fd26993119273f381c42894e2672c6">00107</a>         <a class="code" href="classInstructionQueue.html">InstructionQueue&lt;Impl&gt;</a> *<a class="code" href="classInstructionQueue_1_1FUCompletion.html#ae1fd26993119273f381c42894e2672c6">iqPtr</a>;
+<a name="l00108"></a>00108 
+<a name="l00112"></a><a class="code" href="classInstructionQueue_1_1FUCompletion.html#a535ed82ab8098d4da414bfa62e95867d">00112</a>         <span class="keywordtype">bool</span> <a class="code" href="classInstructionQueue_1_1FUCompletion.html#a535ed82ab8098d4da414bfa62e95867d">freeFU</a>;
+<a name="l00113"></a>00113 
+<a name="l00114"></a>00114       <span class="keyword">public</span>:
+<a name="l00116"></a>00116         <a class="code" href="classInstructionQueue_1_1FUCompletion.html#a61244ecdd6a72de08a00a1e3435c0d98">FUCompletion</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;_inst, <span class="keywordtype">int</span> fu_idx,
+<a name="l00117"></a>00117                      <a class="code" href="classInstructionQueue.html">InstructionQueue&lt;Impl&gt;</a> *iq_ptr);
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119         <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue_1_1FUCompletion.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>();
+<a name="l00120"></a>00120         <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classInstructionQueue_1_1FUCompletion.html#a5a14fe478e2393ff51f02e9b7be27e00">description</a>() <span class="keyword">const</span>;
+<a name="l00121"></a><a class="code" href="classInstructionQueue_1_1FUCompletion.html#ae7af3c3f2fa23850b94771ec2838c3fc">00121</a>         <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue_1_1FUCompletion.html#ae7af3c3f2fa23850b94771ec2838c3fc">setFreeFU</a>() { <a class="code" href="classInstructionQueue_1_1FUCompletion.html#a535ed82ab8098d4da414bfa62e95867d">freeFU</a> = <span class="keyword">true</span>; }
+<a name="l00122"></a>00122     };
+<a name="l00123"></a>00123 
+<a name="l00125"></a>00125     <a class="code" href="classInstructionQueue.html#a70773a251ef988cdd7b3fa494aed7a72">InstructionQueue</a>(<a class="code" href="classInstructionQueue.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *cpu_ptr, <a class="code" href="classInstructionQueue.html#a23f60a4095b5240dfcb18a4ec40210a9">IEW</a> *iew_ptr, DerivO3CPUParams *params);
+<a name="l00126"></a>00126 
+<a name="l00128"></a>00128     <a class="code" href="classInstructionQueue.html#a80656aa048fa902ea6e652373a9d4c58">~InstructionQueue</a>();
+<a name="l00129"></a>00129 
+<a name="l00131"></a>00131     std::string <a class="code" href="classInstructionQueue.html#a37627d5d5bba7f4a8690c71c2ab3cb07">name</a>() <span class="keyword">const</span>;
+<a name="l00132"></a>00132 
+<a name="l00134"></a>00134     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00135"></a>00135 
+<a name="l00137"></a>00137     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a755ee993c2d4e9d422c37990b15afa37">resetState</a>();
+<a name="l00138"></a>00138 
+<a name="l00140"></a>00140     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#aab96bdacf8bd420402cbb543f994e054">setActiveThreads</a>(<a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> *at_ptr);
+<a name="l00141"></a>00141 
+<a name="l00143"></a>00143     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a7cbe625b8c47621898e7ca92d70c826b">setIssueToExecuteQueue</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IssueStruct&gt;</a> *i2eQueue);
+<a name="l00144"></a>00144 
+<a name="l00146"></a>00146     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a2b521ea5f191fff72265f60d4ed5187b">setTimeBuffer</a>(<a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *tb_ptr);
+<a name="l00147"></a>00147 
+<a name="l00149"></a>00149     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a0240eb42fa57fe5d3788093f62b77347">drainSanityCheck</a>() <span class="keyword">const</span>;
+<a name="l00150"></a>00150 
+<a name="l00152"></a>00152     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a8674059ce345e23aac5086b2c3e24a43">takeOverFrom</a>();
+<a name="l00153"></a>00153 
+<a name="l00155"></a>00155     <span class="keywordtype">int</span> <a class="code" href="classInstructionQueue.html#a5d2b0e4e7d98ea4ebd9fb98ac0d91e2f">entryAmount</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> num_threads);
+<a name="l00156"></a>00156 
+<a name="l00158"></a>00158     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#aaf9a05771a835f9f8d634cef36e24d40">resetEntries</a>();
+<a name="l00159"></a>00159 
+<a name="l00161"></a>00161     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#a028971a565aca048c67ea1c36a6a9d51">numFreeEntries</a>();
+<a name="l00162"></a>00162 
+<a name="l00164"></a>00164     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#a028971a565aca048c67ea1c36a6a9d51">numFreeEntries</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00165"></a>00165 
+<a name="l00167"></a>00167     <span class="keywordtype">bool</span> <a class="code" href="classInstructionQueue.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>();
+<a name="l00168"></a>00168 
+<a name="l00170"></a>00170     <span class="keywordtype">bool</span> <a class="code" href="classInstructionQueue.html#a3e70330939fdfc4dbc2f60c1a660584d">isFull</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00171"></a>00171 
+<a name="l00173"></a>00173     <span class="keywordtype">bool</span> <a class="code" href="classInstructionQueue.html#ae59aad9cee1e45b5817a9d96553e4567">hasReadyInsts</a>();
+<a name="l00174"></a>00174 
+<a name="l00176"></a>00176     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a786595aecf8ab7aae40868b5ac4a79a7">insert</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00177"></a>00177 
+<a name="l00179"></a>00179     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a4f7523e76440d88096a4eac14f2e0dd3">insertNonSpec</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00180"></a>00180 
+<a name="l00184"></a>00184     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#ae556f19566bae9c4f55350eab17abacd">insertBarrier</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;barr_inst);
+<a name="l00185"></a>00185 
+<a name="l00189"></a>00189     <a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classInstructionQueue.html#acf940a475d9687f26e8ab8a98c244f08">getInstToExecute</a>();
+<a name="l00190"></a>00190 
+<a name="l00194"></a>00194     <a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> <a class="code" href="classInstructionQueue.html#ae2aedd3b5257ee38cb5a4e307d2d50a5">getDeferredMemInstToExecute</a>();
+<a name="l00195"></a>00195 
+<a name="l00200"></a><a class="code" href="classInstructionQueue.html#ae43022d3677118a4ab40113712045f64">00200</a>     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#ae43022d3677118a4ab40113712045f64">recordProducer</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst)
+<a name="l00201"></a>00201     { <a class="code" href="classInstructionQueue.html#af89be5ea301621fdfb44941b4db60339">addToProducers</a>(inst); }
+<a name="l00202"></a>00202 
+<a name="l00204"></a>00204     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#ad118e191396cf75b93afd066a6a3f486">processFUCompletion</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst, <span class="keywordtype">int</span> fu_idx);
+<a name="l00205"></a>00205 
+<a name="l00210"></a>00210     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a3694e72427d3a616808797f9343d1fc4">scheduleReadyInsts</a>();
+<a name="l00211"></a>00211 
+<a name="l00213"></a>00213     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a15ca5aaeab5bd4c2169ed41bbc7fb79c">scheduleNonSpec</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;inst);
+<a name="l00214"></a>00214 
+<a name="l00219"></a>00219     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a04f8d2acf3cd0b90a1efc69b528f91bc">commit</a>(<span class="keyword">const</span> <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> &amp;inst, <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid = 0);
+<a name="l00220"></a>00220 
+<a name="l00222"></a>00222     <span class="keywordtype">int</span> <a class="code" href="classInstructionQueue.html#aab5cfade3ce4bb4addbf52c7464676d9">wakeDependents</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;completed_inst);
+<a name="l00223"></a>00223 
+<a name="l00225"></a>00225     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a76bcc078140b3e79923f7b5be8b302fb">addReadyMemInst</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;ready_inst);
+<a name="l00226"></a>00226 
+<a name="l00231"></a>00231     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#afdf61c4d00a7c48449b14c6f525e3869">rescheduleMemInst</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;resched_inst);
+<a name="l00232"></a>00232 
+<a name="l00234"></a>00234     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#af6c215567b7a5a496ef245cd86df2e62">replayMemInst</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;replay_inst);
+<a name="l00235"></a>00235 
+<a name="l00237"></a>00237     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#aad2715729f71f220e9cf9b99515384ca">completeMemInst</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;completed_inst);
+<a name="l00238"></a>00238 
+<a name="l00243"></a>00243     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#ab1617ebdf253a795f97a7936a598e151">deferMemInst</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;deferred_inst);
+<a name="l00244"></a>00244 
+<a name="l00246"></a>00246     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#aeea40175042f18a63a90cbbd7dd451bc">violation</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;store, <a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;faulting_load);
+<a name="l00247"></a>00247 
+<a name="l00252"></a>00252     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#ad33d65c18c323d90695d7c2355b49af9">squash</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00253"></a>00253 
+<a name="l00255"></a><a class="code" href="classInstructionQueue.html#aaf7eb96b7ab2a8240d043b7d82494d15">00255</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#aaf7eb96b7ab2a8240d043b7d82494d15">getCount</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid) { <span class="keywordflow">return</span> <a class="code" href="classInstructionQueue.html#ac638062ba1de6609f143c5ee3a601109">count</a>[tid]; };
+<a name="l00256"></a>00256 
+<a name="l00258"></a>00258     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#afc9c0c90c27fe0dc8bd4da915596bc21">printInsts</a>();
+<a name="l00259"></a>00259 
+<a name="l00260"></a>00260   <span class="keyword">private</span>:
+<a name="l00262"></a>00262     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a06cf52c4f09162bea03ec848f247151a">doSquash</a>(<a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> tid);
+<a name="l00263"></a>00263 
+<a name="l00265"></a>00265     <span class="comment">// Various pointers</span>
+<a name="l00267"></a>00267 <span class="comment"></span>
+<a name="l00269"></a><a class="code" href="classInstructionQueue.html#a1379cf882a12ac6fc9eba5da7c84b18b">00269</a>     <a class="code" href="classInstructionQueue.html#a44622cf06940413482836cb62931ac3f">O3CPU</a> *<a class="code" href="classInstructionQueue.html#a1379cf882a12ac6fc9eba5da7c84b18b">cpu</a>;
+<a name="l00270"></a>00270 
+<a name="l00272"></a><a class="code" href="classInstructionQueue.html#a22dc8294eecb144fbdd951d2e32e9330">00272</a>     MemInterface *<a class="code" href="classInstructionQueue.html#a22dc8294eecb144fbdd951d2e32e9330">dcacheInterface</a>;
+<a name="l00273"></a>00273 
+<a name="l00275"></a><a class="code" href="classInstructionQueue.html#a4e9ef25d8913b270d432be4bbfe4965c">00275</a>     <a class="code" href="classInstructionQueue.html#a23f60a4095b5240dfcb18a4ec40210a9">IEW</a> *<a class="code" href="classInstructionQueue.html#a4e9ef25d8913b270d432be4bbfe4965c">iewStage</a>;
+<a name="l00276"></a>00276 
+<a name="l00280"></a><a class="code" href="classInstructionQueue.html#a8cb80ccbf6ed6c1029c6d9ebeaa40f6e">00280</a>     <a class="code" href="classMemDepUnit.html">MemDepUnit</a> <a class="code" href="classInstructionQueue.html#a8cb80ccbf6ed6c1029c6d9ebeaa40f6e">memDepUnit</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00281"></a>00281 
+<a name="l00285"></a><a class="code" href="classInstructionQueue.html#af5c55240e63d9a13358eede4eb5352f1">00285</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;IssueStruct&gt;</a> *<a class="code" href="classInstructionQueue.html#af5c55240e63d9a13358eede4eb5352f1">issueToExecuteQueue</a>;
+<a name="l00286"></a>00286 
+<a name="l00288"></a><a class="code" href="classInstructionQueue.html#a83f9ee976e732665aeb08dbc19acfd45">00288</a>     <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;</a> *<a class="code" href="classInstructionQueue.html#a83f9ee976e732665aeb08dbc19acfd45">timeBuffer</a>;
+<a name="l00289"></a>00289 
+<a name="l00291"></a><a class="code" href="classInstructionQueue.html#a0055a92bd94eda21c2641d46ff013dac">00291</a>     <span class="keyword">typename</span> <a class="code" href="classTimeBuffer.html">TimeBuffer&lt;TimeStruct&gt;::wire</a> <a class="code" href="classInstructionQueue.html#a0055a92bd94eda21c2641d46ff013dac">fromCommit</a>;
+<a name="l00292"></a>00292 
+<a name="l00294"></a><a class="code" href="classInstructionQueue.html#a480782fc1cfd21fd9748b26f2a08b97a">00294</a>     <a class="code" href="classFUPool.html">FUPool</a> *<a class="code" href="classInstructionQueue.html#a480782fc1cfd21fd9748b26f2a08b97a">fuPool</a>;
+<a name="l00295"></a>00295 
+<a name="l00297"></a>00297     <span class="comment">// Instruction lists, ready queues, and ordering</span>
+<a name="l00299"></a>00299 <span class="comment"></span>
+<a name="l00301"></a><a class="code" href="classInstructionQueue.html#a7f2828a4f877a4a4d4b85a6788536b82">00301</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classInstructionQueue.html#a7f2828a4f877a4a4d4b85a6788536b82">instList</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00302"></a>00302 
+<a name="l00304"></a><a class="code" href="classInstructionQueue.html#a494cb455333d9f34ee4a3ab8ca5e50fd">00304</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classInstructionQueue.html#a494cb455333d9f34ee4a3ab8ca5e50fd">instsToExecute</a>;
+<a name="l00305"></a>00305 
+<a name="l00309"></a><a class="code" href="classInstructionQueue.html#a6ea0c1a972364b789a8b6831cf7828cf">00309</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;DynInstPtr&gt;</a> <a class="code" href="classInstructionQueue.html#a6ea0c1a972364b789a8b6831cf7828cf">deferredMemInsts</a>;
+<a name="l00310"></a>00310 
+<a name="l00318"></a><a class="code" href="structInstructionQueue_1_1pqCompare.html">00318</a>     <span class="keyword">struct </span><a class="code" href="structInstructionQueue_1_1pqCompare.html">pqCompare</a> {
+<a name="l00319"></a><a class="code" href="structInstructionQueue_1_1pqCompare.html#aa171c804e811b84fcefef511a9031fb6">00319</a>         <span class="keywordtype">bool</span> <a class="code" href="structInstructionQueue_1_1pqCompare.html#aa171c804e811b84fcefef511a9031fb6">operator() </a>(<span class="keyword">const</span> <a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;lhs, <span class="keyword">const</span> <a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;rhs)<span class="keyword"> const</span>
+<a name="l00320"></a>00320 <span class="keyword">        </span>{
+<a name="l00321"></a>00321             <span class="keywordflow">return</span> lhs-&gt;seqNum &gt; rhs-&gt;seqNum;
+<a name="l00322"></a>00322         }
+<a name="l00323"></a>00323     };
+<a name="l00324"></a>00324 
+<a name="l00325"></a>00325     <span class="keyword">typedef</span> std::priority_queue&lt;DynInstPtr, std::vector&lt;DynInstPtr&gt;, pqCompare&gt;
+<a name="l00326"></a><a class="code" href="classInstructionQueue.html#a60636ae8f3b649078c4f1bdd3b20dcad">00326</a>     <a class="code" href="classInstructionQueue.html#a60636ae8f3b649078c4f1bdd3b20dcad">ReadyInstQueue</a>;
+<a name="l00327"></a>00327 
+<a name="l00331"></a><a class="code" href="classInstructionQueue.html#a84f7fc18dadb9ea3ef6ed7dd9f375c46">00331</a>     <a class="code" href="classInstructionQueue.html#a60636ae8f3b649078c4f1bdd3b20dcad">ReadyInstQueue</a> <a class="code" href="classInstructionQueue.html#a84f7fc18dadb9ea3ef6ed7dd9f375c46">readyInsts</a>[<a class="code" href="op__class_8hh.html#a5e0e351c8afca390ef0a05a7dbb68b1b">Num_OpClasses</a>];
+<a name="l00332"></a>00332 
+<a name="l00340"></a><a class="code" href="classInstructionQueue.html#ac0ba4d07026aaf6386c001a68d059cbf">00340</a>     std::map&lt;InstSeqNum, DynInstPtr&gt; <a class="code" href="classInstructionQueue.html#ac0ba4d07026aaf6386c001a68d059cbf">nonSpecInsts</a>;
+<a name="l00341"></a>00341 
+<a name="l00342"></a><a class="code" href="classInstructionQueue.html#a0e9597437fae9e60d5449933949416ec">00342</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> std::map&lt;InstSeqNum, DynInstPtr&gt;::iterator <a class="code" href="classInstructionQueue.html#a0e9597437fae9e60d5449933949416ec">NonSpecMapIt</a>;
+<a name="l00343"></a>00343 
+<a name="l00345"></a><a class="code" href="structInstructionQueue_1_1ListOrderEntry.html">00345</a>     <span class="keyword">struct </span><a class="code" href="structInstructionQueue_1_1ListOrderEntry.html">ListOrderEntry</a> {
+<a name="l00346"></a><a class="code" href="structInstructionQueue_1_1ListOrderEntry.html#ab040f34f48e1c1da91a45f403627275e">00346</a>         OpClass <a class="code" href="structInstructionQueue_1_1ListOrderEntry.html#ab040f34f48e1c1da91a45f403627275e">queueType</a>;
+<a name="l00347"></a><a class="code" href="structInstructionQueue_1_1ListOrderEntry.html#af6279c7c9a940f04a676246e14a4ca75">00347</a>         <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="structInstructionQueue_1_1ListOrderEntry.html#af6279c7c9a940f04a676246e14a4ca75">oldestInst</a>;
+<a name="l00348"></a>00348     };
+<a name="l00349"></a>00349 
+<a name="l00357"></a><a class="code" href="classInstructionQueue.html#afd5860c9cc9c225411df38dd3dc89b87">00357</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;ListOrderEntry&gt;</a> <a class="code" href="classInstructionQueue.html#afd5860c9cc9c225411df38dd3dc89b87">listOrder</a>;
+<a name="l00358"></a>00358 
+<a name="l00359"></a><a class="code" href="classInstructionQueue.html#a120a1fba4fe015f7201e896580df164c">00359</a>     <span class="keyword">typedef</span> <span class="keyword">typename</span> <a class="code" href="classstd_1_1list.html">std::list&lt;ListOrderEntry&gt;::iterator</a> <a class="code" href="classInstructionQueue.html#a120a1fba4fe015f7201e896580df164c">ListOrderIt</a>;
+<a name="l00360"></a>00360 
+<a name="l00362"></a><a class="code" href="classInstructionQueue.html#abd5388bcfcc78ba7299f0178672b4ac2">00362</a>     <span class="keywordtype">bool</span> <a class="code" href="classInstructionQueue.html#abd5388bcfcc78ba7299f0178672b4ac2">queueOnList</a>[<a class="code" href="op__class_8hh.html#a5e0e351c8afca390ef0a05a7dbb68b1b">Num_OpClasses</a>];
+<a name="l00363"></a>00363 
+<a name="l00367"></a><a class="code" href="classInstructionQueue.html#ac6c2d86489eaee465f91586553c3593f">00367</a>     <a class="code" href="classInstructionQueue.html#a120a1fba4fe015f7201e896580df164c">ListOrderIt</a> <a class="code" href="classInstructionQueue.html#ac6c2d86489eaee465f91586553c3593f">readyIt</a>[<a class="code" href="op__class_8hh.html#a5e0e351c8afca390ef0a05a7dbb68b1b">Num_OpClasses</a>];
+<a name="l00368"></a>00368 
+<a name="l00370"></a>00370     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#aa1de4a5c314cc1d0efaf045e05e47165">addToOrderList</a>(OpClass op_class);
+<a name="l00371"></a>00371 
+<a name="l00376"></a>00376     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#ae4cc92176e08b27989bb2838e4e32b1c">moveToYoungerInst</a>(<a class="code" href="classInstructionQueue.html#a120a1fba4fe015f7201e896580df164c">ListOrderIt</a> age_order_it);
+<a name="l00377"></a>00377 
+<a name="l00378"></a><a class="code" href="classInstructionQueue.html#a23fbbb46c9bdd183c06095cc0398fdc4">00378</a>     <a class="code" href="classDependencyGraph.html">DependencyGraph&lt;DynInstPtr&gt;</a> <a class="code" href="classInstructionQueue.html#a23fbbb46c9bdd183c06095cc0398fdc4">dependGraph</a>;
+<a name="l00379"></a>00379 
+<a name="l00381"></a>00381     <span class="comment">// Various parameters</span>
+<a name="l00383"></a>00383 <span class="comment"></span>
+<a name="l00385"></a><a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31b">00385</a>     <span class="keyword">enum</span> <a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31b">IQPolicy</a> {
+<a name="l00386"></a><a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31ba96535b1625776102bcc13f7dfb598dcb">00386</a>         <a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31ba96535b1625776102bcc13f7dfb598dcb">Dynamic</a>,
+<a name="l00387"></a><a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31badd8dfa69b567f90d3f13d819109ab74e">00387</a>         <a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31badd8dfa69b567f90d3f13d819109ab74e">Partitioned</a>,
+<a name="l00388"></a><a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31ba267544c4de8ecc66bd0fed6310af63be">00388</a>         <a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31ba267544c4de8ecc66bd0fed6310af63be">Threshold</a>
+<a name="l00389"></a>00389     };
+<a name="l00390"></a>00390 
+<a name="l00392"></a><a class="code" href="classInstructionQueue.html#a558c2854c6103193667179fa6ac0ac20">00392</a>     <a class="code" href="classInstructionQueue.html#a6af49ff20e9c3b3f7ef7b8fa74c0e31b">IQPolicy</a> <a class="code" href="classInstructionQueue.html#a558c2854c6103193667179fa6ac0ac20">iqPolicy</a>;
+<a name="l00393"></a>00393 
+<a name="l00395"></a><a class="code" href="classInstructionQueue.html#a88377f855dbf5adeeecb06b5bb821d35">00395</a>     <a class="code" href="base_2types_8hh.html#ab39b1a4f9dad884694c7a74ed69e6a6b">ThreadID</a> <a class="code" href="classInstructionQueue.html#a88377f855dbf5adeeecb06b5bb821d35">numThreads</a>;
+<a name="l00396"></a>00396 
+<a name="l00398"></a><a class="code" href="classInstructionQueue.html#af6eaea53db532812052f71bf0380dab5">00398</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;ThreadID&gt;</a> *<a class="code" href="classInstructionQueue.html#af6eaea53db532812052f71bf0380dab5">activeThreads</a>;
+<a name="l00399"></a>00399 
+<a name="l00401"></a><a class="code" href="classInstructionQueue.html#ac638062ba1de6609f143c5ee3a601109">00401</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#ac638062ba1de6609f143c5ee3a601109">count</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00402"></a>00402 
+<a name="l00404"></a><a class="code" href="classInstructionQueue.html#a51e5f9f0cb40d61e95b1518f1be90b73">00404</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#a51e5f9f0cb40d61e95b1518f1be90b73">maxEntries</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00405"></a>00405 
+<a name="l00407"></a><a class="code" href="classInstructionQueue.html#ac2281ff630f82397bda33269f4ee8796">00407</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#ac2281ff630f82397bda33269f4ee8796">freeEntries</a>;
+<a name="l00408"></a>00408 
+<a name="l00410"></a><a class="code" href="classInstructionQueue.html#a325de474a9f6652329339d9fc2ea09c0">00410</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#a325de474a9f6652329339d9fc2ea09c0">numEntries</a>;
+<a name="l00411"></a>00411 
+<a name="l00413"></a><a class="code" href="classInstructionQueue.html#ab3c3a8cd00248d9cd6acad330da902a7">00413</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#ab3c3a8cd00248d9cd6acad330da902a7">totalWidth</a>;
+<a name="l00414"></a>00414 
+<a name="l00416"></a><a class="code" href="classInstructionQueue.html#a0d2a78a8e887f06150904000b2beb6cd">00416</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classInstructionQueue.html#a0d2a78a8e887f06150904000b2beb6cd">numPhysRegs</a>;
+<a name="l00417"></a>00417 
+<a name="l00421"></a><a class="code" href="classInstructionQueue.html#a6b6fe1148ed7c40758e45f351c375552">00421</a>     <a class="code" href="classCycles.html">Cycles</a> <a class="code" href="classInstructionQueue.html#a6b6fe1148ed7c40758e45f351c375552">commitToIEWDelay</a>;
+<a name="l00422"></a>00422 
+<a name="l00424"></a><a class="code" href="classInstructionQueue.html#a97d5a7e4630ad1d017909f7504b9ec32">00424</a>     <a class="code" href="inst__seq_8hh.html#a258d93d98edaedee089435c19ea2ea2e">InstSeqNum</a> <a class="code" href="classInstructionQueue.html#a97d5a7e4630ad1d017909f7504b9ec32">squashedSeqNum</a>[<a class="code" href="namespaceThePipeline.html#ac9c0bbe9cf27d93e08ea8ccc4096e633">Impl::MaxThreads</a>];
+<a name="l00425"></a>00425 
+<a name="l00432"></a><a class="code" href="classInstructionQueue.html#a61aeb86b87d1e105337b5a8973ce61f3">00432</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;bool&gt;</a> <a class="code" href="classInstructionQueue.html#a61aeb86b87d1e105337b5a8973ce61f3">regScoreboard</a>;
+<a name="l00433"></a>00433 
+<a name="l00435"></a>00435     <span class="keywordtype">bool</span> <a class="code" href="classInstructionQueue.html#abeb630fedb38de020599d2a1abd4b02d">addToDependents</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00436"></a>00436 
+<a name="l00438"></a>00438     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#af89be5ea301621fdfb44941b4db60339">addToProducers</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;new_inst);
+<a name="l00439"></a>00439 
+<a name="l00441"></a>00441     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a7e3f1fa43ca939ed6fd9b3abcc47f06e">addIfReady</a>(<a class="code" href="classInstructionQueue.html#a028ce10889c5f6450239d9e9a7347976">DynInstPtr</a> &amp;inst);
+<a name="l00442"></a>00442 
+<a name="l00447"></a>00447     <span class="keywordtype">int</span> <a class="code" href="classInstructionQueue.html#ab654970f03abd90f0c397bba8e218bc9">countInsts</a>();
+<a name="l00448"></a>00448 
+<a name="l00453"></a>00453     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a3d1dae45e8e0b5cf7c1f4f8c796d070e">dumpLists</a>();
+<a name="l00454"></a>00454 
+<a name="l00458"></a>00458     <span class="keywordtype">void</span> <a class="code" href="classInstructionQueue.html#a80587b4fe043bbe1995536cb3b361588">dumpInsts</a>();
+<a name="l00459"></a>00459 
+<a name="l00461"></a><a class="code" href="classInstructionQueue.html#a435e1ce10c3a7f54a60941e583adeb09">00461</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a435e1ce10c3a7f54a60941e583adeb09">iqInstsAdded</a>;
+<a name="l00463"></a><a class="code" href="classInstructionQueue.html#adf890a08fae50ea8249171b07c40adac">00463</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#adf890a08fae50ea8249171b07c40adac">iqNonSpecInstsAdded</a>;
+<a name="l00464"></a>00464 
+<a name="l00465"></a><a class="code" href="classInstructionQueue.html#accc6261a817718dbb727c65f310df357">00465</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#accc6261a817718dbb727c65f310df357">iqInstsIssued</a>;
+<a name="l00467"></a><a class="code" href="classInstructionQueue.html#a735f2023e70e53b7889a3a316bd3d57f">00467</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a735f2023e70e53b7889a3a316bd3d57f">iqIntInstsIssued</a>;
+<a name="l00469"></a><a class="code" href="classInstructionQueue.html#aa9f2fa124c9f0b4b22461b6717449d9a">00469</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#aa9f2fa124c9f0b4b22461b6717449d9a">iqFloatInstsIssued</a>;
+<a name="l00471"></a><a class="code" href="classInstructionQueue.html#a928f22a2c6ce592adc40e5242c9d6572">00471</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a928f22a2c6ce592adc40e5242c9d6572">iqBranchInstsIssued</a>;
+<a name="l00473"></a><a class="code" href="classInstructionQueue.html#a5e7d55d3f07e86e389ca3a715766e108">00473</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a5e7d55d3f07e86e389ca3a715766e108">iqMemInstsIssued</a>;
+<a name="l00475"></a><a class="code" href="classInstructionQueue.html#ad234890bc414fffe7ed71840c51be5cb">00475</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#ad234890bc414fffe7ed71840c51be5cb">iqMiscInstsIssued</a>;
+<a name="l00477"></a><a class="code" href="classInstructionQueue.html#ac91799c895e5aff3af0afdbd7691a163">00477</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#ac91799c895e5aff3af0afdbd7691a163">iqSquashedInstsIssued</a>;
+<a name="l00479"></a><a class="code" href="classInstructionQueue.html#a8312e8984bcfab5a77de40e1738103db">00479</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a8312e8984bcfab5a77de40e1738103db">iqSquashedInstsExamined</a>;
+<a name="l00483"></a><a class="code" href="classInstructionQueue.html#a4398b6005b81008bd163bbba78dfd929">00483</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a4398b6005b81008bd163bbba78dfd929">iqSquashedOperandsExamined</a>;
+<a name="l00486"></a><a class="code" href="classInstructionQueue.html#a6c0b47431b6e84536fd9bb61624d6d97">00486</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a6c0b47431b6e84536fd9bb61624d6d97">iqSquashedNonSpecRemoved</a>;
+<a name="l00487"></a>00487     <span class="comment">// Also include number of instructions rescheduled and replayed.</span>
+<a name="l00488"></a>00488 
+<a name="l00492"></a>00492 <span class="comment">//    Stats::VectorDistribution queueResDist;</span>
+<a name="l00494"></a><a class="code" href="classInstructionQueue.html#a90810f5beb7dff46f4b45f96620474b6">00494</a> <span class="comment"></span>    <a class="code" href="classStats_1_1Distribution.html">Stats::Distribution</a> <a class="code" href="classInstructionQueue.html#a90810f5beb7dff46f4b45f96620474b6">numIssuedDist</a>;
+<a name="l00498"></a>00498 <span class="comment">//    Stats::VectorDistribution issueDelayDist;</span>
+<a name="l00499"></a>00499 
+<a name="l00503"></a><a class="code" href="classInstructionQueue.html#a92266bfdbc9a6de5005fc3f1654e0b3e">00503</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classInstructionQueue.html#a92266bfdbc9a6de5005fc3f1654e0b3e">statFuBusy</a>;
+<a name="l00504"></a>00504 <span class="comment">//    Stats::Vector dist_unissued;</span>
+<a name="l00506"></a><a class="code" href="classInstructionQueue.html#abb8998de49604769ec252fbd0ac1ed2b">00506</a> <span class="comment"></span>    <a class="code" href="classStats_1_1Vector2d.html">Stats::Vector2d</a> <a class="code" href="classInstructionQueue.html#abb8998de49604769ec252fbd0ac1ed2b">statIssuedInstType</a>;
+<a name="l00507"></a>00507 
+<a name="l00509"></a><a class="code" href="classInstructionQueue.html#a6a9ed0564894e83d4c3c5784f667c5e0">00509</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classInstructionQueue.html#a6a9ed0564894e83d4c3c5784f667c5e0">issueRate</a>;
+<a name="l00510"></a>00510 
+<a name="l00512"></a><a class="code" href="classInstructionQueue.html#a54dbf1e1683507aefb83115910feb26b">00512</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classInstructionQueue.html#a54dbf1e1683507aefb83115910feb26b">fuBusy</a>;
+<a name="l00514"></a><a class="code" href="classInstructionQueue.html#ab1ecb3744ca63dcec2b9b7d80c319c69">00514</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classInstructionQueue.html#ab1ecb3744ca63dcec2b9b7d80c319c69">fuBusyRate</a>;
+<a name="l00515"></a>00515    <span class="keyword">public</span>:
+<a name="l00516"></a><a class="code" href="classInstructionQueue.html#a80520cf10aa5e634d9e3fb6cdc0aef2f">00516</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a80520cf10aa5e634d9e3fb6cdc0aef2f">intInstQueueReads</a>;
+<a name="l00517"></a><a class="code" href="classInstructionQueue.html#a095bbdf62a50bf39e824e7187cde5191">00517</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a095bbdf62a50bf39e824e7187cde5191">intInstQueueWrites</a>;
+<a name="l00518"></a><a class="code" href="classInstructionQueue.html#afd00a0a956c7aeab072e57a3927ee148">00518</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#afd00a0a956c7aeab072e57a3927ee148">intInstQueueWakeupAccesses</a>;
+<a name="l00519"></a><a class="code" href="classInstructionQueue.html#ac72607fe25b1d8aefd4ca2dda8533bb2">00519</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#ac72607fe25b1d8aefd4ca2dda8533bb2">fpInstQueueReads</a>;
+<a name="l00520"></a><a class="code" href="classInstructionQueue.html#a462728858d9c7392da1a4e3695a10c3c">00520</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a462728858d9c7392da1a4e3695a10c3c">fpInstQueueWrites</a>;
+<a name="l00521"></a><a class="code" href="classInstructionQueue.html#a666c1c2a3552ee13d2f8185434c9552b">00521</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a666c1c2a3552ee13d2f8185434c9552b">fpInstQueueWakeupQccesses</a>;
+<a name="l00522"></a>00522 
+<a name="l00523"></a><a class="code" href="classInstructionQueue.html#aec28ae6ca74e00e9b5eb0bd8bb9e1176">00523</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#aec28ae6ca74e00e9b5eb0bd8bb9e1176">intAluAccesses</a>;
+<a name="l00524"></a><a class="code" href="classInstructionQueue.html#a1dd5fc6a847750f4294e41e801b47bf4">00524</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classInstructionQueue.html#a1dd5fc6a847750f4294e41e801b47bf4">fpAluAccesses</a>;
+<a name="l00525"></a>00525 };
+<a name="l00526"></a>00526 
+<a name="l00527"></a>00527 <span class="preprocessor">#endif //__CPU_O3_INST_QUEUE_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

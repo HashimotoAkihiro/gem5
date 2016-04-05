@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/ruby/system/MemoryControl.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/ruby/system/MemoryControl.hh</h1><a href="MemoryControl_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 1999-2008 Mark D. Hill and David A. Wood</span>
+<a name="l00003"></a>00003 <span class="comment"> * Copyright (c) 2012 Advanced Micro Devices, Inc.</span>
+<a name="l00004"></a>00004 <span class="comment"> * All rights reserved.</span>
+<a name="l00005"></a>00005 <span class="comment"> *</span>
+<a name="l00006"></a>00006 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00007"></a>00007 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00008"></a>00008 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00009"></a>00009 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00010"></a>00010 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00011"></a>00011 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00012"></a>00012 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00013"></a>00013 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00014"></a>00014 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00015"></a>00015 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00018"></a>00018 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00019"></a>00019 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00020"></a>00020 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00021"></a>00021 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00022"></a>00022 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00023"></a>00023 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00024"></a>00024 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00025"></a>00025 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00026"></a>00026 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00027"></a>00027 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00028"></a>00028 <span class="comment"> */</span>
+<a name="l00029"></a>00029 
+<a name="l00030"></a>00030 <span class="preprocessor">#ifndef __MEM_RUBY_SYSTEM_ABSTRACT_MEMORY_CONTROL_HH__</span>
+<a name="l00031"></a>00031 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_RUBY_SYSTEM_ABSTRACT_MEMORY_CONTROL_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span>
+<a name="l00033"></a>00033 <span class="preprocessor">#include &lt;iostream&gt;</span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &lt;list&gt;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00036"></a>00036 
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;mem/protocol/MemoryControlRequestType.hh&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="Consumer_8hh.html">mem/ruby/common/Consumer.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="Message_8hh.html">mem/ruby/slicc_interface/Message.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="MemoryNode_8hh.html">mem/ruby/system/MemoryNode.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;params/MemoryControl.hh&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="clocked__object_8hh.html">sim/clocked_object.hh</a>&quot;</span>
+<a name="l00043"></a>00043 
+<a name="l00045"></a>00045 
+<a name="l00046"></a><a class="code" href="classMemoryControl.html">00046</a> <span class="keyword">class </span><a class="code" href="classMemoryControl_1_1MemoryControl.html">MemoryControl</a> : <span class="keyword">public</span> <a class="code" href="classClockedObject_1_1ClockedObject.html">ClockedObject</a>, <span class="keyword">public</span> <a class="code" href="classConsumer.html">Consumer</a>
+<a name="l00047"></a>00047 {
+<a name="l00048"></a>00048   <span class="keyword">public</span>:
+<a name="l00049"></a><a class="code" href="classMemoryControl.html#aec6d67eaecba2a2311edc4c4c78fb0f5">00049</a>     <span class="keyword">typedef</span> MemoryControlParams <a class="code" href="classMemoryControl.html#aec6d67eaecba2a2311edc4c4c78fb0f5">Params</a>;
+<a name="l00050"></a><a class="code" href="classMemoryControl.html#acd3c3feb78ae7a8f88fe0f110a718dff">00050</a>     <span class="keyword">const</span> <a class="code" href="classMemoryControl.html#aec6d67eaecba2a2311edc4c4c78fb0f5">Params</a> *<a class="code" href="classMemoryControl.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const</span>
+<a name="l00051"></a>00051 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <span class="keyword">dynamic_cast&lt;</span><span class="keyword">const </span><a class="code" href="classMemoryControl.html#aec6d67eaecba2a2311edc4c4c78fb0f5">Params</a> *<span class="keyword">&gt;</span>(<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>); }
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053     <a class="code" href="classMemoryControl.html#a189a6ca42c937f0d9645cd5ea91be48f">MemoryControl</a>(<span class="keyword">const</span> <a class="code" href="classMemoryControl.html#aec6d67eaecba2a2311edc4c4c78fb0f5">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00054"></a>00054     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#ab5be7e5a13ea77d59aac45d21dceb6a0">init</a>() = 0;
+<a name="l00055"></a>00055     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#a20dcbdfbd0ec77afc802522bb7e379c1">reset</a>() = 0;
+<a name="l00056"></a>00056 
+<a name="l00057"></a>00057     <a class="code" href="classMemoryControl.html#a2e5f16844fdb309595860b4a79f17b67">~MemoryControl</a>();
+<a name="l00058"></a>00058 
+<a name="l00059"></a>00059     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#a623e3e7d1b1c725d70009f7b01a421b9">wakeup</a>() = 0;
+<a name="l00060"></a>00060 
+<a name="l00061"></a>00061     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#ac57bc43eacdddc1423b4f98ead12fd1c">setConsumer</a>(<a class="code" href="classConsumer.html">Consumer</a>* consumer_ptr) = 0;
+<a name="l00062"></a>00062     <span class="keyword">virtual</span> <a class="code" href="classConsumer.html">Consumer</a>* <a class="code" href="classMemoryControl.html#acb101bbbf38f858442ec618e9705d039">getConsumer</a>() = 0;
+<a name="l00063"></a><a class="code" href="classMemoryControl.html#a18a6b7f310731164a6a1509768b93eab">00063</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#a18a6b7f310731164a6a1509768b93eab">setClockObj</a>(<a class="code" href="classClockedObject_1_1ClockedObject.html">ClockedObject</a>* consumer_ptr) {}
+<a name="l00064"></a>00064 
+<a name="l00065"></a>00065     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#aaf16ee4e399ebed0a6434dd085a6fc10">setDescription</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classSimObject.html#adbcff144e5e199d332a1352af1798148">name</a>) = 0;
+<a name="l00066"></a>00066     <span class="keyword">virtual</span> std::string <a class="code" href="classMemoryControl.html#a907d681c378517c972b738f4286c25c5">getDescription</a>() = 0;
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068     <span class="comment">// Called from the directory:</span>
+<a name="l00069"></a>00069     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#a8295a9f6c98555275292b9c1296ea35a">enqueue</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">MsgPtr</a>&amp; message, <a class="code" href="classCycles.html">Cycles</a> latency) = 0;
+<a name="l00070"></a>00070     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#a8c508812a5b1b935117dc32877229599">enqueueMemRef</a>(<a class="code" href="classMemoryNode.html">MemoryNode</a> *memRef) = 0;
+<a name="l00071"></a>00071     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#abc9fc85f4dd561e833bf6b34a78ebcb8">dequeue</a>() = 0;
+<a name="l00072"></a>00072     <span class="keyword">virtual</span> <span class="keyword">const</span> <a class="code" href="classMessage.html">Message</a>* <a class="code" href="classMemoryControl.html#a822b263266795dc49c26e24dc6eb4b54">peek</a>() = 0;
+<a name="l00073"></a>00073     <span class="keyword">virtual</span> <a class="code" href="classMemoryNode.html">MemoryNode</a> *<a class="code" href="classMemoryControl.html#a1daeb227a1c754432729a75c7997d275">peekNode</a>() = 0;
+<a name="l00074"></a>00074     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classMemoryControl.html#a90b7287ef3808f6b4b355495d24a9b38">isReady</a>() = 0;
+<a name="l00075"></a>00075     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classMemoryControl.html#ad5bc408383076d5b274d5c3be9b42c89">areNSlotsAvailable</a>(<span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aeab71244afb687f16d8c4f5ee9d6ef0e">n</a>) = 0;  <span class="comment">// infinite queue length</span>
+<a name="l00076"></a>00076 
+<a name="l00077"></a>00077     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#a3ea5f7af5db62cc24f4e40df9ea5c971">print</a>(std::ostream&amp; out) <span class="keyword">const</span> = 0;
+<a name="l00078"></a><a class="code" href="classMemoryControl.html#ac1739a9be0fbd5d96cf441cd3b2c1c78">00078</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#ac1739a9be0fbd5d96cf441cd3b2c1c78">regStats</a>() {};
+<a name="l00079"></a>00079 
+<a name="l00080"></a>00080     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classMemoryControl.html#a439a91ae6f587e18a500ba947d0728d5">getChannel</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span> = 0;
+<a name="l00081"></a>00081     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classMemoryControl.html#a7a4691e15d68d8bf9df636adff2c964f">getBank</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span> = 0;
+<a name="l00082"></a>00082     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classMemoryControl.html#a22565804f54291d8c37b7456c157f814">getRank</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span> = 0;
+<a name="l00083"></a>00083     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classMemoryControl.html#a86eabafc0d8d68214de261fc7a333a04">getRow</a>(<span class="keyword">const</span> <a class="code" href="TypeDefines_8hh.html#a7901e1a365850c5ff38ec6e12b6b9ffc">physical_address_t</a> <a class="code" href="namespaceX86ISA.html#ab705917f60c5566f9ce56a93f798b2e2">addr</a>) <span class="keyword">const</span> = 0;
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085     <span class="comment">//added by SS</span>
+<a name="l00086"></a>00086     <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classMemoryControl.html#a931e1da3d57d22fd7f4ba3583697c336">getBanksPerRank</a>() = 0;
+<a name="l00087"></a>00087     <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classMemoryControl.html#a8fc5f029d5373799975a32fcd559400c">getRanksPerDimm</a>() = 0;
+<a name="l00088"></a>00088     <span class="keyword">virtual</span> <span class="keywordtype">int</span> <a class="code" href="classMemoryControl.html#a6f39efbb6d1f061b2f6467ac33f6ce34">getDimmsPerChannel</a>() = 0;
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classMemoryControl.html#a8dec08568d22323e381f2e55d4ced403">recordRequestType</a>(MemoryControlRequestType requestType);
+<a name="l00091"></a>00091 
+<a name="l00092"></a><a class="code" href="classMemoryControl.html#ad587c16967cd8dc8b1dcb52a1ce0002b">00092</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classMemoryControl.html#ad587c16967cd8dc8b1dcb52a1ce0002b">functionalReadBuffers</a>(<a class="code" href="classPacket.html">Packet</a> *pkt)
+<a name="l00093"></a>00093     { <a class="code" href="base_2misc_8hh.html#acad519418dbfdd70c1208711e609c80e">fatal</a>(<span class="stringliteral">&quot;Functional read access not implemented!&quot;</span>);}
+<a name="l00094"></a><a class="code" href="classMemoryControl.html#aa1cf5fd9152389ffd0e21700945a149d">00094</a>     <span class="keyword">virtual</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classMemoryControl.html#aa1cf5fd9152389ffd0e21700945a149d">functionalWriteBuffers</a>(<a class="code" href="classPacket.html">Packet</a> *pkt)
+<a name="l00095"></a>00095     { <a class="code" href="base_2misc_8hh.html#acad519418dbfdd70c1208711e609c80e">fatal</a>(<span class="stringliteral">&quot;Functional read access not implemented!&quot;</span>);}
+<a name="l00096"></a>00096 
+<a name="l00097"></a>00097 <span class="keyword">protected</span>:
+<a name="l00098"></a><a class="code" href="classMemoryControl_1_1MemCntrlEvent.html">00098</a>     <span class="keyword">class </span><a class="code" href="classMemoryControl_1_1MemCntrlEvent.html">MemCntrlEvent</a> : <span class="keyword">public</span> <a class="code" href="classEvent.html">Event</a>
+<a name="l00099"></a>00099     {
+<a name="l00100"></a>00100       <span class="keyword">public</span>:
+<a name="l00101"></a><a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#ae3167b7e2836b30c5faff458cab95248">00101</a>         <a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#ae3167b7e2836b30c5faff458cab95248">MemCntrlEvent</a>(<a class="code" href="classMemoryControl_1_1MemoryControl.html">MemoryControl</a>* _mem_cntrl)
+<a name="l00102"></a>00102         {
+<a name="l00103"></a>00103             <a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#a9b07b40513d351ef4d737a15042c1935">mem_cntrl</a> = _mem_cntrl;
+<a name="l00104"></a>00104         }
+<a name="l00105"></a>00105       <span class="keyword">private</span>:
+<a name="l00106"></a><a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">00106</a>         <span class="keywordtype">void</span> <a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#a2e9c5136d19b1a95fc427e0852deab5c">process</a>() { <a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#a9b07b40513d351ef4d737a15042c1935">mem_cntrl</a>-&gt;wakeup(); }
+<a name="l00107"></a>00107 
+<a name="l00108"></a><a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#a9b07b40513d351ef4d737a15042c1935">00108</a>         <a class="code" href="classMemoryControl_1_1MemoryControl.html">MemoryControl</a>* <a class="code" href="classMemoryControl_1_1MemCntrlEvent.html#a9b07b40513d351ef4d737a15042c1935">mem_cntrl</a>;
+<a name="l00109"></a>00109     };
+<a name="l00110"></a>00110 
+<a name="l00111"></a><a class="code" href="classMemoryControl.html#abbf06cc9d10fae424e60034190a2b38f">00111</a>     <a class="code" href="classMemoryControl_1_1MemCntrlEvent.html">MemCntrlEvent</a> <a class="code" href="classMemoryControl.html#abbf06cc9d10fae424e60034190a2b38f">m_event</a>;
+<a name="l00112"></a>00112 };
+<a name="l00113"></a>00113 
+<a name="l00114"></a>00114 <span class="preprocessor">#endif //   __MEM_RUBY_SYSTEM_ABSTRACT_MEMORY_CONTROL_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

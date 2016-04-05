@@ -1,0 +1,131 @@
+\hypertarget{classArmISA_1_1VstMultOp}{
+\section{クラス VstMultOp}
+\label{classArmISA_1_1VstMultOp}\index{ArmISA::VstMultOp@{ArmISA::VstMultOp}}
+}
+
+
+{\ttfamily \#include $<$macromem.hh$>$}VstMultOpに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classArmISA_1_1VstMultOp}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classArmISA_1_1VstMultOp_a701693769a1feaeea70657430ea392b3}{VstMultOp} (const char $\ast$mnem, \hyperlink{classStaticInst_a5605d4fc727eae9e595325c90c0ec108}{ExtMachInst} \hyperlink{classStaticInst_a744598b194ca3d4201d9414ce4cc4af4}{machInst}, OpClass \_\-\_\-opClass, unsigned \hyperlink{namespaceArmISA_a0da89c280130b84ae26405a901396428}{width}, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{namespaceArmISA_adf8c6c579ad8729095a637a4f2181211}{rn}, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} vd, unsigned regs, unsigned inc, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} size, \hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} align, \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{namespaceArmISA_ad546c2cf2168cf2d8ac21b2a9f485e82}{rm})
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Base class for microcoded integer memory instructions. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classArmISA_1_1VstMultOp_a701693769a1feaeea70657430ea392b3}{
+\index{ArmISA::VstMultOp@{ArmISA::VstMultOp}!VstMultOp@{VstMultOp}}
+\index{VstMultOp@{VstMultOp}!ArmISA::VstMultOp@{ArmISA::VstMultOp}}
+\subsubsection[{VstMultOp}]{\setlength{\rightskip}{0pt plus 5cm}{\bf VstMultOp} (const char $\ast$ {\em mnem}, \/  {\bf ExtMachInst} {\em machInst}, \/  OpClass {\em \_\-\_\-opClass}, \/  unsigned {\em width}, \/  {\bf RegIndex} {\em rn}, \/  {\bf RegIndex} {\em vd}, \/  unsigned {\em regs}, \/  unsigned {\em inc}, \/  {\bf uint32\_\-t} {\em size}, \/  {\bf uint32\_\-t} {\em align}, \/  {\bf RegIndex} {\em rm})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classArmISA_1_1VstMultOp_a701693769a1feaeea70657430ea392b3}
+
+
+
+\begin{DoxyCode}
+761                                                                                :
+762     PredMacroOp(mnem, machInst, __opClass)
+763 {
+764     assert(regs > 0 && regs <= 4);
+765     assert(regs % elems == 0);
+766 
+767     numMicroops = (regs > 2) ? 2 : 1;
+768     bool wb = (rm != 15);
+769     bool interleave = (elems > 1);
+770 
+771     if (wb) numMicroops++;
+772     if (interleave) numMicroops += (regs / elems);
+773     microOps = new StaticInstPtr[numMicroops];
+774 
+775     uint32_t noAlign = TLB::MustBeOne;
+776 
+777     RegIndex rMid = interleave ? NumFloatV7ArchRegs : vd * 2;
+778 
+779     unsigned uopIdx = 0;
+780     if (interleave) {
+781         switch (elems) {
+782           case 4:
+783             assert(regs == 4);
+784             microOps[uopIdx++] = newNeonMixInst<MicroInterNeon8Uop>(
+785                     size, machInst, rMid, vd * 2, inc * 2);
+786             break;
+787           case 3:
+788             assert(regs == 3);
+789             microOps[uopIdx++] = newNeonMixInst<MicroInterNeon6Uop>(
+790                     size, machInst, rMid, vd * 2, inc * 2);
+791             break;
+792           case 2:
+793             assert(regs == 4 || regs == 2);
+794             if (regs == 4) {
+795                 microOps[uopIdx++] = newNeonMixInst<MicroInterNeon4Uop>(
+796                         size, machInst, rMid, vd * 2, inc * 2);
+797                 microOps[uopIdx++] = newNeonMixInst<MicroInterNeon4Uop>(
+798                         size, machInst, rMid + 4, vd * 2 + 2, inc * 2);
+799             } else {
+800                 microOps[uopIdx++] = newNeonMixInst<MicroInterNeon4Uop>(
+801                         size, machInst, rMid, vd * 2, inc * 2);
+802             }
+803             break;
+804           default:
+805             // Bad number of elements to interleave
+806             microOps[uopIdx++] = new Unknown(machInst);
+807         }
+808     }
+809     switch (regs) {
+810       case 4:
+811         microOps[uopIdx++] = newNeonMemInst<MicroStrNeon16Uop>(
+812                 size, machInst, rMid, rn, 0, align);
+813         microOps[uopIdx++] = newNeonMemInst<MicroStrNeon16Uop>(
+814                 size, machInst, rMid + 4, rn, 16, noAlign);
+815         break;
+816       case 3:
+817         microOps[uopIdx++] = newNeonMemInst<MicroStrNeon16Uop>(
+818                 size, machInst, rMid, rn, 0, align);
+819         microOps[uopIdx++] = newNeonMemInst<MicroStrNeon8Uop>(
+820                 size, machInst, rMid + 4, rn, 16, noAlign);
+821         break;
+822       case 2:
+823         microOps[uopIdx++] = newNeonMemInst<MicroStrNeon16Uop>(
+824                 size, machInst, rMid, rn, 0, align);
+825         break;
+826       case 1:
+827         microOps[uopIdx++] = newNeonMemInst<MicroStrNeon8Uop>(
+828                 size, machInst, rMid, rn, 0, align);
+829         break;
+830       default:
+831         // Unknown number of registers
+832         microOps[uopIdx++] = new Unknown(machInst);
+833     }
+834     if (wb) {
+835         if (rm != 15 && rm != 13) {
+836             microOps[uopIdx++] =
+837                 new MicroAddUop(machInst, rn, rn, rm, 0, ArmISA::LSL);
+838         } else {
+839             microOps[uopIdx++] =
+840                 new MicroAddiUop(machInst, rn, rn, regs * 8);
+841         }
+842     }
+843     assert(uopIdx == numMicroops);
+844 
+845     for (unsigned i = 0; i < numMicroops - 1; i++) {
+846         MicroOp * uopPtr = dynamic_cast<MicroOp *>(microOps[i].get());
+847         assert(uopPtr);
+848         uopPtr->setDelayedCommit();
+849     }
+850     microOps[numMicroops - 1]->setLastMicroop();
+851 }
+
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/arm/insts/\hyperlink{macromem_8hh}{macromem.hh}\item 
+arch/arm/insts/\hyperlink{macromem_8cc}{macromem.cc}\end{DoxyCompactItemize}

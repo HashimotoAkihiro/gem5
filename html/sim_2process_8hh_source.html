@@ -1,0 +1,347 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: sim/process.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>sim/process.hh</h1><a href="sim_2process_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2001-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> *          Steve Reinhardt</span>
+<a name="l00030"></a>00030 <span class="comment"> */</span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifndef __PROCESS_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define __PROCESS_HH__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;arch/registers.hh&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;config/the_isa.hh&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="se__translating__port__proxy_8hh.html">mem/se_translating_port_proxy.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="syscallreturn_8hh.html">sim/syscallreturn.hh</a>&quot;</span>
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="keyword">class </span><a class="code" href="classPageTable.html">PageTable</a>;
+<a name="l00047"></a>00047 <span class="keyword">struct </span>ProcessParams;
+<a name="l00048"></a>00048 <span class="keyword">struct </span>LiveProcessParams;
+<a name="l00049"></a>00049 <span class="keyword">class </span><a class="code" href="classSyscallDesc.html">SyscallDesc</a>;
+<a name="l00050"></a>00050 <span class="keyword">class </span><a class="code" href="classSystem.html">System</a>;
+<a name="l00051"></a>00051 <span class="keyword">class </span><a class="code" href="classThreadContext.html">ThreadContext</a>;
+<a name="l00052"></a>00052 
+<a name="l00053"></a>00053 <span class="keyword">template</span>&lt;<span class="keyword">class</span> IntType&gt;
+<a name="l00054"></a><a class="code" href="structAuxVector.html">00054</a> <span class="keyword">struct </span><a class="code" href="structAuxVector.html">AuxVector</a>
+<a name="l00055"></a>00055 {
+<a name="l00056"></a><a class="code" href="structAuxVector.html#a4b056bc811e2d0991534ddd1c5f34331">00056</a>     IntType <a class="code" href="structAuxVector.html#a4b056bc811e2d0991534ddd1c5f34331">a_type</a>;
+<a name="l00057"></a><a class="code" href="structAuxVector.html#a107121929143b17dedbc4fb74a7af245">00057</a>     IntType <a class="code" href="structAuxVector.html#a107121929143b17dedbc4fb74a7af245">a_val</a>;
+<a name="l00058"></a>00058 
+<a name="l00059"></a><a class="code" href="structAuxVector.html#af1cd9c349ae0b291d98048cb753dbfcc">00059</a>     <a class="code" href="structAuxVector.html#af1cd9c349ae0b291d98048cb753dbfcc">AuxVector</a>()
+<a name="l00060"></a>00060     {}
+<a name="l00061"></a>00061 
+<a name="l00062"></a>00062     <a class="code" href="structAuxVector.html#af1cd9c349ae0b291d98048cb753dbfcc">AuxVector</a>(IntType <a class="code" href="namespaceX86ISA.html#ad805db903f6899f960fd9a982272096a">type</a>, IntType <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00063"></a>00063 };
+<a name="l00064"></a>00064 
+<a name="l00065"></a><a class="code" href="classProcess.html">00065</a> <span class="keyword">class </span><a class="code" href="classProcess_1_1Process.html">Process</a> : <span class="keyword">public</span> <a class="code" href="classSimObject.html">SimObject</a>
+<a name="l00066"></a>00066 {
+<a name="l00067"></a>00067   <span class="keyword">public</span>:
+<a name="l00068"></a>00068 
+<a name="l00071"></a><a class="code" href="classProcess.html#af27ccd765f13a4b7bd119dc7579e2746">00071</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classProcess.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073     <span class="comment">// thread contexts associated with this process</span>
+<a name="l00074"></a><a class="code" href="classProcess.html#a64a72121f39c3cbc68bb1b863c3f43ed">00074</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;int&gt;</a> <a class="code" href="classProcess.html#a64a72121f39c3cbc68bb1b863c3f43ed">contextIds</a>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076     <span class="comment">// number of CPUs (esxec contexts, really) assigned to this process.</span>
+<a name="l00077"></a><a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">00077</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classProcess.html#ac5c70b967092e10582ce2f165e174890">numCpus</a>() { <span class="keywordflow">return</span> <a class="code" href="classProcess.html#a64a72121f39c3cbc68bb1b863c3f43ed">contextIds</a>.size(); }
+<a name="l00078"></a>00078 
+<a name="l00079"></a>00079     <span class="comment">// record of blocked context</span>
+<a name="l00080"></a><a class="code" href="structProcess_1_1WaitRec.html">00080</a>     <span class="keyword">struct </span><a class="code" href="structProcess_1_1WaitRec.html">WaitRec</a>
+<a name="l00081"></a>00081     {
+<a name="l00082"></a><a class="code" href="structProcess_1_1WaitRec.html#a4e0bff73adcc46aa65c3e7f45803df17">00082</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="structProcess_1_1WaitRec.html#a4e0bff73adcc46aa65c3e7f45803df17">waitChan</a>;
+<a name="l00083"></a><a class="code" href="structProcess_1_1WaitRec.html#af05343af1b3beaa38b21020a12e74a03">00083</a>         <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="structProcess_1_1WaitRec.html#af05343af1b3beaa38b21020a12e74a03">waitingContext</a>;
+<a name="l00084"></a>00084 
+<a name="l00085"></a><a class="code" href="structProcess_1_1WaitRec.html#a7ae7b76bb836e9d49888822586b0c8e6">00085</a>         <a class="code" href="structProcess_1_1WaitRec.html#a7ae7b76bb836e9d49888822586b0c8e6">WaitRec</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> chan, <a class="code" href="classThreadContext.html">ThreadContext</a> *ctx)
+<a name="l00086"></a>00086             : <a class="code" href="structProcess_1_1WaitRec.html#a4e0bff73adcc46aa65c3e7f45803df17">waitChan</a>(chan), <a class="code" href="structProcess_1_1WaitRec.html#af05343af1b3beaa38b21020a12e74a03">waitingContext</a>(ctx)
+<a name="l00087"></a>00087         {       }
+<a name="l00088"></a>00088     };
+<a name="l00089"></a>00089 
+<a name="l00090"></a>00090     <span class="comment">// list of all blocked contexts</span>
+<a name="l00091"></a><a class="code" href="classProcess.html#a8af61364ae9c966602b3b5ec1c0f7f09">00091</a>     <a class="code" href="classstd_1_1list.html">std::list&lt;WaitRec&gt;</a> <a class="code" href="classProcess.html#a8af61364ae9c966602b3b5ec1c0f7f09">waitList</a>;
+<a name="l00092"></a>00092 
+<a name="l00093"></a><a class="code" href="classProcess.html#aa0d3d9ff2a6fcb719d3b83226bb50638">00093</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#aa0d3d9ff2a6fcb719d3b83226bb50638">brk_point</a>;             <span class="comment">// top of the data segment</span>
+<a name="l00094"></a>00094 
+<a name="l00095"></a><a class="code" href="classProcess.html#a9301d238f8ee69de69d9a608f23b0ee2">00095</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#a9301d238f8ee69de69d9a608f23b0ee2">stack_base</a>;            <span class="comment">// stack segment base (highest address)</span>
+<a name="l00096"></a><a class="code" href="classProcess.html#a846e164ff6493f2b7001b0adc9dfe535">00096</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classProcess.html#a846e164ff6493f2b7001b0adc9dfe535">stack_size</a>;        <span class="comment">// initial stack size</span>
+<a name="l00097"></a><a class="code" href="classProcess.html#a03ca56edd14eafca9beec28c150e05a6">00097</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#a03ca56edd14eafca9beec28c150e05a6">stack_min</a>;             <span class="comment">// lowest address accessed on the stack</span>
+<a name="l00098"></a>00098 
+<a name="l00099"></a>00099     <span class="comment">// The maximum size allowed for the stack.</span>
+<a name="l00100"></a><a class="code" href="classProcess.html#a02d0240a7f8b3d791b54cd01f9370121">00100</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#a02d0240a7f8b3d791b54cd01f9370121">max_stack_size</a>;
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102     <span class="comment">// addr to use for next stack region (for multithreaded apps)</span>
+<a name="l00103"></a><a class="code" href="classProcess.html#a55a3705006af6c58cba9f9a23ba89864">00103</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#a55a3705006af6c58cba9f9a23ba89864">next_thread_stack_base</a>;
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105     <span class="comment">// Base of region for mmaps (when user doesn&apos;t specify an address).</span>
+<a name="l00106"></a><a class="code" href="classProcess.html#a39ba573f8e6f0a0f33a82245af695ffc">00106</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#a39ba573f8e6f0a0f33a82245af695ffc">mmap_start</a>;
+<a name="l00107"></a><a class="code" href="classProcess.html#a41a18edd0dbae5a7bb12e20a30c2e3e1">00107</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#a41a18edd0dbae5a7bb12e20a30c2e3e1">mmap_end</a>;
+<a name="l00108"></a>00108 
+<a name="l00109"></a>00109     <span class="comment">// Base of region for nxm data</span>
+<a name="l00110"></a><a class="code" href="classProcess.html#a2e51a258c95c46a8e3b3b4c2c74795e6">00110</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#a2e51a258c95c46a8e3b3b4c2c74795e6">nxm_start</a>;
+<a name="l00111"></a><a class="code" href="classProcess.html#aa47cd9dfc4d79b68bb78ee4b10b8298d">00111</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classProcess.html#aa47cd9dfc4d79b68bb78ee4b10b8298d">nxm_end</a>;
+<a name="l00112"></a>00112 
+<a name="l00113"></a><a class="code" href="classProcess.html#a71ce639346bf9b5caabdf218544e302a">00113</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classProcess.html#a71ce639346bf9b5caabdf218544e302a">num_syscalls</a>;       <span class="comment">// number of syscalls executed</span>
+<a name="l00114"></a>00114 
+<a name="l00115"></a>00115   <span class="keyword">protected</span>:
+<a name="l00116"></a>00116     <span class="comment">// constructor</span>
+<a name="l00117"></a>00117     <a class="code" href="classProcess.html#a2c30075e49c804623c22b25934cfa02a">Process</a>(ProcessParams *<a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>);
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a3c34ea9b29f410748d4435a667484924">initState</a>();
+<a name="l00120"></a>00120 
+<a name="l00121"></a>00121   <span class="keyword">public</span>:
+<a name="l00122"></a>00122 
+<a name="l00123"></a>00123     <span class="comment">//This id is assigned by m5 and is used to keep process&apos; tlb entries</span>
+<a name="l00124"></a>00124     <span class="comment">//separated.</span>
+<a name="l00125"></a><a class="code" href="classProcess.html#a570045a30dc7f4c596f2fa18dfdfbed5">00125</a>     uint64_t <a class="code" href="classProcess.html#a570045a30dc7f4c596f2fa18dfdfbed5">M5_pid</a>;
+<a name="l00126"></a>00126 
+<a name="l00127"></a><a class="code" href="classProcess.html#ad14ffa23ad731f6003755b643f999049">00127</a>     <a class="code" href="classPageTable.html">PageTable</a>* <a class="code" href="classProcess.html#ad14ffa23ad731f6003755b643f999049">pTable</a>;
+<a name="l00128"></a>00128 
+<a name="l00129"></a><a class="code" href="classProcess_1_1FdMap.html">00129</a>     <span class="keyword">class </span><a class="code" href="classProcess_1_1FdMap.html">FdMap</a>
+<a name="l00130"></a>00130     {
+<a name="l00131"></a>00131       <span class="keyword">public</span>:
+<a name="l00132"></a><a class="code" href="classProcess_1_1FdMap.html#a6f8059414f0228f0256115e024eeed4b">00132</a>         <span class="keywordtype">int</span> <a class="code" href="classProcess_1_1FdMap.html#a6f8059414f0228f0256115e024eeed4b">fd</a>;
+<a name="l00133"></a><a class="code" href="classProcess_1_1FdMap.html#ae80f820219e45772366a2a68de6a54c4">00133</a>         std::string <a class="code" href="classProcess_1_1FdMap.html#ae80f820219e45772366a2a68de6a54c4">filename</a>;
+<a name="l00134"></a><a class="code" href="classProcess_1_1FdMap.html#a1ea5d0cb93f22f7d0fdf804bd68c3326">00134</a>         <span class="keywordtype">int</span> <a class="code" href="classProcess_1_1FdMap.html#a1ea5d0cb93f22f7d0fdf804bd68c3326">mode</a>;
+<a name="l00135"></a><a class="code" href="classProcess_1_1FdMap.html#ac8bf36fe0577cba66bccda3a6f7e80a4">00135</a>         <span class="keywordtype">int</span> <a class="code" href="classProcess_1_1FdMap.html#ac8bf36fe0577cba66bccda3a6f7e80a4">flags</a>;
+<a name="l00136"></a><a class="code" href="classProcess_1_1FdMap.html#a9260c74a8a3973a8cb2ac4c6656d5a20">00136</a>         <span class="keywordtype">bool</span> <a class="code" href="classProcess_1_1FdMap.html#a9260c74a8a3973a8cb2ac4c6656d5a20">isPipe</a>;
+<a name="l00137"></a><a class="code" href="classProcess_1_1FdMap.html#abc824a1a926dd34c7050c0ea4ace0d65">00137</a>         <span class="keywordtype">int</span> <a class="code" href="classProcess_1_1FdMap.html#abc824a1a926dd34c7050c0ea4ace0d65">readPipeSource</a>;
+<a name="l00138"></a><a class="code" href="classProcess_1_1FdMap.html#af57442475b89e86b86478fe902d7c4d1">00138</a>         uint64_t <a class="code" href="classProcess_1_1FdMap.html#af57442475b89e86b86478fe902d7c4d1">fileOffset</a>;
+<a name="l00139"></a>00139 
+<a name="l00140"></a><a class="code" href="classProcess_1_1FdMap.html#a6b68970055ea3a7a7e707094013696f8">00140</a>         <a class="code" href="classProcess_1_1FdMap.html#a6b68970055ea3a7a7e707094013696f8">FdMap</a>()
+<a name="l00141"></a>00141             : <a class="code" href="classProcess_1_1FdMap.html#a6f8059414f0228f0256115e024eeed4b">fd</a>(-1), <a class="code" href="classProcess_1_1FdMap.html#ae80f820219e45772366a2a68de6a54c4">filename</a>(<span class="stringliteral">&quot;NULL&quot;</span>), <a class="code" href="classProcess_1_1FdMap.html#a1ea5d0cb93f22f7d0fdf804bd68c3326">mode</a>(0), <a class="code" href="classProcess_1_1FdMap.html#ac8bf36fe0577cba66bccda3a6f7e80a4">flags</a>(0),
+<a name="l00142"></a>00142               <a class="code" href="classProcess_1_1FdMap.html#a9260c74a8a3973a8cb2ac4c6656d5a20">isPipe</a>(false), <a class="code" href="classProcess_1_1FdMap.html#abc824a1a926dd34c7050c0ea4ace0d65">readPipeSource</a>(0), <a class="code" href="classProcess_1_1FdMap.html#af57442475b89e86b86478fe902d7c4d1">fileOffset</a>(0)
+<a name="l00143"></a>00143         { }
+<a name="l00144"></a>00144 
+<a name="l00145"></a>00145         <span class="keywordtype">void</span> <a class="code" href="classProcess_1_1FdMap.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00146"></a>00146         <span class="keywordtype">void</span> <a class="code" href="classProcess_1_1FdMap.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00147"></a>00147     };
+<a name="l00148"></a>00148 
+<a name="l00149"></a>00149   <span class="keyword">protected</span>:
+<a name="l00151"></a><a class="code" href="classProcess.html#a280be1c93dee29cd2c6d5d1502c60a9b">00151</a>     <a class="code" href="classSETranslatingPortProxy.html">SETranslatingPortProxy</a> <a class="code" href="classProcess.html#a280be1c93dee29cd2c6d5d1502c60a9b" title="Memory proxy for initialization (image loading).">initVirtMem</a>;
+<a name="l00152"></a>00152 
+<a name="l00153"></a>00153   <span class="keyword">private</span>:
+<a name="l00154"></a>00154     <span class="comment">// file descriptor remapping support</span>
+<a name="l00155"></a><a class="code" href="classProcess.html#a2a18c1a4811677d6adabab2287226bb1">00155</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classProcess.html#a2a18c1a4811677d6adabab2287226bb1">MAX_FD</a> = 256;    <span class="comment">// max legal fd value</span>
+<a name="l00156"></a><a class="code" href="classProcess.html#ad817e277dc908ed0f32c4180c5ddb350">00156</a>     <a class="code" href="classProcess_1_1FdMap.html">FdMap</a> <a class="code" href="classProcess.html#ad817e277dc908ed0f32c4180c5ddb350">fd_map</a>[<a class="code" href="classProcess.html#a2a18c1a4811677d6adabab2287226bb1">MAX_FD</a>+1];
+<a name="l00157"></a>00157 
+<a name="l00158"></a>00158 
+<a name="l00159"></a>00159   <span class="keyword">public</span>:
+<a name="l00160"></a>00160     <span class="comment">// static helper functions to generate file descriptors for constructor</span>
+<a name="l00161"></a>00161     <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classProcess.html#acea5ecbb223871b0d852b03b68837461">openInputFile</a>(<span class="keyword">const</span> std::string &amp;filename);
+<a name="l00162"></a>00162     <span class="keyword">static</span> <span class="keywordtype">int</span> <a class="code" href="classProcess.html#a230c9c6213b49eef2273fa99e3a511ba">openOutputFile</a>(<span class="keyword">const</span> std::string &amp;filename);
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164     <span class="comment">// override of virtual SimObject method: register statistics</span>
+<a name="l00165"></a>00165     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00166"></a>00166 
+<a name="l00167"></a>00167     <span class="comment">// After getting registered with system object, tell process which</span>
+<a name="l00168"></a>00168     <span class="comment">// system-wide context id it is assigned.</span>
+<a name="l00169"></a><a class="code" href="classProcess.html#aec797e960b8c534f9105fbd4ee83f2c7">00169</a>     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#aec797e960b8c534f9105fbd4ee83f2c7">assignThreadContext</a>(<span class="keywordtype">int</span> context_id)
+<a name="l00170"></a>00170     {
+<a name="l00171"></a>00171         <a class="code" href="classProcess.html#a64a72121f39c3cbc68bb1b863c3f43ed">contextIds</a>.push_back(context_id);
+<a name="l00172"></a>00172     }
+<a name="l00173"></a>00173 
+<a name="l00174"></a>00174     <span class="comment">// Find a free context to use</span>
+<a name="l00175"></a>00175     <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="classProcess.html#ac26b4f23be05f684886e00f4f7526a0e">findFreeContext</a>();
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177     <span class="comment">// provide program name for debug messages</span>
+<a name="l00178"></a><a class="code" href="classProcess.html#a580745d5543eb666c37e2a5f37fb32a0">00178</a>     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classProcess.html#a580745d5543eb666c37e2a5f37fb32a0">progName</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <span class="stringliteral">&quot;&lt;unknown&gt;&quot;</span>; }
+<a name="l00179"></a>00179 
+<a name="l00180"></a>00180     <span class="comment">// map simulator fd sim_fd to target fd tgt_fd</span>
+<a name="l00181"></a>00181     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a292e48ab06f50224924454b6c74c90e4">dup_fd</a>(<span class="keywordtype">int</span> <a class="code" href="classProcess.html#ac7bb7ef35884d6fb4a2c02f167ab7679">sim_fd</a>, <span class="keywordtype">int</span> tgt_fd);
+<a name="l00182"></a>00182 
+<a name="l00183"></a>00183     <span class="comment">// generate new target fd for sim_fd</span>
+<a name="l00184"></a>00184     <span class="keywordtype">int</span> <a class="code" href="classProcess.html#aa98d99fb9a7db11be09b4e5b818d1795">alloc_fd</a>(<span class="keywordtype">int</span> <a class="code" href="classProcess.html#ac7bb7ef35884d6fb4a2c02f167ab7679">sim_fd</a>, std::string filename, <span class="keywordtype">int</span> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a5f3b9b97eb2dfa29d33e74878455f90d">mode</a>,
+<a name="l00185"></a>00185                  <span class="keywordtype">bool</span> pipe);
+<a name="l00186"></a>00186 
+<a name="l00187"></a>00187     <span class="comment">// free target fd (e.g., after close)</span>
+<a name="l00188"></a>00188     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a8c39614271eb6220f2db1bd774f43849">free_fd</a>(<span class="keywordtype">int</span> tgt_fd);
+<a name="l00189"></a>00189 
+<a name="l00190"></a>00190     <span class="comment">// look up simulator fd for given target fd</span>
+<a name="l00191"></a>00191     <span class="keywordtype">int</span> <a class="code" href="classProcess.html#ac7bb7ef35884d6fb4a2c02f167ab7679">sim_fd</a>(<span class="keywordtype">int</span> tgt_fd);
+<a name="l00192"></a>00192 
+<a name="l00193"></a>00193     <span class="comment">// look up simulator fd_map object for a given target fd</span>
+<a name="l00194"></a>00194     FdMap *<a class="code" href="classProcess.html#ac12196dd197c6731a021e211a95edb2d">sim_fd_obj</a>(<span class="keywordtype">int</span> tgt_fd);
+<a name="l00195"></a>00195 
+<a name="l00196"></a>00196     <span class="comment">// fix all offsets for currently open files and save them</span>
+<a name="l00197"></a>00197     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a65bfd573cf5c576db37f79195adb9cbc">fix_file_offsets</a>();
+<a name="l00198"></a>00198 
+<a name="l00199"></a>00199     <span class="comment">// find all offsets for currently open files and save them</span>
+<a name="l00200"></a>00200     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#aec771386421777782ca6bec97dd93db3">find_file_offsets</a>();
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202     <span class="comment">// set the source of this read pipe for a checkpoint resume</span>
+<a name="l00203"></a>00203     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a06811a348d456174f7ad9f2b8f03a129">setReadPipeSource</a>(<span class="keywordtype">int</span> read_pipe_fd, <span class="keywordtype">int</span> source_fd);
+<a name="l00204"></a>00204 
+<a name="l00205"></a>00205     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a0abb4f4856f531e5b48484f5114a5bf9">syscall</a>(int64_t callnum, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>) = 0;
+<a name="l00206"></a>00206 
+<a name="l00207"></a>00207     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#aaebf8af407502fcc035e598795f77089">allocateMem</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, int64_t size, <span class="keywordtype">bool</span> clobber = <span class="keyword">false</span>);
+<a name="l00208"></a>00208 
+<a name="l00211"></a>00211     <span class="keywordtype">bool</span> <a class="code" href="classProcess.html#a5bfc8cca2ce6b8a330e0c209468e5f71">fixupStackFault</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>);
+<a name="l00212"></a>00212 
+<a name="l00226"></a>00226     <span class="keywordtype">bool</span> <a class="code" href="classProcess.html#ac2bb68c3c87d0a046f848f537abb23fc">map</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> paddr, <span class="keywordtype">int</span> size);
+<a name="l00227"></a>00227 
+<a name="l00228"></a>00228     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00229"></a>00229     <span class="keywordtype">void</span> <a class="code" href="classProcess.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00230"></a>00230 };
+<a name="l00231"></a>00231 
+<a name="l00232"></a>00232 <span class="comment">//</span>
+<a name="l00233"></a>00233 <span class="comment">// &quot;Live&quot; process with system calls redirected to host system</span>
+<a name="l00234"></a>00234 <span class="comment">//</span>
+<a name="l00235"></a>00235 <span class="keyword">class </span><a class="code" href="classObjectFile.html">ObjectFile</a>;
+<a name="l00236"></a><a class="code" href="classLiveProcess.html">00236</a> <span class="keyword">class </span><a class="code" href="classProcess_1_1LiveProcess.html">LiveProcess</a> : <span class="keyword">public</span> <a class="code" href="classProcess.html">Process</a>
+<a name="l00237"></a>00237 {
+<a name="l00238"></a>00238   <span class="keyword">protected</span>:
+<a name="l00239"></a><a class="code" href="classLiveProcess.html#ab6cfcfa7903c66267b3e0351c3caa809">00239</a>     <a class="code" href="classObjectFile.html">ObjectFile</a> *<a class="code" href="classLiveProcess.html#ab6cfcfa7903c66267b3e0351c3caa809">objFile</a>;
+<a name="l00240"></a><a class="code" href="classLiveProcess.html#a766c46ccd2bdbcb7f06e1188cf490b53">00240</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::string&gt;</a> <a class="code" href="classLiveProcess.html#a766c46ccd2bdbcb7f06e1188cf490b53">argv</a>;
+<a name="l00241"></a><a class="code" href="classLiveProcess.html#a21b2e69f52b03f0645a9203b9b1bb6d7">00241</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::string&gt;</a> <a class="code" href="classLiveProcess.html#a21b2e69f52b03f0645a9203b9b1bb6d7">envp</a>;
+<a name="l00242"></a><a class="code" href="classLiveProcess.html#a3b9c0a544336b86a5844f5130203fb6d">00242</a>     std::string <a class="code" href="classLiveProcess.html#a3b9c0a544336b86a5844f5130203fb6d">cwd</a>;
+<a name="l00243"></a>00243 
+<a name="l00244"></a>00244     <a class="code" href="classLiveProcess.html#ab066d499d8c28173dc600ff40954e5ea">LiveProcess</a>(LiveProcessParams *<a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>, <a class="code" href="classObjectFile.html">ObjectFile</a> *<a class="code" href="classLiveProcess.html#ab6cfcfa7903c66267b3e0351c3caa809">objFile</a>);
+<a name="l00245"></a>00245 
+<a name="l00246"></a>00246     <span class="comment">// Id of the owner of the process</span>
+<a name="l00247"></a><a class="code" href="classLiveProcess.html#ab5e62bf0809db4db6d1a4c37aa6817f7">00247</a>     uint64_t <a class="code" href="classLiveProcess.html#ab5e62bf0809db4db6d1a4c37aa6817f7">__uid</a>;
+<a name="l00248"></a><a class="code" href="classLiveProcess.html#a8c9c94041c682f507630112575912ef9">00248</a>     uint64_t <a class="code" href="classLiveProcess.html#a8c9c94041c682f507630112575912ef9">__euid</a>;
+<a name="l00249"></a><a class="code" href="classLiveProcess.html#ac2e25e8dbd0a59fa5c2109f28532f72a">00249</a>     uint64_t <a class="code" href="classLiveProcess.html#ac2e25e8dbd0a59fa5c2109f28532f72a">__gid</a>;
+<a name="l00250"></a><a class="code" href="classLiveProcess.html#a3f4f47216d677955b6dd24c2c4dee313">00250</a>     uint64_t <a class="code" href="classLiveProcess.html#a3f4f47216d677955b6dd24c2c4dee313">__egid</a>;
+<a name="l00251"></a>00251 
+<a name="l00252"></a>00252     <span class="comment">// pid of the process and it&apos;s parent</span>
+<a name="l00253"></a><a class="code" href="classLiveProcess.html#a8458ebdafd0edba4f8ed5b479b652f8d">00253</a>     uint64_t <a class="code" href="classLiveProcess.html#a8458ebdafd0edba4f8ed5b479b652f8d">__pid</a>;
+<a name="l00254"></a><a class="code" href="classLiveProcess.html#a86582782130e7b5b5ae7433c8634eec1">00254</a>     uint64_t <a class="code" href="classLiveProcess.html#a86582782130e7b5b5ae7433c8634eec1">__ppid</a>;
+<a name="l00255"></a>00255 
+<a name="l00256"></a>00256   <span class="keyword">public</span>:
+<a name="l00257"></a>00257 
+<a name="l00258"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349a">00258</a>     <span class="keyword">enum</span> <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349a">AuxiliaryVectorType</a> {
+<a name="l00259"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa93d3713d59d605b86574b623e4242212">00259</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa93d3713d59d605b86574b623e4242212">M5_AT_NULL</a> = 0,
+<a name="l00260"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa39b6bdaacb7fa9afb24adc5ccfcde7cd">00260</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa39b6bdaacb7fa9afb24adc5ccfcde7cd">M5_AT_IGNORE</a> = 1,
+<a name="l00261"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa84871b59fa21cf859fcb0e26b5870697">00261</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa84871b59fa21cf859fcb0e26b5870697">M5_AT_EXECFD</a> = 2,
+<a name="l00262"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa36f48f6eb495284ebf5d1b941c66b848">00262</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa36f48f6eb495284ebf5d1b941c66b848">M5_AT_PHDR</a> = 3,
+<a name="l00263"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa9c38dbe22c973257e5d54221bc7f7064">00263</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa9c38dbe22c973257e5d54221bc7f7064">M5_AT_PHENT</a> = 4,
+<a name="l00264"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa74b22be1b0b521d3e5ed1fb1d350a70e">00264</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa74b22be1b0b521d3e5ed1fb1d350a70e">M5_AT_PHNUM</a> = 5,
+<a name="l00265"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aadc94818dfb2bcdce8d734edb2dd84b21">00265</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aadc94818dfb2bcdce8d734edb2dd84b21">M5_AT_PAGESZ</a> = 6,
+<a name="l00266"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa369cb0a7cd29fd54cd60406f0ba0dc95">00266</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa369cb0a7cd29fd54cd60406f0ba0dc95">M5_AT_BASE</a> = 7,
+<a name="l00267"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa3f73157f68676f6ed47d0435afaca5b1">00267</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa3f73157f68676f6ed47d0435afaca5b1">M5_AT_FLAGS</a> = 8,
+<a name="l00268"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aacd1785932da86fe7b1e720333108129f">00268</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aacd1785932da86fe7b1e720333108129f">M5_AT_ENTRY</a> = 9,
+<a name="l00269"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aadd1b0590175c0b19cb67111dfb42ef2a">00269</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aadd1b0590175c0b19cb67111dfb42ef2a">M5_AT_NOTELF</a> = 10,
+<a name="l00270"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa49db1e20ea3cb0fc497505fde04a8d15">00270</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa49db1e20ea3cb0fc497505fde04a8d15">M5_AT_UID</a> = 11,
+<a name="l00271"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa029d064e22c49f3b6a88e57dfaeb4088">00271</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa029d064e22c49f3b6a88e57dfaeb4088">M5_AT_EUID</a> = 12,
+<a name="l00272"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa1a906102f77c4e798e34f7141947f378">00272</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa1a906102f77c4e798e34f7141947f378">M5_AT_GID</a> = 13,
+<a name="l00273"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa56daba51d843a9826902813c6479bc31">00273</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa56daba51d843a9826902813c6479bc31">M5_AT_EGID</a> = 14,
+<a name="l00274"></a>00274         <span class="comment">// The following may be specific to Linux</span>
+<a name="l00275"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa01850afee5ccb341118fa947def7faf2">00275</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa01850afee5ccb341118fa947def7faf2">M5_AT_PLATFORM</a> = 15,
+<a name="l00276"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aad6e66930f88d3e1a0c2c51f3f90f1851">00276</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aad6e66930f88d3e1a0c2c51f3f90f1851">M5_AT_HWCAP</a> = 16,
+<a name="l00277"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa3bc3a7ebce080954256c4c54ba8bc2f3">00277</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa3bc3a7ebce080954256c4c54ba8bc2f3">M5_AT_CLKTCK</a> = 17,
+<a name="l00278"></a>00278 
+<a name="l00279"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa94e8f26f3de09fc99811055b35c06a8a">00279</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aa94e8f26f3de09fc99811055b35c06a8a">M5_AT_SECURE</a> = 23,
+<a name="l00280"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aaf3aaaec24b820caac6accfa66be583f0">00280</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aaf3aaaec24b820caac6accfa66be583f0">M5_BASE_PLATFORM</a> = 24,
+<a name="l00281"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aacd564c0fc8762d6f9d446e7302975eb9">00281</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aacd564c0fc8762d6f9d446e7302975eb9">M5_AT_RANDOM</a> = 25,
+<a name="l00282"></a>00282 
+<a name="l00283"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aabeb3769eab34dfa6cb33929d480b67ea">00283</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aabeb3769eab34dfa6cb33929d480b67ea">M5_AT_EXECFN</a> = 31,
+<a name="l00284"></a>00284 
+<a name="l00285"></a><a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aaf8fdb3a415697474e7de10bc30411646">00285</a>         <a class="code" href="classLiveProcess.html#aeb4aa6d635512df433c7194b793c349aaf8fdb3a415697474e7de10bc30411646">M5_AT_VECTOR_SIZE</a> = 44
+<a name="l00286"></a>00286     };
+<a name="l00287"></a>00287 
+<a name="l00288"></a><a class="code" href="classLiveProcess.html#aa371c162844c3023c2c2c98913267482">00288</a>     <span class="keyword">inline</span> uint64_t <a class="code" href="classLiveProcess.html#aa371c162844c3023c2c2c98913267482">uid</a>() {<span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#ab5e62bf0809db4db6d1a4c37aa6817f7">__uid</a>;}
+<a name="l00289"></a><a class="code" href="classLiveProcess.html#a37002dbf259d35128485c6014a0c2fd9">00289</a>     <span class="keyword">inline</span> uint64_t <a class="code" href="classLiveProcess.html#a37002dbf259d35128485c6014a0c2fd9">euid</a>() {<span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#a8c9c94041c682f507630112575912ef9">__euid</a>;}
+<a name="l00290"></a><a class="code" href="classLiveProcess.html#aa71ba391e05d5e24c3623f7f21edaa74">00290</a>     <span class="keyword">inline</span> uint64_t <a class="code" href="classLiveProcess.html#aa71ba391e05d5e24c3623f7f21edaa74">gid</a>() {<span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#ac2e25e8dbd0a59fa5c2109f28532f72a">__gid</a>;}
+<a name="l00291"></a><a class="code" href="classLiveProcess.html#a0868ad9fa2d15bdaa033a861d2448edc">00291</a>     <span class="keyword">inline</span> uint64_t <a class="code" href="classLiveProcess.html#a0868ad9fa2d15bdaa033a861d2448edc">egid</a>() {<span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#a3f4f47216d677955b6dd24c2c4dee313">__egid</a>;}
+<a name="l00292"></a><a class="code" href="classLiveProcess.html#a8bce5535a19cd849d89dacf166319a1a">00292</a>     <span class="keyword">inline</span> uint64_t <a class="code" href="classLiveProcess.html#a8bce5535a19cd849d89dacf166319a1a">pid</a>() {<span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#a8458ebdafd0edba4f8ed5b479b652f8d">__pid</a>;}
+<a name="l00293"></a><a class="code" href="classLiveProcess.html#a4c1e9134209da61d2f8edc374a94f327">00293</a>     <span class="keyword">inline</span> uint64_t <a class="code" href="classLiveProcess.html#a4c1e9134209da61d2f8edc374a94f327">ppid</a>() {<span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#a86582782130e7b5b5ae7433c8634eec1">__ppid</a>;}
+<a name="l00294"></a>00294 
+<a name="l00295"></a>00295     <span class="comment">// provide program name for debug messages</span>
+<a name="l00296"></a><a class="code" href="classLiveProcess.html#a580745d5543eb666c37e2a5f37fb32a0">00296</a>     <span class="keyword">virtual</span> <span class="keyword">const</span> <span class="keywordtype">char</span> *<a class="code" href="classLiveProcess.html#a580745d5543eb666c37e2a5f37fb32a0">progName</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#a766c46ccd2bdbcb7f06e1188cf490b53">argv</a>[0].c_str(); }
+<a name="l00297"></a>00297 
+<a name="l00298"></a>00298     std::string
+<a name="l00299"></a><a class="code" href="classLiveProcess.html#a9c94a4c8c47961ea420f67ad43c4a5e5">00299</a>     <a class="code" href="classLiveProcess.html#a9c94a4c8c47961ea420f67ad43c4a5e5">fullPath</a>(<span class="keyword">const</span> std::string &amp;filename)
+<a name="l00300"></a>00300     {
+<a name="l00301"></a>00301         <span class="keywordflow">if</span> (filename[0] == <span class="charliteral">&apos;/&apos;</span> || <a class="code" href="classLiveProcess.html#a3b9c0a544336b86a5844f5130203fb6d">cwd</a>.empty())
+<a name="l00302"></a>00302             <span class="keywordflow">return</span> filename;
+<a name="l00303"></a>00303 
+<a name="l00304"></a>00304         std::string full = <a class="code" href="classLiveProcess.html#a3b9c0a544336b86a5844f5130203fb6d">cwd</a>;
+<a name="l00305"></a>00305 
+<a name="l00306"></a>00306         <span class="keywordflow">if</span> (<a class="code" href="classLiveProcess.html#a3b9c0a544336b86a5844f5130203fb6d">cwd</a>[<a class="code" href="classLiveProcess.html#a3b9c0a544336b86a5844f5130203fb6d">cwd</a>.size() - 1] != <span class="charliteral">&apos;/&apos;</span>)
+<a name="l00307"></a>00307             full += <span class="charliteral">&apos;/&apos;</span>;
+<a name="l00308"></a>00308 
+<a name="l00309"></a>00309         <span class="keywordflow">return</span> full + filename;
+<a name="l00310"></a>00310     }
+<a name="l00311"></a>00311 
+<a name="l00312"></a><a class="code" href="classLiveProcess.html#aba6680a83910e09f666106e67bc10c3b">00312</a>     std::string <a class="code" href="classLiveProcess.html#aba6680a83910e09f666106e67bc10c3b">getcwd</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classLiveProcess.html#a3b9c0a544336b86a5844f5130203fb6d">cwd</a>; }
+<a name="l00313"></a>00313 
+<a name="l00314"></a>00314     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classLiveProcess.html#a1ed38802271de4269c3adfa46c73e7e7">syscall</a>(int64_t callnum, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00315"></a>00315 
+<a name="l00316"></a>00316     <span class="keyword">virtual</span> <a class="code" href="namespaceAlphaISA.html#a0e080577527fb3e9685399f75b5caf15">TheISA::IntReg</a> <a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">int</span> &amp;<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>) = 0;
+<a name="l00317"></a>00317     <span class="keyword">virtual</span> <a class="code" href="namespaceAlphaISA.html#a0e080577527fb3e9685399f75b5caf15">TheISA::IntReg</a> <a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">getSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">int</span> &amp;<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a0da89c280130b84ae26405a901396428">width</a>);
+<a name="l00318"></a>00318     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classLiveProcess.html#a0f596ddb560a15ade4257db3a6c9dd44">setSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00319"></a>00319             <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, <a class="code" href="namespaceAlphaISA.html#a0e080577527fb3e9685399f75b5caf15">TheISA::IntReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>) = 0;
+<a name="l00320"></a>00320     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classLiveProcess.html#a5955e790542b86589b9fd75df24ec2d3">setSyscallReturn</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>,
+<a name="l00321"></a>00321             <a class="code" href="classSyscallReturn.html">SyscallReturn</a> return_value) = 0;
+<a name="l00322"></a>00322 
+<a name="l00323"></a>00323     <span class="keyword">virtual</span> <a class="code" href="classSyscallDesc.html">SyscallDesc</a> *<a class="code" href="classLiveProcess.html#a478f396f8895ef7728d26866a00121d7">getDesc</a>(<span class="keywordtype">int</span> callnum) = 0;
+<a name="l00324"></a>00324 
+<a name="l00325"></a>00325     <span class="comment">// this function is used to create the LiveProcess object, since</span>
+<a name="l00326"></a>00326     <span class="comment">// we can&apos;t tell which subclass of LiveProcess to use until we</span>
+<a name="l00327"></a>00327     <span class="comment">// open and look at the object file.</span>
+<a name="l00328"></a>00328     <span class="keyword">static</span> <a class="code" href="classLiveProcess.html">LiveProcess</a> *<a class="code" href="classLiveProcess.html#aacabc29a5ca2191f72591aaf7ffaba64">create</a>(LiveProcessParams *<a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>);
+<a name="l00329"></a>00329 };
+<a name="l00330"></a>00330 
+<a name="l00331"></a>00331 
+<a name="l00332"></a>00332 <span class="preprocessor">#endif // __PROCESS_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

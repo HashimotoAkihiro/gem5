@@ -1,0 +1,139 @@
+\hypertarget{classPciDevice_1_1PciConfigPort}{
+\section{クラス PciConfigPort}
+\label{classPciDevice_1_1PciConfigPort}\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+}
+PciConfigPortに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classPciDevice_1_1PciConfigPort}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPciDevice_1_1PciConfigPort_add98ce4360ec75b21c2f357b7a233acf}{PciConfigPort} (\hyperlink{classPciDevice}{PciDevice} $\ast$dev, int busid, int devid, int funcid, \hyperlink{classPlatform}{Platform} $\ast$p)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{base_2types_8hh_a5c8ed81b7d238c9083e1037ba6d61643}{Tick} \hyperlink{classPciDevice_1_1PciConfigPort_a5f0b4c4a94f6b0053f9d7a4eb9c2518a}{recvAtomic} (\hyperlink{classPacket}{PacketPtr} pkt)
+\item 
+virtual \hyperlink{classstd_1_1list}{AddrRangeList} \hyperlink{classPciDevice_1_1PciConfigPort_a36cf113d5e5e091ebddb32306c098fae}{getAddrRanges} () const 
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPciDevice}{PciDevice} $\ast$ \hyperlink{classPciDevice_1_1PciConfigPort_a9f9600bae2078d3e0d11c471e5e34488}{device}
+\item 
+\hyperlink{classPlatform}{Platform} $\ast$ \hyperlink{classPciDevice_1_1PciConfigPort_a75b48f1787959a4617f2a599d7c09aab}{platform}
+\item 
+int \hyperlink{classPciDevice_1_1PciConfigPort_a5071e865d44deeb430a3bce2cb2689a0}{busId}
+\item 
+int \hyperlink{classPciDevice_1_1PciConfigPort_ae33571d7242e04fb46496c9852fad407}{deviceId}
+\item 
+int \hyperlink{classPciDevice_1_1PciConfigPort_a2f4fdcfa0ddbad69ad60222dd5676868}{functionId}
+\item 
+\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \hyperlink{classPciDevice_1_1PciConfigPort_aab0054b91c8a54dc6f07615338b2e78d}{configAddr}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPciDevice_1_1PciConfigPort_add98ce4360ec75b21c2f357b7a233acf}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!PciConfigPort@{PciConfigPort}}
+\index{PciConfigPort@{PciConfigPort}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{PciConfigPort}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PciConfigPort} ({\bf PciDevice} $\ast$ {\em dev}, \/  int {\em busid}, \/  int {\em devid}, \/  int {\em funcid}, \/  {\bf Platform} $\ast$ {\em p})}}
+\label{classPciDevice_1_1PciConfigPort_add98ce4360ec75b21c2f357b7a233acf}
+
+
+
+\begin{DoxyCode}
+70     : SimpleTimingPort(dev->name() + "-pciconf", dev), device(dev),
+71       platform(p), busId(busid), deviceId(devid), functionId(funcid)
+72 {
+73     configAddr = platform->calcPciConfigAddr(busId, deviceId, functionId);
+74 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPciDevice_1_1PciConfigPort_a36cf113d5e5e091ebddb32306c098fae}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!getAddrRanges@{getAddrRanges}}
+\index{getAddrRanges@{getAddrRanges}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{getAddrRanges}]{\setlength{\rightskip}{0pt plus 5cm}{\bf AddrRangeList} getAddrRanges () const\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_a36cf113d5e5e091ebddb32306c098fae}
+Get a list of the non-\/overlapping address ranges the owner is responsible for. All slave ports must override this function and return a populated list with at least one item.
+
+\begin{DoxyReturn}{戻り値}
+a list of ranges responded to 
+\end{DoxyReturn}
+
+
+\hyperlink{classSlavePort_a6e967f8921e80748eb2be35b6b481a7e}{SlavePort}を実装しています。
+
+
+\begin{DoxyCode}
+89 {
+90     AddrRangeList ranges;
+91     if (configAddr != ULL(-1))
+92         ranges.push_back(RangeSize(configAddr, PCI_CONFIG_SIZE+1));
+93     return ranges;
+94 }
+\end{DoxyCode}
+\hypertarget{classPciDevice_1_1PciConfigPort_a5f0b4c4a94f6b0053f9d7a4eb9c2518a}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!recvAtomic@{recvAtomic}}
+\index{recvAtomic@{recvAtomic}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{recvAtomic}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Tick} recvAtomic ({\bf PacketPtr} {\em pkt})\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_a5f0b4c4a94f6b0053f9d7a4eb9c2518a}
+Receive an atomic request packet from the master port. 
+
+\hyperlink{classSimpleTimingPort_a428ab07671bc9372dc44a2487b12a726}{SimpleTimingPort}を実装しています。
+
+
+\begin{DoxyCode}
+79 {
+80     assert(pkt->getAddr() >= configAddr &&
+81            pkt->getAddr() < configAddr + PCI_CONFIG_SIZE);
+82     // @todo someone should pay for this
+83     pkt->busFirstWordDelay = pkt->busLastWordDelay = 0;
+84     return pkt->isRead() ? device->readConfig(pkt) : device->writeConfig(pkt);
+85 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPciDevice_1_1PciConfigPort_a5071e865d44deeb430a3bce2cb2689a0}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!busId@{busId}}
+\index{busId@{busId}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{busId}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf busId}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_a5071e865d44deeb430a3bce2cb2689a0}
+\hypertarget{classPciDevice_1_1PciConfigPort_aab0054b91c8a54dc6f07615338b2e78d}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!configAddr@{configAddr}}
+\index{configAddr@{configAddr}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{configAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Addr} {\bf configAddr}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_aab0054b91c8a54dc6f07615338b2e78d}
+\hypertarget{classPciDevice_1_1PciConfigPort_a9f9600bae2078d3e0d11c471e5e34488}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!device@{device}}
+\index{device@{device}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{device}]{\setlength{\rightskip}{0pt plus 5cm}{\bf PciDevice}$\ast$ {\bf device}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_a9f9600bae2078d3e0d11c471e5e34488}
+\hypertarget{classPciDevice_1_1PciConfigPort_ae33571d7242e04fb46496c9852fad407}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!deviceId@{deviceId}}
+\index{deviceId@{deviceId}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{deviceId}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf deviceId}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_ae33571d7242e04fb46496c9852fad407}
+\hypertarget{classPciDevice_1_1PciConfigPort_a2f4fdcfa0ddbad69ad60222dd5676868}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!functionId@{functionId}}
+\index{functionId@{functionId}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{functionId}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf functionId}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_a2f4fdcfa0ddbad69ad60222dd5676868}
+\hypertarget{classPciDevice_1_1PciConfigPort_a75b48f1787959a4617f2a599d7c09aab}{
+\index{PciDevice::PciConfigPort@{PciDevice::PciConfigPort}!platform@{platform}}
+\index{platform@{platform}!PciDevice::PciConfigPort@{PciDevice::PciConfigPort}}
+\subsubsection[{platform}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Platform}$\ast$ {\bf platform}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPciDevice_1_1PciConfigPort_a75b48f1787959a4617f2a599d7c09aab}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+dev/\hyperlink{pcidev_8hh}{pcidev.hh}\item 
+dev/\hyperlink{pcidev_8cc}{pcidev.cc}\end{DoxyCompactItemize}

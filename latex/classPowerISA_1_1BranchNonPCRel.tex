@@ -1,0 +1,109 @@
+\hypertarget{classPowerISA_1_1BranchNonPCRel}{
+\section{クラス BranchNonPCRel}
+\label{classPowerISA_1_1BranchNonPCRel}\index{PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}}
+}
+
+
+{\ttfamily \#include $<$branch.hh$>$}BranchNonPCRelに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=5cm]{classPowerISA_1_1BranchNonPCRel}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classPowerISA_1_1BranchNonPCRel_a1117eecee7455c92a3da453b412e574d}{BranchNonPCRel} (const char $\ast$mnem, \hyperlink{namespacePowerISA_a301c22ea09fa33dcfe6ddf22f203699c}{MachInst} \_\-machInst, OpClass \_\-\_\-opClass)
+\begin{DoxyCompactList}\small\item\em Constructor. \item\end{DoxyCompactList}\item 
+PowerISA::PCState \hyperlink{classPowerISA_1_1BranchNonPCRel_a860401b0a6432ac5dbe246c64448d56d}{branchTarget} (const PowerISA::PCState \&pc) const 
+\item 
+std::string \hyperlink{classPowerISA_1_1BranchNonPCRel_a95d323a22a5f07e14d6b4c9385a91896}{generateDisassembly} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} pc, const SymbolTable $\ast$symtab) const 
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{Type_8hh_a435d1572bf3f880d55459d9805097f62}{uint32\_\-t} \hyperlink{classPowerISA_1_1BranchNonPCRel_af2e4ceec51be67b8f833e5e205e11ca7}{targetAddr}
+\begin{DoxyCompactList}\small\item\em Target address. \item\end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Base class for unconditional, non PC-\/relative branches. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classPowerISA_1_1BranchNonPCRel_a1117eecee7455c92a3da453b412e574d}{
+\index{PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}!BranchNonPCRel@{BranchNonPCRel}}
+\index{BranchNonPCRel@{BranchNonPCRel}!PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}}
+\subsubsection[{BranchNonPCRel}]{\setlength{\rightskip}{0pt plus 5cm}{\bf BranchNonPCRel} (const char $\ast$ {\em mnem}, \/  {\bf MachInst} {\em \_\-machInst}, \/  OpClass {\em \_\-\_\-opClass})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classPowerISA_1_1BranchNonPCRel_a1117eecee7455c92a3da453b412e574d}
+
+
+Constructor. 
+
+
+\begin{DoxyCode}
+109         : PCDependentDisassembly(mnem, _machInst, __opClass),
+110           targetAddr(machInst.li << 2)
+111     {
+112         // If bit 26 is 1 then sign extend
+113         if (targetAddr & 0x2000000) {
+114             targetAddr |= 0xfc000000;
+115         }
+116     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classPowerISA_1_1BranchNonPCRel_a860401b0a6432ac5dbe246c64448d56d}{
+\index{PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}!branchTarget@{branchTarget}}
+\index{branchTarget@{branchTarget}!PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}}
+\subsubsection[{branchTarget}]{\setlength{\rightskip}{0pt plus 5cm}PowerISA::PCState branchTarget (const PowerISA::PCState \& {\em pc}) const\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPowerISA_1_1BranchNonPCRel_a860401b0a6432ac5dbe246c64448d56d}
+
+
+
+\begin{DoxyCode}
+81 {
+82     return targetAddr;
+83 }
+\end{DoxyCode}
+\hypertarget{classPowerISA_1_1BranchNonPCRel_a95d323a22a5f07e14d6b4c9385a91896}{
+\index{PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}!generateDisassembly@{generateDisassembly}}
+\index{generateDisassembly@{generateDisassembly}!PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}}
+\subsubsection[{generateDisassembly}]{\setlength{\rightskip}{0pt plus 5cm}std::string generateDisassembly ({\bf Addr} {\em pc}, \/  const SymbolTable $\ast$ {\em symtab}) const\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classPowerISA_1_1BranchNonPCRel_a95d323a22a5f07e14d6b4c9385a91896}
+Internal function to generate disassembly string. 
+
+\hyperlink{classPowerISA_1_1PowerStaticInst_a95d323a22a5f07e14d6b4c9385a91896}{PowerStaticInst}を再定義しています。
+
+
+\begin{DoxyCode}
+87 {
+88     std::stringstream ss;
+89 
+90     ccprintf(ss, "%-10s ", mnemonic);
+91 
+92     std::string str;
+93     if (symtab && symtab->findSymbol(targetAddr, str))
+94         ss << str;
+95     else
+96         ccprintf(ss, "0x%x", targetAddr);
+97 
+98     return ss.str();
+99 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classPowerISA_1_1BranchNonPCRel_af2e4ceec51be67b8f833e5e205e11ca7}{
+\index{PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}!targetAddr@{targetAddr}}
+\index{targetAddr@{targetAddr}!PowerISA::BranchNonPCRel@{PowerISA::BranchNonPCRel}}
+\subsubsection[{targetAddr}]{\setlength{\rightskip}{0pt plus 5cm}{\bf uint32\_\-t} {\bf targetAddr}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classPowerISA_1_1BranchNonPCRel_af2e4ceec51be67b8f833e5e205e11ca7}
+
+
+Target address. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/power/insts/\hyperlink{power_2insts_2branch_8hh}{branch.hh}\item 
+arch/power/insts/\hyperlink{branch_8cc}{branch.cc}\end{DoxyCompactItemize}

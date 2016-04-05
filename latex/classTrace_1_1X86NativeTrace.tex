@@ -1,0 +1,237 @@
+\hypertarget{classTrace_1_1X86NativeTrace}{
+\section{クラス X86NativeTrace}
+\label{classTrace_1_1X86NativeTrace}\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+}
+
+
+{\ttfamily \#include $<$nativetrace.hh$>$}X86NativeTraceに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classTrace_1_1X86NativeTrace}
+\end{center}
+\end{figure}
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structTrace_1_1X86NativeTrace_1_1ThreadState}{ThreadState}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classTrace_1_1X86NativeTrace_af861ba55625d4733915ac926900e6944}{X86NativeTrace} (const \hyperlink{classTrace_1_1ExeTracer_a6680098765037131737b022c9fa9252e}{Params} $\ast$p)
+\item 
+void \hyperlink{classTrace_1_1X86NativeTrace_a826e1279dfa7dd9ce6760a2e6efe4116}{check} (\hyperlink{classTrace_1_1NativeTraceRecord}{NativeTraceRecord} $\ast$record)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classTrace_1_1X86NativeTrace_a3b44534ea889f35c16accfb8c67bee63}{checkRcxReg} (const char $\ast$regName, uint64\_\-t \&, uint64\_\-t \&)
+\item 
+bool \hyperlink{classTrace_1_1X86NativeTrace_a71ac25d49cd03430b8d3b773ed04ddbc}{checkR11Reg} (const char $\ast$regName, uint64\_\-t \&, uint64\_\-t \&)
+\item 
+bool \hyperlink{classTrace_1_1X86NativeTrace_a1e5c8f953a4bd6df5c37ce64ad70e2fe}{checkXMM} (int num, uint64\_\-t mXmmBuf\mbox{[}$\,$\mbox{]}, uint64\_\-t nXmmBuf\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classTrace_1_1X86NativeTrace_a4d4ab0009530e0c7cbb09d6c4a1a2beb}{checkRcx}
+\item 
+bool \hyperlink{classTrace_1_1X86NativeTrace_a1fbc4b221078d00768571267f930e6a4}{checkR11}
+\item 
+uint64\_\-t \hyperlink{classTrace_1_1X86NativeTrace_a4d5ab35e2c67c65a1aa5245272177962}{oldRcxVal}
+\item 
+uint64\_\-t \hyperlink{classTrace_1_1X86NativeTrace_ad476adc78d5c3b311dee50de3d0d0d2c}{oldR11Val}
+\item 
+uint64\_\-t \hyperlink{classTrace_1_1X86NativeTrace_a8b25e7523e18835b059948c858936dd2}{oldRealRcxVal}
+\item 
+uint64\_\-t \hyperlink{classTrace_1_1X86NativeTrace_a9a98c7db1b30cd8d2501a91344160a3e}{oldRealR11Val}
+\item 
+\hyperlink{structTrace_1_1X86NativeTrace_1_1ThreadState}{ThreadState} \hyperlink{classTrace_1_1X86NativeTrace_a9b1e159170b558aeaa3694f2183d4d68}{nState}
+\item 
+\hyperlink{structTrace_1_1X86NativeTrace_1_1ThreadState}{ThreadState} \hyperlink{classTrace_1_1X86NativeTrace_a72f1181d2c4bc9244a9bea747b68881f}{mState}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classTrace_1_1X86NativeTrace_af861ba55625d4733915ac926900e6944}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!X86NativeTrace@{X86NativeTrace}}
+\index{X86NativeTrace@{X86NativeTrace}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{X86NativeTrace}]{\setlength{\rightskip}{0pt plus 5cm}{\bf X86NativeTrace} (const {\bf Params} $\ast$ {\em p})}}
+\label{classTrace_1_1X86NativeTrace_af861ba55625d4733915ac926900e6944}
+
+
+
+\begin{DoxyCode}
+99     : NativeTrace(p)
+100 {
+101     checkRcx = true;
+102     checkR11 = true;
+103 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classTrace_1_1X86NativeTrace_a826e1279dfa7dd9ce6760a2e6efe4116}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!check@{check}}
+\index{check@{check}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{check}]{\setlength{\rightskip}{0pt plus 5cm}void check ({\bf NativeTraceRecord} $\ast$ {\em record})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a826e1279dfa7dd9ce6760a2e6efe4116}
+
+
+\hyperlink{classTrace_1_1NativeTrace_adb484644aa43b4370d31b6a7286b0dd1}{NativeTrace}を実装しています。
+
+
+\begin{DoxyCode}
+141 {
+142     nState.update(this);
+143     mState.update(record->getThread());
+144 
+145     if(record->getStaticInst()->isSyscall())
+146     {
+147         checkRcx = false;
+148         checkR11 = false;
+149         oldRcxVal = mState.rcx;
+150         oldRealRcxVal = nState.rcx;
+151         oldR11Val = mState.r11;
+152         oldRealR11Val = nState.r11;
+153     }
+154 
+155     checkReg("rax", mState.rax, nState.rax);
+156     checkRcxReg("rcx", mState.rcx, nState.rcx);
+157     checkReg("rdx", mState.rdx, nState.rdx);
+158     checkReg("rbx", mState.rbx, nState.rbx);
+159     checkReg("rsp", mState.rsp, nState.rsp);
+160     checkReg("rbp", mState.rbp, nState.rbp);
+161     checkReg("rsi", mState.rsi, nState.rsi);
+162     checkReg("rdi", mState.rdi, nState.rdi);
+163     checkReg("r8",  mState.r8,  nState.r8);
+164     checkReg("r9",  mState.r9,  nState.r9);
+165     checkReg("r10", mState.r10, nState.r10);
+166     checkR11Reg("r11", mState.r11, nState.r11);
+167     checkReg("r12", mState.r12, nState.r12);
+168     checkReg("r13", mState.r13, nState.r13);
+169     checkReg("r14", mState.r14, nState.r14);
+170     checkReg("r15", mState.r15, nState.r15);
+171     checkReg("rip", mState.rip, nState.rip);
+172     checkXMM(0, mState.xmm, nState.xmm);
+173     checkXMM(1, mState.xmm, nState.xmm);
+174     checkXMM(2, mState.xmm, nState.xmm);
+175     checkXMM(3, mState.xmm, nState.xmm);
+176     checkXMM(4, mState.xmm, nState.xmm);
+177     checkXMM(5, mState.xmm, nState.xmm);
+178     checkXMM(6, mState.xmm, nState.xmm);
+179     checkXMM(7, mState.xmm, nState.xmm);
+180     checkXMM(8, mState.xmm, nState.xmm);
+181     checkXMM(9, mState.xmm, nState.xmm);
+182     checkXMM(10, mState.xmm, nState.xmm);
+183     checkXMM(11, mState.xmm, nState.xmm);
+184     checkXMM(12, mState.xmm, nState.xmm);
+185     checkXMM(13, mState.xmm, nState.xmm);
+186     checkXMM(14, mState.xmm, nState.xmm);
+187     checkXMM(15, mState.xmm, nState.xmm);
+188 }
+\end{DoxyCode}
+\hypertarget{classTrace_1_1X86NativeTrace_a71ac25d49cd03430b8d3b773ed04ddbc}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!checkR11Reg@{checkR11Reg}}
+\index{checkR11Reg@{checkR11Reg}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{checkR11Reg}]{\setlength{\rightskip}{0pt plus 5cm}bool checkR11Reg (const char $\ast$ {\em regName}, \/  uint64\_\-t \& {\em mVal}, \/  uint64\_\-t \& {\em nVal})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a71ac25d49cd03430b8d3b773ed04ddbc}
+
+
+
+\begin{DoxyCode}
+117 {
+118     if(!checkR11)
+119         checkR11 = (mVal != oldR11Val || nVal != oldRealR11Val);
+120     if(checkR11)
+121         return checkReg(name, mVal, nVal);
+122     return true;
+123 }
+\end{DoxyCode}
+\hypertarget{classTrace_1_1X86NativeTrace_a3b44534ea889f35c16accfb8c67bee63}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!checkRcxReg@{checkRcxReg}}
+\index{checkRcxReg@{checkRcxReg}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{checkRcxReg}]{\setlength{\rightskip}{0pt plus 5cm}bool checkRcxReg (const char $\ast$ {\em regName}, \/  uint64\_\-t \& {\em mVal}, \/  uint64\_\-t \& {\em nVal})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a3b44534ea889f35c16accfb8c67bee63}
+
+
+
+\begin{DoxyCode}
+107 {
+108     if(!checkRcx)
+109         checkRcx = (mVal != oldRcxVal || nVal != oldRealRcxVal);
+110     if(checkRcx)
+111         return checkReg(name, mVal, nVal);
+112     return true;
+113 }
+\end{DoxyCode}
+\hypertarget{classTrace_1_1X86NativeTrace_a1e5c8f953a4bd6df5c37ce64ad70e2fe}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!checkXMM@{checkXMM}}
+\index{checkXMM@{checkXMM}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{checkXMM}]{\setlength{\rightskip}{0pt plus 5cm}bool checkXMM (int {\em num}, \/  uint64\_\-t {\em mXmmBuf}\mbox{[}$\,$\mbox{]}, \/  uint64\_\-t {\em nXmmBuf}\mbox{[}$\,$\mbox{]})\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a1e5c8f953a4bd6df5c37ce64ad70e2fe}
+
+
+
+\begin{DoxyCode}
+127 {
+128     if (mXmmBuf[num * 2]     != nXmmBuf[num * 2] ||
+129         mXmmBuf[num * 2 + 1] != nXmmBuf[num * 2 + 1]) {
+130         DPRINTF(ExecRegDelta,
+131                 "Register xmm%d should be 0x%016x%016x but is 0x%016x%016x.\n",
+132                 num, nXmmBuf[num * 2 + 1], nXmmBuf[num * 2],
+133                      mXmmBuf[num * 2 + 1], mXmmBuf[num * 2]);
+134         return false;
+135     }
+136     return true;
+137 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classTrace_1_1X86NativeTrace_a1fbc4b221078d00768571267f930e6a4}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!checkR11@{checkR11}}
+\index{checkR11@{checkR11}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{checkR11}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf checkR11}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a1fbc4b221078d00768571267f930e6a4}
+\hypertarget{classTrace_1_1X86NativeTrace_a4d4ab0009530e0c7cbb09d6c4a1a2beb}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!checkRcx@{checkRcx}}
+\index{checkRcx@{checkRcx}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{checkRcx}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf checkRcx}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a4d4ab0009530e0c7cbb09d6c4a1a2beb}
+\hypertarget{classTrace_1_1X86NativeTrace_a72f1181d2c4bc9244a9bea747b68881f}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!mState@{mState}}
+\index{mState@{mState}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{mState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadState} {\bf mState}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a72f1181d2c4bc9244a9bea747b68881f}
+\hypertarget{classTrace_1_1X86NativeTrace_a9b1e159170b558aeaa3694f2183d4d68}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!nState@{nState}}
+\index{nState@{nState}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{nState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadState} {\bf nState}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a9b1e159170b558aeaa3694f2183d4d68}
+\hypertarget{classTrace_1_1X86NativeTrace_ad476adc78d5c3b311dee50de3d0d0d2c}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!oldR11Val@{oldR11Val}}
+\index{oldR11Val@{oldR11Val}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{oldR11Val}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf oldR11Val}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_ad476adc78d5c3b311dee50de3d0d0d2c}
+\hypertarget{classTrace_1_1X86NativeTrace_a4d5ab35e2c67c65a1aa5245272177962}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!oldRcxVal@{oldRcxVal}}
+\index{oldRcxVal@{oldRcxVal}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{oldRcxVal}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf oldRcxVal}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a4d5ab35e2c67c65a1aa5245272177962}
+\hypertarget{classTrace_1_1X86NativeTrace_a9a98c7db1b30cd8d2501a91344160a3e}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!oldRealR11Val@{oldRealR11Val}}
+\index{oldRealR11Val@{oldRealR11Val}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{oldRealR11Val}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf oldRealR11Val}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a9a98c7db1b30cd8d2501a91344160a3e}
+\hypertarget{classTrace_1_1X86NativeTrace_a8b25e7523e18835b059948c858936dd2}{
+\index{Trace::X86NativeTrace@{Trace::X86NativeTrace}!oldRealRcxVal@{oldRealRcxVal}}
+\index{oldRealRcxVal@{oldRealRcxVal}!Trace::X86NativeTrace@{Trace::X86NativeTrace}}
+\subsubsection[{oldRealRcxVal}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t {\bf oldRealRcxVal}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classTrace_1_1X86NativeTrace_a8b25e7523e18835b059948c858936dd2}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/\hyperlink{arch_2x86_2nativetrace_8hh}{nativetrace.hh}\item 
+arch/x86/\hyperlink{arch_2x86_2nativetrace_8cc}{nativetrace.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/kvm/vm.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/kvm/vm.hh</h1><a href="vm_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Andreas Sandberg</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __CPU_KVM_KVMVM_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_KVM_KVMVM_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="preprocessor">#include &quot;<a class="code" href="addr__range_8hh.html">base/addr_range.hh</a>&quot;</span>
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="sim__object_8hh.html">sim/sim_object.hh</a>&quot;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="comment">// forward declarations</span>
+<a name="l00049"></a>00049 <span class="keyword">struct </span>KvmVMParams;
+<a name="l00050"></a>00050 <span class="keyword">class </span><a class="code" href="classSystem.html">System</a>;
+<a name="l00051"></a>00051 
+<a name="l00072"></a><a class="code" href="classKvm.html">00072</a> <span class="keyword">class </span><a class="code" href="classKvm.html">Kvm</a>
+<a name="l00073"></a>00073 {
+<a name="l00074"></a><a class="code" href="classKvm.html#a9210c8f6e282c397940f37aff4d6c32d">00074</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classKvmVM.html">KvmVM</a>;
+<a name="l00075"></a>00075 
+<a name="l00076"></a>00076   <span class="keyword">public</span>:
+<a name="l00077"></a><a class="code" href="classKvm.html#af9d6fd6949b666ab0f41114891c201db">00077</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;struct kvm_cpuid_entry2&gt;</a> <a class="code" href="classstd_1_1vector.html">CPUIDVector</a>;
+<a name="l00078"></a><a class="code" href="classKvm.html#ab2ddfab51860a21d04f8ca0abe33a77f">00078</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;uint32_t&gt;</a> <a class="code" href="classstd_1_1vector.html">MSRIndexVector</a>;
+<a name="l00079"></a>00079 
+<a name="l00080"></a>00080     <span class="keyword">virtual</span> <a class="code" href="classKvm.html#af634ce04aefb47ce4de9d029a9bc0642">~Kvm</a>();
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082     <a class="code" href="classKvm.html">Kvm</a> *<a class="code" href="classKvm.html#a5a41f15f5b11ddab46bb5622409aea52">create</a>();
+<a name="l00083"></a>00083 
+<a name="l00085"></a><a class="code" href="classKvm.html#a5bbf835d489e2bd0242d5b3840aa1304">00085</a>     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#a5bbf835d489e2bd0242d5b3840aa1304">getAPIVersion</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classKvm.html#ab3562fc781db97a1faac4c863e257ca9">apiVersion</a>; }
+<a name="l00091"></a><a class="code" href="classKvm.html#a554cb4dd3512dba2169997c9c804d4ec">00091</a>     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#a554cb4dd3512dba2169997c9c804d4ec">getVCPUMMapSize</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classKvm.html#a0915679bdc25b2c015f15996f6d4ff6d">vcpuMMapSize</a>; }
+<a name="l00092"></a>00092 
+<a name="l00095"></a>00095     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#a3f08fc1c466eca4129d52fa3b21023d1">capUserMemory</a>() <span class="keyword">const</span>;
+<a name="l00097"></a>00097     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#a8bc7fe4f8395a54ef945822211a57228">capSetTSSAddress</a>() <span class="keyword">const</span>;
+<a name="l00099"></a>00099     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#a6db5aefbe1a9535f5124ef07a04e23a5">capExtendedCPUID</a>() <span class="keyword">const</span>;
+<a name="l00101"></a>00101     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#acf36e247bf7857c1c7b1e260eff7f7db">capUserNMI</a>() <span class="keyword">const</span>;
+<a name="l00102"></a>00102 
+<a name="l00110"></a>00110     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#a23013f2d078b52428edae7ecfb6b5b7b">capCoalescedMMIO</a>() <span class="keyword">const</span>;
+<a name="l00111"></a>00111 
+<a name="l00117"></a>00117     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#af1ad3b73711f45008bcb240d012987f7">capOneReg</a>() <span class="keyword">const</span>;
+<a name="l00118"></a>00118 
+<a name="l00124"></a>00124     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#ab3e6d2bb7ea83c6cdc20369bf3a274a6">capIRQChip</a>() <span class="keyword">const</span>;
+<a name="l00125"></a>00125 
+<a name="l00127"></a>00127     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#a75f29a9991c1117d5182abfb23bfbc92">capVCPUEvents</a>() <span class="keyword">const</span>;
+<a name="l00128"></a>00128 
+<a name="l00130"></a>00130     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#a4e15b92a17300f1d37ceca6e4a984086">capDebugRegs</a>() <span class="keyword">const</span>;
+<a name="l00131"></a>00131 
+<a name="l00133"></a>00133     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#aa9b34836edde016c16df3006fb33b0a9">capXCRs</a>() <span class="keyword">const</span>;
+<a name="l00134"></a>00134 
+<a name="l00136"></a>00136     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#a9c6bbe65d43e3f2708723fc21f00b4cd">capXSave</a>() <span class="keyword">const</span>;
+<a name="l00146"></a>00146     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#aa0fc800a2144e592218a484d24b94f0f">getSupportedCPUID</a>(<span class="keyword">struct</span> kvm_cpuid2 &amp;<a class="code" href="namespaceMipsISA.html#ad8c57e94aa3e790a8d7259e5b798123b">cpuid</a>) <span class="keyword">const</span>;
+<a name="l00147"></a>00147 
+<a name="l00158"></a>00158     <span class="keyword">const</span> <a class="code" href="classKvm.html#af9d6fd6949b666ab0f41114891c201db">CPUIDVector</a> &amp;<a class="code" href="classKvm.html#aa0fc800a2144e592218a484d24b94f0f">getSupportedCPUID</a>() <span class="keyword">const</span>;
+<a name="l00159"></a>00159 
+<a name="l00165"></a>00165     <span class="keywordtype">bool</span> <a class="code" href="classKvm.html#ab43b4ff4aabd353eef30f8defba2718d">getSupportedMSRs</a>(<span class="keyword">struct</span> kvm_msr_list &amp;msrs) <span class="keyword">const</span>;
+<a name="l00166"></a>00166 
+<a name="l00175"></a>00175     <span class="keyword">const</span> <a class="code" href="classKvm.html#ab2ddfab51860a21d04f8ca0abe33a77f">MSRIndexVector</a> &amp;<a class="code" href="classKvm.html#ab43b4ff4aabd353eef30f8defba2718d">getSupportedMSRs</a>() <span class="keyword">const</span>;
+<a name="l00176"></a>00176 
+<a name="l00177"></a>00177   <span class="keyword">protected</span>:
+<a name="l00188"></a>00188     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#a8e6e0d0db01a127dd0798b0a87263a29">checkExtension</a>(<span class="keywordtype">int</span> extension) <span class="keyword">const</span>;
+<a name="l00189"></a>00189 
+<a name="l00203"></a>00203     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(<span class="keywordtype">int</span> request, <span class="keywordtype">long</span> p1) <span class="keyword">const</span>;
+<a name="l00204"></a><a class="code" href="group__KvmIoctl.html#ga89db87cb31fe2ba732de8fa68c8bd1f1">00204</a>     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga89db87cb31fe2ba732de8fa68c8bd1f1">ioctl</a>(<span class="keywordtype">int</span> request, <span class="keywordtype">void</span> *p1)<span class="keyword"> const </span>{
+<a name="l00205"></a>00205         <span class="keywordflow">return</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(request, (<span class="keywordtype">long</span>)p1);
+<a name="l00206"></a>00206     }
+<a name="l00207"></a><a class="code" href="group__KvmIoctl.html#ga32cd3b0742689c29c9ab9e3e03feb5f2">00207</a>     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga32cd3b0742689c29c9ab9e3e03feb5f2">ioctl</a>(<span class="keywordtype">int</span> request)<span class="keyword"> const </span>{
+<a name="l00208"></a>00208         <span class="keywordflow">return</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(request, 0<a class="code" href="namespaceX86ISA.html#a0485da3ef528ce3058f6f335248c0764">L</a>);
+<a name="l00209"></a>00209     }
+<a name="l00212"></a>00212   <span class="keyword">private</span>:
+<a name="l00213"></a>00213     <span class="comment">// This object is a singleton, so prevent instantiation.</span>
+<a name="l00214"></a>00214     <a class="code" href="classKvm.html#ac52c88ab9138b51acbd7dedc0b4203ea">Kvm</a>();
+<a name="l00215"></a>00215 
+<a name="l00216"></a>00216     <span class="comment">// Prevent copying</span>
+<a name="l00217"></a>00217     <a class="code" href="classKvm.html#ac52c88ab9138b51acbd7dedc0b4203ea">Kvm</a>(<span class="keyword">const</span> <a class="code" href="classKvm.html">Kvm</a> &amp;<a class="code" href="classKvmVM.html#a4169de9bdb8aa1afbeed2acc231dbb7f">kvm</a>);
+<a name="l00218"></a>00218     <span class="comment">// Prevent assignment</span>
+<a name="l00219"></a>00219     <a class="code" href="classKvm.html">Kvm</a> &amp;<a class="code" href="classKvm.html#a99c5e2a3a05865b3109843939909b4f6">operator=</a>(<span class="keyword">const</span> <a class="code" href="classKvm.html">Kvm</a> &amp;<a class="code" href="classKvmVM.html#a4169de9bdb8aa1afbeed2acc231dbb7f">kvm</a>);
+<a name="l00220"></a>00220 
+<a name="l00226"></a>00226     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#acac1d5ae396f1e3fb2804d78bc986db2">createVM</a>();
+<a name="l00227"></a>00227 
+<a name="l00229"></a><a class="code" href="classKvm.html#af331fe85a8df29abc3f2d301b0afddc2">00229</a>     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#af331fe85a8df29abc3f2d301b0afddc2">kvmFD</a>;
+<a name="l00231"></a><a class="code" href="classKvm.html#ab3562fc781db97a1faac4c863e257ca9">00231</a>     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#ab3562fc781db97a1faac4c863e257ca9">apiVersion</a>;
+<a name="l00233"></a><a class="code" href="classKvm.html#a0915679bdc25b2c015f15996f6d4ff6d">00233</a>     <span class="keywordtype">int</span> <a class="code" href="classKvm.html#a0915679bdc25b2c015f15996f6d4ff6d">vcpuMMapSize</a>;
+<a name="l00234"></a>00234 
+<a name="l00236"></a><a class="code" href="classKvm.html#a3d5dc75656640e2eb3b52c27e4497b75">00236</a>     <span class="keyword">mutable</span> <a class="code" href="classstd_1_1vector.html">CPUIDVector</a> <a class="code" href="classKvm.html#a3d5dc75656640e2eb3b52c27e4497b75">supportedCPUIDCache</a>;
+<a name="l00237"></a>00237 
+<a name="l00239"></a><a class="code" href="classKvm.html#a5553ee613be7488e7c7c28058dc7d487">00239</a>     <span class="keyword">mutable</span> <a class="code" href="classstd_1_1vector.html">MSRIndexVector</a> <a class="code" href="classKvm.html#a5553ee613be7488e7c7c28058dc7d487">supportedMSRCache</a>;
+<a name="l00240"></a>00240 
+<a name="l00242"></a><a class="code" href="classKvm.html#a64c6606364bd27581f929800703a402e">00242</a>     <span class="keyword">static</span> <a class="code" href="classKvm.html">Kvm</a> *<a class="code" href="classKvm.html#a64c6606364bd27581f929800703a402e">instance</a>;
+<a name="l00243"></a>00243 };
+<a name="l00244"></a>00244 
+<a name="l00271"></a><a class="code" href="classKvmVM.html">00271</a> <span class="keyword">class </span><a class="code" href="classKvmVM.html">KvmVM</a> : <span class="keyword">public</span> <a class="code" href="classSimObject.html">SimObject</a>
+<a name="l00272"></a>00272 {
+<a name="l00273"></a><a class="code" href="classKvmVM.html#a61d1fc6581a443ce7c1106a1b6922d40">00273</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classBaseKvmCPU.html">BaseKvmCPU</a>;
+<a name="l00274"></a>00274 
+<a name="l00275"></a>00275   <span class="keyword">public</span>:
+<a name="l00276"></a>00276     <a class="code" href="classKvmVM.html#affe776b6ed46258acb05e93d1e3ea060">KvmVM</a>(KvmVMParams *<a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>);
+<a name="l00277"></a>00277     <span class="keyword">virtual</span> <a class="code" href="classKvmVM.html#a57e34345c5d7c563ce7bdddcd0fb6017">~KvmVM</a>();
+<a name="l00278"></a>00278 
+<a name="l00285"></a>00285     <span class="keywordtype">void</span> <a class="code" href="classKvmVM.html#a04e3bed0038549a704fe5c04015ce46d">setTSSAddress</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> tss_address);
+<a name="l00286"></a>00286 
+<a name="l00294"></a>00294     <span class="keywordtype">void</span> <a class="code" href="classKvmVM.html#a438f7ca24f2e320af449cd86d2a70990">coalesceMMIO</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> start, <span class="keywordtype">int</span> size);
+<a name="l00295"></a>00295 
+<a name="l00301"></a>00301     <span class="keywordtype">void</span> <a class="code" href="classKvmVM.html#a438f7ca24f2e320af449cd86d2a70990">coalesceMMIO</a>(<span class="keyword">const</span> <a class="code" href="classAddrRange.html">AddrRange</a> &amp;range);
+<a name="l00313"></a>00313     <span class="keywordtype">void</span> <a class="code" href="group__KvmInterrupts.html#ga75f1140369bf3942bb93a75d1b3de2c9">createIRQChip</a>();
+<a name="l00314"></a>00314 
+<a name="l00326"></a>00326     <span class="keywordtype">void</span> <a class="code" href="group__KvmInterrupts.html#ga5037b917c47fff611ecdd5b547655284">setIRQLine</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#ab4cb505fdb6b51415c3a27f4c4323960">irq</a>, <span class="keywordtype">bool</span> high);
+<a name="l00327"></a>00327 
+<a name="l00331"></a><a class="code" href="group__KvmInterrupts.html#ga4e9371a3b5e598c4cde8ebef65be940f">00331</a>     <span class="keywordtype">bool</span> <a class="code" href="group__KvmInterrupts.html#ga4e9371a3b5e598c4cde8ebef65be940f">hasKernelIRQChip</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classKvmVM.html#a7256488cd8c3b1c41c2417ade40cde88">_hasKernelIRQChip</a>; }
+<a name="l00335"></a><a class="code" href="classKvmVM.html#a4169de9bdb8aa1afbeed2acc231dbb7f">00335</a>     <a class="code" href="classKvm.html">Kvm</a> <a class="code" href="classKvmVM.html#a4169de9bdb8aa1afbeed2acc231dbb7f">kvm</a>;
+<a name="l00336"></a>00336 
+<a name="l00337"></a>00337   <span class="keyword">protected</span>:
+<a name="l00346"></a>00346     <span class="keywordtype">void</span> <a class="code" href="classKvmVM.html#a0161816a71e88927cba137fb4dde7298">cpuStartup</a>();
+<a name="l00347"></a>00347 
+<a name="l00359"></a>00359     <span class="keywordtype">void</span> <a class="code" href="classKvmVM.html#a508d2bd176120153c08b1fe4c7e2bc2c">delayedStartup</a>();
+<a name="l00360"></a>00360 
+<a name="l00361"></a>00361 
+<a name="l00373"></a>00373     <span class="keywordtype">void</span> <a class="code" href="classKvmVM.html#a2d2ed492c91fc674db226f86fae39127">setUserMemoryRegion</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> slot,
+<a name="l00374"></a>00374                              <span class="keywordtype">void</span> *host_addr, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> guest_addr,
+<a name="l00375"></a>00375                              uint64_t <a class="code" href="namespaceArmISA.html#a41a9f22a6c7645fac2f8d633371e354d">len</a>, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>);
+<a name="l00376"></a>00376     <span class="keywordtype">void</span> <a class="code" href="classKvmVM.html#a2d2ed492c91fc674db226f86fae39127">setUserMemoryRegion</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> slot,
+<a name="l00377"></a>00377                              <span class="keywordtype">void</span> *host_addr, <a class="code" href="classAddrRange.html">AddrRange</a> guest_range,
+<a name="l00378"></a>00378                              <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespacem5_1_1debug.html#a9ceb38153d5c0f156fbeada6dc00ff4f">flags</a>);
+<a name="l00387"></a>00387     <span class="keywordtype">int</span> <a class="code" href="classKvmVM.html#a3841d0c536bfa3b8f3b4e8ef5a46039b">createVCPU</a>(<span class="keywordtype">long</span> <a class="code" href="classBaseKvmCPU.html#ac52bdf6886dcfd53068633de9ed83184">vcpuID</a>);
+<a name="l00388"></a>00388 
+<a name="l00397"></a>00397     <span class="keywordtype">long</span> <a class="code" href="classKvmVM.html#a78b0d1b84b25d38fca24a596ebdbcea6">allocVCPUID</a>();
+<a name="l00398"></a>00398 
+<a name="l00412"></a>00412     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(<span class="keywordtype">int</span> request, <span class="keywordtype">long</span> p1) <span class="keyword">const</span>;
+<a name="l00413"></a><a class="code" href="group__KvmIoctl.html#ga89db87cb31fe2ba732de8fa68c8bd1f1">00413</a>     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga89db87cb31fe2ba732de8fa68c8bd1f1">ioctl</a>(<span class="keywordtype">int</span> request, <span class="keywordtype">void</span> *p1)<span class="keyword"> const </span>{
+<a name="l00414"></a>00414         <span class="keywordflow">return</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(request, (<span class="keywordtype">long</span>)p1);
+<a name="l00415"></a>00415     }
+<a name="l00416"></a><a class="code" href="group__KvmIoctl.html#ga32cd3b0742689c29c9ab9e3e03feb5f2">00416</a>     <span class="keywordtype">int</span> <a class="code" href="group__KvmIoctl.html#ga32cd3b0742689c29c9ab9e3e03feb5f2">ioctl</a>(<span class="keywordtype">int</span> request)<span class="keyword"> const </span>{
+<a name="l00417"></a>00417         <span class="keywordflow">return</span> <a class="code" href="group__KvmIoctl.html#ga106fe09b5e87d6c14884f8ffff7b338a">ioctl</a>(request, 0<a class="code" href="namespaceX86ISA.html#a0485da3ef528ce3058f6f335248c0764">L</a>);
+<a name="l00418"></a>00418     }
+<a name="l00421"></a>00421   <span class="keyword">private</span>:
+<a name="l00422"></a>00422     <span class="comment">// Prevent copying</span>
+<a name="l00423"></a>00423     <a class="code" href="classKvmVM.html#affe776b6ed46258acb05e93d1e3ea060">KvmVM</a>(<span class="keyword">const</span> <a class="code" href="classKvmVM.html">KvmVM</a> &amp;<a class="code" href="namespaceArmISA.html#a74830881d990d681c2c1def45223195e">vm</a>);
+<a name="l00424"></a>00424     <span class="comment">// Prevent assignment</span>
+<a name="l00425"></a>00425     <a class="code" href="classKvmVM.html">KvmVM</a> &amp;<a class="code" href="classKvmVM.html#a4618bd58dd0f40bb2ab57327f7223310">operator=</a>(<span class="keyword">const</span> <a class="code" href="classKvmVM.html">KvmVM</a> &amp;<a class="code" href="namespaceArmISA.html#a74830881d990d681c2c1def45223195e">vm</a>);
+<a name="l00426"></a>00426 
+<a name="l00427"></a><a class="code" href="classKvmVM.html#af27ccd765f13a4b7bd119dc7579e2746">00427</a>     <a class="code" href="classSystem.html">System</a> *<a class="code" href="classKvmVM.html#af27ccd765f13a4b7bd119dc7579e2746">system</a>;
+<a name="l00428"></a>00428 
+<a name="l00430"></a><a class="code" href="classKvmVM.html#ad268d2f789e668c440ed8fe37f115860">00430</a>     <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classKvmVM.html#ad268d2f789e668c440ed8fe37f115860">vmFD</a>;
+<a name="l00431"></a>00431 
+<a name="l00433"></a><a class="code" href="classKvmVM.html#a43c08d193d555a2b2a61c53d2a4e5a63">00433</a>     <span class="keywordtype">bool</span> <a class="code" href="classKvmVM.html#a43c08d193d555a2b2a61c53d2a4e5a63">started</a>;
+<a name="l00434"></a>00434 
+<a name="l00436"></a><a class="code" href="classKvmVM.html#a7256488cd8c3b1c41c2417ade40cde88">00436</a>     <span class="keywordtype">bool</span> <a class="code" href="classKvmVM.html#a7256488cd8c3b1c41c2417ade40cde88">_hasKernelIRQChip</a>;
+<a name="l00437"></a>00437 
+<a name="l00439"></a><a class="code" href="classKvmVM.html#a1739363b740f33ceef9f8187dd2078f1">00439</a>     <span class="keywordtype">long</span> <a class="code" href="classKvmVM.html#a1739363b740f33ceef9f8187dd2078f1">nextVCPUID</a>;
+<a name="l00440"></a>00440 };
+<a name="l00441"></a>00441 
+<a name="l00442"></a>00442 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

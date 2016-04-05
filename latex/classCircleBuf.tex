@@ -1,0 +1,360 @@
+\hypertarget{classCircleBuf}{
+\section{クラス CircleBuf}
+\label{classCircleBuf}\index{CircleBuf@{CircleBuf}}
+}
+
+
+{\ttfamily \#include $<$circlebuf.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classCircleBuf_af891350dcd605da7c72c31ef7f5d6fa8}{CircleBuf} (int l)
+\item 
+\hyperlink{classCircleBuf_a4b75d682afe5fefd7d4333f411379e20}{$\sim$CircleBuf} ()
+\item 
+bool \hyperlink{classCircleBuf_ac6e61de369e994009e36f344f99c15ad}{empty} () const 
+\item 
+int \hyperlink{classCircleBuf_ab8e4e3e2a7bf18888b71bdf9dda0770b}{size} () const 
+\item 
+void \hyperlink{classCircleBuf_accd2600060dbaee3a3b41aed4034c63c}{dump} ()
+\item 
+void \hyperlink{classCircleBuf_adac116554b543b7c4228c018a85882f5}{flush} ()
+\item 
+void \hyperlink{classCircleBuf_a208ffb7fc988270a34244c2004d9a6e2}{read} (char $\ast$b, int len)
+\item 
+void \hyperlink{classCircleBuf_a456a2875e76e14ea14f598f248506f21}{read} (int fd, int len)
+\item 
+void \hyperlink{classCircleBuf_a7d3756c26077c588c877e36f8b3c94af}{read} (int fd)
+\item 
+void \hyperlink{classCircleBuf_affdc602556fb4fb51bfa307d5aa4f956}{read} (std::ostream \&out)
+\item 
+void \hyperlink{classCircleBuf_a3c78951b2792a613e4cff9194ced196c}{readall} (int fd)
+\item 
+void \hyperlink{classCircleBuf_a03ed9bf9f1a85f8085db042491f62b1d}{write} (char b)
+\item 
+void \hyperlink{classCircleBuf_adeb1ea40a2a10d78a2143225d4c8045b}{write} (const char $\ast$b)
+\item 
+void \hyperlink{classCircleBuf_a4dc60fcb37e3faf4658e301baf4a2be8}{write} (const char $\ast$b, int len)
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+char $\ast$ \hyperlink{classCircleBuf_a171b0ba0bac75f8ed2daaf76db929931}{\_\-buf}
+\item 
+bool \hyperlink{classCircleBuf_abb2cb011de6ab8624161c6ac6fbd49f8}{\_\-rollover}
+\item 
+int \hyperlink{classCircleBuf_a946c68b8ac85188df76f904b65bb2c21}{\_\-buflen}
+\item 
+int \hyperlink{classCircleBuf_aaa6c8c862a2c0bc18c802314cc58961d}{\_\-size}
+\item 
+int \hyperlink{classCircleBuf_aea5c93b4bb6fe666b13e46b84db33233}{\_\-start}
+\item 
+int \hyperlink{classCircleBuf_afe79e6847d4f6bee712af4da0425e962}{\_\-stop}
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classCircleBuf_af891350dcd605da7c72c31ef7f5d6fa8}{
+\index{CircleBuf@{CircleBuf}!CircleBuf@{CircleBuf}}
+\index{CircleBuf@{CircleBuf}!CircleBuf@{CircleBuf}}
+\subsubsection[{CircleBuf}]{\setlength{\rightskip}{0pt plus 5cm}{\bf CircleBuf} (int {\em l})\hspace{0.3cm}{\ttfamily  \mbox{[}explicit\mbox{]}}}}
+\label{classCircleBuf_af891350dcd605da7c72c31ef7f5d6fa8}
+
+
+
+\begin{DoxyCode}
+44     : _rollover(false), _buflen(l), _size(0), _start(0), _stop(0)
+45 {
+46     _buf = new char[_buflen];
+47 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_a4b75d682afe5fefd7d4333f411379e20}{
+\index{CircleBuf@{CircleBuf}!$\sim$CircleBuf@{$\sim$CircleBuf}}
+\index{$\sim$CircleBuf@{$\sim$CircleBuf}!CircleBuf@{CircleBuf}}
+\subsubsection[{$\sim$CircleBuf}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf CircleBuf} ()}}
+\label{classCircleBuf_a4b75d682afe5fefd7d4333f411379e20}
+
+
+
+\begin{DoxyCode}
+50 {
+51     if (_buf)
+52         delete [] _buf;
+53 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classCircleBuf_accd2600060dbaee3a3b41aed4034c63c}{
+\index{CircleBuf@{CircleBuf}!dump@{dump}}
+\index{dump@{dump}!CircleBuf@{CircleBuf}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}void dump ()}}
+\label{classCircleBuf_accd2600060dbaee3a3b41aed4034c63c}
+
+
+
+\begin{DoxyCode}
+57 {
+58     cprintf("start = %10d, stop = %10d, buflen = %10d\n",
+59             _start, _stop, _buflen);
+60     fflush(stdout);
+61     atomic_write(STDOUT_FILENO, _buf, _buflen);
+62     atomic_write(STDOUT_FILENO, "<\n", 2);
+63 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_ac6e61de369e994009e36f344f99c15ad}{
+\index{CircleBuf@{CircleBuf}!empty@{empty}}
+\index{empty@{empty}!CircleBuf@{CircleBuf}}
+\subsubsection[{empty}]{\setlength{\rightskip}{0pt plus 5cm}bool empty () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCircleBuf_ac6e61de369e994009e36f344f99c15ad}
+
+
+
+\begin{DoxyCode}
+50 { return _size == 0; }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_adac116554b543b7c4228c018a85882f5}{
+\index{CircleBuf@{CircleBuf}!flush@{flush}}
+\index{flush@{flush}!CircleBuf@{CircleBuf}}
+\subsubsection[{flush}]{\setlength{\rightskip}{0pt plus 5cm}void flush ()}}
+\label{classCircleBuf_adac116554b543b7c4228c018a85882f5}
+
+
+
+\begin{DoxyCode}
+67 {
+68     _start = 0;
+69     _stop = 0;
+70     _rollover = false;
+71 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_affdc602556fb4fb51bfa307d5aa4f956}{
+\index{CircleBuf@{CircleBuf}!read@{read}}
+\index{read@{read}!CircleBuf@{CircleBuf}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}void read (std::ostream \& {\em out})}}
+\label{classCircleBuf_affdc602556fb4fb51bfa307d5aa4f956}
+\hypertarget{classCircleBuf_a7d3756c26077c588c877e36f8b3c94af}{
+\index{CircleBuf@{CircleBuf}!read@{read}}
+\index{read@{read}!CircleBuf@{CircleBuf}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}void read (int {\em fd})}}
+\label{classCircleBuf_a7d3756c26077c588c877e36f8b3c94af}
+
+
+
+\begin{DoxyCode}
+127 {
+128     _size = 0;
+129 
+130     if (_stop > _start) {
+131         atomic_write(fd, _buf + _start, _stop - _start);
+132     }
+133     else {
+134         atomic_write(fd, _buf + _start, _buflen - _start);
+135         atomic_write(fd, _buf, _stop);
+136     }
+137 
+138     _start = _stop;
+139 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_a456a2875e76e14ea14f598f248506f21}{
+\index{CircleBuf@{CircleBuf}!read@{read}}
+\index{read@{read}!CircleBuf@{CircleBuf}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}void read (int {\em fd}, \/  int {\em len})}}
+\label{classCircleBuf_a456a2875e76e14ea14f598f248506f21}
+
+
+
+\begin{DoxyCode}
+101 {
+102     _size -= len;
+103     if (_size < 0)
+104         _size = 0;
+105 
+106     if (_stop > _start) {
+107         len = min(len, _stop - _start);
+108         atomic_write(fd, _buf + _start, len);
+109         _start += len;
+110     }
+111     else {
+112         int endlen = _buflen - _start;
+113         if (endlen > len) {
+114             atomic_write(fd, _buf + _start, len);
+115             _start += len;
+116         }
+117         else {
+118             atomic_write(fd, _buf + _start, endlen);
+119             _start = min(len - endlen, _stop);
+120             atomic_write(fd, _buf, _start);
+121         }
+122     }
+123 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_a208ffb7fc988270a34244c2004d9a6e2}{
+\index{CircleBuf@{CircleBuf}!read@{read}}
+\index{read@{read}!CircleBuf@{CircleBuf}}
+\subsubsection[{read}]{\setlength{\rightskip}{0pt plus 5cm}void read (char $\ast$ {\em b}, \/  int {\em len})}}
+\label{classCircleBuf_a208ffb7fc988270a34244c2004d9a6e2}
+
+
+
+\begin{DoxyCode}
+75 {
+76     _size -= len;
+77     if (_size < 0)
+78         _size = 0;
+79 
+80     if (_stop > _start) {
+81         len = min(len, _stop - _start);
+82         memcpy(b, _buf + _start, len);
+83         _start += len;
+84     }
+85     else {
+86         int endlen = _buflen - _start;
+87         if (endlen > len) {
+88             memcpy(b, _buf + _start, len);
+89             _start += len;
+90         }
+91         else {
+92             memcpy(b, _buf + _start, endlen);
+93             _start = min(len - endlen, _stop);
+94             memcpy(b + endlen, _buf, _start);
+95         }
+96     }
+97 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_a3c78951b2792a613e4cff9194ced196c}{
+\index{CircleBuf@{CircleBuf}!readall@{readall}}
+\index{readall@{readall}!CircleBuf@{CircleBuf}}
+\subsubsection[{readall}]{\setlength{\rightskip}{0pt plus 5cm}void readall (int {\em fd})}}
+\label{classCircleBuf_a3c78951b2792a613e4cff9194ced196c}
+
+
+
+\begin{DoxyCode}
+159 {
+160     if (_rollover)
+161         atomic_write(fd, _buf + _stop, _buflen - _stop);
+162 
+163     atomic_write(fd, _buf, _stop);
+164     _start = _stop;
+165 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_ab8e4e3e2a7bf18888b71bdf9dda0770b}{
+\index{CircleBuf@{CircleBuf}!size@{size}}
+\index{size@{size}!CircleBuf@{CircleBuf}}
+\subsubsection[{size}]{\setlength{\rightskip}{0pt plus 5cm}int size () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCircleBuf_ab8e4e3e2a7bf18888b71bdf9dda0770b}
+
+
+
+\begin{DoxyCode}
+51 { return _size; }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_a4dc60fcb37e3faf4658e301baf4a2be8}{
+\index{CircleBuf@{CircleBuf}!write@{write}}
+\index{write@{write}!CircleBuf@{CircleBuf}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}void write (const char $\ast$ {\em b}, \/  int {\em len})}}
+\label{classCircleBuf_a4dc60fcb37e3faf4658e301baf4a2be8}
+
+
+
+\begin{DoxyCode}
+181 {
+182     if (len <= 0)
+183         return;
+184 
+185     _size += len;
+186     if (_size > _buflen)
+187         _size = _buflen;
+188 
+189     int old_start = _start;
+190     int old_stop = _stop;
+191 
+192     if (len >= _buflen) {
+193         _start = 0;
+194         _stop = _buflen;
+195         _rollover = true;
+196         memcpy(_buf, b + (len - _buflen), _buflen);
+197         return;
+198     }
+199 
+200     if (_stop + len <= _buflen) {
+201         memcpy(_buf + _stop, b, len);
+202         _stop += len;
+203     } else {
+204         int end_len = _buflen - old_stop;
+205         _stop = len - end_len;
+206         memcpy(_buf + old_stop, b, end_len);
+207         memcpy(_buf, b + end_len, _stop);
+208         _rollover = true;
+209     }
+210 
+211     if ((old_start > old_stop && old_start < _stop) ||
+212         (old_start < old_stop && _stop < old_stop))
+213         _start = _stop + 1;
+214 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_adeb1ea40a2a10d78a2143225d4c8045b}{
+\index{CircleBuf@{CircleBuf}!write@{write}}
+\index{write@{write}!CircleBuf@{CircleBuf}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}void write (const char $\ast$ {\em b})}}
+\label{classCircleBuf_adeb1ea40a2a10d78a2143225d4c8045b}
+
+
+
+\begin{DoxyCode}
+175 {
+176     write(b, strlen(b));
+177 }
+\end{DoxyCode}
+\hypertarget{classCircleBuf_a03ed9bf9f1a85f8085db042491f62b1d}{
+\index{CircleBuf@{CircleBuf}!write@{write}}
+\index{write@{write}!CircleBuf@{CircleBuf}}
+\subsubsection[{write}]{\setlength{\rightskip}{0pt plus 5cm}void write (char {\em b})}}
+\label{classCircleBuf_a03ed9bf9f1a85f8085db042491f62b1d}
+
+
+
+\begin{DoxyCode}
+169 {
+170     write(&b, 1);
+171 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCircleBuf_a171b0ba0bac75f8ed2daaf76db929931}{
+\index{CircleBuf@{CircleBuf}!\_\-buf@{\_\-buf}}
+\index{\_\-buf@{\_\-buf}!CircleBuf@{CircleBuf}}
+\subsubsection[{\_\-buf}]{\setlength{\rightskip}{0pt plus 5cm}char$\ast$ {\bf \_\-buf}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCircleBuf_a171b0ba0bac75f8ed2daaf76db929931}
+\hypertarget{classCircleBuf_a946c68b8ac85188df76f904b65bb2c21}{
+\index{CircleBuf@{CircleBuf}!\_\-buflen@{\_\-buflen}}
+\index{\_\-buflen@{\_\-buflen}!CircleBuf@{CircleBuf}}
+\subsubsection[{\_\-buflen}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf \_\-buflen}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCircleBuf_a946c68b8ac85188df76f904b65bb2c21}
+\hypertarget{classCircleBuf_abb2cb011de6ab8624161c6ac6fbd49f8}{
+\index{CircleBuf@{CircleBuf}!\_\-rollover@{\_\-rollover}}
+\index{\_\-rollover@{\_\-rollover}!CircleBuf@{CircleBuf}}
+\subsubsection[{\_\-rollover}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf \_\-rollover}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCircleBuf_abb2cb011de6ab8624161c6ac6fbd49f8}
+\hypertarget{classCircleBuf_aaa6c8c862a2c0bc18c802314cc58961d}{
+\index{CircleBuf@{CircleBuf}!\_\-size@{\_\-size}}
+\index{\_\-size@{\_\-size}!CircleBuf@{CircleBuf}}
+\subsubsection[{\_\-size}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf \_\-size}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCircleBuf_aaa6c8c862a2c0bc18c802314cc58961d}
+\hypertarget{classCircleBuf_aea5c93b4bb6fe666b13e46b84db33233}{
+\index{CircleBuf@{CircleBuf}!\_\-start@{\_\-start}}
+\index{\_\-start@{\_\-start}!CircleBuf@{CircleBuf}}
+\subsubsection[{\_\-start}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf \_\-start}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCircleBuf_aea5c93b4bb6fe666b13e46b84db33233}
+\hypertarget{classCircleBuf_afe79e6847d4f6bee712af4da0425e962}{
+\index{CircleBuf@{CircleBuf}!\_\-stop@{\_\-stop}}
+\index{\_\-stop@{\_\-stop}!CircleBuf@{CircleBuf}}
+\subsubsection[{\_\-stop}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf \_\-stop}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classCircleBuf_afe79e6847d4f6bee712af4da0425e962}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+base/\hyperlink{circlebuf_8hh}{circlebuf.hh}\item 
+base/\hyperlink{circlebuf_8cc}{circlebuf.cc}\end{DoxyCompactItemize}

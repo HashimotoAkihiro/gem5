@@ -1,0 +1,171 @@
+\hypertarget{classSparc64LiveProcess}{
+\section{クラス Sparc64LiveProcess}
+\label{classSparc64LiveProcess}\index{Sparc64LiveProcess@{Sparc64LiveProcess}}
+}
+
+
+{\ttfamily \#include $<$process.hh$>$}Sparc64LiveProcessに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=7cm]{classSparc64LiveProcess}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classSparc64LiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{argsInit} (int intSize, int pageSize)
+\item 
+void \hyperlink{classSparc64LiveProcess_ac36137c98f2b65736e0c5745c3c90c85}{flushWindows} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc)
+\item 
+\hyperlink{namespaceSparcISA_a0e080577527fb3e9685399f75b5caf15}{SparcISA::IntReg} \hyperlink{classSparc64LiveProcess_abab14482db5480cf54186cb10b08491e}{getSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int \&i)
+\item 
+void \hyperlink{classSparc64LiveProcess_acab5265ebb2016965a75bd93006c36d3}{setSyscallArg} (\hyperlink{classThreadContext}{ThreadContext} $\ast$tc, int i, \hyperlink{namespaceSparcISA_a0e080577527fb3e9685399f75b5caf15}{SparcISA::IntReg} val)
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classSparc64LiveProcess_a4c7f41076cd817d0c075b22537526abb}{Sparc64LiveProcess} (LiveProcessParams $\ast$params, \hyperlink{classObjectFile}{ObjectFile} $\ast$\hyperlink{classLiveProcess_ab6cfcfa7903c66267b3e0351c3caa809}{objFile})
+\item 
+void \hyperlink{classSparc64LiveProcess_a3c34ea9b29f410748d4435a667484924}{initState} ()
+\end{DoxyCompactItemize}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classSparc64LiveProcess_a4c7f41076cd817d0c075b22537526abb}{
+\index{Sparc64LiveProcess@{Sparc64LiveProcess}!Sparc64LiveProcess@{Sparc64LiveProcess}}
+\index{Sparc64LiveProcess@{Sparc64LiveProcess}!Sparc64LiveProcess@{Sparc64LiveProcess}}
+\subsubsection[{Sparc64LiveProcess}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Sparc64LiveProcess} (LiveProcessParams $\ast$ {\em params}, \/  {\bf ObjectFile} $\ast$ {\em objFile})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classSparc64LiveProcess_a4c7f41076cd817d0c075b22537526abb}
+
+
+
+\begin{DoxyCode}
+107                                                                         :
+108             SparcLiveProcess(params, objFile, 2047)
+109     {
+110         // Set up stack. On SPARC Linux, stack goes from the top of memory
+111         // downward, less the hole for the kernel address space.
+112         stack_base = (Addr)0x80000000000ULL;
+113 
+114         // Set up region for mmaps.  Tru64 seems to start just above 0 and
+115         // grow up from there.
+116         mmap_start = mmap_end = 0xfffff80000000000ULL;
+117     }
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classSparc64LiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}{
+\index{Sparc64LiveProcess@{Sparc64LiveProcess}!argsInit@{argsInit}}
+\index{argsInit@{argsInit}!Sparc64LiveProcess@{Sparc64LiveProcess}}
+\subsubsection[{argsInit}]{\setlength{\rightskip}{0pt plus 5cm}void argsInit (int {\em intSize}, \/  int {\em pageSize})}}
+\label{classSparc64LiveProcess_a60e5314ffeede1e51c6bcb2cf606ca92}
+
+
+
+\begin{DoxyCode}
+415 {
+416     SparcLiveProcess::argsInit<uint64_t>(pageSize);
+417 
+418     // Stuff the trap handlers into the process address space
+419     initVirtMem.writeBlob(fillStart,
+420             (uint8_t*)fillHandler64, sizeof(MachInst) * numFillInsts);
+421     initVirtMem.writeBlob(spillStart,
+422             (uint8_t*)spillHandler64, sizeof(MachInst) *  numSpillInsts);
+423 }
+\end{DoxyCode}
+\hypertarget{classSparc64LiveProcess_ac36137c98f2b65736e0c5745c3c90c85}{
+\index{Sparc64LiveProcess@{Sparc64LiveProcess}!flushWindows@{flushWindows}}
+\index{flushWindows@{flushWindows}!Sparc64LiveProcess@{Sparc64LiveProcess}}
+\subsubsection[{flushWindows}]{\setlength{\rightskip}{0pt plus 5cm}void flushWindows ({\bf ThreadContext} $\ast$ {\em tc})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSparc64LiveProcess_ac36137c98f2b65736e0c5745c3c90c85}
+
+
+\hyperlink{classSparcLiveProcess_ab39e13308fa993d443b20e56572106f5}{SparcLiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+473 {
+474     IntReg Cansave = tc->readIntReg(NumIntArchRegs + 3);
+475     IntReg Canrestore = tc->readIntReg(NumIntArchRegs + 4);
+476     IntReg Otherwin = tc->readIntReg(NumIntArchRegs + 6);
+477     MiscReg CWP = tc->readMiscReg(MISCREG_CWP);
+478     MiscReg origCWP = CWP;
+479     CWP = (CWP + Cansave + 2) % NWindows;
+480     while (NWindows - 2 - Cansave != 0) {
+481         if (Otherwin) {
+482             panic("Otherwin non-zero.\n");
+483         } else {
+484             tc->setMiscReg(MISCREG_CWP, CWP);
+485             // Do the stores
+486             IntReg sp = tc->readIntReg(StackPointerReg);
+487             for (int index = 16; index < 32; index++) {
+488                 IntReg regVal = tc->readIntReg(index);
+489                 regVal = htog(regVal);
+490                 if (!tc->getMemProxy().tryWriteBlob(
+491                         sp + 2047 + (index - 16) * 8, (uint8_t *)&regVal, 8)) {
+492                     warn("Failed to save register to the stack when "
+493                             "flushing windows.\n");
+494                 }
+495             }
+496             Canrestore--;
+497             Cansave++;
+498             CWP = (CWP + 1) % NWindows;
+499         }
+500     }
+501     tc->setIntReg(NumIntArchRegs + 3, Cansave);
+502     tc->setIntReg(NumIntArchRegs + 4, Canrestore);
+503     tc->setMiscReg(MISCREG_CWP, origCWP);
+504 }
+\end{DoxyCode}
+\hypertarget{classSparc64LiveProcess_abab14482db5480cf54186cb10b08491e}{
+\index{Sparc64LiveProcess@{Sparc64LiveProcess}!getSyscallArg@{getSyscallArg}}
+\index{getSyscallArg@{getSyscallArg}!Sparc64LiveProcess@{Sparc64LiveProcess}}
+\subsubsection[{getSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}IntReg getSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int \& {\em i})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classSparc64LiveProcess_abab14482db5480cf54186cb10b08491e}
+
+
+\hyperlink{classLiveProcess_aa001ff57ec460026facb89ba19c7bf96}{LiveProcess}を実装しています。
+
+
+\begin{DoxyCode}
+522 {
+523     assert(i < 6);
+524     return tc->readIntReg(FirstArgumentReg + i++);
+525 }
+\end{DoxyCode}
+\hypertarget{classSparc64LiveProcess_a3c34ea9b29f410748d4435a667484924}{
+\index{Sparc64LiveProcess@{Sparc64LiveProcess}!initState@{initState}}
+\index{initState@{initState}!Sparc64LiveProcess@{Sparc64LiveProcess}}
+\subsubsection[{initState}]{\setlength{\rightskip}{0pt plus 5cm}void initState ()\hspace{0.3cm}{\ttfamily  \mbox{[}protected, virtual\mbox{]}}}}
+\label{classSparc64LiveProcess_a3c34ea9b29f410748d4435a667484924}
+\hyperlink{classSparc64LiveProcess_a3c34ea9b29f410748d4435a667484924}{initState()} is called on each \hyperlink{classSimObject}{SimObject} when $\ast$not$\ast$ restoring from a checkpoint. This provides a hook for state initializations that are only required for a \char`\"{}cold start\char`\"{}. 
+
+\hyperlink{classSparcLiveProcess_a3c34ea9b29f410748d4435a667484924}{SparcLiveProcess}を再定義しています。
+
+
+\begin{DoxyCode}
+174 {
+175     SparcLiveProcess::initState();
+176 
+177     ThreadContext *tc = system->getThreadContext(contextIds[0]);
+178     // The process runs in user mode
+179     PSTATE pstate = 0;
+180     pstate.ie = 1;
+181     tc->setMiscReg(MISCREG_PSTATE, pstate);
+182 
+183     argsInit(sizeof(IntReg), VMPageSize);
+184 }
+\end{DoxyCode}
+\hypertarget{classSparc64LiveProcess_acab5265ebb2016965a75bd93006c36d3}{
+\index{Sparc64LiveProcess@{Sparc64LiveProcess}!setSyscallArg@{setSyscallArg}}
+\index{setSyscallArg@{setSyscallArg}!Sparc64LiveProcess@{Sparc64LiveProcess}}
+\subsubsection[{setSyscallArg}]{\setlength{\rightskip}{0pt plus 5cm}void setSyscallArg ({\bf ThreadContext} $\ast$ {\em tc}, \/  int {\em i}, \/  {\bf SparcISA::IntReg} {\em val})}}
+\label{classSparc64LiveProcess_acab5265ebb2016965a75bd93006c36d3}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/sparc/\hyperlink{arch_2sparc_2process_8hh}{process.hh}\item 
+arch/sparc/\hyperlink{arch_2sparc_2process_8cc}{process.cc}\end{DoxyCompactItemize}

@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: dev/sinic.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>dev/sinic.hh</h1><a href="sinic_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2004-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> */</span>
+<a name="l00030"></a>00030 
+<a name="l00031"></a>00031 <span class="preprocessor">#ifndef __DEV_SINIC_HH__</span>
+<a name="l00032"></a>00032 <span class="preprocessor"></span><span class="preprocessor">#define __DEV_SINIC_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span>
+<a name="l00034"></a>00034 <span class="preprocessor">#include &quot;<a class="code" href="inet_8hh.html">base/inet.hh</a>&quot;</span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="etherdevice_8hh.html">dev/etherdevice.hh</a>&quot;</span>
+<a name="l00037"></a>00037 <span class="preprocessor">#include &quot;<a class="code" href="etherint_8hh.html">dev/etherint.hh</a>&quot;</span>
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="etherpkt_8hh.html">dev/etherpkt.hh</a>&quot;</span>
+<a name="l00039"></a>00039 <span class="preprocessor">#include &quot;<a class="code" href="io__device_8hh.html">dev/io_device.hh</a>&quot;</span>
+<a name="l00040"></a>00040 <span class="preprocessor">#include &quot;<a class="code" href="pcidev_8hh.html">dev/pcidev.hh</a>&quot;</span>
+<a name="l00041"></a>00041 <span class="preprocessor">#include &quot;<a class="code" href="pktfifo_8hh.html">dev/pktfifo.hh</a>&quot;</span>
+<a name="l00042"></a>00042 <span class="preprocessor">#include &quot;<a class="code" href="sinicreg_8hh.html">dev/sinicreg.hh</a>&quot;</span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &quot;params/Sinic.hh&quot;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="keyword">namespace </span>Sinic {
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="keyword">class </span>Interface;
+<a name="l00049"></a><a class="code" href="classSinic_1_1Base.html">00049</a> <span class="keyword">class </span><a class="code" href="classSinic_1_1Base.html">Base</a> : <span class="keyword">public</span> <a class="code" href="classEtherDevBase.html">EtherDevBase</a>
+<a name="l00050"></a>00050 {
+<a name="l00051"></a>00051   <span class="keyword">protected</span>:
+<a name="l00052"></a><a class="code" href="classSinic_1_1Base.html#a62cd12a758780749d1ed0ec4d4cfbe71">00052</a>     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Base.html#a62cd12a758780749d1ed0ec4d4cfbe71">rxEnable</a>;
+<a name="l00053"></a><a class="code" href="classSinic_1_1Base.html#a950ab5d638f497b596eacdbf60bcb3f0">00053</a>     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Base.html#a950ab5d638f497b596eacdbf60bcb3f0">txEnable</a>;
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055   <span class="keyword">protected</span>:
+<a name="l00056"></a><a class="code" href="classSinic_1_1Base.html#a2c0cc3d9993d1f77cdb0902bc5e257a9">00056</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Base.html#a2c0cc3d9993d1f77cdb0902bc5e257a9">intrDelay</a>;
+<a name="l00057"></a><a class="code" href="classSinic_1_1Base.html#ad967cc729c22843df7961315b2fdab72">00057</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Base.html#ad967cc729c22843df7961315b2fdab72">intrTick</a>;
+<a name="l00058"></a><a class="code" href="classSinic_1_1Base.html#a8bac804ce4074a5297817a10e2a11110">00058</a>     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Base.html#a8bac804ce4074a5297817a10e2a11110">cpuIntrEnable</a>;
+<a name="l00059"></a><a class="code" href="classSinic_1_1Base.html#aa3e6b7b45f86d3fcd5565d6c960dbfa7">00059</a>     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Base.html#aa3e6b7b45f86d3fcd5565d6c960dbfa7">cpuPendingIntr</a>;
+<a name="l00060"></a>00060     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Base.html#af1fc872917f4ac5efa0d55c5c139bc9a">cpuIntrPost</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> when);
+<a name="l00061"></a>00061     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Base.html#a6191ac616bb71f81aeb9a72898f5207f">cpuInterrupt</a>();
+<a name="l00062"></a>00062     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Base.html#ab1873826f52c78bed89f2ee53382a4c2">cpuIntrClear</a>();
+<a name="l00063"></a>00063 
+<a name="l00064"></a><a class="code" href="classSinic_1_1Base.html#a09f9d93e16b939356647836884f8f47f">00064</a>     <span class="keyword">typedef</span> <a class="code" href="classEventWrapper.html">EventWrapper&lt;Base, &amp;Base::cpuInterrupt&gt;</a> <a class="code" href="classEventWrapper.html">IntrEvent</a>;
+<a name="l00065"></a>00065     <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code" href="classEventWrapper.html#a2e9c5136d19b1a95fc427e0852deab5c">IntrEvent::process</a>();
+<a name="l00066"></a><a class="code" href="classSinic_1_1Base.html#a3839fcc574c7379ba7ec297aba0396e2">00066</a>     <a class="code" href="classEventWrapper.html">IntrEvent</a> *<a class="code" href="classSinic_1_1Base.html#a3839fcc574c7379ba7ec297aba0396e2">intrEvent</a>;
+<a name="l00067"></a><a class="code" href="classSinic_1_1Base.html#a98d75f7466a1c032c9ba46044c3ad05e">00067</a>     <a class="code" href="classSinic_1_1Interface.html">Interface</a> *<a class="code" href="classSinic_1_1Base.html#a98d75f7466a1c032c9ba46044c3ad05e">interface</a>;
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Base.html#a8f53e358ba260670dbc7296b35482316">cpuIntrPending</a>() <span class="keyword">const</span>;
+<a name="l00070"></a><a class="code" href="classSinic_1_1Base.html#aa1dc801f063bc87ddb1cf8c618ec692e">00070</a>     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Base.html#aa1dc801f063bc87ddb1cf8c618ec692e">cpuIntrAck</a>() { <a class="code" href="classSinic_1_1Base.html#ab1873826f52c78bed89f2ee53382a4c2">cpuIntrClear</a>(); }
+<a name="l00071"></a>00071 
+<a name="l00075"></a>00075   <span class="keyword">public</span>:
+<a name="l00076"></a>00076     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Base.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00077"></a>00077     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Base.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00078"></a>00078 
+<a name="l00082"></a>00082   <span class="keyword">public</span>:
+<a name="l00083"></a><a class="code" href="classSinic_1_1Base.html#ae32fbee6dea75ffbb01b7d869c7bedad">00083</a>     <span class="keyword">typedef</span> SinicParams <a class="code" href="classSinic_1_1Base.html#ae32fbee6dea75ffbb01b7d869c7bedad">Params</a>;
+<a name="l00084"></a><a class="code" href="classSinic_1_1Base.html#acd3c3feb78ae7a8f88fe0f110a718dff">00084</a>     <span class="keyword">const</span> <a class="code" href="classSinic_1_1Base.html#ae32fbee6dea75ffbb01b7d869c7bedad">Params</a> *<a class="code" href="classSinic_1_1Base.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<span class="keyword">const</span> <a class="code" href="classSinic_1_1Base.html#ae32fbee6dea75ffbb01b7d869c7bedad">Params</a> *)<a class="code" href="classSimObject.html#acaf6024ae9dda44bfb1c67e05ad70aef">_params</a>; }
+<a name="l00085"></a>00085     <a class="code" href="classSinic_1_1Base.html#ae02136eda3d063396056b352cc26f7e6">Base</a>(<span class="keyword">const</span> <a class="code" href="classSinic_1_1Base.html#ae32fbee6dea75ffbb01b7d869c7bedad">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00086"></a>00086 };
+<a name="l00087"></a>00087 
+<a name="l00088"></a><a class="code" href="classSinic_1_1Device.html">00088</a> <span class="keyword">class </span><a class="code" href="classSinic_1_1Device.html">Device</a> : <span class="keyword">public</span> <a class="code" href="classSinic_1_1Base.html">Base</a>
+<a name="l00089"></a>00089 {
+<a name="l00090"></a>00090   <span class="keyword">protected</span>:
+<a name="l00092"></a><a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82">00092</a>     <span class="keyword">enum</span> <a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82">RxState</a> {
+<a name="l00093"></a><a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82ab702fffa03e4cec4b054f71cfe34ce7c">00093</a>         <a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82ab702fffa03e4cec4b054f71cfe34ce7c">rxIdle</a>,
+<a name="l00094"></a><a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82acd42510cc5c902cc3b338fee8106b4ca">00094</a>         <a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82acd42510cc5c902cc3b338fee8106b4ca">rxFifoBlock</a>,
+<a name="l00095"></a><a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82ad650f06241a5757f0fa65acae2960b1f">00095</a>         <a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82ad650f06241a5757f0fa65acae2960b1f">rxBeginCopy</a>,
+<a name="l00096"></a><a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82acc200faa35bf75419147de6b805d083b">00096</a>         <a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82acc200faa35bf75419147de6b805d083b">rxCopy</a>,
+<a name="l00097"></a><a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82a8fbf22d6f8cc55993cc2a09d07418446">00097</a>         <a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82a8fbf22d6f8cc55993cc2a09d07418446">rxCopyDone</a>
+<a name="l00098"></a>00098     };
+<a name="l00099"></a>00099 
+<a name="l00101"></a><a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6a">00101</a>     <span class="keyword">enum</span> <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6a">TxState</a> {
+<a name="l00102"></a><a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aa6ae23f58218fed48a3f17abba689fcb6">00102</a>         <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aa6ae23f58218fed48a3f17abba689fcb6">txIdle</a>,
+<a name="l00103"></a><a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aaf6571d0685a78da76fe4116ae36afdc3">00103</a>         <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aaf6571d0685a78da76fe4116ae36afdc3">txFifoBlock</a>,
+<a name="l00104"></a><a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aaf2c21c54301af068a37b641c220915c1">00104</a>         <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aaf2c21c54301af068a37b641c220915c1">txBeginCopy</a>,
+<a name="l00105"></a><a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aa76918a4583683f130898f157b820164c">00105</a>         <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aa76918a4583683f130898f157b820164c">txCopy</a>,
+<a name="l00106"></a><a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aa60ba4d6a047deb74d1eccb2904472127">00106</a>         <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aa60ba4d6a047deb74d1eccb2904472127">txCopyDone</a>
+<a name="l00107"></a>00107     };
+<a name="l00108"></a>00108 
+<a name="l00110"></a>00110     <span class="keyword">struct </span>{
+<a name="l00111"></a><a class="code" href="classSinic_1_1Device.html#a4ce7377178b8c0ee57726e8a73c06e66">00111</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a4ce7377178b8c0ee57726e8a73c06e66">Config</a>;       <span class="comment">// 0x00</span>
+<a name="l00112"></a><a class="code" href="classSinic_1_1Device.html#a04596aab9f96da6679ea03286f74b3df">00112</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a04596aab9f96da6679ea03286f74b3df">Command</a>;      <span class="comment">// 0x04</span>
+<a name="l00113"></a><a class="code" href="classSinic_1_1Device.html#a48050ef73aa0e6da5537fca47130d76f">00113</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a48050ef73aa0e6da5537fca47130d76f">IntrStatus</a>;   <span class="comment">// 0x08</span>
+<a name="l00114"></a><a class="code" href="classSinic_1_1Device.html#aa3e3d884e5a8b959eeccc3660451c7ed">00114</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#aa3e3d884e5a8b959eeccc3660451c7ed">IntrMask</a>;     <span class="comment">// 0x0c</span>
+<a name="l00115"></a><a class="code" href="classSinic_1_1Device.html#a40cf84e9a58828b94d92f3f4af8e2132">00115</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a40cf84e9a58828b94d92f3f4af8e2132">RxMaxCopy</a>;    <span class="comment">// 0x10</span>
+<a name="l00116"></a><a class="code" href="classSinic_1_1Device.html#a8dfcab9c852a1e3e564b4ccceb9a594d">00116</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a8dfcab9c852a1e3e564b4ccceb9a594d">TxMaxCopy</a>;    <span class="comment">// 0x14</span>
+<a name="l00117"></a><a class="code" href="classSinic_1_1Device.html#a0a6cb3337e941db43aff26f90444592a">00117</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a0a6cb3337e941db43aff26f90444592a">ZeroCopySize</a>; <span class="comment">// 0x18</span>
+<a name="l00118"></a><a class="code" href="classSinic_1_1Device.html#a93d85f8e9d6efa8d85cce98ef514c54d">00118</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a93d85f8e9d6efa8d85cce98ef514c54d">ZeroCopyMark</a>; <span class="comment">// 0x1c</span>
+<a name="l00119"></a><a class="code" href="classSinic_1_1Device.html#a8e55d9d438f57f1cf9bee803876daf7e">00119</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a8e55d9d438f57f1cf9bee803876daf7e">VirtualCount</a>; <span class="comment">// 0x20</span>
+<a name="l00120"></a><a class="code" href="classSinic_1_1Device.html#a29b4ff4ee34664ea46879c0fed891fe6">00120</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a29b4ff4ee34664ea46879c0fed891fe6">RxMaxIntr</a>;    <span class="comment">// 0x24</span>
+<a name="l00121"></a><a class="code" href="classSinic_1_1Device.html#ad95eeec9a1e7f6804da0d44916333d3c">00121</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#ad95eeec9a1e7f6804da0d44916333d3c">RxFifoSize</a>;   <span class="comment">// 0x28</span>
+<a name="l00122"></a><a class="code" href="classSinic_1_1Device.html#a07afc60b5230368629f6b0eb9ab6c51a">00122</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a07afc60b5230368629f6b0eb9ab6c51a">TxFifoSize</a>;   <span class="comment">// 0x2c</span>
+<a name="l00123"></a><a class="code" href="classSinic_1_1Device.html#a4d0eb17fd55782f70d98e6b96ccd8d16">00123</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a4d0eb17fd55782f70d98e6b96ccd8d16">RxFifoLow</a>;    <span class="comment">// 0x30</span>
+<a name="l00124"></a><a class="code" href="classSinic_1_1Device.html#a72783e023c789fe9ff7b3d526a202417">00124</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a72783e023c789fe9ff7b3d526a202417">TxFifoLow</a>;    <span class="comment">// 0x34</span>
+<a name="l00125"></a><a class="code" href="classSinic_1_1Device.html#a5f1b0015444b58705dd253c2e0aed9b4">00125</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a5f1b0015444b58705dd253c2e0aed9b4">RxFifoHigh</a>;   <span class="comment">// 0x38</span>
+<a name="l00126"></a><a class="code" href="classSinic_1_1Device.html#ae282c8042fb1e67c966a0040eed2c37f">00126</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#ae282c8042fb1e67c966a0040eed2c37f">TxFifoHigh</a>;   <span class="comment">// 0x3c</span>
+<a name="l00127"></a><a class="code" href="classSinic_1_1Device.html#a6c9104d7b097720d299cae2ffe977554">00127</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#a6c9104d7b097720d299cae2ffe977554">RxData</a>;       <span class="comment">// 0x40</span>
+<a name="l00128"></a><a class="code" href="classSinic_1_1Device.html#a3eeed0cb70c02a0da59c7a4c407dd6e9">00128</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#a3eeed0cb70c02a0da59c7a4c407dd6e9">RxDone</a>;       <span class="comment">// 0x48</span>
+<a name="l00129"></a><a class="code" href="classSinic_1_1Device.html#a49b873aef0e771896569f73b69ed5f6a">00129</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#a49b873aef0e771896569f73b69ed5f6a">RxWait</a>;       <span class="comment">// 0x50</span>
+<a name="l00130"></a><a class="code" href="classSinic_1_1Device.html#a6f031a974796558748f14b7ba7f64985">00130</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#a6f031a974796558748f14b7ba7f64985">TxData</a>;       <span class="comment">// 0x58</span>
+<a name="l00131"></a><a class="code" href="classSinic_1_1Device.html#ab0c6a1c886fdea04c1107ab914188fe7">00131</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#ab0c6a1c886fdea04c1107ab914188fe7">TxDone</a>;       <span class="comment">// 0x60</span>
+<a name="l00132"></a><a class="code" href="classSinic_1_1Device.html#aee07d31d26bcedc3ec903158356f7d06">00132</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#aee07d31d26bcedc3ec903158356f7d06">TxWait</a>;       <span class="comment">// 0x68</span>
+<a name="l00133"></a><a class="code" href="classSinic_1_1Device.html#acc1119b12c1f476a7aa533a975ac4249">00133</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#acc1119b12c1f476a7aa533a975ac4249">HwAddr</a>;       <span class="comment">// 0x70</span>
+<a name="l00134"></a><a class="code" href="classSinic_1_1Device.html#a1d5b24603a5677cd3cf0a67f8c44d540">00134</a>         uint64_t <a class="code" href="classSinic_1_1Device.html#a1d5b24603a5677cd3cf0a67f8c44d540">RxStatus</a>;     <span class="comment">// 0x78</span>
+<a name="l00135"></a>00135     } <a class="code" href="classSinic_1_1Device.html#a1898630b26f531edc311e99e742572af">regs</a>;
+<a name="l00136"></a>00136 
+<a name="l00137"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html">00137</a>     <span class="keyword">struct </span><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html">VirtualReg</a> {
+<a name="l00138"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a6c9104d7b097720d299cae2ffe977554">00138</a>         uint64_t <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a6c9104d7b097720d299cae2ffe977554">RxData</a>;
+<a name="l00139"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a3eeed0cb70c02a0da59c7a4c407dd6e9">00139</a>         uint64_t <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a3eeed0cb70c02a0da59c7a4c407dd6e9">RxDone</a>;
+<a name="l00140"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a6f031a974796558748f14b7ba7f64985">00140</a>         uint64_t <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a6f031a974796558748f14b7ba7f64985">TxData</a>;
+<a name="l00141"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ab0c6a1c886fdea04c1107ab914188fe7">00141</a>         uint64_t <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ab0c6a1c886fdea04c1107ab914188fe7">TxDone</a>;
+<a name="l00142"></a>00142 
+<a name="l00143"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ac748495b0282452145381f164d34fafa">00143</a>         <a class="code" href="classPacketFifo.html#a6905b6d8863a2eecd86b633802b68fda">PacketFifo::iterator</a> <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ac748495b0282452145381f164d34fafa">rxIndex</a>;
+<a name="l00144"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#aade7097b66b9c9fe7f09eb7d6b9b56ee">00144</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#aade7097b66b9c9fe7f09eb7d6b9b56ee">rxPacketOffset</a>;
+<a name="l00145"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ae77d1e50da368a073a19df07b08d9eca">00145</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ae77d1e50da368a073a19df07b08d9eca">rxPacketBytes</a>;
+<a name="l00146"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a820aee0fdf543497af18d8f5ddc3fe7d">00146</a>         uint64_t <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a820aee0fdf543497af18d8f5ddc3fe7d">rxDoneData</a>;
+<a name="l00147"></a>00147 
+<a name="l00148"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a98e0c2747f2107c6f81f51e9ba3bdc8a">00148</a>         <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a98e0c2747f2107c6f81f51e9ba3bdc8a">rxUnique</a>;
+<a name="l00149"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#addcc8e87969e32011941cd144fe23c73">00149</a>         <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#addcc8e87969e32011941cd144fe23c73">txUnique</a>;
+<a name="l00150"></a>00150 
+<a name="l00151"></a><a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a23a91ef4f737638e489fa9a82174e918">00151</a>         <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a23a91ef4f737638e489fa9a82174e918">VirtualReg</a>()
+<a name="l00152"></a>00152             : <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a6c9104d7b097720d299cae2ffe977554">RxData</a>(0), <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a3eeed0cb70c02a0da59c7a4c407dd6e9">RxDone</a>(0), <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a6f031a974796558748f14b7ba7f64985">TxData</a>(0), <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ab0c6a1c886fdea04c1107ab914188fe7">TxDone</a>(0),
+<a name="l00153"></a>00153               <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#aade7097b66b9c9fe7f09eb7d6b9b56ee">rxPacketOffset</a>(0), <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#ae77d1e50da368a073a19df07b08d9eca">rxPacketBytes</a>(0), <a class="code" href="structSinic_1_1Device_1_1VirtualReg.html#a820aee0fdf543497af18d8f5ddc3fe7d">rxDoneData</a>(0)
+<a name="l00154"></a>00154         { }
+<a name="l00155"></a>00155     };
+<a name="l00156"></a><a class="code" href="classSinic_1_1Device.html#aa30f329d058c1b4134f557c529c86ca2">00156</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1vector.html">std::vector&lt;VirtualReg&gt;</a> <a class="code" href="classstd_1_1vector.html">VirtualRegs</a>;
+<a name="l00157"></a><a class="code" href="classSinic_1_1Device.html#a825103ea4ae04062ca13fa65d29bcfc6">00157</a>     <span class="keyword">typedef</span> <a class="code" href="classstd_1_1list.html">std::list&lt;unsigned&gt;</a> <a class="code" href="classstd_1_1list.html">VirtualList</a>;
+<a name="l00158"></a><a class="code" href="classSinic_1_1Device.html#a98e0c2747f2107c6f81f51e9ba3bdc8a">00158</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classSinic_1_1Device.html#a98e0c2747f2107c6f81f51e9ba3bdc8a">rxUnique</a>;
+<a name="l00159"></a><a class="code" href="classSinic_1_1Device.html#addcc8e87969e32011941cd144fe23c73">00159</a>     <a class="code" href="base_2types_8hh.html#ae1475755791765b8e6f6a8bb091e273e">Counter</a> <a class="code" href="classSinic_1_1Device.html#addcc8e87969e32011941cd144fe23c73">txUnique</a>;
+<a name="l00160"></a><a class="code" href="classSinic_1_1Device.html#acb438fcaae56ab29f35376e8b0726c23">00160</a>     <a class="code" href="classstd_1_1vector.html">VirtualRegs</a> <a class="code" href="classSinic_1_1Device.html#acb438fcaae56ab29f35376e8b0726c23">virtualRegs</a>;
+<a name="l00161"></a><a class="code" href="classSinic_1_1Device.html#a45202257b5522a1436d8130249ee0a0d">00161</a>     <a class="code" href="classstd_1_1list.html">VirtualList</a> <a class="code" href="classSinic_1_1Device.html#a45202257b5522a1436d8130249ee0a0d">rxList</a>;
+<a name="l00162"></a><a class="code" href="classSinic_1_1Device.html#afd33bf96a9045d1f90d0685ad3e33253">00162</a>     <a class="code" href="classstd_1_1list.html">VirtualList</a> <a class="code" href="classSinic_1_1Device.html#afd33bf96a9045d1f90d0685ad3e33253">rxBusy</a>;
+<a name="l00163"></a><a class="code" href="classSinic_1_1Device.html#a560efaee55571ea588551a80aadc6cda">00163</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#a560efaee55571ea588551a80aadc6cda">rxActive</a>;
+<a name="l00164"></a><a class="code" href="classSinic_1_1Device.html#a7010216dd085a0c2dac9d6b830a64f35">00164</a>     <a class="code" href="classstd_1_1list.html">VirtualList</a> <a class="code" href="classSinic_1_1Device.html#a7010216dd085a0c2dac9d6b830a64f35">txList</a>;
+<a name="l00165"></a>00165 
+<a name="l00166"></a><a class="code" href="classSinic_1_1Device.html#a508dbc989a9476f10e7622b054aac7e1">00166</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#a508dbc989a9476f10e7622b054aac7e1">rxBusyCount</a>;
+<a name="l00167"></a><a class="code" href="classSinic_1_1Device.html#a41d5a12c120010c50c75ea0dc2f01241">00167</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#a41d5a12c120010c50c75ea0dc2f01241">rxMappedCount</a>;
+<a name="l00168"></a><a class="code" href="classSinic_1_1Device.html#a9e5a18ec7025db57fa6ff2f05a289804">00168</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#a9e5a18ec7025db57fa6ff2f05a289804">rxDirtyCount</a>;
+<a name="l00169"></a>00169 
+<a name="l00170"></a><a class="code" href="classSinic_1_1Device.html#ab9d3fc8abcb0bc9a41665d6311d64106">00170</a>     uint8_t  &amp;<a class="code" href="classSinic_1_1Device.html#ab9d3fc8abcb0bc9a41665d6311d64106">regData8</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr) { <span class="keywordflow">return</span> *((uint8_t *)&amp;<a class="code" href="classSinic_1_1Device.html#a1898630b26f531edc311e99e742572af">regs</a> + daddr); }
+<a name="l00171"></a><a class="code" href="classSinic_1_1Device.html#af3697c3ddcc9030231a62c95ddcd193b">00171</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> &amp;<a class="code" href="classSinic_1_1Device.html#af3697c3ddcc9030231a62c95ddcd193b">regData32</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr) { <span class="keywordflow">return</span> *(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> *)&amp;<a class="code" href="classSinic_1_1Device.html#ab9d3fc8abcb0bc9a41665d6311d64106">regData8</a>(daddr); }
+<a name="l00172"></a><a class="code" href="classSinic_1_1Device.html#a107fa1384335bcf976734520e213a501">00172</a>     uint64_t &amp;<a class="code" href="classSinic_1_1Device.html#a107fa1384335bcf976734520e213a501">regData64</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> daddr) { <span class="keywordflow">return</span> *(uint64_t *)&amp;<a class="code" href="classSinic_1_1Device.html#ab9d3fc8abcb0bc9a41665d6311d64106">regData8</a>(daddr); }
+<a name="l00173"></a>00173 
+<a name="l00174"></a>00174   <span class="keyword">protected</span>:
+<a name="l00175"></a><a class="code" href="classSinic_1_1Device.html#a17c506ad3a705ec9dbd1762e6a80fbf5">00175</a>     <a class="code" href="classSinic_1_1Device.html#afa22e66eb5ea0daab0f0cd0360936f82">RxState</a> <a class="code" href="classSinic_1_1Device.html#a17c506ad3a705ec9dbd1762e6a80fbf5">rxState</a>;
+<a name="l00176"></a><a class="code" href="classSinic_1_1Device.html#a45c9c6a3665bcd91e57ff35aa9089fa7">00176</a>     <a class="code" href="classPacketFifo.html">PacketFifo</a> <a class="code" href="classSinic_1_1Device.html#a45c9c6a3665bcd91e57ff35aa9089fa7">rxFifo</a>;
+<a name="l00177"></a><a class="code" href="classSinic_1_1Device.html#aee345bc47c94b616b04d8f502dab1826">00177</a>     <a class="code" href="classPacketFifo.html#a6905b6d8863a2eecd86b633802b68fda">PacketFifo::iterator</a> <a class="code" href="classSinic_1_1Device.html#aee345bc47c94b616b04d8f502dab1826">rxFifoPtr</a>;
+<a name="l00178"></a><a class="code" href="classSinic_1_1Device.html#a62b6a5f468811226da2581374919b1a5">00178</a>     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Device.html#a62b6a5f468811226da2581374919b1a5">rxEmpty</a>;
+<a name="l00179"></a><a class="code" href="classSinic_1_1Device.html#a1ef589f4a0a6d9baae11626a0d89b5ec">00179</a>     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Device.html#a1ef589f4a0a6d9baae11626a0d89b5ec">rxLow</a>;
+<a name="l00180"></a><a class="code" href="classSinic_1_1Device.html#a4a609f84c6849bcfb6dee08329773fca">00180</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classSinic_1_1Device.html#a4a609f84c6849bcfb6dee08329773fca">rxDmaAddr</a>;
+<a name="l00181"></a><a class="code" href="classSinic_1_1Device.html#ae917f4bc2a610fed06749a854fb89d14">00181</a>     uint8_t *<a class="code" href="classSinic_1_1Device.html#ae917f4bc2a610fed06749a854fb89d14">rxDmaData</a>;
+<a name="l00182"></a><a class="code" href="classSinic_1_1Device.html#a0efc207ddfcff656cbe0237c3bc237c1">00182</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classSinic_1_1Device.html#a0efc207ddfcff656cbe0237c3bc237c1">rxDmaLen</a>;
+<a name="l00183"></a>00183 
+<a name="l00184"></a><a class="code" href="classSinic_1_1Device.html#a12e3a80bef638cd15c067541b96a4756">00184</a>     <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6a">TxState</a> <a class="code" href="classSinic_1_1Device.html#a12e3a80bef638cd15c067541b96a4756">txState</a>;
+<a name="l00185"></a><a class="code" href="classSinic_1_1Device.html#ae699c324753236e0a59aa2465920eb46">00185</a>     <a class="code" href="classPacketFifo.html">PacketFifo</a> <a class="code" href="classSinic_1_1Device.html#ae699c324753236e0a59aa2465920eb46">txFifo</a>;
+<a name="l00186"></a><a class="code" href="classSinic_1_1Device.html#aa09cc8a4752916111328b7353e64f3bb">00186</a>     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Device.html#aa09cc8a4752916111328b7353e64f3bb">txFull</a>;
+<a name="l00187"></a><a class="code" href="classSinic_1_1Device.html#a8d22e1a154942ff0d4ab9048e7e844bb">00187</a>     <a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> <a class="code" href="classSinic_1_1Device.html#a8d22e1a154942ff0d4ab9048e7e844bb">txPacket</a>;
+<a name="l00188"></a><a class="code" href="classSinic_1_1Device.html#ac0d074adcc00053882737a0009c84adb">00188</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#ac0d074adcc00053882737a0009c84adb">txPacketOffset</a>;
+<a name="l00189"></a><a class="code" href="classSinic_1_1Device.html#a1e82240f06ef6f0c8d8c0bb1a141a600">00189</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#a1e82240f06ef6f0c8d8c0bb1a141a600">txPacketBytes</a>;
+<a name="l00190"></a><a class="code" href="classSinic_1_1Device.html#aef3a8dd866e8017fd7a675414596ec6b">00190</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classSinic_1_1Device.html#aef3a8dd866e8017fd7a675414596ec6b">txDmaAddr</a>;
+<a name="l00191"></a><a class="code" href="classSinic_1_1Device.html#af56464970a8957faf3a1d35026db6a12">00191</a>     uint8_t *<a class="code" href="classSinic_1_1Device.html#af56464970a8957faf3a1d35026db6a12">txDmaData</a>;
+<a name="l00192"></a><a class="code" href="classSinic_1_1Device.html#a5782be4cae30f9377ab0c645a9f65892">00192</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#a5782be4cae30f9377ab0c645a9f65892">txDmaLen</a>;
+<a name="l00193"></a>00193 
+<a name="l00194"></a>00194   <span class="keyword">protected</span>:
+<a name="l00195"></a>00195     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#ad20897c5c8bd47f5d4005989bead0e55">reset</a>();
+<a name="l00196"></a>00196 
+<a name="l00197"></a>00197     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a5fa946a73db6f59c9819d457c991486a">rxKick</a>();
+<a name="l00198"></a><a class="code" href="classSinic_1_1Device.html#aa36d466a86f77d2c7afdc014e3a6f8b3">00198</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#aa36d466a86f77d2c7afdc014e3a6f8b3">rxKickTick</a>;
+<a name="l00199"></a><a class="code" href="classSinic_1_1Device.html#a1094ea52a2a9cb27d833549a0407932d">00199</a>     <span class="keyword">typedef</span> <a class="code" href="classEventWrapper.html">EventWrapper&lt;Device, &amp;Device::rxKick&gt;</a> <a class="code" href="classEventWrapper.html">RxKickEvent</a>;
+<a name="l00200"></a>00200     <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code" href="classEventWrapper.html#a2e9c5136d19b1a95fc427e0852deab5c">RxKickEvent::process</a>();
+<a name="l00201"></a>00201 
+<a name="l00202"></a>00202     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#ac5484e8debdd6a2d3cf4c2902b832a76">txKick</a>();
+<a name="l00203"></a><a class="code" href="classSinic_1_1Device.html#acfce4fae6fa03f94e3d91d71302fe349">00203</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#acfce4fae6fa03f94e3d91d71302fe349">txKickTick</a>;
+<a name="l00204"></a><a class="code" href="classSinic_1_1Device.html#ad902ad2446ba2b0506a150072f971da5">00204</a>     <span class="keyword">typedef</span> <a class="code" href="classEventWrapper.html">EventWrapper&lt;Device, &amp;Device::txKick&gt;</a> <a class="code" href="classEventWrapper.html">TxKickEvent</a>;
+<a name="l00205"></a>00205     <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code" href="classEventWrapper.html#a2e9c5136d19b1a95fc427e0852deab5c">TxKickEvent::process</a>();
+<a name="l00206"></a>00206 
+<a name="l00210"></a>00210     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#af04463ca216d10ffa94db8463cee04c9">transmit</a>();
+<a name="l00211"></a><a class="code" href="classSinic_1_1Device.html#a2b61c48d7a63b50007517c67e35dfd20">00211</a>     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a2b61c48d7a63b50007517c67e35dfd20">txEventTransmit</a>()
+<a name="l00212"></a>00212     {
+<a name="l00213"></a>00213         <a class="code" href="classSinic_1_1Device.html#af04463ca216d10ffa94db8463cee04c9">transmit</a>();
+<a name="l00214"></a>00214         <span class="keywordflow">if</span> (<a class="code" href="classSinic_1_1Device.html#a12e3a80bef638cd15c067541b96a4756">txState</a> == <a class="code" href="classSinic_1_1Device.html#a96f29317c7f6628ea6a0c1bc5ab05d6aaf6571d0685a78da76fe4116ae36afdc3">txFifoBlock</a>)
+<a name="l00215"></a>00215             <a class="code" href="classSinic_1_1Device.html#ac5484e8debdd6a2d3cf4c2902b832a76">txKick</a>();
+<a name="l00216"></a>00216     }
+<a name="l00217"></a><a class="code" href="classSinic_1_1Device.html#a9a650a51d23bb10d0de3cb621d918e50">00217</a>     <span class="keyword">typedef</span> <a class="code" href="classEventWrapper.html">EventWrapper&lt;Device, &amp;Device::txEventTransmit&gt;</a> <a class="code" href="classEventWrapper.html">TxEvent</a>;
+<a name="l00218"></a>00218     <span class="keyword">friend</span> <span class="keywordtype">void</span> <a class="code" href="classEventWrapper.html#a2e9c5136d19b1a95fc427e0852deab5c">TxEvent::process</a>();
+<a name="l00219"></a><a class="code" href="classSinic_1_1Device.html#a324fed072a29716c20a98a82927bd2a2">00219</a>     <a class="code" href="classEventWrapper.html">TxEvent</a> <a class="code" href="classSinic_1_1Device.html#a324fed072a29716c20a98a82927bd2a2">txEvent</a>;
+<a name="l00220"></a>00220 
+<a name="l00221"></a>00221     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#afe787c5d7928546256f34b65f485be32">txDump</a>() <span class="keyword">const</span>;
+<a name="l00222"></a>00222     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#aa1b380dc961134ace0f88ee7743b32b6">rxDump</a>() <span class="keyword">const</span>;
+<a name="l00223"></a>00223 
+<a name="l00227"></a>00227     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Device.html#a5bcec2e17f6aca766b063f7a92289bdb">rxFilter</a>(<span class="keyword">const</span> <a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> &amp;packet);
+<a name="l00228"></a>00228 
+<a name="l00232"></a>00232     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#abac0082da5c2420162cd3d183fab4f1f">changeConfig</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> newconfig);
+<a name="l00233"></a>00233     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a8747db3299e3afcb225c4e64f725f453">command</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classSinic_1_1Device.html#a8747db3299e3afcb225c4e64f725f453">command</a>);
+<a name="l00234"></a>00234 
+<a name="l00238"></a>00238   <span class="keyword">public</span>:
+<a name="l00239"></a>00239     <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Device.html#ad54e71348f53dfb5444979e9bfaf3164">recvPacket</a>(<a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> packet);
+<a name="l00240"></a>00240     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#ac47b2c25cccfafe7e2c12673a1b3e793">transferDone</a>();
+<a name="l00241"></a>00241     <span class="keyword">virtual</span> <a class="code" href="classEtherInt.html">EtherInt</a> *<a class="code" href="classSinic_1_1Device.html#a10260c5a583c0894dcdcd1ced50a53ae">getEthPort</a>(<span class="keyword">const</span> std::string &amp;if_name, <span class="keywordtype">int</span> idx);
+<a name="l00242"></a>00242 
+<a name="l00246"></a>00246   <span class="keyword">protected</span>:
+<a name="l00247"></a>00247     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#ae8fff6d9b2bdd860ce365599560f67e7">rxDmaDone</a>();
+<a name="l00248"></a><a class="code" href="classSinic_1_1Device.html#aeca94de76c2e5173eca0cd628c06cb43">00248</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classEventWrapper.html">EventWrapper</a>&lt;<a class="code" href="classSinic_1_1Device.html">Device</a>, &amp;<a class="code" href="classSinic_1_1Device.html#ae8fff6d9b2bdd860ce365599560f67e7">Device::rxDmaDone</a>&gt;;
+<a name="l00249"></a><a class="code" href="classSinic_1_1Device.html#a50d4f78a0a458835572bb101383bf692">00249</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;Device, &amp;Device::rxDmaDone&gt;</a> <a class="code" href="classSinic_1_1Device.html#a50d4f78a0a458835572bb101383bf692">rxDmaEvent</a>;
+<a name="l00250"></a>00250 
+<a name="l00251"></a>00251     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a5204e0ceaa6484825f9506e447e072c6">txDmaDone</a>();
+<a name="l00252"></a><a class="code" href="classSinic_1_1Device.html#af2d0621641d94343bd091391cd6cf46f">00252</a>     <span class="keyword">friend</span> <span class="keyword">class </span><a class="code" href="classEventWrapper.html">EventWrapper</a>&lt;<a class="code" href="classSinic_1_1Device.html">Device</a>, &amp;<a class="code" href="classSinic_1_1Device.html#a5204e0ceaa6484825f9506e447e072c6">Device::txDmaDone</a>&gt;;
+<a name="l00253"></a><a class="code" href="classSinic_1_1Device.html#a3d31afcc8e7130b3e43e5dc1a0ef0e37">00253</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;Device, &amp;Device::txDmaDone&gt;</a> <a class="code" href="classSinic_1_1Device.html#a3d31afcc8e7130b3e43e5dc1a0ef0e37">txDmaEvent</a>;
+<a name="l00254"></a>00254 
+<a name="l00255"></a><a class="code" href="classSinic_1_1Device.html#abff269bf1752a04839eb356b47d4348b">00255</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#abff269bf1752a04839eb356b47d4348b">dmaReadDelay</a>;
+<a name="l00256"></a><a class="code" href="classSinic_1_1Device.html#a632abfe8a89dfa1d944547874f1b4fe4">00256</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#a632abfe8a89dfa1d944547874f1b4fe4">dmaReadFactor</a>;
+<a name="l00257"></a><a class="code" href="classSinic_1_1Device.html#add556e09206ac9f4675d3e2da53339e8">00257</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#add556e09206ac9f4675d3e2da53339e8">dmaWriteDelay</a>;
+<a name="l00258"></a><a class="code" href="classSinic_1_1Device.html#a396f950eb0d0a011cfa5790861e32608">00258</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#a396f950eb0d0a011cfa5790861e32608">dmaWriteFactor</a>;
+<a name="l00259"></a>00259 
+<a name="l00263"></a>00263   <span class="keyword">protected</span>:
+<a name="l00264"></a>00264     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#ad1a6ea4f31e657c02d56bdf168fb988a">devIntrPost</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> interrupts);
+<a name="l00265"></a>00265     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#af2e6de78cabe5fab3233fb1b29fb478b">devIntrClear</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> interrupts = Regs::Intr_All);
+<a name="l00266"></a>00266     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a776f6f1cbea3e0200c28319eb0d5446b">devIntrChangeMask</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> newmask);
+<a name="l00267"></a>00267 
+<a name="l00271"></a>00271   <span class="keyword">public</span>:
+<a name="l00272"></a>00272     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#a613ec7d5e1ec64f8d21fec78ae8e568e">read</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00273"></a>00273     <span class="keyword">virtual</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classSinic_1_1Device.html#a4cefab464e72b5dd42c003a0a4341802">write</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00274"></a>00274     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a8f020d3237536fe007fc488c4125c5d8">drainResume</a>();
+<a name="l00275"></a>00275 
+<a name="l00276"></a>00276     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a65d0ce31d782d0d1233ce4a464e21fe3">prepareIO</a>(<span class="keywordtype">int</span> cpu, <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>);
+<a name="l00277"></a>00277     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a90e004f9ca30532075cace46234c6ad5">prepareRead</a>(<span class="keywordtype">int</span> cpu, <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>);
+<a name="l00278"></a>00278     <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a8527de0a20c247f91f96abe895bf4448">prepareWrite</a>(<span class="keywordtype">int</span> cpu, <span class="keywordtype">int</span> <a class="code" href="namespaceMipsISA.html#ae6714ce3c5ef82205cecbd410556edf3">index</a>);
+<a name="l00279"></a>00279  <span class="comment">//   Fault iprRead(Addr daddr, int cpu, uint64_t &amp;result);</span>
+<a name="l00280"></a>00280 
+<a name="l00284"></a>00284   <span class="keyword">private</span>:
+<a name="l00285"></a><a class="code" href="classSinic_1_1Device.html#aceabe9d2fb5f87ee602c22e0d0141479">00285</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classSinic_1_1Device.html#aceabe9d2fb5f87ee602c22e0d0141479">totalVnicDistance</a>;
+<a name="l00286"></a><a class="code" href="classSinic_1_1Device.html#a489a76c8b17d7dec4865d06b211218fb">00286</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classSinic_1_1Device.html#a489a76c8b17d7dec4865d06b211218fb">numVnicDistance</a>;
+<a name="l00287"></a><a class="code" href="classSinic_1_1Device.html#a55159ce061f8632637c330b0b101d370">00287</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classSinic_1_1Device.html#a55159ce061f8632637c330b0b101d370">maxVnicDistance</a>;
+<a name="l00288"></a><a class="code" href="classSinic_1_1Device.html#a6846633bb8f156a544f88825a26a3090">00288</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classSinic_1_1Device.html#a6846633bb8f156a544f88825a26a3090">avgVnicDistance</a>;
+<a name="l00289"></a>00289 
+<a name="l00290"></a><a class="code" href="classSinic_1_1Device.html#a3eb6949618cb5ab7fcb963974eb980a0">00290</a>     <span class="keywordtype">int</span> <a class="code" href="classSinic_1_1Device.html#a3eb6949618cb5ab7fcb963974eb980a0">_maxVnicDistance</a>;
+<a name="l00291"></a>00291 
+<a name="l00292"></a>00292   <span class="keyword">public</span>:
+<a name="l00293"></a>00293     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00294"></a>00294     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a65880e61108132689a1bd769b9187fb7">resetStats</a>();
+<a name="l00295"></a>00295 
+<a name="l00299"></a>00299   <span class="keyword">public</span>:
+<a name="l00300"></a>00300     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00301"></a>00301     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Device.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00302"></a>00302 
+<a name="l00303"></a>00303   <span class="keyword">public</span>:
+<a name="l00304"></a>00304     <a class="code" href="classSinic_1_1Device.html#a3e931e68104ea04933647b3c2e08097b">Device</a>(<span class="keyword">const</span> <a class="code" href="classSinic_1_1Base.html#ae32fbee6dea75ffbb01b7d869c7bedad">Params</a> *<a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00305"></a>00305     <a class="code" href="classSinic_1_1Device.html#a3b1601f6f775f47420713f755d1ef320">~Device</a>();
+<a name="l00306"></a>00306 };
+<a name="l00307"></a>00307 
+<a name="l00308"></a>00308 <span class="comment">/*</span>
+<a name="l00309"></a>00309 <span class="comment"> * Ethernet Interface for an Ethernet Device</span>
+<a name="l00310"></a>00310 <span class="comment"> */</span>
+<a name="l00311"></a><a class="code" href="classSinic_1_1Interface.html">00311</a> <span class="keyword">class </span><a class="code" href="classSinic_1_1Interface.html">Interface</a> : <span class="keyword">public</span> <a class="code" href="classEtherInt.html">EtherInt</a>
+<a name="l00312"></a>00312 {
+<a name="l00313"></a>00313   <span class="keyword">private</span>:
+<a name="l00314"></a><a class="code" href="classSinic_1_1Interface.html#a4b03696f02d977bb09c0ed16cd40aba0">00314</a>     <a class="code" href="classSinic_1_1Device.html">Device</a> *<a class="code" href="classSinic_1_1Interface.html#a4b03696f02d977bb09c0ed16cd40aba0">dev</a>;
+<a name="l00315"></a>00315 
+<a name="l00316"></a>00316   <span class="keyword">public</span>:
+<a name="l00317"></a><a class="code" href="classSinic_1_1Interface.html#a6ad1baa3798920369a4dca54848444f8">00317</a>     <a class="code" href="classSinic_1_1Interface.html#a6ad1baa3798920369a4dca54848444f8">Interface</a>(<span class="keyword">const</span> std::string &amp;<a class="code" href="classEtherInt.html#a324e8c54c4c5161913681a1a52fef959">name</a>, <a class="code" href="classSinic_1_1Device.html">Device</a> *<a class="code" href="namespaceArmISA.html#a780d191da4f56c853452d790bddbacb1">d</a>)
+<a name="l00318"></a>00318         : <a class="code" href="classEtherInt.html">EtherInt</a>(name), <a class="code" href="classSinic_1_1Interface.html#a4b03696f02d977bb09c0ed16cd40aba0">dev</a>(d)
+<a name="l00319"></a>00319     { }
+<a name="l00320"></a>00320 
+<a name="l00321"></a><a class="code" href="classSinic_1_1Interface.html#a9bd96a108d6f58f140c9f7d83726eebe">00321</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classSinic_1_1Interface.html#a9bd96a108d6f58f140c9f7d83726eebe">recvPacket</a>(<a class="code" href="classRefCountingPtr.html">EthPacketPtr</a> pkt) { <span class="keywordflow">return</span> <a class="code" href="classSinic_1_1Interface.html#a4b03696f02d977bb09c0ed16cd40aba0">dev</a>-&gt;<a class="code" href="classSinic_1_1Device.html#ad54e71348f53dfb5444979e9bfaf3164">recvPacket</a>(pkt); }
+<a name="l00322"></a><a class="code" href="classSinic_1_1Interface.html#a967489e0b2900f4b12d99e6257d24dbe">00322</a>     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classSinic_1_1Interface.html#a967489e0b2900f4b12d99e6257d24dbe">sendDone</a>() { <a class="code" href="classSinic_1_1Interface.html#a4b03696f02d977bb09c0ed16cd40aba0">dev</a>-&gt;<a class="code" href="classSinic_1_1Device.html#ac47b2c25cccfafe7e2c12673a1b3e793">transferDone</a>(); }
+<a name="l00323"></a>00323 };
+<a name="l00324"></a>00324 
+<a name="l00325"></a>00325 } <span class="comment">// namespace Sinic</span>
+<a name="l00326"></a>00326 
+<a name="l00327"></a>00327 <span class="preprocessor">#endif // __DEV_SINIC_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

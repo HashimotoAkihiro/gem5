@@ -1,0 +1,76 @@
+\hypertarget{arch_2x86_2process_8cc}{
+\section{arch/x86/process.cc}
+\label{arch_2x86_2process_8cc}\index{arch/x86/process.cc@{arch/x86/process.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/x86/regs/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/regs/segment.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/isa\_\-traits.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/process.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/elf\_\-object.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/object\_\-file.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/trace.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}cpu/thread\_\-context.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}debug/Stack.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/page\_\-table.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/process\_\-impl.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/syscall\_\-emul.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/system.hh\char`\"{}}\par
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+static const int \hyperlink{arch_2x86_2process_8cc_af2bb90a23fc27d090cab65b3ade30883}{ArgumentReg} \mbox{[}$\,$\mbox{]}
+\item 
+static const int \hyperlink{arch_2x86_2process_8cc_afce5b087d1b866c8f91317e6ddbe62dd}{NumArgumentRegs} = sizeof(\hyperlink{arch_2x86_2process_8cc_af2bb90a23fc27d090cab65b3ade30883}{ArgumentReg}) / sizeof(const int)
+\item 
+static const int \hyperlink{arch_2x86_2process_8cc_a21234b2bd5c54c61398b3eae42a7b474}{ArgumentReg32} \mbox{[}$\,$\mbox{]}
+\item 
+static const int \hyperlink{arch_2x86_2process_8cc_a605e4a54d04aa4907d4f3c339a4c4476}{NumArgumentRegs32} = sizeof(\hyperlink{arch_2x86_2process_8cc_af2bb90a23fc27d090cab65b3ade30883}{ArgumentReg}) / sizeof(const int)
+\end{DoxyCompactItemize}
+
+
+\subsection{変数}
+\hypertarget{arch_2x86_2process_8cc_af2bb90a23fc27d090cab65b3ade30883}{
+\index{arch/x86/process.cc@{arch/x86/process.cc}!ArgumentReg@{ArgumentReg}}
+\index{ArgumentReg@{ArgumentReg}!arch/x86/process.cc@{arch/x86/process.cc}}
+\subsubsection[{ArgumentReg}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf ArgumentReg}\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2x86_2process_8cc_af2bb90a23fc27d090cab65b3ade30883}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+ {
+    INTREG_RDI,
+    INTREG_RSI,
+    INTREG_RDX,
+    
+    INTREG_R10W,
+    
+    INTREG_R8W,
+    INTREG_R9W
+}
+\end{DoxyCode}
+\hypertarget{arch_2x86_2process_8cc_a21234b2bd5c54c61398b3eae42a7b474}{
+\index{arch/x86/process.cc@{arch/x86/process.cc}!ArgumentReg32@{ArgumentReg32}}
+\index{ArgumentReg32@{ArgumentReg32}!arch/x86/process.cc@{arch/x86/process.cc}}
+\subsubsection[{ArgumentReg32}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf ArgumentReg32}\mbox{[}$\,$\mbox{]}\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2x86_2process_8cc_a21234b2bd5c54c61398b3eae42a7b474}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+ {
+    INTREG_EBX,
+    INTREG_ECX,
+    INTREG_EDX,
+    INTREG_ESI,
+    INTREG_EDI,
+}
+\end{DoxyCode}
+\hypertarget{arch_2x86_2process_8cc_afce5b087d1b866c8f91317e6ddbe62dd}{
+\index{arch/x86/process.cc@{arch/x86/process.cc}!NumArgumentRegs@{NumArgumentRegs}}
+\index{NumArgumentRegs@{NumArgumentRegs}!arch/x86/process.cc@{arch/x86/process.cc}}
+\subsubsection[{NumArgumentRegs}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf NumArgumentRegs} = sizeof({\bf ArgumentReg}) / sizeof(const int)\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2x86_2process_8cc_afce5b087d1b866c8f91317e6ddbe62dd}
+\hypertarget{arch_2x86_2process_8cc_a605e4a54d04aa4907d4f3c339a4c4476}{
+\index{arch/x86/process.cc@{arch/x86/process.cc}!NumArgumentRegs32@{NumArgumentRegs32}}
+\index{NumArgumentRegs32@{NumArgumentRegs32}!arch/x86/process.cc@{arch/x86/process.cc}}
+\subsubsection[{NumArgumentRegs32}]{\setlength{\rightskip}{0pt plus 5cm}const int {\bf NumArgumentRegs32} = sizeof({\bf ArgumentReg}) / sizeof(const int)\hspace{0.3cm}{\ttfamily  \mbox{[}static\mbox{]}}}}
+\label{arch_2x86_2process_8cc_a605e4a54d04aa4907d4f3c339a4c4476}

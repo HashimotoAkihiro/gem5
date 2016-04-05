@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/alpha/pagetable.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/alpha/pagetable.hh</h1><a href="alpha_2pagetable_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2002-2005 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> *          Steve Reinhardt</span>
+<a name="l00030"></a>00030 <span class="comment"> */</span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifndef __ARCH_ALPHA_PAGETABLE_H__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ALPHA_PAGETABLE_H__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &quot;<a class="code" href="alpha_2isa__traits_8hh.html">arch/alpha/isa_traits.hh</a>&quot;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &quot;<a class="code" href="alpha_2utility_8hh.html">arch/alpha/utility.hh</a>&quot;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="keyword">namespace </span>AlphaISA {
+<a name="l00039"></a>00039 
+<a name="l00040"></a><a class="code" href="structAlphaISA_1_1VAddr.html">00040</a> <span class="keyword">struct </span><a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a>
+<a name="l00041"></a>00041 {
+<a name="l00042"></a><a class="code" href="structAlphaISA_1_1VAddr.html#a90a805e8bf3e59628bdcc4ca67fc68c4">00042</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="structAlphaISA_1_1VAddr.html#a90a805e8bf3e59628bdcc4ca67fc68c4">ImplBits</a> = 43;
+<a name="l00043"></a><a class="code" href="structAlphaISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">00043</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">ImplMask</a> = (<a class="code" href="base_2types_8hh.html#adcc3cf526a71c0dfaae020d432c78b83">ULL</a>(1) &lt;&lt; <a class="code" href="structAlphaISA_1_1VAddr.html#a90a805e8bf3e59628bdcc4ca67fc68c4">ImplBits</a>) - 1;
+<a name="l00044"></a><a class="code" href="structAlphaISA_1_1VAddr.html#aea265d87906fd130da86ab5d0977f26a">00044</a>     <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#aea265d87906fd130da86ab5d0977f26a">UnImplMask</a> = ~<a class="code" href="structAlphaISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">ImplMask</a>;
+<a name="l00045"></a>00045 
+<a name="l00046"></a><a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">00046</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00047"></a>00047 
+<a name="l00048"></a><a class="code" href="structAlphaISA_1_1VAddr.html#aea4be566b2249d0b69dcee270c8b461d">00048</a>     <a class="code" href="structAlphaISA_1_1VAddr.html#aea4be566b2249d0b69dcee270c8b461d">VAddr</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>) : <a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>(a) {}
+<a name="l00049"></a><a class="code" href="structAlphaISA_1_1VAddr.html#acb58a2b913b1ee45cf52ff8a6f5297c5">00049</a>     <a class="code" href="structAlphaISA_1_1VAddr.html#acb58a2b913b1ee45cf52ff8a6f5297c5">operator Addr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>; }
+<a name="l00050"></a><a class="code" href="structAlphaISA_1_1VAddr.html#a7a4215209d20e18c277206574eb1a86e">00050</a>     <span class="keyword">const</span> <a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> &amp;<a class="code" href="structAlphaISA_1_1VAddr.html#a7a4215209d20e18c277206574eb1a86e">operator=</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>) { <a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> = a; <span class="keywordflow">return</span> *<span class="keyword">this</span>; }
+<a name="l00051"></a>00051 
+<a name="l00052"></a><a class="code" href="structAlphaISA_1_1VAddr.html#ab81a86f36291439a60bf57c10ae767f4">00052</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#ab81a86f36291439a60bf57c10ae767f4">vpn</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &amp; <a class="code" href="structAlphaISA_1_1VAddr.html#af9099d6c5264dd55210ff2a90bec4c2e">ImplMask</a>) &gt;&gt; <a class="code" href="namespaceAlphaISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>; }
+<a name="l00053"></a><a class="code" href="structAlphaISA_1_1VAddr.html#a0a2c0c43cd466cb2730c9387a7061a2b">00053</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#a0a2c0c43cd466cb2730c9387a7061a2b">page</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &amp; <a class="code" href="namespaceAlphaISA.html#acd1e88c82c4d48223a490f4d235ced74">PageMask</a>; }
+<a name="l00054"></a><a class="code" href="structAlphaISA_1_1VAddr.html#ad7614ecd306d0a915379cd6fae8b02de">00054</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#ad7614ecd306d0a915379cd6fae8b02de">offset</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &amp; <a class="code" href="namespaceAlphaISA.html#a51e1064f1269394dc26702651be5061f">PageOffset</a>; }
+<a name="l00055"></a>00055 
+<a name="l00056"></a><a class="code" href="structAlphaISA_1_1VAddr.html#a4ea534e4bdbdfebe2d82eddb86284b5d">00056</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#a4ea534e4bdbdfebe2d82eddb86284b5d">level3</a>()<span class="keyword"> const</span>
+<a name="l00057"></a>00057 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="namespaceAlphaISA.html#a7011d6b73edace006e7c43b09d9ae703">PteAddr</a>(<a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &gt;&gt; <a class="code" href="namespaceAlphaISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>); }
+<a name="l00058"></a><a class="code" href="structAlphaISA_1_1VAddr.html#a5fb0a2faeaa59b4d186256f71f494020">00058</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#a5fb0a2faeaa59b4d186256f71f494020">level2</a>()<span class="keyword"> const</span>
+<a name="l00059"></a>00059 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="namespaceAlphaISA.html#a7011d6b73edace006e7c43b09d9ae703">PteAddr</a>(<a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &gt;&gt; (<a class="code" href="namespaceAlphaISA.html#a9f060ccda225dfb28dff712695adab46">NPtePageShift</a> + <a class="code" href="namespaceAlphaISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>)); }
+<a name="l00060"></a><a class="code" href="structAlphaISA_1_1VAddr.html#a6fac2640aa06dbd7e9cf8af5b81f8969">00060</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1VAddr.html#a6fac2640aa06dbd7e9cf8af5b81f8969">level1</a>()<span class="keyword"> const</span>
+<a name="l00061"></a>00061 <span class="keyword">    </span>{ <span class="keywordflow">return</span> <a class="code" href="namespaceAlphaISA.html#a7011d6b73edace006e7c43b09d9ae703">PteAddr</a>(<a class="code" href="structAlphaISA_1_1VAddr.html#a0bb77b4ba61e408313e1118250f9278c">addr</a> &gt;&gt; (2 * <a class="code" href="namespaceAlphaISA.html#a9f060ccda225dfb28dff712695adab46">NPtePageShift</a> + <a class="code" href="namespaceAlphaISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>)); }
+<a name="l00062"></a>00062 };
+<a name="l00063"></a>00063 
+<a name="l00064"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html">00064</a> <span class="keyword">struct </span><a class="code" href="structAlphaISA_1_1PageTableEntry.html">PageTableEntry</a>
+<a name="l00065"></a>00065 {
+<a name="l00066"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a9b78564edbdf997072d03154bcbe97b6">00066</a>     <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a9b78564edbdf997072d03154bcbe97b6">PageTableEntry</a>(uint64_t <a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a>) : <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a>(e) {}
+<a name="l00067"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">00067</a>     uint64_t <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a>;
+<a name="l00068"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6b0df69d39b0e944a8337f52c840be2d">00068</a>     <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6b0df69d39b0e944a8337f52c840be2d">operator uint64_t</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a>; }
+<a name="l00069"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#aa0ab0fbd3211d9dbc19476a3f0bb0ab8">00069</a>     <span class="keyword">const</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html">PageTableEntry</a> &amp;<a class="code" href="structAlphaISA_1_1PageTableEntry.html#aa0ab0fbd3211d9dbc19476a3f0bb0ab8">operator=</a>(uint64_t <a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a>) { <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> = e; <span class="keywordflow">return</span> *<span class="keyword">this</span>; }
+<a name="l00070"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a3dc2db6c9f4ed3f6e9a5b199307a78e0">00070</a>     <span class="keyword">const</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html">PageTableEntry</a> &amp;<a class="code" href="structAlphaISA_1_1PageTableEntry.html#aa0ab0fbd3211d9dbc19476a3f0bb0ab8">operator=</a>(<span class="keyword">const</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html">PageTableEntry</a> &amp;<a class="code" href="namespaceArmISA.html#a55520507919005a961edbe8b177f3bba">e</a>)
+<a name="l00071"></a>00071     { <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> = e.<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a>; <span class="keywordflow">return</span> *<span class="keyword">this</span>; }
+<a name="l00072"></a>00072 
+<a name="l00073"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a5a30d622eca4ff3de1d213cd4f6e5cfd">00073</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a5a30d622eca4ff3de1d213cd4f6e5cfd">_pfn</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt; 32) &amp; 0xffffffff; }
+<a name="l00074"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#ae0af54e10ca4b07a9afb66b3211d88d2">00074</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#ae0af54e10ca4b07a9afb66b3211d88d2">_sw</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt; 16) &amp; 0xffff; }
+<a name="l00075"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6b35d93b7a6be0c385f9417d53e27266">00075</a>     <span class="keywordtype">int</span>  <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6b35d93b7a6be0c385f9417d53e27266">_rsv0</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt; 14) &amp; 0x3; }
+<a name="l00076"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a7c7589f98d14a3d99a6f9ef394c378f1">00076</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a7c7589f98d14a3d99a6f9ef394c378f1">_uwe</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt; 13) &amp; 0x1; }
+<a name="l00077"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a0be5668cbc16499f2e4c5a25601b418b">00077</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a0be5668cbc16499f2e4c5a25601b418b">_kwe</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt; 12) &amp; 0x1; }
+<a name="l00078"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a830c54fc6920e1b76baf89149950e0a0">00078</a>     <span class="keywordtype">int</span>  <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a830c54fc6920e1b76baf89149950e0a0">_rsv1</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt; 10) &amp; 0x3; }
+<a name="l00079"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6c829f9f6ef8d642a3cfee1dbe5d6b07">00079</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6c829f9f6ef8d642a3cfee1dbe5d6b07">_ure</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  9) &amp; 0x1; }
+<a name="l00080"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a886bd53491efdc0c5f4b46e8e3642518">00080</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a886bd53491efdc0c5f4b46e8e3642518">_kre</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  8) &amp; 0x1; }
+<a name="l00081"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a19f91bef46ab704015d281ff010a3ee6">00081</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a19f91bef46ab704015d281ff010a3ee6">_nomb</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  7) &amp; 0x1; }
+<a name="l00082"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a4fd13deb4a3f8213b920514b88dda02f">00082</a>     <span class="keywordtype">int</span>  <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a4fd13deb4a3f8213b920514b88dda02f">_gh</a>()<span class="keyword">   const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  5) &amp; 0x3; }
+<a name="l00083"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6f47582a90558c6fea1e6d1b302afcdc">00083</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6f47582a90558c6fea1e6d1b302afcdc">_asm_</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  4) &amp; 0x1; }
+<a name="l00084"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#ac5f2d531b0def22bd32800c958bcafc7">00084</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#ac5f2d531b0def22bd32800c958bcafc7">_foe</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  3) &amp; 0x1; }
+<a name="l00085"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#ac3c6c6808afd061802240a77c8f178c9">00085</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#ac3c6c6808afd061802240a77c8f178c9">_fow</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  2) &amp; 0x1; }
+<a name="l00086"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#aa04a2734db47dbad23285c46220ea521">00086</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#aa04a2734db47dbad23285c46220ea521">_for</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  1) &amp; 0x1; }
+<a name="l00087"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a8d985300b138b6c5556ab17ed4df3b38">00087</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a8d985300b138b6c5556ab17ed4df3b38">valid</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> (<a class="code" href="structAlphaISA_1_1PageTableEntry.html#a6aac0a1a7d70f8270f9bb1222445f370">entry</a> &gt;&gt;  0) &amp; 0x1; }
+<a name="l00088"></a>00088 
+<a name="l00089"></a><a class="code" href="structAlphaISA_1_1PageTableEntry.html#a26f24be1556c1c0ac2c42e1eff5e1197">00089</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a26f24be1556c1c0ac2c42e1eff5e1197">paddr</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="structAlphaISA_1_1PageTableEntry.html#a5a30d622eca4ff3de1d213cd4f6e5cfd">_pfn</a>() &lt;&lt; <a class="code" href="namespaceAlphaISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>; }
+<a name="l00090"></a>00090 };
+<a name="l00091"></a>00091 
+<a name="l00092"></a>00092 <span class="comment">// ITB/DTB table entry</span>
+<a name="l00093"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html">00093</a> <span class="keyword">struct </span><a class="code" href="structAlphaISA_1_1TlbEntry.html">TlbEntry</a>
+<a name="l00094"></a>00094 {
+<a name="l00095"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#a37fe97093e3df5a68f35c18538628836">00095</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1TlbEntry.html#a37fe97093e3df5a68f35c18538628836">tag</a>;               <span class="comment">// virtual page number tag</span>
+<a name="l00096"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#ac015791e15ce4dda4e015f8da6a1f910">00096</a>     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> <a class="code" href="structAlphaISA_1_1TlbEntry.html#ac015791e15ce4dda4e015f8da6a1f910">ppn</a>;               <span class="comment">// physical page number</span>
+<a name="l00097"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#adffc88fa4f56bc343e0b278168618a61">00097</a>     uint8_t <a class="code" href="structAlphaISA_1_1TlbEntry.html#adffc88fa4f56bc343e0b278168618a61">xre</a>;            <span class="comment">// read permissions - VMEM_PERM_* mask</span>
+<a name="l00098"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#a6e9e8d2fb06547035ddbbff85a8f5212">00098</a>     uint8_t <a class="code" href="structAlphaISA_1_1TlbEntry.html#a6e9e8d2fb06547035ddbbff85a8f5212">xwe</a>;            <span class="comment">// write permissions - VMEM_PERM_* mask</span>
+<a name="l00099"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#af93960fdeafb7442fd6c1bffd85480e5">00099</a>     uint8_t <a class="code" href="structAlphaISA_1_1TlbEntry.html#af93960fdeafb7442fd6c1bffd85480e5">asn</a>;            <span class="comment">// address space number</span>
+<a name="l00100"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#a4c2313f46fd0f7d51da7f34d5677b957">00100</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1TlbEntry.html#a4c2313f46fd0f7d51da7f34d5677b957">asma</a>;              <span class="comment">// address space match</span>
+<a name="l00101"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#a94e6f5a70e9acb00a86980a45091e108">00101</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1TlbEntry.html#a94e6f5a70e9acb00a86980a45091e108">fonr</a>;              <span class="comment">// fault on read</span>
+<a name="l00102"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#aadb4ef16aa2c522df6bbcdfb6ab396f6">00102</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1TlbEntry.html#aadb4ef16aa2c522df6bbcdfb6ab396f6">fonw</a>;              <span class="comment">// fault on write</span>
+<a name="l00103"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#a28e3c179a86f337095088b3ca02a2b2a">00103</a>     <span class="keywordtype">bool</span> <a class="code" href="structAlphaISA_1_1TlbEntry.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a>;             <span class="comment">// valid page table entry</span>
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106     <span class="comment">//Construct an entry that maps to physical address addr.</span>
+<a name="l00107"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#ad54289f363defd185361d4c812a4fca5">00107</a>     <a class="code" href="structAlphaISA_1_1TlbEntry.html#ad069716fb78ffaa2d9bfba679a8eac9a">TlbEntry</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _asn, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _vaddr, <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> _paddr)
+<a name="l00108"></a>00108     {
+<a name="l00109"></a>00109         <a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>(_vaddr);
+<a name="l00110"></a>00110         <a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> paddr(_paddr);
+<a name="l00111"></a>00111         <a class="code" href="structAlphaISA_1_1TlbEntry.html#a37fe97093e3df5a68f35c18538628836">tag</a> = vaddr.<a class="code" href="structAlphaISA_1_1VAddr.html#ab81a86f36291439a60bf57c10ae767f4">vpn</a>();
+<a name="l00112"></a>00112         <a class="code" href="structAlphaISA_1_1TlbEntry.html#ac015791e15ce4dda4e015f8da6a1f910">ppn</a> = paddr.<a class="code" href="structAlphaISA_1_1VAddr.html#ab81a86f36291439a60bf57c10ae767f4">vpn</a>();
+<a name="l00113"></a>00113         <a class="code" href="structAlphaISA_1_1TlbEntry.html#adffc88fa4f56bc343e0b278168618a61">xre</a> = 15;
+<a name="l00114"></a>00114         <a class="code" href="structAlphaISA_1_1TlbEntry.html#a6e9e8d2fb06547035ddbbff85a8f5212">xwe</a> = 15;
+<a name="l00115"></a>00115         <a class="code" href="structAlphaISA_1_1TlbEntry.html#af93960fdeafb7442fd6c1bffd85480e5">asn</a> = _asn;
+<a name="l00116"></a>00116         <a class="code" href="structAlphaISA_1_1TlbEntry.html#a4c2313f46fd0f7d51da7f34d5677b957">asma</a> = <span class="keyword">false</span>;
+<a name="l00117"></a>00117         <a class="code" href="structAlphaISA_1_1TlbEntry.html#a94e6f5a70e9acb00a86980a45091e108">fonr</a> = <span class="keyword">false</span>;
+<a name="l00118"></a>00118         <a class="code" href="structAlphaISA_1_1TlbEntry.html#aadb4ef16aa2c522df6bbcdfb6ab396f6">fonw</a> = <span class="keyword">false</span>;
+<a name="l00119"></a>00119         <a class="code" href="structAlphaISA_1_1TlbEntry.html#a28e3c179a86f337095088b3ca02a2b2a">valid</a> = <span class="keyword">true</span>;
+<a name="l00120"></a>00120     }
+<a name="l00121"></a>00121 
+<a name="l00122"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#ad069716fb78ffaa2d9bfba679a8eac9a">00122</a>     <a class="code" href="structAlphaISA_1_1TlbEntry.html#ad069716fb78ffaa2d9bfba679a8eac9a">TlbEntry</a>()
+<a name="l00123"></a>00123     {}
+<a name="l00124"></a>00124 
+<a name="l00125"></a>00125     <span class="keywordtype">void</span>
+<a name="l00126"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#a5b72666b92ee0adbe9a7d218a0343754">00126</a>     <a class="code" href="structAlphaISA_1_1TlbEntry.html#a5b72666b92ee0adbe9a7d218a0343754">updateVaddr</a>(<a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a> new_vaddr)
+<a name="l00127"></a>00127     {
+<a name="l00128"></a>00128         <a class="code" href="structAlphaISA_1_1VAddr.html">VAddr</a> <a class="code" href="namespaceMipsISA.html#ac78d9788b3f9a366df64485c9afaf1b1">vaddr</a>(new_vaddr);
+<a name="l00129"></a>00129         <a class="code" href="structAlphaISA_1_1TlbEntry.html#a37fe97093e3df5a68f35c18538628836">tag</a> = vaddr.<a class="code" href="structAlphaISA_1_1VAddr.html#ab81a86f36291439a60bf57c10ae767f4">vpn</a>();
+<a name="l00130"></a>00130     }
+<a name="l00131"></a>00131 
+<a name="l00132"></a>00132     <a class="code" href="classm5_1_1params_1_1Addr.html">Addr</a>
+<a name="l00133"></a><a class="code" href="structAlphaISA_1_1TlbEntry.html#a4f87fae41ff4bd27577a41dba3cf2b90">00133</a>     <a class="code" href="structAlphaISA_1_1TlbEntry.html#a4f87fae41ff4bd27577a41dba3cf2b90">pageStart</a>()
+<a name="l00134"></a>00134     {
+<a name="l00135"></a>00135         <span class="keywordflow">return</span> <a class="code" href="structAlphaISA_1_1TlbEntry.html#ac015791e15ce4dda4e015f8da6a1f910">ppn</a> &lt;&lt; <a class="code" href="namespaceAlphaISA.html#a6eacddc1d6d191380d9afdac5920ea48">PageShift</a>;
+<a name="l00136"></a>00136     }
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138     <span class="keywordtype">void</span> <a class="code" href="structAlphaISA_1_1TlbEntry.html#a53e036786d17361be4c7320d39c99b84">serialize</a>(std::ostream &amp;<a class="code" href="namespaceX86ISA.html#a6b6e6ba763e7eaf46ac5b6372ca98d30">os</a>);
+<a name="l00139"></a>00139     <span class="keywordtype">void</span> <a class="code" href="structAlphaISA_1_1TlbEntry.html#af22e5d6d660b97db37003ac61ac4ee49">unserialize</a>(<a class="code" href="classCheckpoint.html">Checkpoint</a> *cp, <span class="keyword">const</span> std::string &amp;section);
+<a name="l00140"></a>00140 };
+<a name="l00141"></a>00141 
+<a name="l00142"></a>00142 } <span class="comment">// namespace AlphaISA</span>
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144 <span class="preprocessor">#endif // __ARCH_ALPHA_PAGETABLE_H__</span>
+<a name="l00145"></a>00145 <span class="preprocessor"></span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

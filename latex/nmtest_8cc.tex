@@ -1,0 +1,68 @@
+\hypertarget{nmtest_8cc}{
+\section{unittest/nmtest.cc}
+\label{nmtest_8cc}\index{unittest/nmtest.cc@{unittest/nmtest.cc}}
+}
+{\ttfamily \#include $<$iostream$>$}\par
+{\ttfamily \#include $<$string$>$}\par
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include \char`\"{}base/loader/object\_\-file.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/loader/symtab.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/str.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{nmtest_8cc_a0ddf1224851353fc92bfbff6f499fa97}{main} (int argc, char $\ast$argv\mbox{[}$\,$\mbox{]})
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{nmtest_8cc_a0ddf1224851353fc92bfbff6f499fa97}{
+\index{nmtest.cc@{nmtest.cc}!main@{main}}
+\index{main@{main}!nmtest.cc@{nmtest.cc}}
+\subsubsection[{main}]{\setlength{\rightskip}{0pt plus 5cm}int main (int {\em argc}, \/  char $\ast$ {\em argv}\mbox{[}$\,$\mbox{]})}}
+\label{nmtest_8cc_a0ddf1224851353fc92bfbff6f499fa97}
+
+
+
+\begin{DoxyCode}
+44 {
+45     if (argc != 2 && argc != 3)
+46         panic("usage: %s <filename> <symbol>\n", argv[0]);
+47 
+48     ObjectFile *obj = createObjectFile(argv[1]);
+49     if (!obj)
+50         panic("file not found\n");
+51 
+52     SymbolTable symtab;
+53     obj->loadGlobalSymbols(&symtab);
+54     obj->loadLocalSymbols(&symtab);
+55 
+56     if (argc == 2) {
+57         SymbolTable::ATable::const_iterator i = symtab.getAddrTable().begin();
+58         SymbolTable::ATable::const_iterator end = symtab.getAddrTable().end();
+59         while (i != end) {
+60             cprintf("%#x %s\n", i->first, i->second);
+61             ++i;
+62         }
+63     } else {
+64         string symbol = argv[2];
+65         Addr address;
+66 
+67         if (symbol[0] == '0' && symbol[1] == 'x') {
+68             if (to_number(symbol, address) &&
+69                 symtab.findSymbol(address, symbol))
+70                 cprintf("address = %#x, symbol = %s\n", address, symbol);
+71             else
+72                 cprintf("address = %#x was not found\n", address);
+73         } else {
+74             if (symtab.findAddress(symbol, address))
+75                 cprintf("symbol = %s address = %#x\n", symbol, address);
+76             else
+77                 cprintf("symbol = %s was not found\n", symbol);
+78         }
+79     }
+80 
+81     return 0;
+82 }
+\end{DoxyCode}

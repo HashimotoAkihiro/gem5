@@ -1,0 +1,253 @@
+\hypertarget{namespacem5_1_1stats}{
+\section{ネームスペース m5::stats}
+\label{namespacem5_1_1stats}\index{m5::stats@{m5::stats}}
+}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespacem5_1_1stats_a31642248b580dfb85a72a918738e3fb1}{initText}
+\item 
+def \hyperlink{namespacem5_1_1stats_a5d626524a9640c1019937a3e1994e370}{initSimStats}
+\item 
+def \hyperlink{namespacem5_1_1stats_a315834bd39080d3e697f308f478779ef}{enable}
+\item 
+def \hyperlink{namespacem5_1_1stats_a437ead66c0abee290697da2855e4af6b}{prepare}
+\item 
+def \hyperlink{namespacem5_1_1stats_a4ce2e68e958246a7a6d90428f663a6ef}{dump}
+\item 
+def \hyperlink{namespacem5_1_1stats_a6a83187ec43594ae46577dc5b44d3242}{reset}
+\end{DoxyCompactItemize}
+\subsection*{変数}
+\begin{DoxyCompactItemize}
+\item 
+list \hyperlink{namespacem5_1_1stats_a1cb3fc67d245c8981c09d7690290d8ae}{outputList} = \mbox{[}$\,$\mbox{]}
+\item 
+list \hyperlink{namespacem5_1_1stats_a31c1745e8384111d62933080372a6861}{names} = \mbox{[}$\,$\mbox{]}
+\item 
+dictionary \hyperlink{namespacem5_1_1stats_a95d2ac3ff82f1511e17e2ebf662a766c}{stats\_\-dict} = \{\}
+\item 
+list \hyperlink{namespacem5_1_1stats_a6d45e9e0fc7637bc0d25181cff8cfe14}{stats\_\-list} = \mbox{[}$\,$\mbox{]}
+\item 
+list \hyperlink{namespacem5_1_1stats_a171a8d9605eaa8eaa190ac8942d74def}{raw\_\-stats\_\-list} = \mbox{[}$\,$\mbox{]}
+\item 
+int \hyperlink{namespacem5_1_1stats_a20e8a16c034e351837c23b9da8238d12}{lastDump} = 0
+\item 
+tuple \hyperlink{namespacem5_1_1stats_a9ceb38153d5c0f156fbeada6dc00ff4f}{flags}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespacem5_1_1stats_a4ce2e68e958246a7a6d90428f663a6ef}{
+\index{m5::stats@{m5::stats}!dump@{dump}}
+\index{dump@{dump}!m5::stats@{m5::stats}}
+\subsubsection[{dump}]{\setlength{\rightskip}{0pt plus 5cm}def m5::stats::dump ()}}
+\label{namespacem5_1_1stats_a4ce2e68e958246a7a6d90428f663a6ef}
+\begin{DoxyVerb}Dump all statistics data to the registered outputs\end{DoxyVerb}
+ 
+
+
+\begin{DoxyCode}
+96           :
+97     '''Dump all statistics data to the registered outputs'''
+98 
+99     curTick = m5.curTick()
+100 
+101     global lastDump
+102     assert lastDump <= curTick
+103     if lastDump == curTick:
+104         return
+105     lastDump = curTick
+106 
+107     internal.stats.processDumpQueue()
+108 
+109     prepare()
+110 
+111     for output in outputList:
+112         if output.valid():
+113             output.begin()
+114             for stat in stats_list:
+115                 output.visit(stat)
+116             output.end()
+117 
+def reset():
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1stats_a315834bd39080d3e697f308f478779ef}{
+\index{m5::stats@{m5::stats}!enable@{enable}}
+\index{enable@{enable}!m5::stats@{m5::stats}}
+\subsubsection[{enable}]{\setlength{\rightskip}{0pt plus 5cm}def m5::stats::enable ()}}
+\label{namespacem5_1_1stats_a315834bd39080d3e697f308f478779ef}
+\begin{DoxyVerb}Enable the statistics package.  Before the statistics package is
+enabled, all statistics must be created and initialized and once
+the package is enabled, no more statistics can be created.\end{DoxyVerb}
+ 
+
+
+\begin{DoxyCode}
+49             :
+50     '''Enable the statistics package.  Before the statistics package is
+51     enabled, all statistics must be created and initialized and once
+52     the package is enabled, no more statistics can be created.'''
+53     __dynamic_cast = []
+54     for k, v in internal.stats.__dict__.iteritems():
+55         if k.startswith('dynamic_'):
+56             __dynamic_cast.append(v)
+57 
+58     for stat in internal.stats.statsList():
+59         for cast in __dynamic_cast:
+60             val = cast(stat)
+61             if val is not None:
+62                 stats_list.append(val)
+63                 raw_stats_list.append(val)
+64                 break
+65         else:
+66             fatal("unknown stat type %s", stat)
+67 
+68     for stat in stats_list:
+69         if not stat.check() or not stat.baseCheck():
+70             fatal("statistic '%s' (%d) was not properly initialized " \
+71                   "by a regStats() function\n", stat.name, stat.id)
+72 
+73         if not (stat.flags & flags.display):
+74             stat.name = "__Stat%06d" % stat.id
+75 
+76     def less(stat1, stat2):
+77         v1 = stat1.name.split('.')
+78         v2 = stat2.name.split('.')
+79         return v1 < v2
+80 
+81     stats_list.sort(less)
+82     for stat in stats_list:
+83         stats_dict[stat.name] = stat
+84         stat.enable()
+85 
+86     internal.stats.enable();
+87 
+def prepare():
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1stats_a5d626524a9640c1019937a3e1994e370}{
+\index{m5::stats@{m5::stats}!initSimStats@{initSimStats}}
+\index{initSimStats@{initSimStats}!m5::stats@{m5::stats}}
+\subsubsection[{initSimStats}]{\setlength{\rightskip}{0pt plus 5cm}def m5::stats::initSimStats ()}}
+\label{namespacem5_1_1stats_a5d626524a9640c1019937a3e1994e370}
+
+
+
+\begin{DoxyCode}
+42                   :
+43     internal.stats.initSimStats()
+44 
+names = []
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1stats_a31642248b580dfb85a72a918738e3fb1}{
+\index{m5::stats@{m5::stats}!initText@{initText}}
+\index{initText@{initText}!m5::stats@{m5::stats}}
+\subsubsection[{initText}]{\setlength{\rightskip}{0pt plus 5cm}def m5::stats::initText ( {\em filename}, \/   {\em desc} = {\ttfamily True})}}
+\label{namespacem5_1_1stats_a31642248b580dfb85a72a918738e3fb1}
+
+
+
+\begin{DoxyCode}
+38                                  :
+39     output = internal.stats.initText(filename, desc)
+40     outputList.append(output)
+41 
+def initSimStats():
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1stats_a437ead66c0abee290697da2855e4af6b}{
+\index{m5::stats@{m5::stats}!prepare@{prepare}}
+\index{prepare@{prepare}!m5::stats@{m5::stats}}
+\subsubsection[{prepare}]{\setlength{\rightskip}{0pt plus 5cm}def m5::stats::prepare ()}}
+\label{namespacem5_1_1stats_a437ead66c0abee290697da2855e4af6b}
+\begin{DoxyVerb}Prepare all stats for data access.  This must be done before
+dumping and serialization.\end{DoxyVerb}
+ 
+
+
+\begin{DoxyCode}
+88              :
+89     '''Prepare all stats for data access.  This must be done before
+90     dumping and serialization.'''
+91 
+92     for stat in stats_list:
+93         stat.prepare()
+94 
+lastDump = 0
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1stats_a6a83187ec43594ae46577dc5b44d3242}{
+\index{m5::stats@{m5::stats}!reset@{reset}}
+\index{reset@{reset}!m5::stats@{m5::stats}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}def m5::stats::reset ()}}
+\label{namespacem5_1_1stats_a6a83187ec43594ae46577dc5b44d3242}
+\begin{DoxyVerb}Reset all statistics to the base state\end{DoxyVerb}
+ 
+
+
+\begin{DoxyCode}
+118            :
+119     '''Reset all statistics to the base state'''
+120 
+121     # call reset stats on all SimObjects
+122     root = Root.getInstance()
+123     if root:
+124         for obj in root.descendants(): obj.resetStats()
+125 
+126     # call any other registered stats reset callbacks
+127     for stat in stats_list:
+128         stat.reset()
+129 
+130     internal.stats.processResetQueue()
+131 
+flags = attrdict({
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{namespacem5_1_1stats_a9ceb38153d5c0f156fbeada6dc00ff4f}{
+\index{m5::stats@{m5::stats}!flags@{flags}}
+\index{flags@{flags}!m5::stats@{m5::stats}}
+\subsubsection[{flags}]{\setlength{\rightskip}{0pt plus 5cm}tuple {\bf flags}}}
+\label{namespacem5_1_1stats_a9ceb38153d5c0f156fbeada6dc00ff4f}
+{\bfseries 初期値:}
+\begin{DoxyCode}
+attrdict({
+    'none'    : 0x0000,
+    'init'    : 0x0001,
+    'display' : 0x0002,
+    'total'   : 0x0010,
+    'pdf'     : 0x0020,
+    'cdf'     : 0x0040,
+    'dist'    : 0x0080,
+    'nozero'  : 0x0100,
+    'nonan'   : 0x0200,
+})
+\end{DoxyCode}
+\hypertarget{namespacem5_1_1stats_a20e8a16c034e351837c23b9da8238d12}{
+\index{m5::stats@{m5::stats}!lastDump@{lastDump}}
+\index{lastDump@{lastDump}!m5::stats@{m5::stats}}
+\subsubsection[{lastDump}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf lastDump} = 0}}
+\label{namespacem5_1_1stats_a20e8a16c034e351837c23b9da8238d12}
+\hypertarget{namespacem5_1_1stats_a31c1745e8384111d62933080372a6861}{
+\index{m5::stats@{m5::stats}!names@{names}}
+\index{names@{names}!m5::stats@{m5::stats}}
+\subsubsection[{names}]{\setlength{\rightskip}{0pt plus 5cm}list {\bf names} = \mbox{[}$\,$\mbox{]}}}
+\label{namespacem5_1_1stats_a31c1745e8384111d62933080372a6861}
+\hypertarget{namespacem5_1_1stats_a1cb3fc67d245c8981c09d7690290d8ae}{
+\index{m5::stats@{m5::stats}!outputList@{outputList}}
+\index{outputList@{outputList}!m5::stats@{m5::stats}}
+\subsubsection[{outputList}]{\setlength{\rightskip}{0pt plus 5cm}list {\bf outputList} = \mbox{[}$\,$\mbox{]}}}
+\label{namespacem5_1_1stats_a1cb3fc67d245c8981c09d7690290d8ae}
+\hypertarget{namespacem5_1_1stats_a171a8d9605eaa8eaa190ac8942d74def}{
+\index{m5::stats@{m5::stats}!raw\_\-stats\_\-list@{raw\_\-stats\_\-list}}
+\index{raw\_\-stats\_\-list@{raw\_\-stats\_\-list}!m5::stats@{m5::stats}}
+\subsubsection[{raw\_\-stats\_\-list}]{\setlength{\rightskip}{0pt plus 5cm}list {\bf raw\_\-stats\_\-list} = \mbox{[}$\,$\mbox{]}}}
+\label{namespacem5_1_1stats_a171a8d9605eaa8eaa190ac8942d74def}
+\hypertarget{namespacem5_1_1stats_a95d2ac3ff82f1511e17e2ebf662a766c}{
+\index{m5::stats@{m5::stats}!stats\_\-dict@{stats\_\-dict}}
+\index{stats\_\-dict@{stats\_\-dict}!m5::stats@{m5::stats}}
+\subsubsection[{stats\_\-dict}]{\setlength{\rightskip}{0pt plus 5cm}dictionary {\bf stats\_\-dict} = \{\}}}
+\label{namespacem5_1_1stats_a95d2ac3ff82f1511e17e2ebf662a766c}
+\hypertarget{namespacem5_1_1stats_a6d45e9e0fc7637bc0d25181cff8cfe14}{
+\index{m5::stats@{m5::stats}!stats\_\-list@{stats\_\-list}}
+\index{stats\_\-list@{stats\_\-list}!m5::stats@{m5::stats}}
+\subsubsection[{stats\_\-list}]{\setlength{\rightskip}{0pt plus 5cm}list {\bf stats\_\-list} = \mbox{[}$\,$\mbox{]}}}
+\label{namespacem5_1_1stats_a6d45e9e0fc7637bc0d25181cff8cfe14}

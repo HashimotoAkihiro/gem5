@@ -1,0 +1,234 @@
+\hypertarget{namespaceBaseCPU}{
+\section{ネームスペース BaseCPU}
+\label{namespaceBaseCPU}\index{BaseCPU@{BaseCPU}}
+}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespaceBaseCPU_a8257bcf9f6ddebdde3a2317f02011312}{createInterruptController}
+\begin{DoxyCompactList}\small\item\em insert member variable \item\end{DoxyCompactList}\item 
+def \hyperlink{namespaceBaseCPU_a372b5c90dd183c956b0e8a6f1c0919d9}{connectCachedPorts}
+\item 
+def \hyperlink{namespaceBaseCPU_a40397b46bd8a3283b7c8420e0a4b800a}{connectUncachedPorts}
+\item 
+def \hyperlink{namespaceBaseCPU_a2fdb04d818d2d05d543deeb45cacfe20}{connectAllPorts}
+\item 
+def \hyperlink{namespaceBaseCPU_a6a3b2194b3d12de8cec0a3b63a527ac5}{addPrivateSplitL1Caches}
+\begin{DoxyCompactList}\small\item\em l1cache's statement python only refer the hikisuu(ic,dc). \item\end{DoxyCompactList}\item 
+def \hyperlink{namespaceBaseCPU_a41ff86a3a8e8eda4aa0a61a14518c09a}{addTwoLevelCacheHierarchy}
+\item 
+def \hyperlink{namespaceBaseCPU_a777d9a4ff3af90a6d70daf01dc86fa6b}{createThreads}
+\item 
+def \hyperlink{namespaceBaseCPU_a9d135198342aad4c3efaf34f35a36310}{addCheckerCpu}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespaceBaseCPU_a9d135198342aad4c3efaf34f35a36310}{
+\index{BaseCPU@{BaseCPU}!addCheckerCpu@{addCheckerCpu}}
+\index{addCheckerCpu@{addCheckerCpu}!BaseCPU@{BaseCPU}}
+\subsubsection[{addCheckerCpu}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::addCheckerCpu ( {\em self})}}
+\label{namespaceBaseCPU_a9d135198342aad4c3efaf34f35a36310}
+
+
+
+\begin{DoxyCode}
+357                            :
+358         pass
+        pass
+\end{DoxyCode}
+\hypertarget{namespaceBaseCPU_a6a3b2194b3d12de8cec0a3b63a527ac5}{
+\index{BaseCPU@{BaseCPU}!addPrivateSplitL1Caches@{addPrivateSplitL1Caches}}
+\index{addPrivateSplitL1Caches@{addPrivateSplitL1Caches}!BaseCPU@{BaseCPU}}
+\subsubsection[{addPrivateSplitL1Caches}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::addPrivateSplitL1Caches ( {\em self}, \/   {\em ic}, \/   {\em dc}, \/   {\em iwc} = {\ttfamily None}, \/   {\em dwc} = {\ttfamily None})}}
+\label{namespaceBaseCPU_a6a3b2194b3d12de8cec0a3b63a527ac5}
+
+
+l1cache's statement python only refer the hikisuu(ic,dc). If I chase ic and dc, I will find the answer(CPU frequency) 
+
+
+\begin{DoxyCode}
+287                                                                      :
+288 #        self.icache = ic
+289 #        self.dcache = dc
+290 #        self.icache_port = ic.cpu_side
+291 #        self.dcache_port = dc.cpu_side
+292 
+293         # Set a width of 16 bytes (128-bits), 
+294         # which is four times that of the default bus. The clock of the CPU 
+295         # is inherited by
+296         # default.
+297         #L2 is define ports. So I think DL1 is defined the same method. 
+298 #        self.toDL1Bus = CoherentBus(width = 16)
+299         self.icache = ic
+300         self.dcache = dc
+301         self.icache_port = ic.cpu_side
+302         self.dcache_port = dc.cpu_side
+303         self._cached_ports = ['icache.mem_side', 'dcache.mem_side']
+304         #osoraku that's all(for L1 cache)
+305         #If I change the data1cache bus width, 
+306         #I should change or add the upper.
+307         if buildEnv['TARGET_ISA'] in ['x86', 'arm']:
+308             if iwc and dwc:
+309                 self.itb_walker_cache = iwc
+310                 self.dtb_walker_cache = dwc
+311                 if buildEnv['TARGET_ISA'] in ['arm']:
+312                     self.itb_walker_cache_bus = CoherentBus()
+313                     self.dtb_walker_cache_bus = CoherentBus()
+314                     self.itb_walker_cache_bus.master = iwc.cpu_side
+315                     self.dtb_walker_cache_bus.master = dwc.cpu_side
+316                     self.itb.walker.port = self.itb_walker_cache_bus.slave
+317                     self.dtb.walker.port = self.dtb_walker_cache_bus.slave
+318                     self.istage2_mmu.stage2_tlb.walker.port = self.
+      itb_walker_cache_bus.slave
+319                     self.dstage2_mmu.stage2_tlb.walker.port = self.
+      dtb_walker_cache_bus.slave
+320                 else:
+321                     self.itb.walker.port = iwc.cpu_side
+322                     self.dtb.walker.port = dwc.cpu_side
+323                 self._cached_ports += ["itb_walker_cache.mem_side", \
+324                                        "dtb_walker_cache.mem_side"]
+325             else:
+326                 self._cached_ports += ["itb.walker.port", "dtb.walker.port"]
+327 
+328                 if buildEnv['TARGET_ISA'] in ['arm']:
+329                     self._cached_ports += ["istage2_mmu.stage2_tlb.walker.port", 
+      \
+330                                            "dstage2_mmu.stage2_tlb.walker.port"]
+331 
+332             # Checker doesn't need its own tlb caches because it does
+333             # functional accesses only
+334             if self.checker != NULL:
+335                 self._cached_ports += ["checker.itb.walker.port", \
+336                                        "checker.dtb.walker.port"]
+337                 if buildEnv['TARGET_ISA'] in ['arm']:
+338                     self._cached_ports += ["checker.istage2_mmu.stage2_tlb.walker
+      .port", \
+339                                            "checker.dstage2_mmu.stage2_tlb.walker
+      .port"]
+340 
+    def addTwoLevelCacheHierarchy(self, ic, dc, l2c, iwc = None, dwc = None):
+\end{DoxyCode}
+\hypertarget{namespaceBaseCPU_a41ff86a3a8e8eda4aa0a61a14518c09a}{
+\index{BaseCPU@{BaseCPU}!addTwoLevelCacheHierarchy@{addTwoLevelCacheHierarchy}}
+\index{addTwoLevelCacheHierarchy@{addTwoLevelCacheHierarchy}!BaseCPU@{BaseCPU}}
+\subsubsection[{addTwoLevelCacheHierarchy}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::addTwoLevelCacheHierarchy ( {\em self}, \/   {\em ic}, \/   {\em dc}, \/   {\em l2c}, \/   {\em iwc} = {\ttfamily None}, \/   {\em dwc} = {\ttfamily None})}}
+\label{namespaceBaseCPU_a41ff86a3a8e8eda4aa0a61a14518c09a}
+
+
+
+\begin{DoxyCode}
+341                                                                             :
+342         self.addPrivateSplitL1Caches(ic, dc, iwc, dwc)
+343         # Set a width of 32 bytes (256-bits), which is four times that
+344         # of the default bus. The clock of the CPU is inherited by
+345         # default.
+346         self.toL2Bus = CoherentBus(width = 32)
+347         self.connectCachedPorts(self.toL2Bus)
+348         self.l2cache = l2c
+349         self.toL2Bus.master = self.l2cache.cpu_side
+350         self._cached_ports = ['l2cache.mem_side']
+351 
+    def createThreads(self):
+\end{DoxyCode}
+\hypertarget{namespaceBaseCPU_a2fdb04d818d2d05d543deeb45cacfe20}{
+\index{BaseCPU@{BaseCPU}!connectAllPorts@{connectAllPorts}}
+\index{connectAllPorts@{connectAllPorts}!BaseCPU@{BaseCPU}}
+\subsubsection[{connectAllPorts}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::connectAllPorts ( {\em self}, \/   {\em cached\_\-bus}, \/   {\em uncached\_\-bus} = {\ttfamily None})}}
+\label{namespaceBaseCPU_a2fdb04d818d2d05d543deeb45cacfe20}
+
+
+
+\begin{DoxyCode}
+276                                                               :
+277         self.connectCachedPorts(cached_bus)
+278         if not uncached_bus:
+279             uncached_bus = cached_bus
+280         self.connectUncachedPorts(uncached_bus)
+281 
+##
+\end{DoxyCode}
+\hypertarget{namespaceBaseCPU_a372b5c90dd183c956b0e8a6f1c0919d9}{
+\index{BaseCPU@{BaseCPU}!connectCachedPorts@{connectCachedPorts}}
+\index{connectCachedPorts@{connectCachedPorts}!BaseCPU@{BaseCPU}}
+\subsubsection[{connectCachedPorts}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::connectCachedPorts ( {\em self}, \/   {\em bus})}}
+\label{namespaceBaseCPU_a372b5c90dd183c956b0e8a6f1c0919d9}
+
+
+
+\begin{DoxyCode}
+266                                      :
+267         for p in self._cached_ports:
+268             exec('self.%s = bus.slave' % p)
+269 
+    def connectUncachedPorts(self, bus):
+\end{DoxyCode}
+\hypertarget{namespaceBaseCPU_a40397b46bd8a3283b7c8420e0a4b800a}{
+\index{BaseCPU@{BaseCPU}!connectUncachedPorts@{connectUncachedPorts}}
+\index{connectUncachedPorts@{connectUncachedPorts}!BaseCPU@{BaseCPU}}
+\subsubsection[{connectUncachedPorts}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::connectUncachedPorts ( {\em self}, \/   {\em bus})}}
+\label{namespaceBaseCPU_a40397b46bd8a3283b7c8420e0a4b800a}
+
+
+
+\begin{DoxyCode}
+270                                        :
+271         for p in self._uncached_slave_ports:
+272             exec('self.%s = bus.master' % p)
+273         for p in self._uncached_master_ports:
+274             exec('self.%s = bus.slave' % p)
+275 
+    def connectAllPorts(self, cached_bus, uncached_bus = None):
+\end{DoxyCode}
+\hypertarget{namespaceBaseCPU_a8257bcf9f6ddebdde3a2317f02011312}{
+\index{BaseCPU@{BaseCPU}!createInterruptController@{createInterruptController}}
+\index{createInterruptController@{createInterruptController}!BaseCPU@{BaseCPU}}
+\subsubsection[{createInterruptController}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::createInterruptController ( {\em self})}}
+\label{namespaceBaseCPU_a8257bcf9f6ddebdde3a2317f02011312}
+
+
+insert member variable 
+
+
+\begin{DoxyCode}
+243                                        :
+244         if buildEnv['TARGET_ISA'] == 'sparc':
+245             self.interrupts = SparcInterrupts()
+246         elif buildEnv['TARGET_ISA'] == 'alpha':
+247             self.interrupts = AlphaInterrupts()
+248         elif buildEnv['TARGET_ISA'] == 'x86':
+249             self.apic_clk_domain = DerivedClockDomain(clk_domain =
+250                                                       Parent.clk_domain,
+251                                                       clk_divider = 16)
+252             self.interrupts = X86LocalApic(clk_domain = self.apic_clk_domain,
+253                                            pio_addr=0x2000000000000000)
+254             _localApic = self.interrupts
+255         elif buildEnv['TARGET_ISA'] == 'mips':
+256             self.interrupts = MipsInterrupts()
+257         elif buildEnv['TARGET_ISA'] == 'arm':
+258             self.interrupts = ArmInterrupts()
+259         elif buildEnv['TARGET_ISA'] == 'power':
+260             self.interrupts = PowerInterrupts()
+261         else:
+262             print "Don't know what Interrupt Controller to use for ISA %s" % \
+263                 buildEnv['TARGET_ISA']
+264             sys.exit(1)
+265 
+    def connectCachedPorts(self, bus):
+\end{DoxyCode}
+\hypertarget{namespaceBaseCPU_a777d9a4ff3af90a6d70daf01dc86fa6b}{
+\index{BaseCPU@{BaseCPU}!createThreads@{createThreads}}
+\index{createThreads@{createThreads}!BaseCPU@{BaseCPU}}
+\subsubsection[{createThreads}]{\setlength{\rightskip}{0pt plus 5cm}def BaseCPU::createThreads ( {\em self})}}
+\label{namespaceBaseCPU_a777d9a4ff3af90a6d70daf01dc86fa6b}
+
+
+
+\begin{DoxyCode}
+352                            :
+353         self.isa = [ isa_class() for i in xrange(self.numThreads) ]
+354         if self.checker != NULL:
+355             self.checker.createThreads()
+356 
+    def addCheckerCpu(self):
+\end{DoxyCode}

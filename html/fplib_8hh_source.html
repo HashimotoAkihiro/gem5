@@ -1,0 +1,282 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/arm/insts/fplib.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/arm/insts/fplib.hh</h1><a href="fplib_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012-2013 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Edmund Grimley Evans</span>
+<a name="l00038"></a>00038 <span class="comment"> *          Thomas Grocutt</span>
+<a name="l00039"></a>00039 <span class="comment"> */</span>
+<a name="l00040"></a>00040 
+<a name="l00049"></a>00049 <span class="preprocessor">#ifndef __ARCH_ARM_INSTS_FPLIB_HH__</span>
+<a name="l00050"></a>00050 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_ARM_INSTS_FPLIB_HH__</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &lt;stdint.h&gt;</span>
+<a name="l00053"></a>00053 
+<a name="l00054"></a>00054 <span class="preprocessor">#include &quot;<a class="code" href="arm_2miscregs_8hh.html">arch/arm/miscregs.hh</a>&quot;</span>
+<a name="l00055"></a>00055 
+<a name="l00056"></a>00056 <span class="keyword">namespace </span>ArmISA
+<a name="l00057"></a>00057 {
+<a name="l00058"></a>00058 
+<a name="l00059"></a><a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">00059</a> <span class="keyword">enum</span> <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> {
+<a name="l00060"></a><a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a689bcabf5ded815e4d9fc68cdac6a5ae">00060</a>     <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a689bcabf5ded815e4d9fc68cdac6a5ae">FPRounding_TIEEVEN</a> = 0,
+<a name="l00061"></a><a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a95f550bf7258c7187786df4e71b6dde8">00061</a>     <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a95f550bf7258c7187786df4e71b6dde8">FPRounding_POSINF</a> = 1,
+<a name="l00062"></a><a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a90625b90d9549783d34ea896cb1edb82">00062</a>     <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a90625b90d9549783d34ea896cb1edb82">FPRounding_NEGINF</a> = 2,
+<a name="l00063"></a><a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23abe9986d8b46e7e94b35fd34c63c5fdae">00063</a>     <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23abe9986d8b46e7e94b35fd34c63c5fdae">FPRounding_ZERO</a> = 3,
+<a name="l00064"></a><a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a60da886b9a77b5bf61278046265f7b4c">00064</a>     <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23a60da886b9a77b5bf61278046265f7b4c">FPRounding_TIEAWAY</a> = 4,
+<a name="l00065"></a><a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23ab0a26e378304d5f480f92c188616392d">00065</a>     <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23ab0a26e378304d5f480f92c188616392d">FPRounding_ODD</a> = 5
+<a name="l00066"></a>00066 };
+<a name="l00067"></a>00067 
+<a name="l00068"></a>00068 <span class="keyword">static</span> <span class="keyword">inline</span> <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a>
+<a name="l00069"></a><a class="code" href="namespaceArmISA.html#ac3868bde2da2b545550e434e63ec639d">00069</a> <a class="code" href="namespaceArmISA.html#ac3868bde2da2b545550e434e63ec639d">FPCRRounding</a>(FPSCR &amp;fpscr)
+<a name="l00070"></a>00070 {
+<a name="l00071"></a>00071     <span class="keywordflow">return</span> (<a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a>)((<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a>)fpscr &gt;&gt; 22 &amp; 3);
+<a name="l00072"></a>00072 }
+<a name="l00073"></a>00073 
+<a name="l00075"></a>00075 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00076"></a>00076 T <a class="code" href="namespaceArmISA.html#a88f7062127be5875d97894bec7466af9">fplibAbs</a>(T <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>);
+<a name="l00078"></a>00078 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00079"></a>00079 T <a class="code" href="namespaceArmISA.html#a953ee43de9711746b8bf39b152e07c3c">fplibAdd</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00081"></a>00081 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00082"></a>00082 <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#adae25f4c649c825b6ab862cafa8392d2">fplibCompare</a>(T op1, T op2, <span class="keywordtype">bool</span> signal_nans, FPSCR &amp;fpscr);
+<a name="l00084"></a>00084 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00085"></a>00085 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a5a452aacea8a693e3b3d23e37aed05bd">fplibCompareEQ</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00087"></a>00087 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00088"></a>00088 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a784bceb28834cf03f2f443bd3ae013cc">fplibCompareGE</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00090"></a>00090 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00091"></a>00091 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a73ac687d8fc0aa9507a3171faebce253">fplibCompareGT</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00093"></a>00093 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T1, <span class="keyword">class</span> T2&gt;
+<a name="l00094"></a>00094 T2 <a class="code" href="namespaceArmISA.html#a12a7749861b3585bb2c43f78eda6e2ef">fplibConvert</a>(T1 <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00096"></a>00096 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00097"></a>00097 T <a class="code" href="namespaceArmISA.html#a4a7d5aa817c9203e4833f8b489e53f2c">fplibDiv</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00099"></a>00099 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00100"></a>00100 T <a class="code" href="namespaceArmISA.html#a4eb73ac0de762b9681b3a982015b8772">fplibMax</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00102"></a>00102 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00103"></a>00103 T <a class="code" href="namespaceArmISA.html#a9502bd6b59d0aa250036f8798ee5d268">fplibMaxNum</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00105"></a>00105 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00106"></a>00106 T <a class="code" href="namespaceArmISA.html#aaff91a9ef684a2fbae263d7e28bb47a3">fplibMin</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00108"></a>00108 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00109"></a>00109 T <a class="code" href="namespaceArmISA.html#acf433633709ae6dec5ce4dfa468003d7">fplibMinNum</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00111"></a>00111 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00112"></a>00112 T <a class="code" href="namespaceArmISA.html#a76377f5422d9c42beeb46d780d9e67fc">fplibMul</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00114"></a>00114 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00115"></a>00115 T <a class="code" href="namespaceArmISA.html#a42dcc9fb6e3a3023d21c268e3e9b4165">fplibMulAdd</a>(T addend, T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00117"></a>00117 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00118"></a>00118 T <a class="code" href="namespaceArmISA.html#a3b7e2c49fcae44b9e8277cb5a8071b2a">fplibMulX</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00120"></a>00120 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00121"></a>00121 T <a class="code" href="namespaceArmISA.html#ab5b770580085f7dac4b6f4b89b790980">fplibNeg</a>(T <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>);
+<a name="l00123"></a>00123 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00124"></a>00124 T <a class="code" href="namespaceArmISA.html#af7a6eda02787e25034d915f9b2bc1269">fplibRSqrtEstimate</a>(T <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00126"></a>00126 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00127"></a>00127 T <a class="code" href="namespaceArmISA.html#a101a644231829e76613bfeef72004f89">fplibRSqrtStepFused</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00129"></a>00129 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00130"></a>00130 T <a class="code" href="namespaceArmISA.html#abde99661be8e680808632aea977225f6">fplibRecipEstimate</a>(T <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00132"></a>00132 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00133"></a>00133 T <a class="code" href="namespaceArmISA.html#a1cb770590af9161319a168035eea258d">fplibRecipStepFused</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00135"></a>00135 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00136"></a>00136 T <a class="code" href="namespaceArmISA.html#a92558db61b13348bea996a347e807cce">fplibRecpX</a>(T <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00138"></a>00138 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00139"></a>00139 T <a class="code" href="namespaceArmISA.html#a6868618a91c5e94f964e05c0dca0c118">fplibRoundInt</a>(T <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, <span class="keywordtype">bool</span> exact, FPSCR &amp;fpscr);
+<a name="l00141"></a>00141 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00142"></a>00142 T <a class="code" href="namespaceArmISA.html#ad32495f160fbc72be7ab48a53b25b11c">fplibSqrt</a>(T <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00144"></a>00144 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00145"></a>00145 T <a class="code" href="namespaceArmISA.html#aeb0bc3ee8ee781a2038e66289a323a7d">fplibSub</a>(T op1, T op2, FPSCR &amp;fpscr);
+<a name="l00147"></a>00147 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T1, <span class="keyword">class</span> T2&gt;
+<a name="l00148"></a>00148 T2 <a class="code" href="namespaceArmISA.html#a7ceb39cb77f124c2c26f681bd0df8956">fplibFPToFixed</a>(T1 <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00150"></a>00150 <span class="keyword">template</span> &lt;<span class="keyword">class</span> T&gt;
+<a name="l00151"></a>00151 T <a class="code" href="namespaceArmISA.html#ad1582732786716fd44209d3a9935bba7">fplibFixedToFP</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding,
+<a name="l00152"></a>00152                  FPSCR &amp;fpscr);
+<a name="l00153"></a>00153 
+<a name="l00154"></a>00154 <span class="comment">/* Function specializations... */</span>
+<a name="l00155"></a>00155 <span class="keyword">template</span> &lt;&gt;
+<a name="l00156"></a>00156 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a88f7062127be5875d97894bec7466af9">fplibAbs</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>);
+<a name="l00157"></a>00157 <span class="keyword">template</span> &lt;&gt;
+<a name="l00158"></a>00158 uint64_t <a class="code" href="namespaceArmISA.html#a88f7062127be5875d97894bec7466af9">fplibAbs</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>);
+<a name="l00159"></a>00159 <span class="keyword">template</span> &lt;&gt;
+<a name="l00160"></a>00160 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a953ee43de9711746b8bf39b152e07c3c">fplibAdd</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00161"></a>00161 <span class="keyword">template</span> &lt;&gt;
+<a name="l00162"></a>00162 uint64_t <a class="code" href="namespaceArmISA.html#a953ee43de9711746b8bf39b152e07c3c">fplibAdd</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00163"></a>00163 <span class="keyword">template</span> &lt;&gt;
+<a name="l00164"></a>00164 <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#adae25f4c649c825b6ab862cafa8392d2">fplibCompare</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, <span class="keywordtype">bool</span> signal_nans, FPSCR &amp;fpscr);
+<a name="l00165"></a>00165 <span class="keyword">template</span> &lt;&gt;
+<a name="l00166"></a>00166 <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#adae25f4c649c825b6ab862cafa8392d2">fplibCompare</a>(uint64_t op1, uint64_t op2, <span class="keywordtype">bool</span> signal_nans, FPSCR &amp;fpscr);
+<a name="l00167"></a>00167 <span class="keyword">template</span> &lt;&gt;
+<a name="l00168"></a>00168 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a5a452aacea8a693e3b3d23e37aed05bd">fplibCompareEQ</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00169"></a>00169 <span class="keyword">template</span> &lt;&gt;
+<a name="l00170"></a>00170 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a5a452aacea8a693e3b3d23e37aed05bd">fplibCompareEQ</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00171"></a>00171 <span class="keyword">template</span> &lt;&gt;
+<a name="l00172"></a>00172 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a784bceb28834cf03f2f443bd3ae013cc">fplibCompareGE</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00173"></a>00173 <span class="keyword">template</span> &lt;&gt;
+<a name="l00174"></a>00174 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a784bceb28834cf03f2f443bd3ae013cc">fplibCompareGE</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00175"></a>00175 <span class="keyword">template</span> &lt;&gt;
+<a name="l00176"></a>00176 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a73ac687d8fc0aa9507a3171faebce253">fplibCompareGT</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00177"></a>00177 <span class="keyword">template</span> &lt;&gt;
+<a name="l00178"></a>00178 <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a73ac687d8fc0aa9507a3171faebce253">fplibCompareGT</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00179"></a>00179 <span class="keyword">template</span> &lt;&gt;
+<a name="l00180"></a>00180 uint16_t <a class="code" href="namespaceArmISA.html#a12a7749861b3585bb2c43f78eda6e2ef">fplibConvert</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00181"></a>00181 <span class="keyword">template</span> &lt;&gt;
+<a name="l00182"></a>00182 uint16_t <a class="code" href="namespaceArmISA.html#a12a7749861b3585bb2c43f78eda6e2ef">fplibConvert</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00183"></a>00183 <span class="keyword">template</span> &lt;&gt;
+<a name="l00184"></a>00184 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a12a7749861b3585bb2c43f78eda6e2ef">fplibConvert</a>(uint16_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00185"></a>00185 <span class="keyword">template</span> &lt;&gt;
+<a name="l00186"></a>00186 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a12a7749861b3585bb2c43f78eda6e2ef">fplibConvert</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00187"></a>00187 <span class="keyword">template</span> &lt;&gt;
+<a name="l00188"></a>00188 uint64_t <a class="code" href="namespaceArmISA.html#a12a7749861b3585bb2c43f78eda6e2ef">fplibConvert</a>(uint16_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00189"></a>00189 <span class="keyword">template</span> &lt;&gt;
+<a name="l00190"></a>00190 uint64_t <a class="code" href="namespaceArmISA.html#a12a7749861b3585bb2c43f78eda6e2ef">fplibConvert</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, FPSCR &amp;fpscr);
+<a name="l00191"></a>00191 <span class="keyword">template</span> &lt;&gt;
+<a name="l00192"></a>00192 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a4a7d5aa817c9203e4833f8b489e53f2c">fplibDiv</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00193"></a>00193 <span class="keyword">template</span> &lt;&gt;
+<a name="l00194"></a>00194 uint64_t <a class="code" href="namespaceArmISA.html#a4a7d5aa817c9203e4833f8b489e53f2c">fplibDiv</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00195"></a>00195 <span class="keyword">template</span> &lt;&gt;
+<a name="l00196"></a>00196 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a4eb73ac0de762b9681b3a982015b8772">fplibMax</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00197"></a>00197 <span class="keyword">template</span> &lt;&gt;
+<a name="l00198"></a>00198 uint64_t <a class="code" href="namespaceArmISA.html#a4eb73ac0de762b9681b3a982015b8772">fplibMax</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00199"></a>00199 <span class="keyword">template</span> &lt;&gt;
+<a name="l00200"></a>00200 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a9502bd6b59d0aa250036f8798ee5d268">fplibMaxNum</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00201"></a>00201 <span class="keyword">template</span> &lt;&gt;
+<a name="l00202"></a>00202 uint64_t <a class="code" href="namespaceArmISA.html#a9502bd6b59d0aa250036f8798ee5d268">fplibMaxNum</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00203"></a>00203 <span class="keyword">template</span> &lt;&gt;
+<a name="l00204"></a>00204 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#aaff91a9ef684a2fbae263d7e28bb47a3">fplibMin</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00205"></a>00205 <span class="keyword">template</span> &lt;&gt;
+<a name="l00206"></a>00206 uint64_t <a class="code" href="namespaceArmISA.html#aaff91a9ef684a2fbae263d7e28bb47a3">fplibMin</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00207"></a>00207 <span class="keyword">template</span> &lt;&gt;
+<a name="l00208"></a>00208 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#acf433633709ae6dec5ce4dfa468003d7">fplibMinNum</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00209"></a>00209 <span class="keyword">template</span> &lt;&gt;
+<a name="l00210"></a>00210 uint64_t <a class="code" href="namespaceArmISA.html#acf433633709ae6dec5ce4dfa468003d7">fplibMinNum</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00211"></a>00211 <span class="keyword">template</span> &lt;&gt;
+<a name="l00212"></a>00212 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a76377f5422d9c42beeb46d780d9e67fc">fplibMul</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00213"></a>00213 <span class="keyword">template</span> &lt;&gt;
+<a name="l00214"></a>00214 uint64_t <a class="code" href="namespaceArmISA.html#a76377f5422d9c42beeb46d780d9e67fc">fplibMul</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00215"></a>00215 <span class="keyword">template</span> &lt;&gt;
+<a name="l00216"></a>00216 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a42dcc9fb6e3a3023d21c268e3e9b4165">fplibMulAdd</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> addend, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2,
+<a name="l00217"></a>00217                      FPSCR &amp;fpscr);
+<a name="l00218"></a>00218 <span class="keyword">template</span> &lt;&gt;
+<a name="l00219"></a>00219 uint64_t <a class="code" href="namespaceArmISA.html#a42dcc9fb6e3a3023d21c268e3e9b4165">fplibMulAdd</a>(uint64_t addend, uint64_t op1, uint64_t op2,
+<a name="l00220"></a>00220                      FPSCR &amp;fpscr);
+<a name="l00221"></a>00221 <span class="keyword">template</span> &lt;&gt;
+<a name="l00222"></a>00222 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a3b7e2c49fcae44b9e8277cb5a8071b2a">fplibMulX</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00223"></a>00223 <span class="keyword">template</span> &lt;&gt;
+<a name="l00224"></a>00224 uint64_t <a class="code" href="namespaceArmISA.html#a3b7e2c49fcae44b9e8277cb5a8071b2a">fplibMulX</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00225"></a>00225 <span class="keyword">template</span> &lt;&gt;
+<a name="l00226"></a>00226 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#ab5b770580085f7dac4b6f4b89b790980">fplibNeg</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>);
+<a name="l00227"></a>00227 <span class="keyword">template</span> &lt;&gt;
+<a name="l00228"></a>00228 uint64_t <a class="code" href="namespaceArmISA.html#ab5b770580085f7dac4b6f4b89b790980">fplibNeg</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>);
+<a name="l00229"></a>00229 <span class="keyword">template</span> &lt;&gt;
+<a name="l00230"></a>00230 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#af7a6eda02787e25034d915f9b2bc1269">fplibRSqrtEstimate</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00231"></a>00231 <span class="keyword">template</span>&lt;&gt;
+<a name="l00232"></a>00232 uint64_t <a class="code" href="namespaceArmISA.html#af7a6eda02787e25034d915f9b2bc1269">fplibRSqrtEstimate</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00233"></a>00233 <span class="keyword">template</span> &lt;&gt;
+<a name="l00234"></a>00234 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a101a644231829e76613bfeef72004f89">fplibRSqrtStepFused</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00235"></a>00235 <span class="keyword">template</span> &lt;&gt;
+<a name="l00236"></a>00236 uint64_t <a class="code" href="namespaceArmISA.html#a101a644231829e76613bfeef72004f89">fplibRSqrtStepFused</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00237"></a>00237 <span class="keyword">template</span> &lt;&gt;
+<a name="l00238"></a>00238 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#abde99661be8e680808632aea977225f6">fplibRecipEstimate</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00239"></a>00239 <span class="keyword">template</span> &lt;&gt;
+<a name="l00240"></a>00240 uint64_t <a class="code" href="namespaceArmISA.html#abde99661be8e680808632aea977225f6">fplibRecipEstimate</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00241"></a>00241 <span class="keyword">template</span> &lt;&gt;
+<a name="l00242"></a>00242 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a1cb770590af9161319a168035eea258d">fplibRecipStepFused</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00243"></a>00243 <span class="keyword">template</span> &lt;&gt;
+<a name="l00244"></a>00244 uint64_t <a class="code" href="namespaceArmISA.html#a1cb770590af9161319a168035eea258d">fplibRecipStepFused</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00245"></a>00245 <span class="keyword">template</span> &lt;&gt;
+<a name="l00246"></a>00246 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a92558db61b13348bea996a347e807cce">fplibRecpX</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00247"></a>00247 <span class="keyword">template</span> &lt;&gt;
+<a name="l00248"></a>00248 uint64_t <a class="code" href="namespaceArmISA.html#a92558db61b13348bea996a347e807cce">fplibRecpX</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00249"></a>00249 <span class="keyword">template</span> &lt;&gt;
+<a name="l00250"></a>00250 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a6868618a91c5e94f964e05c0dca0c118">fplibRoundInt</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, <span class="keywordtype">bool</span> exact,
+<a name="l00251"></a>00251                        FPSCR &amp;fpscr);
+<a name="l00252"></a>00252 <span class="keyword">template</span> &lt;&gt;
+<a name="l00253"></a>00253 uint64_t <a class="code" href="namespaceArmISA.html#a6868618a91c5e94f964e05c0dca0c118">fplibRoundInt</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding, <span class="keywordtype">bool</span> exact,
+<a name="l00254"></a>00254                        FPSCR &amp;fpscr);
+<a name="l00255"></a>00255 <span class="keyword">template</span> &lt;&gt;
+<a name="l00256"></a>00256 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#ad32495f160fbc72be7ab48a53b25b11c">fplibSqrt</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00257"></a>00257 <span class="keyword">template</span> &lt;&gt;
+<a name="l00258"></a>00258 uint64_t <a class="code" href="namespaceArmISA.html#ad32495f160fbc72be7ab48a53b25b11c">fplibSqrt</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, FPSCR &amp;fpscr);
+<a name="l00259"></a>00259 <span class="keyword">template</span> &lt;&gt;
+<a name="l00260"></a>00260 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#aeb0bc3ee8ee781a2038e66289a323a7d">fplibSub</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op1, <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> op2, FPSCR &amp;fpscr);
+<a name="l00261"></a>00261 <span class="keyword">template</span> &lt;&gt;
+<a name="l00262"></a>00262 uint64_t <a class="code" href="namespaceArmISA.html#aeb0bc3ee8ee781a2038e66289a323a7d">fplibSub</a>(uint64_t op1, uint64_t op2, FPSCR &amp;fpscr);
+<a name="l00263"></a>00263 <span class="keyword">template</span> &lt;&gt;
+<a name="l00264"></a>00264 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a7ceb39cb77f124c2c26f681bd0df8956">fplibFPToFixed</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding,
+<a name="l00265"></a>00265                         FPSCR &amp;fpscr);
+<a name="l00266"></a>00266 <span class="keyword">template</span> &lt;&gt;
+<a name="l00267"></a>00267 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#a7ceb39cb77f124c2c26f681bd0df8956">fplibFPToFixed</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding,
+<a name="l00268"></a>00268                         FPSCR &amp;fpscr);
+<a name="l00269"></a>00269 <span class="keyword">template</span> &lt;&gt;
+<a name="l00270"></a>00270 uint64_t <a class="code" href="namespaceArmISA.html#a7ceb39cb77f124c2c26f681bd0df8956">fplibFPToFixed</a>(<a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding,
+<a name="l00271"></a>00271                         FPSCR &amp;fpscr);
+<a name="l00272"></a>00272 <span class="keyword">template</span> &lt;&gt;
+<a name="l00273"></a>00273 uint64_t <a class="code" href="namespaceArmISA.html#a7ceb39cb77f124c2c26f681bd0df8956">fplibFPToFixed</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding,
+<a name="l00274"></a>00274                         FPSCR &amp;fpscr);
+<a name="l00275"></a>00275 <span class="keyword">template</span> &lt;&gt;
+<a name="l00276"></a>00276 <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="namespaceArmISA.html#ad1582732786716fd44209d3a9935bba7">fplibFixedToFP</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding,
+<a name="l00277"></a>00277                         FPSCR &amp;fpscr);
+<a name="l00278"></a>00278 <span class="keyword">template</span> &lt;&gt;
+<a name="l00279"></a>00279 uint64_t <a class="code" href="namespaceArmISA.html#ad1582732786716fd44209d3a9935bba7">fplibFixedToFP</a>(uint64_t <a class="code" href="namespaceX86ISA.html#ac120faf051fe003563eb1b3ece78528c">op</a>, <span class="keywordtype">int</span> fbits, <span class="keywordtype">bool</span> <a class="code" href="namespaceArmISA.html#a60f3e621d99974925adab65b14f4189e">u</a>, <a class="code" href="namespaceArmISA.html#a1d30750bfd1f4a9f3f05ee7b04c4cf23">FPRounding</a> rounding,
+<a name="l00280"></a>00280                         FPSCR &amp;fpscr);
+<a name="l00281"></a>00281 }
+<a name="l00282"></a>00282 
+<a name="l00283"></a>00283 <span class="preprocessor">#endif</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

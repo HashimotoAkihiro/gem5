@@ -1,0 +1,83 @@
+\hypertarget{intelmp_8cc}{
+\section{arch/x86/bios/intelmp.cc}
+\label{intelmp_8cc}\index{arch/x86/bios/intelmp.cc@{arch/x86/bios/intelmp.cc}}
+}
+{\ttfamily \#include \char`\"{}arch/x86/bios/intelmp.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}arch/x86/isa\_\-traits.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/misc.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}base/types.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/port\_\-proxy.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/byteswap.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPBaseConfigEntry.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPExtConfigEntry.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPConfigTable.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPFloatingPointer.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPBus.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPIOAPIC.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPIOIntAssignment.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPLocalIntAssignment.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPProcessor.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPAddrSpaceMapping.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPBusHierarchy.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/X86IntelMPCompatAddrSpaceMod.hh\char`\"{}}\par
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+{\footnotesize template$<$class T $>$ }\\uint8\_\-t \hyperlink{intelmp_8cc_ab3e94577548c6c5fe3f19157088c400c}{writeOutField} (\hyperlink{classPortProxy}{PortProxy} \&proxy, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, T val)
+\item 
+uint8\_\-t \hyperlink{intelmp_8cc_a4f5f9ee589916b40b024d6dc3d651738}{writeOutString} (\hyperlink{classPortProxy}{PortProxy} \&proxy, \hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} addr, string str, int length)
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{intelmp_8cc_ab3e94577548c6c5fe3f19157088c400c}{
+\index{intelmp.cc@{intelmp.cc}!writeOutField@{writeOutField}}
+\index{writeOutField@{writeOutField}!intelmp.cc@{intelmp.cc}}
+\subsubsection[{writeOutField}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t writeOutField ({\bf PortProxy} \& {\em proxy}, \/  {\bf Addr} {\em addr}, \/  T {\em val})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{intelmp_8cc_ab3e94577548c6c5fe3f19157088c400c}
+
+
+
+\begin{DoxyCode}
+74 {
+75     uint64_t guestVal = X86ISA::htog(val);
+76     proxy.writeBlob(addr, (uint8_t *)(&guestVal), sizeof(T));
+77 
+78     uint8_t checkSum = 0;
+79     while(guestVal) {
+80         checkSum += guestVal;
+81         guestVal >>= 8;
+82     }
+83     return checkSum;
+84 }
+\end{DoxyCode}
+\hypertarget{intelmp_8cc_a4f5f9ee589916b40b024d6dc3d651738}{
+\index{intelmp.cc@{intelmp.cc}!writeOutString@{writeOutString}}
+\index{writeOutString@{writeOutString}!intelmp.cc@{intelmp.cc}}
+\subsubsection[{writeOutString}]{\setlength{\rightskip}{0pt plus 5cm}uint8\_\-t writeOutString ({\bf PortProxy} \& {\em proxy}, \/  {\bf Addr} {\em addr}, \/  string {\em str}, \/  int {\em length})}}
+\label{intelmp_8cc_a4f5f9ee589916b40b024d6dc3d651738}
+
+
+
+\begin{DoxyCode}
+88 {
+89     char cleanedString[length + 1];
+90     cleanedString[length] = 0;
+91 
+92     if (str.length() > length) {
+93         memcpy(cleanedString, str.c_str(), length);
+94         warn("Intel MP configuration table string \"%s\" "
+95                 "will be truncated to \"%s\".\n", str, cleanedString);
+96     } else {
+97         memcpy(cleanedString, str.c_str(), str.length());
+98         memset(cleanedString + str.length(), 0, length - str.length());
+99     }
+100     proxy.writeBlob(addr, (uint8_t *)(&cleanedString), length);
+101 
+102     uint8_t checkSum = 0;
+103     for (int i = 0; i < length; i++)
+104         checkSum += cleanedString[i];
+105 
+106     return checkSum;
+107 }
+\end{DoxyCode}

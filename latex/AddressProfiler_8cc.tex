@@ -1,0 +1,149 @@
+\hypertarget{AddressProfiler_8cc}{
+\section{mem/ruby/profiler/AddressProfiler.cc}
+\label{AddressProfiler_8cc}\index{mem/ruby/profiler/AddressProfiler.cc@{mem/ruby/profiler/AddressProfiler.cc}}
+}
+{\ttfamily \#include $<$vector$>$}\par
+{\ttfamily \#include \char`\"{}base/stl\_\-helpers.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/protocol/RubyRequest.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/ruby/profiler/AddressProfiler.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/ruby/profiler/Profiler.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}mem/ruby/system/System.hh\char`\"{}}\par
+\subsection*{型定義}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classAddressProfiler_a8a9f1225b5c1cb2d26e7cea035910b56}{AddressProfiler::AddressMap} \hyperlink{AddressProfiler_8cc_a740ed72939b90adcb358a3c59ba83842}{AddressMap}
+\end{DoxyCompactItemize}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classAccessTraceForAddress}{AccessTraceForAddress} \& \hyperlink{AddressProfiler_8cc_ab6d6314c5a9a171c8c62be6d0e6fbf51}{lookupTraceForAddress} (const \hyperlink{classAddress}{Address} \&addr, \hyperlink{AddressProfiler_8cc_a740ed72939b90adcb358a3c59ba83842}{AddressMap} \&record\_\-map)
+\item 
+void \hyperlink{AddressProfiler_8cc_a576fc1dc4c765015fe395ab2d5a364cd}{printSorted} (ostream \&out, int num\_\-of\_\-sequencers, const \hyperlink{AddressProfiler_8cc_a740ed72939b90adcb358a3c59ba83842}{AddressMap} \&record\_\-map, string description)
+\end{DoxyCompactItemize}
+
+
+\subsection{型定義}
+\hypertarget{AddressProfiler_8cc_a740ed72939b90adcb358a3c59ba83842}{
+\index{AddressProfiler.cc@{AddressProfiler.cc}!AddressMap@{AddressMap}}
+\index{AddressMap@{AddressMap}!AddressProfiler.cc@{AddressProfiler.cc}}
+\subsubsection[{AddressMap}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf AddressProfiler::AddressMap} {\bf AddressMap}}}
+\label{AddressProfiler_8cc_a740ed72939b90adcb358a3c59ba83842}
+
+
+\subsection{関数}
+\hypertarget{AddressProfiler_8cc_ab6d6314c5a9a171c8c62be6d0e6fbf51}{
+\index{AddressProfiler.cc@{AddressProfiler.cc}!lookupTraceForAddress@{lookupTraceForAddress}}
+\index{lookupTraceForAddress@{lookupTraceForAddress}!AddressProfiler.cc@{AddressProfiler.cc}}
+\subsubsection[{lookupTraceForAddress}]{\setlength{\rightskip}{0pt plus 5cm}{\bf AccessTraceForAddress}\& lookupTraceForAddress (const {\bf Address} \& {\em addr}, \/  {\bf AddressMap} \& {\em record\_\-map})}}
+\label{AddressProfiler_8cc_ab6d6314c5a9a171c8c62be6d0e6fbf51}
+
+
+
+\begin{DoxyCode}
+45 {
+46     // we create a static default object here that is used to insert
+47     // since the insertion will create a copy of the object in the
+48     // process.  Perhaps this is optimizing early, but it doesn't seem
+49     // like it could hurt.
+50     static const AccessTraceForAddress dflt;
+51 
+52     pair<AddressMap::iterator, bool> r =
+53         record_map.insert(make_pair(addr, dflt));
+54     AddressMap::iterator i = r.first;
+55     AccessTraceForAddress &access_trace = i->second;
+56     if (r.second) {
+57         // there was nothing there and the insert succeed, so we need
+58         // to actually set the address.
+59         access_trace.setAddress(addr);
+60     }
+61 
+62     return access_trace;
+63 }
+\end{DoxyCode}
+\hypertarget{AddressProfiler_8cc_a576fc1dc4c765015fe395ab2d5a364cd}{
+\index{AddressProfiler.cc@{AddressProfiler.cc}!printSorted@{printSorted}}
+\index{printSorted@{printSorted}!AddressProfiler.cc@{AddressProfiler.cc}}
+\subsubsection[{printSorted}]{\setlength{\rightskip}{0pt plus 5cm}void printSorted (ostream \& {\em out}, \/  int {\em num\_\-of\_\-sequencers}, \/  const {\bf AddressMap} \& {\em record\_\-map}, \/  string {\em description})}}
+\label{AddressProfiler_8cc_a576fc1dc4c765015fe395ab2d5a364cd}
+
+
+
+\begin{DoxyCode}
+68 {
+69     const int records_printed = 100;
+70 
+71     uint64 misses = 0;
+72     std::vector<const AccessTraceForAddress *> sorted;
+73 
+74     AddressMap::const_iterator i = record_map.begin();
+75     AddressMap::const_iterator end = record_map.end();
+76     for (; i != end; ++i) {
+77         const AccessTraceForAddress* record = &i->second;
+78         misses += record->getTotal();
+79         sorted.push_back(record);
+80     }
+81     sort(sorted.begin(), sorted.end(), AccessTraceForAddress::less_equal);
+82 
+83     out << "Total_entries_" << description << ": " << record_map.size()
+84         << endl;
+85     if (g_system_ptr->getProfiler()->getAllInstructions())
+86         out << "Total_Instructions_" << description << ": " << misses << endl;
+87     else
+88         out << "Total_data_misses_" << description << ": " << misses << endl;
+89 
+90     out << "total | load store atomic | user supervisor | sharing | touched-by"
+91         << endl;
+92 
+93     Histogram remaining_records(1, 100);
+94     Histogram all_records(1, 100);
+95     Histogram remaining_records_log(-1);
+96     Histogram all_records_log(-1);
+97 
+98     // Allows us to track how many lines where touched by n processors
+99     std::vector<int64> m_touched_vec;
+100     std::vector<int64> m_touched_weighted_vec;
+101     m_touched_vec.resize(num_of_sequencers+1);
+102     m_touched_weighted_vec.resize(num_of_sequencers+1);
+103     for (int j = 0; j < m_touched_vec.size(); j++) {
+104         m_touched_vec[j] = 0;
+105         m_touched_weighted_vec[j] = 0;
+106     }
+107 
+108     int counter = 0;
+109     int max = sorted.size();
+110     while (counter < max && counter < records_printed) {
+111         const AccessTraceForAddress* record = sorted[counter];
+112         double percent = 100.0 * (record->getTotal() / double(misses));
+113         out << description << " | " << percent << " % " << *record << endl;
+114         all_records.add(record->getTotal());
+115         all_records_log.add(record->getTotal());
+116         counter++;
+117         m_touched_vec[record->getTouchedBy()]++;
+118         m_touched_weighted_vec[record->getTouchedBy()] += record->getTotal();
+119     }
+120 
+121     while (counter < max) {
+122         const AccessTraceForAddress* record = sorted[counter];
+123         all_records.add(record->getTotal());
+124         remaining_records.add(record->getTotal());
+125         all_records_log.add(record->getTotal());
+126         remaining_records_log.add(record->getTotal());
+127         m_touched_vec[record->getTouchedBy()]++;
+128         m_touched_weighted_vec[record->getTouchedBy()] += record->getTotal();
+129     }
+130     out << endl;
+131     out << "all_records_" << description << ": "
+132         << all_records << endl
+133         << "all_records_log_" << description << ": "
+134         << all_records_log << endl
+135         << "remaining_records_" << description << ": "
+136         << remaining_records << endl
+137         << "remaining_records_log_" << description << ": "
+138         << remaining_records_log << endl
+139         << "touched_by_" << description << ": "
+140         << m_touched_vec << endl
+141         << "touched_by_weighted_" << description << ": "
+142         << m_touched_weighted_vec << endl
+143         << endl;
+144 }
+\end{DoxyCode}

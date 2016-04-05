@@ -1,0 +1,170 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: arch/x86/process.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>arch/x86/process.hh</h1><a href="arch_2x86_2process_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2007 The Hewlett-Packard Development Company</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00015"></a>00015 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00016"></a>00016 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00017"></a>00017 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00018"></a>00018 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00019"></a>00019 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00020"></a>00020 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00021"></a>00021 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00022"></a>00022 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00023"></a>00023 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00024"></a>00024 <span class="comment"> *</span>
+<a name="l00025"></a>00025 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00026"></a>00026 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00027"></a>00027 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00028"></a>00028 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00029"></a>00029 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00030"></a>00030 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00031"></a>00031 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00032"></a>00032 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00033"></a>00033 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00034"></a>00034 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00035"></a>00035 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00036"></a>00036 <span class="comment"> *</span>
+<a name="l00037"></a>00037 <span class="comment"> * Authors: Gabe Black</span>
+<a name="l00038"></a>00038 <span class="comment"> */</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="preprocessor">#ifndef __ARCH_X86_PROCESS_HH__</span>
+<a name="l00041"></a>00041 <span class="preprocessor"></span><span class="preprocessor">#define __ARCH_X86_PROCESS_HH__</span>
+<a name="l00042"></a>00042 <span class="preprocessor"></span>
+<a name="l00043"></a>00043 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00044"></a>00044 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00045"></a>00045 
+<a name="l00046"></a>00046 <span class="preprocessor">#include &quot;<a class="code" href="sim_2process_8hh.html">sim/process.hh</a>&quot;</span>
+<a name="l00047"></a>00047 
+<a name="l00048"></a>00048 <span class="keyword">class </span><a class="code" href="classSyscallDesc.html">SyscallDesc</a>;
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="keyword">namespace </span>X86ISA
+<a name="l00051"></a>00051 {
+<a name="l00052"></a><a class="code" href="namespaceX86ISA.html#a220a5701eb61c9715f2a66aa880d30b9">00052</a>     <span class="keyword">enum</span> <a class="code" href="namespaceX86ISA.html#a220a5701eb61c9715f2a66aa880d30b9">X86AuxiliaryVectorTypes</a> {
+<a name="l00053"></a><a class="code" href="namespaceX86ISA.html#a220a5701eb61c9715f2a66aa880d30b9a39296c9be5af2ec4edc9830fa3da5ee4">00053</a>         <a class="code" href="namespaceX86ISA.html#a220a5701eb61c9715f2a66aa880d30b9a39296c9be5af2ec4edc9830fa3da5ee4">M5_AT_SYSINFO</a> = 32,
+<a name="l00054"></a><a class="code" href="namespaceX86ISA.html#a220a5701eb61c9715f2a66aa880d30b9abd0818adabbd02d06de1065979ec4691">00054</a>         <a class="code" href="namespaceX86ISA.html#a220a5701eb61c9715f2a66aa880d30b9abd0818adabbd02d06de1065979ec4691">M5_AT_SYSINFO_EHDR</a> = 33
+<a name="l00055"></a>00055     };
+<a name="l00056"></a>00056 
+<a name="l00057"></a><a class="code" href="classX86ISA_1_1X86LiveProcess.html">00057</a>     <span class="keyword">class </span><a class="code" href="classX86ISA_1_1X86LiveProcess.html">X86LiveProcess</a> : <span class="keyword">public</span> <a class="code" href="classLiveProcess.html">LiveProcess</a>
+<a name="l00058"></a>00058     {
+<a name="l00059"></a>00059       <span class="keyword">protected</span>:
+<a name="l00060"></a><a class="code" href="classX86ISA_1_1X86LiveProcess.html#ac5ecf9d163642401bfbd3a3c123e7588">00060</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#ac5ecf9d163642401bfbd3a3c123e7588">_gdtStart</a>;
+<a name="l00061"></a><a class="code" href="classX86ISA_1_1X86LiveProcess.html#a758d088d5e01acff75151eb6b1fd4a16">00061</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#a758d088d5e01acff75151eb6b1fd4a16">_gdtSize</a>;
+<a name="l00062"></a>00062 
+<a name="l00063"></a><a class="code" href="classX86ISA_1_1X86LiveProcess.html#a36d3cbdd5c6e5a64542256b84b0fa0c3">00063</a>         <a class="code" href="classSyscallDesc.html">SyscallDesc</a> *<a class="code" href="classX86ISA_1_1X86LiveProcess.html#a36d3cbdd5c6e5a64542256b84b0fa0c3">syscallDescs</a>;
+<a name="l00064"></a><a class="code" href="classX86ISA_1_1X86LiveProcess.html#ae08bf33f0aaf2f6045ed37acbe0779c8">00064</a>         <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#ae08bf33f0aaf2f6045ed37acbe0779c8">numSyscallDescs</a>;
+<a name="l00065"></a>00065 
+<a name="l00066"></a>00066         <a class="code" href="classX86ISA_1_1X86LiveProcess.html#a6a12433fc14d1afa3744abbe3c019b7b">X86LiveProcess</a>(LiveProcessParams * <a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>, <a class="code" href="classObjectFile.html">ObjectFile</a> *<a class="code" href="classLiveProcess.html#ab6cfcfa7903c66267b3e0351c3caa809">objFile</a>,
+<a name="l00067"></a>00067                 <a class="code" href="classSyscallDesc.html">SyscallDesc</a> *_syscallDescs, <span class="keywordtype">int</span> _numSyscallDescs);
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069         <span class="keyword">template</span>&lt;<span class="keyword">class</span> IntType&gt;
+<a name="l00070"></a>00070         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#ac7876453870f7620e67298b48c3ec93c">argsInit</a>(<span class="keywordtype">int</span> pageSize,
+<a name="l00071"></a>00071                 <a class="code" href="classstd_1_1vector.html">std::vector</a>&lt;<a class="code" href="structAuxVector.html">AuxVector&lt;IntType&gt;</a> &gt; extraAuxvs);
+<a name="l00072"></a>00072 
+<a name="l00073"></a>00073       <span class="keyword">public</span>:
+<a name="l00074"></a><a class="code" href="classX86ISA_1_1X86LiveProcess.html#a3fa3a6673b5b14edb04c4b8dfdb46051">00074</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#a3fa3a6673b5b14edb04c4b8dfdb46051">gdtStart</a>()
+<a name="l00075"></a>00075         { <span class="keywordflow">return</span> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#ac5ecf9d163642401bfbd3a3c123e7588">_gdtStart</a>; }
+<a name="l00076"></a>00076         
+<a name="l00077"></a><a class="code" href="classX86ISA_1_1X86LiveProcess.html#abf5ae8f7b5ef9fdfd43c7b783fd540b1">00077</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#abf5ae8f7b5ef9fdfd43c7b783fd540b1">gdtSize</a>()
+<a name="l00078"></a>00078         { <span class="keywordflow">return</span> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#a758d088d5e01acff75151eb6b1fd4a16">_gdtSize</a>; }
+<a name="l00079"></a>00079 
+<a name="l00080"></a>00080         <a class="code" href="classSyscallDesc.html">SyscallDesc</a>* <a class="code" href="classX86ISA_1_1X86LiveProcess.html#aebbff609a7235342925445690acf5ee8">getDesc</a>(<span class="keywordtype">int</span> callnum);
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1X86LiveProcess.html#aaefd02663c1eae206b851290d9276a5e">setSyscallReturn</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <a class="code" href="classSyscallReturn.html">SyscallReturn</a> return_value);
+<a name="l00083"></a>00083     };
+<a name="l00084"></a>00084 
+<a name="l00085"></a><a class="code" href="classX86ISA_1_1X86__64LiveProcess.html">00085</a>     <span class="keyword">class </span><a class="code" href="classX86ISA_1_1X86__64LiveProcess.html">X86_64LiveProcess</a> : <span class="keyword">public</span> <a class="code" href="classX86ISA_1_1X86LiveProcess.html">X86LiveProcess</a>
+<a name="l00086"></a>00086     {
+<a name="l00087"></a>00087       <span class="keyword">protected</span>:
+<a name="l00088"></a>00088         <a class="code" href="classX86ISA_1_1X86__64LiveProcess.html#a35212370da5f0cb7e3b7ddfcea68bced">X86_64LiveProcess</a>(LiveProcessParams *<a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>, <a class="code" href="classObjectFile.html">ObjectFile</a> *<a class="code" href="classLiveProcess.html#ab6cfcfa7903c66267b3e0351c3caa809">objFile</a>,
+<a name="l00089"></a>00089                 <a class="code" href="classSyscallDesc.html">SyscallDesc</a> *_syscallDescs, <span class="keywordtype">int</span> _numSyscallDescs);
+<a name="l00090"></a>00090 
+<a name="l00091"></a><a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html">00091</a>         <span class="keyword">class </span><a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html">VSyscallPage</a>
+<a name="l00092"></a>00092         {
+<a name="l00093"></a>00093           <span class="keyword">public</span>:
+<a name="l00094"></a><a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#acbb25a86d519ae439e2d01ddb0b85357">00094</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#acbb25a86d519ae439e2d01ddb0b85357">base</a>;
+<a name="l00095"></a><a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#a8ce507144b5ef53350af753eafb669f0">00095</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#a8ce507144b5ef53350af753eafb669f0">size</a>;
+<a name="l00096"></a><a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#a38977531bcb83545c3c54ab5e2edbb14">00096</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#a38977531bcb83545c3c54ab5e2edbb14">vtimeOffset</a>;
+<a name="l00097"></a><a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#aa6dd91974e908006a2e736f7cc343abe">00097</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html#aa6dd91974e908006a2e736f7cc343abe">vgettimeofdayOffset</a>;
+<a name="l00098"></a>00098         };
+<a name="l00099"></a><a class="code" href="classX86ISA_1_1X86__64LiveProcess.html#a9f7ed190dd32bddc3f1074ce39168abd">00099</a>         <a class="code" href="classX86ISA_1_1X86__64LiveProcess_1_1VSyscallPage.html">VSyscallPage</a> <a class="code" href="classX86ISA_1_1X86__64LiveProcess.html#a9f7ed190dd32bddc3f1074ce39168abd">vsyscallPage</a>;
+<a name="l00100"></a>00100 
+<a name="l00101"></a>00101       <span class="keyword">public</span>:
+<a name="l00102"></a>00102         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1X86__64LiveProcess.html#a60e5314ffeede1e51c6bcb2cf606ca92">argsInit</a>(<span class="keywordtype">int</span> intSize, <span class="keywordtype">int</span> pageSize);
+<a name="l00103"></a>00103         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1X86__64LiveProcess.html#a3c34ea9b29f410748d4435a667484924">initState</a>();
+<a name="l00104"></a>00104 
+<a name="l00105"></a>00105         <a class="code" href="namespaceX86ISA.html#a0e080577527fb3e9685399f75b5caf15">X86ISA::IntReg</a> <a class="code" href="classX86ISA_1_1X86__64LiveProcess.html#a6f33c62983b3e68106d1cdb43b9fc09c">getSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">int</span> &amp;<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>);
+<a name="l00107"></a>00107         <span class="keyword">using</span> <a class="code" href="classLiveProcess.html#aa001ff57ec460026facb89ba19c7bf96">LiveProcess::getSyscallArg</a>;
+<a name="l00108"></a>00108         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1X86__64LiveProcess.html#a834e8e05416e3487f87d942259506abe">setSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, <a class="code" href="namespaceX86ISA.html#a0e080577527fb3e9685399f75b5caf15">X86ISA::IntReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00109"></a>00109     };
+<a name="l00110"></a>00110 
+<a name="l00111"></a><a class="code" href="classX86ISA_1_1I386LiveProcess.html">00111</a>     <span class="keyword">class </span><a class="code" href="classX86ISA_1_1I386LiveProcess.html">I386LiveProcess</a> : <span class="keyword">public</span> <a class="code" href="classX86ISA_1_1X86LiveProcess.html">X86LiveProcess</a>
+<a name="l00112"></a>00112     {
+<a name="l00113"></a>00113       <span class="keyword">protected</span>:
+<a name="l00114"></a>00114         <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a6556f426be989188ef0a961836b3b490">I386LiveProcess</a>(LiveProcessParams *<a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>, <a class="code" href="classObjectFile.html">ObjectFile</a> *<a class="code" href="classLiveProcess.html#ab6cfcfa7903c66267b3e0351c3caa809">objFile</a>,
+<a name="l00115"></a>00115                 <a class="code" href="classSyscallDesc.html">SyscallDesc</a> *_syscallDescs, <span class="keywordtype">int</span> _numSyscallDescs);
+<a name="l00116"></a>00116 
+<a name="l00117"></a><a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html">00117</a>         <span class="keyword">class </span><a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html">VSyscallPage</a>
+<a name="l00118"></a>00118         {
+<a name="l00119"></a>00119           <span class="keyword">public</span>:
+<a name="l00120"></a><a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#acbb25a86d519ae439e2d01ddb0b85357">00120</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#acbb25a86d519ae439e2d01ddb0b85357">base</a>;
+<a name="l00121"></a><a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#a8ce507144b5ef53350af753eafb669f0">00121</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#a8ce507144b5ef53350af753eafb669f0">size</a>;
+<a name="l00122"></a><a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#a25e9c58aee3d0c9703241fa6050e180f">00122</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#a25e9c58aee3d0c9703241fa6050e180f">vsyscallOffset</a>;
+<a name="l00123"></a><a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#a1e6ef77838358497dc782b098f3f027b">00123</a>             <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html#a1e6ef77838358497dc782b098f3f027b">vsysexitOffset</a>;
+<a name="l00124"></a>00124         };
+<a name="l00125"></a><a class="code" href="classX86ISA_1_1I386LiveProcess.html#a9f7ed190dd32bddc3f1074ce39168abd">00125</a>         <a class="code" href="classX86ISA_1_1I386LiveProcess_1_1VSyscallPage.html">VSyscallPage</a> <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a9f7ed190dd32bddc3f1074ce39168abd">vsyscallPage</a>;
+<a name="l00126"></a>00126 
+<a name="l00127"></a>00127       <span class="keyword">public</span>:
+<a name="l00128"></a>00128         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a60e5314ffeede1e51c6bcb2cf606ca92">argsInit</a>(<span class="keywordtype">int</span> intSize, <span class="keywordtype">int</span> pageSize);
+<a name="l00129"></a>00129         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a3c34ea9b29f410748d4435a667484924">initState</a>();
+<a name="l00130"></a>00130 
+<a name="l00131"></a>00131         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a1ed38802271de4269c3adfa46c73e7e7">syscall</a>(int64_t callnum, <a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>);
+<a name="l00132"></a>00132         <a class="code" href="namespaceX86ISA.html#a0e080577527fb3e9685399f75b5caf15">X86ISA::IntReg</a> <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a6f33c62983b3e68106d1cdb43b9fc09c">getSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">int</span> &amp;<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>);
+<a name="l00133"></a>00133         <a class="code" href="namespaceX86ISA.html#a0e080577527fb3e9685399f75b5caf15">X86ISA::IntReg</a> <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a6f33c62983b3e68106d1cdb43b9fc09c">getSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">int</span> &amp;<a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#a0da89c280130b84ae26405a901396428">width</a>);
+<a name="l00134"></a>00134         <span class="keywordtype">void</span> <a class="code" href="classX86ISA_1_1I386LiveProcess.html#a834e8e05416e3487f87d942259506abe">setSyscallArg</a>(<a class="code" href="classThreadContext.html">ThreadContext</a> *<a class="code" href="namespaceArmISA.html#a5aff829af55e65b802d83dfcef4e9dd0">tc</a>, <span class="keywordtype">int</span> <a class="code" href="namespaceArmISA.html#aca8175497376fbb9f0e71fefa122cef7">i</a>, <a class="code" href="namespaceX86ISA.html#a0e080577527fb3e9685399f75b5caf15">X86ISA::IntReg</a> <a class="code" href="namespaceX86ISA.html#ae13bf1250853ff6b72aabe3c79b587cc">val</a>);
+<a name="l00135"></a>00135     };
+<a name="l00136"></a>00136 }
+<a name="l00137"></a>00137 
+<a name="l00138"></a>00138 <span class="preprocessor">#endif // __ARCH_X86_PROCESS_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

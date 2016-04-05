@@ -1,0 +1,161 @@
+\hypertarget{classCacheSet}{
+\section{クラス テンプレート CacheSet$<$ Blktype $>$}
+\label{classCacheSet}\index{CacheSet@{CacheSet}}
+}
+
+
+{\ttfamily \#include $<$cacheset.hh$>$}\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+Blktype $\ast$ \hyperlink{classCacheSet_a0536397551c228605cbb683c0d18971a}{findBlk} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} tag, bool is\_\-secure, int \&way\_\-id) const 
+\item 
+Blktype $\ast$ \hyperlink{classCacheSet_a393be734604995160749b784359a6ab0}{findBlk} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} tag, bool is\_\-secure) const 
+\item 
+void \hyperlink{classCacheSet_a36bd3b7504969f977b5f5a9c2d2d5413}{moveToHead} (Blktype $\ast$blk)
+\item 
+void \hyperlink{classCacheSet_abac25ca30812f3e15af829d389845946}{moveToTail} (Blktype $\ast$blk)
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+int \hyperlink{classCacheSet_a07d90beac0f56f39fbcff30aea1863d7}{assoc}
+\item 
+Blktype $\ast$$\ast$ \hyperlink{classCacheSet_a6e04ed065f754b0b10cbd1edfb239c64}{blks}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\subsubsection*{template$<$class Blktype$>$ class CacheSet$<$ Blktype $>$}
+
+An associative set of cache blocks. 
+
+\subsection{関数}
+\hypertarget{classCacheSet_a393be734604995160749b784359a6ab0}{
+\index{CacheSet@{CacheSet}!findBlk@{findBlk}}
+\index{findBlk@{findBlk}!CacheSet@{CacheSet}}
+\subsubsection[{findBlk}]{\setlength{\rightskip}{0pt plus 5cm}Blktype $\ast$ findBlk ({\bf Addr} {\em tag}, \/  bool {\em is\_\-secure}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCacheSet_a393be734604995160749b784359a6ab0}
+
+
+
+\begin{DoxyCode}
+114 {
+115     int ignored_way_id;
+116     return findBlk(tag, is_secure, ignored_way_id);
+117 }
+\end{DoxyCode}
+\hypertarget{classCacheSet_a0536397551c228605cbb683c0d18971a}{
+\index{CacheSet@{CacheSet}!findBlk@{findBlk}}
+\index{findBlk@{findBlk}!CacheSet@{CacheSet}}
+\subsubsection[{findBlk}]{\setlength{\rightskip}{0pt plus 5cm}Blktype $\ast$ findBlk ({\bf Addr} {\em tag}, \/  bool {\em is\_\-secure}, \/  int \& {\em way\_\-id}) const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCacheSet_a0536397551c228605cbb683c0d18971a}
+Find a block matching the tag in this set. 
+\begin{DoxyParams}{引数}
+\item[{\em way\_\-id}]The id of the way that matches the tag. \item[{\em tag}]The Tag to find. \item[{\em is\_\-secure}]True if the target memory space is secure. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Pointer to the block if found. \hyperlink{classSet}{Set} way\_\-id to assoc if none found 
+\end{DoxyReturn}
+
+
+Way\_\-id returns the id of the way that matches the block If no block is found way\_\-id is set to assoc.
+
+
+\begin{DoxyCode}
+95 {
+100     way_id = assoc;
+101     for (int i = 0; i < assoc; ++i) {
+102         if (blks[i]->tag == tag && blks[i]->isValid() &&
+103             blks[i]->isSecure() == is_secure) {
+104             way_id = i;
+105             return blks[i];
+106         }
+107     }
+108     return NULL;
+109 }
+\end{DoxyCode}
+\hypertarget{classCacheSet_a36bd3b7504969f977b5f5a9c2d2d5413}{
+\index{CacheSet@{CacheSet}!moveToHead@{moveToHead}}
+\index{moveToHead@{moveToHead}!CacheSet@{CacheSet}}
+\subsubsection[{moveToHead}]{\setlength{\rightskip}{0pt plus 5cm}void moveToHead (Blktype $\ast$ {\em blk})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCacheSet_a36bd3b7504969f977b5f5a9c2d2d5413}
+Move the given block to the head of the list. 
+\begin{DoxyParams}{引数}
+\item[{\em blk}]The block to move. \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+122 {
+123     // nothing to do if blk is already head
+124     if (blks[0] == blk)
+125         return;
+126 
+127     // write 'next' block into blks[i], moving up from MRU toward LRU
+128     // until we overwrite the block we moved to head.
+129 
+130     // start by setting up to write 'blk' into blks[0]
+131     int i = 0;
+132     Blktype *next = blk;
+133 
+134     do {
+135         assert(i < assoc);
+136         // swap blks[i] and next
+137         Blktype *tmp = blks[i];
+138         blks[i] = next;
+139         next = tmp;
+140         ++i;
+141     } while (next != blk);
+142 }
+\end{DoxyCode}
+\hypertarget{classCacheSet_abac25ca30812f3e15af829d389845946}{
+\index{CacheSet@{CacheSet}!moveToTail@{moveToTail}}
+\index{moveToTail@{moveToTail}!CacheSet@{CacheSet}}
+\subsubsection[{moveToTail}]{\setlength{\rightskip}{0pt plus 5cm}void moveToTail (Blktype $\ast$ {\em blk})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classCacheSet_abac25ca30812f3e15af829d389845946}
+Move the given block to the tail of the list. 
+\begin{DoxyParams}{引数}
+\item[{\em blk}]The block to move \end{DoxyParams}
+
+
+
+\begin{DoxyCode}
+147 {
+148     // nothing to do if blk is already tail
+149     if (blks[assoc - 1] == blk)
+150         return;
+151 
+152     // write 'next' block into blks[i], moving from LRU to MRU
+153     // until we overwrite the block we moved to tail.
+154 
+155     // start by setting up to write 'blk' into tail
+156     int i = assoc - 1;
+157     Blktype *next = blk;
+158 
+159     do {
+160         assert(i >= 0);
+161         // swap blks[i] and next
+162         Blktype *tmp = blks[i];
+163         blks[i] = next;
+164         next = tmp;
+165         --i;
+166     } while (next != blk);
+167 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classCacheSet_a07d90beac0f56f39fbcff30aea1863d7}{
+\index{CacheSet@{CacheSet}!assoc@{assoc}}
+\index{assoc@{assoc}!CacheSet@{CacheSet}}
+\subsubsection[{assoc}]{\setlength{\rightskip}{0pt plus 5cm}int {\bf assoc}}}
+\label{classCacheSet_a07d90beac0f56f39fbcff30aea1863d7}
+The associativity of this set. \hypertarget{classCacheSet_a6e04ed065f754b0b10cbd1edfb239c64}{
+\index{CacheSet@{CacheSet}!blks@{blks}}
+\index{blks@{blks}!CacheSet@{CacheSet}}
+\subsubsection[{blks}]{\setlength{\rightskip}{0pt plus 5cm}Blktype$\ast$$\ast$ {\bf blks}}}
+\label{classCacheSet_a6e04ed065f754b0b10cbd1edfb239c64}
+\hyperlink{classCache}{Cache} blocks in this set, maintained in \hyperlink{classLRU}{LRU} order 0 = MRU. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/cache/tags/\hyperlink{cacheset_8hh}{cacheset.hh}\end{DoxyCompactItemize}

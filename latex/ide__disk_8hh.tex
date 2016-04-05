@@ -1,0 +1,638 @@
+\hypertarget{ide__disk_8hh}{
+\section{dev/ide\_\-disk.hh}
+\label{ide__disk_8hh}\index{dev/ide\_\-disk.hh@{dev/ide\_\-disk.hh}}
+}
+{\ttfamily \#include \char`\"{}base/statistics.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}dev/disk\_\-image.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}dev/ide\_\-atareg.h\char`\"{}}\par
+{\ttfamily \#include \char`\"{}dev/ide\_\-ctrl.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}dev/ide\_\-wdcreg.h\char`\"{}}\par
+{\ttfamily \#include \char`\"{}dev/io\_\-device.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/IdeDisk.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/eventq.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+struct \hyperlink{structPrdEntry}{PrdEntry}
+\item 
+class \hyperlink{classPrdTableEntry}{PrdTableEntry}
+\item 
+struct \hyperlink{structCommandReg}{CommandReg}
+\item 
+class \hyperlink{classIdeDisk}{IdeDisk}
+\end{DoxyCompactItemize}
+\subsection*{マクロ定義}
+\begin{DoxyCompactItemize}
+\item 
+\#define \hyperlink{ide__disk_8hh_a64bcea63cca60e512b1094c19fc4c587}{DMA\_\-BACKOFF\_\-PERIOD}~200
+\item 
+\#define \hyperlink{ide__disk_8hh_a941d6074126345e6acdf3d91ee305b11}{MAX\_\-DMA\_\-SIZE}~0x20000
+\item 
+\#define \hyperlink{ide__disk_8hh_ad950b58f27507f6e618a3ef8352ae796}{MAX\_\-SINGLE\_\-DMA\_\-SIZE}~0x10000
+\item 
+\#define \hyperlink{ide__disk_8hh_a78590681c8717cc04539b5c406dda023}{MAX\_\-MULTSECT}~(128)
+\item 
+\#define \hyperlink{ide__disk_8hh_a0bcee6e9fd01e441176bd95db85fb66f}{PRD\_\-BASE\_\-MASK}~0xfffffffe
+\item 
+\#define \hyperlink{ide__disk_8hh_add4e538b71947470f10c2c63183b63d3}{PRD\_\-COUNT\_\-MASK}~0xfffe
+\item 
+\#define \hyperlink{ide__disk_8hh_a7284616a4b3048d94f87562a8a38b751}{PRD\_\-EOT\_\-MASK}~0x8000
+\item 
+\#define \hyperlink{ide__disk_8hh_a11faa4c105a137b8edaa096de5063835}{DATA\_\-OFFSET}~(0)
+\item 
+\#define \hyperlink{ide__disk_8hh_a34da2490156c0fde3a3a9e8b658e6639}{ERROR\_\-OFFSET}~(1)
+\item 
+\#define \hyperlink{ide__disk_8hh_aa9c9d2fc107ac643f0a4b591955beaa9}{FEATURES\_\-OFFSET}~(1)
+\item 
+\#define \hyperlink{ide__disk_8hh_a3c028923d4dbc280c75f2d05a07af561}{NSECTOR\_\-OFFSET}~(2)
+\item 
+\#define \hyperlink{ide__disk_8hh_afe1c25cd3dcc7137056f351bb4bae70a}{SECTOR\_\-OFFSET}~(3)
+\item 
+\#define \hyperlink{ide__disk_8hh_a3c15c23524c451211d9eb469b602bb80}{LCYL\_\-OFFSET}~(4)
+\item 
+\#define \hyperlink{ide__disk_8hh_af4211242794af5adce364ae3025bbd58}{HCYL\_\-OFFSET}~(5)
+\item 
+\#define \hyperlink{ide__disk_8hh_adce132abdb19a249ce2627563386d64d}{SELECT\_\-OFFSET}~(6)
+\item 
+\#define \hyperlink{ide__disk_8hh_ab15fd72af5d7f9b9cb8c06f0d2e40b45}{DRIVE\_\-OFFSET}~(6)
+\item 
+\#define \hyperlink{ide__disk_8hh_ac3959778b8b4ee593c16fa33a06d844c}{STATUS\_\-OFFSET}~(7)
+\item 
+\#define \hyperlink{ide__disk_8hh_adb83c033ee492824badb77fa8ebd5c5d}{COMMAND\_\-OFFSET}~(7)
+\item 
+\#define \hyperlink{ide__disk_8hh_ae15f861f15f995e6655f24ababa373b0}{CONTROL\_\-OFFSET}~(2)
+\item 
+\#define \hyperlink{ide__disk_8hh_ae0878ccca45f58e9438fd4b05593042b}{ALTSTAT\_\-OFFSET}~(2)
+\item 
+\#define \hyperlink{ide__disk_8hh_a05842c3a1c122fb3d8cf867fdfda63ab}{SELECT\_\-DEV\_\-BIT}~0x10
+\item 
+\#define \hyperlink{ide__disk_8hh_a8156819b43430caea117fda9179f6b92}{CONTROL\_\-RST\_\-BIT}~0x04
+\item 
+\#define \hyperlink{ide__disk_8hh_ae9920e68c1f940e29dee8f47c5b0da54}{CONTROL\_\-IEN\_\-BIT}~0x02
+\item 
+\#define \hyperlink{ide__disk_8hh_a3d03a0c27c2a175009ae7cb5f1a5b5e1}{STATUS\_\-BSY\_\-BIT}~0x80
+\item 
+\#define \hyperlink{ide__disk_8hh_ab8255d1245e66901dbf984fcb88b39b2}{STATUS\_\-DRDY\_\-BIT}~0x40
+\item 
+\#define \hyperlink{ide__disk_8hh_a6dc9ea6abc0948e38e3716456d711267}{STATUS\_\-DRQ\_\-BIT}~0x08
+\item 
+\#define \hyperlink{ide__disk_8hh_a6d24123c25308f8d0b135602dca13b8d}{STATUS\_\-SEEK\_\-BIT}~0x10
+\item 
+\#define \hyperlink{ide__disk_8hh_a723478546687fa887ff111c2aa99983b}{STATUS\_\-DF\_\-BIT}~0x20
+\item 
+\#define \hyperlink{ide__disk_8hh_ad88dd68f3f134fbb039bc89e99db0e64}{DRIVE\_\-LBA\_\-BIT}~0x40
+\item 
+\#define \hyperlink{ide__disk_8hh_a23bd1221f53dd9ccc84c6afd59bde187}{DEV0}~(0)
+\item 
+\#define \hyperlink{ide__disk_8hh_a5bb415eb7788e538901aa11bbe583094}{DEV1}~(1)
+\end{DoxyCompactItemize}
+\subsection*{型定義}
+\begin{DoxyCompactItemize}
+\item 
+typedef struct \hyperlink{structPrdEntry}{PrdEntry} \hyperlink{ide__disk_8hh_a9f5eed7ed127258b053477a283b2e469}{PrdEntry\_\-t}
+\item 
+typedef struct \hyperlink{structCommandReg}{CommandReg} \hyperlink{ide__disk_8hh_af4010b661f64b0062097e418091f5d62}{CommandReg\_\-t}
+\item 
+typedef enum \hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1}{Events} \hyperlink{ide__disk_8hh_ab811aa466b9304fc1fc7edf03adb3ebc}{Events\_\-t}
+\item 
+typedef enum \hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15c}{DevAction} \hyperlink{ide__disk_8hh_ab9a7252f05d40d629a2b3e780862846c}{DevAction\_\-t}
+\item 
+typedef enum \hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6}{DevState} \hyperlink{ide__disk_8hh_abe49db4804c1744e30c8df026681eaf0}{DevState\_\-t}
+\item 
+typedef enum \hyperlink{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebf}{DmaState} \hyperlink{ide__disk_8hh_a398a1d251e78562f1eccfb43ad5fdf49}{DmaState\_\-t}
+\end{DoxyCompactItemize}
+\subsection*{列挙型}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1}{Events} \{ \par
+\hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1ac9d3e887722f2bc482bcca9d41c512af}{None} =  0, 
+\hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a0f6148e320034642ee8ec78d5cbb03aa}{Transfer}, 
+\hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a8601472b66eb7a6b3a758080ad6c8a81}{ReadWait}, 
+\hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a269f4f627793c0b24baf513c619e76ae}{WriteWait}, 
+\par
+\hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a9335332362efb228e15c6580aef09dd9}{PrdRead}, 
+\hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a1639c08b8811b3c45c069169cea66e7a}{DmaRead}, 
+\hyperlink{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a8fda525da8bab927fe38d82888083bbf}{DmaWrite}
+ \}
+\item 
+enum \hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15c}{DevAction} \{ \par
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caf1ee39018887e21bccccb4d0ddf0ac50}{ACT\_\-NONE} =  0, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15cae1dd7a3a517c2f858845012756768591}{ACT\_\-CMD\_\-WRITE}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca264757d803e500a0e811725ecdd896f1}{ACT\_\-CMD\_\-COMPLETE}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca564e5d0c9a0d03e4e0d901a18100c6fd}{ACT\_\-CMD\_\-ERROR}, 
+\par
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca6610e6fb837bbd223db1436df81ef3d7}{ACT\_\-SELECT\_\-WRITE}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caf826d1740bb55069b77c41dcda84b26a}{ACT\_\-STAT\_\-READ}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca040e963d0aeed73747b1a0cf0631aa6d}{ACT\_\-DATA\_\-READY}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caba3b6986bd4622c3227ff958da2f6778}{ACT\_\-DATA\_\-READ\_\-BYTE}, 
+\par
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca569047ea4f8599fd76feb7ad76b1e0dc}{ACT\_\-DATA\_\-READ\_\-SHORT}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca0481ac27625f7b14bcee1eacb2c9153c}{ACT\_\-DATA\_\-WRITE\_\-BYTE}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca3af5a74985a6671feb0d9bb3bff9a543}{ACT\_\-DATA\_\-WRITE\_\-SHORT}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca6c282bf261ebd28f1d87398129882dee}{ACT\_\-DMA\_\-READY}, 
+\par
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15cacce8d2685977821326c313a603e35f7a}{ACT\_\-DMA\_\-DONE}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca2c18dc37b9298471dec71104f1d46fff}{ACT\_\-SRST\_\-SET}, 
+\hyperlink{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca8a6e319f6c3971a39132513d188576fd}{ACT\_\-SRST\_\-CLEAR}
+ \}
+\item 
+enum \hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6}{DevState} \{ \par
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a24221ccc1bb4a323bc12d64883208c11}{Device\_\-Idle\_\-S} =  0, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ac4673e63774c8b75b7b7aad4588b1aad}{Device\_\-Idle\_\-SI}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ae8a630d79f6da7a97bcae438a9bfd1db}{Device\_\-Idle\_\-NS}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ac88c15837f00c88c0dbda9f774a9f689}{Device\_\-Srst}, 
+\par
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ab0c139f4bbab430ab7b877aa8e211217}{Command\_\-Execution}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a963c5e183f934c0552bab67315ef0901}{Prepare\_\-Data\_\-In}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a9aa9d424633dc557b88576993e7a413c}{Data\_\-Ready\_\-INTRQ\_\-In}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6afcd577c08925582e323f8916f1ec0d9d}{Transfer\_\-Data\_\-In}, 
+\par
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ad03435c752fd718ef93cc2988775da64}{Prepare\_\-Data\_\-Out}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a132a29467ed2679d80bc8119545df28f}{Data\_\-Ready\_\-INTRQ\_\-Out}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a16561636b0602f9e542694a66d69e36a}{Transfer\_\-Data\_\-Out}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6aed547cd1619ef3146a31732b777681ee}{Prepare\_\-Data\_\-Dma}, 
+\par
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a64d0d40fb6f851777564c89760787a96}{Transfer\_\-Data\_\-Dma}, 
+\hyperlink{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ab38004dd5047db164833d19ff9abc91d}{Device\_\-Dma\_\-Abort}
+ \}
+\item 
+enum \hyperlink{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebf}{DmaState} \{ \hyperlink{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfa98b4f39d2f8dca680f8b1ac92943966c}{Dma\_\-Idle} =  0, 
+\hyperlink{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfae35abb19ade6161b3817f6dd498ca711}{Dma\_\-Start}, 
+\hyperlink{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfa1479e31de2b235a422d366215ade33d4}{Dma\_\-Transfer}
+ \}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\hyperlink{namespaceDevice}{Device} model for an IDE disk 
+
+\subsection{マクロ定義}
+\hypertarget{ide__disk_8hh_ae0878ccca45f58e9438fd4b05593042b}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ALTSTAT\_\-OFFSET@{ALTSTAT\_\-OFFSET}}
+\index{ALTSTAT\_\-OFFSET@{ALTSTAT\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{ALTSTAT\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define ALTSTAT\_\-OFFSET~(2)}}
+\label{ide__disk_8hh_ae0878ccca45f58e9438fd4b05593042b}
+\hypertarget{ide__disk_8hh_adb83c033ee492824badb77fa8ebd5c5d}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!COMMAND\_\-OFFSET@{COMMAND\_\-OFFSET}}
+\index{COMMAND\_\-OFFSET@{COMMAND\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{COMMAND\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define COMMAND\_\-OFFSET~(7)}}
+\label{ide__disk_8hh_adb83c033ee492824badb77fa8ebd5c5d}
+\hypertarget{ide__disk_8hh_ae9920e68c1f940e29dee8f47c5b0da54}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!CONTROL\_\-IEN\_\-BIT@{CONTROL\_\-IEN\_\-BIT}}
+\index{CONTROL\_\-IEN\_\-BIT@{CONTROL\_\-IEN\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{CONTROL\_\-IEN\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define CONTROL\_\-IEN\_\-BIT~0x02}}
+\label{ide__disk_8hh_ae9920e68c1f940e29dee8f47c5b0da54}
+\hypertarget{ide__disk_8hh_ae15f861f15f995e6655f24ababa373b0}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!CONTROL\_\-OFFSET@{CONTROL\_\-OFFSET}}
+\index{CONTROL\_\-OFFSET@{CONTROL\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{CONTROL\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define CONTROL\_\-OFFSET~(2)}}
+\label{ide__disk_8hh_ae15f861f15f995e6655f24ababa373b0}
+\hypertarget{ide__disk_8hh_a8156819b43430caea117fda9179f6b92}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!CONTROL\_\-RST\_\-BIT@{CONTROL\_\-RST\_\-BIT}}
+\index{CONTROL\_\-RST\_\-BIT@{CONTROL\_\-RST\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{CONTROL\_\-RST\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define CONTROL\_\-RST\_\-BIT~0x04}}
+\label{ide__disk_8hh_a8156819b43430caea117fda9179f6b92}
+\hypertarget{ide__disk_8hh_a11faa4c105a137b8edaa096de5063835}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DATA\_\-OFFSET@{DATA\_\-OFFSET}}
+\index{DATA\_\-OFFSET@{DATA\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DATA\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define DATA\_\-OFFSET~(0)}}
+\label{ide__disk_8hh_a11faa4c105a137b8edaa096de5063835}
+\hypertarget{ide__disk_8hh_a23bd1221f53dd9ccc84c6afd59bde187}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DEV0@{DEV0}}
+\index{DEV0@{DEV0}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DEV0}]{\setlength{\rightskip}{0pt plus 5cm}\#define DEV0~(0)}}
+\label{ide__disk_8hh_a23bd1221f53dd9ccc84c6afd59bde187}
+\hypertarget{ide__disk_8hh_a5bb415eb7788e538901aa11bbe583094}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DEV1@{DEV1}}
+\index{DEV1@{DEV1}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DEV1}]{\setlength{\rightskip}{0pt plus 5cm}\#define DEV1~(1)}}
+\label{ide__disk_8hh_a5bb415eb7788e538901aa11bbe583094}
+\hypertarget{ide__disk_8hh_a64bcea63cca60e512b1094c19fc4c587}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DMA\_\-BACKOFF\_\-PERIOD@{DMA\_\-BACKOFF\_\-PERIOD}}
+\index{DMA\_\-BACKOFF\_\-PERIOD@{DMA\_\-BACKOFF\_\-PERIOD}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DMA\_\-BACKOFF\_\-PERIOD}]{\setlength{\rightskip}{0pt plus 5cm}\#define DMA\_\-BACKOFF\_\-PERIOD~200}}
+\label{ide__disk_8hh_a64bcea63cca60e512b1094c19fc4c587}
+\hypertarget{ide__disk_8hh_ad88dd68f3f134fbb039bc89e99db0e64}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DRIVE\_\-LBA\_\-BIT@{DRIVE\_\-LBA\_\-BIT}}
+\index{DRIVE\_\-LBA\_\-BIT@{DRIVE\_\-LBA\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DRIVE\_\-LBA\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define DRIVE\_\-LBA\_\-BIT~0x40}}
+\label{ide__disk_8hh_ad88dd68f3f134fbb039bc89e99db0e64}
+\hypertarget{ide__disk_8hh_ab15fd72af5d7f9b9cb8c06f0d2e40b45}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DRIVE\_\-OFFSET@{DRIVE\_\-OFFSET}}
+\index{DRIVE\_\-OFFSET@{DRIVE\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DRIVE\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define DRIVE\_\-OFFSET~(6)}}
+\label{ide__disk_8hh_ab15fd72af5d7f9b9cb8c06f0d2e40b45}
+\hypertarget{ide__disk_8hh_a34da2490156c0fde3a3a9e8b658e6639}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ERROR\_\-OFFSET@{ERROR\_\-OFFSET}}
+\index{ERROR\_\-OFFSET@{ERROR\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{ERROR\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define ERROR\_\-OFFSET~(1)}}
+\label{ide__disk_8hh_a34da2490156c0fde3a3a9e8b658e6639}
+\hypertarget{ide__disk_8hh_aa9c9d2fc107ac643f0a4b591955beaa9}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!FEATURES\_\-OFFSET@{FEATURES\_\-OFFSET}}
+\index{FEATURES\_\-OFFSET@{FEATURES\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{FEATURES\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define FEATURES\_\-OFFSET~(1)}}
+\label{ide__disk_8hh_aa9c9d2fc107ac643f0a4b591955beaa9}
+\hypertarget{ide__disk_8hh_af4211242794af5adce364ae3025bbd58}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!HCYL\_\-OFFSET@{HCYL\_\-OFFSET}}
+\index{HCYL\_\-OFFSET@{HCYL\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{HCYL\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define HCYL\_\-OFFSET~(5)}}
+\label{ide__disk_8hh_af4211242794af5adce364ae3025bbd58}
+\hypertarget{ide__disk_8hh_a3c15c23524c451211d9eb469b602bb80}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!LCYL\_\-OFFSET@{LCYL\_\-OFFSET}}
+\index{LCYL\_\-OFFSET@{LCYL\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{LCYL\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define LCYL\_\-OFFSET~(4)}}
+\label{ide__disk_8hh_a3c15c23524c451211d9eb469b602bb80}
+\hypertarget{ide__disk_8hh_a941d6074126345e6acdf3d91ee305b11}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!MAX\_\-DMA\_\-SIZE@{MAX\_\-DMA\_\-SIZE}}
+\index{MAX\_\-DMA\_\-SIZE@{MAX\_\-DMA\_\-SIZE}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{MAX\_\-DMA\_\-SIZE}]{\setlength{\rightskip}{0pt plus 5cm}\#define MAX\_\-DMA\_\-SIZE~0x20000}}
+\label{ide__disk_8hh_a941d6074126345e6acdf3d91ee305b11}
+\hypertarget{ide__disk_8hh_a78590681c8717cc04539b5c406dda023}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!MAX\_\-MULTSECT@{MAX\_\-MULTSECT}}
+\index{MAX\_\-MULTSECT@{MAX\_\-MULTSECT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{MAX\_\-MULTSECT}]{\setlength{\rightskip}{0pt plus 5cm}\#define MAX\_\-MULTSECT~(128)}}
+\label{ide__disk_8hh_a78590681c8717cc04539b5c406dda023}
+\hypertarget{ide__disk_8hh_ad950b58f27507f6e618a3ef8352ae796}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!MAX\_\-SINGLE\_\-DMA\_\-SIZE@{MAX\_\-SINGLE\_\-DMA\_\-SIZE}}
+\index{MAX\_\-SINGLE\_\-DMA\_\-SIZE@{MAX\_\-SINGLE\_\-DMA\_\-SIZE}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{MAX\_\-SINGLE\_\-DMA\_\-SIZE}]{\setlength{\rightskip}{0pt plus 5cm}\#define MAX\_\-SINGLE\_\-DMA\_\-SIZE~0x10000}}
+\label{ide__disk_8hh_ad950b58f27507f6e618a3ef8352ae796}
+\hypertarget{ide__disk_8hh_a3c028923d4dbc280c75f2d05a07af561}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!NSECTOR\_\-OFFSET@{NSECTOR\_\-OFFSET}}
+\index{NSECTOR\_\-OFFSET@{NSECTOR\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{NSECTOR\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define NSECTOR\_\-OFFSET~(2)}}
+\label{ide__disk_8hh_a3c028923d4dbc280c75f2d05a07af561}
+\hypertarget{ide__disk_8hh_a0bcee6e9fd01e441176bd95db85fb66f}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!PRD\_\-BASE\_\-MASK@{PRD\_\-BASE\_\-MASK}}
+\index{PRD\_\-BASE\_\-MASK@{PRD\_\-BASE\_\-MASK}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{PRD\_\-BASE\_\-MASK}]{\setlength{\rightskip}{0pt plus 5cm}\#define PRD\_\-BASE\_\-MASK~0xfffffffe}}
+\label{ide__disk_8hh_a0bcee6e9fd01e441176bd95db85fb66f}
+\hypertarget{ide__disk_8hh_add4e538b71947470f10c2c63183b63d3}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!PRD\_\-COUNT\_\-MASK@{PRD\_\-COUNT\_\-MASK}}
+\index{PRD\_\-COUNT\_\-MASK@{PRD\_\-COUNT\_\-MASK}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{PRD\_\-COUNT\_\-MASK}]{\setlength{\rightskip}{0pt plus 5cm}\#define PRD\_\-COUNT\_\-MASK~0xfffe}}
+\label{ide__disk_8hh_add4e538b71947470f10c2c63183b63d3}
+\hypertarget{ide__disk_8hh_a7284616a4b3048d94f87562a8a38b751}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!PRD\_\-EOT\_\-MASK@{PRD\_\-EOT\_\-MASK}}
+\index{PRD\_\-EOT\_\-MASK@{PRD\_\-EOT\_\-MASK}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{PRD\_\-EOT\_\-MASK}]{\setlength{\rightskip}{0pt plus 5cm}\#define PRD\_\-EOT\_\-MASK~0x8000}}
+\label{ide__disk_8hh_a7284616a4b3048d94f87562a8a38b751}
+\hypertarget{ide__disk_8hh_afe1c25cd3dcc7137056f351bb4bae70a}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!SECTOR\_\-OFFSET@{SECTOR\_\-OFFSET}}
+\index{SECTOR\_\-OFFSET@{SECTOR\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{SECTOR\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define SECTOR\_\-OFFSET~(3)}}
+\label{ide__disk_8hh_afe1c25cd3dcc7137056f351bb4bae70a}
+\hypertarget{ide__disk_8hh_a05842c3a1c122fb3d8cf867fdfda63ab}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!SELECT\_\-DEV\_\-BIT@{SELECT\_\-DEV\_\-BIT}}
+\index{SELECT\_\-DEV\_\-BIT@{SELECT\_\-DEV\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{SELECT\_\-DEV\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define SELECT\_\-DEV\_\-BIT~0x10}}
+\label{ide__disk_8hh_a05842c3a1c122fb3d8cf867fdfda63ab}
+\hypertarget{ide__disk_8hh_adce132abdb19a249ce2627563386d64d}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!SELECT\_\-OFFSET@{SELECT\_\-OFFSET}}
+\index{SELECT\_\-OFFSET@{SELECT\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{SELECT\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define SELECT\_\-OFFSET~(6)}}
+\label{ide__disk_8hh_adce132abdb19a249ce2627563386d64d}
+\hypertarget{ide__disk_8hh_a3d03a0c27c2a175009ae7cb5f1a5b5e1}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!STATUS\_\-BSY\_\-BIT@{STATUS\_\-BSY\_\-BIT}}
+\index{STATUS\_\-BSY\_\-BIT@{STATUS\_\-BSY\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{STATUS\_\-BSY\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define STATUS\_\-BSY\_\-BIT~0x80}}
+\label{ide__disk_8hh_a3d03a0c27c2a175009ae7cb5f1a5b5e1}
+\hypertarget{ide__disk_8hh_a723478546687fa887ff111c2aa99983b}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!STATUS\_\-DF\_\-BIT@{STATUS\_\-DF\_\-BIT}}
+\index{STATUS\_\-DF\_\-BIT@{STATUS\_\-DF\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{STATUS\_\-DF\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define STATUS\_\-DF\_\-BIT~0x20}}
+\label{ide__disk_8hh_a723478546687fa887ff111c2aa99983b}
+\hypertarget{ide__disk_8hh_ab8255d1245e66901dbf984fcb88b39b2}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!STATUS\_\-DRDY\_\-BIT@{STATUS\_\-DRDY\_\-BIT}}
+\index{STATUS\_\-DRDY\_\-BIT@{STATUS\_\-DRDY\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{STATUS\_\-DRDY\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define STATUS\_\-DRDY\_\-BIT~0x40}}
+\label{ide__disk_8hh_ab8255d1245e66901dbf984fcb88b39b2}
+\hypertarget{ide__disk_8hh_a6dc9ea6abc0948e38e3716456d711267}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!STATUS\_\-DRQ\_\-BIT@{STATUS\_\-DRQ\_\-BIT}}
+\index{STATUS\_\-DRQ\_\-BIT@{STATUS\_\-DRQ\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{STATUS\_\-DRQ\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define STATUS\_\-DRQ\_\-BIT~0x08}}
+\label{ide__disk_8hh_a6dc9ea6abc0948e38e3716456d711267}
+\hypertarget{ide__disk_8hh_ac3959778b8b4ee593c16fa33a06d844c}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!STATUS\_\-OFFSET@{STATUS\_\-OFFSET}}
+\index{STATUS\_\-OFFSET@{STATUS\_\-OFFSET}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{STATUS\_\-OFFSET}]{\setlength{\rightskip}{0pt plus 5cm}\#define STATUS\_\-OFFSET~(7)}}
+\label{ide__disk_8hh_ac3959778b8b4ee593c16fa33a06d844c}
+\hypertarget{ide__disk_8hh_a6d24123c25308f8d0b135602dca13b8d}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!STATUS\_\-SEEK\_\-BIT@{STATUS\_\-SEEK\_\-BIT}}
+\index{STATUS\_\-SEEK\_\-BIT@{STATUS\_\-SEEK\_\-BIT}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{STATUS\_\-SEEK\_\-BIT}]{\setlength{\rightskip}{0pt plus 5cm}\#define STATUS\_\-SEEK\_\-BIT~0x10}}
+\label{ide__disk_8hh_a6d24123c25308f8d0b135602dca13b8d}
+
+
+\subsection{型定義}
+\hypertarget{ide__disk_8hh_af4010b661f64b0062097e418091f5d62}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!CommandReg\_\-t@{CommandReg\_\-t}}
+\index{CommandReg\_\-t@{CommandReg\_\-t}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{CommandReg\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf CommandReg}  {\bf CommandReg\_\-t}}}
+\label{ide__disk_8hh_af4010b661f64b0062097e418091f5d62}
+\hypertarget{ide__disk_8hh_ab9a7252f05d40d629a2b3e780862846c}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DevAction\_\-t@{DevAction\_\-t}}
+\index{DevAction\_\-t@{DevAction\_\-t}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DevAction\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef enum {\bf DevAction}  {\bf DevAction\_\-t}}}
+\label{ide__disk_8hh_ab9a7252f05d40d629a2b3e780862846c}
+\hypertarget{ide__disk_8hh_abe49db4804c1744e30c8df026681eaf0}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DevState\_\-t@{DevState\_\-t}}
+\index{DevState\_\-t@{DevState\_\-t}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DevState\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef enum {\bf DevState}  {\bf DevState\_\-t}}}
+\label{ide__disk_8hh_abe49db4804c1744e30c8df026681eaf0}
+\hypertarget{ide__disk_8hh_a398a1d251e78562f1eccfb43ad5fdf49}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DmaState\_\-t@{DmaState\_\-t}}
+\index{DmaState\_\-t@{DmaState\_\-t}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DmaState\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef enum {\bf DmaState}  {\bf DmaState\_\-t}}}
+\label{ide__disk_8hh_a398a1d251e78562f1eccfb43ad5fdf49}
+\hypertarget{ide__disk_8hh_ab811aa466b9304fc1fc7edf03adb3ebc}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Events\_\-t@{Events\_\-t}}
+\index{Events\_\-t@{Events\_\-t}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{Events\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef enum {\bf Events}  {\bf Events\_\-t}}}
+\label{ide__disk_8hh_ab811aa466b9304fc1fc7edf03adb3ebc}
+\hypertarget{ide__disk_8hh_a9f5eed7ed127258b053477a283b2e469}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!PrdEntry\_\-t@{PrdEntry\_\-t}}
+\index{PrdEntry\_\-t@{PrdEntry\_\-t}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{PrdEntry\_\-t}]{\setlength{\rightskip}{0pt plus 5cm}typedef struct {\bf PrdEntry}  {\bf PrdEntry\_\-t}}}
+\label{ide__disk_8hh_a9f5eed7ed127258b053477a283b2e469}
+
+
+\subsection{列挙型}
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15c}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DevAction@{DevAction}}
+\index{DevAction@{DevAction}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DevAction}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf DevAction}}}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15c}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{ACT\_\-NONE@{ACT\_\-NONE}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-NONE@{ACT\_\-NONE}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caf1ee39018887e21bccccb4d0ddf0ac50}{
+ACT\_\-NONE}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caf1ee39018887e21bccccb4d0ddf0ac50}
+}]\index{ACT\_\-CMD\_\-WRITE@{ACT\_\-CMD\_\-WRITE}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-CMD\_\-WRITE@{ACT\_\-CMD\_\-WRITE}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15cae1dd7a3a517c2f858845012756768591}{
+ACT\_\-CMD\_\-WRITE}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15cae1dd7a3a517c2f858845012756768591}
+}]\index{ACT\_\-CMD\_\-COMPLETE@{ACT\_\-CMD\_\-COMPLETE}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-CMD\_\-COMPLETE@{ACT\_\-CMD\_\-COMPLETE}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca264757d803e500a0e811725ecdd896f1}{
+ACT\_\-CMD\_\-COMPLETE}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca264757d803e500a0e811725ecdd896f1}
+}]\index{ACT\_\-CMD\_\-ERROR@{ACT\_\-CMD\_\-ERROR}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-CMD\_\-ERROR@{ACT\_\-CMD\_\-ERROR}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca564e5d0c9a0d03e4e0d901a18100c6fd}{
+ACT\_\-CMD\_\-ERROR}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca564e5d0c9a0d03e4e0d901a18100c6fd}
+}]\index{ACT\_\-SELECT\_\-WRITE@{ACT\_\-SELECT\_\-WRITE}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-SELECT\_\-WRITE@{ACT\_\-SELECT\_\-WRITE}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca6610e6fb837bbd223db1436df81ef3d7}{
+ACT\_\-SELECT\_\-WRITE}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca6610e6fb837bbd223db1436df81ef3d7}
+}]\index{ACT\_\-STAT\_\-READ@{ACT\_\-STAT\_\-READ}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-STAT\_\-READ@{ACT\_\-STAT\_\-READ}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caf826d1740bb55069b77c41dcda84b26a}{
+ACT\_\-STAT\_\-READ}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caf826d1740bb55069b77c41dcda84b26a}
+}]\index{ACT\_\-DATA\_\-READY@{ACT\_\-DATA\_\-READY}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-DATA\_\-READY@{ACT\_\-DATA\_\-READY}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca040e963d0aeed73747b1a0cf0631aa6d}{
+ACT\_\-DATA\_\-READY}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca040e963d0aeed73747b1a0cf0631aa6d}
+}]\index{ACT\_\-DATA\_\-READ\_\-BYTE@{ACT\_\-DATA\_\-READ\_\-BYTE}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-DATA\_\-READ\_\-BYTE@{ACT\_\-DATA\_\-READ\_\-BYTE}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caba3b6986bd4622c3227ff958da2f6778}{
+ACT\_\-DATA\_\-READ\_\-BYTE}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15caba3b6986bd4622c3227ff958da2f6778}
+}]\index{ACT\_\-DATA\_\-READ\_\-SHORT@{ACT\_\-DATA\_\-READ\_\-SHORT}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-DATA\_\-READ\_\-SHORT@{ACT\_\-DATA\_\-READ\_\-SHORT}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca569047ea4f8599fd76feb7ad76b1e0dc}{
+ACT\_\-DATA\_\-READ\_\-SHORT}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca569047ea4f8599fd76feb7ad76b1e0dc}
+}]\index{ACT\_\-DATA\_\-WRITE\_\-BYTE@{ACT\_\-DATA\_\-WRITE\_\-BYTE}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-DATA\_\-WRITE\_\-BYTE@{ACT\_\-DATA\_\-WRITE\_\-BYTE}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca0481ac27625f7b14bcee1eacb2c9153c}{
+ACT\_\-DATA\_\-WRITE\_\-BYTE}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca0481ac27625f7b14bcee1eacb2c9153c}
+}]\index{ACT\_\-DATA\_\-WRITE\_\-SHORT@{ACT\_\-DATA\_\-WRITE\_\-SHORT}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-DATA\_\-WRITE\_\-SHORT@{ACT\_\-DATA\_\-WRITE\_\-SHORT}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca3af5a74985a6671feb0d9bb3bff9a543}{
+ACT\_\-DATA\_\-WRITE\_\-SHORT}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca3af5a74985a6671feb0d9bb3bff9a543}
+}]\index{ACT\_\-DMA\_\-READY@{ACT\_\-DMA\_\-READY}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-DMA\_\-READY@{ACT\_\-DMA\_\-READY}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca6c282bf261ebd28f1d87398129882dee}{
+ACT\_\-DMA\_\-READY}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca6c282bf261ebd28f1d87398129882dee}
+}]\index{ACT\_\-DMA\_\-DONE@{ACT\_\-DMA\_\-DONE}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-DMA\_\-DONE@{ACT\_\-DMA\_\-DONE}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15cacce8d2685977821326c313a603e35f7a}{
+ACT\_\-DMA\_\-DONE}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15cacce8d2685977821326c313a603e35f7a}
+}]\index{ACT\_\-SRST\_\-SET@{ACT\_\-SRST\_\-SET}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-SRST\_\-SET@{ACT\_\-SRST\_\-SET}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca2c18dc37b9298471dec71104f1d46fff}{
+ACT\_\-SRST\_\-SET}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca2c18dc37b9298471dec71104f1d46fff}
+}]\index{ACT\_\-SRST\_\-CLEAR@{ACT\_\-SRST\_\-CLEAR}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ACT\_\-SRST\_\-CLEAR@{ACT\_\-SRST\_\-CLEAR}}\item[{\em 
+\hypertarget{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca8a6e319f6c3971a39132513d188576fd}{
+ACT\_\-SRST\_\-CLEAR}
+\label{ide__disk_8hh_a3bae184d288bce92398b814aa118c15ca8a6e319f6c3971a39132513d188576fd}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+150                        {
+151     ACT_NONE = 0,
+152     ACT_CMD_WRITE,
+153     ACT_CMD_COMPLETE,
+154     ACT_CMD_ERROR,
+155     ACT_SELECT_WRITE,
+156     ACT_STAT_READ,
+157     ACT_DATA_READY,
+158     ACT_DATA_READ_BYTE,
+159     ACT_DATA_READ_SHORT,
+160     ACT_DATA_WRITE_BYTE,
+161     ACT_DATA_WRITE_SHORT,
+162     ACT_DMA_READY,
+163     ACT_DMA_DONE,
+164     ACT_SRST_SET,
+165     ACT_SRST_CLEAR
+166 } DevAction_t;
+\end{DoxyCode}
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DevState@{DevState}}
+\index{DevState@{DevState}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DevState}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf DevState}}}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{Device\_\-Idle\_\-S@{Device\_\-Idle\_\-S}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Device\_\-Idle\_\-S@{Device\_\-Idle\_\-S}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a24221ccc1bb4a323bc12d64883208c11}{
+Device\_\-Idle\_\-S}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a24221ccc1bb4a323bc12d64883208c11}
+}]\index{Device\_\-Idle\_\-SI@{Device\_\-Idle\_\-SI}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Device\_\-Idle\_\-SI@{Device\_\-Idle\_\-SI}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ac4673e63774c8b75b7b7aad4588b1aad}{
+Device\_\-Idle\_\-SI}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ac4673e63774c8b75b7b7aad4588b1aad}
+}]\index{Device\_\-Idle\_\-NS@{Device\_\-Idle\_\-NS}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Device\_\-Idle\_\-NS@{Device\_\-Idle\_\-NS}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ae8a630d79f6da7a97bcae438a9bfd1db}{
+Device\_\-Idle\_\-NS}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ae8a630d79f6da7a97bcae438a9bfd1db}
+}]\index{Device\_\-Srst@{Device\_\-Srst}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Device\_\-Srst@{Device\_\-Srst}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ac88c15837f00c88c0dbda9f774a9f689}{
+Device\_\-Srst}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ac88c15837f00c88c0dbda9f774a9f689}
+}]\index{Command\_\-Execution@{Command\_\-Execution}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Command\_\-Execution@{Command\_\-Execution}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ab0c139f4bbab430ab7b877aa8e211217}{
+Command\_\-Execution}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ab0c139f4bbab430ab7b877aa8e211217}
+}]\index{Prepare\_\-Data\_\-In@{Prepare\_\-Data\_\-In}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Prepare\_\-Data\_\-In@{Prepare\_\-Data\_\-In}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a963c5e183f934c0552bab67315ef0901}{
+Prepare\_\-Data\_\-In}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a963c5e183f934c0552bab67315ef0901}
+}]\index{Data\_\-Ready\_\-INTRQ\_\-In@{Data\_\-Ready\_\-INTRQ\_\-In}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Data\_\-Ready\_\-INTRQ\_\-In@{Data\_\-Ready\_\-INTRQ\_\-In}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a9aa9d424633dc557b88576993e7a413c}{
+Data\_\-Ready\_\-INTRQ\_\-In}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a9aa9d424633dc557b88576993e7a413c}
+}]\index{Transfer\_\-Data\_\-In@{Transfer\_\-Data\_\-In}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Transfer\_\-Data\_\-In@{Transfer\_\-Data\_\-In}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6afcd577c08925582e323f8916f1ec0d9d}{
+Transfer\_\-Data\_\-In}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6afcd577c08925582e323f8916f1ec0d9d}
+}]\index{Prepare\_\-Data\_\-Out@{Prepare\_\-Data\_\-Out}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Prepare\_\-Data\_\-Out@{Prepare\_\-Data\_\-Out}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ad03435c752fd718ef93cc2988775da64}{
+Prepare\_\-Data\_\-Out}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ad03435c752fd718ef93cc2988775da64}
+}]\index{Data\_\-Ready\_\-INTRQ\_\-Out@{Data\_\-Ready\_\-INTRQ\_\-Out}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Data\_\-Ready\_\-INTRQ\_\-Out@{Data\_\-Ready\_\-INTRQ\_\-Out}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a132a29467ed2679d80bc8119545df28f}{
+Data\_\-Ready\_\-INTRQ\_\-Out}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a132a29467ed2679d80bc8119545df28f}
+}]\index{Transfer\_\-Data\_\-Out@{Transfer\_\-Data\_\-Out}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Transfer\_\-Data\_\-Out@{Transfer\_\-Data\_\-Out}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a16561636b0602f9e542694a66d69e36a}{
+Transfer\_\-Data\_\-Out}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a16561636b0602f9e542694a66d69e36a}
+}]\index{Prepare\_\-Data\_\-Dma@{Prepare\_\-Data\_\-Dma}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Prepare\_\-Data\_\-Dma@{Prepare\_\-Data\_\-Dma}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6aed547cd1619ef3146a31732b777681ee}{
+Prepare\_\-Data\_\-Dma}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6aed547cd1619ef3146a31732b777681ee}
+}]\index{Transfer\_\-Data\_\-Dma@{Transfer\_\-Data\_\-Dma}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Transfer\_\-Data\_\-Dma@{Transfer\_\-Data\_\-Dma}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a64d0d40fb6f851777564c89760787a96}{
+Transfer\_\-Data\_\-Dma}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6a64d0d40fb6f851777564c89760787a96}
+}]\index{Device\_\-Dma\_\-Abort@{Device\_\-Dma\_\-Abort}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Device\_\-Dma\_\-Abort@{Device\_\-Dma\_\-Abort}}\item[{\em 
+\hypertarget{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ab38004dd5047db164833d19ff9abc91d}{
+Device\_\-Dma\_\-Abort}
+\label{ide__disk_8hh_a11f4d653b474b99bf5796f4be62f72c6ab38004dd5047db164833d19ff9abc91d}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+168                       {
+169     // Device idle
+170     Device_Idle_S = 0,
+171     Device_Idle_SI,
+172     Device_Idle_NS,
+173 
+174     // Software reset
+175     Device_Srst,
+176 
+177     // Non-data commands
+178     Command_Execution,
+179 
+180     // PIO data-in (data to host)
+181     Prepare_Data_In,
+182     Data_Ready_INTRQ_In,
+183     Transfer_Data_In,
+184 
+185     // PIO data-out (data from host)
+186     Prepare_Data_Out,
+187     Data_Ready_INTRQ_Out,
+188     Transfer_Data_Out,
+189 
+190     // DMA protocol
+191     Prepare_Data_Dma,
+192     Transfer_Data_Dma,
+193     Device_Dma_Abort
+194 } DevState_t;
+\end{DoxyCode}
+\hypertarget{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebf}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DmaState@{DmaState}}
+\index{DmaState@{DmaState}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{DmaState}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf DmaState}}}
+\label{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebf}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{Dma\_\-Idle@{Dma\_\-Idle}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Dma\_\-Idle@{Dma\_\-Idle}}\item[{\em 
+\hypertarget{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfa98b4f39d2f8dca680f8b1ac92943966c}{
+Dma\_\-Idle}
+\label{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfa98b4f39d2f8dca680f8b1ac92943966c}
+}]\index{Dma\_\-Start@{Dma\_\-Start}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Dma\_\-Start@{Dma\_\-Start}}\item[{\em 
+\hypertarget{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfae35abb19ade6161b3817f6dd498ca711}{
+Dma\_\-Start}
+\label{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfae35abb19ade6161b3817f6dd498ca711}
+}]\index{Dma\_\-Transfer@{Dma\_\-Transfer}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Dma\_\-Transfer@{Dma\_\-Transfer}}\item[{\em 
+\hypertarget{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfa1479e31de2b235a422d366215ade33d4}{
+Dma\_\-Transfer}
+\label{ide__disk_8hh_a8adb9656d6ea50580adaf9c8e7d9eebfa1479e31de2b235a422d366215ade33d4}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+196                       {
+197     Dma_Idle = 0,
+198     Dma_Start,
+199     Dma_Transfer
+200 } DmaState_t;
+\end{DoxyCode}
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1}{
+\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Events@{Events}}
+\index{Events@{Events}!ide_disk.hh@{ide\_\-disk.hh}}
+\subsubsection[{Events}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf Events}}}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{None@{None}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!None@{None}}\item[{\em 
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1ac9d3e887722f2bc482bcca9d41c512af}{
+None}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1ac9d3e887722f2bc482bcca9d41c512af}
+}]\index{Transfer@{Transfer}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!Transfer@{Transfer}}\item[{\em 
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a0f6148e320034642ee8ec78d5cbb03aa}{
+Transfer}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a0f6148e320034642ee8ec78d5cbb03aa}
+}]\index{ReadWait@{ReadWait}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!ReadWait@{ReadWait}}\item[{\em 
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a8601472b66eb7a6b3a758080ad6c8a81}{
+ReadWait}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a8601472b66eb7a6b3a758080ad6c8a81}
+}]\index{WriteWait@{WriteWait}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!WriteWait@{WriteWait}}\item[{\em 
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a269f4f627793c0b24baf513c619e76ae}{
+WriteWait}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a269f4f627793c0b24baf513c619e76ae}
+}]\index{PrdRead@{PrdRead}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!PrdRead@{PrdRead}}\item[{\em 
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a9335332362efb228e15c6580aef09dd9}{
+PrdRead}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a9335332362efb228e15c6580aef09dd9}
+}]\index{DmaRead@{DmaRead}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DmaRead@{DmaRead}}\item[{\em 
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a1639c08b8811b3c45c069169cea66e7a}{
+DmaRead}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a1639c08b8811b3c45c069169cea66e7a}
+}]\index{DmaWrite@{DmaWrite}!ide\_\-disk.hh@{ide\_\-disk.hh}}\index{ide\_\-disk.hh@{ide\_\-disk.hh}!DmaWrite@{DmaWrite}}\item[{\em 
+\hypertarget{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a8fda525da8bab927fe38d82888083bbf}{
+DmaWrite}
+\label{ide__disk_8hh_af60e00b78607064c5be6aa9397ea49c1a8fda525da8bab927fe38d82888083bbf}
+}]\end{description}
+\end{Desc}
+
+
+
+
+\begin{DoxyCode}
+140                     {
+141     None = 0,
+142     Transfer,
+143     ReadWait,
+144     WriteWait,
+145     PrdRead,
+146     DmaRead,
+147     DmaWrite
+148 } Events_t;
+\end{DoxyCode}

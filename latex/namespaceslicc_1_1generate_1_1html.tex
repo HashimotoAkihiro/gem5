@@ -1,0 +1,89 @@
+\hypertarget{namespaceslicc_1_1generate_1_1html}{
+\section{ネームスペース slicc::generate::html}
+\label{namespaceslicc_1_1generate_1_1html}\index{slicc::generate::html@{slicc::generate::html}}
+}
+\subsection*{関数}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{namespaceslicc_1_1generate_1_1html_afe7347b33e29a31ff6b4a3093c9c7e9f}{createSymbol}
+\item 
+def \hyperlink{namespaceslicc_1_1generate_1_1html_aa54ddafc064a401d182be1e891fe33a2}{formatShorthand}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{namespaceslicc_1_1generate_1_1html_afe7347b33e29a31ff6b4a3093c9c7e9f}{
+\index{slicc::generate::html@{slicc::generate::html}!createSymbol@{createSymbol}}
+\index{createSymbol@{createSymbol}!slicc::generate::html@{slicc::generate::html}}
+\subsubsection[{createSymbol}]{\setlength{\rightskip}{0pt plus 5cm}def slicc::generate::html::createSymbol ( {\em symbol}, \/   {\em title})}}
+\label{namespaceslicc_1_1generate_1_1html_afe7347b33e29a31ff6b4a3093c9c7e9f}
+
+
+
+\begin{DoxyCode}
+30                                :
+31     code = code_formatter()
+32     code('''
+33 <HTML><BODY><BIG>
+34 $title: ${{formatShorthand(symbol.short)}} - ${{symbol.desc}}
+35 </BIG></BODY></HTML>
+36 ''')
+37     return code
+38 
+def formatShorthand(short):
+\end{DoxyCode}
+\hypertarget{namespaceslicc_1_1generate_1_1html_aa54ddafc064a401d182be1e891fe33a2}{
+\index{slicc::generate::html@{slicc::generate::html}!formatShorthand@{formatShorthand}}
+\index{formatShorthand@{formatShorthand}!slicc::generate::html@{slicc::generate::html}}
+\subsubsection[{formatShorthand}]{\setlength{\rightskip}{0pt plus 5cm}def slicc::generate::html::formatShorthand ( {\em short})}}
+\label{namespaceslicc_1_1generate_1_1html_aa54ddafc064a401d182be1e891fe33a2}
+
+
+
+\begin{DoxyCode}
+39                           :
+40     munged_shorthand = ""
+41     mode_is_normal = True
+42 
+43     # -- Walk over the string, processing superscript directives
+44     gen = enumerate(short)
+45     for i,c in gen:
+46         if c == '!':
+47             # -- Reached logical end of shorthand name
+48             break
+49         elif c == '_':
+50             munged_shorthand += " "
+51         elif c == '^':
+52             # -- Process super/subscript formatting
+53             mode_is_normal = not mode_is_normal
+54             if mode_is_normal:
+55                 # -- Back to normal mode
+56                 munged_shorthand += "</SUP>"
+57             else:
+58                 # -- Going to superscript mode
+59                 munged_shorthand += "<SUP>"
+60         elif c == '\\':
+61             # -- Process Symbol character set
+62             if i + 1 < len(short):
+63                 # -- Proceed to next char. Yes I know that changing
+64                 # the loop var is ugly!
+65                 i,c = gen.next()
+66                 munged_shorthand += "<B><FONT size=+1>"
+67                 munged_shorthand += c
+68                 munged_shorthand += "</FONT></B>"
+69             else:
+70                 # -- FIXME: Add line number info later
+71                 panic("Encountered a `\\` without anything following it!")
+72         else:
+73             # -- Pass on un-munged
+74             munged_shorthand += c
+75 
+76     # -- Do any other munging
+77     if not mode_is_normal:
+78         # -- Back to normal mode
+79         munged_shorthand += "</SUP>"
+80 
+81     return munged_shorthand
+82 
+
+\end{DoxyCode}

@@ -1,0 +1,213 @@
+\hypertarget{structO3ThreadState}{
+\section{構造体 テンプレート O3ThreadState$<$ Impl $>$}
+\label{structO3ThreadState}\index{O3ThreadState@{O3ThreadState}}
+}
+
+
+{\ttfamily \#include $<$thread\_\-state.hh$>$}O3ThreadState$<$ Impl $>$に対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{structO3ThreadState}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+typedef \hyperlink{classThreadContext_a67a0db04d321a74b7e7fcfd3f1a3f70b}{ThreadContext::Status} \hyperlink{structO3ThreadState_a3af29dcea6d2bbb0a1de56f02ec789f1}{Status}
+\item 
+typedef Impl::O3CPU \hyperlink{structO3ThreadState_a44622cf06940413482836cb62931ac3f}{O3CPU}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structO3ThreadState_ac155052720ec3adfe617a0bc7d5be7a0}{O3ThreadState} (\hyperlink{structO3ThreadState_a44622cf06940413482836cb62931ac3f}{O3CPU} $\ast$\_\-cpu, int \_\-thread\_\-num, \hyperlink{classProcess}{Process} $\ast$\_\-process)
+\item 
+void \hyperlink{structO3ThreadState_a53e036786d17361be4c7320d39c99b84}{serialize} (std::ostream \&os)
+\item 
+void \hyperlink{structO3ThreadState_af22e5d6d660b97db37003ac61ac4ee49}{unserialize} (\hyperlink{classCheckpoint}{Checkpoint} $\ast$cp, const std::string \&section)
+\item 
+\hyperlink{classThreadContext}{ThreadContext} $\ast$ \hyperlink{structO3ThreadState_a81894d15db5190d5364449a4915b76f5}{getTC} ()
+\item 
+void \hyperlink{structO3ThreadState_a36e0b96120fcbbc2ee8699158f7be5c2}{syscall} (int64\_\-t callnum)
+\item 
+void \hyperlink{structO3ThreadState_a13fa12d1779a94a1e0b968946a1367c7}{dumpFuncProfile} ()
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{structO3ThreadState_afdfc33b720511483d84f7098ab6ba075}{noSquashFromTC}
+\item 
+bool \hyperlink{structO3ThreadState_aa9f948437524f88e51afd737df505200}{trapPending}
+\item 
+\hyperlink{classThreadContext}{ThreadContext} $\ast$ \hyperlink{structO3ThreadState_a4455a4759e69e5ebe68ae7298cbcc37d}{tc}
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{structO3ThreadState_a44622cf06940413482836cb62931ac3f}{O3CPU} $\ast$ \hyperlink{structO3ThreadState_a1379cf882a12ac6fc9eba5da7c84b18b}{cpu}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+\subsubsection*{template$<$class Impl$>$ struct O3ThreadState$<$ Impl $>$}
+
+Class that has various thread state, such as the status, the current instruction being processed, whether or not the thread has a trap pending or is being externally updated, the \hyperlink{classThreadContext}{ThreadContext} pointer, etc. It also handles anything related to a specific thread's process, such as syscalls and checking valid addresses. 
+
+\subsection{型定義}
+\hypertarget{structO3ThreadState_a44622cf06940413482836cb62931ac3f}{
+\index{O3ThreadState@{O3ThreadState}!O3CPU@{O3CPU}}
+\index{O3CPU@{O3CPU}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{O3CPU}]{\setlength{\rightskip}{0pt plus 5cm}typedef Impl::O3CPU {\bf O3CPU}}}
+\label{structO3ThreadState_a44622cf06940413482836cb62931ac3f}
+\hypertarget{structO3ThreadState_a3af29dcea6d2bbb0a1de56f02ec789f1}{
+\index{O3ThreadState@{O3ThreadState}!Status@{Status}}
+\index{Status@{Status}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{Status}]{\setlength{\rightskip}{0pt plus 5cm}typedef {\bf ThreadContext::Status} {\bf Status}}}
+\label{structO3ThreadState_a3af29dcea6d2bbb0a1de56f02ec789f1}
+
+
+\hyperlink{structThreadState_a3af29dcea6d2bbb0a1de56f02ec789f1}{ThreadState}を再定義しています。
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{structO3ThreadState_ac155052720ec3adfe617a0bc7d5be7a0}{
+\index{O3ThreadState@{O3ThreadState}!O3ThreadState@{O3ThreadState}}
+\index{O3ThreadState@{O3ThreadState}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{O3ThreadState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf O3ThreadState} ({\bf O3CPU} $\ast$ {\em \_\-cpu}, \/  int {\em \_\-thread\_\-num}, \/  {\bf Process} $\ast$ {\em \_\-process})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structO3ThreadState_ac155052720ec3adfe617a0bc7d5be7a0}
+
+
+
+\begin{DoxyCode}
+92         : ThreadState(_cpu, _thread_num, _process),
+93           cpu(_cpu), noSquashFromTC(false), trapPending(false)
+94     {
+95         if (!FullSystem)
+96             return;
+97 
+98         if (cpu->params()->profile) {
+99             profile = new FunctionProfile(
+100                     cpu->params()->system->kernelSymtab);
+101             Callback *cb =
+102                 new MakeCallback<O3ThreadState,
+103                 &O3ThreadState::dumpFuncProfile>(this);
+104             registerExitCallback(cb);
+105         }
+106 
+107         // let's fill with a dummy node for now so we don't get a segfault
+108         // on the first cycle when there's no node available.
+109         static ProfileNode dummyNode;
+110         profileNode = &dummyNode;
+111         profilePC = 3;
+112     }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{structO3ThreadState_a13fa12d1779a94a1e0b968946a1367c7}{
+\index{O3ThreadState@{O3ThreadState}!dumpFuncProfile@{dumpFuncProfile}}
+\index{dumpFuncProfile@{dumpFuncProfile}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{dumpFuncProfile}]{\setlength{\rightskip}{0pt plus 5cm}void dumpFuncProfile ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structO3ThreadState_a13fa12d1779a94a1e0b968946a1367c7}
+
+
+\hyperlink{structThreadState_a13fa12d1779a94a1e0b968946a1367c7}{ThreadState}を再定義しています。
+
+
+\begin{DoxyCode}
+145     {
+146         std::ostream *os = simout.create(csprintf("profile.%s.dat", cpu->name()))
+      ;
+147         profile->dump(tc, *os);
+148     }
+\end{DoxyCode}
+\hypertarget{structO3ThreadState_a81894d15db5190d5364449a4915b76f5}{
+\index{O3ThreadState@{O3ThreadState}!getTC@{getTC}}
+\index{getTC@{getTC}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{getTC}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadContext}$\ast$ getTC ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structO3ThreadState_a81894d15db5190d5364449a4915b76f5}
+Returns a pointer to the TC of this thread. 
+
+
+\begin{DoxyCode}
+139 { return tc; }
+\end{DoxyCode}
+\hypertarget{structO3ThreadState_a53e036786d17361be4c7320d39c99b84}{
+\index{O3ThreadState@{O3ThreadState}!serialize@{serialize}}
+\index{serialize@{serialize}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{serialize}]{\setlength{\rightskip}{0pt plus 5cm}void serialize (std::ostream \& {\em os})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structO3ThreadState_a53e036786d17361be4c7320d39c99b84}
+
+
+\hyperlink{structThreadState_a53e036786d17361be4c7320d39c99b84}{ThreadState}を再定義しています。
+
+
+\begin{DoxyCode}
+115     {
+116         ThreadState::serialize(os);
+117         // Use the ThreadContext serialization helper to serialize the
+118         // TC.
+119         ::serialize(*tc, os);
+120     }
+\end{DoxyCode}
+\hypertarget{structO3ThreadState_a36e0b96120fcbbc2ee8699158f7be5c2}{
+\index{O3ThreadState@{O3ThreadState}!syscall@{syscall}}
+\index{syscall@{syscall}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{syscall}]{\setlength{\rightskip}{0pt plus 5cm}void syscall (int64\_\-t {\em callnum})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structO3ThreadState_a36e0b96120fcbbc2ee8699158f7be5c2}
+Handles the syscall. 
+
+
+\begin{DoxyCode}
+142 { process->syscall(callnum, tc); }
+\end{DoxyCode}
+\hypertarget{structO3ThreadState_af22e5d6d660b97db37003ac61ac4ee49}{
+\index{O3ThreadState@{O3ThreadState}!unserialize@{unserialize}}
+\index{unserialize@{unserialize}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{unserialize}]{\setlength{\rightskip}{0pt plus 5cm}void unserialize ({\bf Checkpoint} $\ast$ {\em cp}, \/  const std::string \& {\em section})\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{structO3ThreadState_af22e5d6d660b97db37003ac61ac4ee49}
+
+
+\hyperlink{structThreadState_af22e5d6d660b97db37003ac61ac4ee49}{ThreadState}を再定義しています。
+
+
+\begin{DoxyCode}
+123     {
+124         // Prevent squashing - we don't have any instructions in
+125         // flight that we need to squash since we just instantiated a
+126         // clean system.
+127         noSquashFromTC = true;
+128         ThreadState::unserialize(cp, section);
+129         // Use the ThreadContext serialization helper to unserialize
+130         // the TC.
+131         ::unserialize(*tc, cp, section);
+132         noSquashFromTC = false;
+133     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{structO3ThreadState_a1379cf882a12ac6fc9eba5da7c84b18b}{
+\index{O3ThreadState@{O3ThreadState}!cpu@{cpu}}
+\index{cpu@{cpu}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{cpu}]{\setlength{\rightskip}{0pt plus 5cm}{\bf O3CPU}$\ast$ {\bf cpu}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{structO3ThreadState_a1379cf882a12ac6fc9eba5da7c84b18b}
+Pointer to the CPU. \hypertarget{structO3ThreadState_afdfc33b720511483d84f7098ab6ba075}{
+\index{O3ThreadState@{O3ThreadState}!noSquashFromTC@{noSquashFromTC}}
+\index{noSquashFromTC@{noSquashFromTC}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{noSquashFromTC}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf noSquashFromTC}}}
+\label{structO3ThreadState_afdfc33b720511483d84f7098ab6ba075}
+\hypertarget{structO3ThreadState_a4455a4759e69e5ebe68ae7298cbcc37d}{
+\index{O3ThreadState@{O3ThreadState}!tc@{tc}}
+\index{tc@{tc}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{tc}]{\setlength{\rightskip}{0pt plus 5cm}{\bf ThreadContext}$\ast$ {\bf tc}}}
+\label{structO3ThreadState_a4455a4759e69e5ebe68ae7298cbcc37d}
+Pointer to the \hyperlink{classThreadContext}{ThreadContext} of this thread. \hypertarget{structO3ThreadState_aa9f948437524f88e51afd737df505200}{
+\index{O3ThreadState@{O3ThreadState}!trapPending@{trapPending}}
+\index{trapPending@{trapPending}!O3ThreadState@{O3ThreadState}}
+\subsubsection[{trapPending}]{\setlength{\rightskip}{0pt plus 5cm}bool {\bf trapPending}}}
+\label{structO3ThreadState_aa9f948437524f88e51afd737df505200}
+Whether or not the thread is currently waiting on a trap, and thus able to be externally updated without squashing. 
+
+この構造体の説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/o3/\hyperlink{o3_2thread__state_8hh}{thread\_\-state.hh}\end{DoxyCompactItemize}

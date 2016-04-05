@@ -1,0 +1,430 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: mem/dram_ctrl.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>mem/dram_ctrl.hh</h1><a href="dram__ctrl_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2012-2014 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2013 Amin Farmahini-Farahani</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Andreas Hansson</span>
+<a name="l00041"></a>00041 <span class="comment"> *          Ani Udipi</span>
+<a name="l00042"></a>00042 <span class="comment"> *          Neha Agarwal</span>
+<a name="l00043"></a>00043 <span class="comment"> */</span>
+<a name="l00044"></a>00044 
+<a name="l00050"></a>00050 <span class="preprocessor">#ifndef __MEM_DRAM_CTRL_HH__</span>
+<a name="l00051"></a>00051 <span class="preprocessor"></span><span class="preprocessor">#define __MEM_DRAM_CTRL_HH__</span>
+<a name="l00052"></a>00052 <span class="preprocessor"></span>
+<a name="l00053"></a>00053 <span class="preprocessor">#include &lt;deque&gt;</span>
+<a name="l00054"></a>00054 
+<a name="l00055"></a>00055 <span class="preprocessor">#include &quot;<a class="code" href="statistics_8hh.html">base/statistics.hh</a>&quot;</span>
+<a name="l00056"></a>00056 <span class="preprocessor">#include &quot;enums/AddrMap.hh&quot;</span>
+<a name="l00057"></a>00057 <span class="preprocessor">#include &quot;enums/MemSched.hh&quot;</span>
+<a name="l00058"></a>00058 <span class="preprocessor">#include &quot;enums/PageManage.hh&quot;</span>
+<a name="l00059"></a>00059 <span class="preprocessor">#include &quot;<a class="code" href="abstract__mem_8hh.html">mem/abstract_mem.hh</a>&quot;</span>
+<a name="l00060"></a>00060 <span class="preprocessor">#include &quot;<a class="code" href="qport_8hh.html">mem/qport.hh</a>&quot;</span>
+<a name="l00061"></a>00061 <span class="preprocessor">#include &quot;params/DRAMCtrl.hh&quot;</span>
+<a name="l00062"></a>00062 <span class="preprocessor">#include &quot;<a class="code" href="eventq_8hh.html">sim/eventq.hh</a>&quot;</span>
+<a name="l00063"></a>00063 
+<a name="l00083"></a><a class="code" href="classDRAMCtrl.html">00083</a> <span class="keyword">class </span><a class="code" href="classDRAMCtrl_1_1DRAMCtrl.html">DRAMCtrl</a> : <span class="keyword">public</span> <a class="code" href="classAbstractMemory_1_1AbstractMemory.html">AbstractMemory</a>
+<a name="l00084"></a>00084 {
+<a name="l00085"></a>00085 
+<a name="l00086"></a>00086   <span class="keyword">private</span>:
+<a name="l00087"></a>00087 
+<a name="l00088"></a>00088     <span class="comment">// For now, make use of a queued slave port to avoid dealing with</span>
+<a name="l00089"></a>00089     <span class="comment">// flow control for the responses being sent back</span>
+<a name="l00090"></a><a class="code" href="classDRAMCtrl_1_1MemoryPort.html">00090</a>     <span class="keyword">class </span><a class="code" href="classDRAMCtrl_1_1MemoryPort.html">MemoryPort</a> : <span class="keyword">public</span> <a class="code" href="classQueuedSlavePort.html">QueuedSlavePort</a>
+<a name="l00091"></a>00091     {
+<a name="l00092"></a>00092 
+<a name="l00093"></a><a class="code" href="classDRAMCtrl_1_1MemoryPort.html#a3055168363a9ed42f38173363b6c1975">00093</a>         <a class="code" href="classSlavePacketQueue.html">SlavePacketQueue</a> <a class="code" href="classDRAMCtrl_1_1MemoryPort.html#a3055168363a9ed42f38173363b6c1975">queue</a>;
+<a name="l00094"></a><a class="code" href="classDRAMCtrl_1_1MemoryPort.html#aab24e4ab19c79062554e1ad4bb0c5eb7">00094</a>         <a class="code" href="classDRAMCtrl_1_1DRAMCtrl.html">DRAMCtrl</a>&amp; <a class="code" href="classDRAMCtrl_1_1MemoryPort.html#aab24e4ab19c79062554e1ad4bb0c5eb7">memory</a>;
+<a name="l00095"></a>00095 
+<a name="l00096"></a>00096       <span class="keyword">public</span>:
+<a name="l00097"></a>00097 
+<a name="l00098"></a>00098         <a class="code" href="classDRAMCtrl_1_1MemoryPort.html#aee0ee389785135af506951436ea56679">MemoryPort</a>(<span class="keyword">const</span> std::string&amp; <a class="code" href="classPort.html#a6490f765a824ced1cc94979609fe7e07">name</a>, <a class="code" href="classDRAMCtrl_1_1DRAMCtrl.html">DRAMCtrl</a>&amp; _memory);
+<a name="l00099"></a>00099 
+<a name="l00100"></a>00100       <span class="keyword">protected</span>:
+<a name="l00101"></a>00101 
+<a name="l00102"></a>00102         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl_1_1MemoryPort.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00103"></a>00103 
+<a name="l00104"></a>00104         <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl_1_1MemoryPort.html#aeefa907fb6d6a787e6dab90e8138ea90">recvFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00105"></a>00105 
+<a name="l00106"></a>00106         <span class="keywordtype">bool</span> <a class="code" href="classDRAMCtrl_1_1MemoryPort.html#a8a15a0ae9c080c5f879fc5e791a9e3e7">recvTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a>);
+<a name="l00107"></a>00107 
+<a name="l00108"></a>00108         <span class="keyword">virtual</span> <a class="code" href="classstd_1_1list.html">AddrRangeList</a> <a class="code" href="classDRAMCtrl_1_1MemoryPort.html#a36cf113d5e5e091ebddb32306c098fae">getAddrRanges</a>() <span class="keyword">const</span>;
+<a name="l00109"></a>00109 
+<a name="l00110"></a>00110     };
+<a name="l00111"></a>00111 
+<a name="l00116"></a><a class="code" href="classDRAMCtrl.html#a55c076720c982014096b57cadebf9a14">00116</a>     <a class="code" href="classDRAMCtrl_1_1MemoryPort.html">MemoryPort</a> <a class="code" href="classDRAMCtrl.html#a55c076720c982014096b57cadebf9a14">port</a>;
+<a name="l00117"></a>00117 
+<a name="l00121"></a><a class="code" href="classDRAMCtrl.html#aa4e05579e39e0e1ae7859ddba8538932">00121</a>     <span class="keywordtype">bool</span> <a class="code" href="classDRAMCtrl.html#aa4e05579e39e0e1ae7859ddba8538932">retryRdReq</a>;
+<a name="l00122"></a><a class="code" href="classDRAMCtrl.html#acf0d3616b5317008b8248aa2245df220">00122</a>     <span class="keywordtype">bool</span> <a class="code" href="classDRAMCtrl.html#acf0d3616b5317008b8248aa2245df220">retryWrReq</a>;
+<a name="l00123"></a>00123 
+<a name="l00128"></a><a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11">00128</a>     <span class="keyword">enum</span> <a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11">BusState</a> {
+<a name="l00129"></a><a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11acb9be765f361bb7efb9073730aac92c6">00129</a>         <a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11acb9be765f361bb7efb9073730aac92c6">READ</a> = 0,
+<a name="l00130"></a><a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11a12f0259011cf4a6cf10274abcf71daaa">00130</a>         <a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11a12f0259011cf4a6cf10274abcf71daaa">READ_TO_WRITE</a>,
+<a name="l00131"></a><a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11a61aa7ff70b76bff0fda378cf61d6afbc">00131</a>         <a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11a61aa7ff70b76bff0fda378cf61d6afbc">WRITE</a>,
+<a name="l00132"></a><a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11ad12c9fdf4a8009963c2eb263513e4aab">00132</a>         <a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11ad12c9fdf4a8009963c2eb263513e4aab">WRITE_TO_READ</a>
+<a name="l00133"></a>00133     };
+<a name="l00134"></a>00134 
+<a name="l00135"></a><a class="code" href="classDRAMCtrl.html#a898cc5ed4c5a9ec9c13dbe52d1ea0eb2">00135</a>     <a class="code" href="classDRAMCtrl.html#a167375ed712267f43fee8fa5d1aa4f11">BusState</a> <a class="code" href="classDRAMCtrl.html#a898cc5ed4c5a9ec9c13dbe52d1ea0eb2">busState</a>;
+<a name="l00136"></a>00136 
+<a name="l00138"></a><a class="code" href="classDRAMCtrl.html#a4a4e224ac2ca35b6d47a3ff850e1ff3e">00138</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::deque&lt;Tick&gt;</a>&gt; <a class="code" href="classDRAMCtrl.html#a4a4e224ac2ca35b6d47a3ff850e1ff3e">actTicks</a>;
+<a name="l00139"></a>00139 
+<a name="l00149"></a><a class="code" href="classDRAMCtrl_1_1Bank.html">00149</a>     <span class="keyword">class </span><a class="code" href="classDRAMCtrl_1_1Bank.html">Bank</a>
+<a name="l00150"></a>00150     {
+<a name="l00151"></a>00151 
+<a name="l00152"></a>00152       <span class="keyword">public</span>:
+<a name="l00153"></a>00153 
+<a name="l00154"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#a4c1f8277dd32c2b530a7acc4969310f1">00154</a>         <span class="keyword">static</span> <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl_1_1Bank.html#a4c1f8277dd32c2b530a7acc4969310f1">NO_ROW</a> = -1;
+<a name="l00155"></a>00155 
+<a name="l00156"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#a1c7dd95b87279d92d9a9bbcfed850ddf">00156</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl_1_1Bank.html#a1c7dd95b87279d92d9a9bbcfed850ddf">openRow</a>;
+<a name="l00157"></a>00157 
+<a name="l00158"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#a7427bdcfd6e622f1dcef902e3151f822">00158</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl_1_1Bank.html#a7427bdcfd6e622f1dcef902e3151f822">colAllowedAt</a>;
+<a name="l00159"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#a6b5a4430002d443a4554dbe50d754a4b">00159</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl_1_1Bank.html#a6b5a4430002d443a4554dbe50d754a4b">preAllowedAt</a>;
+<a name="l00160"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#aed744bd1f16791b6a50c73f78d86a63f">00160</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl_1_1Bank.html#aed744bd1f16791b6a50c73f78d86a63f">actAllowedAt</a>;
+<a name="l00161"></a>00161 
+<a name="l00162"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#a92cca9826301cce285e011714476dbbb">00162</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl_1_1Bank.html#a92cca9826301cce285e011714476dbbb">rowAccesses</a>;
+<a name="l00163"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#a9e3845d35a835259678291e0f5db84b9">00163</a>         <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl_1_1Bank.html#a9e3845d35a835259678291e0f5db84b9">bytesAccessed</a>;
+<a name="l00164"></a>00164 
+<a name="l00165"></a><a class="code" href="classDRAMCtrl_1_1Bank.html#a271cedab6e0be527fb734df530225686">00165</a>         <a class="code" href="classDRAMCtrl_1_1Bank.html#a271cedab6e0be527fb734df530225686">Bank</a>() :
+<a name="l00166"></a>00166             <a class="code" href="classDRAMCtrl_1_1Bank.html#a1c7dd95b87279d92d9a9bbcfed850ddf">openRow</a>(<a class="code" href="classDRAMCtrl_1_1Bank.html#a4c1f8277dd32c2b530a7acc4969310f1">NO_ROW</a>), <a class="code" href="classDRAMCtrl_1_1Bank.html#a7427bdcfd6e622f1dcef902e3151f822">colAllowedAt</a>(0), <a class="code" href="classDRAMCtrl_1_1Bank.html#a6b5a4430002d443a4554dbe50d754a4b">preAllowedAt</a>(0), <a class="code" href="classDRAMCtrl_1_1Bank.html#aed744bd1f16791b6a50c73f78d86a63f">actAllowedAt</a>(0),
+<a name="l00167"></a>00167             <a class="code" href="classDRAMCtrl_1_1Bank.html#a92cca9826301cce285e011714476dbbb">rowAccesses</a>(0), <a class="code" href="classDRAMCtrl_1_1Bank.html#a9e3845d35a835259678291e0f5db84b9">bytesAccessed</a>(0)
+<a name="l00168"></a>00168         { }
+<a name="l00169"></a>00169     };
+<a name="l00170"></a>00170 
+<a name="l00177"></a><a class="code" href="classDRAMCtrl_1_1BurstHelper.html">00177</a>     <span class="keyword">class </span><a class="code" href="classDRAMCtrl_1_1BurstHelper.html">BurstHelper</a> {
+<a name="l00178"></a>00178 
+<a name="l00179"></a>00179       <span class="keyword">public</span>:
+<a name="l00180"></a>00180 
+<a name="l00182"></a><a class="code" href="classDRAMCtrl_1_1BurstHelper.html#af18956b23801b2515632faae1975c9d4">00182</a>         <span class="keyword">const</span> <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDRAMCtrl_1_1BurstHelper.html#af18956b23801b2515632faae1975c9d4">burstCount</a>;
+<a name="l00183"></a>00183 
+<a name="l00185"></a><a class="code" href="classDRAMCtrl_1_1BurstHelper.html#ad168c5fe8d0f76ba798feb77107a06a1">00185</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDRAMCtrl_1_1BurstHelper.html#ad168c5fe8d0f76ba798feb77107a06a1">burstsServiced</a>;
+<a name="l00186"></a>00186 
+<a name="l00187"></a><a class="code" href="classDRAMCtrl_1_1BurstHelper.html#acb98ae00af4221d6b613fcef7a1a04b0">00187</a>         <a class="code" href="classDRAMCtrl_1_1BurstHelper.html#acb98ae00af4221d6b613fcef7a1a04b0">BurstHelper</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> _burstCount)
+<a name="l00188"></a>00188             : <a class="code" href="classDRAMCtrl_1_1BurstHelper.html#af18956b23801b2515632faae1975c9d4">burstCount</a>(_burstCount), <a class="code" href="classDRAMCtrl_1_1BurstHelper.html#ad168c5fe8d0f76ba798feb77107a06a1">burstsServiced</a>(0)
+<a name="l00189"></a>00189             { }
+<a name="l00190"></a>00190     };
+<a name="l00191"></a>00191 
+<a name="l00196"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html">00196</a>     <span class="keyword">class </span><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html">DRAMPacket</a> {
+<a name="l00197"></a>00197 
+<a name="l00198"></a>00198       <span class="keyword">public</span>:
+<a name="l00199"></a>00199 
+<a name="l00201"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ab1ccb8a8c8d1a5b1c5f41693f4097e63">00201</a>         <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ab1ccb8a8c8d1a5b1c5f41693f4097e63">entryTime</a>;
+<a name="l00202"></a>00202 
+<a name="l00204"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a7cb362ebfb8750bd53baf5e8f96e00d0">00204</a>         <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a7cb362ebfb8750bd53baf5e8f96e00d0">readyTime</a>;
+<a name="l00205"></a>00205 
+<a name="l00207"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a6fb971eb547deb70a1eb9fc09047e9ae">00207</a>         <span class="keyword">const</span> <a class="code" href="classPacket.html">PacketPtr</a> <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a6fb971eb547deb70a1eb9fc09047e9ae">pkt</a>;
+<a name="l00208"></a>00208 
+<a name="l00209"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a932f133d9a9765cb284a8898c11a9c5f">00209</a>         <span class="keyword">const</span> <span class="keywordtype">bool</span> <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a932f133d9a9765cb284a8898c11a9c5f">isRead</a>;
+<a name="l00210"></a>00210 
+<a name="l00212"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#aa939c368630feb349e132c957bf16cc8">00212</a>         <span class="keyword">const</span> uint8_t <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#aa939c368630feb349e132c957bf16cc8">rank</a>;
+<a name="l00213"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a8897945a64d084a58d8bbee43e74bbc6">00213</a>         <span class="keyword">const</span> uint8_t <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a8897945a64d084a58d8bbee43e74bbc6">bank</a>;
+<a name="l00214"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a48cff24d2110d967f3f47db949e329e0">00214</a>         <span class="keyword">const</span> uint16_t <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a48cff24d2110d967f3f47db949e329e0">row</a>;
+<a name="l00215"></a>00215 
+<a name="l00221"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a81996324dee2e231987a689d700a4dc2">00221</a>         <span class="keyword">const</span> uint16_t <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a81996324dee2e231987a689d700a4dc2">bankId</a>;
+<a name="l00222"></a>00222 
+<a name="l00229"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a0bb77b4ba61e408313e1118250f9278c">00229</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>;
+<a name="l00230"></a>00230 
+<a name="l00235"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#aac913b3a1f6ef005d66bf7a84428773e">00235</a>         <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#aac913b3a1f6ef005d66bf7a84428773e">size</a>;
+<a name="l00236"></a>00236 
+<a name="l00241"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ad3b6db2cc317849c6f88f306116e6540">00241</a>         <a class="code" href="classDRAMCtrl_1_1BurstHelper.html">BurstHelper</a>* <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ad3b6db2cc317849c6f88f306116e6540">burstHelper</a>;
+<a name="l00242"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ad74d737401d318ad6e3449a0826de315">00242</a>         <a class="code" href="classDRAMCtrl_1_1Bank.html">Bank</a>&amp; <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ad74d737401d318ad6e3449a0826de315">bankRef</a>;
+<a name="l00243"></a>00243 
+<a name="l00244"></a><a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a80655cee61e7cbc2d5dff02d112876e2">00244</a>         <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a80655cee61e7cbc2d5dff02d112876e2">DRAMPacket</a>(<a class="code" href="classPacket.html">PacketPtr</a> _pkt, <span class="keywordtype">bool</span> is_read, uint8_t _rank, uint8_t _bank,
+<a name="l00245"></a>00245                    uint16_t _row, uint16_t bank_id, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> _addr,
+<a name="l00246"></a>00246                    <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> _size, <a class="code" href="classDRAMCtrl_1_1Bank.html">Bank</a>&amp; bank_ref)
+<a name="l00247"></a>00247             : <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ab1ccb8a8c8d1a5b1c5f41693f4097e63">entryTime</a>(<a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>()), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a7cb362ebfb8750bd53baf5e8f96e00d0">readyTime</a>(<a class="code" href="statistics_8hh.html#a7acdccbf0d35ce0c159c0cdd36371b22" title="The universal simulation clock.">curTick</a>()),
+<a name="l00248"></a>00248               <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a6fb971eb547deb70a1eb9fc09047e9ae">pkt</a>(_pkt), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a932f133d9a9765cb284a8898c11a9c5f">isRead</a>(is_read), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#aa939c368630feb349e132c957bf16cc8">rank</a>(_rank), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a8897945a64d084a58d8bbee43e74bbc6">bank</a>(_bank), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a48cff24d2110d967f3f47db949e329e0">row</a>(_row),
+<a name="l00249"></a>00249               <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a81996324dee2e231987a689d700a4dc2">bankId</a>(bank_id), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#a0bb77b4ba61e408313e1118250f9278c">addr</a>(_addr), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#aac913b3a1f6ef005d66bf7a84428773e">size</a>(_size), <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ad3b6db2cc317849c6f88f306116e6540">burstHelper</a>(<a class="code" href="namespacem5_1_1params.html#a1e2e219ac4e913a2c59019be3094d3ca">NULL</a>),
+<a name="l00250"></a>00250               <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html#ad74d737401d318ad6e3449a0826de315">bankRef</a>(bank_ref)
+<a name="l00251"></a>00251         { }
+<a name="l00252"></a>00252 
+<a name="l00253"></a>00253     };
+<a name="l00254"></a>00254 
+<a name="l00261"></a>00261     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a0798c7e6d736756005d72ec03a38badd">processNextReqEvent</a>();
+<a name="l00262"></a><a class="code" href="classDRAMCtrl.html#a6f6c894e157329404d6b23503c4fa62e">00262</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;DRAMCtrl,&amp;DRAMCtrl::processNextReqEvent&gt;</a> <a class="code" href="classDRAMCtrl.html#a6f6c894e157329404d6b23503c4fa62e">nextReqEvent</a>;
+<a name="l00263"></a>00263 
+<a name="l00264"></a>00264     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#ab4cdaf6d543d6785652264ff7ebbecac">processRespondEvent</a>();
+<a name="l00265"></a><a class="code" href="classDRAMCtrl.html#a31bec941f92f261930a6df5cf9fb166e">00265</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;DRAMCtrl, &amp;DRAMCtrl::processRespondEvent&gt;</a> <a class="code" href="classDRAMCtrl.html#a31bec941f92f261930a6df5cf9fb166e">respondEvent</a>;
+<a name="l00266"></a>00266 
+<a name="l00267"></a>00267     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#ac54213c91d7d83dfe481534b1f165391">processActivateEvent</a>();
+<a name="l00268"></a><a class="code" href="classDRAMCtrl.html#ad15dbdabb028b909655b32ab9e322e50">00268</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;DRAMCtrl, &amp;DRAMCtrl::processActivateEvent&gt;</a> <a class="code" href="classDRAMCtrl.html#ad15dbdabb028b909655b32ab9e322e50">activateEvent</a>;
+<a name="l00269"></a>00269 
+<a name="l00270"></a>00270     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#aac7163c120622a5f0bcc2291bc3054cd">processPrechargeEvent</a>();
+<a name="l00271"></a><a class="code" href="classDRAMCtrl.html#a80cac8f63f85f5c7781367b8b728750f">00271</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;DRAMCtrl, &amp;DRAMCtrl::processPrechargeEvent&gt;</a> <a class="code" href="classDRAMCtrl.html#a80cac8f63f85f5c7781367b8b728750f">prechargeEvent</a>;
+<a name="l00272"></a>00272 
+<a name="l00273"></a>00273     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a56cadd2563b7704b3af145a6a9f5e6ea">processRefreshEvent</a>();
+<a name="l00274"></a><a class="code" href="classDRAMCtrl.html#a0bc8ce4f4a849871eb32bd983b5d2843">00274</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;DRAMCtrl, &amp;DRAMCtrl::processRefreshEvent&gt;</a> <a class="code" href="classDRAMCtrl.html#a0bc8ce4f4a849871eb32bd983b5d2843">refreshEvent</a>;
+<a name="l00275"></a>00275 
+<a name="l00276"></a>00276     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a969289183ebadcc99a8dd9f63120b4eb">processPowerEvent</a>();
+<a name="l00277"></a><a class="code" href="classDRAMCtrl.html#afb2cbddd4a31e9a3b11886230f18f44b">00277</a>     <a class="code" href="classEventWrapper.html">EventWrapper&lt;DRAMCtrl,&amp;DRAMCtrl::processPowerEvent&gt;</a> <a class="code" href="classDRAMCtrl.html#afb2cbddd4a31e9a3b11886230f18f44b">powerEvent</a>;
+<a name="l00278"></a>00278 
+<a name="l00285"></a>00285     <span class="keywordtype">bool</span> <a class="code" href="classDRAMCtrl.html#a865d7144c26ea7f206d937e12935f840">readQueueFull</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> pktCount) <span class="keyword">const</span>;
+<a name="l00286"></a>00286 
+<a name="l00293"></a>00293     <span class="keywordtype">bool</span> <a class="code" href="classDRAMCtrl.html#a34f56ea41ba7accf7b75a46aa79b560c">writeQueueFull</a>(<span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> pktCount) <span class="keyword">const</span>;
+<a name="l00294"></a>00294 
+<a name="l00309"></a>00309     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#ac224a72395d7f9bea08435f4aee435df">addToReadQueue</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> pktCount);
+<a name="l00310"></a>00310 
+<a name="l00322"></a>00322     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a9538c5891b7139a62cffe6cbd7853b9a">addToWriteQueue</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> pktCount);
+<a name="l00323"></a>00323 
+<a name="l00334"></a>00334     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a981a4462a622304ff598af5a232d7dd5">doDRAMAccess</a>(<a class="code" href="classDRAMCtrl_1_1DRAMPacket.html">DRAMPacket</a>* dram_pkt);
+<a name="l00335"></a>00335 
+<a name="l00345"></a>00345     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#aa10846589da1206d0047f6b82c2814e4">accessAndRespond</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> static_latency);
+<a name="l00346"></a>00346 
+<a name="l00359"></a>00359     <a class="code" href="classDRAMCtrl_1_1DRAMPacket.html">DRAMPacket</a>* <a class="code" href="classDRAMCtrl.html#a6d379162bc91622a9b1f1bdf82e062cc">decodeAddr</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> dramPktAddr, <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classAbstractMemory.html#a0b6868dbef44fc07f11d050eb59e5f7e">size</a>,
+<a name="l00360"></a>00360                            <span class="keywordtype">bool</span> isRead);
+<a name="l00361"></a>00361 
+<a name="l00367"></a>00367     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a45c15f5a90be2e23d6bde9f706db7f24">chooseNext</a>(<a class="code" href="classstd_1_1deque.html">std::deque&lt;DRAMPacket*&gt;</a>&amp; queue);
+<a name="l00368"></a>00368 
+<a name="l00373"></a>00373     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#aabfe6aa48e67d5b5c21e77dfa8a7e965">reorderQueue</a>(<a class="code" href="classstd_1_1deque.html">std::deque&lt;DRAMPacket*&gt;</a>&amp; queue);
+<a name="l00374"></a>00374 
+<a name="l00382"></a>00382     uint64_t <a class="code" href="classDRAMCtrl.html#a29301d0e29279a6e233f15c13959b0de">minBankActAt</a>(<span class="keyword">const</span> <a class="code" href="classstd_1_1deque.html">std::deque&lt;DRAMPacket*&gt;</a>&amp; queue) <span class="keyword">const</span>;
+<a name="l00383"></a>00383 
+<a name="l00396"></a>00396     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a98181e99df633f767f5116fe80e92042">activateBank</a>(<a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> act_tick, uint8_t rank, uint8_t bank,
+<a name="l00397"></a>00397                       uint16_t row, <a class="code" href="classDRAMCtrl_1_1Bank.html">Bank</a>&amp; bank_ref);
+<a name="l00398"></a>00398 
+<a name="l00407"></a>00407     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#ae75715461eec20eff07a532c11c3d54c">prechargeBank</a>(<a class="code" href="classDRAMCtrl_1_1Bank.html">Bank</a>&amp; bank, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> pre_at);
+<a name="l00408"></a>00408 
+<a name="l00412"></a>00412     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a3c5f01de2fe3a6826581f3641cac2ba7">printQs</a>() <span class="keyword">const</span>;
+<a name="l00413"></a>00413 
+<a name="l00417"></a><a class="code" href="classDRAMCtrl.html#af799cb4e1a6e82bcb68ff9354bdf6876">00417</a>     <a class="code" href="classstd_1_1deque.html">std::deque&lt;DRAMPacket*&gt;</a> <a class="code" href="classDRAMCtrl.html#af799cb4e1a6e82bcb68ff9354bdf6876">readQueue</a>;
+<a name="l00418"></a><a class="code" href="classDRAMCtrl.html#a3286652a16bd92e1fd02c6a5f42b83a1">00418</a>     <a class="code" href="classstd_1_1deque.html">std::deque&lt;DRAMPacket*&gt;</a> <a class="code" href="classDRAMCtrl.html#a3286652a16bd92e1fd02c6a5f42b83a1">writeQueue</a>;
+<a name="l00419"></a>00419 
+<a name="l00428"></a><a class="code" href="classDRAMCtrl.html#a04637ab08ad048aa826537a67dba4654">00428</a>     <a class="code" href="classstd_1_1deque.html">std::deque&lt;DRAMPacket*&gt;</a> <a class="code" href="classDRAMCtrl.html#a04637ab08ad048aa826537a67dba4654">respQueue</a>;
+<a name="l00429"></a>00429 
+<a name="l00434"></a><a class="code" href="classDRAMCtrl.html#a329b71fb934a93312ca0aacbf5a3f982">00434</a>     <a class="code" href="classDrainManager.html">DrainManager</a> *<a class="code" href="classDRAMCtrl.html#a329b71fb934a93312ca0aacbf5a3f982">drainManager</a>;
+<a name="l00435"></a>00435 
+<a name="l00440"></a><a class="code" href="classDRAMCtrl.html#ac4dd7a78e52bcaca6fb18d24b45bb7f3">00440</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;std::vector&lt;Bank&gt;</a> &gt; <a class="code" href="classDRAMCtrl.html#ac4dd7a78e52bcaca6fb18d24b45bb7f3">banks</a>;
+<a name="l00441"></a>00441 
+<a name="l00448"></a><a class="code" href="classDRAMCtrl.html#a9b8ba3e3a3cc11b904cd1b70e7a40ea5">00448</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a9b8ba3e3a3cc11b904cd1b70e7a40ea5">deviceBusWidth</a>;
+<a name="l00449"></a><a class="code" href="classDRAMCtrl.html#a7ac4e4b031082616f09700ea29168920">00449</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a7ac4e4b031082616f09700ea29168920">burstLength</a>;
+<a name="l00450"></a><a class="code" href="classDRAMCtrl.html#afdaeeb74e1622ca1cc0f00dcf937a3b0">00450</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#afdaeeb74e1622ca1cc0f00dcf937a3b0">deviceRowBufferSize</a>;
+<a name="l00451"></a><a class="code" href="classDRAMCtrl.html#a962c654402093dcbdd4b40fd32c0de69">00451</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a962c654402093dcbdd4b40fd32c0de69">devicesPerRank</a>;
+<a name="l00452"></a><a class="code" href="classDRAMCtrl.html#aed1f7024fc9eeb4654afe54d86683d76">00452</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#aed1f7024fc9eeb4654afe54d86683d76">burstSize</a>;
+<a name="l00453"></a><a class="code" href="classDRAMCtrl.html#abe6f704496dadf8c0b246eb57b4e25d5">00453</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#abe6f704496dadf8c0b246eb57b4e25d5">rowBufferSize</a>;
+<a name="l00454"></a><a class="code" href="classDRAMCtrl.html#a1f84aad3340018bfb3c46ace200df8cb">00454</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a1f84aad3340018bfb3c46ace200df8cb">columnsPerRowBuffer</a>;
+<a name="l00455"></a><a class="code" href="classDRAMCtrl.html#afb57a2b8af54b8949b2c14434c74bd98">00455</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#afb57a2b8af54b8949b2c14434c74bd98">ranksPerChannel</a>;
+<a name="l00456"></a><a class="code" href="classDRAMCtrl.html#abd3ef09f9d5c70e15763a9761c8a14ca">00456</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#abd3ef09f9d5c70e15763a9761c8a14ca">banksPerRank</a>;
+<a name="l00457"></a><a class="code" href="classDRAMCtrl.html#a2fa7bea53e9bf8fb52623b494d814d30">00457</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a2fa7bea53e9bf8fb52623b494d814d30">channels</a>;
+<a name="l00458"></a><a class="code" href="classDRAMCtrl.html#ad878fffffe428b1673a17f489f5a4e94">00458</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#ad878fffffe428b1673a17f489f5a4e94">rowsPerBank</a>;
+<a name="l00459"></a><a class="code" href="classDRAMCtrl.html#a7a26078fba8217391c336c615ce8ab69">00459</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a7a26078fba8217391c336c615ce8ab69">readBufferSize</a>;
+<a name="l00460"></a><a class="code" href="classDRAMCtrl.html#ae1cedccfe0fe11c2bd10c28f4be1ea63">00460</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#ae1cedccfe0fe11c2bd10c28f4be1ea63">writeBufferSize</a>;
+<a name="l00461"></a><a class="code" href="classDRAMCtrl.html#a61f48157d680c1ddf7dd818c9008dd53">00461</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a61f48157d680c1ddf7dd818c9008dd53">writeHighThreshold</a>;
+<a name="l00462"></a><a class="code" href="classDRAMCtrl.html#a803b97da34c3b40357123d5713e6ab4a">00462</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a803b97da34c3b40357123d5713e6ab4a">writeLowThreshold</a>;
+<a name="l00463"></a><a class="code" href="classDRAMCtrl.html#a2753a60747e9836fe5f5fec7b613385c">00463</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a2753a60747e9836fe5f5fec7b613385c">minWritesPerSwitch</a>;
+<a name="l00464"></a><a class="code" href="classDRAMCtrl.html#a332d2848d0e28912ff8b0c8c9e09842a">00464</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a332d2848d0e28912ff8b0c8c9e09842a">writesThisTime</a>;
+<a name="l00465"></a><a class="code" href="classDRAMCtrl.html#a72f27fd33d5f9c72099763cf6c518b87">00465</a>     <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#a72f27fd33d5f9c72099763cf6c518b87">readsThisTime</a>;
+<a name="l00466"></a>00466 
+<a name="l00471"></a><a class="code" href="classDRAMCtrl.html#a9cd12bc6d433964d98ff2386c03e5246">00471</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a9cd12bc6d433964d98ff2386c03e5246">tCK</a>;
+<a name="l00472"></a><a class="code" href="classDRAMCtrl.html#a33aeea1fd32ea7035fc8ca3a32f75473">00472</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a33aeea1fd32ea7035fc8ca3a32f75473">tWTR</a>;
+<a name="l00473"></a><a class="code" href="classDRAMCtrl.html#a578e383b38a4b65988799b3c16c4c17d">00473</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a578e383b38a4b65988799b3c16c4c17d">tRTW</a>;
+<a name="l00474"></a><a class="code" href="classDRAMCtrl.html#a15520c5298cfcc33032b7f0e363f7a3d">00474</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a15520c5298cfcc33032b7f0e363f7a3d">tBURST</a>;
+<a name="l00475"></a><a class="code" href="classDRAMCtrl.html#a482d43285a450eeb021dcb7065741b33">00475</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a482d43285a450eeb021dcb7065741b33">tRCD</a>;
+<a name="l00476"></a><a class="code" href="classDRAMCtrl.html#a96c42cd586bf995db505fbb5c0252ac1">00476</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a96c42cd586bf995db505fbb5c0252ac1">tCL</a>;
+<a name="l00477"></a><a class="code" href="classDRAMCtrl.html#aa3828096d625ef4b6b497ce02b3fac85">00477</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#aa3828096d625ef4b6b497ce02b3fac85">tRP</a>;
+<a name="l00478"></a><a class="code" href="classDRAMCtrl.html#a91e2a0dae0024646d5cf40c844996bcc">00478</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a91e2a0dae0024646d5cf40c844996bcc">tRAS</a>;
+<a name="l00479"></a><a class="code" href="classDRAMCtrl.html#a3c3ee9ca057928cc876fc54a20356535">00479</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a3c3ee9ca057928cc876fc54a20356535">tWR</a>;
+<a name="l00480"></a><a class="code" href="classDRAMCtrl.html#a850e39d6fd527d4992315e86a8978292">00480</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a850e39d6fd527d4992315e86a8978292">tRTP</a>;
+<a name="l00481"></a><a class="code" href="classDRAMCtrl.html#ada7c680f071957137175c60c125b929a">00481</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#ada7c680f071957137175c60c125b929a">tRFC</a>;
+<a name="l00482"></a><a class="code" href="classDRAMCtrl.html#a2082aad1296022a7ff2d7b1a95bae882">00482</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a2082aad1296022a7ff2d7b1a95bae882">tREFI</a>;
+<a name="l00483"></a><a class="code" href="classDRAMCtrl.html#ac09c7763d97a33e93c89f266ed29df29">00483</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#ac09c7763d97a33e93c89f266ed29df29">tRRD</a>;
+<a name="l00484"></a><a class="code" href="classDRAMCtrl.html#a32fe8eab168b3a01214255fde6091e0b">00484</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a32fe8eab168b3a01214255fde6091e0b">tXAW</a>;
+<a name="l00485"></a><a class="code" href="classDRAMCtrl.html#aba56ec7c49633bf73f29b24ff6a18b38">00485</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#aba56ec7c49633bf73f29b24ff6a18b38">activationLimit</a>;
+<a name="l00486"></a>00486 
+<a name="l00491"></a><a class="code" href="classDRAMCtrl.html#a77153a963ea47f1f424595cbc94461e7">00491</a>     Enums::MemSched <a class="code" href="classDRAMCtrl.html#a77153a963ea47f1f424595cbc94461e7">memSchedPolicy</a>;
+<a name="l00492"></a><a class="code" href="classDRAMCtrl.html#a39c22fc32946a97479fd50b6d4db1ed0">00492</a>     Enums::AddrMap <a class="code" href="classDRAMCtrl.html#a39c22fc32946a97479fd50b6d4db1ed0">addrMapping</a>;
+<a name="l00493"></a><a class="code" href="classDRAMCtrl.html#a0ad0ee34c37f7b1694ad9aa4495c2c0f">00493</a>     Enums::PageManage <a class="code" href="classDRAMCtrl.html#a0ad0ee34c37f7b1694ad9aa4495c2c0f">pageMgmt</a>;
+<a name="l00494"></a>00494 
+<a name="l00499"></a><a class="code" href="classDRAMCtrl.html#ab0ff1e80c0fcb937ef53eee0175cbd13">00499</a>     <span class="keyword">const</span> <a class="code" href="Type_8hh.html#a435d1572bf3f880d55459d9805097f62">uint32_t</a> <a class="code" href="classDRAMCtrl.html#ab0ff1e80c0fcb937ef53eee0175cbd13">maxAccessesPerRow</a>;
+<a name="l00500"></a>00500 
+<a name="l00506"></a><a class="code" href="classDRAMCtrl.html#ad88c33e41f0bdc247328c7420c515f30">00506</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#ad88c33e41f0bdc247328c7420c515f30">frontendLatency</a>;
+<a name="l00507"></a>00507 
+<a name="l00513"></a><a class="code" href="classDRAMCtrl.html#af7b0d4000762b26f57e6bdbbdf45cf6d">00513</a>     <span class="keyword">const</span> <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#af7b0d4000762b26f57e6bdbbdf45cf6d">backendLatency</a>;
+<a name="l00514"></a>00514 
+<a name="l00518"></a><a class="code" href="classDRAMCtrl.html#a0a423ce73b4c78a0da7ce4ad9e60add6">00518</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a0a423ce73b4c78a0da7ce4ad9e60add6">busBusyUntil</a>;
+<a name="l00519"></a>00519 
+<a name="l00523"></a><a class="code" href="classDRAMCtrl.html#adee1f5c3afbe3ccf89880cde10ff9478">00523</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#adee1f5c3afbe3ccf89880cde10ff9478">refreshDueAt</a>;
+<a name="l00524"></a>00524 
+<a name="l00534"></a><a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5">00534</a>     <span class="keyword">enum</span> <a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5">RefreshState</a> {
+<a name="l00535"></a><a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5a0408d01a98c94c06e9b5f01e52b7e4b6">00535</a>         <a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5a0408d01a98c94c06e9b5f01e52b7e4b6">REF_IDLE</a> = 0,
+<a name="l00536"></a><a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5ad23d9d9efbe62841456648a9292a4e77">00536</a>         <a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5ad23d9d9efbe62841456648a9292a4e77">REF_DRAIN</a>,
+<a name="l00537"></a><a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5a24272ed749c86212cfa9092585b05592">00537</a>         <a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5a24272ed749c86212cfa9092585b05592">REF_PRE</a>,
+<a name="l00538"></a><a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5a590de673c457621a7d12606a2b2360f5">00538</a>         <a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5a590de673c457621a7d12606a2b2360f5">REF_RUN</a>
+<a name="l00539"></a>00539     };
+<a name="l00540"></a>00540 
+<a name="l00541"></a><a class="code" href="classDRAMCtrl.html#aa74cbca6192755f3cec9950a97c90342">00541</a>     <a class="code" href="classDRAMCtrl.html#a5f4b1f67c62d22fa4cb3ec1f98b8edf5">RefreshState</a> <a class="code" href="classDRAMCtrl.html#aa74cbca6192755f3cec9950a97c90342">refreshState</a>;
+<a name="l00542"></a>00542 
+<a name="l00554"></a><a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80">00554</a>     <span class="keyword">enum</span> <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80">PowerState</a> {
+<a name="l00555"></a><a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80ada4f1ff35db67e1783712214c08010f2">00555</a>         <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80ada4f1ff35db67e1783712214c08010f2">PWR_IDLE</a> = 0,
+<a name="l00556"></a><a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80a96cbccc90bf08cf55fb9ce1fde8fb984">00556</a>         <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80a96cbccc90bf08cf55fb9ce1fde8fb984">PWR_REF</a>,
+<a name="l00557"></a><a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80ad70441288ec3dbe4fb80e814a1342f18">00557</a>         <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80ad70441288ec3dbe4fb80e814a1342f18">PWR_PRE_PDN</a>,
+<a name="l00558"></a><a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80a7cdf09b08fcb323cdbd78014f98ab870">00558</a>         <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80a7cdf09b08fcb323cdbd78014f98ab870">PWR_ACT</a>,
+<a name="l00559"></a><a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80acb35a2366cd70ef3f0d263d22a3f3200">00559</a>         <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80acb35a2366cd70ef3f0d263d22a3f3200">PWR_ACT_PDN</a>
+<a name="l00560"></a>00560     };
+<a name="l00561"></a>00561 
+<a name="l00570"></a><a class="code" href="classDRAMCtrl.html#ab31f48c472ee16c28fc62b8be41b740e">00570</a>     <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80">PowerState</a> <a class="code" href="classDRAMCtrl.html#ab31f48c472ee16c28fc62b8be41b740e">pwrStateTrans</a>;
+<a name="l00571"></a>00571 
+<a name="l00575"></a><a class="code" href="classDRAMCtrl.html#a9c9c5adc18a56a35103536d6afddfd5f">00575</a>     <a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80">PowerState</a> <a class="code" href="classDRAMCtrl.html#a9c9c5adc18a56a35103536d6afddfd5f">pwrState</a>;
+<a name="l00576"></a>00576 
+<a name="l00584"></a>00584     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a233880f1f4b8f6455a2ff083dda871d3">schedulePowerEvent</a>(<a class="code" href="classDRAMCtrl.html#aa59b8ef6374ae587f3c228eba57bdf80">PowerState</a> pwr_state, <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classClockedObject.html#a4daae57fbf09ee5423d123f5ce330e92">tick</a>);
+<a name="l00585"></a>00585 
+<a name="l00586"></a><a class="code" href="classDRAMCtrl.html#ae3e56b38f5969512cd915824ec1d5740">00586</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#ae3e56b38f5969512cd915824ec1d5740">prevArrival</a>;
+<a name="l00587"></a>00587 
+<a name="l00594"></a><a class="code" href="classDRAMCtrl.html#a61a2436b0d2ca4872e69f76fecaeca7f">00594</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a61a2436b0d2ca4872e69f76fecaeca7f">nextReqTime</a>;
+<a name="l00595"></a>00595 
+<a name="l00596"></a>00596     <span class="comment">// All statistics that the model needs to capture</span>
+<a name="l00597"></a><a class="code" href="classDRAMCtrl.html#a8baa6fa0f23d432bebbbf1f3845c9cd5">00597</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a8baa6fa0f23d432bebbbf1f3845c9cd5">readReqs</a>;
+<a name="l00598"></a><a class="code" href="classDRAMCtrl.html#afb65580143c89e0011c2878c20e8ed0a">00598</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#afb65580143c89e0011c2878c20e8ed0a">writeReqs</a>;
+<a name="l00599"></a><a class="code" href="classDRAMCtrl.html#a342b92d18cc1b861071c5b596f127de8">00599</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a342b92d18cc1b861071c5b596f127de8">readBursts</a>;
+<a name="l00600"></a><a class="code" href="classDRAMCtrl.html#a14baa61a63ebc1c4ce4aa1930aa9ba50">00600</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a14baa61a63ebc1c4ce4aa1930aa9ba50">writeBursts</a>;
+<a name="l00601"></a><a class="code" href="classDRAMCtrl.html#a4409b60f101f8ea21148966043864074">00601</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a4409b60f101f8ea21148966043864074">bytesReadDRAM</a>;
+<a name="l00602"></a><a class="code" href="classDRAMCtrl.html#ae2ea884ed0a7e793cabc56748b833ed2">00602</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#ae2ea884ed0a7e793cabc56748b833ed2">bytesReadWrQ</a>;
+<a name="l00603"></a><a class="code" href="classDRAMCtrl.html#a98c4533d0a7053d00f6882f984ebdaef">00603</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a98c4533d0a7053d00f6882f984ebdaef">bytesWritten</a>;
+<a name="l00604"></a><a class="code" href="classDRAMCtrl.html#afd688f67c6a876a7b272e2ec9221fc8f">00604</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#afd688f67c6a876a7b272e2ec9221fc8f">bytesReadSys</a>;
+<a name="l00605"></a><a class="code" href="classDRAMCtrl.html#acaf3b49004885b5bc8d40fef342c14c1">00605</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#acaf3b49004885b5bc8d40fef342c14c1">bytesWrittenSys</a>;
+<a name="l00606"></a><a class="code" href="classDRAMCtrl.html#a234c092fa122ea27676236c3b6f11bcb">00606</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a234c092fa122ea27676236c3b6f11bcb">servicedByWrQ</a>;
+<a name="l00607"></a><a class="code" href="classDRAMCtrl.html#accaed2ab83bb63d6ddff7bfa861ea537">00607</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#accaed2ab83bb63d6ddff7bfa861ea537">mergedWrBursts</a>;
+<a name="l00608"></a><a class="code" href="classDRAMCtrl.html#a10a3647b9ff175594214578eece1e1f7">00608</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a10a3647b9ff175594214578eece1e1f7">neitherReadNorWrite</a>;
+<a name="l00609"></a><a class="code" href="classDRAMCtrl.html#a1a6c6b88a19805ae5453e5811633f884">00609</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDRAMCtrl.html#a1a6c6b88a19805ae5453e5811633f884">perBankRdBursts</a>;
+<a name="l00610"></a><a class="code" href="classDRAMCtrl.html#ae757d149b2ff05a908b6ceb28f53decc">00610</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDRAMCtrl.html#ae757d149b2ff05a908b6ceb28f53decc">perBankWrBursts</a>;
+<a name="l00611"></a><a class="code" href="classDRAMCtrl.html#acc056895269ee73447f6e9d814a22319">00611</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#acc056895269ee73447f6e9d814a22319">numRdRetry</a>;
+<a name="l00612"></a><a class="code" href="classDRAMCtrl.html#a961b9dc82d0ef2814dbdbc498a20e9b3">00612</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a961b9dc82d0ef2814dbdbc498a20e9b3">numWrRetry</a>;
+<a name="l00613"></a><a class="code" href="classDRAMCtrl.html#ad5c827068947b103cac8503aa45cf6e5">00613</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#ad5c827068947b103cac8503aa45cf6e5">totGap</a>;
+<a name="l00614"></a><a class="code" href="classDRAMCtrl.html#aee4577f07fe67bcc60ba3c504b35c9f3">00614</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDRAMCtrl.html#aee4577f07fe67bcc60ba3c504b35c9f3">readPktSize</a>;
+<a name="l00615"></a><a class="code" href="classDRAMCtrl.html#aecc027383223e3500a37a9646607df81">00615</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDRAMCtrl.html#aecc027383223e3500a37a9646607df81">writePktSize</a>;
+<a name="l00616"></a><a class="code" href="classDRAMCtrl.html#a34cdc0482a9faf13f94abb3a37fa90b8">00616</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDRAMCtrl.html#a34cdc0482a9faf13f94abb3a37fa90b8">rdQLenPdf</a>;
+<a name="l00617"></a><a class="code" href="classDRAMCtrl.html#ace3009d78850dc82f90724de8df96227">00617</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDRAMCtrl.html#ace3009d78850dc82f90724de8df96227">wrQLenPdf</a>;
+<a name="l00618"></a><a class="code" href="classDRAMCtrl.html#a097e6ef9437eaed0d05c3d0881455b1a">00618</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classDRAMCtrl.html#a097e6ef9437eaed0d05c3d0881455b1a">bytesPerActivate</a>;
+<a name="l00619"></a><a class="code" href="classDRAMCtrl.html#aff56c8c0df213e51ad714cb2b0df2de3">00619</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classDRAMCtrl.html#aff56c8c0df213e51ad714cb2b0df2de3">rdPerTurnAround</a>;
+<a name="l00620"></a><a class="code" href="classDRAMCtrl.html#a6f8f6528076f5f3f9d56b7658368a781">00620</a>     <a class="code" href="classStats_1_1Histogram.html">Stats::Histogram</a> <a class="code" href="classDRAMCtrl.html#a6f8f6528076f5f3f9d56b7658368a781">wrPerTurnAround</a>;
+<a name="l00621"></a>00621 
+<a name="l00622"></a>00622     <span class="comment">// Latencies summed over all requests</span>
+<a name="l00623"></a><a class="code" href="classDRAMCtrl.html#a3eea84ec922ff55ae38676da7222cd01">00623</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a3eea84ec922ff55ae38676da7222cd01">totQLat</a>;
+<a name="l00624"></a><a class="code" href="classDRAMCtrl.html#a9aa73ba3e536064d1686b6489e57a4bf">00624</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a9aa73ba3e536064d1686b6489e57a4bf">totMemAccLat</a>;
+<a name="l00625"></a><a class="code" href="classDRAMCtrl.html#abbb23dd61d5f4a897a59ea51328ad3fd">00625</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#abbb23dd61d5f4a897a59ea51328ad3fd">totBusLat</a>;
+<a name="l00626"></a>00626 
+<a name="l00627"></a>00627     <span class="comment">// Average latencies per request</span>
+<a name="l00628"></a><a class="code" href="classDRAMCtrl.html#ad594e3077a6ad256f07ab26b96b34c5f">00628</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#ad594e3077a6ad256f07ab26b96b34c5f">avgQLat</a>;
+<a name="l00629"></a><a class="code" href="classDRAMCtrl.html#ad2f8163270cbb3392f2e10fb6c4f78c4">00629</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#ad2f8163270cbb3392f2e10fb6c4f78c4">avgBusLat</a>;
+<a name="l00630"></a><a class="code" href="classDRAMCtrl.html#ac7abb815f3daf254a44904528d4e816b">00630</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#ac7abb815f3daf254a44904528d4e816b">avgMemAccLat</a>;
+<a name="l00631"></a>00631 
+<a name="l00632"></a>00632     <span class="comment">// Average bandwidth</span>
+<a name="l00633"></a><a class="code" href="classDRAMCtrl.html#a28dfaaa96a94257709a4f53f65ff6de8">00633</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a28dfaaa96a94257709a4f53f65ff6de8">avgRdBW</a>;
+<a name="l00634"></a><a class="code" href="classDRAMCtrl.html#a286267c923c741d2fb82bdf8e76ed309">00634</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a286267c923c741d2fb82bdf8e76ed309">avgWrBW</a>;
+<a name="l00635"></a><a class="code" href="classDRAMCtrl.html#a22abe27ebad6f2dff8823abcbfd821b8">00635</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a22abe27ebad6f2dff8823abcbfd821b8">avgRdBWSys</a>;
+<a name="l00636"></a><a class="code" href="classDRAMCtrl.html#ab3ccc99d9b3a33a2783095e6299af1d8">00636</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#ab3ccc99d9b3a33a2783095e6299af1d8">avgWrBWSys</a>;
+<a name="l00637"></a><a class="code" href="classDRAMCtrl.html#af80252f1fcfad371b526eac5f9bf7e4f">00637</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#af80252f1fcfad371b526eac5f9bf7e4f">peakBW</a>;
+<a name="l00638"></a><a class="code" href="classDRAMCtrl.html#a32757323249e0ec2fd96e77d543fc60d">00638</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a32757323249e0ec2fd96e77d543fc60d">busUtil</a>;
+<a name="l00639"></a><a class="code" href="classDRAMCtrl.html#a578cf14141a41ca0c302331cf1641d4a">00639</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a578cf14141a41ca0c302331cf1641d4a">busUtilRead</a>;
+<a name="l00640"></a><a class="code" href="classDRAMCtrl.html#a414d3be953606d246b346cc75032e7d5">00640</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a414d3be953606d246b346cc75032e7d5">busUtilWrite</a>;
+<a name="l00641"></a>00641 
+<a name="l00642"></a>00642     <span class="comment">// Average queue lengths</span>
+<a name="l00643"></a><a class="code" href="classDRAMCtrl.html#ab0f0022a38b8ccefd6d4d17ed434fcea">00643</a>     <a class="code" href="classStats_1_1Average.html">Stats::Average</a> <a class="code" href="classDRAMCtrl.html#ab0f0022a38b8ccefd6d4d17ed434fcea">avgRdQLen</a>;
+<a name="l00644"></a><a class="code" href="classDRAMCtrl.html#a4cdec63bcb455cfe5f1d8e6db40b66f5">00644</a>     <a class="code" href="classStats_1_1Average.html">Stats::Average</a> <a class="code" href="classDRAMCtrl.html#a4cdec63bcb455cfe5f1d8e6db40b66f5">avgWrQLen</a>;
+<a name="l00645"></a>00645 
+<a name="l00646"></a>00646     <span class="comment">// Row hit count and rate</span>
+<a name="l00647"></a><a class="code" href="classDRAMCtrl.html#a7f3862d0c1944536c2ec30b0d012e288">00647</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a7f3862d0c1944536c2ec30b0d012e288">readRowHits</a>;
+<a name="l00648"></a><a class="code" href="classDRAMCtrl.html#a5b75e7220ef0da8a50fe5777a9a1ae52">00648</a>     <a class="code" href="classStats_1_1Scalar.html">Stats::Scalar</a> <a class="code" href="classDRAMCtrl.html#a5b75e7220ef0da8a50fe5777a9a1ae52">writeRowHits</a>;
+<a name="l00649"></a><a class="code" href="classDRAMCtrl.html#a085bc7747d9a41218a9de406bf814c64">00649</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a085bc7747d9a41218a9de406bf814c64">readRowHitRate</a>;
+<a name="l00650"></a><a class="code" href="classDRAMCtrl.html#ae193ec834aceec0ed536dc53ec409f22">00650</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#ae193ec834aceec0ed536dc53ec409f22">writeRowHitRate</a>;
+<a name="l00651"></a><a class="code" href="classDRAMCtrl.html#ab29b83e3d43dd519d59172a842b673a3">00651</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#ab29b83e3d43dd519d59172a842b673a3">avgGap</a>;
+<a name="l00652"></a>00652 
+<a name="l00653"></a>00653     <span class="comment">// DRAM Power Calculation</span>
+<a name="l00654"></a><a class="code" href="classDRAMCtrl.html#a8ec7f3dd4d238e4283760a15dc16c965">00654</a>     <a class="code" href="classStats_1_1Formula.html">Stats::Formula</a> <a class="code" href="classDRAMCtrl.html#a8ec7f3dd4d238e4283760a15dc16c965">pageHitRate</a>;
+<a name="l00655"></a><a class="code" href="classDRAMCtrl.html#ad084b0fe354d053d0f369a72b8559291">00655</a>     <a class="code" href="classStats_1_1Vector.html">Stats::Vector</a> <a class="code" href="classDRAMCtrl.html#ad084b0fe354d053d0f369a72b8559291">pwrStateTime</a>;
+<a name="l00656"></a>00656 
+<a name="l00657"></a>00657     <span class="comment">// Track when we transitioned to the current power state</span>
+<a name="l00658"></a><a class="code" href="classDRAMCtrl.html#a06e80ba25d388ee981f9c88e27e189df">00658</a>     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a06e80ba25d388ee981f9c88e27e189df">pwrStateTick</a>;
+<a name="l00659"></a>00659 
+<a name="l00660"></a>00660     <span class="comment">// To track number of banks which are currently active</span>
+<a name="l00661"></a><a class="code" href="classDRAMCtrl.html#a2742d81312b2f4e257aaa3690989bc88">00661</a>     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDRAMCtrl.html#a2742d81312b2f4e257aaa3690989bc88">numBanksActive</a>;
+<a name="l00662"></a>00662 
+<a name="l00667"></a><a class="code" href="classDRAMCtrl.html#a21da4bea3554874b557428e4cce5d4a4">00667</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;PacketPtr&gt;</a> <a class="code" href="classDRAMCtrl.html#a21da4bea3554874b557428e4cce5d4a4">pendingDelete</a>;
+<a name="l00668"></a>00668 
+<a name="l00669"></a>00669   <span class="keyword">public</span>:
+<a name="l00670"></a>00670 
+<a name="l00671"></a>00671     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a4dc637449366fcdfc4e764cdf12d9b11">regStats</a>();
+<a name="l00672"></a>00672 
+<a name="l00673"></a>00673     <a class="code" href="classDRAMCtrl.html#af86a9f0ba5b3737e1a7ba1f97dbf0e91">DRAMCtrl</a>(<span class="keyword">const</span> DRAMCtrlParams* <a class="code" href="namespaceMipsISA.html#a37d3f683959086eac7bcf24a002a9fb8">p</a>);
+<a name="l00674"></a>00674 
+<a name="l00675"></a>00675     <span class="keywordtype">unsigned</span> <span class="keywordtype">int</span> <a class="code" href="classDRAMCtrl.html#aa8a18d230dba7a674ac8a0b4f35bc36a">drain</a>(<a class="code" href="classDrainManager.html">DrainManager</a>* <a class="code" href="namespaceMipsISA.html#a2575c29e7f4617b6076486f340b6fe19">dm</a>);
+<a name="l00676"></a>00676 
+<a name="l00677"></a>00677     <span class="keyword">virtual</span> <a class="code" href="classBaseSlavePort.html">BaseSlavePort</a>&amp; <a class="code" href="classDRAMCtrl.html#a4edba7d5e567b66fcd93297802a97077">getSlavePort</a>(<span class="keyword">const</span> std::string&amp; if_name,
+<a name="l00678"></a>00678                                         <a class="code" href="base_2types_8hh.html#acef4d7d41cb21fdc252e20c04cd7bb8e">PortID</a> idx = <a class="code" href="base_2types_8hh.html#a65bf40f138cf863f0c5e2d8ca1144126">InvalidPortID</a>);
+<a name="l00679"></a>00679 
+<a name="l00680"></a>00680     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#a02fd73d861ef2e4aabb38c0c9ff82947">init</a>();
+<a name="l00681"></a>00681     <span class="keyword">virtual</span> <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#aecc7d8debf54990ffeaaed5bac7d7d81">startup</a>();
+<a name="l00682"></a>00682 
+<a name="l00683"></a>00683   <span class="keyword">protected</span>:
+<a name="l00684"></a>00684 
+<a name="l00685"></a>00685     <a class="code" href="base_2types_8hh.html#a5c8ed81b7d238c9083e1037ba6d61643">Tick</a> <a class="code" href="classDRAMCtrl.html#a5f0b4c4a94f6b0053f9d7a4eb9c2518a">recvAtomic</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00686"></a>00686     <span class="keywordtype">void</span> <a class="code" href="classDRAMCtrl.html#aeefa907fb6d6a787e6dab90e8138ea90">recvFunctional</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00687"></a>00687     <span class="keywordtype">bool</span> <a class="code" href="classDRAMCtrl.html#a3344d9dd0f83257feab5424e761f31c6">recvTimingReq</a>(<a class="code" href="classPacket.html">PacketPtr</a> pkt);
+<a name="l00688"></a>00688 
+<a name="l00689"></a>00689 };
+<a name="l00690"></a>00690 
+<a name="l00691"></a>00691 <span class="preprocessor">#endif //__MEM_DRAM_CTRL_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

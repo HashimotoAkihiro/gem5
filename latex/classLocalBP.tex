@@ -1,0 +1,321 @@
+\hypertarget{classLocalBP}{
+\section{クラス LocalBP}
+\label{classLocalBP}\index{LocalBP@{LocalBP}}
+}
+
+
+{\ttfamily \#include $<$2bit\_\-local.hh$>$}LocalBPに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classLocalBP}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classLocalBP_aec0c0965d267585d311300273d8976d0}{LocalBP} (const \hyperlink{classBPredUnit_aa715df0f49f029439cca4c7bd6e3d4fb}{Params} $\ast$params)
+\item 
+virtual void \hyperlink{classLocalBP_ad3d898a5eab93d923a1073fe6a0f0030}{uncondBranch} (void $\ast$\&bp\_\-history)
+\item 
+bool \hyperlink{classLocalBP_a9c30d728e49473b5a3825835e98a10bc}{lookup} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} branch\_\-addr, void $\ast$\&bp\_\-history)
+\item 
+void \hyperlink{classLocalBP_a101ada238eecd07cc6905c60272e2693}{btbUpdate} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} branch\_\-addr, void $\ast$\&bp\_\-history)
+\item 
+void \hyperlink{classLocalBP_a590e0fd17d5b663e25f0e956fadc7062}{update} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} branch\_\-addr, bool taken, void $\ast$bp\_\-history, bool squashed)
+\item 
+void \hyperlink{classLocalBP_aeb215cee5cdccdf52d02b73fffe80220}{squash} (void $\ast$bp\_\-history)
+\item 
+void \hyperlink{classLocalBP_ad20897c5c8bd47f5d4005989bead0e55}{reset} ()
+\end{DoxyCompactItemize}
+\subsection*{Private メソッド}
+\begin{DoxyCompactItemize}
+\item 
+bool \hyperlink{classLocalBP_ad0f11a4da5ded93ef111f9d8a1d40a54}{getPrediction} (uint8\_\-t \&count)
+\item 
+unsigned \hyperlink{classLocalBP_a60ccaea333f32c53f3645a2f7c7e6737}{getLocalIndex} (\hyperlink{base_2types_8hh_af1bb03d6a4ee096394a6749f0a169232}{Addr} \&PC)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classstd_1_1vector}{std::vector}$<$ \hyperlink{classSatCounter}{SatCounter} $>$ \hyperlink{classLocalBP_a639a100e0452520604d19db58d98721d}{localCtrs}
+\item 
+unsigned \hyperlink{classLocalBP_ad980634448337df2bf521bc96fd5653d}{localPredictorSize}
+\item 
+unsigned \hyperlink{classLocalBP_a82806c3c6e4b9e285b11f8739a692665}{localPredictorSets}
+\item 
+unsigned \hyperlink{classLocalBP_a815998927bcd79afe7f787b90f9954f5}{localCtrBits}
+\item 
+unsigned \hyperlink{classLocalBP_a8ad2ee60a6143561753205840ad144e7}{instShiftAmt}
+\item 
+unsigned \hyperlink{classLocalBP_af74847baefa86f9623cf55bb28803c99}{indexMask}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Implements a local predictor that uses the PC to index into a table of counters. Note that any time a pointer to the bp\_\-history is given, it should be NULL using this predictor because it does not have any branch predictor state that needs to be recorded or updated; the update can be determined solely by the branch being taken or not taken. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classLocalBP_aec0c0965d267585d311300273d8976d0}{
+\index{LocalBP@{LocalBP}!LocalBP@{LocalBP}}
+\index{LocalBP@{LocalBP}!LocalBP@{LocalBP}}
+\subsubsection[{LocalBP}]{\setlength{\rightskip}{0pt plus 5cm}{\bf LocalBP} (const {\bf Params} $\ast$ {\em params})}}
+\label{classLocalBP_aec0c0965d267585d311300273d8976d0}
+Default branch predictor constructor. 
+
+
+\begin{DoxyCode}
+38     : BPredUnit(params),
+39       localPredictorSize(params->localPredictorSize),
+40       localCtrBits(params->localCtrBits),
+41       instShiftAmt(params->instShiftAmt)
+42 {
+43     if (!isPowerOf2(localPredictorSize)) {
+44         fatal("Invalid local predictor size!\n");
+45     }
+46 
+47     localPredictorSets = localPredictorSize / localCtrBits;
+48 
+49     if (!isPowerOf2(localPredictorSets)) {
+50         fatal("Invalid number of local predictor sets! Check localCtrBits.\n");
+51     }
+52 
+53     // Setup the index mask.
+54     indexMask = localPredictorSets - 1;
+55 
+56     DPRINTF(Fetch, "index mask: %#x\n", indexMask);
+57 
+58     // Setup the array of counters for the local predictor.
+59     localCtrs.resize(localPredictorSets);
+60 
+61     for (unsigned i = 0; i < localPredictorSets; ++i)
+62         localCtrs[i].setBits(localCtrBits);
+63 
+64     DPRINTF(Fetch, "local predictor size: %i\n",
+65             localPredictorSize);
+66 
+67     DPRINTF(Fetch, "local counter bits: %i\n", localCtrBits);
+68 
+69     DPRINTF(Fetch, "instruction shift amount: %i\n",
+70             instShiftAmt);
+71 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classLocalBP_a101ada238eecd07cc6905c60272e2693}{
+\index{LocalBP@{LocalBP}!btbUpdate@{btbUpdate}}
+\index{btbUpdate@{btbUpdate}!LocalBP@{LocalBP}}
+\subsubsection[{btbUpdate}]{\setlength{\rightskip}{0pt plus 5cm}void btbUpdate ({\bf Addr} {\em branch\_\-addr}, \/  void $\ast$\& {\em bp\_\-history})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classLocalBP_a101ada238eecd07cc6905c60272e2693}
+Updates the branch predictor to Not Taken if a BTB entry is invalid or not found. 
+\begin{DoxyParams}{引数}
+\item[{\em branch\_\-addr}]The address of the branch to look up. \item[{\em bp\_\-history}]Pointer to any bp history state. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Whether or not the branch is taken. 
+\end{DoxyReturn}
+
+
+\hyperlink{classBPredUnit_a7b687ebde63095b00a0b083ba6607cd4}{BPredUnit}を実装しています。
+
+
+\begin{DoxyCode}
+83 {
+84 // Place holder for a function that is called to update predictor history when
+85 // a BTB entry is invalid or not found.
+86 }
+\end{DoxyCode}
+\hypertarget{classLocalBP_a60ccaea333f32c53f3645a2f7c7e6737}{
+\index{LocalBP@{LocalBP}!getLocalIndex@{getLocalIndex}}
+\index{getLocalIndex@{getLocalIndex}!LocalBP@{LocalBP}}
+\subsubsection[{getLocalIndex}]{\setlength{\rightskip}{0pt plus 5cm}unsigned getLocalIndex ({\bf Addr} \& {\em PC})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classLocalBP_a60ccaea333f32c53f3645a2f7c7e6737}
+Calculates the local index based on the PC. 
+
+
+\begin{DoxyCode}
+151 {
+152     return (branch_addr >> instShiftAmt) & indexMask;
+153 }
+\end{DoxyCode}
+\hypertarget{classLocalBP_ad0f11a4da5ded93ef111f9d8a1d40a54}{
+\index{LocalBP@{LocalBP}!getPrediction@{getPrediction}}
+\index{getPrediction@{getPrediction}!LocalBP@{LocalBP}}
+\subsubsection[{getPrediction}]{\setlength{\rightskip}{0pt plus 5cm}bool getPrediction (uint8\_\-t \& {\em count})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, private\mbox{]}}}}
+\label{classLocalBP_ad0f11a4da5ded93ef111f9d8a1d40a54}
+Returns the taken/not taken prediction given the value of the counter. 
+\begin{DoxyParams}{引数}
+\item[{\em count}]The value of the counter. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+The prediction based on the counter value. 
+\end{DoxyReturn}
+
+
+
+\begin{DoxyCode}
+143 {
+144     // Get the MSB of the count
+145     return (count >> (localCtrBits - 1));
+146 }
+\end{DoxyCode}
+\hypertarget{classLocalBP_a9c30d728e49473b5a3825835e98a10bc}{
+\index{LocalBP@{LocalBP}!lookup@{lookup}}
+\index{lookup@{lookup}!LocalBP@{LocalBP}}
+\subsubsection[{lookup}]{\setlength{\rightskip}{0pt plus 5cm}bool lookup ({\bf Addr} {\em branch\_\-addr}, \/  void $\ast$\& {\em bp\_\-history})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classLocalBP_a9c30d728e49473b5a3825835e98a10bc}
+Looks up the given address in the branch predictor and returns a true/false value as to whether it is taken. 
+\begin{DoxyParams}{引数}
+\item[{\em branch\_\-addr}]The address of the branch to look up. \item[{\em bp\_\-history}]Pointer to any bp history state. \end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+Whether or not the branch is taken. 
+\end{DoxyReturn}
+
+
+\hyperlink{classBPredUnit_a5632fdea0abc34f7d68d8445a7a6c166}{BPredUnit}を実装しています。
+
+
+\begin{DoxyCode}
+91 {
+92     bool taken;
+93     uint8_t counter_val;
+94     unsigned local_predictor_idx = getLocalIndex(branch_addr);
+95 
+96     DPRINTF(Fetch, "Looking up index %#x\n",
+97             local_predictor_idx);
+98 
+99     counter_val = localCtrs[local_predictor_idx].read();
+100 
+101     DPRINTF(Fetch, "prediction is %i.\n",
+102             (int)counter_val);
+103 
+104     taken = getPrediction(counter_val);
+105 
+106 #if 0
+107     // Speculative update.
+108     if (taken) {
+109         DPRINTF(Fetch, "Branch updated as taken.\n");
+110         localCtrs[local_predictor_idx].increment();
+111     } else {
+112         DPRINTF(Fetch, "Branch updated as not taken.\n");
+113         localCtrs[local_predictor_idx].decrement();
+114     }
+115 #endif
+116 
+117     return taken;
+118 }
+\end{DoxyCode}
+\hypertarget{classLocalBP_ad20897c5c8bd47f5d4005989bead0e55}{
+\index{LocalBP@{LocalBP}!reset@{reset}}
+\index{reset@{reset}!LocalBP@{LocalBP}}
+\subsubsection[{reset}]{\setlength{\rightskip}{0pt plus 5cm}void reset ()}}
+\label{classLocalBP_ad20897c5c8bd47f5d4005989bead0e55}
+
+
+
+\begin{DoxyCode}
+75 {
+76     for (unsigned i = 0; i < localPredictorSets; ++i) {
+77         localCtrs[i].reset();
+78     }
+79 }
+\end{DoxyCode}
+\hypertarget{classLocalBP_aeb215cee5cdccdf52d02b73fffe80220}{
+\index{LocalBP@{LocalBP}!squash@{squash}}
+\index{squash@{squash}!LocalBP@{LocalBP}}
+\subsubsection[{squash}]{\setlength{\rightskip}{0pt plus 5cm}void squash (void $\ast$ {\em bp\_\-history})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classLocalBP_aeb215cee5cdccdf52d02b73fffe80220}
+
+\begin{DoxyParams}{引数}
+\item[{\em bp\_\-history}]Pointer to the history object. The predictor will need to update any state and delete the object. \end{DoxyParams}
+
+
+\hyperlink{classBPredUnit_a2af63ba741727bdf58e2b2dc22a912ed}{BPredUnit}を実装しています。
+
+
+\begin{DoxyCode}
+96     { assert(bp_history == NULL); }
+\end{DoxyCode}
+\hypertarget{classLocalBP_ad3d898a5eab93d923a1073fe6a0f0030}{
+\index{LocalBP@{LocalBP}!uncondBranch@{uncondBranch}}
+\index{uncondBranch@{uncondBranch}!LocalBP@{LocalBP}}
+\subsubsection[{uncondBranch}]{\setlength{\rightskip}{0pt plus 5cm}void uncondBranch (void $\ast$\& {\em bp\_\-history})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classLocalBP_ad3d898a5eab93d923a1073fe6a0f0030}
+
+
+\hyperlink{classBPredUnit_a17161e0c51444f148e49e4df2ba89704}{BPredUnit}を実装しています。
+
+
+\begin{DoxyCode}
+157 {
+158 }
+\end{DoxyCode}
+\hypertarget{classLocalBP_a590e0fd17d5b663e25f0e956fadc7062}{
+\index{LocalBP@{LocalBP}!update@{update}}
+\index{update@{update}!LocalBP@{LocalBP}}
+\subsubsection[{update}]{\setlength{\rightskip}{0pt plus 5cm}void update ({\bf Addr} {\em branch\_\-addr}, \/  bool {\em taken}, \/  void $\ast$ {\em bp\_\-history}, \/  bool {\em squashed})\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classLocalBP_a590e0fd17d5b663e25f0e956fadc7062}
+Updates the branch predictor with the actual result of a branch. 
+\begin{DoxyParams}{引数}
+\item[{\em branch\_\-addr}]The address of the branch to update. \item[{\em taken}]Whether or not the branch was taken. \end{DoxyParams}
+
+
+\hyperlink{classBPredUnit_ab00dd76dc9f830cdae0edc72357c013a}{BPredUnit}を実装しています。
+
+
+\begin{DoxyCode}
+122 {
+123     assert(bp_history == NULL);
+124     unsigned local_predictor_idx;
+125 
+126     // Update the local predictor.
+127     local_predictor_idx = getLocalIndex(branch_addr);
+128 
+129     DPRINTF(Fetch, "Looking up index %#x\n", local_predictor_idx);
+130 
+131     if (taken) {
+132         DPRINTF(Fetch, "Branch updated as taken.\n");
+133         localCtrs[local_predictor_idx].increment();
+134     } else {
+135         DPRINTF(Fetch, "Branch updated as not taken.\n");
+136         localCtrs[local_predictor_idx].decrement();
+137     }
+138 }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classLocalBP_af74847baefa86f9623cf55bb28803c99}{
+\index{LocalBP@{LocalBP}!indexMask@{indexMask}}
+\index{indexMask@{indexMask}!LocalBP@{LocalBP}}
+\subsubsection[{indexMask}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf indexMask}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLocalBP_af74847baefa86f9623cf55bb28803c99}
+Mask to get index bits. \hypertarget{classLocalBP_a8ad2ee60a6143561753205840ad144e7}{
+\index{LocalBP@{LocalBP}!instShiftAmt@{instShiftAmt}}
+\index{instShiftAmt@{instShiftAmt}!LocalBP@{LocalBP}}
+\subsubsection[{instShiftAmt}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf instShiftAmt}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLocalBP_a8ad2ee60a6143561753205840ad144e7}
+Number of bits to shift the PC when calculating index. \hypertarget{classLocalBP_a815998927bcd79afe7f787b90f9954f5}{
+\index{LocalBP@{LocalBP}!localCtrBits@{localCtrBits}}
+\index{localCtrBits@{localCtrBits}!LocalBP@{LocalBP}}
+\subsubsection[{localCtrBits}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf localCtrBits}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLocalBP_a815998927bcd79afe7f787b90f9954f5}
+Number of bits of the local predictor's counters. \hypertarget{classLocalBP_a639a100e0452520604d19db58d98721d}{
+\index{LocalBP@{LocalBP}!localCtrs@{localCtrs}}
+\index{localCtrs@{localCtrs}!LocalBP@{LocalBP}}
+\subsubsection[{localCtrs}]{\setlength{\rightskip}{0pt plus 5cm}{\bf std::vector}$<${\bf SatCounter}$>$ {\bf localCtrs}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLocalBP_a639a100e0452520604d19db58d98721d}
+Array of counters that make up the local predictor. \hypertarget{classLocalBP_a82806c3c6e4b9e285b11f8739a692665}{
+\index{LocalBP@{LocalBP}!localPredictorSets@{localPredictorSets}}
+\index{localPredictorSets@{localPredictorSets}!LocalBP@{LocalBP}}
+\subsubsection[{localPredictorSets}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf localPredictorSets}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLocalBP_a82806c3c6e4b9e285b11f8739a692665}
+Number of sets. \hypertarget{classLocalBP_ad980634448337df2bf521bc96fd5653d}{
+\index{LocalBP@{LocalBP}!localPredictorSize@{localPredictorSize}}
+\index{localPredictorSize@{localPredictorSize}!LocalBP@{LocalBP}}
+\subsubsection[{localPredictorSize}]{\setlength{\rightskip}{0pt plus 5cm}unsigned {\bf localPredictorSize}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classLocalBP_ad980634448337df2bf521bc96fd5653d}
+Size of the local predictor. 
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+cpu/pred/\hyperlink{2bit__local_8hh}{2bit\_\-local.hh}\item 
+cpu/pred/\hyperlink{2bit__local_8cc}{2bit\_\-local.cc}\end{DoxyCompactItemize}

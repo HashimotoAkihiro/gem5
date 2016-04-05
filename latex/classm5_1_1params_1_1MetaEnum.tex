@@ -1,0 +1,191 @@
+\hypertarget{classm5_1_1params_1_1MetaEnum}{
+\section{クラス MetaEnum}
+\label{classm5_1_1params_1_1MetaEnum}\index{m5::params::MetaEnum@{m5::params::MetaEnum}}
+}
+MetaEnumに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2cm]{classm5_1_1params_1_1MetaEnum}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classm5_1_1params_1_1MetaEnum_a2f15a4676204349e06bcced484b06b70}{\_\-\_\-new\_\-\_\-}
+\item 
+def \hyperlink{classm5_1_1params_1_1MetaEnum_ac775ee34451fdfa742b318538164070e}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classm5_1_1params_1_1MetaEnum_a723cbb1dc9ae0e7f3d102c6678f181c0}{cxx\_\-decl}
+\item 
+def \hyperlink{classm5_1_1params_1_1MetaEnum_a52673dd9e1546665069ec8891e00eeb8}{cxx\_\-def}
+\item 
+def \hyperlink{classm5_1_1params_1_1MetaEnum_a83526365333b680bfcbd9b037527cc25}{swig\_\-decl}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classm5_1_1params_1_1MetaEnum_ac775ee34451fdfa742b318538164070e}{
+\index{m5::params::MetaEnum@{m5::params::MetaEnum}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!m5::params::MetaEnum@{m5::params::MetaEnum}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-init\_\-\_\- ( {\em cls}, \/   {\em name}, \/   {\em bases}, \/   {\em init\_\-dict})}}
+\label{classm5_1_1params_1_1MetaEnum_ac775ee34451fdfa742b318538164070e}
+
+
+
+\begin{DoxyCode}
+1017                                              :
+1018         if init_dict.has_key('map'):
+1019             if not isinstance(cls.map, dict):
+1020                 raise TypeError, "Enum-derived class attribute 'map' " \
+1021                       "must be of type dict"
+1022             # build list of value strings from map
+1023             cls.vals = cls.map.keys()
+1024             cls.vals.sort()
+1025         elif init_dict.has_key('vals'):
+1026             if not isinstance(cls.vals, list):
+1027                 raise TypeError, "Enum-derived class attribute 'vals' " \
+1028                       "must be of type list"
+1029             # build string->value map from vals sequence
+1030             cls.map = {}
+1031             for idx,val in enumerate(cls.vals):
+1032                 cls.map[val] = idx
+1033         else:
+1034             raise TypeError, "Enum-derived class must define "\
+1035                   "attribute 'map' or 'vals'"
+1036 
+1037         cls.cxx_type = 'Enums::%s' % name
+1038 
+1039         super(MetaEnum, cls).__init__(name, bases, init_dict)
+1040 
+1041     # Generate C++ class declaration for this enum type.
+1042     # Note that we wrap the enum in a class/struct to act as a namespace,
+1043     # so that the enum strings can be brief w/o worrying about collisions.
+    def cxx_decl(cls, code):
+\end{DoxyCode}
+\hypertarget{classm5_1_1params_1_1MetaEnum_a2f15a4676204349e06bcced484b06b70}{
+\index{m5::params::MetaEnum@{m5::params::MetaEnum}!\_\-\_\-new\_\-\_\-@{\_\-\_\-new\_\-\_\-}}
+\index{\_\-\_\-new\_\-\_\-@{\_\-\_\-new\_\-\_\-}!m5::params::MetaEnum@{m5::params::MetaEnum}}
+\subsubsection[{\_\-\_\-new\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-new\_\-\_\- ( {\em mcls}, \/   {\em name}, \/   {\em bases}, \/   {\em dict})}}
+\label{classm5_1_1params_1_1MetaEnum_a2f15a4676204349e06bcced484b06b70}
+
+
+\hyperlink{classm5_1_1params_1_1MetaParamValue_a2f15a4676204349e06bcced484b06b70}{MetaParamValue}を再定義しています。
+
+
+\begin{DoxyCode}
+1010                                         :
+1011         assert name not in allEnums
+1012 
+1013         cls = super(MetaEnum, mcls).__new__(mcls, name, bases, dict)
+1014         allEnums[name] = cls
+1015         return cls
+1016 
+    def __init__(cls, name, bases, init_dict):
+\end{DoxyCode}
+\hypertarget{classm5_1_1params_1_1MetaEnum_a723cbb1dc9ae0e7f3d102c6678f181c0}{
+\index{m5::params::MetaEnum@{m5::params::MetaEnum}!cxx\_\-decl@{cxx\_\-decl}}
+\index{cxx\_\-decl@{cxx\_\-decl}!m5::params::MetaEnum@{m5::params::MetaEnum}}
+\subsubsection[{cxx\_\-decl}]{\setlength{\rightskip}{0pt plus 5cm}def cxx\_\-decl ( {\em cls}, \/   {\em code})}}
+\label{classm5_1_1params_1_1MetaEnum_a723cbb1dc9ae0e7f3d102c6678f181c0}
+
+
+
+\begin{DoxyCode}
+1044                            :
+1045         wrapper_name = cls.wrapper_name
+1046         wrapper = 'struct' if cls.wrapper_is_struct else 'namespace'
+1047         name = cls.__name__ if cls.enum_name is None else cls.enum_name
+1048         idem_macro = '__ENUM__%s__%s__' % (wrapper_name, name)
+1049 
+1050         code('''\
+1051 #ifndef $idem_macro
+1052 #define $idem_macro
+1053 
+1054 $wrapper $wrapper_name {
+1055     enum $name {
+1056 ''')
+1057         code.indent(2)
+1058         for val in cls.vals:
+1059             code('$val = ${{cls.map[val]}},')
+1060         code('Num_$name = ${{len(cls.vals)}}')
+1061         code.dedent(2)
+1062         code('    };')
+1063 
+1064         if cls.wrapper_is_struct:
+1065             code('    static const char *${name}Strings[Num_${name}];')
+1066             code('};')
+1067         else:
+1068             code('extern const char *${name}Strings[Num_${name}];')
+1069             code('}')
+1070 
+1071         code()
+1072         code('#endif // $idem_macro')
+1073 
+    def cxx_def(cls, code):
+\end{DoxyCode}
+\hypertarget{classm5_1_1params_1_1MetaEnum_a52673dd9e1546665069ec8891e00eeb8}{
+\index{m5::params::MetaEnum@{m5::params::MetaEnum}!cxx\_\-def@{cxx\_\-def}}
+\index{cxx\_\-def@{cxx\_\-def}!m5::params::MetaEnum@{m5::params::MetaEnum}}
+\subsubsection[{cxx\_\-def}]{\setlength{\rightskip}{0pt plus 5cm}def cxx\_\-def ( {\em cls}, \/   {\em code})}}
+\label{classm5_1_1params_1_1MetaEnum_a52673dd9e1546665069ec8891e00eeb8}
+
+
+
+\begin{DoxyCode}
+1074                           :
+1075         wrapper_name = cls.wrapper_name
+1076         file_name = cls.__name__
+1077         name = cls.__name__ if cls.enum_name is None else cls.enum_name
+1078 
+1079         code('#include "enums/$file_name.hh"')
+1080         if cls.wrapper_is_struct:
+1081             code('const char *${wrapper_name}::${name}Strings'
+1082                 '[Num_${name}] =')
+1083         else:
+1084             code('namespace Enums {')
+1085             code.indent(1)
+1086             code(' const char *${name}Strings[Num_${name}] =')
+1087 
+1088         code('{')
+1089         code.indent(1)
+1090         for val in cls.vals:
+1091             code('"$val",')
+1092         code.dedent(1)
+1093         code('};')
+1094 
+1095         if not cls.wrapper_is_struct:
+1096             code('} // namespace $wrapper_name')
+1097             code.dedent(1)
+1098 
+    def swig_decl(cls, code):
+\end{DoxyCode}
+\hypertarget{classm5_1_1params_1_1MetaEnum_a83526365333b680bfcbd9b037527cc25}{
+\index{m5::params::MetaEnum@{m5::params::MetaEnum}!swig\_\-decl@{swig\_\-decl}}
+\index{swig\_\-decl@{swig\_\-decl}!m5::params::MetaEnum@{m5::params::MetaEnum}}
+\subsubsection[{swig\_\-decl}]{\setlength{\rightskip}{0pt plus 5cm}def swig\_\-decl ( {\em cls}, \/   {\em code})}}
+\label{classm5_1_1params_1_1MetaEnum_a83526365333b680bfcbd9b037527cc25}
+
+
+
+\begin{DoxyCode}
+1099                             :
+1100         name = cls.__name__
+1101         code('''\
+1102 %module(package="m5.internal") enum_$name
+1103 
+1104 %{
+1105 #include "enums/$name.hh"
+1106 %}
+1107 
+1108 %include "enums/$name.hh"
+1109 ''')
+1110 
+1111 
+1112 # Base class for enum types.
+class Enum(ParamValue):
+\end{DoxyCode}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+python/m5/\hyperlink{params_8py}{params.py}\end{DoxyCompactItemize}

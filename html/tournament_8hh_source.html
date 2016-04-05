@@ -1,0 +1,175 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: cpu/pred/tournament.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>cpu/pred/tournament.hh</h1><a href="tournament_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2011 ARM Limited</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * The license below extends only to copyright in the software and shall</span>
+<a name="l00006"></a>00006 <span class="comment"> * not be construed as granting a license to any other intellectual</span>
+<a name="l00007"></a>00007 <span class="comment"> * property including but not limited to intellectual property relating</span>
+<a name="l00008"></a>00008 <span class="comment"> * to a hardware implementation of the functionality of the software</span>
+<a name="l00009"></a>00009 <span class="comment"> * licensed hereunder.  You may use the software subject to the license</span>
+<a name="l00010"></a>00010 <span class="comment"> * terms below provided that you ensure that this notice is replicated</span>
+<a name="l00011"></a>00011 <span class="comment"> * unmodified and in its entirety in all distributions of the software,</span>
+<a name="l00012"></a>00012 <span class="comment"> * modified or unmodified, in source code or in binary form.</span>
+<a name="l00013"></a>00013 <span class="comment"> *</span>
+<a name="l00014"></a>00014 <span class="comment"> * Copyright (c) 2004-2006 The Regents of The University of Michigan</span>
+<a name="l00015"></a>00015 <span class="comment"> * All rights reserved.</span>
+<a name="l00016"></a>00016 <span class="comment"> *</span>
+<a name="l00017"></a>00017 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00018"></a>00018 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00019"></a>00019 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00020"></a>00020 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00021"></a>00021 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00022"></a>00022 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00023"></a>00023 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00024"></a>00024 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00025"></a>00025 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00026"></a>00026 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00029"></a>00029 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00030"></a>00030 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00031"></a>00031 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00032"></a>00032 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00033"></a>00033 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00034"></a>00034 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00035"></a>00035 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00036"></a>00036 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00037"></a>00037 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00038"></a>00038 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00039"></a>00039 <span class="comment"> *</span>
+<a name="l00040"></a>00040 <span class="comment"> * Authors: Kevin Lim</span>
+<a name="l00041"></a>00041 <span class="comment"> *          Timothy M. Jones</span>
+<a name="l00042"></a>00042 <span class="comment"> *          Nilay Vaish</span>
+<a name="l00043"></a>00043 <span class="comment"> */</span>
+<a name="l00044"></a>00044 
+<a name="l00045"></a>00045 <span class="preprocessor">#ifndef __CPU_PRED_TOURNAMENT_PRED_HH__</span>
+<a name="l00046"></a>00046 <span class="preprocessor"></span><span class="preprocessor">#define __CPU_PRED_TOURNAMENT_PRED_HH__</span>
+<a name="l00047"></a>00047 <span class="preprocessor"></span>
+<a name="l00048"></a>00048 <span class="preprocessor">#include &lt;vector&gt;</span>
+<a name="l00049"></a>00049 
+<a name="l00050"></a>00050 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00051"></a>00051 <span class="preprocessor">#include &quot;<a class="code" href="bpred__unit_8hh.html">cpu/pred/bpred_unit.hh</a>&quot;</span>
+<a name="l00052"></a>00052 <span class="preprocessor">#include &quot;<a class="code" href="sat__counter_8hh.html">cpu/pred/sat_counter.hh</a>&quot;</span>
+<a name="l00053"></a>00053 
+<a name="l00063"></a><a class="code" href="classTournamentBP.html">00063</a> <span class="keyword">class </span><a class="code" href="classTournamentBP.html">TournamentBP</a> : <span class="keyword">public</span> <a class="code" href="classBPredUnit.html">BPredUnit</a>
+<a name="l00064"></a>00064 {
+<a name="l00065"></a>00065   <span class="keyword">public</span>:
+<a name="l00069"></a>00069     <a class="code" href="classTournamentBP.html#ad2381a9dbad94a16f6413cf1d69b1ce1">TournamentBP</a>(<span class="keyword">const</span> <a class="code" href="classBPredUnit.html#aa715df0f49f029439cca4c7bd6e3d4fb">Params</a> *<a class="code" href="classSimObject.html#acd3c3feb78ae7a8f88fe0f110a718dff">params</a>);
+<a name="l00070"></a>00070 
+<a name="l00079"></a>00079     <span class="keywordtype">bool</span> <a class="code" href="classTournamentBP.html#a9c30d728e49473b5a3825835e98a10bc">lookup</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> branch_addr, <span class="keywordtype">void</span> * &amp;bp_history);
+<a name="l00080"></a>00080 
+<a name="l00087"></a>00087     <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#ad3d898a5eab93d923a1073fe6a0f0030">uncondBranch</a>(<span class="keywordtype">void</span> * &amp;bp_history);
+<a name="l00095"></a>00095     <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#a101ada238eecd07cc6905c60272e2693">btbUpdate</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> branch_addr, <span class="keywordtype">void</span> * &amp;bp_history);
+<a name="l00105"></a>00105     <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#a590e0fd17d5b663e25f0e956fadc7062">update</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> branch_addr, <span class="keywordtype">bool</span> taken, <span class="keywordtype">void</span> *bp_history, <span class="keywordtype">bool</span> squashed);
+<a name="l00106"></a>00106 
+<a name="l00112"></a>00112     <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#aeb215cee5cdccdf52d02b73fffe80220">squash</a>(<span class="keywordtype">void</span> *bp_history);
+<a name="l00113"></a>00113 
+<a name="l00115"></a><a class="code" href="classTournamentBP.html#a0024022d02f61b8c4166f8ea91c0e112">00115</a>     <span class="keyword">inline</span> <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a0024022d02f61b8c4166f8ea91c0e112">readGlobalHist</a>() { <span class="keywordflow">return</span> <a class="code" href="classTournamentBP.html#a48805f17e95aa944cb6eda2fcf061adf">globalHistory</a>; }
+<a name="l00116"></a>00116 
+<a name="l00117"></a>00117   <span class="keyword">private</span>:
+<a name="l00123"></a>00123     <span class="keyword">inline</span> <span class="keywordtype">bool</span> <a class="code" href="classTournamentBP.html#ad0f11a4da5ded93ef111f9d8a1d40a54">getPrediction</a>(uint8_t &amp;<a class="code" href="namespaceX86ISA.html#a668f84c330035fdb72824eb18e09cd09">count</a>);
+<a name="l00124"></a>00124 
+<a name="l00129"></a>00129     <span class="keyword">inline</span> <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#ae93fe8c8e3b6835f6fe2489f56600258">calcLocHistIdx</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> &amp;branch_addr);
+<a name="l00130"></a>00130 
+<a name="l00132"></a>00132     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#a134f4849d0956d21b8d179d9cc4d5484">updateGlobalHistTaken</a>();
+<a name="l00133"></a>00133 
+<a name="l00135"></a>00135     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#aa8baf2d471498ae49654c3398d7b1f1f">updateGlobalHistNotTaken</a>();
+<a name="l00136"></a>00136 
+<a name="l00142"></a>00142     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#a4f9579428ce30b76c76e2c6bdc876672">updateLocalHistTaken</a>(<span class="keywordtype">unsigned</span> local_history_idx);
+<a name="l00143"></a>00143 
+<a name="l00149"></a>00149     <span class="keyword">inline</span> <span class="keywordtype">void</span> <a class="code" href="classTournamentBP.html#a7be8a3b2838c05c1199ae3490e0c4a31">updateLocalHistNotTaken</a>(<span class="keywordtype">unsigned</span> local_history_idx);
+<a name="l00150"></a>00150 
+<a name="l00157"></a><a class="code" href="structTournamentBP_1_1BPHistory.html">00157</a>     <span class="keyword">struct </span><a class="code" href="structTournamentBP_1_1BPHistory.html">BPHistory</a> {
+<a name="l00158"></a>00158 <span class="preprocessor">#ifdef DEBUG</span>
+<a name="l00159"></a>00159 <span class="preprocessor"></span>        <a class="code" href="structTournamentBP_1_1BPHistory.html">BPHistory</a>()
+<a name="l00160"></a>00160         { newCount++; }
+<a name="l00161"></a>00161         ~<a class="code" href="structTournamentBP_1_1BPHistory.html">BPHistory</a>()
+<a name="l00162"></a>00162         { newCount--; }
+<a name="l00163"></a>00163 
+<a name="l00164"></a>00164         <span class="keyword">static</span> <span class="keywordtype">int</span> newCount;
+<a name="l00165"></a>00165 <span class="preprocessor">#endif</span>
+<a name="l00166"></a><a class="code" href="structTournamentBP_1_1BPHistory.html#a48805f17e95aa944cb6eda2fcf061adf">00166</a> <span class="preprocessor"></span>        <span class="keywordtype">unsigned</span> <a class="code" href="structTournamentBP_1_1BPHistory.html#a48805f17e95aa944cb6eda2fcf061adf">globalHistory</a>;
+<a name="l00167"></a><a class="code" href="structTournamentBP_1_1BPHistory.html#abd1ecd91e08530456ca48f9f9ee37ae1">00167</a>         <span class="keywordtype">unsigned</span> <a class="code" href="structTournamentBP_1_1BPHistory.html#abd1ecd91e08530456ca48f9f9ee37ae1">localHistory</a>;
+<a name="l00168"></a><a class="code" href="structTournamentBP_1_1BPHistory.html#a3079bd6e296cf8dc0c0ddb8613b9143d">00168</a>         <span class="keywordtype">bool</span> <a class="code" href="structTournamentBP_1_1BPHistory.html#a3079bd6e296cf8dc0c0ddb8613b9143d">localPredTaken</a>;
+<a name="l00169"></a><a class="code" href="structTournamentBP_1_1BPHistory.html#a763776bd09694368843a75e358d9ad2f">00169</a>         <span class="keywordtype">bool</span> <a class="code" href="structTournamentBP_1_1BPHistory.html#a763776bd09694368843a75e358d9ad2f">globalPredTaken</a>;
+<a name="l00170"></a><a class="code" href="structTournamentBP_1_1BPHistory.html#a32f4254e16ae5ad5e8fe606127986427">00170</a>         <span class="keywordtype">bool</span> <a class="code" href="structTournamentBP_1_1BPHistory.html#a32f4254e16ae5ad5e8fe606127986427">globalUsed</a>;
+<a name="l00171"></a>00171     };
+<a name="l00172"></a>00172 
+<a name="l00174"></a><a class="code" href="classTournamentBP.html#ac963a89cba9b2e4b21e99863bc5a78f1">00174</a>     <span class="keyword">static</span> <span class="keyword">const</span> <span class="keywordtype">int</span> <a class="code" href="classTournamentBP.html#ac963a89cba9b2e4b21e99863bc5a78f1">invalidPredictorIndex</a> = -1;
+<a name="l00176"></a><a class="code" href="classTournamentBP.html#a639a100e0452520604d19db58d98721d">00176</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;SatCounter&gt;</a> <a class="code" href="classTournamentBP.html#a639a100e0452520604d19db58d98721d">localCtrs</a>;
+<a name="l00177"></a>00177 
+<a name="l00179"></a><a class="code" href="classTournamentBP.html#ad980634448337df2bf521bc96fd5653d">00179</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#ad980634448337df2bf521bc96fd5653d">localPredictorSize</a>;
+<a name="l00180"></a>00180 
+<a name="l00182"></a><a class="code" href="classTournamentBP.html#a260a954fa701712cdc113f3f9d0fc9ee">00182</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a260a954fa701712cdc113f3f9d0fc9ee">localPredictorMask</a>;
+<a name="l00183"></a>00183 
+<a name="l00185"></a><a class="code" href="classTournamentBP.html#a815998927bcd79afe7f787b90f9954f5">00185</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a815998927bcd79afe7f787b90f9954f5">localCtrBits</a>;
+<a name="l00186"></a>00186 
+<a name="l00188"></a><a class="code" href="classTournamentBP.html#a0cd7dde45fcd92a2f25e895f8232007e">00188</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;unsigned&gt;</a> <a class="code" href="classTournamentBP.html#a0cd7dde45fcd92a2f25e895f8232007e">localHistoryTable</a>;
+<a name="l00189"></a>00189 
+<a name="l00191"></a><a class="code" href="classTournamentBP.html#a71759b087accf553cc72b42bbd20dacd">00191</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a71759b087accf553cc72b42bbd20dacd">localHistoryTableSize</a>;
+<a name="l00192"></a>00192 
+<a name="l00194"></a><a class="code" href="classTournamentBP.html#affb9008b5a92be8b47d319a4ecc28683">00194</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#affb9008b5a92be8b47d319a4ecc28683">localHistoryBits</a>;
+<a name="l00195"></a>00195 
+<a name="l00197"></a><a class="code" href="classTournamentBP.html#aa8fc28af97afce3a4f54e4924f7d4815">00197</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;SatCounter&gt;</a> <a class="code" href="classTournamentBP.html#aa8fc28af97afce3a4f54e4924f7d4815">globalCtrs</a>;
+<a name="l00198"></a>00198 
+<a name="l00200"></a><a class="code" href="classTournamentBP.html#ad3a4f2fc3c100e6baa69ece70da3cc07">00200</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#ad3a4f2fc3c100e6baa69ece70da3cc07">globalPredictorSize</a>;
+<a name="l00201"></a>00201 
+<a name="l00203"></a><a class="code" href="classTournamentBP.html#a21c0cae328ca40466ae7e247bd62373f">00203</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a21c0cae328ca40466ae7e247bd62373f">globalCtrBits</a>;
+<a name="l00204"></a>00204 
+<a name="l00208"></a><a class="code" href="classTournamentBP.html#a48805f17e95aa944cb6eda2fcf061adf">00208</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a48805f17e95aa944cb6eda2fcf061adf">globalHistory</a>;
+<a name="l00209"></a>00209 
+<a name="l00212"></a><a class="code" href="classTournamentBP.html#a64788f44637c4acaa30edab60e940f1e">00212</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a64788f44637c4acaa30edab60e940f1e">globalHistoryBits</a>;
+<a name="l00213"></a>00213 
+<a name="l00216"></a><a class="code" href="classTournamentBP.html#a8a8a42593ca0c54c9cea34315edaf5fa">00216</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a8a8a42593ca0c54c9cea34315edaf5fa">globalHistoryMask</a>;
+<a name="l00217"></a>00217 
+<a name="l00220"></a><a class="code" href="classTournamentBP.html#aaaf50cc17f3cbe92a7d57a4f86c0cf5c">00220</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#aaaf50cc17f3cbe92a7d57a4f86c0cf5c">choiceHistoryMask</a>;
+<a name="l00221"></a>00221 
+<a name="l00224"></a><a class="code" href="classTournamentBP.html#acdbccf5f7c6840a7dd6cd9350d2d29c2">00224</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#acdbccf5f7c6840a7dd6cd9350d2d29c2">historyRegisterMask</a>;
+<a name="l00225"></a>00225 
+<a name="l00227"></a><a class="code" href="classTournamentBP.html#a26f80c7389224a73876e470b543e327a">00227</a>     <a class="code" href="classstd_1_1vector.html">std::vector&lt;SatCounter&gt;</a> <a class="code" href="classTournamentBP.html#a26f80c7389224a73876e470b543e327a">choiceCtrs</a>;
+<a name="l00228"></a>00228 
+<a name="l00230"></a><a class="code" href="classTournamentBP.html#aa71f36048f2ff08f22872c928bb15ad7">00230</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#aa71f36048f2ff08f22872c928bb15ad7">choicePredictorSize</a>;
+<a name="l00231"></a>00231 
+<a name="l00233"></a><a class="code" href="classTournamentBP.html#aee44accc1717e338f8b33ff113d62be2">00233</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#aee44accc1717e338f8b33ff113d62be2">choiceCtrBits</a>;
+<a name="l00234"></a>00234 
+<a name="l00238"></a><a class="code" href="classTournamentBP.html#a8ad2ee60a6143561753205840ad144e7">00238</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a8ad2ee60a6143561753205840ad144e7">instShiftAmt</a>;
+<a name="l00239"></a>00239 
+<a name="l00243"></a><a class="code" href="classTournamentBP.html#ad1e9eb27631bc79b7aaf699c608ab9e9">00243</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#ad1e9eb27631bc79b7aaf699c608ab9e9">localThreshold</a>;
+<a name="l00244"></a><a class="code" href="classTournamentBP.html#ab40a9a7c94a0d33e3b1782a60c208c56">00244</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#ab40a9a7c94a0d33e3b1782a60c208c56">globalThreshold</a>;
+<a name="l00245"></a><a class="code" href="classTournamentBP.html#a6de119a3b475137cbfab3f2a0604886b">00245</a>     <span class="keywordtype">unsigned</span> <a class="code" href="classTournamentBP.html#a6de119a3b475137cbfab3f2a0604886b">choiceThreshold</a>;
+<a name="l00246"></a>00246 };
+<a name="l00247"></a>00247 
+<a name="l00248"></a>00248 <span class="preprocessor">#endif // __CPU_PRED_TOURNAMENT_PRED_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

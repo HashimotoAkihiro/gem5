@@ -1,0 +1,117 @@
+\hypertarget{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST}{
+\section{クラス MemberExprAST}
+\label{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST}\index{slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}}
+}
+MemberExprASTに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=4cm]{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST}
+\end{center}
+\end{figure}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ac775ee34451fdfa742b318538164070e}{\_\-\_\-init\_\-\_\-}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ad8b9328939df072e4740cd9a63189744}{\_\-\_\-repr\_\-\_\-}
+\item 
+def \hyperlink{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_a4555d1cee0dccf3942ea35fe86de2e8e}{generate}
+\end{DoxyCompactItemize}
+\subsection*{Public 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_a4faa2d9c34d29aa06b2dacd8c3aee45d}{expr\_\-ast}
+\item 
+\hyperlink{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ad62af17df5486963eef933792624216d}{field}
+\end{DoxyCompactItemize}
+
+
+\subsection{関数}
+\hypertarget{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ac775ee34451fdfa742b318538164070e}{
+\index{slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}!\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}}
+\index{\_\-\_\-init\_\-\_\-@{\_\-\_\-init\_\-\_\-}!slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}}
+\subsubsection[{\_\-\_\-init\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-init\_\-\_\- ( {\em self}, \/   {\em slicc}, \/   {\em expr\_\-ast}, \/   {\em field})}}
+\label{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ac775ee34451fdfa742b318538164070e}
+
+
+
+\begin{DoxyCode}
+31                                               :
+32         super(MemberExprAST, self).__init__(slicc)
+33 
+34         self.expr_ast = expr_ast
+35         self.field = field
+36 
+    def __repr__(self):
+\end{DoxyCode}
+\hypertarget{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ad8b9328939df072e4740cd9a63189744}{
+\index{slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}!\_\-\_\-repr\_\-\_\-@{\_\-\_\-repr\_\-\_\-}}
+\index{\_\-\_\-repr\_\-\_\-@{\_\-\_\-repr\_\-\_\-}!slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}}
+\subsubsection[{\_\-\_\-repr\_\-\_\-}]{\setlength{\rightskip}{0pt plus 5cm}def \_\-\_\-repr\_\-\_\- ( {\em self})}}
+\label{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ad8b9328939df072e4740cd9a63189744}
+
+
+
+\begin{DoxyCode}
+37                       :
+38         return "[MemberExprAST: %r.%r]" % (self.expr_ast, self.field)
+39 
+    def generate(self, code):
+\end{DoxyCode}
+\hypertarget{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_a4555d1cee0dccf3942ea35fe86de2e8e}{
+\index{slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}!generate@{generate}}
+\index{generate@{generate}!slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}}
+\subsubsection[{generate}]{\setlength{\rightskip}{0pt plus 5cm}def generate ( {\em self}, \/   {\em code})}}
+\label{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_a4555d1cee0dccf3942ea35fe86de2e8e}
+
+
+
+\begin{DoxyCode}
+40                             :
+41         return_type, gcode = self.expr_ast.inline(True)
+42         fix = code.nofix()
+43 
+44         if str(return_type) == "TBE" \
+45            or ("interface" in return_type and
+46             (return_type["interface"] == "AbstractCacheEntry" or
+47              return_type["interface"] == "AbstractEntry")):
+48             code("(*$gcode).m_${{self.field}}")
+49         else:
+50             code("($gcode).m_${{self.field}}")
+51 
+52         code.fix(fix)
+53 
+54         # Verify that this is a valid field name for this type
+55         if self.field in return_type.data_members:
+56             # Return the type of the field
+57             return return_type.data_members[self.field].type
+58         else:
+59             if "interface" in return_type:
+60                interface_type = self.symtab.find(return_type["interface"]);
+61                if interface_type != None:
+62                    if self.field in interface_type.data_members:
+63                        # Return the type of the field
+64                        return interface_type.data_members[self.field].type
+65         self.error("Invalid object field: " +
+66                    "Type '%s' does not have data member %s" % \
+67                    (return_type, self.field))
+                   (return_type, self.field))
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_a4faa2d9c34d29aa06b2dacd8c3aee45d}{
+\index{slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}!expr\_\-ast@{expr\_\-ast}}
+\index{expr\_\-ast@{expr\_\-ast}!slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}}
+\subsubsection[{expr\_\-ast}]{\setlength{\rightskip}{0pt plus 5cm}{\bf expr\_\-ast}}}
+\label{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_a4faa2d9c34d29aa06b2dacd8c3aee45d}
+\hypertarget{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ad62af17df5486963eef933792624216d}{
+\index{slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}!field@{field}}
+\index{field@{field}!slicc::ast::MemberExprAST::MemberExprAST@{slicc::ast::MemberExprAST::MemberExprAST}}
+\subsubsection[{field}]{\setlength{\rightskip}{0pt plus 5cm}{\bf field}}}
+\label{classslicc_1_1ast_1_1MemberExprAST_1_1MemberExprAST_ad62af17df5486963eef933792624216d}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+mem/slicc/ast/\hyperlink{MemberExprAST_8py}{MemberExprAST.py}\end{DoxyCompactItemize}

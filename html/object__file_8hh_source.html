@@ -1,0 +1,180 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/xhtml;charset=UTF-8"/>
+<title>File&nbsp;GEM5&nbsp;Wrapper: base/loader/object_file.hh ソースファイル</title>
+<link href="tabs.css" rel="stylesheet" type="text/css"/>
+<link href="doxygen.css" rel="stylesheet" type="text/css"/>
+</head>
+<body>
+<!-- 作成： Doxygen 1.6.1 -->
+<div class="navigation" id="top">
+  <div class="tabs">
+    <ul>
+      <li><a href="main.html"><span>メインページ</span></a></li>
+      <li><a href="pages.html"><span>関連ページ</span></a></li>
+      <li><a href="modules.html"><span>モジュール</span></a></li>
+      <li><a href="namespaces.html"><span>ネームスペース</span></a></li>
+      <li><a href="annotated.html"><span>クラス</span></a></li>
+      <li class="current"><a href="files.html"><span>ファイル</span></a></li>
+    </ul>
+  </div>
+  <div class="tabs">
+    <ul>
+      <li><a href="files.html"><span>ファイル一覧</span></a></li>
+      <li><a href="globals.html"><span>ファイルメンバ</span></a></li>
+    </ul>
+  </div>
+<h1>base/loader/object_file.hh</h1><a href="object__file_8hh.html">説明を見る。</a><div class="fragment"><pre class="fragment"><a name="l00001"></a>00001 <span class="comment">/*</span>
+<a name="l00002"></a>00002 <span class="comment"> * Copyright (c) 2002-2004 The Regents of The University of Michigan</span>
+<a name="l00003"></a>00003 <span class="comment"> * All rights reserved.</span>
+<a name="l00004"></a>00004 <span class="comment"> *</span>
+<a name="l00005"></a>00005 <span class="comment"> * Redistribution and use in source and binary forms, with or without</span>
+<a name="l00006"></a>00006 <span class="comment"> * modification, are permitted provided that the following conditions are</span>
+<a name="l00007"></a>00007 <span class="comment"> * met: redistributions of source code must retain the above copyright</span>
+<a name="l00008"></a>00008 <span class="comment"> * notice, this list of conditions and the following disclaimer;</span>
+<a name="l00009"></a>00009 <span class="comment"> * redistributions in binary form must reproduce the above copyright</span>
+<a name="l00010"></a>00010 <span class="comment"> * notice, this list of conditions and the following disclaimer in the</span>
+<a name="l00011"></a>00011 <span class="comment"> * documentation and/or other materials provided with the distribution;</span>
+<a name="l00012"></a>00012 <span class="comment"> * neither the name of the copyright holders nor the names of its</span>
+<a name="l00013"></a>00013 <span class="comment"> * contributors may be used to endorse or promote products derived from</span>
+<a name="l00014"></a>00014 <span class="comment"> * this software without specific prior written permission.</span>
+<a name="l00015"></a>00015 <span class="comment"> *</span>
+<a name="l00016"></a>00016 <span class="comment"> * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS</span>
+<a name="l00017"></a>00017 <span class="comment"> * &quot;AS IS&quot; AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT</span>
+<a name="l00018"></a>00018 <span class="comment"> * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR</span>
+<a name="l00019"></a>00019 <span class="comment"> * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT</span>
+<a name="l00020"></a>00020 <span class="comment"> * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,</span>
+<a name="l00021"></a>00021 <span class="comment"> * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT</span>
+<a name="l00022"></a>00022 <span class="comment"> * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,</span>
+<a name="l00023"></a>00023 <span class="comment"> * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY</span>
+<a name="l00024"></a>00024 <span class="comment"> * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT</span>
+<a name="l00025"></a>00025 <span class="comment"> * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE</span>
+<a name="l00026"></a>00026 <span class="comment"> * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</span>
+<a name="l00027"></a>00027 <span class="comment"> *</span>
+<a name="l00028"></a>00028 <span class="comment"> * Authors: Nathan Binkert</span>
+<a name="l00029"></a>00029 <span class="comment"> *          Steve Reinhardt</span>
+<a name="l00030"></a>00030 <span class="comment"> */</span>
+<a name="l00031"></a>00031 
+<a name="l00032"></a>00032 <span class="preprocessor">#ifndef __OBJECT_FILE_HH__</span>
+<a name="l00033"></a>00033 <span class="preprocessor"></span><span class="preprocessor">#define __OBJECT_FILE_HH__</span>
+<a name="l00034"></a>00034 <span class="preprocessor"></span>
+<a name="l00035"></a>00035 <span class="preprocessor">#include &lt;limits&gt;</span>
+<a name="l00036"></a>00036 <span class="preprocessor">#include &lt;string&gt;</span>
+<a name="l00037"></a>00037 
+<a name="l00038"></a>00038 <span class="preprocessor">#include &quot;<a class="code" href="base_2types_8hh.html">base/types.hh</a>&quot;</span>
+<a name="l00039"></a>00039 
+<a name="l00040"></a>00040 <span class="keyword">class </span><a class="code" href="classPortProxy.html">PortProxy</a>;
+<a name="l00041"></a>00041 <span class="keyword">class </span><a class="code" href="classSymbolTable.html">SymbolTable</a>;
+<a name="l00042"></a>00042 
+<a name="l00043"></a><a class="code" href="classObjectFile.html">00043</a> <span class="keyword">class </span><a class="code" href="classObjectFile.html">ObjectFile</a>
+<a name="l00044"></a>00044 {
+<a name="l00045"></a>00045   <span class="keyword">public</span>:
+<a name="l00046"></a>00046 
+<a name="l00047"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0f">00047</a>     <span class="keyword">enum</span> <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0f">Arch</a> {
+<a name="l00048"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa3d412097d6ea9c1b24de7400e4919521">00048</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa3d412097d6ea9c1b24de7400e4919521">UnknownArch</a>,
+<a name="l00049"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fab8e4fd775ba181b65c0fb6929cc7c6b3">00049</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fab8e4fd775ba181b65c0fb6929cc7c6b3">Alpha</a>,
+<a name="l00050"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa48b410e756481b51e7f687135f1ce151">00050</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa48b410e756481b51e7f687135f1ce151">SPARC64</a>,
+<a name="l00051"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fad2d6812031f572affcd295872e331ce7">00051</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fad2d6812031f572affcd295872e331ce7">SPARC32</a>,
+<a name="l00052"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa1df5f60b94591996efca8935d58881a2">00052</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa1df5f60b94591996efca8935d58881a2">Mips</a>,
+<a name="l00053"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fac0b790eb7ddc28e20f860b623a855408">00053</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fac0b790eb7ddc28e20f860b623a855408">X86_64</a>,
+<a name="l00054"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa58813c68444eccd5ab9839ad2a99846c">00054</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa58813c68444eccd5ab9839ad2a99846c">I386</a>,
+<a name="l00055"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa2ddc2d006b17f0660b7856f6ff023ed1">00055</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa2ddc2d006b17f0660b7856f6ff023ed1">Arm64</a>,
+<a name="l00056"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa07f3f83da0378adb9ffac1448424cfbc">00056</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa07f3f83da0378adb9ffac1448424cfbc">Arm</a>,
+<a name="l00057"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa4809fc71ac3101d5a5f13ea60e431149">00057</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0fa4809fc71ac3101d5a5f13ea60e431149">Thumb</a>,
+<a name="l00058"></a><a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0faeaf106a8b179fcfe2585c7efd72ed55a">00058</a>         <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0faeaf106a8b179fcfe2585c7efd72ed55a">Power</a>
+<a name="l00059"></a>00059     };
+<a name="l00060"></a>00060 
+<a name="l00061"></a><a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8">00061</a>     <span class="keyword">enum</span> <a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8">OpSys</a> {
+<a name="l00062"></a><a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8a0a9060169ceda4a5e8809d5d7e7f2603">00062</a>         <a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8a0a9060169ceda4a5e8809d5d7e7f2603">UnknownOpSys</a>,
+<a name="l00063"></a><a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8ab61c3390f9c06f70929a10c444e28b3c">00063</a>         <a class="code" href="classTru64.html">Tru64</a>,
+<a name="l00064"></a><a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8a64aa4a9dfaed169f6326303c56d624c3">00064</a>         <a class="code" href="classLinux.html">Linux</a>,
+<a name="l00065"></a><a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8a7f4d1e3cd13e1aa8e3e22a8e60f5a5dc">00065</a>         <a class="code" href="classSolaris.html">Solaris</a>,
+<a name="l00066"></a><a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8addb1b2f583571d7bd44054c749f1f903">00066</a>         <a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8addb1b2f583571d7bd44054c749f1f903">LinuxArmOABI</a>
+<a name="l00067"></a>00067     };
+<a name="l00068"></a>00068 
+<a name="l00069"></a>00069   <span class="keyword">protected</span>:
+<a name="l00070"></a><a class="code" href="classObjectFile.html#a42a21beb8018ac623f4d09db1343b9cf">00070</a>     <span class="keyword">const</span> std::string <a class="code" href="classObjectFile.html#a42a21beb8018ac623f4d09db1343b9cf">filename</a>;
+<a name="l00071"></a><a class="code" href="classObjectFile.html#afbe0a70d4d8f0e3df77ec516d0926b23">00071</a>     <span class="keywordtype">int</span> <a class="code" href="classObjectFile.html#afbe0a70d4d8f0e3df77ec516d0926b23">descriptor</a>;
+<a name="l00072"></a><a class="code" href="classObjectFile.html#a3e95cf013fe7a42d87c9d64a0599776e">00072</a>     uint8_t *<a class="code" href="classObjectFile.html#a3e95cf013fe7a42d87c9d64a0599776e">fileData</a>;
+<a name="l00073"></a><a class="code" href="classObjectFile.html#a7360b55975153b822efc5217b7734e6a">00073</a>     <span class="keywordtype">size_t</span> <a class="code" href="classObjectFile.html#a7360b55975153b822efc5217b7734e6a">len</a>;
+<a name="l00074"></a>00074 
+<a name="l00075"></a><a class="code" href="classObjectFile.html#aa13a20446350f8c7d3785f38d998883e">00075</a>     <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0f">Arch</a>  <a class="code" href="classObjectFile.html#aa13a20446350f8c7d3785f38d998883e">arch</a>;
+<a name="l00076"></a><a class="code" href="classObjectFile.html#a59ee96d686807b0019e538b4cdad36cf">00076</a>     <a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8">OpSys</a> <a class="code" href="classObjectFile.html#a59ee96d686807b0019e538b4cdad36cf">opSys</a>;
+<a name="l00077"></a>00077 
+<a name="l00078"></a>00078     <a class="code" href="classObjectFile.html#a12e93d714650071eab585e1f54ba0348">ObjectFile</a>(<span class="keyword">const</span> std::string &amp;_filename, <span class="keywordtype">int</span> _fd,
+<a name="l00079"></a>00079                <span class="keywordtype">size_t</span> _len, uint8_t *_data,
+<a name="l00080"></a>00080                <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0f">Arch</a> _arch, <a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8">OpSys</a> _opSys);
+<a name="l00081"></a>00081 
+<a name="l00082"></a>00082   <span class="keyword">public</span>:
+<a name="l00083"></a>00083     <span class="keyword">virtual</span> <a class="code" href="classObjectFile.html#a30c48e661f5edc3172278593aea73067">~ObjectFile</a>();
+<a name="l00084"></a>00084 
+<a name="l00085"></a>00085     <span class="keywordtype">void</span> <a class="code" href="classObjectFile.html#a5ae591df94fc66ccb85cbb6565368bca">close</a>();
+<a name="l00086"></a>00086 
+<a name="l00087"></a>00087     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classObjectFile.html#a69ba3469bb66a1ffa5049d581c1faf70">loadSections</a>(<a class="code" href="classPortProxy.html">PortProxy</a>&amp; memProxy, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> addrMask =
+<a name="l00088"></a>00088                               std::numeric_limits&lt;Addr&gt;::max(),
+<a name="l00089"></a>00089                               <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a> = 0);
+<a name="l00090"></a>00090     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classObjectFile.html#abd8b86c98494f055ba7e0babbd55f4a0">loadGlobalSymbols</a>(<a class="code" href="classSymbolTable.html">SymbolTable</a> *symtab, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> addrMask =
+<a name="l00091"></a>00091             std::numeric_limits&lt;Addr&gt;::max()) = 0;
+<a name="l00092"></a>00092     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classObjectFile.html#a15e7fbacc339ac9a4d50e4aa36591339">loadLocalSymbols</a>(<a class="code" href="classSymbolTable.html">SymbolTable</a> *symtab, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> addrMask =
+<a name="l00093"></a>00093             std::numeric_limits&lt;Addr&gt;::max()) = 0;
+<a name="l00094"></a><a class="code" href="classObjectFile.html#ad466ccc8c0bb76d0ff5a2e7e965a2200">00094</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classObjectFile.html#ad466ccc8c0bb76d0ff5a2e7e965a2200">loadWeakSymbols</a>(<a class="code" href="classSymbolTable.html">SymbolTable</a> *symtab, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> addrMask =
+<a name="l00095"></a>00095             std::numeric_limits&lt;Addr&gt;::max())
+<a name="l00096"></a>00096     { <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00097"></a>00097 
+<a name="l00098"></a><a class="code" href="classObjectFile.html#adeb3f3d68421f3e5f75dbbdf998a21ac">00098</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classObjectFile.html#adeb3f3d68421f3e5f75dbbdf998a21ac">isDynamic</a>() { <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00099"></a><a class="code" href="classObjectFile.html#a1ed34e505be8c6dabe578012e35a0317">00099</a>     <span class="keyword">virtual</span> <span class="keywordtype">bool</span> <a class="code" href="classObjectFile.html#a1ed34e505be8c6dabe578012e35a0317">hasTLS</a>() { <span class="keywordflow">return</span> <span class="keyword">false</span>; }
+<a name="l00100"></a>00100 
+<a name="l00101"></a><a class="code" href="classObjectFile.html#ad7fc69cf1a5c5cab25428f0c85c869bf">00101</a>     <a class="code" href="classObjectFile.html#a0ac03ab06a859320a9072002bdf3aa0f">Arch</a>  <a class="code" href="classObjectFile.html#ad7fc69cf1a5c5cab25428f0c85c869bf">getArch</a>()<span class="keyword">  const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#aa13a20446350f8c7d3785f38d998883e">arch</a>; }
+<a name="l00102"></a><a class="code" href="classObjectFile.html#a5235adbd87201760b27541a439a96254">00102</a>     <a class="code" href="classObjectFile.html#aafc438343baf22e5884dde40c41331e8">OpSys</a> <a class="code" href="classObjectFile.html#a5235adbd87201760b27541a439a96254">getOpSys</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#a59ee96d686807b0019e538b4cdad36cf">opSys</a>; }
+<a name="l00103"></a>00103 
+<a name="l00104"></a>00104   <span class="keyword">protected</span>:
+<a name="l00105"></a>00105 
+<a name="l00106"></a><a class="code" href="structObjectFile_1_1Section.html">00106</a>     <span class="keyword">struct </span><a class="code" href="structObjectFile_1_1Section.html">Section</a> {
+<a name="l00107"></a><a class="code" href="structObjectFile_1_1Section.html#ab8b2ea9ac4bd680f931257c07f96a8a7">00107</a>         <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a>     <a class="code" href="structObjectFile_1_1Section.html#ab8b2ea9ac4bd680f931257c07f96a8a7">baseAddr</a>;
+<a name="l00108"></a><a class="code" href="structObjectFile_1_1Section.html#a00b348b061f5075686180cf11654b898">00108</a>         uint8_t *<a class="code" href="structObjectFile_1_1Section.html#a00b348b061f5075686180cf11654b898">fileImage</a>;
+<a name="l00109"></a><a class="code" href="structObjectFile_1_1Section.html#a854352f53b148adc24983a58a1866d66">00109</a>         <span class="keywordtype">size_t</span>   <a class="code" href="structObjectFile_1_1Section.html#a854352f53b148adc24983a58a1866d66">size</a>;
+<a name="l00110"></a>00110     };
+<a name="l00111"></a>00111 
+<a name="l00112"></a><a class="code" href="classObjectFile.html#a562dc1f7463f5ab88239b002d538b4db">00112</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classObjectFile.html#a562dc1f7463f5ab88239b002d538b4db">entry</a>;
+<a name="l00113"></a><a class="code" href="classObjectFile.html#a4304297b6427c5c8928dc762d0ebf95a">00113</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classObjectFile.html#a4304297b6427c5c8928dc762d0ebf95a">globalPtr</a>;
+<a name="l00114"></a>00114 
+<a name="l00115"></a><a class="code" href="classObjectFile.html#afa43ec010e59dc9f2d3f6a76dde82e25">00115</a>     <a class="code" href="structObjectFile_1_1Section.html">Section</a> <a class="code" href="classObjectFile.html#afa43ec010e59dc9f2d3f6a76dde82e25">text</a>;
+<a name="l00116"></a><a class="code" href="classObjectFile.html#abbae3bd152e2d64768026e03593e64f3">00116</a>     <a class="code" href="structObjectFile_1_1Section.html">Section</a> <a class="code" href="classObjectFile.html#abbae3bd152e2d64768026e03593e64f3">data</a>;
+<a name="l00117"></a><a class="code" href="classObjectFile.html#a9f3ce9bbede1311cacc26e2f59356c50">00117</a>     <a class="code" href="structObjectFile_1_1Section.html">Section</a> <a class="code" href="classObjectFile.html#a9f3ce9bbede1311cacc26e2f59356c50">bss</a>;
+<a name="l00118"></a>00118 
+<a name="l00119"></a>00119     <span class="keywordtype">bool</span> <a class="code" href="classObjectFile.html#aa7e7fd749b6ba3ce19c7d5a3032d890c">loadSection</a>(<a class="code" href="structObjectFile_1_1Section.html">Section</a> *sec, <a class="code" href="classPortProxy.html">PortProxy</a>&amp; memProxy, <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> addrMask,
+<a name="l00120"></a>00120                      <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a87b7a740701cddafb930a9460e9f4eba">offset</a> = 0);
+<a name="l00121"></a><a class="code" href="classObjectFile.html#a31ebe109c735ee4f1460edce76d98426">00121</a>     <span class="keywordtype">void</span> <a class="code" href="classObjectFile.html#a31ebe109c735ee4f1460edce76d98426">setGlobalPointer</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> global_ptr) { <a class="code" href="classObjectFile.html#a4304297b6427c5c8928dc762d0ebf95a">globalPtr</a> = global_ptr; }
+<a name="l00122"></a>00122 
+<a name="l00123"></a>00123   <span class="keyword">public</span>:
+<a name="l00124"></a><a class="code" href="classObjectFile.html#a9f08cb3194ccbdd03293d351e149c9ac">00124</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classObjectFile.html#a9f08cb3194ccbdd03293d351e149c9ac">entryPoint</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#a562dc1f7463f5ab88239b002d538b4db">entry</a>; }
+<a name="l00125"></a>00125 
+<a name="l00126"></a><a class="code" href="classObjectFile.html#aa83734f26b4c275bac69715b9fbcc35d">00126</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classObjectFile.html#aa83734f26b4c275bac69715b9fbcc35d">globalPointer</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#a4304297b6427c5c8928dc762d0ebf95a">globalPtr</a>; }
+<a name="l00127"></a>00127 
+<a name="l00128"></a><a class="code" href="classObjectFile.html#a39d861e1995f538cbc2cdb860602b36e">00128</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classObjectFile.html#a39d861e1995f538cbc2cdb860602b36e">textBase</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#afa43ec010e59dc9f2d3f6a76dde82e25">text</a>.<a class="code" href="structObjectFile_1_1Section.html#ab8b2ea9ac4bd680f931257c07f96a8a7">baseAddr</a>; }
+<a name="l00129"></a><a class="code" href="classObjectFile.html#a08072d959ffdf2624181b55cd9d1450d">00129</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classObjectFile.html#a08072d959ffdf2624181b55cd9d1450d">dataBase</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#abbae3bd152e2d64768026e03593e64f3">data</a>.<a class="code" href="structObjectFile_1_1Section.html#ab8b2ea9ac4bd680f931257c07f96a8a7">baseAddr</a>; }
+<a name="l00130"></a><a class="code" href="classObjectFile.html#a9aeb851c40011850f45b34cdd60aada9">00130</a>     <a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="classObjectFile.html#a9aeb851c40011850f45b34cdd60aada9">bssBase</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#a9f3ce9bbede1311cacc26e2f59356c50">bss</a>.<a class="code" href="structObjectFile_1_1Section.html#ab8b2ea9ac4bd680f931257c07f96a8a7">baseAddr</a>; }
+<a name="l00131"></a>00131 
+<a name="l00132"></a><a class="code" href="classObjectFile.html#afd33bc083adc1815b4e5daf6739e248d">00132</a>     <span class="keywordtype">size_t</span> <a class="code" href="classObjectFile.html#afd33bc083adc1815b4e5daf6739e248d">textSize</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#afa43ec010e59dc9f2d3f6a76dde82e25">text</a>.<a class="code" href="structObjectFile_1_1Section.html#a854352f53b148adc24983a58a1866d66">size</a>; }
+<a name="l00133"></a><a class="code" href="classObjectFile.html#a71a8a324d6ab3da19c74380f2f264033">00133</a>     <span class="keywordtype">size_t</span> <a class="code" href="classObjectFile.html#a71a8a324d6ab3da19c74380f2f264033">dataSize</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#abbae3bd152e2d64768026e03593e64f3">data</a>.<a class="code" href="structObjectFile_1_1Section.html#a854352f53b148adc24983a58a1866d66">size</a>; }
+<a name="l00134"></a><a class="code" href="classObjectFile.html#af1e935fb177f10df6fd2d752a2c0abc8">00134</a>     <span class="keywordtype">size_t</span> <a class="code" href="classObjectFile.html#af1e935fb177f10df6fd2d752a2c0abc8">bssSize</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> <a class="code" href="classObjectFile.html#a9f3ce9bbede1311cacc26e2f59356c50">bss</a>.<a class="code" href="structObjectFile_1_1Section.html#a854352f53b148adc24983a58a1866d66">size</a>; }
+<a name="l00135"></a>00135 
+<a name="l00136"></a>00136     <span class="comment">/* This function allows you to override the base address where</span>
+<a name="l00137"></a>00137 <span class="comment">     * a binary is going to be loaded or set it if the binary is just a</span>
+<a name="l00138"></a>00138 <span class="comment">     * blob that doesn&apos;t include an object header.</span>
+<a name="l00139"></a>00139 <span class="comment">     * @param a address to load the binary/text section at</span>
+<a name="l00140"></a>00140 <span class="comment">     */</span>
+<a name="l00141"></a><a class="code" href="classObjectFile.html#a94b9967a6f94e8ea6fee38d6ae664405">00141</a>     <span class="keywordtype">void</span> <a class="code" href="classObjectFile.html#a94b9967a6f94e8ea6fee38d6ae664405">setTextBase</a>(<a class="code" href="base_2types_8hh.html#af1bb03d6a4ee096394a6749f0a169232">Addr</a> <a class="code" href="namespaceArmISA.html#a468da4d7330577ee8746df2acfa40959">a</a>) { <a class="code" href="classObjectFile.html#afa43ec010e59dc9f2d3f6a76dde82e25">text</a>.<a class="code" href="structObjectFile_1_1Section.html#ab8b2ea9ac4bd680f931257c07f96a8a7">baseAddr</a> = a; }
+<a name="l00142"></a>00142 };
+<a name="l00143"></a>00143 
+<a name="l00144"></a>00144 <a class="code" href="classObjectFile.html">ObjectFile</a> *<a class="code" href="object__file_8cc.html#af9c937baadd807efe7819a5214ca652f">createObjectFile</a>(<span class="keyword">const</span> std::string &amp;fname, <span class="keywordtype">bool</span> raw = <span class="keyword">false</span>);
+<a name="l00145"></a>00145 
+<a name="l00146"></a>00146 
+<a name="l00147"></a>00147 <span class="preprocessor">#endif // __OBJECT_FILE_HH__</span>
+</pre></div></div>
+<hr size="1"/><address style="text-align: right;"><small>File&nbsp;GEM5&nbsp;Wrapperに対して25 May 2015に生成されました。&nbsp;
+<a href="http://www.doxygen.org/index.html">
+<img class="footer" src="doxygen.png" alt="doxygen"/></a> 1.6.1 </small></address>
+</body>
+</html>

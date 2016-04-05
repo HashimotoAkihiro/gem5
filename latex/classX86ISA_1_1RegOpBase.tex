@@ -1,0 +1,131 @@
+\hypertarget{classX86ISA_1_1RegOpBase}{
+\section{クラス RegOpBase}
+\label{classX86ISA_1_1RegOpBase}\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+}
+
+
+{\ttfamily \#include $<$microregop.hh$>$}RegOpBaseに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=6cm]{classX86ISA_1_1RegOpBase}
+\end{center}
+\end{figure}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classX86ISA_1_1RegOpBase_ad7c88ff8f34220cd01fb7989aa8ddd11}{RegOpBase} (\hyperlink{structX86ISA_1_1ExtMachInst}{ExtMachInst} \_\-machInst, const char $\ast$mnem, const char $\ast$\_\-instMnem, uint64\_\-t setFlags, \hyperlink{structX86ISA_1_1InstRegIndex}{InstRegIndex} \_\-src1, \hyperlink{structX86ISA_1_1InstRegIndex}{InstRegIndex} \_\-dest, uint8\_\-t \_\-dataSize, uint16\_\-t \_\-ext, OpClass \_\-\_\-opClass)
+\item 
+uint64\_\-t \hyperlink{classX86ISA_1_1RegOpBase_a19668781839109586f199936333ef8c6}{genFlags} (uint64\_\-t oldFlags, uint64\_\-t flagMask, uint64\_\-t \_\-dest, uint64\_\-t \_\-src1, uint64\_\-t \_\-src2, bool subtract=false) const 
+\end{DoxyCompactItemize}
+\subsection*{Protected 変数}
+\begin{DoxyCompactItemize}
+\item 
+const \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{classX86ISA_1_1RegOpBase_ac0ec0327e65bf2376ccab1d826a7094e}{src1}
+\item 
+const \hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{classX86ISA_1_1RegOpBase_ab74217a19b7ae8f204175991a8087f1e}{dest}
+\item 
+const uint8\_\-t \hyperlink{classX86ISA_1_1RegOpBase_a107c258b340f17c2bfd8326ada8441ce}{dataSize}
+\item 
+const uint16\_\-t \hyperlink{classX86ISA_1_1RegOpBase_a389186ffbf742eed7830fbe38d05f08c}{ext}
+\item 
+\hyperlink{classStaticInst_a36d25e03e43fa3bb4c5482cbefe5e0fb}{RegIndex} \hyperlink{classX86ISA_1_1RegOpBase_a90c82d522b8ec23488d1dab400eb43d8}{foldOBit}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Base classes for RegOps which provides a generateDisassembly method. 
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classX86ISA_1_1RegOpBase_ad7c88ff8f34220cd01fb7989aa8ddd11}{
+\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}!RegOpBase@{RegOpBase}}
+\index{RegOpBase@{RegOpBase}!X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+\subsubsection[{RegOpBase}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegOpBase} ({\bf ExtMachInst} {\em \_\-machInst}, \/  const char $\ast$ {\em mnem}, \/  const char $\ast$ {\em \_\-instMnem}, \/  uint64\_\-t {\em setFlags}, \/  {\bf InstRegIndex} {\em \_\-src1}, \/  {\bf InstRegIndex} {\em \_\-dest}, \/  uint8\_\-t {\em \_\-dataSize}, \/  uint16\_\-t {\em \_\-ext}, \/  OpClass {\em \_\-\_\-opClass})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classX86ISA_1_1RegOpBase_ad7c88ff8f34220cd01fb7989aa8ddd11}
+
+
+
+\begin{DoxyCode}
+64                                    :
+65             X86MicroopBase(_machInst, mnem, _instMnem, setFlags,
+66                     __opClass),
+67             src1(_src1.idx), dest(_dest.idx),
+68             dataSize(_dataSize), ext(_ext)
+69         {
+70             foldOBit = (dataSize == 1 && !_machInst.rex.present) ? 1 << 6 : 0;
+71         }
+
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classX86ISA_1_1RegOpBase_a19668781839109586f199936333ef8c6}{
+\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}!genFlags@{genFlags}}
+\index{genFlags@{genFlags}!X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+\subsubsection[{genFlags}]{\setlength{\rightskip}{0pt plus 5cm}uint64\_\-t genFlags (uint64\_\-t {\em oldFlags}, \/  uint64\_\-t {\em flagMask}, \/  uint64\_\-t {\em \_\-dest}, \/  uint64\_\-t {\em \_\-src1}, \/  uint64\_\-t {\em \_\-src2}, \/  bool {\em subtract} = {\ttfamily false}) const\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1RegOpBase_a19668781839109586f199936333ef8c6}
+
+
+
+\begin{DoxyCode}
+52     {
+53         DPRINTF(X86, "flagMask = %#x\n", flagMask);
+54         uint64_t flags = oldFlags & ~flagMask;
+55         if(flagMask & (ECFBit | CFBit))
+56         {
+57             if(findCarry(dataSize*8, _dest, _src1, _src2))
+58                 flags |= (flagMask & (ECFBit | CFBit));
+59             if(subtract)
+60                 flags ^= (flagMask & (ECFBit | CFBit));
+61         }
+62         if(flagMask & PFBit && !findParity(8, _dest))
+63             flags |= PFBit;
+64         if(flagMask & AFBit)
+65         {
+66             if(findCarry(4, _dest, _src1, _src2))
+67                 flags |= AFBit;
+68             if(subtract)
+69                 flags ^= AFBit;
+70         }
+71         if(flagMask & (EZFBit | ZFBit) && findZero(dataSize*8, _dest))
+72             flags |= (flagMask & (EZFBit | ZFBit));
+73         if(flagMask & SFBit && findNegative(dataSize*8, _dest))
+74             flags |= SFBit;
+75         if(flagMask & OFBit && findOverflow(dataSize*8, _dest, _src1, _src2))
+76             flags |= OFBit;
+77         return flags;
+78     }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classX86ISA_1_1RegOpBase_a107c258b340f17c2bfd8326ada8441ce}{
+\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}!dataSize@{dataSize}}
+\index{dataSize@{dataSize}!X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+\subsubsection[{dataSize}]{\setlength{\rightskip}{0pt plus 5cm}const uint8\_\-t {\bf dataSize}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1RegOpBase_a107c258b340f17c2bfd8326ada8441ce}
+\hypertarget{classX86ISA_1_1RegOpBase_ab74217a19b7ae8f204175991a8087f1e}{
+\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}!dest@{dest}}
+\index{dest@{dest}!X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+\subsubsection[{dest}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf RegIndex} {\bf dest}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1RegOpBase_ab74217a19b7ae8f204175991a8087f1e}
+\hypertarget{classX86ISA_1_1RegOpBase_a389186ffbf742eed7830fbe38d05f08c}{
+\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}!ext@{ext}}
+\index{ext@{ext}!X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+\subsubsection[{ext}]{\setlength{\rightskip}{0pt plus 5cm}const uint16\_\-t {\bf ext}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1RegOpBase_a389186ffbf742eed7830fbe38d05f08c}
+\hypertarget{classX86ISA_1_1RegOpBase_a90c82d522b8ec23488d1dab400eb43d8}{
+\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}!foldOBit@{foldOBit}}
+\index{foldOBit@{foldOBit}!X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+\subsubsection[{foldOBit}]{\setlength{\rightskip}{0pt plus 5cm}{\bf RegIndex} {\bf foldOBit}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1RegOpBase_a90c82d522b8ec23488d1dab400eb43d8}
+\hypertarget{classX86ISA_1_1RegOpBase_ac0ec0327e65bf2376ccab1d826a7094e}{
+\index{X86ISA::RegOpBase@{X86ISA::RegOpBase}!src1@{src1}}
+\index{src1@{src1}!X86ISA::RegOpBase@{X86ISA::RegOpBase}}
+\subsubsection[{src1}]{\setlength{\rightskip}{0pt plus 5cm}const {\bf RegIndex} {\bf src1}\hspace{0.3cm}{\ttfamily  \mbox{[}protected\mbox{]}}}}
+\label{classX86ISA_1_1RegOpBase_ac0ec0327e65bf2376ccab1d826a7094e}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+arch/x86/insts/\hyperlink{microregop_8hh}{microregop.hh}\item 
+arch/x86/insts/\hyperlink{microregop_8cc}{microregop.cc}\end{DoxyCompactItemize}

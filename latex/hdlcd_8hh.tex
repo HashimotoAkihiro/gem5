@@ -1,0 +1,25 @@
+\hypertarget{hdlcd_8hh}{
+\section{dev/arm/hdlcd.hh}
+\label{hdlcd_8hh}\index{dev/arm/hdlcd.hh@{dev/arm/hdlcd.hh}}
+}
+{\ttfamily \#include $<$fstream$>$}\par
+{\ttfamily \#include \char`\"{}dev/arm/amba\_\-device.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}params/HDLcd.hh\char`\"{}}\par
+{\ttfamily \#include \char`\"{}sim/serialize.hh\char`\"{}}\par
+\subsection*{構成}
+\begin{DoxyCompactItemize}
+\item 
+class \hyperlink{classHDLcd}{HDLcd}
+\item 
+class \hyperlink{classHDLcd_1_1DmaDoneEvent}{DmaDoneEvent}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Implementiation of the ARM \hyperlink{classHDLcd}{HDLcd} controller.
+
+This implementation aims to have sufficient detail such that underrun conditions are reasonable / behave similar to reality. There are two 'engines' going at once. First, the DMA engine running at LCD clock frequency is responsible for filling the controller's internal buffer. The second engine runs at the pixel clock frequency and reads the pixels out of the internal buffer. The pixel rendering engine uses front / back porch and sync delays between lines and frames.
+
+If the pixel rendering engine does not have a pixel to display, it will cause an underrun event. The \hyperlink{classHDLcd}{HDLcd} controller, per spec, will stop issuing DMA requests for the rest of the frame and resume normal behavior on the subsequent frame. What pixels are rendered upon an underrun condition is different than the real hardware; while the user will see artifacts (previous frame mixed with current frame), it is not the same behavior as real hardware which repeats the last pixel value for the rest of the current frame. This compromise was made to save on memory and complexity and assumes that it is not important to accurately model the content of an underrun frame.
+
+KNOWN ISSUES 1. The default kernel driver used in testing sets the line count to one less than the expected 768. However, it also sets the v\_\-count to 767. The controller specifies that 1 should be added to v\_\-count but does not specify adding 1 to the line count. The driver is probably wrong. However, to sync these two numbers up, this model uses fb\_\-line\_\-count and fb\_\-line\_\-length rather than using v\_\-data or h\_\-data values to determine the width and height of the frame; those values are ignored. 2. The \hyperlink{classHDLcd}{HDLcd} is implemented here as an \hyperlink{classAmbaDmaDevice}{AmbaDmaDevice}, but it doesn't have an AMBA ID as far as I know. That is the only bit of the \hyperlink{classAmbaDmaDevice}{AmbaDmaDevice} interface that is irrelevant to it, so a fake AMBA ID is used for now. I didn't think inserting an extra layer of hierachy between \hyperlink{classAmbaDmaDevice}{AmbaDmaDevice} and \hyperlink{classDmaDevice}{DmaDevice} would be helpful to anyone else, but that may be the right answer. 3. The internal buffer size is either 1 or 2 KB depending on which specification is referenced for the different Versatile Express tiles. This implementation uses the larger 2 KB buffer by default. 

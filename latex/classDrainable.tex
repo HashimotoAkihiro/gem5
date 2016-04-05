@@ -1,0 +1,258 @@
+\hypertarget{classDrainable}{
+\section{クラス Drainable}
+\label{classDrainable}\index{Drainable@{Drainable}}
+}
+
+
+{\ttfamily \#include $<$drain.hh$>$}Drainableに対する継承グラフ:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=12cm]{classDrainable}
+\end{center}
+\end{figure}
+\subsection*{Public 型}
+\begin{DoxyCompactItemize}
+\item 
+enum \hyperlink{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8}{State} \{ \hyperlink{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a2f5f2c4a8c4f4f0519d503dcdfbf55cb}{Running}, 
+\hyperlink{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a929d17847bfad0d4689c9ab8540d5134}{Draining}, 
+\hyperlink{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a5656955cb808502a2ec75b367e2c1e82}{Drained}
+ \}
+\end{DoxyCompactItemize}
+\subsection*{Public メソッド}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDrainable_ab7e0a5035cfc2b76d859c266fa9f23ac}{Drainable} ()
+\item 
+virtual \hyperlink{classDrainable_acbac1c0890f30cd7ed12ce72c755a270}{$\sim$Drainable} ()
+\item 
+virtual unsigned int \hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{drain} (\hyperlink{classDrainManager}{DrainManager} $\ast$drainManager)=0
+\item 
+virtual void \hyperlink{classDrainable_a8f020d3237536fe007fc488c4125c5d8}{drainResume} ()
+\item 
+virtual void \hyperlink{classDrainable_aaec8b1741246cef384bc2743ce21cc34}{memWriteback} ()
+\item 
+virtual void \hyperlink{classDrainable_a7f243f736712f56d8dd50cd21c77b9d1}{memInvalidate} ()
+\item 
+\hyperlink{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8}{State} \hyperlink{classDrainable_a5c95358f0e9355bcc3979baf3fb7307f}{getDrainState} () const 
+\end{DoxyCompactItemize}
+\subsection*{Protected メソッド}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{classDrainable_ad800905390fe03e850cf996e914038f9}{setDrainState} (\hyperlink{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8}{State} new\_\-state)
+\end{DoxyCompactItemize}
+\subsection*{Private 変数}
+\begin{DoxyCompactItemize}
+\item 
+\hyperlink{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8}{State} \hyperlink{classDrainable_a5aef2a2eb3b798eb214b1e83d6f75275}{\_\-drainState}
+\end{DoxyCompactItemize}
+
+
+\subsection{説明}
+Interface for objects that might require draining before checkpointing.
+
+An object's internal state needs to be drained when creating a checkpoint, switching between CPU models, or switching between timing models. Once the internal state has been drained from {\itshape all\/} objects in the system, the objects are serialized to disc or the configuration change takes place. The process works as follows (see \hyperlink{simulate_8py}{simulate.py} for details):
+
+
+\begin{DoxyEnumerate}
+\item An instance of a \hyperlink{classDrainManager}{DrainManager} is created to keep track of how many objects need to be drained. The object maintains an internal counter that is decreased every time its CountedDrainEvent::signalDrainDone() method is called. When the counter reaches zero, the simulation is stopped.
+
+
+\item Call \hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{Drainable::drain()} for every object in the system. Draining has completed if all of them return zero. Otherwise, the sum of the return values is loaded into the counter of the \hyperlink{classDrainManager}{DrainManager}. A pointer to the drain manager is passed as an argument to the \hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{drain()} method.
+
+
+\item Continue simulation. When an object has finished draining its internal state, it calls CountedDrainEvent::signalDrainDone() on the manager. When the counter in the manager reaches zero, the simulation stops.
+
+
+\item \hyperlink{classCheck}{Check} if any object still needs draining, if so repeat the process above.
+
+
+\item Serialize objects, switch CPU model, or change timing model.
+
+
+\item Call \hyperlink{classDrainable_a8f020d3237536fe007fc488c4125c5d8}{Drainable::drainResume()} and continue the simulation. 
+\end{DoxyEnumerate}
+
+\subsection{列挙型}
+\hypertarget{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8}{
+\index{Drainable@{Drainable}!State@{State}}
+\index{State@{State}!Drainable@{Drainable}}
+\subsubsection[{State}]{\setlength{\rightskip}{0pt plus 5cm}enum {\bf State}}}
+\label{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8}
+Object drain/handover states
+
+An object starts out in the Running state. When the simulator prepares to take a snapshot or prepares a CPU for handover, it calls the \hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{drain()} method to transfer the object into the Draining or Drained state. If any object enters the Draining state (\hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{drain()} returning $>$0), simulation continues until it all objects have entered the Drained state.
+
+Before resuming simulation, the simulator calls \hyperlink{namespacem5_1_1simulate_a2985608bac11887a6ae3df9b068b10fe}{resume()} to transfer the object to the Running state.
+
+\begin{DoxyNote}{覚え書き}
+Even though the state of an object (visible to the rest of the world through getState()) could be used to determine if all objects have entered the Drained state, the protocol is actually a bit more elaborate. See \hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{drain()} for details. 
+\end{DoxyNote}
+\begin{Desc}
+\item[列挙型の値: ]\par
+\begin{description}
+\index{Running@{Running}!Drainable@{Drainable}}\index{Drainable@{Drainable}!Running@{Running}}\item[{\em 
+\hypertarget{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a2f5f2c4a8c4f4f0519d503dcdfbf55cb}{
+Running}
+\label{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a2f5f2c4a8c4f4f0519d503dcdfbf55cb}
+}]\index{Draining@{Draining}!Drainable@{Drainable}}\index{Drainable@{Drainable}!Draining@{Draining}}\item[{\em 
+\hypertarget{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a929d17847bfad0d4689c9ab8540d5134}{
+Draining}
+\label{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a929d17847bfad0d4689c9ab8540d5134}
+}]Running normally \index{Drained@{Drained}!Drainable@{Drainable}}\index{Drainable@{Drainable}!Drained@{Drained}}\item[{\em 
+\hypertarget{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a5656955cb808502a2ec75b367e2c1e82}{
+Drained}
+\label{classDrainable_a5d74787dedbc4e11c1ab15bf487e61f8a5656955cb808502a2ec75b367e2c1e82}
+}]Draining buffers pending serialization/handover Buffers drained, ready for serialization/handover \end{description}
+\end{Desc}
+
+
+
+\hyperlink{classBaseBus_1_1Layer_a5d74787dedbc4e11c1ab15bf487e61f8}{Layer$<$ SrcType, DstType $>$}, と \hyperlink{classVGic_a4ad4e2a479baf0de8e8cdcb0c84276db}{VGic}で再定義されています。
+
+
+\begin{DoxyCode}
+162                {
+163         Running,  
+164         Draining, 
+165         Drained   
+166     };
+\end{DoxyCode}
+
+
+\subsection{コンストラクタとデストラクタ}
+\hypertarget{classDrainable_ab7e0a5035cfc2b76d859c266fa9f23ac}{
+\index{Drainable@{Drainable}!Drainable@{Drainable}}
+\index{Drainable@{Drainable}!Drainable@{Drainable}}
+\subsubsection[{Drainable}]{\setlength{\rightskip}{0pt plus 5cm}{\bf Drainable} ()}}
+\label{classDrainable_ab7e0a5035cfc2b76d859c266fa9f23ac}
+
+
+
+\begin{DoxyCode}
+61     : _drainState(Running)
+62 {
+63 }
+\end{DoxyCode}
+\hypertarget{classDrainable_acbac1c0890f30cd7ed12ce72c755a270}{
+\index{Drainable@{Drainable}!$\sim$Drainable@{$\sim$Drainable}}
+\index{$\sim$Drainable@{$\sim$Drainable}!Drainable@{Drainable}}
+\subsubsection[{$\sim$Drainable}]{\setlength{\rightskip}{0pt plus 5cm}$\sim${\bf Drainable} ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classDrainable_acbac1c0890f30cd7ed12ce72c755a270}
+
+
+
+\begin{DoxyCode}
+66 {
+67 }
+\end{DoxyCode}
+
+
+\subsection{関数}
+\hypertarget{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{
+\index{Drainable@{Drainable}!drain@{drain}}
+\index{drain@{drain}!Drainable@{Drainable}}
+\subsubsection[{drain}]{\setlength{\rightskip}{0pt plus 5cm}virtual unsigned int drain ({\bf DrainManager} $\ast$ {\em drainManager})\hspace{0.3cm}{\ttfamily  \mbox{[}pure virtual\mbox{]}}}}
+\label{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}
+Determine if an object needs draining and register a \hyperlink{classDrainManager}{DrainManager}.
+
+When draining the state of an object, the simulator calls drain with a pointer to a drain manager. If the object does not need further simulation to drain internal buffers, it switched to the Drained state and returns 0, otherwise it switches to the Draining state and returns the number of times that it will call \hyperlink{classEvent_a142b75b68a6291400e20fb0dd905b1c8}{Event::process()} on the drain event. Most objects are expected to return either 0 or 1.
+
+\begin{DoxyNote}{覚え書き}
+An object that has entered the Drained state can be disturbed by other objects in the system and consequently be forced to enter the Draining state again. The simulator therefore repeats the draining process until all objects return 0 on the first call to \hyperlink{classDrainable_a1ed42c14f2f622ea6b0df3865e89c8b4}{drain()}.
+\end{DoxyNote}
+
+\begin{DoxyParams}{引数}
+\item[{\em drainManager}]\hyperlink{classDrainManager}{DrainManager} to use to inform the simulator when draining has completed.\end{DoxyParams}
+\begin{DoxyReturn}{戻り値}
+0 if the object is ready for serialization now, $>$0 if it needs further simulation. 
+\end{DoxyReturn}
+
+
+\hyperlink{classArmISA_1_1TableWalker_aa8a18d230dba7a674ac8a0b4f35bc36a}{TableWalker}, \hyperlink{classTrafficGen_aa8a18d230dba7a674ac8a0b4f35bc36a}{TrafficGen}, \hyperlink{classCopyEngine_1_1CopyEngineChannel_a6bf479c521c7c3eb473822d953275b26}{CopyEngineChannel}, \hyperlink{classCopyEngine_a6bf479c521c7c3eb473822d953275b26}{CopyEngine}, \hyperlink{classDmaDevice_a6bf479c521c7c3eb473822d953275b26}{DmaDevice}, \hyperlink{classIGbE_aa8a18d230dba7a674ac8a0b4f35bc36a}{IGbE}, \hyperlink{classPioDevice_a6bf479c521c7c3eb473822d953275b26}{PioDevice}, \hyperlink{classPciDevice_aa8a18d230dba7a674ac8a0b4f35bc36a}{PciDevice}, \hyperlink{classBaseBus_1_1Layer_aa8a18d230dba7a674ac8a0b4f35bc36a}{Layer$<$ SrcType, DstType $>$}, \hyperlink{classBaseBus_ac8c1510f7e1591e75a5c79b4b873f6b4}{BaseBus}, \hyperlink{classBaseCache_aa8a18d230dba7a674ac8a0b4f35bc36a}{BaseCache}, \hyperlink{classMSHRQueue_aa8a18d230dba7a674ac8a0b4f35bc36a}{MSHRQueue}, \hyperlink{classCoherentBus_aa8a18d230dba7a674ac8a0b4f35bc36a}{CoherentBus}, \hyperlink{classDRAMCtrl_aa8a18d230dba7a674ac8a0b4f35bc36a}{DRAMCtrl}, \hyperlink{classDRAMSim2_aa8a18d230dba7a674ac8a0b4f35bc36a}{DRAMSim2}, \hyperlink{classNoncoherentBus_aa8a18d230dba7a674ac8a0b4f35bc36a}{NoncoherentBus}, \hyperlink{classPacketQueue_aa8a18d230dba7a674ac8a0b4f35bc36a}{PacketQueue}, \hyperlink{classRubyMemoryControl_aa8a18d230dba7a674ac8a0b4f35bc36a}{RubyMemoryControl}, \hyperlink{classRubyPort_aa8a18d230dba7a674ac8a0b4f35bc36a}{RubyPort}, \hyperlink{classSimpleMemory_aa8a18d230dba7a674ac8a0b4f35bc36a}{SimpleMemory}, \hyperlink{classSimObject_a6bf479c521c7c3eb473822d953275b26}{SimObject}, と \hyperlink{classSystem_aa8a18d230dba7a674ac8a0b4f35bc36a}{System}で実装されています。\hypertarget{classDrainable_a8f020d3237536fe007fc488c4125c5d8}{
+\index{Drainable@{Drainable}!drainResume@{drainResume}}
+\index{drainResume@{drainResume}!Drainable@{Drainable}}
+\subsubsection[{drainResume}]{\setlength{\rightskip}{0pt plus 5cm}void drainResume ()\hspace{0.3cm}{\ttfamily  \mbox{[}virtual\mbox{]}}}}
+\label{classDrainable_a8f020d3237536fe007fc488c4125c5d8}
+Resume execution after a successful drain.
+
+\begin{DoxyNote}{覚え書き}
+This method is normally only called from the simulation scripts. 
+\end{DoxyNote}
+
+
+\hyperlink{classArmISA_1_1TableWalker_a8f020d3237536fe007fc488c4125c5d8}{TableWalker}, \hyperlink{classArmISA_1_1TLB_a8f020d3237536fe007fc488c4125c5d8}{TLB}, \hyperlink{classCopyEngine_1_1CopyEngineChannel_a8f020d3237536fe007fc488c4125c5d8}{CopyEngineChannel}, \hyperlink{classCopyEngine_a8f020d3237536fe007fc488c4125c5d8}{CopyEngine}, \hyperlink{classIGbE_a8f020d3237536fe007fc488c4125c5d8}{IGbE}, \hyperlink{classNSGigE_a8f020d3237536fe007fc488c4125c5d8}{NSGigE}, \hyperlink{classSinic_1_1Device_a8f020d3237536fe007fc488c4125c5d8}{Device}, と \hyperlink{classSystem_a8f020d3237536fe007fc488c4125c5d8}{System}で再定義されています。
+
+
+\begin{DoxyCode}
+71 {
+72     _drainState = Running;
+73 }
+\end{DoxyCode}
+\hypertarget{classDrainable_a5c95358f0e9355bcc3979baf3fb7307f}{
+\index{Drainable@{Drainable}!getDrainState@{getDrainState}}
+\index{getDrainState@{getDrainState}!Drainable@{Drainable}}
+\subsubsection[{getDrainState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf State} getDrainState () const\hspace{0.3cm}{\ttfamily  \mbox{[}inline\mbox{]}}}}
+\label{classDrainable_a5c95358f0e9355bcc3979baf3fb7307f}
+
+
+
+\begin{DoxyCode}
+228 { return _drainState; }
+\end{DoxyCode}
+\hypertarget{classDrainable_a7f243f736712f56d8dd50cd21c77b9d1}{
+\index{Drainable@{Drainable}!memInvalidate@{memInvalidate}}
+\index{memInvalidate@{memInvalidate}!Drainable@{Drainable}}
+\subsubsection[{memInvalidate}]{\setlength{\rightskip}{0pt plus 5cm}virtual void memInvalidate ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classDrainable_a7f243f736712f56d8dd50cd21c77b9d1}
+Invalidate the contents of memory buffers.
+
+When the switching to hardware virtualized CPU models, we need to make sure that we don't have any cached state in the system that might become stale when we return. This method is used to flush all such state back to main memory.
+
+This does {\itshape not\/} cause any dirty state to be written back to memory. 
+
+\hyperlink{classBaseCache_aeb9356f940fbf8410f41920ee1d5864d}{BaseCache}, \hyperlink{classCache_afea64b0aa579c17485db54c6a5c2ede3}{Cache$<$ TagStore $>$}, と \hyperlink{classBaseTLB_afea64b0aa579c17485db54c6a5c2ede3}{BaseTLB}で再定義されています。
+
+
+\begin{DoxyCode}
+226 {};
+\end{DoxyCode}
+\hypertarget{classDrainable_aaec8b1741246cef384bc2743ce21cc34}{
+\index{Drainable@{Drainable}!memWriteback@{memWriteback}}
+\index{memWriteback@{memWriteback}!Drainable@{Drainable}}
+\subsubsection[{memWriteback}]{\setlength{\rightskip}{0pt plus 5cm}virtual void memWriteback ()\hspace{0.3cm}{\ttfamily  \mbox{[}inline, virtual\mbox{]}}}}
+\label{classDrainable_aaec8b1741246cef384bc2743ce21cc34}
+Write back dirty buffers to memory using functional writes.
+
+After returning, an object implementing this method should have written all its dirty data back to memory. This method is typically used to prepare a system with caches for checkpointing. 
+
+\hyperlink{classBaseCache_afd3c83f1883488031612de6c47fcaabb}{BaseCache}, と \hyperlink{classCache_a381272ae5c2cc173adb59cd67a76b458}{Cache$<$ TagStore $>$}で再定義されています。
+
+
+\begin{DoxyCode}
+213 {};
+\end{DoxyCode}
+\hypertarget{classDrainable_ad800905390fe03e850cf996e914038f9}{
+\index{Drainable@{Drainable}!setDrainState@{setDrainState}}
+\index{setDrainState@{setDrainState}!Drainable@{Drainable}}
+\subsubsection[{setDrainState}]{\setlength{\rightskip}{0pt plus 5cm}void setDrainState ({\bf State} {\em new\_\-state})\hspace{0.3cm}{\ttfamily  \mbox{[}inline, protected\mbox{]}}}}
+\label{classDrainable_ad800905390fe03e850cf996e914038f9}
+
+
+
+\begin{DoxyCode}
+231 { _drainState = new_state; }
+\end{DoxyCode}
+
+
+\subsection{変数}
+\hypertarget{classDrainable_a5aef2a2eb3b798eb214b1e83d6f75275}{
+\index{Drainable@{Drainable}!\_\-drainState@{\_\-drainState}}
+\index{\_\-drainState@{\_\-drainState}!Drainable@{Drainable}}
+\subsubsection[{\_\-drainState}]{\setlength{\rightskip}{0pt plus 5cm}{\bf State} {\bf \_\-drainState}\hspace{0.3cm}{\ttfamily  \mbox{[}private\mbox{]}}}}
+\label{classDrainable_a5aef2a2eb3b798eb214b1e83d6f75275}
+
+
+このクラスの説明は次のファイルから生成されました:\begin{DoxyCompactItemize}
+\item 
+sim/\hyperlink{drain_8hh}{drain.hh}\item 
+sim/\hyperlink{drain_8cc}{drain.cc}\end{DoxyCompactItemize}
