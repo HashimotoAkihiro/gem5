@@ -41,7 +41,7 @@ from m5.params import *
 from m5.proxy import *
 from MemObject import MemObject
 
-# The traffic generator is a master module that generates stimuli for
+# The traffic generator is a main module that generates stimuli for
 # the memory system, based on a collection of simple behaviours that
 # are either probabilistic or based on traces. It can be used stand
 # alone for creating test cases for interconnect and memory
@@ -49,7 +49,7 @@ from MemObject import MemObject
 # components that are not yet modelled in detail, e.g. a video engine
 # or baseband subsystem in an SoC.
 #
-# The traffic generator has a single master port that is used to send
+# The traffic generator has a single main port that is used to send
 # requests, independent of the specific behaviour. The behaviour of
 # the traffic generator is specified in a configuration file, and this
 # file describes a state transition graph where each state is a
@@ -64,7 +64,7 @@ class TrafficGen(MemObject):
     cxx_header = "cpu/testers/traffic_gen/traffic_gen.hh"
 
     # Port used for sending requests and receiving responses
-    port = MasterPort("Master port")
+    port = MainPort("Main port")
 
     # Config file to parse for the state descriptions
     config_file = Param.String("Configuration file describing the behaviour")

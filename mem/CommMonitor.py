@@ -50,8 +50,8 @@ class CommMonitor(MemObject):
     system = Param.System(Parent.any, "System that the monitor belongs to.")
 
     # one port in each direction
-    master = MasterPort("Master port")
-    slave = SlavePort("Slave port")
+    main = MainPort("Main port")
+    subordinate = SubordinatePort("Subordinate port")
 
     # Boolean to enable or disable the trace. Writes to an a file named based on
     # SimObject hierarchy.

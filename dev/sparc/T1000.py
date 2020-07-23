@@ -113,8 +113,8 @@ class T1000(Platform):
     iob = Iob()
     # Attach I/O devices that are on chip
     def attachOnChipIO(self, bus):
-        self.iob.pio = bus.master
-        self.htod.pio = bus.master
+        self.iob.pio = bus.main
+        self.htod.pio = bus.main
 
 
     # Attach I/O devices to specified bus object.  Can't do this
@@ -123,17 +123,17 @@ class T1000(Platform):
     def attachIO(self, bus):
         self.hvuart.terminal = self.hterm
         self.puart0.terminal = self.pterm
-        self.fake_clk.pio = bus.master
-        self.fake_membnks.pio = bus.master
-        self.fake_l2_1.pio = bus.master
-        self.fake_l2_2.pio = bus.master
-        self.fake_l2_3.pio = bus.master
-        self.fake_l2_4.pio = bus.master
-        self.fake_l2esr_1.pio = bus.master
-        self.fake_l2esr_2.pio = bus.master
-        self.fake_l2esr_3.pio = bus.master
-        self.fake_l2esr_4.pio = bus.master
-        self.fake_ssi.pio = bus.master
-        self.fake_jbi.pio = bus.master
-        self.puart0.pio = bus.master
-        self.hvuart.pio = bus.master
+        self.fake_clk.pio = bus.main
+        self.fake_membnks.pio = bus.main
+        self.fake_l2_1.pio = bus.main
+        self.fake_l2_2.pio = bus.main
+        self.fake_l2_3.pio = bus.main
+        self.fake_l2_4.pio = bus.main
+        self.fake_l2esr_1.pio = bus.main
+        self.fake_l2esr_2.pio = bus.main
+        self.fake_l2esr_3.pio = bus.main
+        self.fake_l2esr_4.pio = bus.main
+        self.fake_ssi.pio = bus.main
+        self.fake_jbi.pio = bus.main
+        self.puart0.pio = bus.main
+        self.hvuart.pio = bus.main

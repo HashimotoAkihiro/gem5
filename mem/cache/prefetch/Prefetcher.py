@@ -55,8 +55,8 @@ class BasePrefetcher(ClockedObject):
     degree = Param.Int(1,
          "Degree of the prefetch depth")
     latency = Param.Cycles('1', "Latency of the prefetcher")
-    use_master_id = Param.Bool(True,
-         "Use the master id to separate calculations of prefetches")
+    use_main_id = Param.Bool(True,
+         "Use the main id to separate calculations of prefetches")
     data_accesses_only = Param.Bool(False,
          "Only prefetch on data not on instruction accesses")
     on_miss_only = Param.Bool(False,

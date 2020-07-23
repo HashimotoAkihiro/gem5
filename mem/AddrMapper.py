@@ -39,10 +39,10 @@ from m5.params import *
 from MemObject import MemObject
 
 # An address mapper changes the packet addresses in going from the
-# slave port side of the mapper to the master port side. When the
-# slave port is queried for the address ranges, it also performs the
+# subordinate port side of the mapper to the main port side. When the
+# subordinate port is queried for the address ranges, it also performs the
 # necessary range updates. Note that snoop requests that travel from
-# the master port (i.e. the memory side) to the slave port are
+# the main port (i.e. the memory side) to the subordinate port are
 # currently not modified.
 class AddrMapper(MemObject):
     type = 'AddrMapper'
@@ -50,8 +50,8 @@ class AddrMapper(MemObject):
     abstract = True
 
     # one port in each direction
-    master = MasterPort("Master port")
-    slave = SlavePort("Slave port")
+    main = MainPort("Main port")
+    subordinate = SubordinatePort("Subordinate port")
 
 
 # Range address mapper that maps a set of original ranges to a set of

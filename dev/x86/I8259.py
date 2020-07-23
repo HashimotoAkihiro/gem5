@@ -32,8 +32,8 @@ from Device import BasicPioDevice
 from X86IntPin import X86IntSourcePin, X86IntSinkPin
 
 class X86I8259CascadeMode(Enum):
-    map = {'I8259Master' : 0,
-           'I8259Slave' : 1,
+    map = {'I8259Main' : 0,
+           'I8259Subordinate' : 1,
            'I8259Single' : 2
     }
 
@@ -44,7 +44,7 @@ class I8259(BasicPioDevice):
     output = Param.X86IntSourcePin(X86IntSourcePin(),
             'The pin this I8259 drives')
     mode = Param.X86I8259CascadeMode('How this I8259 is cascaded')
-    slave = Param.I8259(NULL, 'Slave I8259, if any')
+    subordinate = Param.I8259(NULL, 'Subordinate I8259, if any')
 
     def pin(self, line):
         return X86IntSinkPin(device=self, number=line)

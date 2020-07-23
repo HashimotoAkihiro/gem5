@@ -37,12 +37,12 @@ class RubyPort(MemObject):
     cxx_header = "mem/ruby/system/RubyPort.hh"
     version = Param.Int(0, "")
 
-    slave = VectorSlavePort("CPU slave port")
-    master = VectorMasterPort("CPU master port")
-    pio_master_port = MasterPort("Ruby mem master port")
-    mem_master_port = MasterPort("Ruby mem master port")
-    pio_slave_port = SlavePort("Ruby pio slave port")
-    mem_slave_port = SlavePort("Ruby memory port")
+    subordinate = VectorSubordinatePort("CPU subordinate port")
+    main = VectorMainPort("CPU main port")
+    pio_main_port = MainPort("Ruby mem main port")
+    mem_main_port = MainPort("Ruby mem main port")
+    pio_subordinate_port = SubordinatePort("Ruby pio subordinate port")
+    mem_subordinate_port = SubordinatePort("Ruby memory port")
 
     using_ruby_tester = Param.Bool(False, "")
     access_phys_mem = Param.Bool(False,
