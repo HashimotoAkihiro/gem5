@@ -1454,7 +1454,7 @@ class PortRef(object):
         from m5.internal.pyobject import connectPorts
 
         if self.role == 'SLAVE':
-            # do nothing and let the master take care of it
+            # do nothing and let the main take care of it
             return
 
         if self.ccConnected: # already done this
@@ -1463,14 +1463,14 @@ class PortRef(object):
         if not self.peer: # nothing to connect to
             return
 
-        # check that we connect a master to a slave
+        # check that we connect a main to a subordinate
         if self.role == peer.role:
             raise TypeError, \
                 "cannot connect '%s' and '%s' due to identical role '%s'" \
                 % (peer, self, self.role)
 
         try:
-            # self is always the master and peer the slave
+            # self is always the main and peer the subordinate
             connectPorts(self.simobj.getCCObject(), self.name, self.index,
                          peer.simobj.getCCObject(), peer.name, peer.index)
         except:
@@ -1588,8 +1588,8 @@ class Port(object):
     def cxx_decl(self, code):
         code('unsigned int port_${{self.name}}_connection_count;')
 
-class MasterPort(Port):
-    # MasterPort("description")
+class MainPort(Port):
+    # MainPort("description")
     def __init__(self, *args):
         if len(args) == 1:
             self.desc = args[0]
@@ -1597,8 +1597,8 @@ class MasterPort(Port):
         else:
             raise TypeError, 'wrong number of arguments'
 
-class SlavePort(Port):
-    # SlavePort("description")
+class SubordinatePort(Port):
+    # SubordinatePort("description")
     def __init__(self, *args):
         if len(args) == 1:
             self.desc = args[0]
@@ -1615,8 +1615,8 @@ class VectorPort(Port):
     def makeRef(self, simobj):
         return VectorPortRef(simobj, self.name, self.role)
 
-class VectorMasterPort(VectorPort):
-    # VectorMasterPort("description")
+class VectorMainPort(VectorPort):
+    # VectorMainPort("description")
     def __init__(self, *args):
         if len(args) == 1:
             self.desc = args[0]
@@ -1625,8 +1625,8 @@ class VectorMasterPort(VectorPort):
         else:
             raise TypeError, 'wrong number of arguments'
 
-class VectorSlavePort(VectorPort):
-    # VectorSlavePort("description")
+class VectorSubordinatePort(VectorPort):
+    # VectorSubordinatePort("description")
     def __init__(self, *args):
         if len(args) == 1:
             self.desc = args[0]
@@ -1667,7 +1667,7 @@ __all__ = ['Param', 'VectorParam',
            'MaxAddr', 'MaxTick', 'AllMemory',
            'Time',
            'NextEthernetAddr', 'NULL',
-           'MasterPort', 'SlavePort',
-           'VectorMasterPort', 'VectorSlavePort']
+           'MainPort', 'SubordinatePort',
+           'VectorMainPort', 'VectorSubordinatePort']
 
 import SimObject

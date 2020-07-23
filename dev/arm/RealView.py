@@ -71,7 +71,7 @@ class AmbaDmaDevice(DmaDevice):
     type = 'AmbaDmaDevice'
     abstract = True
     cxx_header = "dev/arm/amba_device.hh"
-    pio_addr = Param.Addr("Address for AMBA slave interface")
+    pio_addr = Param.Addr("Address for AMBA subordinate interface")
     pio_latency = Param.Latency("10ns", "Time between action and write/read result by AMBA DMA Device")
     gic = Param.BaseGic(Parent.any, "Gic to use for interrupting")
     int_num = Param.UInt32("Interrupt number that connects to GIC")
@@ -187,7 +187,7 @@ class RealView(Platform):
     def setupBootLoader(self, mem_bus, cur_sys, loc):
         self.nvmem = SimpleMemory(range = AddrRange('2GB', size = '64MB'),
                                   conf_table_reported = False)
-        self.nvmem.port = mem_bus.master
+        self.nvmem.port = mem_bus.main
         cur_sys.boot_loader = loc('boot.arm')
         cur_sys.atags_addr = 0x100
         cur_sys.load_addr_mask = 0xfffffff
@@ -238,10 +238,10 @@ class RealViewPBX(RealView):
     # Attach I/O devices that are on chip and also set the appropriate
     # ranges for the bridge
     def attachOnChipIO(self, bus, bridge):
-       self.gic.pio = bus.master
-       self.l2x0_fake.pio = bus.master
-       self.a9scu.pio = bus.master
-       self.local_cpu_timer.pio = bus.master
+       self.gic.pio = bus.main
+       self.l2x0_fake.pio = bus.main
+       self.a9scu.pio = bus.main
+       self.local_cpu_timer.pio = bus.main
        # Bridge ranges based on excluding what is part of on-chip I/O
        # (gic, l2x0, a9scu, local_cpu_timer)
        bridge.ranges = [AddrRange(self.realview_io.pio_addr,
@@ -254,33 +254,33 @@ class RealViewPBX(RealView):
     # earlier, since the bus object itself is typically defined at the
     # System level.
     def attachIO(self, bus):
-       self.uart.pio          = bus.master
-       self.realview_io.pio   = bus.master
-       self.timer0.pio        = bus.master
-       self.timer1.pio        = bus.master
-       self.clcd.pio          = bus.master
-       self.clcd.dma          = bus.slave
-       self.kmi0.pio          = bus.master
-       self.kmi1.pio          = bus.master
-       self.cf_ctrl.pio       = bus.master
-       self.cf_ctrl.config    = bus.master
-       self.cf_ctrl.dma       = bus.slave
-       self.dmac_fake.pio     = bus.master
-       self.uart1_fake.pio    = bus.master
-       self.uart2_fake.pio    = bus.master
-       self.uart3_fake.pio    = bus.master
-       self.smc_fake.pio      = bus.master
-       self.sp810_fake.pio    = bus.master
-       self.watchdog_fake.pio = bus.master
-       self.gpio0_fake.pio    = bus.master
-       self.gpio1_fake.pio    = bus.master
-       self.gpio2_fake.pio    = bus.master
-       self.ssp_fake.pio      = bus.master
-       self.sci_fake.pio      = bus.master
-       self.aaci_fake.pio     = bus.master
-       self.mmc_fake.pio      = bus.master
-       self.rtc.pio           = bus.master
-       self.flash_fake.pio    = bus.master
+       self.uart.pio          = bus.main
+       self.realview_io.pio   = bus.main
+       self.timer0.pio        = bus.main
+       self.timer1.pio        = bus.main
+       self.clcd.pio          = bus.main
+       self.clcd.dma          = bus.subordinate
+       self.kmi0.pio          = bus.main
+       self.kmi1.pio          = bus.main
+       self.cf_ctrl.pio       = bus.main
+       self.cf_ctrl.config    = bus.main
+       self.cf_ctrl.dma       = bus.subordinate
+       self.dmac_fake.pio     = bus.main
+       self.uart1_fake.pio    = bus.main
+       self.uart2_fake.pio    = bus.main
+       self.uart3_fake.pio    = bus.main
+       self.smc_fake.pio      = bus.main
+       self.sp810_fake.pio    = bus.main
+       self.watchdog_fake.pio = bus.main
+       self.gpio0_fake.pio    = bus.main
+       self.gpio1_fake.pio    = bus.main
+       self.gpio2_fake.pio    = bus.main
+       self.ssp_fake.pio      = bus.main
+       self.sci_fake.pio      = bus.main
+       self.aaci_fake.pio     = bus.main
+       self.mmc_fake.pio      = bus.main
+       self.rtc.pio           = bus.main
+       self.flash_fake.pio    = bus.main
 
 # Reference for memory map and interrupt number
 # RealView Emulation Baseboard User Guide (ARM DUI 0143B)
@@ -320,8 +320,8 @@ class RealViewEB(RealView):
     # Attach I/O devices that are on chip and also set the appropriate
     # ranges for the bridge
     def attachOnChipIO(self, bus, bridge):
-       self.gic.pio = bus.master
-       self.l2x0_fake.pio = bus.master
+       self.gic.pio = bus.main
+       self.l2x0_fake.pio = bus.main
        # Bridge ranges based on excluding what is part of on-chip I/O
        # (gic, l2x0)
        bridge.ranges = [AddrRange(self.realview_io.pio_addr,
@@ -332,31 +332,31 @@ class RealViewEB(RealView):
     # earlier, since the bus object itself is typically defined at the
     # System level.
     def attachIO(self, bus):
-       self.uart.pio          = bus.master
-       self.realview_io.pio   = bus.master
-       self.timer0.pio        = bus.master
-       self.timer1.pio        = bus.master
-       self.clcd.pio          = bus.master
-       self.clcd.dma          = bus.slave
-       self.kmi0.pio          = bus.master
-       self.kmi1.pio          = bus.master
-       self.dmac_fake.pio     = bus.master
-       self.uart1_fake.pio    = bus.master
-       self.uart2_fake.pio    = bus.master
-       self.uart3_fake.pio    = bus.master
-       self.smc_fake.pio      = bus.master
-       self.sp810_fake.pio    = bus.master
-       self.watchdog_fake.pio = bus.master
-       self.gpio0_fake.pio    = bus.master
-       self.gpio1_fake.pio    = bus.master
-       self.gpio2_fake.pio    = bus.master
-       self.ssp_fake.pio      = bus.master
-       self.sci_fake.pio      = bus.master
-       self.aaci_fake.pio     = bus.master
-       self.mmc_fake.pio      = bus.master
-       self.rtc_fake.pio      = bus.master
-       self.flash_fake.pio    = bus.master
-       self.smcreg_fake.pio   = bus.master
+       self.uart.pio          = bus.main
+       self.realview_io.pio   = bus.main
+       self.timer0.pio        = bus.main
+       self.timer1.pio        = bus.main
+       self.clcd.pio          = bus.main
+       self.clcd.dma          = bus.subordinate
+       self.kmi0.pio          = bus.main
+       self.kmi1.pio          = bus.main
+       self.dmac_fake.pio     = bus.main
+       self.uart1_fake.pio    = bus.main
+       self.uart2_fake.pio    = bus.main
+       self.uart3_fake.pio    = bus.main
+       self.smc_fake.pio      = bus.main
+       self.sp810_fake.pio    = bus.main
+       self.watchdog_fake.pio = bus.main
+       self.gpio0_fake.pio    = bus.main
+       self.gpio1_fake.pio    = bus.main
+       self.gpio2_fake.pio    = bus.main
+       self.ssp_fake.pio      = bus.main
+       self.sci_fake.pio      = bus.main
+       self.aaci_fake.pio     = bus.main
+       self.mmc_fake.pio      = bus.main
+       self.rtc_fake.pio      = bus.main
+       self.flash_fake.pio    = bus.main
+       self.smcreg_fake.pio   = bus.main
 
 class VExpress_EMM(RealView):
     mem_start_addr = '2GB'
@@ -406,7 +406,7 @@ class VExpress_EMM(RealView):
     def setupBootLoader(self, mem_bus, cur_sys, loc):
         self.nvmem = SimpleMemory(range = AddrRange('64MB'),
                                   conf_table_reported = False)
-        self.nvmem.port = mem_bus.master
+        self.nvmem.port = mem_bus.main
         cur_sys.boot_loader = loc('boot_emm.arm')
         cur_sys.atags_addr = 0x8000000
         cur_sys.load_addr_mask = 0xfffffff
@@ -415,9 +415,9 @@ class VExpress_EMM(RealView):
     # Attach I/O devices that are on chip and also set the appropriate
     # ranges for the bridge
     def attachOnChipIO(self, bus, bridge):
-       self.gic.pio = bus.master
-       self.local_cpu_timer.pio = bus.master
-       self.hdlcd.dma           = bus.slave
+       self.gic.pio = bus.main
+       self.local_cpu_timer.pio = bus.main
+       self.hdlcd.dma           = bus.subordinate
        # Bridge ranges based on excluding what is part of on-chip I/O
        # (gic, a9scu)
        bridge.ranges = [AddrRange(0x2F000000, size='16MB'),
@@ -426,51 +426,51 @@ class VExpress_EMM(RealView):
                         AddrRange(0x40000000, size='512MB'),
                         AddrRange(0x18000000, size='64MB'),
                         AddrRange(0x1C000000, size='64MB')]
-       self.vgic.pio = bus.master
+       self.vgic.pio = bus.main
 
 
     # Attach I/O devices to specified bus object.  Can't do this
     # earlier, since the bus object itself is typically defined at the
     # System level.
     def attachIO(self, bus):
-       self.uart.pio            = bus.master
-       self.realview_io.pio     = bus.master
-       self.timer0.pio          = bus.master
-       self.timer1.pio          = bus.master
-       self.clcd.pio            = bus.master
-       self.clcd.dma            = bus.slave
-       self.hdlcd.pio           = bus.master
-       self.kmi0.pio            = bus.master
-       self.kmi1.pio            = bus.master
-       self.cf_ctrl.pio         = bus.master
-       self.cf_ctrl.dma         = bus.slave
-       self.cf_ctrl.config      = bus.master
-       self.rtc.pio             = bus.master
+       self.uart.pio            = bus.main
+       self.realview_io.pio     = bus.main
+       self.timer0.pio          = bus.main
+       self.timer1.pio          = bus.main
+       self.clcd.pio            = bus.main
+       self.clcd.dma            = bus.subordinate
+       self.hdlcd.pio           = bus.main
+       self.kmi0.pio            = bus.main
+       self.kmi1.pio            = bus.main
+       self.cf_ctrl.pio         = bus.main
+       self.cf_ctrl.dma         = bus.subordinate
+       self.cf_ctrl.config      = bus.main
+       self.rtc.pio             = bus.main
        bus.use_default_range    = True
-       self.vram.port           = bus.master
-       self.ide.pio             = bus.master
-       self.ide.config          = bus.master
-       self.ide.dma             = bus.slave
-       self.ethernet.pio        = bus.master
-       self.ethernet.config     = bus.master
-       self.ethernet.dma        = bus.slave
+       self.vram.port           = bus.main
+       self.ide.pio             = bus.main
+       self.ide.config          = bus.main
+       self.ide.dma             = bus.subordinate
+       self.ethernet.pio        = bus.main
+       self.ethernet.config     = bus.main
+       self.ethernet.dma        = bus.subordinate
        self.pciconfig.pio       = bus.default
 
-       self.l2x0_fake.pio       = bus.master
-       self.uart1_fake.pio      = bus.master
-       self.uart2_fake.pio      = bus.master
-       self.uart3_fake.pio      = bus.master
-       self.sp810_fake.pio      = bus.master
-       self.watchdog_fake.pio   = bus.master
-       self.aaci_fake.pio       = bus.master
-       self.lan_fake.pio        = bus.master
-       self.usb_fake.pio        = bus.master
-       self.mmc_fake.pio        = bus.master
+       self.l2x0_fake.pio       = bus.main
+       self.uart1_fake.pio      = bus.main
+       self.uart2_fake.pio      = bus.main
+       self.uart3_fake.pio      = bus.main
+       self.sp810_fake.pio      = bus.main
+       self.watchdog_fake.pio   = bus.main
+       self.aaci_fake.pio       = bus.main
+       self.lan_fake.pio        = bus.main
+       self.usb_fake.pio        = bus.main
+       self.mmc_fake.pio        = bus.main
 
 class VExpress_EMM64(VExpress_EMM):
     def setupBootLoader(self, mem_bus, cur_sys, loc):
         self.nvmem = SimpleMemory(range = AddrRange(0, size = '64MB'))
-        self.nvmem.port = mem_bus.master
+        self.nvmem.port = mem_bus.main
         cur_sys.boot_loader = loc('boot_emm.arm64')
         cur_sys.atags_addr = 0x8000000
         cur_sys.load_addr_mask = 0xfffffff

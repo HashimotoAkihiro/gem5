@@ -48,16 +48,16 @@ class BaseBus(MemObject):
     type = 'BaseBus'
     abstract = True
     cxx_header = "mem/bus.hh"
-    slave = VectorSlavePort("vector port for connecting masters")
-    master = VectorMasterPort("vector port for connecting slaves")
+    subordinate = VectorSubordinatePort("vector port for connecting mains")
+    main = VectorMainPort("vector port for connecting subordinates")
     header_cycles = Param.Cycles(1, "cycles of overhead per transaction")
 #    width = Param.Unsigned(8, "bus width (bytes)")
     #add 2014 10 21
     width = Param.Unsigned(16, "bus width (bytes)")
 
     # The default port can be left unconnected, or be used to connect
-    # a default slave port
-    default = MasterPort("Port for connecting an optional default slave")
+    # a default subordinate port
+    default = MainPort("Port for connecting an optional default subordinate")
 
     # The default port can be used unconditionally, or based on
     # address range, in which case it may overlap with other

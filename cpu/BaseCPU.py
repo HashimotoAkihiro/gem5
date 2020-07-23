@@ -218,8 +218,8 @@ class BaseCPU(MemObject):
 
     tracer = Param.InstTracer(default_tracer, "Instruction tracer")
 
-    icache_port = MasterPort("Instruction Port")
-    dcache_port = MasterPort("Data Port")
+    icache_port = MainPort("Instruction Port")
+    dcache_port = MainPort("Data Port")
     _cached_ports = ['icache_port', 'dcache_port']
 
 ##
@@ -232,11 +232,11 @@ class BaseCPU(MemObject):
             _cached_ports += ["istage2_mmu.stage2_tlb.walker.port",
                               "dstage2_mmu.stage2_tlb.walker.port"]
 
-    _uncached_slave_ports = []
-    _uncached_master_ports = []
+    _uncached_subordinate_ports = []
+    _uncached_main_ports = []
     if buildEnv['TARGET_ISA'] == 'x86':
-        _uncached_slave_ports += ["interrupts.pio", "interrupts.int_slave"]
-        _uncached_master_ports += ["interrupts.int_master"]
+        _uncached_subordinate_ports += ["interrupts.pio", "interrupts.int_subordinate"]
+        _uncached_main_ports += ["interrupts.int_main"]
 
 ##
 #insert member variable
@@ -266,13 +266,13 @@ class BaseCPU(MemObject):
 
     def connectCachedPorts(self, bus):
         for p in self._cached_ports:
-            exec('self.%s = bus.slave' % p)
+            exec('self.%s = bus.subordinate' % p)
 
     def connectUncachedPorts(self, bus):
-        for p in self._uncached_slave_ports:
-            exec('self.%s = bus.master' % p)
-        for p in self._uncached_master_ports:
-            exec('self.%s = bus.slave' % p)
+        for p in self._uncached_subordinate_ports:
+            exec('self.%s = bus.main' % p)
+        for p in self._uncached_main_ports:
+            exec('self.%s = bus.subordinate' % p)
 
     def connectAllPorts(self, cached_bus, uncached_bus = None):
         self.connectCachedPorts(cached_bus)
@@ -312,12 +312,12 @@ class BaseCPU(MemObject):
                 if buildEnv['TARGET_ISA'] in ['arm']:
                     self.itb_walker_cache_bus = CoherentBus()
                     self.dtb_walker_cache_bus = CoherentBus()
-                    self.itb_walker_cache_bus.master = iwc.cpu_side
-                    self.dtb_walker_cache_bus.master = dwc.cpu_side
-                    self.itb.walker.port = self.itb_walker_cache_bus.slave
-                    self.dtb.walker.port = self.dtb_walker_cache_bus.slave
-                    self.istage2_mmu.stage2_tlb.walker.port = self.itb_walker_cache_bus.slave
-                    self.dstage2_mmu.stage2_tlb.walker.port = self.dtb_walker_cache_bus.slave
+                    self.itb_walker_cache_bus.main = iwc.cpu_side
+                    self.dtb_walker_cache_bus.main = dwc.cpu_side
+                    self.itb.walker.port = self.itb_walker_cache_bus.subordinate
+                    self.dtb.walker.port = self.dtb_walker_cache_bus.subordinate
+                    self.istage2_mmu.stage2_tlb.walker.port = self.itb_walker_cache_bus.subordinate
+                    self.dstage2_mmu.stage2_tlb.walker.port = self.dtb_walker_cache_bus.subordinate
                 else:
                     self.itb.walker.port = iwc.cpu_side
                     self.dtb.walker.port = dwc.cpu_side
@@ -347,7 +347,7 @@ class BaseCPU(MemObject):
         self.toL2Bus = CoherentBus(width = 32)
         self.connectCachedPorts(self.toL2Bus)
         self.l2cache = l2c
-        self.toL2Bus.master = self.l2cache.cpu_side
+        self.toL2Bus.main = self.l2cache.cpu_side
         self._cached_ports = ['l2cache.mem_side']
 
     def createThreads(self):

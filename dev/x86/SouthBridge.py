@@ -48,8 +48,8 @@ class SouthBridge(SimObject):
     cxx_header = "dev/x86/south_bridge.hh"
     platform = Param.Platform(Parent.any, "Platform this device is part of")
 
-    _pic1 = I8259(pio_addr=x86IOAddress(0x20), mode='I8259Master')
-    _pic2 = I8259(pio_addr=x86IOAddress(0xA0), mode='I8259Slave')
+    _pic1 = I8259(pio_addr=x86IOAddress(0x20), mode='I8259Main')
+    _pic2 = I8259(pio_addr=x86IOAddress(0xA0), mode='I8259Subordinate')
     _cmos = Cmos(pio_addr=x86IOAddress(0x70))
     _dma1 = I8237(pio_addr=x86IOAddress(0x0))
     _keyboard = I8042(data_port=x86IOAddress(0x60), \
@@ -58,8 +58,8 @@ class SouthBridge(SimObject):
     _speaker = PcSpeaker(pio_addr=x86IOAddress(0x61))
     _io_apic = I82094AA(pio_addr=0xFEC00000)
 
-    pic1 = Param.I8259(_pic1, "Master PIC")
-    pic2 = Param.I8259(_pic2, "Slave PIC")
+    pic1 = Param.I8259(_pic1, "Main PIC")
+    pic2 = Param.I8259(_pic2, "Subordinate PIC")
     cmos = Param.Cmos(_cmos, "CMOS memory and real time clock device")
     dma1 = Param.I8237(_dma1, "The first dma controller")
     keyboard = Param.I8042(_keyboard, "The keyboard controller")
@@ -98,20 +98,20 @@ class SouthBridge(SimObject):
            X86IntLine(source=self.keyboard.mouse_int_pin,
                       sink=self.io_apic.pin(12))]
         # Tell the devices about each other
-        self.pic1.slave = self.pic2
+        self.pic1.subordinate = self.pic2
         self.speaker.i8254 = self.pit
         self.io_apic.external_int_pic = self.pic1
         # Connect to the bus
-        self.cmos.pio = bus.master
-        self.dma1.pio = bus.master
-        self.ide.pio = bus.master
-        self.ide.config = bus.master
+        self.cmos.pio = bus.main
+        self.dma1.pio = bus.main
+        self.ide.pio = bus.main
+        self.ide.config = bus.main
         if dma_ports.count(self.ide.dma) == 0:
-                self.ide.dma = bus.slave
-        self.keyboard.pio = bus.master
-        self.pic1.pio = bus.master
-        self.pic2.pio = bus.master
-        self.pit.pio = bus.master
-        self.speaker.pio = bus.master
-        self.io_apic.pio = bus.master
-        self.io_apic.int_master = bus.slave
+                self.ide.dma = bus.subordinate
+        self.keyboard.pio = bus.main
+        self.pic1.pio = bus.main
+        self.pic2.pio = bus.main
+        self.pit.pio = bus.main
+        self.speaker.pio = bus.main
+        self.io_apic.pio = bus.main
+        self.io_apic.int_main = bus.subordinate

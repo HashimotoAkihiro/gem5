@@ -45,8 +45,8 @@ from MemObject import MemObject
 class Bridge(MemObject):
     type = 'Bridge'
     cxx_header = "mem/bridge.hh"
-    slave = SlavePort('Slave port')
-    master = MasterPort('Master port')
+    subordinate = SubordinatePort('Subordinate port')
+    main = MainPort('Main port')
     req_size = Param.Unsigned(16, "The number of requests to buffer")
     resp_size = Param.Unsigned(16, "The number of responses to buffer")
     delay = Param.Latency('0ns', "The latency of this bridge")
